@@ -4,12 +4,14 @@ classdef WorkspaceWrenchClosure < WorkspaceCondition
     
     properties (SetAccess = protected, GetAccess = protected)
         semi_singular_type              % The method for determining semisingular values
+        options                         % The options for the wrench closure
     end
     
     methods
         %% Constructor for wrench closure workspace
         function w = WorkspaceWrenchClosure(semi_singular_type)
-            w.semi_singular_type = semi_singular_type;
+            w.semi_singular_type    = semi_singular_type;
+            w.options               =   optimset('display','off');
         end
         
         %% Evaluate the wrench closure condition return true if satisfied 
@@ -25,14 +27,11 @@ classdef WorkspaceWrenchClosure < WorkspaceCondition
             % Test if Jacobian is a positive spanning subspace
             H       =   eye(dynamics.numCables);
             f       =   zeros(dynamics.numCables,1);
-            A       =   [];
-            b       =   [];
             Aeq     =   -L';
             beq     =   zeros(dynamics.numDofs,1);
             lb      =   1e-9*ones(dynamics.numCables,1);
             ub      =   Inf*ones(dynamics.numCables,1);
-            options =   optimset('display','off');
-            [~,~,exit_flag] = quadprog(H,f,A,b,Aeq,beq,lb,ub,[],options);
+            [~,~,exit_flag] = quadprog(H,f,[],[],Aeq,beq,lb,ub,[],obj.options);
             % Test if the Jacobian is full rank
             inWorkspace = (exit_flag==1) && (L_rank == dynamics.numDofs);
             % Calculate semi-singular value
@@ -53,7 +52,7 @@ classdef WorkspaceWrenchClosure < WorkspaceCondition
                 % Initialise necessary parameters
                 Gram                =   zeros(dynamics.numCables); % This matrix could also be used for separating hyperplane test
                 semi_singular_value =   1;
-                L                   = dynamics.L;
+                L                   =   dynamics.L;
                 % Determine candidate semi_singular values
                 % THIS SHOULD BE CHANGED FOR THE GENERAL CASE (IE FOR ALL
                 % POSSIBLE HYPERPLANES)
@@ -108,6 +107,7 @@ classdef WorkspaceWrenchClosure < WorkspaceCondition
             % of rank
             S = svd(L'*L);
             singular_value = min(S);
+            % Display the singular and semi-singular values for the system
             str =sprintf('SV: %f, SSV: %f',singular_value,semi_singular_value);
             disp(str);
             semi_singular_value = 20*semi_singular_value+1;

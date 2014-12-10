@@ -61,7 +61,7 @@ sdConstructor = @() SystemDynamics(bdConstructor, cdConstructor, bkConstructor, 
 
 %% Define the workspace condition
 % Workspace conditions
-wcondition  =   WorkspaceWrenchClosure(0);
+wcondition  =   WorkspaceWrenchClosure(1);
 % wcondition  =   TestDriftClosure();
 % wcondition  =   PositiveControlContinuous();
 % wcondition  =   WorkspaceTaskWrenchClosure();
