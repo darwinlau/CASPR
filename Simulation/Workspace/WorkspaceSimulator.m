@@ -22,7 +22,7 @@ classdef WorkspaceSimulator < MotionSimulator
             % Runs over the grid and evaluates the workspace condition at
             % each point
             for i = 1:round(obj.grid.n_points)
-                i
+%                 i
                 q = obj.grid.getGridPoint(i);
                 dynamics.update(q, zeros(size(q)), zeros(size(q)));
                 [inWorkspace,max_vel] = obj.WCondition.evaluate(dynamics);
@@ -37,7 +37,7 @@ classdef WorkspaceSimulator < MotionSimulator
         function plotWorkspace(obj)
             assert(obj.grid.n_dimensions<=4,'Dimension of Workspace too large to plot');
             figure;  hold on;    axis([-180 180 -180 180]);
-            mw = max(obj.workspace(obj.grid.n_dimensions+1,:).*(obj.workspace(obj.grid.n_dimensions+1,:)~=Inf))+5;
+            mw = ceil(max(obj.workspace(obj.grid.n_dimensions+1,:).*(obj.workspace(obj.grid.n_dimensions+1,:)~=Inf))+5);
             if(isnan(mw))
                 mw = 1;
             end
@@ -50,12 +50,11 @@ classdef WorkspaceSimulator < MotionSimulator
                         plot((180/pi)*obj.workspace(1,i),(180/pi)*obj.workspace(2,i),'Color',map(int32(obj.workspace(3,i))+1,:),'Marker','.')
                     end
                 elseif(obj.grid.n_dimensions == 3)
-                    if(obj.workspace(3,i)==Inf)
+                    if(obj.workspace(4,i)==Inf)
                         plot3((180/pi)*obj.workspace(1,i),(180/pi)*obj.workspace(2,i),(180/pi)*obj.workspace(3,i),'Color',map(mw,:),'Marker','.')
                     else
                         plot3((180/pi)*obj.workspace(1,i),(180/pi)*obj.workspace(2,i),(180/pi)*obj.workspace(3,i),'Color',map(int32(obj.workspace(4,i))+1,:),'Marker','.')
                     end
-                    plot((180/pi)*obj.workspace(1,i),(180/pi)*obj.workspace(2,i),(180/pi)*obj.workspace(3,i),'k.')
                 end
             end 
             colorbar();
