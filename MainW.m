@@ -61,7 +61,7 @@ sdConstructor = @() SystemDynamics(bdConstructor, cdConstructor, bkConstructor, 
 
 %% Define the workspace condition
 % Workspace conditions
-wcondition  =   WorkspaceWrenchClosure(1);
+wcondition  =   WorkspaceWrenchClosure(0);
 % wcondition  =   TestDriftClosure();
 % wcondition  =   PositiveControlContinuous();
 % wcondition  =   WorkspaceTaskWrenchClosure();
@@ -71,8 +71,9 @@ wcondition  =   WorkspaceWrenchClosure(1);
 disp('Start Setup Simulation');
 start_tic       =   tic;
 wsim            =   WorkspaceSimulator(wcondition);
-q_step          =   pi/36;
-uGrid           =   UniformGrid(-pi*ones(2,1),(pi-q_step)*ones(2,1),q_step*ones(2,1));
+q_step          =   pi/180;
+n_dim           =   2;
+uGrid           =   UniformGrid(-pi*ones(n_dim,1),(pi-q_step)*ones(n_dim,1),q_step*ones(n_dim,1));
 % uGrid            =   UniformGrid([-97.5*pi/180;96.5*pi/180],[-96.5*pi/180;97.5*pi/180],[pi/720;pi/720]);
 % uGrid            =   UniformGrid(-pi*ones(3,1),(pi-pi/9)*ones(3,1),pi/9*ones(3,1));
 % uGrid            =   UniformGrid(-5*pi/9*ones(2,1),-4*pi/9*ones(2,1),pi/18*ones(2,1));
