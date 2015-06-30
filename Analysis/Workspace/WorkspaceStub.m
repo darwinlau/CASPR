@@ -9,9 +9,10 @@ classdef WorkspaceStub < WorkspaceCondition
         function id = WorkspaceStub()
         end
         
-        function [inWorkspace] = evaluate(obj,dynamics)
+        function [inWorkspace,max_vel] = evaluate(obj,dynamics)
             % This is just a dummy workspace all points will be returned.
             inWorkspace = 1;
+            max_vel = 1;
         end
         
         function [isConnected] = connected(obj,workspace,i,j,grid)

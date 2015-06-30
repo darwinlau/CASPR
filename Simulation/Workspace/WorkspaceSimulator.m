@@ -5,7 +5,7 @@ classdef WorkspaceSimulator < MotionSimulator
     properties
         grid            % Grid object for brute force workspace (input)
         workspace       % Final Workspace (output)
-        
+        filtered_workspace %Filtered workspace
         WCondition
     end
     
@@ -22,7 +22,7 @@ classdef WorkspaceSimulator < MotionSimulator
             % Runs over the grid and evaluates the workspace condition at
             % each point
             for i = 1:round(obj.grid.n_points)
-%                 i
+                i
                 q = obj.grid.getGridPoint(i);
                 dynamics.update(q, zeros(size(q)), zeros(size(q)));
                 [inWorkspace,max_vel] = obj.WCondition.evaluate(dynamics);
@@ -37,10 +37,11 @@ classdef WorkspaceSimulator < MotionSimulator
         function plotWorkspace(obj)
             assert(obj.grid.n_dimensions<=4,'Dimension of Workspace too large to plot');
             figure;  hold on;    axis([-180 180 -180 180]);
-            mw = ceil(max(obj.workspace(obj.grid.n_dimensions+1,:).*(obj.workspace(obj.grid.n_dimensions+1,:)~=Inf))+5);
+            mw = ceil(max(obj.workspace(obj.grid.n_dimensions+1,:).*(obj.workspace(obj.grid.n_dimensions+1,:)~=Inf))+1);
             if(isnan(mw))
                 mw = 1;
             end
+            mw
             map = colormap(flipud(gray(mw)));
             for i =1:size(obj.workspace,2)
                 if(obj.grid.n_dimensions == 2)
@@ -60,6 +61,30 @@ classdef WorkspaceSimulator < MotionSimulator
             colorbar();
         end
         
+        function plotWorkspacePlane(obj)
+            assert(obj.grid.n_dimensions<=3,'Dimension of Workspace too large to plot');
+            figure;  hold on;    axis([-180 180 -180 180]);
+            for i =1:size(obj.workspace,2)
+                if(obj.grid.n_dimensions == 2)
+                    plot((180/pi)*obj.workspace(1,i),(180/pi)*obj.workspace(2,i),'k.')
+                elseif(obj.grid.n_dimensions == 3)
+                    plot3((180/pi)*obj.workspace(1,i),(180/pi)*obj.workspace(2,i),(180/pi)*obj.workspace(3,i),'k.')
+                end
+            end 
+        end
+        
+        function plotFilterWorkspace(obj)
+            assert(obj.grid.n_dimensions<=3,'Dimension of Workspace too large to plot');
+            figure;  hold on;    axis([-180 180 -180 180]);
+            for i =1:size(obj.filtered_workspace,2)
+                if(obj.grid.n_dimensions == 2)
+                    plot((180/pi)*obj.filtered_workspace(1,i),(180/pi)*obj.filtered_workspace(2,i),'k.')
+                elseif(obj.grid.n_dimensions == 3)
+                    plot3((180/pi)*obj.filtered_workspace(1,i),(180/pi)*obj.filtered_workspace(2,i),(180/pi)*obj.filtered_workspace(3,i),'k.')
+                end
+            end 
+        end
+        
         function plotWorkspaceComponents(obj,components)
             assert(obj.grid.n_dimensions<=3,'Dimension of Workspace too large to plot');
             figure;  hold on;    axis([-180 180 -180 180]);
@@ -71,6 +96,32 @@ classdef WorkspaceSimulator < MotionSimulator
                     plot3((180/pi)*obj.workspace(1,i),(180/pi)*obj.workspace(2,i),(180/pi)*obj.workspace(3,i),'Color',map(components(i),:),'Marker','.')
                 end
             end 
+        end
+        
+        function boundaryFilter(obj)
+            obj.filtered_workspace = zeros(size(obj.workspace));
+            f_count = 1;
+            n_nodes = size(obj.workspace,2);
+            tol = 1e-6;
+            for i = 1:n_nodes
+                c_count = 0;
+                j = 1;
+                while((j<=n_nodes)&&(c_count<8))
+                    % Check if points are connected
+                    if((i~=j)&&(obj.WCondition.connected(obj.workspace,i,j,obj.grid)))
+%                     if((obj.WCondition.connected(obj.workspace,i,j,obj.grid)))
+                        c_count = c_count + 1;
+                    end
+                    
+                    if(c_count == 8)
+                        obj.filtered_workspace(:,f_count) = obj.workspace(:,i);
+                        f_count = f_count+1;
+                    end
+                    j = j+1;
+                end
+                i
+            end
+            obj.filtered_workspace = obj.filtered_workspace(:,1:f_count-1);
         end
         
         function [adjacency_matrix,laplacian_matrix] = toAdjacencyMatrix(obj)

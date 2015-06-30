@@ -9,7 +9,7 @@ classdef WorkspaceTaskWrenchClosure < WorkspaceCondition
         function id = WorkspaceTaskWrenchClosure()
         end
         
-        function [inWorkspace] = evaluate(obj,dynamics)
+        function [inWorkspace,max_vel] = evaluate(obj,dynamics)
             % Evalute the output closure condition, return true if it is
             % satisfied.
             % THIS CURRENTLY HAS A HARDCODED JACOBIAN.
@@ -21,19 +21,28 @@ classdef WorkspaceTaskWrenchClosure < WorkspaceCondition
                     J(i) = 0;
                 end
             end 
-            JL = -J*dynamics.L';  % JL = - dynamics.J*inv(dynamics.M)*dynamics.L';
-            JL_rank  =   rank(JL);
-            H       =   eye(dynamics.numCables);
-            f       =   zeros(dynamics.numCables,1);
-            A       =   [];
-            b       =   [];
-            Aeq     =   JL;
-            beq     =   zeros(1,1); % beq     =   zeros(dynamics.numOutDofs,1);
-            lb      =   1e-6*ones(dynamics.numCables,1);
-            ub      =   Inf*ones(dynamics.numCables,1);
-            options =   optimset('display','off');
-            [~,~,exit_flag] = quadprog(H,f,A,b,Aeq,beq,lb,ub,[],options);
+            JL = -J*inv(dynamics.M)*dynamics.L';  % JL = - dynamics.J*inv(dynamics.M)*dynamics.L';
+            JL_rank     =   rank(JL);
+%             H           =   eye(dynamics.numCables);
+%             f           =   zeros(dynamics.numCables,1);
+            A           =   [];
+            b           =   [];
+            Aeq         =   JL;
+            beq         =   zeros(1,1); % beq     =   zeros(dynamics.numOutDofs,1);
+            lb          =   1e-6*ones(dynamics.numCables,1);
+            ub          =   Inf*ones(dynamics.numCables,1);
+            options     =   optimset('display','off');
+            [~,~,exit_flag] = linprog(ones(dynamics.numCables,1),A,b,Aeq,beq,lb,ub,[],options);
+            [~,~,exit_flag_2] = linprog(ones(dynamics.numCables,1),A,b,dynamics.M\dynamics.L',dynamics.q_ddot_dynamics,zeros(dynamics.numCables,1),ub,[],options);
+%             inWorkspace = (exit_flag==1) && (exit_flag_2 == 1) && (JL_rank == 1);
             inWorkspace = (exit_flag==1) && (JL_rank == 1);
+            max_vel = 1;
+            if(norm(dynamics.q - [pi/6;pi/3])<0.01)
+                JL
+                dynamics.q
+                exit_flag
+                JL_rank
+            end
         end
         
         function [isConnected] = connected(obj,workspace,i,j,grid)

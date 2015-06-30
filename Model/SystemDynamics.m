@@ -24,6 +24,9 @@ classdef SystemDynamics < SystemKinematics
         jointMomentMagnitudes
         
         
+        
+%         B                         % Linearised B matrix
+        
         q_ddot_dynamics           % q_ddot from the system dynamics
         
         cableForces               % cable forces 
