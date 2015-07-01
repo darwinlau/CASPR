@@ -2,7 +2,8 @@ classdef WorkspaceCondition < handle
     %IDFUNCTION Summary of this class goes here
     %   Detailed explanation goes here
     
-    properties (SetAccess = protected, GetAccess = protected)
+    properties 
+        type                    % Type of workspace
     end
     
     methods (Abstract)

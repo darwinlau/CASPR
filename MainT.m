@@ -61,10 +61,17 @@ dynamics.update(q, zeros(size(q)), zeros(size(q)));
 w = WrenchSet(dynamics.L,dynamics.cableDynamics.forcesMax,dynamics.cableDynamics.forcesMin);
 w_ca = w.sphereApproximationCapacity(dynamics.G);
 w_ch = w.sphereApproximationChebyshev();
+w_sp = w.sphereApproximationMax(dynamics.G,0.01);
 time_elapsed    =   toc(start_tic);
 fprintf('End Running Simulation : %f seconds\n', time_elapsed);
-
-% Plot the wrench sets
+% m = UnilateralDexterityMetric();
+% m = TensionFactorMetric();
+% m = CapacityMarginMetric();
+% m = RelativeVolumeMetric();
+% m = RelativeRadiusMetric([0;0])
+m = SemiSingularMetric()
+m.evaluate(dynamics)
+%% Plot the wrench sets
 disp('Start Plotting Simulation');
 start_tic = tic;
 figure; hold on; grid on;
@@ -81,7 +88,9 @@ plot(x1,x2,'m')
 % Plot the Chebyshev sphere
 theta = -pi:pi/100:pi;
 x1 = w_ch.T(1) + w_ch.r*cos(theta);x2 = w_ch.T(2) + w_ch.r*sin(theta);
-plot(x1,x2,'m')
+plot(x1,x2,'c')
+% Plot the largest sphere
+theta = -pi:pi/100:pi;
+x1 = w_sp.T(1) + w_sp.r*cos(theta);x2 = w_sp.T(2) + w_sp.r*sin(theta);
+plot(x1,x2,'g')
 time_elapsed    =   toc(start_tic);
-
-

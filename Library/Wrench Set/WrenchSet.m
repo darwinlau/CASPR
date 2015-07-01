@@ -5,6 +5,7 @@ classdef WrenchSet < handle
         n_faces
         A
         b
+        v
     end
     
     methods
@@ -19,7 +20,7 @@ classdef WrenchSet < handle
                 f(k,:) = (ones(m) - diag(beta))*f_l + diag(beta)*f_u;
                 w(k,:) = -L'*f(k,:)';
             end
-            K = convhulln(w);
+            [K,id.v] = convhulln(w);
             id.n_faces = size(K,1);
             q = id.n_faces;
             t_A = zeros(q,n);
@@ -72,6 +73,11 @@ classdef WrenchSet < handle
             w_approx_sphere = WrenchSetSphere(o(1:2),o(3));
         end
         
+        function w_approx_sphere = sphereApproximationMax(obj,x_ref,buffer)
+            options = optimoptions('fmincon','Algorithm','active-set','Display','off');
+            [T,r,~] = fmincon(@(x) costMinRad(x,obj.A,obj.b),[0;0],obj.A,obj.b,[],[],[],[],@(x) constraintPointContained(x,obj.A,obj.b,x_ref,buffer),options);
+            w_approx_sphere = WrenchSetSphere(T,r);
+        end
     end
 end
 

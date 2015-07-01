@@ -1,5 +1,5 @@
 % Load configs
-clc; clear; warning off; close all;
+clc; clear; warning off; %close all;
 %% Set up folders
 % Change this
 % Darwin's Computer
@@ -58,22 +58,32 @@ cdConstructor = @() SystemDynamicsCablesIdeal(cables_prop_filepath);
 % Construct the kinematics
 sdConstructor = @() SystemDynamics(bdConstructor, cdConstructor, bkConstructor, ckConstructor);
 
+
 %% Define the workspace condition
 % Workspace conditions
-% wcondition  =   WorkspaceWrenchClosure(-1);
-% wcondition  =   HyperplaneWorkspaceWrenchClosure(1);
-% wcondition  =   TestDriftClosure();
-% wcondition  =   PositiveControlContinuous();
-% wcondition  =   PositiveControlContinuousAlt();
-% wcondition  =   WorkspaceStaticClosure();
-wcondition  =   WorkspaceTaskWrenchClosure();
 % wcondition = WorkspaceStub();
+wcondition  =   WorkspaceWrenchClosure();
+% wcondition  =   PositiveControlContinuous();
+% wcondition  =   WorkspaceStaticClosure();
+% wcondition  =   WorkspaceStatic();
+% wcondition  =   WorkspaceTaskWrenchClosure();
+
+
+%% Define the metric
+% metric = NullMetric();
+% metric = UnilateralDexterityMetric();
+% metric = TensionFactorMetric();
+metric = SemiSingularMetric();
+% metric = RelativeVolumeMetric();
+% metric = RelativeRadiusMetric([0;0]);
+% metric = CapacityMarginMetric();
+
 
 %% Start the simulation
 disp('Start Setup Simulation');
 start_tic       =   tic;
-wsim            =   WorkspaceSimulator(wcondition);
-q_step          =   pi/18;
+wsim            =   WorkspaceSimulator(wcondition,metric);
+q_step          =   pi/72;
 n_dim           =   2;
 uGrid           =   UniformGrid(-pi*ones(n_dim,1),(pi-q_step)*ones(n_dim,1),q_step*ones(n_dim,1));
 % uGrid           =   UniformGrid(-[pi*ones(n_dim-1,1);q_step/5],[(pi-q_step)*ones(n_dim-1,1);q_step/5],[q_step*ones(n_dim-1,1);q_step/5]);
@@ -97,8 +107,8 @@ fprintf('End Running Simulation : %f seconds\n', time_elapsed);
 
 disp('Start Plotting Simulation');
 start_tic = tic;
-% wsim.plotWorkspace();
-wsim.plotWorkspacePlane();
+wsim.plotWorkspace();
+% wsim.plotWorkspacePlane();
 % wsim.plotFilterWorkspace();
 % wsim.plotWorkspaceComponents(con_comp);
 % time_elapsed = toc(start_tic);
