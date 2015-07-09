@@ -1,0 +1,79 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<cables>
+  <ideal_cable name="Cable 1">
+    <properties>
+      <force_min>0.1</force_min>
+      <force_max>1000</force_max>
+      <force_error>1500</force_error>
+    </properties>
+    <segments>
+      <segment>
+        <begin>
+          <link>0</link>
+          <location>0.0 0.0 0.0</location>
+        </begin>
+        <end>
+          <link>1</link>
+          <location>-0.125 -0.125 0</location>
+        </end>
+      </segment>
+    </segments>
+  </ideal_cable>
+  <ideal_cable name="Cable 2">
+    <properties>
+      <force_min>0.1</force_min>
+      <force_max>1000</force_max>
+      <force_error>1500</force_error>
+    </properties>
+    <segments>
+      <segment>
+        <begin>
+          <link>0</link>
+          <location>0.0 1.0 0.0</location>
+        </begin>
+        <end>
+          <link>1</link>
+          <location>0.125 -0.125 0</location>
+        </end>
+      </segment>
+    </segments>
+  </ideal_cable>
+  <ideal_cable name="Cable 3">
+    <properties>
+      <force_min>0.1</force_min>
+      <force_max>1000</force_max>
+      <force_error>1500</force_error>
+    </properties>
+    <segments>
+      <segment>
+        <begin>
+          <link>0</link>
+          <location>0.0 1.0 1.0</location>
+        </begin>
+        <end>
+          <link>1</link>
+          <location>0.125 0.125 0</location>
+        </end>
+      </segment>
+    </segments>
+  </ideal_cable>
+  <ideal_cable name="Cable 4">
+    <properties>
+      <force_min>0.1</force_min>
+      <force_max>1000</force_max>
+      <force_error>1500</force_error>
+    </properties>
+    <segments>
+      <segment>
+        <begin>
+          <link>0</link>
+          <location>0.0 0.0 1.0</location>
+        </begin>
+        <end>
+          <link>1</link>
+          <location>-0.125 0.125 0</location>
+        </end>
+      </segment>
+    </segments>
+  </ideal_cable>
+</cables>
