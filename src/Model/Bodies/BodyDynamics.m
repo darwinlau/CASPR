@@ -15,6 +15,9 @@ classdef BodyDynamics < handle
         function bk = BodyDynamics(id)
             bk.id = id;
         end
+        
+        function update(obj, bodyKinematics)
+        end
     end
 end
 

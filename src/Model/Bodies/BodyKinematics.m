@@ -1,4 +1,4 @@
-classdef BodyKinematics < handle
+classdef (Abstract) BodyKinematics < handle
     %BODYKINEMATICS Summary of this class goes here
     %   Detailed explanation goes here
     
@@ -7,7 +7,10 @@ classdef BodyKinematics < handle
         
         r_G                     % Position vector from joint to COG
         r_P                     % Position vector from joint to end of link
-        r_Parent                % Position from joint of parent link to joint
+        
+        r_Parent                % Position from joint of parent link to this joint
+        parentLinkId            % Link ID of the parent
+        
         parentLink = []         % Parent link of type BodyKinematics
         childLinks = {}         % Cell array of child links
         
@@ -25,15 +28,17 @@ classdef BodyKinematics < handle
     
     properties (SetAccess = private)
         id                      % Body ID
+        name
     end
     
     properties (Dependent)
-        parentLinkId
+        numDofs
     end
    
     methods
-        function bk = BodyKinematics(id, jointType)
+        function bk = BodyKinematics(id, name, jointType)
             bk.id = id;
+            bk.name = name;
             bk.joint = Joint.CreateJoint(jointType);
         end
         
@@ -46,12 +51,12 @@ classdef BodyKinematics < handle
             end
         end        
         
-        function id = get.parentLinkId(obj)            
-            if (isempty(obj.parentLink))
-                id = 0;
-            else
-                id = obj.parentLink.id;
-            end
+        function dofs = get.numDofs(obj)   
+            dofs = obj.joint.numDofs;
+        end
+        
+        function update(obj, q, q_dot, q_ddot)
+            obj.joint.update(q, q_dot, q_ddot);
         end
     end
 end

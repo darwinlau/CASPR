@@ -1,11 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <links>
-  <rigid_link name="Link 1">
-    <num>1</num>
-    <joint>PLANAR_XY</joint>
+  <link_rigid num="1" name="Link 1">
+    <joint_type>PLANAR_XY</joint_type>
     <physical>
       <mass>1</mass>
       <com_location>0.0 0.0 0.0</com_location>
+      <end_location>0.0 0.0 0.0</end_location>
       <inertia ref="CoM">
         <Ixx>0.005208333</Ixx>
         <Iyy>0.005208333</Iyy>
@@ -19,5 +19,5 @@
       <num>0</num>
       <location>0.0 0.0 0.0</location>
     </parent>
-  </rigid_link>
+  </link_rigid>
 </links>

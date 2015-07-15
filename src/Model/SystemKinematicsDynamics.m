@@ -1,11 +1,10 @@
-classdef SystemDynamics < SystemKinematics
+classdef SystemKinematicsDynamics < SystemKinematics
     %SystemKinematics Contains the information for the kinematic state for
     %the entire cable-driven system
     
-    properties (SetAccess = private)            
+    properties (SetAccess = protected)            
         bodyDynamics              % SystemDynamicsBodies object
         cableDynamics             % SystemDynamicsCables object
-        
     end
     
     properties (Constant)
@@ -41,14 +40,21 @@ classdef SystemDynamics < SystemKinematics
     end
     
     methods (Static)
+        function b = LoadXmlObj(body_xmlobj, cable_xmlobj)
+            b = SystemKinematicsDynamics;
+            b.bodyKinematics = SystemKinematicsBodies.LoadXmlObj(body_xmlobj);
+            b.bodyDynamics = SystemDynamicsBodies.LoadXmlObj(body_xmlobj);
+            b.cableKinematics = SystemKinematicsCables.LoadXmlObj(cable_xmlobj, b.numLinks);
+            b.cableDynamics = SystemDynamicsCables.LoadXmlObj(cable_xmlobj);
+            b.update(zeros(b.numDofs,1), zeros(b.numDofs,1), zeros(b.numDofs,1));
+        end
     end
     
     methods
-        function b = SystemDynamics(bdConstructor, cdConstructor, bkConstructor, ckConstructor)
+        function b = SystemKinematicsDynamics()
             % Constructor from the bodies and cables properties
-            b@SystemKinematics(bkConstructor, ckConstructor);
-            b.bodyDynamics = bdConstructor();
-            b.cableDynamics = cdConstructor();
+%             b.bodyDynamics = bdConstructor();
+%             b.cableDynamics = cdConstructor();
         end
         
         
@@ -58,7 +64,7 @@ classdef SystemDynamics < SystemKinematics
             % sets the system Jacobian matrix                
             update@SystemKinematics(obj, q, q_dot, q_ddot);
             obj.bodyDynamics.update(obj.bodyKinematics);
-            obj.cableDynamics.update(obj.cableKinematics, obj.bodyKinematics, obj.bodyDynamics);
+            obj.cableDynamics.update(obj.cableKinematics, obj.bodyKinematics);
         end
         
         function value = get.jointWrenches(obj)

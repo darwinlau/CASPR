@@ -53,45 +53,33 @@ classdef JointTrajectory < handle
     end
     
     methods (Static)
-        function trajectory = ReadFromConfig(prop_file, bk)
-            assert(exist(prop_file, 'file') == 2, 'File does not exist');
+        function trajectory = LoadXmlObj(xmlObj, kin)
+            assert(strcmp(xmlObj.getNodeName, 'trajectory'), 'Element should be <trajectory>');
+            total_time = str2double(xmlObj.getElementsByTagName('time_total').item(0).getFirstChild.getData);
+            time_step = str2double(xmlObj.getElementsByTagName('time_step').item(0).getFirstChild.getData);
+            beginObj = xmlObj.getElementsByTagName('begin').item(0);
+            endObj = xmlObj.getElementsByTagName('end').item(0);
             
-            fid = fopen(prop_file);
-            % get line one "num_cables, num_links"
-            line = fgetl(fid);
-            s = sscanf(line,'%f,%f');
-            total_time = s(1);
-            time_step = s(2);
+            q_s = XmlOperations.StringToVector(char(beginObj.getElementsByTagName('q').item(0).getFirstChild.getData));
+            q_s_d = XmlOperations.StringToVector(char(beginObj.getElementsByTagName('q_dot').item(0).getFirstChild.getData));
+            q_s_dd = XmlOperations.StringToVector(char(beginObj.getElementsByTagName('q_ddot').item(0).getFirstChild.getData));
+            q_e = XmlOperations.StringToVector(char(endObj.getElementsByTagName('q').item(0).getFirstChild.getData));
+            q_e_d = XmlOperations.StringToVector(char(endObj.getElementsByTagName('q_dot').item(0).getFirstChild.getData));
+            q_e_dd = XmlOperations.StringToVector(char(endObj.getElementsByTagName('q_ddot').item(0).getFirstChild.getData));
             
-            q_s = zeros(bk.numDofs, 1);
-            q_s_d = zeros(bk.numDofs, 1);
-            q_s_dd = zeros(bk.numDofs, 1);
-            q_e = zeros(bk.numDofs, 1);
-            q_e_d = zeros(bk.numDofs, 1);
-            q_e_dd = zeros(bk.numDofs, 1);
+            assert(length(q_s) == kin.numDofs, sprintf('Trajectory config does not contain correct number of DoFs for q begin, desired : %d, specified : %d', kin.numDofs, length(q_s)));
+            assert(length(q_s_d) == kin.numDofs, sprintf('Trajectory config does not contain correct number of DoFs for q_dot begin, desired : %d, specified : %d', kin.numDofs, length(q_s_d)));
+            assert(length(q_s_dd) == kin.numDofs, sprintf('Trajectory config does not contain correct number of DoFs for q_ddot begin, desired : %d, specified : %d', kin.numDofs, length(q_s_dd)));
+            assert(length(q_e) == kin.numDofs, sprintf('Trajectory config does not contain correct number of DoFs for q end, desired : %d, specified : %d', kin.numDofs, length(q_e)));
+            assert(length(q_e_d) == kin.numDofs, sprintf('Trajectory config does not contain correct number of DoFs for q_dot end, desired : %d, specified : %d', kin.numDofs, length(q_e_d)));
+            assert(length(q_e_dd) == kin.numDofs, sprintf('Trajectory config does not contain correct number of DoFs for q_ddot end, desired : %d, specified : %d', kin.numDofs, length(q_e_dd)));
             
-            varnum = 0;
-            % read each dof line
-            while ~feof(fid)
-                varnum = varnum+1;
-                line = fgetl(fid);
-                s = sscanf(line,'%f,%f,%f,%f,%f,%f');
-                q_s(varnum) = s(1);
-                q_s_d(varnum) = s(2);
-                q_s_dd(varnum) = s(3);
-                q_e(varnum) = s(4);
-                q_e_d(varnum) = s(5);
-                q_e_dd(varnum) = s(6);
-            end
-            fclose(fid);
-            assert(varnum == bk.numDofs, sprintf('Trajectory config does not contain correct number of DoFs, specified : %d, added : %d', bk.numDofs, varnum)');
-                        
-            trajectory = JointTrajectory.GenerateTrajectory(bk, q_s, q_s_d, q_s_dd, q_e, q_e_d, q_e_dd, total_time, time_step);
+            trajectory = JointTrajectory.GenerateTrajectory(kin, q_s, q_s_d, q_s_dd, q_e, q_e_d, q_e_dd, total_time, time_step);
         end
         
-        function trajectory = GenerateTrajectory(bk, q_s, q_s_d, q_s_dd, q_e, q_e_d, q_e_dd, total_time, time_step)            
+        function trajectory = GenerateTrajectory(kin, q_s, q_s_d, q_s_dd, q_e, q_e_d, q_e_dd, total_time, time_step)
             trajectory = JointTrajectory;
-            n_dof = bk.numDofs;    
+            n_dof = kin.numDofs;    
             t = 0:time_step:total_time;
             trajectory.timeVector = t;
             trajectory.totalTime = total_time;
@@ -102,9 +90,9 @@ classdef JointTrajectory < handle
             qdd_array = zeros(n_dof, length(t));
             
             index = 1;
-            for k = 1:bk.numLinks
+            for k = 1:kin.numLinks
                 ind_k_s = index;
-                ind_k_e = index+bk.bodies{k}.joint.numDofs-1;
+                ind_k_e = index+kin.bodyKinematics.bodies{k}.joint.numDofs-1;
                 qk_s = q_s(ind_k_s:ind_k_e);
                 qk_e = q_e(ind_k_s:ind_k_e);
                 qk_s_d = q_s_d(ind_k_s:ind_k_e);
@@ -112,7 +100,7 @@ classdef JointTrajectory < handle
                 qk_s_dd = q_s_dd(ind_k_s:ind_k_e);
                 qk_e_dd = q_e_dd(ind_k_s:ind_k_e);
                 
-                switch bk.bodies{k}.joint.type
+                switch kin.bodyKinematics.bodies{k}.joint.type
                     case JointType.R_X
                         [qk, qk_dot, qk_ddot] = JointTrajectory.InterpolateVariable(qk_s, qk_s_d, qk_s_dd, qk_e, qk_e_d, qk_e_dd, t);
                     case JointType.R_Y
@@ -133,7 +121,7 @@ classdef JointTrajectory < handle
                 q_array(ind_k_s:ind_k_e, :) = qk;
                 qd_array(ind_k_s:ind_k_e, :) = qk_dot;
                 qdd_array(ind_k_s:ind_k_e, :) = qk_ddot;
-                index = index+bk.bodies{k}.joint.numDofs;
+                index = index+kin.bodyKinematics.bodies{k}.joint.numDofs;
             end
             s = size(q_array);
             trajectory.q = mat2cell(q_array, s(1), ones(1, s(2)));
@@ -141,15 +129,7 @@ classdef JointTrajectory < handle
             trajectory.q_ddot = mat2cell(qdd_array, s(1), ones(1, s(2)));
         end  
         
-        function [q, q_dot, q_ddot] = InterpolateXYZFixed(q_s, ~, ~, q_e, ~, ~, time)
-%        function [x, x_dot, x_ddot, t] = InterpolateXYZFixed(q_s, q_s_dot, q_s_ddot, q_e, q_e_dot, q_e_ddot, t_s, t_e, t_step)
-%             a_s = q_s(1); b_s = q_s(2); g_s = q_s(3);
-%             a_s_dot = q_s_dot(1); b_s_dot = q_s_dot(2); g_s_dot = q_s_dot(3);
-%             a_s_ddot = q_s_ddot(1); b_s_ddot = q_s_ddot(2); g_s_ddot = q_s_ddot(3);
-%             a_e = q_e(1); b_e = q_e(2); g_e = q_e(3); 
-%             a_e_dot = q_e_dot(1); b_e_dot = q_e_dot(2); g_e_dot = q_e_dot(3);
-%             a_e_ddot = q_e_ddot(1); b_e_ddot = q_e_ddot(2); g_e_ddot = q_e_ddot(3);
-            
+        function [q, q_dot, q_ddot] = InterpolateXYZFixed(q_s, ~, ~, q_e, ~, ~, time)            
             % Step 1 Quaternion axis and rotation
             R_0s = SphericalFixedXYZ.RelRotationMatrix(q_s);
             R_0e = SphericalFixedXYZ.RelRotationMatrix(q_e);
@@ -269,15 +249,7 @@ classdef JointTrajectory < handle
             end
         end
         
-        function [q, q_dot, q_ddot] = InterpolateXYZEuler(q_s, ~, ~, q_e, ~, ~, time)
-%        function [x, x_dot, x_ddot, t] = InterpolateXYZEuler(q_s, q_s_dot, q_s_ddot, q_e, q_e_dot, q_e_ddot, t_s, t_e, t_step)
-%             a_s = q_s(1); b_s = q_s(2); g_s = q_s(3);
-%             a_s_dot = q_s_dot(1); b_s_dot = q_s_dot(2); g_s_dot = q_s_dot(3);
-%             a_s_ddot = q_s_ddot(1); b_s_ddot = q_s_ddot(2); g_s_ddot = q_s_ddot(3);
-%             a_e = q_e(1); b_e = q_e(2); g_e = q_e(3); 
-%             a_e_dot = q_e_dot(1); b_e_dot = q_e_dot(2); g_e_dot = q_e_dot(3);
-%             a_e_ddot = q_e_ddot(1); b_e_ddot = q_e_ddot(2); g_e_ddot = q_e_ddot(3);
-            
+        function [q, q_dot, q_ddot] = InterpolateXYZEuler(q_s, ~, ~, q_e, ~, ~, time)            
             % Step 1 Quaternion axis and rotation
             R_0s = SphericalEulerXYZ.RelRotationMatrix(q_s);
             R_0e = SphericalEulerXYZ.RelRotationMatrix(q_e);

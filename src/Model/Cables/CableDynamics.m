@@ -1,4 +1,4 @@
-classdef CableDynamics < handle
+classdef (Abstract) CableDynamics < handle
     %CABLEKINEMATICS Summary of this class goes here
     %   Detailed explanation goes here
     properties
@@ -14,6 +14,9 @@ classdef CableDynamics < handle
     methods
         function ck = CableDynamics(name)
             ck.name = name;
+        end
+        
+        function update(obj, cableKinematics, bodyKinematics)
         end
     end
     

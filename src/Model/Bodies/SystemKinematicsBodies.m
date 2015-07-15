@@ -23,17 +23,18 @@ classdef SystemKinematicsBodies < handle
         
         C_a                     % Relationship between body and joint accelerations \ddot{\mathbf{x}} = W \ddot{\mathbf{q}} + C_a
         
-        numLinks
         numDofs
     end
     
     properties (Dependent)
+        numLinks
     end
     
     methods
-        function b = SystemKinematicsBodies(num_links, num_dofs)
-            b.numLinks = num_links;
+        function b = SystemKinematicsBodies(bodies, num_dofs)
+            b.bodies = bodies;
             b.numDofs = num_dofs;
+            
             b.connectivityGraph = zeros(b.numLinks, b.numLinks);
             b.bodiesPathGraph = zeros(b.numLinks, b.numLinks);
             b.S = zeros(6*b.numLinks, b.numDofs);
@@ -47,16 +48,18 @@ classdef SystemKinematicsBodies < handle
             obj.q_dot = q_dot;
             obj.q_ddot = q_ddot;
             
-            % Assign state to joints
+            % Update each body first
             index = 1;
             for k = 1:obj.numLinks
                 q_k = q(index:index+obj.bodies{k}.joint.numDofs-1);
                 q_dot_k = q_dot(index:index+obj.bodies{k}.joint.numDofs-1);
                 q_ddot_k = q_ddot(index:index+obj.bodies{k}.joint.numDofs-1);
-                obj.bodies{k}.joint.update(q_k, q_dot_k, q_ddot_k);
+                obj.bodies{k}.update(q_k, q_dot_k, q_ddot_k);
+                %obj.bodies{k}.joint.update(q_k, q_dot_k, q_ddot_k);
                 index = index + obj.bodies{k}.joint.numDofs;
             end
             
+            % Now the global system updates
             % Set bodies kinematics (rotation matrices)
             for k = 1:obj.numLinks
                 parent_link_num = obj.bodies{k}.parentLinkId;
@@ -138,6 +141,12 @@ classdef SystemKinematicsBodies < handle
             end
         end
         
+        function formConnectiveMap(obj)
+            for k = 1:obj.numLinks
+                obj.connectBodies(obj.bodies{k}.parentLinkId, k, obj.bodies{k}.r_Parent);
+            end
+        end
+        
         function connectBodies(obj, parent_link_num, child_link_num, r_parent_loc)   
             assert(parent_link_num < child_link_num, 'Parent link number must be smaller than child');
             assert(~isempty(obj.bodies{child_link_num}), 'Child link does not exist');
@@ -160,7 +169,44 @@ classdef SystemKinematicsBodies < handle
                 obj.bodiesPathGraph(:, child_link_num) = obj.bodiesPathGraph(:, child_link_num) | obj.bodiesPathGraph(:, parent_link_num);
             end
         end
+        
+        function n = get.numLinks(obj)
+            n = length(obj.bodies);
+        end
     end
     
+    methods (Static)
+        function b = LoadXmlObj(body_prop_xmlobj)
+            rootNode = body_prop_xmlobj.getDocumentElement;
+            assert(strcmp(rootNode.getNodeName, 'links'), 'Root elemnt should be <links>');
+            allLinkItems = rootNode.getChildNodes;
+                        
+            num_links = allLinkItems.getLength;
+            num_dofs = 0;
+            links = cell(1,num_links);
+            
+            % Creates all of the links first
+            for k = 1:num_links
+                % Java uses 0 indexing
+                currentLinkItem = allLinkItems.item(k-1);
+                
+                num_k = str2double(currentLinkItem.getAttribute('num'));
+                assert(num_k == k, sprintf('Link number does not correspond to its order, order: %d, specified num: %d ', k, num_k));
+                     
+                type = char(currentLinkItem.getNodeName);
+                if (strcmp(type, 'link_rigid'))
+                    %currentLinkItem.getChildNodes.getElementsByTagName('parent').item(0).getChildNodes.getLength
+                    links{k} = BodyKinematicsRigid.LoadXmlObj(currentLinkItem);
+                else
+                    error('Unknown link type: %s', type);
+                end
+                num_dofs = num_dofs + links{k}.numDofs;
+            end
+            
+            % Create the actual object to return
+            b = SystemKinematicsBodies(links, num_dofs);
+            b.formConnectiveMap();
+        end
+    end
 end
 

@@ -2,10 +2,9 @@ classdef SystemKinematics < handle
     %SystemKinematics Contains the information for the kinematic state for
     %the entire cable-driven system
     
-    properties (SetAccess = private)    
+    properties (SetAccess = protected)    
         bodyKinematics              % SystemKinematicsBodies object
         cableKinematics             % SystemKinematicsCables object
-        
     end
     
     properties (Dependent)
@@ -28,13 +27,20 @@ classdef SystemKinematics < handle
     end
     
     methods (Static)
+        function k = LoadXmlObj(body_xmlobj, cable_xmlobj)
+            k = SystemKinematics();
+            k.bodyKinematics = SystemKinematicsBodies.LoadXmlObj(body_xmlobj);
+            k.cableKinematics = SystemKinematicsCables.LoadXmlObj(cable_xmlobj, k.numLinks);
+            k.update(zeros(k.numDofs,1), zeros(k.numDofs,1), zeros(k.numDofs,1));
+        end
     end
     
     methods
-        function b = SystemKinematics(bkConstructor, ckConstructor)
-            % Constructor from the bodies and cables properties
-            b.bodyKinematics = bkConstructor();
-            b.cableKinematics = ckConstructor();
+        function k = SystemKinematics()            
+%             (bkConstructor, ckConstructor)
+%             % Constructor from the bodies and cables properties
+%             b.bodyKinematics = bkConstructor();
+%             b.cableKinematics = ckConstructor();
         end
         
         

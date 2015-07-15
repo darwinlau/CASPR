@@ -1,4 +1,4 @@
-classdef (Abstract) SystemKinematicsCables < handle
+classdef SystemKinematicsCables < handle
     %CABLESYSTEMKINEMATICS Summary of this class goes here
     %   Detailed explanation goes here
     
@@ -19,42 +19,22 @@ classdef (Abstract) SystemKinematicsCables < handle
     end
     
     methods
-        function ck = SystemKinematicsCables(numCables, numLinks)
+        function ck = SystemKinematicsCables(cables, numLinks)
+            ck.cables = cables;
+            ck.numCables = length(cables);
             ck.numLinks = numLinks;
-            ck.numCables = numCables;
-            for i = 1:numCables
-                ck.cables{i} = CableKinematics(sprintf('Cable %d', i), ck.numLinks);
-            end
+%             for i = 1:ck.numCables
+%                 ck.cables{i} = CableKinematics(sprintf('Cable %d', i), ck.numLinks);
+%             end
         end
         
         function update(obj, bodyKinematics)
             assert(bodyKinematics.numLinks == obj.numLinks, 'Number of links between the cable and body kinematics must be consistent');
+            
             % Set each cable's kinematics (absolute attachment locations
             % and segment vectors)
             for i = 1:obj.numCables
-                for j = 1:obj.cables{i}.numSegments
-                    % cycle through links 0 to p, linkNum = k-1
-                    obj.cables{i}.segments{j}.segmentVector = [0;0;0];
-                    for k = 1:obj.numLinks+1
-                        % First : compute absolute attachment locations
-                        if obj.getCRMTerm(i,j,k) ~= 0
-                            % k == 1 is base link
-                            if k == 1
-                                obj.cables{i}.segments{j}.attachmentsAbs{k} = obj.cables{i}.segments{j}.attachmentsLocal{k};
-                            else
-                                % bodies{k-1} because bodyNum = k - 1;
-                                obj.cables{i}.segments{j}.attachmentsAbs{k} = bodyKinematics.bodies{k-1}.r_OG + obj.cables{i}.segments{j}.attachmentsLocal{k};
-                            end
-                        end
-                        % Second : compute cable segment vectors
-                        % k == 1 is base link
-                        if k == 1
-                            obj.cables{i}.segments{j}.segmentVector = obj.cables{i}.segments{j}.segmentVector + obj.getCRMTerm(i,j,k)*obj.cables{i}.segments{j}.attachmentsAbs{k};
-                        else
-                            obj.cables{i}.segments{j}.segmentVector = obj.cables{i}.segments{j}.segmentVector + obj.getCRMTerm(i,j,k)*(bodyKinematics.bodies{k-1}.R_0k*obj.cables{i}.segments{j}.attachmentsAbs{k});
-                        end
-                    end
-                end
+                obj.cables{i}.update(bodyKinematics);
             end
             
             % Determine V
@@ -109,6 +89,34 @@ classdef (Abstract) SystemKinematicsCables < handle
             for i = 1:obj.numCables
                 value(i) = obj.cables{i}.length;
             end
+        end
+    end
+    
+    
+    methods (Static)
+        function c = LoadXmlObj(cable_prop_xmlobj, num_links)
+            rootNode = cable_prop_xmlobj.getDocumentElement;
+            assert(strcmp(rootNode.getNodeName, 'cables'), 'Root element should be <cables>');
+            allCableItems = rootNode.getChildNodes;
+                        
+            num_cables = allCableItems.getLength;
+            xml_cables = cell(1,num_cables);
+            
+            % Creates all of the links first
+            for k = 1:num_cables
+                % Java uses 0 indexing
+                currentCableItem = allCableItems.item(k-1);
+                
+                type = char(currentCableItem.getNodeName);
+                if (strcmp(type, 'cable_ideal'))
+                    xml_cables{k} = CableKinematicsIdeal.LoadXmlObj(currentCableItem, num_links);
+                else
+                    error('Unknown cables type: %s', type);
+                end
+            end
+            
+            % Create the actual object to return
+            c = SystemKinematicsCables(xml_cables, num_links);
         end
     end
 end

@@ -1,0 +1,139 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<cables>
+  <cable_ideal name="cleid-mast (right)">
+    <properties>
+      <force_min>0.001</force_min>
+      <force_max>1000</force_max>
+      <force_error>1500</force_error>
+    </properties>
+    <attachments>
+      <attachment>
+        <link>0</link>
+        <location>0.03958 -0.0572 -0.02058</location>
+      </attachment>
+      <attachment>
+        <link>8</link>
+        <location>-0.0051 -0.0643 -0.09307</location>
+      </attachment>
+    </attachments>
+  </cable_ideal>
+  <cable_ideal name="cleid-occ (right)">
+    <properties>
+      <force_min>0.001</force_min>
+      <force_max>1000</force_max>
+      <force_error>1500</force_error>
+    </properties>
+    <attachments>
+      <attachment>
+        <link>0</link>
+        <location>0.03958 -0.0572 -0.02058</location>
+      </attachment>
+      <attachment>
+        <link>8</link>
+        <location>-0.035 -0.0664 -0.077</location>
+      </attachment>
+    </attachments>
+  </cable_ideal>
+  <cable_ideal name="deepmult-C4/5-C2 (right)">
+    <properties>
+      <force_min>0.001</force_min>
+      <force_max>1000</force_max>
+      <force_error>1500</force_error>
+    </properties>
+    <attachments>
+      <attachment>
+        <link>3</link>
+        <location>-0.01317 -0.02096 0.02025</location>
+      </attachment>
+      <attachment>
+        <link>6</link>
+        <location>-0.02089 -0.00599 -0.00497</location>
+      </attachment>
+    </attachments>
+  </cable_ideal>
+  <cable_ideal name="deepmult-C5/6-C3 (right)">
+    <properties>
+      <force_min>0.001</force_min>
+      <force_max>1000</force_max>
+      <force_error>1500</force_error>
+    </properties>
+    <attachments>
+      <attachment>
+        <link>2</link>
+        <location>-0.01159 -0.0236 0.02103</location>
+      </attachment>
+      <attachment>
+        <link>5</link>
+        <location>-0.02136 -0.00611 -0.00324</location>
+      </attachment>
+    </attachments>
+  </cable_ideal>
+  <cable_ideal name="deepmult-C6/7-C4 (right)">
+    <properties>
+      <force_min>0.001</force_min>
+      <force_max>1000</force_max>
+      <force_error>1500</force_error>
+    </properties>
+    <attachments>
+      <attachment>
+        <link>1</link>
+        <location>-0.01278 -0.02508 0.02103</location>
+      </attachment>
+      <attachment>
+        <link>4</link>
+        <location>-0.02161 -0.0065 -0.00016</location>
+      </attachment>
+    </attachments>
+  </cable_ideal>
+  <cable_ideal name="deepmult-T1-C5 (right)">
+    <properties>
+      <force_min>0.001</force_min>
+      <force_max>1000</force_max>
+      <force_error>1500</force_error>
+    </properties>
+    <attachments>
+      <attachment>
+        <link>0</link>
+        <location>-0.03554 -0.03082 0.01279</location>
+      </attachment>
+      <attachment>
+        <link>3</link>
+        <location>-0.02781 -0.00578 0.01012</location>
+      </attachment>
+    </attachments>
+  </cable_ideal>
+  <cable_ideal name="deepmult-T1-C6 (right)">
+    <properties>
+      <force_min>0.001</force_min>
+      <force_max>1000</force_max>
+      <force_error>1500</force_error>
+    </properties>
+    <attachments>
+      <attachment>
+        <link>0</link>
+        <location>-0.03451 -0.02898 0.00959</location>
+      </attachment>
+      <attachment>
+        <link>2</link>
+        <location>-0.02756 -0.00579 0.01081</location>
+      </attachment>
+    </attachments>
+  </cable_ideal>
+  <cable_ideal name="deepmult-T2-C7 (right)">
+    <properties>
+      <force_min>0.001</force_min>
+      <force_max>1000</force_max>
+      <force_error>1500</force_error>
+    </properties>
+    <attachments>
+      <attachment>
+        <link>0</link>
+        <location>-0.04135 -0.02771 -0.01022</location>
+      </attachment>
+      <attachment>
+        <link>1</link>
+        <location>-0.02697 -0.00579 0.01224</location>
+      </attachment>
+    </attachments>
+  </cable_ideal>
+</cables>
