@@ -1,4 +1,4 @@
-classdef WorkspaceStaticClosure < WorkspaceCondition
+classdef WorkspaceStatic < WorkspaceCondition
     %IDFUNCTION Summary of this class goes here
     %   Detailed explanation goes here
     
@@ -6,8 +6,8 @@ classdef WorkspaceStaticClosure < WorkspaceCondition
     end
     
     methods
-        function id = WorkspaceStaticClosure()
-            id.type = WorkspaceType.SCW;
+        function id = WorkspaceStatic()
+            id.type = WorkspaceType.SW;
         end
         
         function inWorkspace = evaluate(obj,dynamics)
@@ -17,14 +17,13 @@ classdef WorkspaceStaticClosure < WorkspaceCondition
            A       =   [];
            b       =   [];
            Aeq     =   [dynamics.M\dynamics.L',dynamics.M\dynamics.G];
-           Lrank   =    rank(Aeq);
            Aeq     =   (abs(Aeq)>1e-6).*Aeq;
            beq     =   zeros(dynamics.numDofs,1);
            lb      =   [1e-6*ones(dynamics.numCables+1,1)];
            ub      =   [Inf*ones(dynamics.numCables+1,1)];
            options =   optimset('display','off');
            [~,~,exit_flag] = quadprog(H,f,A,b,Aeq,beq,lb,ub,[],options);
-           if((Lrank == dynamics.numDofs) && (exit_flag == 1))
+           if(exit_flag == 1)
                inWorkspace = 1;
            else
                inWorkspace = 0;

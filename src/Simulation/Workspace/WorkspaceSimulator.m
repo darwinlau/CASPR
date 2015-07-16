@@ -6,12 +6,16 @@ classdef WorkspaceSimulator < MotionSimulator
         grid            % Grid object for brute force workspace (input)
         workspace       % Final Workspace (output)
         filtered_workspace %Filtered workspace
-        WCondition
+        WCondition      % The workspace condition
+        metric          % The metric
+        m_flag          % Flag to indicate whether metric can be used to look at workspace
     end
     
     methods        
-        function id = WorkspaceSimulator(w_condition)
-            id.WCondition = w_condition;
+        function id = WorkspaceSimulator(w_condition,metric)
+            id.WCondition   =   w_condition;
+            id.metric       =   metric;
+            id.m_flag       =   metric.workspaceCheck(w_condition.type);
         end
         
         function run(obj, grid, sdConstructor)
@@ -25,10 +29,16 @@ classdef WorkspaceSimulator < MotionSimulator
                 i
                 q = obj.grid.getGridPoint(i);
                 dynamics.update(q, zeros(size(q)), zeros(size(q)));
-                [inWorkspace,max_vel] = obj.WCondition.evaluate(dynamics);
+                if(obj.m_flag)
+                    metricValue     =   obj.metric.evaluate(dynamics);
+                    inWorkspace     =   metricValue>0;
+                else
+                    inWorkspace     =   obj.WCondition.evaluate(dynamics);
+                    metricValue    =   obj.metric.evaluate(dynamics);
+                end
                 if(inWorkspace)
                     workspace_count = workspace_count + 1;
-                    obj.workspace(:,workspace_count) = [q;max_vel];
+                    obj.workspace(:,workspace_count) = [q;metricValue];
                 end
             end
             obj.workspace = obj.workspace(:,1:workspace_count);
@@ -41,14 +51,14 @@ classdef WorkspaceSimulator < MotionSimulator
             if(isnan(mw))
                 mw = 1;
             end
-            mw
-            map = colormap(flipud(gray(mw)));
+            sf = 100/mw;
+            map = colormap(flipud(gray(sf*mw)));
             for i =1:size(obj.workspace,2)
                 if(obj.grid.n_dimensions == 2)
                     if(obj.workspace(3,i)==Inf)
-                        plot((180/pi)*obj.workspace(1,i),(180/pi)*obj.workspace(2,i),'Color',map(mw,:),'Marker','.')
+                        plot((180/pi)*obj.workspace(1,i),(180/pi)*obj.workspace(2,i),'Color',map(sf*mw,:),'Marker','.')
                     else
-                        plot((180/pi)*obj.workspace(1,i),(180/pi)*obj.workspace(2,i),'Color',map(int32(obj.workspace(3,i))+1,:),'Marker','.')
+                        plot((180/pi)*obj.workspace(1,i),(180/pi)*obj.workspace(2,i),'Color',map(int32(sf*obj.workspace(3,i))+1,:),'Marker','.')
                     end
                 elseif(obj.grid.n_dimensions == 3)
                     if(obj.workspace(4,i)==Inf)
