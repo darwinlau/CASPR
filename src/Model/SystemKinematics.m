@@ -36,11 +36,7 @@ classdef SystemKinematics < handle
     end
     
     methods
-        function k = SystemKinematics()            
-%             (bkConstructor, ckConstructor)
-%             % Constructor from the bodies and cables properties
-%             b.bodyKinematics = bkConstructor();
-%             b.cableKinematics = ckConstructor();
+        function k = SystemKinematics()
         end
         
         
@@ -48,13 +44,8 @@ classdef SystemKinematics < handle
             % Assign the system states q, q_dot, q_ddot
             % Calls set state for BodyKinematics and CableKinematics, and
             % sets the system Jacobian matrix
-%             obj.q = q;
-%             obj.q_dot = q_dot;
-%             obj.q_ddot = q_ddot;
-            
             obj.bodyKinematics.update(q, q_dot, q_ddot);
             obj.cableKinematics.update(obj.bodyKinematics);
-            %obj.L = obj.cableKinematics.V*obj.bodyKinematics.W;
         end
                 
         function value = get.numLinks(obj)

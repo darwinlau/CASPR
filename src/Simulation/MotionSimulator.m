@@ -1,18 +1,17 @@
-classdef (Abstract) MotionSimulator < handle
+classdef (Abstract) MotionSimulator < Simulator
     %DYNAMICSSIMULATION Summary of this class goes here
     %   Detailed explanation goes here
     
-    properties (SetAccess = public)    
-        states              % Cell array of SystemKinematics object
+    properties     
         timeVector          % time vector
     end
     
-    methods (Abstract)
-        run(obj)
-    end
-    
-    methods        
-        function plotMovie(obj, plot_axis, filename, time, width, height)
+    methods
+        function ms = MotionSimulator(kinObj)
+            ms@Simulator(kinObj);
+        end
+        
+        function plotMovie(obj, joint_trajectory, plot_axis, filename, time, width, height)
             fps = 30;
             
             writerObj = VideoWriter(filename);
@@ -25,7 +24,8 @@ classdef (Abstract) MotionSimulator < handle
                 if t == 0
                     t = 1;
                 end
-                MotionSimulator.PlotFrame(obj.states{t}, plot_axis, plot_handle)
+                obj.kinematicsObj.update(joint_trajectory.q{t}, joint_trajectory.q_dot{t}, joint_trajectory.q_ddot{t});
+                MotionSimulator.PlotFrame(obj.kinematicsObj, plot_axis, plot_handle)
                 frame = getframe(plot_handle);
                 writerObj.writeVideo(frame);
                 clf(plot_handle);
@@ -35,23 +35,15 @@ classdef (Abstract) MotionSimulator < handle
             close(plot_handle);
         end
         
-        function plotCableLengths(obj, cables_to_plot)
-            assert(~isempty(obj.states), 'State kinematics cell array is empty and nothing to plot.');
-
-            if nargin == 1 || isempty(cables_to_plot)
-                cables_to_plot = 1:obj.states{1}.numCables;
+        function plotCableLengths(obj, length_trajectory, length_dot_trajectory, cables_to_plot)
+            if nargin == 3 || isempty(cables_to_plot)
+                cables_to_plot = 1:obj.kinematicsObj.numCables;
             end
-                        
-            lengths = zeros(obj.states{1}.numCables, length(obj.timeVector));
-            lengths_dot = zeros(obj.states{1}.numCables, length(obj.timeVector));
+            length_array = cell2mat(length_trajectory);
+            length_dot_array = cell2mat(length_dot_trajectory);
             
-            for t = 1:length(obj.timeVector)
-                lengths(:, t) = obj.states{t}.cableLengths;
-                lengths_dot(:, t) = obj.states{t}.cableLengthsDot;
-            end
-            
-            figure; plot(obj.timeVector, lengths(cables_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); title('Cable Lengths'); 
-            figure; plot(obj.timeVector, lengths_dot(cables_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); title('Cable Lengths Derivative'); 
+            figure; plot(obj.timeVector, length_array(cables_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); title('Cable Lengths'); 
+            figure; plot(obj.timeVector, length_dot_array(cables_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); title('Cable Lengths Derivative'); 
             
             % ONLY USED IN DEBUGGING START
 %             lengths_dot_num = zeros(obj.states{1}.numCables, length(obj.timeVector));
@@ -62,95 +54,57 @@ classdef (Abstract) MotionSimulator < handle
             % ONLY USED IN DEBUGGING END   
         end
         
-        function plotJointSpace(obj, states_to_plot)
-            assert(~isempty(obj.states), 'State kinematics cell array is empty and nothing to plot.');
+        function plotJointSpace(obj, joint_trajectory, states_to_plot)            
+            n_dof = obj.kinematicsObj.numDofs;
             
-            n_dof = obj.states{1}.numDofs;
-            
-            if nargin == 1 || isempty(states_to_plot)
+            if nargin == 2 || isempty(states_to_plot)
                 states_to_plot = 1:n_dof;
             end
+            
+            q_array = cell2mat(joint_trajectory.q);
+            q_dot_array = cell2mat(joint_trajectory.q_dot);
             
             % Plots joint space variables q(t)
             figure;
             title('Joint space variables');
-            hold on;
-            
-            q_vector = zeros(length(states_to_plot), length(obj.timeVector));
-            
-            for t = 1:length(obj.timeVector)
-                q_vector(:, t) = obj.states{t}.q(states_to_plot);
-            end
-            
-            plot(obj.timeVector, q_vector, 'Color', 'k', 'LineWidth', 1.5);
-            hold off;
+            plot(obj.timeVector, q_array(states_to_plot, :), 'Color', 'k', 'LineWidth', 1.5);
             
             % Plots derivative joint space variables q_dot(t)
             figure;
             title('Joint space derivatives');
-            hold on;
-            
-            qd_vector = zeros(length(states_to_plot), length(obj.timeVector));
-            
-            for t = 1:length(obj.timeVector)
-                qd_vector(:, t) = obj.states{t}.q_dot(states_to_plot);
-            end
-            
-            plot(obj.timeVector, qd_vector, 'Color', 'k', 'LineWidth', 1.5);
-            hold off;
+            plot(obj.timeVector, q_dot_array(states_to_plot, :), 'Color', 'k', 'LineWidth', 1.5);
         end
         
-        function plotBodyCOG(obj, bodies_to_plot)
-            assert(~isempty(obj.states), 'State kinematics cell array is empty and nothing to plot.');
-            
+        function plotBodyCOG(obj, joint_trajectory, bodies_to_plot)            
             % Plots absolute position, velocity and acceleration of COG
             % with respect to {0}
-            if nargin == 1 || isempty(bodies_to_plot)
-                bodies_to_plot = 1:obj.states{1}.numLinks;
+            if nargin == 2 || isempty(bodies_to_plot)
+                bodies_to_plot = 1:obj.kinematicsObj.numLinks;
             end
             
-            % Plots position for COG vectors in {0}
-            figure;
-            title('Position of CoG');
-            hold on;
             pos0 = zeros(3*length(bodies_to_plot), length(obj.timeVector));
-            for ki = 1:length(bodies_to_plot)
-                % Plots COG in {0}
-                for t = 1:length(obj.timeVector)
-                    pos0(3*ki-2:3*ki, t) = obj.states{t}.bodyKinematics.bodies{bodies_to_plot(ki)}.R_0k*obj.states{t}.bodyKinematics.bodies{bodies_to_plot(ki)}.r_OG;
+            pos0_dot = zeros(3*length(bodies_to_plot), length(obj.timeVector));
+            pos0_ddot = zeros(3*length(bodies_to_plot), length(obj.timeVector));
+            for t = 1:length(obj.timeVector)
+                obj.kinematicsObj.bodyKinematics.update(joint_trajectory.q{t}, joint_trajectory.q_dot{t}, joint_trajectory.q_ddot{t});
+                for ki = 1:length(bodies_to_plot)
+                    pos0(3*ki-2:3*ki, t) = obj.kinematicsObj.bodyKinematics.bodies{bodies_to_plot(ki)}.R_0k*obj.kinematicsObj.bodyKinematics.bodies{bodies_to_plot(ki)}.r_OG;
+                    pos0_dot(3*ki-2:3*ki, t) = obj.kinematicsObj.bodyKinematics.bodies{bodies_to_plot(ki)}.R_0k*obj.kinematicsObj.bodyKinematics.bodies{bodies_to_plot(ki)}.v_OG;
+                    pos0_ddot(3*ki-2:3*ki, t) = obj.kinematicsObj.bodyKinematics.bodies{bodies_to_plot(ki)}.R_0k*obj.kinematicsObj.bodyKinematics.bodies{bodies_to_plot(ki)}.a_OG;
                 end
             end
+            figure; 
+            title('Position of CoG');
             plot(obj.timeVector, pos0, 'Color', 'k', 'LineWidth', 1.5);
-            hold off;
             
-            % Plots derivative for COG vectors in {0}
-            % x_dot = W*q_dot where x_dot is in local frame
-            figure;
+            figure; 
             title('Velocity of CoG');
-            hold on;
-            for k = bodies_to_plot
-                pos0_dot = zeros(3, length(obj.timeVector));
-                for t = 1:length(obj.timeVector)
-                    pos0_dot(:,t) = obj.states{t}.bodyKinematics.bodies{k}.R_0k*obj.states{t}.bodyKinematics.bodies{k}.v_OG;
-                end
-                plot(obj.timeVector, pos0_dot, 'Color', 'k', 'LineWidth', 1.5);
-            end
-            hold off;
+            plot(obj.timeVector, pos0_dot, 'Color', 'k', 'LineWidth', 1.5);
             
-            % Plots derivative for COG derivative vectors in {0}
-            % x_ddot is in local frame
-            figure;
+            figure; 
             title('Acceleration of CoG');
-            hold on;
-            for k = bodies_to_plot
-                pos0_ddot = zeros(3, length(obj.timeVector));
-                for t = 1:length(obj.timeVector)
-                    pos0_ddot(:,t) = obj.states{t}.bodyKinematics.bodies{k}.R_0k*obj.states{t}.bodyKinematics.bodies{k}.a_OG;
-                end
-                plot(obj.timeVector, pos0_ddot, 'Color', 'k', 'LineWidth', 1.5);
-            end
-            hold off;
-            
+            plot(obj.timeVector, pos0_ddot, 'Color', 'k', 'LineWidth', 1.5);
+                        
             % ONLY USED IN DEBUGGING START
             % Numerical derivative must be performed in frame {0}
 %             pos0_dot_num = zeros(size(pos0));
@@ -166,40 +120,31 @@ classdef (Abstract) MotionSimulator < handle
             % ONLY USED IN DEBUGGING END
         end
         
-        function plotAngularAcceleration(obj, bodies_to_plot)
-            assert(~isempty(obj.states), 'State kinematics cell array is empty and nothing to plot.');
-            
+        function plotAngularAcceleration(obj, joint_trajectory, bodies_to_plot)
             % Plots absolute position, velocity and acceleration of COG
             % with respect to {0}            
-            if nargin == 1 || isempty(bodies_to_plot)
-                bodies_to_plot = 1:obj.states{1}.numLinks;
+            if nargin == 2 || isempty(bodies_to_plot)
+                bodies_to_plot = 1:obj.kinematicsObj.numLinks;
             end
             
-            % Plots angular velocity in {0}
+            
+            ang0 = zeros(3*length(bodies_to_plot), length(obj.timeVector));
+            ang0_dot = zeros(3*length(bodies_to_plot), length(obj.timeVector));
+            for t = 1:length(obj.timeVector)
+                obj.kinematicsObj.bodyKinematics.update(joint_trajectory.q{t}, joint_trajectory.q_dot{t}, joint_trajectory.q_ddot{t});
+                for ki = 1:length(bodies_to_plot)
+                    ang0(3*ki-2:3*ki, t) = obj.kinematicsObj.bodyKinematics.bodies{bodies_to_plot(ki)}.R_0k*obj.kinematicsObj.bodyKinematics.bodies{bodies_to_plot(ki)}.w;
+                    ang0_dot(3*ki-2:3*ki, t) = obj.kinematicsObj.bodyKinematics.bodies{bodies_to_plot(ki)}.R_0k*obj.kinematicsObj.bodyKinematics.bodies{bodies_to_plot(ki)}.w_dot;
+                end
+            end
+            
             figure;
             title('Angular velocity of rigid bodies');
-            hold on;
-            ang0 = zeros(3*length(bodies_to_plot), length(obj.timeVector));
-            for ki = 1:length(bodies_to_plot)
-                for t = 1:length(obj.timeVector)
-                    ang0(3*ki-2:3*ki, t) = obj.states{t}.bodyKinematics.bodies{bodies_to_plot(ki)}.R_0k*obj.states{t}.bodyKinematics.bodies{bodies_to_plot(ki)}.w;
-                end
-            end
-            plot(obj.timeVector, ang0, 'Color', 'k');
-            hold off;
+            plot(obj.timeVector, ang0, 'Color', 'k', 'LineWidth', 1.5);
             
-            % Plots angular acceleration in {0}
             figure;
             title('Angular acceleration of rigid bodies');
-            hold on;
-            for k = bodies_to_plot
-                ang0_dot = zeros(3, length(obj.timeVector));
-                for t = 1:length(obj.timeVector)
-                    ang0_dot(:,t) = obj.states{t}.bodyKinematics.bodies{k}.R_0k*obj.states{t}.bodyKinematics.bodies{k}.w_dot;
-                end
-                plot(obj.timeVector, ang0_dot, 'Color', 'k');
-            end
-            hold off;
+            plot(obj.timeVector, ang0_dot, 'Color', 'k', 'LineWidth', 1.5);
             
             % ONLY USED IN DEBUGGING START
 %             % Numerical derivative must be performed in frame {0}

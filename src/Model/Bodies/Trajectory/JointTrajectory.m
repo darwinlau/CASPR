@@ -19,36 +19,21 @@ classdef JointTrajectory < handle
                 states_to_plot = 1:n_dof;
             end
             
-            q_vector = zeros(n_dof, length(obj.timeVector));
-            qd_vector = zeros(n_dof, length(obj.timeVector));
-            qdd_vector = zeros(n_dof, length(obj.timeVector));
+            q_vector = cell2mat(obj.q);
+            qd_vector = cell2mat(obj.q_dot);
+            qdd_vector = cell2mat(obj.q_ddot);
             
             figure;
             title('Trajectory');
-            hold on;            
-            for t = 1:length(obj.timeVector)
-                q_vector(:, t) = obj.q{t};
-            end
-            plot(obj.timeVector, q_vector(states_to_plot, :), 'Color', 'k');
-            hold off;
+            plot(obj.timeVector, q_vector(states_to_plot, :), 'Color', 'k', 'LineWidth', 1.5);
             
             figure;
             title('Trajectory velocity');
-            hold on;            
-            for t = 1:length(obj.timeVector)
-                qd_vector(:, t) = obj.q_dot{t};
-            end
-            plot(obj.timeVector, qd_vector(states_to_plot, :), 'Color', 'k');
-            hold off;
+            plot(obj.timeVector, qd_vector(states_to_plot, :), 'Color', 'k', 'LineWidth', 1.5);
             
             figure;
             title('Trajectory acceleration');
-            hold on;            
-            for t = 1:length(obj.timeVector)
-                qdd_vector(:, t) = obj.q_ddot{t};
-            end
-            plot(obj.timeVector, qdd_vector(states_to_plot, :), 'Color', 'k');
-            hold off;
+            plot(obj.timeVector, qdd_vector(states_to_plot, :), 'Color', 'k', 'LineWidth', 1.5);
         end
     end
     

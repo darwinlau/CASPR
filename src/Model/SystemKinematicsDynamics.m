@@ -22,8 +22,6 @@ classdef SystemKinematicsDynamics < SystemKinematics
         jointForceAngles
         jointMomentMagnitudes
         
-        
-        
 %         B                         % Linearised B matrix
         
         q_ddot_dynamics           % q_ddot from the system dynamics
@@ -52,9 +50,6 @@ classdef SystemKinematicsDynamics < SystemKinematics
     
     methods
         function b = SystemKinematicsDynamics()
-            % Constructor from the bodies and cables properties
-%             b.bodyDynamics = bdConstructor();
-%             b.cableDynamics = cdConstructor();
         end
         
         
