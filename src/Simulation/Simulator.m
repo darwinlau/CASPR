@@ -3,12 +3,12 @@ classdef (Abstract) Simulator < handle
     %   Detailed explanation goes here
     
     properties (SetAccess = private)    
-        kinematicsObj          % base SystemKinematics object 
+        model          % base SystemKinematics object 
     end
     
     methods 
-        function s = Simulator(kinObj)
-            s.kinematicsObj = kinObj;
+        function s = Simulator(model)
+            s.model = model;
         end
     end
     

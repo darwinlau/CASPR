@@ -17,24 +17,17 @@ classdef SystemKinematicsDynamics < SystemKinematics
         C
         G
         
-        jointWrenches             % Vector of joint wrenches
-        jointForceMagnitudes
-        jointForceAngles
-        jointMomentMagnitudes
+        interactionWrench             % Vector of joint interaction wrenches
+        
+        interactionForceMagnitudes
+        interactionMomentMagnitudes
+        %jointForceAngles
         
 %         B                         % Linearised B matrix
         
         q_ddot_dynamics           % q_ddot from the system dynamics
         
         cableForces               % cable forces 
-%         
-%         JointInteractionVector      % Vector of interaction forces/moments
-%         JointInteractionForceMagnitudes
-%         JointInteractionForceAngles
-%         JointInteractionMomentMagnitudes
-%         
-%         JointInteractionForceMagnitudes2
-%         JointInteractionMomentMagnitudes2
     end
     
     methods (Static)
@@ -62,13 +55,13 @@ classdef SystemKinematicsDynamics < SystemKinematics
             obj.cableDynamics.update(obj.cableKinematics, obj.bodyKinematics);
         end
         
-        function value = get.jointWrenches(obj)
+        function value = get.interactionWrench(obj)
             value = obj.P'*(obj.V'*obj.cableDynamics.forces + obj.bodyDynamics.M_b*obj.q_ddot + obj.bodyDynamics.C_b - obj.bodyDynamics.G_b);
         end
         
         
-        function value = get.jointForceMagnitudes(obj)
-            vector = obj.jointWrenches;
+        function value = get.interactionForceMagnitudes(obj)
+            vector = obj.interactionWrench;
             mag = zeros(obj.numLinks,1);
             for k = 1:obj.numLinks
                 mag(k) = norm(vector(6*k-5:6*k-3),2);
@@ -76,24 +69,23 @@ classdef SystemKinematicsDynamics < SystemKinematics
             value = mag;
         end
         
-        function value = get.jointForceAngles(obj)
-            vector = obj.jointWrenches;
-            angle = zeros(obj.numLinks,1);
-            for k = 1:obj.numLinks
-                angle(k) = atan(norm(vector(6*k-5:6*k-4),2)/abs(vector(6*k-3)))*180/pi;
-            end
-            value = angle;
-        end
-        
-        function value = get.jointMomentMagnitudes(obj)
-            
-            vector = obj.jointWrenches;
+        function value = get.interactionMomentMagnitudes(obj)
+            vector = obj.interactionWrench;
             mag = zeros(obj.numLinks,1);
             for k = 1:obj.numLinks
                 mag(k) = norm(vector(6*k-2:6*k),2);
             end
             value = mag;
         end
+        
+%         function value = get.jointForceAngles(obj)
+%             vector = obj.jointWrenches;
+%             angle = zeros(obj.numLinks,1);
+%             for k = 1:obj.numLinks
+%                 angle(k) = atan(norm(vector(6*k-5:6*k-4),2)/abs(vector(6*k-3)))*180/pi;
+%             end
+%             value = angle;
+%         end
         
         function value = get.q_ddot_dynamics(obj)
             value =  obj.M\(-obj.L'*obj.cableDynamics.forces - obj.C - obj.G);

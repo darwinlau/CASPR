@@ -2,15 +2,12 @@ classdef InverseKinematicsSimulator < MotionSimulator
     %InverseDynamicsSimulation Simulation for Inverse Dynamics (cable force
     %resolution)
     
-    properties (SetAccess = protected)          
-        trajectory      	% Trajectory object for inverse problems only (input)
-        lengths             % cell array of cable lengths (output)
-        lengths_dot         % cell array of cable lengths dot (output)
+    properties (SetAccess = protected)       
     end
     
     methods
-        function ik = InverseKinematicsSimulator(kinObj)
-            ik@MotionSimulator(kinObj);
+        function ik = InverseKinematicsSimulator(model)
+            ik@MotionSimulator(model);
         end
         
         function run(obj, trajectory)
@@ -24,9 +21,9 @@ classdef InverseKinematicsSimulator < MotionSimulator
             
             for t = 1:length(obj.trajectory.timeVector)
                 fprintf('Time : %f\n', obj.trajectory.timeVector(t));
-                obj.kinematicsObj.update(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t});
-                obj.lengths{t} = obj.kinematicsObj.cableLengths;
-                obj.lengths_dot{t} = obj.kinematicsObj.cableLengthsDot;
+                obj.model.update(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t});
+                obj.lengths{t} = obj.model.cableLengths;
+                obj.lengths_dot{t} = obj.model.cableLengthsDot;
             end
         end
     end
