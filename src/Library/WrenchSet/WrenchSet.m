@@ -78,6 +78,28 @@ classdef WrenchSet < handle
             [T,r,~] = fmincon(@(x) costMinRad(x,obj.A,obj.b),[0;0],obj.A,obj.b,[],[],[],[],@(x) constraintPointContained(x,obj.A,obj.b,x_ref,buffer),options);
             w_approx_sphere = WrenchSetSphere(T,r);
         end
+        
+        function w_approx_sphere = sphereApproximationCoriolis(obj,G,q2)
+            % THIS NEEDS TO BE CHANGED LATER
+            q = obj.n_faces;
+            s = zeros(q,1);
+            t = sign(sin(q2));
+            for j=1:q
+                s(j) = (obj.b(j) - obj.A(j,:)*G)/norm(obj.A(j,:));
+                p = dynamics.G + s(j)*(w.A(j,:)')/norm(w.A(j,:));
+                if(t*(p(2)-dynamics.G(2))<0)
+                    pd = (1/w.A(j,1))*(w.b(j) - w.A(j,2)*dynamics.G(2));
+                    if(abs(pd)==Inf)
+                        s(j) = Inf;
+                    else
+                        s(j) = abs(pd - dynamics.G(1));
+                    end
+                    % Find the correct intersection of the boundary ray to the line
+                end
+            end
+            s = min(s);
+            w_approx_sphere = WrenchSetSphere(G,s);
+        end
     end
 end
 

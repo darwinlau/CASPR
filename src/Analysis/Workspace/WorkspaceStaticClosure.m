@@ -34,7 +34,7 @@ classdef WorkspaceStaticClosure < WorkspaceCondition
         function [isConnected] = connected(obj,workspace,i,j,grid)
             % This file may need a dynamics object added at a later date
             tol = 1e-6;
-            isConnected = sum((abs(workspace(:,i) - workspace(:,j)) < grid.delta_q+tol)) + sum((abs(workspace(:,i) - workspace(:,j)-2*pi) < grid.delta_q+tol)) + sum((abs(workspace(:,i) - workspace(:,j)+2*pi) < grid.delta_q+tol)) == grid.n_dimensions;
+            isConnected = sum((abs(workspace(1:2,i) - workspace(1:2,j)) < grid.delta_q+tol)) + sum((abs(workspace(1:2,i) - workspace(1:2,j)-2*pi) < grid.delta_q+tol)) + sum((abs(workspace(1:2,i) - workspace(1:2,j)+2*pi) < grid.delta_q+tol)) == grid.n_dimensions;
         end
     end
 end

@@ -14,9 +14,9 @@ clc; clear; warning off; %close all;
 % folder = '/home/jonathan/Dropbox/mcdm-analysis.matlab';
 
 % Jonathan's Uni Computer
-addpath(genpath('C:\Users\jpeden\Dropbox\mcdm-analysis.matlab'))
+% addpath(genpath('C:\Users\jpeden\Dropbox\mcdm-analysis.matlab'))
 folder = 'C:\Users\jpeden\Dropbox\mcdm-analysis.matlab';
-subfolder = 'systems_prop';
+subfolder = 'data\config\models';
 
 if(isunix)
     dlm = '/';
@@ -24,66 +24,45 @@ else
     dlm = '\';
 end
 
-%% Load the model - Only the models below have been tested for worksapce generation
-% 2R Model - 4 Cables
-model_folder        =   '2R_model';
-cable_file          =   '2R_ideal_cable_props.csv';
-body_file           =   '2R_body_prop.csv';
+%% 2R_planar Model 4 Cables
+model_folder 	= 	'2R_planar';
+cable_file 	 	= 	'2R_planar_cable_properties.xml';
+body_file 	 	= 	'2R_planar_body_properties.xml';
 
-% 2R Model - 3 Cables
-% model_folder        =   '2R_model_3C';
-% cable_file          =   '2R_ideal_cable_props.csv';
-% body_file           =   '2R_body_prop.csv';
+%% Set up the file paths
+cable_prop_filepath = [folder,dlm,subfolder,dlm,model_folder,dlm,cable_file];
+body_prop_filepath = [folder,dlm,subfolder,dlm,model_folder,dlm,body_file];
 
+body_xmlobj = XmlOperations.XmlReadRemoveIndents(body_prop_filepath);
+cable_xmlobj = XmlOperations.XmlReadRemoveIndents(cable_prop_filepath);
 
-% Ball and Socket Model - WCW at 0
-% model_folder        =   'ball_socket_model';
-% cable_file          =   'ball_socket_ideal_cable_props.csv';
-% body_file           =   'ball_socket_body_prop.csv';
-
-% Ball and Socket Model - No WCW at 0
-% model_folder        =   'ball_socket_model_test';
-% cable_file          =   'ball_socket_ideal_cable_props.csv';
-% body_file           =   'ball_socket_body_prop.csv';
-
-cables_prop_filepath = [folder,dlm,subfolder,dlm,model_folder,dlm,cable_file];
-bodies_prop_filepath = [folder,dlm,subfolder,dlm,model_folder,dlm,body_file];
-
-% Constructor for bodies and cables
-bkConstructor = @() SystemKinematicsBodiesRigid(bodies_prop_filepath);
-ckConstructor = @() SystemKinematicsCablesIdeal(cables_prop_filepath);
-bdConstructor = @() SystemDynamicsBodiesRigid(bodies_prop_filepath);
-cdConstructor = @() SystemDynamicsCablesIdeal(cables_prop_filepath);
-% add SystemKinematicsTask, SystemDynamicsTask
-% Construct the kinematics
-sdConstructor = @() SystemDynamics(bdConstructor, cdConstructor, bkConstructor, ckConstructor);
-
-
-%% Define the workspace condition
+%% Initialisation
+dynObj = SystemKinematicsDynamics.LoadXmlObj(body_xmlobj, cable_xmlobj);
+% Define the workspace condition
 % Workspace conditions
 % wcondition = WorkspaceStub();
-wcondition  =   WorkspaceWrenchClosure();
+% wcondition  =   WorkspaceWrenchClosure();
 % wcondition  =   PositiveControlContinuous();
-% wcondition  =   WorkspaceStaticClosure();
+wcondition  =   WorkspaceStaticClosure();
 % wcondition  =   WorkspaceStatic();
 % wcondition  =   WorkspaceTaskWrenchClosure();
-
-
 %% Define the metric
-% metric = NullMetric();
+metric = NullMetric();
 % metric = UnilateralDexterityMetric();
 % metric = TensionFactorMetric();
-metric = SemiSingularMetric();
+% metric = SemiSingularMetric();
 % metric = RelativeVolumeMetric();
 % metric = RelativeRadiusMetric([0;0]);
 % metric = CapacityMarginMetric();
+% metric = CapacityMarginAccelerationMetric();
+% metric = MagnitudeVelocityMetric();
 
 
 %% Start the simulation
 disp('Start Setup Simulation');
 start_tic       =   tic;
-wsim            =   WorkspaceSimulator(wcondition,metric);
-q_step          =   pi/72;
+wsim            =   WorkspaceSimulator(dynObj,wcondition,metric);
+q_step          =   pi/18;
 n_dim           =   2;
 uGrid           =   UniformGrid(-pi*ones(n_dim,1),(pi-q_step)*ones(n_dim,1),q_step*ones(n_dim,1));
 % uGrid           =   UniformGrid(-[pi*ones(n_dim-1,1);q_step/5],[(pi-q_step)*ones(n_dim-1,1);q_step/5],[q_step*ones(n_dim-1,1);q_step/5]);
@@ -98,7 +77,7 @@ fprintf('End Setup Simulation : %f seconds\n', time_elapsed);
 
 disp('Start Running Simulation');
 start_tic       =   tic;
-wsim.run(uGrid, sdConstructor);
+wsim.run(uGrid);
 % wsim.boundaryFilter();
 % [adjacency_matrix,laplacian_matrix] = wsim.toAdjacencyMatrix();
 % con_comp = wsim.findConnectedComponents(adjacency_matrix);

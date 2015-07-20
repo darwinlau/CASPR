@@ -1,6 +1,7 @@
 % Load configs
 clc; clear; close all;
 folder = 'D:\Darwin''s Notebook Documents\Work\Research\Studies\Cable-driven manipulators\Simulations\MCDM_matlab\data';
+% folder = 'C:\Users\jpeden\Dropbox\mcdm-analysis.matlab\data';
 
 % % Planar model
 body_prop_filepath = [folder, '\config\models\planar\planar_body_properties.xml'];

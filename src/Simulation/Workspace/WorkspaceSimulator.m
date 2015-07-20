@@ -12,29 +12,29 @@ classdef WorkspaceSimulator < MotionSimulator
     end
     
     methods        
-        function id = WorkspaceSimulator(w_condition,metric)
+        function id = WorkspaceSimulator(model,w_condition,metric)
+            id@MotionSimulator(model);
             id.WCondition   =   w_condition;
             id.metric       =   metric;
             id.m_flag       =   metric.workspaceCheck(w_condition.type);
         end
         
-        function run(obj, grid, sdConstructor)
+        function run(obj, grid)
             obj.grid        =   grid;
             obj.workspace   =   repmat([grid.getGridPoint(1);0],1,obj.grid.n_points);
             workspace_count =   0;
-            dynamics = sdConstructor();
             % Runs over the grid and evaluates the workspace condition at
             % each point
             for i = 1:round(obj.grid.n_points)
                 i
                 q = obj.grid.getGridPoint(i);
-                dynamics.update(q, zeros(size(q)), zeros(size(q)));
+                obj.model.update(q, zeros(size(q)), zeros(size(q)));
                 if(obj.m_flag)
-                    metricValue     =   obj.metric.evaluate(dynamics);
+                    metricValue     =   obj.metric.evaluate(obj.model);
                     inWorkspace     =   metricValue>0;
                 else
-                    inWorkspace     =   obj.WCondition.evaluate(dynamics);
-                    metricValue    =   obj.metric.evaluate(dynamics);
+                    inWorkspace     =   obj.WCondition.evaluate(obj.model);
+                    metricValue    =   obj.metric.evaluate(obj.model);
                 end
                 if(inWorkspace)
                     workspace_count = workspace_count + 1;
@@ -52,7 +52,7 @@ classdef WorkspaceSimulator < MotionSimulator
                 mw = 1;
             end
             sf = 100/mw;
-            map = colormap(flipud(gray(sf*mw)));
+            map = colormap(flipud(gray(sf*mw+1)));
             for i =1:size(obj.workspace,2)
                 if(obj.grid.n_dimensions == 2)
                     if(obj.workspace(3,i)==Inf)
@@ -154,6 +154,34 @@ classdef WorkspaceSimulator < MotionSimulator
                     end
                 end
             end
+        end
+        
+        function wsim_matrix = toMatrix(obj)
+            n_x = obj.grid.q_length(1);
+            n_y = obj.grid.q_length(2);
+            wsim_matrix = zeros(n_x,n_y);
+            if(obj.grid.n_dimensions==2)
+                for i=1:length(obj.workspace)
+                    j = int32((obj.workspace(1,i) - obj.grid.q_begin(1))/obj.grid.delta_q(1) + 1);
+                    k = int32((obj.workspace(2,i) - obj.grid.q_begin(2))/obj.grid.delta_q(2) + 1);
+                    wsim_matrix(j,k) = obj.workspace(3,i);
+                end
+            else
+                disp('Dimension is too large');
+            end
+        end
+        
+        function toWorkspace(obj,wsim_matrix)
+            k = 1;
+            for i = 1:size(wsim_matrix,1)
+                for j = 1:size(wsim_matrix,2)
+                    if(wsim_matrix(i,j)>0)
+                        obj.workspace(:,k) = [obj.grid.q_begin(1) + i*obj.grid.delta_q(1);obj.grid.q_begin(2) + j*obj.grid.delta_q(2);wsim_matrix(i,j)];
+                        k = k+1;
+                    end
+                end
+            end
+            obj.workspace = obj.workspace(:,1:k);
         end
         
         function con_comp = findConnectedComponents(obj,adjacency_matrix)
