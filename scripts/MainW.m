@@ -24,10 +24,20 @@ else
     dlm = '\';
 end
 
-%% 2R_planar Model 4 Cables
+% 2R_planar Model 4 Cables
 model_folder 	= 	'2R_planar';
 cable_file 	 	= 	'2R_planar_cable_properties.xml';
 body_file 	 	= 	'2R_planar_body_properties.xml';
+
+% Ball and Socket Model 4 Cables
+% model_folder 	= 	'ball_and_socket';
+% cable_file 	 	= 	'ball_and_socket_cable_properties.xml';
+% body_file 	 	= 	'ball_and_socket_body_properties.xml';
+
+% Planar Robot
+% model_folder    =   'planar';
+% cable_file 	 	= 	'planar_cable_properties.xml';
+% body_file 	 	= 	'planar_body_properties.xml';
 
 %% Set up the file paths
 cable_prop_filepath = [folder,dlm,subfolder,dlm,model_folder,dlm,cable_file];

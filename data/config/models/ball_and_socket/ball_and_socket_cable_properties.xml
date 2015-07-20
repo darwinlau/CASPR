@@ -1,0 +1,71 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<cables>
+  <cable_ideal name="cable 1">
+    <properties>
+      <force_min>0.1</force_min>
+      <force_max>1000</force_max>
+      <force_error>1500</force_error>
+    </properties>
+    <attachments>
+      <attachment>
+        <link>0</link>
+        <location>0.15 0.0 0.0</location>
+      </attachment>
+      <attachment>
+        <link>1</link>
+        <location>0.05 0.0 0.0</location>
+      </attachment>
+    </attachments>
+  </cable_ideal>
+  <cable_ideal name="cable 2">
+    <properties>
+      <force_min>0.1</force_min>
+      <force_max>1000</force_max>
+      <force_error>1500</force_error>
+    </properties>
+    <attachments>
+      <attachment>
+        <link>0</link>
+        <location>-0.11 -0.11 0.0</location>
+      </attachment>
+      <attachment>
+        <link>1</link>
+        <location>-0.035 -0.035 0.0</location>
+      </attachment>
+    </attachments>
+  </cable_ideal>
+  <cable_ideal name="cable 3">
+    <properties>
+      <force_min>0.1</force_min>
+      <force_max>1000</force_max>
+      <force_error>1500</force_error>
+    </properties>
+    <attachments>
+      <attachment>
+        <link>0</link>
+        <location>-0.11 0.11 0.0</location>
+      </attachment>
+      <attachment>
+        <link>1</link>
+        <location>-0.05 0.0 0.0</location>
+      </attachment>
+    </attachments>
+  </cable_ideal>
+  <cable_ideal name="cable 4">
+    <properties>
+      <force_min>0.1</force_min>
+      <force_max>1000</force_max>
+      <force_error>1500</force_error>
+    </properties>
+    <attachments>
+      <attachment>
+        <link>0</link>
+        <location>0.0 0.15 0.0</location>
+      </attachment>
+      <attachment>
+        <link>1</link>
+        <location>0.35 0.35 0.0</location>
+      </attachment>
+    </attachments>
+  </cable_ideal>
+</cables>

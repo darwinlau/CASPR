@@ -180,13 +180,13 @@ classdef SystemKinematicsBodies < handle
             end
             
             % Set S (joint state matrix) and S_dot
-            index = 1; obj.S = sym(zeros(size(obj.S)));
+            index = 1; obj.S = sym(zeros(size(obj.S))); obj.S_dot = sym(zeros(size(obj.S_dot)));
             for k = 1:obj.numLinks
                 obj.S(6*k-5:6*k, index:index+obj.bodies{k}.joint.numDofs-1) = obj.bodies{k}.joint.S;  
                 obj.S_dot(6*k-5:6*k, index:index+obj.bodies{k}.joint.numDofs-1) = obj.bodies{k}.joint.S_dot;  
                 index = index + obj.bodies{k}.joint.numDofs;
             end
-            
+                        
             % Set P (relationship with joint propagation)
             obj.P = sym(zeros(size(obj.P)));
             for k = 1:obj.numLinks
@@ -197,9 +197,11 @@ classdef SystemKinematicsBodies < handle
                     obj.P(6*k-5:6*k, 6*a-5:6*a) = Pak;
                 end
             end
+            obj.P = simplify(obj.P);
             
             % W = P*S
             obj.W = obj.P*obj.S;
+            obj.W = simplify(obj.W);
             
             % Determine x_dot
             obj.x_dot = obj.W*obj.q_dot;
@@ -232,6 +234,7 @@ classdef SystemKinematicsBodies < handle
                 end
                 obj.C_a(6*k-5:6*k-3) = obj.C_a(6*k-5:6*k-3) + cross(obj.bodies{k}.w, cross(obj.bodies{k}.w, obj.bodies{k}.r_G));
             end
+            obj.C_a = simplify(obj.C_a);
             
             obj.x_ddot = obj.P*obj.S*obj.q_ddot + obj.C_a;
             % Extract absolute accelerations

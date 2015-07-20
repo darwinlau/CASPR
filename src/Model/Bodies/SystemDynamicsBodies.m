@@ -62,9 +62,9 @@ classdef SystemDynamicsBodies < handle
                 obj.G_b(6*k-5:6*k-3) = bodyKinematics.bodies{k}.R_0k.'*[0; 0; -obj.bodies{k}.m*SystemKinematicsDynamics.GRAVITY_CONSTANT];
             end        
         
-            obj.M =   bodyKinematics.W.' * obj.M_b;
-            obj.C =   bodyKinematics.W.' * obj.C_b;
-            obj.G = - bodyKinematics.W.' * obj.G_b;
+            obj.M =   simplify(bodyKinematics.W.' * obj.M_b);
+            obj.C =   simplify(bodyKinematics.W.' * obj.C_b);
+            obj.G = - simplify(bodyKinematics.W.' * obj.G_b);
         end
         
         function M = get.massInertiaMatrix(obj)
@@ -160,6 +160,7 @@ classdef SystemDynamicsBodies < handle
                 for i=1:n_q
                     V(i) = bodyKinematics.q_dot.'*N(:,(i-1)*n_q+1:(i-1)*n_q+n_q)*bodyKinematics.q_dot;
                 end
+                simplify(V)
             end
         end
         
