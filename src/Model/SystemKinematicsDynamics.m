@@ -55,8 +55,17 @@ classdef SystemKinematicsDynamics < SystemKinematics
             obj.cableDynamics.update(obj.cableKinematics, obj.bodyKinematics);
         end
         
+        function sim_update(obj, q, q_dot, q_ddot)
+            % Assign the system states q, q_dot, q_ddot
+            % Calls set state for BodyKinematics and CableKinematics, and
+            % sets the system Jacobian matrix                
+            sim_update@SystemKinematics(obj, q, q_dot, q_ddot);
+            obj.bodyDynamics.sim_update(obj.bodyKinematics);
+            obj.cableDynamics.sim_update(obj.cableKinematics, obj.bodyKinematics);
+        end
+        
         function value = get.interactionWrench(obj)
-            value = obj.P'*(obj.V'*obj.cableDynamics.forces + obj.bodyDynamics.M_b*obj.q_ddot + obj.bodyDynamics.C_b - obj.bodyDynamics.G_b);
+            value = obj.P.'*(obj.V.'*obj.cableDynamics.forces + obj.bodyDynamics.M_b*obj.q_ddot + obj.bodyDynamics.C_b - obj.bodyDynamics.G_b);
         end
         
         
@@ -88,7 +97,7 @@ classdef SystemKinematicsDynamics < SystemKinematics
 %         end
         
         function value = get.q_ddot_dynamics(obj)
-            value =  obj.M\(-obj.L'*obj.cableDynamics.forces - obj.C - obj.G);
+            value =  obj.M\(-obj.L.'*obj.cableDynamics.forces - obj.C - obj.G);
         end
         
         function value = get.M(obj)

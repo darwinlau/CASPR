@@ -14,7 +14,7 @@ clc; clear; warning off; %close all;
 % folder = '/home/jonathan/Dropbox/mcdm-analysis.matlab';
 
 % Jonathan's Uni Computer
-% addpath(genpath('C:\Users\jpeden\Dropbox\mcdm-analysis.matlab'))
+addpath(genpath('C:\Users\jpeden\Dropbox\mcdm-analysis.matlab'))
 folder = 'C:\Users\jpeden\Dropbox\mcdm-analysis.matlab';
 subfolder = 'data\config\models';
 

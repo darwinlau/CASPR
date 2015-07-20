@@ -47,6 +47,14 @@ classdef SystemKinematics < handle
             obj.bodyKinematics.update(q, q_dot, q_ddot);
             obj.cableKinematics.update(obj.bodyKinematics);
         end
+        
+        function sim_update(obj, q, q_dot, q_ddot)
+            % Assign the system states q, q_dot, q_ddot
+            % Calls set state for BodyKinematics and CableKinematics, and
+            % sets the system Jacobian matrix
+            obj.bodyKinematics.sim_update(q, q_dot, q_ddot);
+            obj.cableKinematics.sim_update(obj.bodyKinematics);
+        end
                 
         function value = get.numLinks(obj)
             value = obj.bodyKinematics.numLinks;

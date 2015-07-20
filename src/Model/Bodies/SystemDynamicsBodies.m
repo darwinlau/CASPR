@@ -39,12 +39,32 @@ classdef SystemDynamicsBodies < handle
             end
             obj.G_b = zeros(6*obj.numLinks, 1);
             for k = 1:obj.numLinks
-                obj.G_b(6*k-5:6*k-3) = bodyKinematics.bodies{k}.R_0k'*[0; 0; -obj.bodies{k}.m*SystemKinematicsDynamics.GRAVITY_CONSTANT];
+                obj.G_b(6*k-5:6*k-3) = bodyKinematics.bodies{k}.R_0k.'*[0; 0; -obj.bodies{k}.m*SystemKinematicsDynamics.GRAVITY_CONSTANT];
             end        
         
-            obj.M =   bodyKinematics.W' * obj.M_b;
-            obj.C =   bodyKinematics.W' * obj.C_b;
-            obj.G = - bodyKinematics.W' * obj.G_b;
+            obj.M =   bodyKinematics.W.' * obj.M_b;
+            obj.C =   bodyKinematics.W.' * obj.C_b;
+            obj.G = - bodyKinematics.W.' * obj.G_b;
+        end
+        
+        function sim_update(obj, bodyKinematics)
+            for k = 1:obj.numLinks
+                obj.bodies{k}.update(bodyKinematics);
+            end
+            
+            obj.M_b = obj.massInertiaMatrix*bodyKinematics.W;
+            obj.C_b = obj.massInertiaMatrix*bodyKinematics.C_a;
+            for k = 1:obj.numLinks
+                obj.C_b(6*k-2:6*k) = obj.C_b(6*k-2:6*k) + cross(bodyKinematics.bodies{k}.w, obj.bodies{k}.I_G*bodyKinematics.bodies{k}.w);
+            end
+            obj.G_b = sym(zeros(6*obj.numLinks, 1));
+            for k = 1:obj.numLinks
+                obj.G_b(6*k-5:6*k-3) = bodyKinematics.bodies{k}.R_0k.'*[0; 0; -obj.bodies{k}.m*SystemKinematicsDynamics.GRAVITY_CONSTANT];
+            end        
+        
+            obj.M =   bodyKinematics.W.' * obj.M_b;
+            obj.C =   bodyKinematics.W.' * obj.C_b;
+            obj.G = - bodyKinematics.W.' * obj.G_b;
         end
         
         function M = get.massInertiaMatrix(obj)
