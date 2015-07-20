@@ -67,6 +67,14 @@ classdef SphericalEulerXYZ < Joint
                 b_d*cos(b) 0 0];
         end
         
+        function [N_j,A] = QuadMatrix(q)
+            b = SphericalEulerXYZ.GetBeta(q);
+            g = SphericalEulerXYZ.GetGamma(q);
+            N_j = [0,-0.5*sin(b)*cos(g),-0.5*cos(b)*sin(g),0,0.5*sin(b)*sin(g),-0.5*cos(b)*cos(g),0,0.5*cos(b),0;...
+                -0.5*sin(q(2))*cos(g),0,0.5*cos(g),0.5*sin(b)*sin(g),0,-0.5*sin(g),0.5*cos(b),0,0;...
+                -0.5*cos(q(2))*sin(g),0.5*cos(g),0,-0.5*cos(b)*cos(g),-0.5*sin(g),0,0,0,0];
+            A = [zeros(3);eye(3)];
+        end
         
         % Get variables from the gen coordinates
         function alpha = GetAlpha(q)

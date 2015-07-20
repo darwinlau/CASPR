@@ -37,6 +37,11 @@ classdef RevoluteZ < Joint
             S_dot = zeros(6,1);
         end
         
+        function [N_j,A] = QuadMatrix(~)
+            N_j = 0;
+            A = zeros(6,1);
+        end
+        
         % Get variables from the gen coordinates
         function theta = GetTheta(q)
             theta = q(1);

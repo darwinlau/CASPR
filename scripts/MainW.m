@@ -47,14 +47,14 @@ wcondition  =   WorkspaceStaticClosure();
 % wcondition  =   WorkspaceStatic();
 % wcondition  =   WorkspaceTaskWrenchClosure();
 %% Define the metric
-metric = NullMetric();
+% metric = NullMetric();
 % metric = UnilateralDexterityMetric();
 % metric = TensionFactorMetric();
 % metric = SemiSingularMetric();
 % metric = RelativeVolumeMetric();
 % metric = RelativeRadiusMetric([0;0]);
 % metric = CapacityMarginMetric();
-% metric = CapacityMarginAccelerationMetric();
+metric = CapacityMarginAccelerationMetric();
 % metric = MagnitudeVelocityMetric();
 
 
@@ -62,7 +62,7 @@ metric = NullMetric();
 disp('Start Setup Simulation');
 start_tic       =   tic;
 wsim            =   WorkspaceSimulator(dynObj,wcondition,metric);
-q_step          =   pi/18;
+q_step          =   pi/90;
 n_dim           =   2;
 uGrid           =   UniformGrid(-pi*ones(n_dim,1),(pi-q_step)*ones(n_dim,1),q_step*ones(n_dim,1));
 % uGrid           =   UniformGrid(-[pi*ones(n_dim-1,1);q_step/5],[(pi-q_step)*ones(n_dim-1,1);q_step/5],[q_step*ones(n_dim-1,1);q_step/5]);

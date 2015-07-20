@@ -65,6 +65,15 @@ classdef SphericalFixedXYZ < Joint
             S = [zeros(3,3); 0, 0, -b_d*cos(b); 0, -a_d*sin(a), a_d*cos(a)*cos(b)-b_d*sin(a)*sin(b); 0, -a_d*cos(a), -a_d*sin(a)*cos(b)-b_d*cos(a)*sin(b)];
         end
         
+        function [N_j,A] = QuadMatrix(q)
+            a = SphericalFixedXYZ.GetAlpha(q);
+            b = SphericalFixedXYZ.GetBeta(q);
+            N_j = [[0,0,0;0,0,-cos(b)/2;0,-cos(b)/2,0],...
+                [0,-sin(a)/2,cos(a)*cos(b)/2;-sin(a)/2,0,-sin(a)*sin(b)/2;cos(a)*cos(b)/2,-sin(a)*sin(b)/2,0],...
+                [0,-cos(a)/2,-sin(a)*cos(b)/2;-cos(a)/2,0,-cos(a)*sin(b)/2;-sin(a)*cos(b)/2,-cos(a)*sin(b)/2,0]];
+            A = [zeros(3);eye(3)];
+        end
+        
         
         % Get variables from the gen coordinates
         function alpha = GetAlpha(q)
