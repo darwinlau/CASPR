@@ -1,0 +1,1405 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE cables [
+  <!ATTLIST cable_set id ID #REQUIRED>
+]>
+
+<cables>
+  <cable_set id="opensim_vasavada">
+    <cable_ideal name="cleid-mast (right)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.03958 -0.0572 -0.02058</location>
+        </attachment>
+        <attachment>
+          <link>8</link>
+          <location>-0.0051 -0.0643 -0.09307</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cleid-occ (right)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.03958 -0.0572 -0.02058</location>
+        </attachment>
+        <attachment>
+          <link>8</link>
+          <location>-0.035 -0.0664 -0.077</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="deepmult-C4/5-C2 (right)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>3</link>
+          <location>-0.01317 -0.02096 0.02025</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>-0.02089 -0.00599 -0.00497</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="deepmult-C5/6-C3 (right)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>2</link>
+          <location>-0.01159 -0.0236 0.02103</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>-0.02136 -0.00611 -0.00324</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="deepmult-C6/7-C4 (right)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>1</link>
+          <location>-0.01278 -0.02508 0.02103</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>-0.02161 -0.0065 -0.00016</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="deepmult-T1-C5 (right)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.03554 -0.03082 0.01279</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>-0.02781 -0.00578 0.01012</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="deepmult-T1-C6 (right)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.03451 -0.02898 0.00959</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>-0.02756 -0.00579 0.01081</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="deepmult-T2-C7 (right)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.04135 -0.02771 -0.01022</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>-0.02697 -0.00579 0.01224</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="iliocost-cerv-c5rib (right)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.03624 -0.04035 0.01508</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>-0.0094 -0.026 0.01258</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="levator-scap (right)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.08659 -0.10224 -0.03524</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>-0.01186 -0.02121 0.00725</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="long-cap-sklc4 (right)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>4</link>
+          <location>0.00652 -0.0242 0.01164</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>0.01197 -0.01897 0.01009</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>0.0172 -0.01477 0.00829</location>
+        </attachment>
+        <attachment>
+          <link>7</link>
+          <location>0.05818 -0.01159 0.00309</location>
+        </attachment>
+        <attachment>
+          <link>8</link>
+          <location>0.0098 -0.0036 -0.08404</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="long-col-c1c5 (right)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>3</link>
+          <location>0.00669 -0.0238 0.00889</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>0.01121 -0.0207 0.00749</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>0.01739 -0.01365 0.00159</location>
+        </attachment>
+        <attachment>
+          <link>7</link>
+          <location>0.05725 -0.0062 0.00482</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="long-col-c1thx (right)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.00138 -0.0037 -0.05796</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0.0232 -0.004 0.0011</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>0.02314 -0.00402 0.00231</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>0.02228 -0.0039 0.00228</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>0.02205 -0.00379 0.00331</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>0.02212 -0.00368 0.00603</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>0.02122 -0.00356 0.00973</location>
+        </attachment>
+        <attachment>
+          <link>7</link>
+          <location>0.05825 -0.0031 0.00482</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="long-col-c5thx (right)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.00511 -0.01778 -0.00347</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0.01111 -0.01979 0.00731</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>0.00961 -0.02216 0.00713</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>0.00669 -0.0238 0.00889</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="longissi-cap-sklc6 (right)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>2</link>
+          <location>-0.00817 -0.02759 0.01515</location>
+        </attachment>
+        <attachment>
+          <link>8</link>
+          <location>-0.0344 -0.055 -0.0949</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="longissi-cerv-c4thx (right)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.0338 -0.0279 0.0117</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>-0.00709 -0.0261 0.01157</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="obl-cap-inf (right)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>6</link>
+          <location>-0.03637 -0.00547 -0.00647</location>
+        </attachment>
+        <attachment>
+          <link>7</link>
+          <location>0.02996 -0.03791 0.00349</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="obl-cap-sup (right)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>7</link>
+          <location>0.03505 -0.042 0.00385</location>
+        </attachment>
+        <attachment>
+          <link>8</link>
+          <location>-0.04758 -0.03818 -0.09069</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="rectcap-post-maj (right)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>6</link>
+          <location>-0.03637 -0.0024 -0.00647</location>
+        </attachment>
+        <attachment>
+          <link>8</link>
+          <location>-0.0604 -0.023 -0.091</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="rectcap-post-min (right)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>7</link>
+          <location>0.00007 -0.0061 0.0009</location>
+        </attachment>
+        <attachment>
+          <link>8</link>
+          <location>-0.0667 -0.0145 -0.091</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="scalenus-ant (right)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.02611 -0.0529 -0.02884</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>0.00713 -0.02323 0.0079</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="scalenus-med (right)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.01352 -0.0627 -0.01797</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>-0.00902 -0.02119 0.00981</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="scalenus-post (right)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.01112 -0.1062 -0.0486</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>-0.0032 -0.0257 0.01371</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="semi-cap-sklc5 (right)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>3</link>
+          <location>-0.00931 -0.0235 0.01154</location>
+        </attachment>
+        <attachment>
+          <link>8</link>
+          <location>-0.07441 -0.018 -0.08</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="semi-cap-sklthx (right)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.03789 -0.0347 0.01602</location>
+        </attachment>
+        <attachment>
+          <link>8</link>
+          <location>-0.07671 -0.0111 -0.08</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="semi-cerv-c3thx (right)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.04146 -0.02607 -0.01133</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>-0.04064 -0.0024 -0.00322</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="splen-cap-sklc6 (right)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>2</link>
+          <location>-0.0486 -0.00305 0.01647</location>
+        </attachment>
+        <attachment>
+          <link>8</link>
+          <location>-0.06164 -0.044 -0.08082</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="splen-cap-sklthx (right)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.05634 -0.003 -0.02228</location>
+        </attachment>
+        <attachment>
+          <link>8</link>
+          <location>-0.04016 -0.05423 -0.089</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="splen-cerv-c3thx (right)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.08098 -0.0041 -0.09908</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>-0.00787 -0.02365 0.01005</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="stern-mast (right)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.0468 -0.0096 -0.0344</location>
+        </attachment>
+        <attachment>
+          <link>8</link>
+          <location>-0.0051 -0.0643 -0.09307</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="supmult-C4/5-C2 (right)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>3</link>
+          <location>-0.01341 -0.02297 0.01994</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>-0.03301 -0.00489 -0.01135</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="supmult-C5/6-C2 (right)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>2</link>
+          <location>-0.01155 -0.02512 0.02078</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>-0.03395 -0.00471 -0.01049</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="supmult-C5/6-C2 (right)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>1</link>
+          <location>-0.01217 -0.02668 0.02111</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>-0.03398 -0.0047 -0.01046</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="supmult-T1-C4 (right)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.03623 -0.03185 0.01225</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>-0.03041 -0.00449 0.00081</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="supmult-T1-C5 (right)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.03505 -0.02985 0.01008</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>-0.03549 -0.00507 0.00983</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="supmult-T2-C6 (right)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.04129 -0.02764 -0.01</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>-0.03704 -0.00491 0.01113</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="trap-acr (right)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.01289 -0.17634 -0.00816</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>-0.0477 -0.00305 0.019</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="trap-cl (right)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.0063 -0.1089 -0.0028</location>
+        </attachment>
+        <attachment>
+          <link>8</link>
+          <location>-0.08031 -0.01324 -0.07396</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cleid-mast (left)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.03958 0.0572 -0.02058</location>
+        </attachment>
+        <attachment>
+          <link>8</link>
+          <location>-0.0051 0.0643 -0.09307</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cleid-occ (left)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.03958 0.0572 -0.02058</location>
+        </attachment>
+        <attachment>
+          <link>8</link>
+          <location>-0.035 0.0664 -0.077</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="deepmult-C4/5-C2 (left)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>3</link>
+          <location>-0.01317 0.02096 0.02025</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>-0.02089 0.00599 -0.00497</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="deepmult-C5/6-C3 (left)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>2</link>
+          <location>-0.01159 0.0236 0.02103</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>-0.02136 0.00611 -0.00324</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="deepmult-C6/7-C4 (left)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>1</link>
+          <location>-0.01278 0.02508 0.02103</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>-0.02161 0.0065 -0.00016</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="deepmult-T1-C5 (left)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.03554 0.03082 0.01279</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>-0.02781 0.00578 0.01012</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="deepmult-T1-C6 (left)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.03451 0.02898 0.00959</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>-0.02756 0.00579 0.01081</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="deepmult-T2-C7 (left)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.04135 0.02771 -0.01022</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>-0.02697 0.00579 0.01224</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="iliocost-cerv-c5rib (left)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.03624 0.04035 0.01508</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>-0.0094 0.026 0.01258</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="levator-scap (left)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.08659 0.10224 -0.03524</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>-0.01186 0.02121 0.00725</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="long-cap-sklc4 (left)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>4</link>
+          <location>0.00652 0.0242 0.01164</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>0.01197 0.01897 0.01009</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>0.0172 0.01477 0.00829</location>
+        </attachment>
+        <attachment>
+          <link>7</link>
+          <location>0.05818 0.01159 0.00309</location>
+        </attachment>
+        <attachment>
+          <link>8</link>
+          <location>0.0098 0.0036 -0.08404</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="long-col-c1c5 (left)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>3</link>
+          <location>0.00669 0.0238 0.00889</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>0.01121 0.0207 0.00749</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>0.01739 0.01365 0.00159</location>
+        </attachment>
+        <attachment>
+          <link>7</link>
+          <location>0.05725 0.0062 0.00482</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="long-col-c1thx (left)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.00138 0.0037 -0.05796</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0.0232 0.004 0.0011</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>0.02314 0.00402 0.00231</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>0.02228 0.0039 0.00228</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>0.02205 0.00379 0.00331</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>0.02212 0.00368 0.00603</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>0.02122 0.00356 0.00973</location>
+        </attachment>
+        <attachment>
+          <link>7</link>
+          <location>0.05825 0.0031 0.00482</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="long-col-c5thx (left)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.00511 0.01778 -0.00347</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0.01111 0.01979 0.00731</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>0.00961 0.02216 0.00713</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>0.00669 0.0238 0.00889</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="longissi-cap-sklc6 (left)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>2</link>
+          <location>-0.00817 0.02759 0.01515</location>
+        </attachment>
+        <attachment>
+          <link>8</link>
+          <location>-0.0344 0.055 -0.0949</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="longissi-cerv-c4thx (left)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.0338 0.0279 0.0117</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>-0.00709 0.0261 0.01157</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="obl-cap-inf (left)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>6</link>
+          <location>-0.03637 0.00547 -0.00647</location>
+        </attachment>
+        <attachment>
+          <link>7</link>
+          <location>0.02996 0.03791 0.00349</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="obl-cap-sup (left)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>7</link>
+          <location>0.03505 0.042 0.00385</location>
+        </attachment>
+        <attachment>
+          <link>8</link>
+          <location>-0.04758 0.03818 -0.09069</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="rectcap-post-maj (left)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>6</link>
+          <location>-0.03637 0.0024 -0.00647</location>
+        </attachment>
+        <attachment>
+          <link>8</link>
+          <location>-0.0604 0.023 -0.091</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="rectcap-post-min (left)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>7</link>
+          <location>0.00007 0.0061 0.0009</location>
+        </attachment>
+        <attachment>
+          <link>8</link>
+          <location>-0.0667 0.0145 -0.091</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="scalenus-ant (left)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.02611 0.0529 -0.02884</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>0.00713 0.02323 0.0079</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="scalenus-med (left)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.01352 0.0627 -0.01797</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>-0.00902 0.02119 0.00981</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="scalenus-post (left)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.01112 0.1062 -0.0486</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>-0.0032 0.0257 0.01371</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="semi-cap-sklc5 (left)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>3</link>
+          <location>-0.00931 0.0235 0.01154</location>
+        </attachment>
+        <attachment>
+          <link>8</link>
+          <location>-0.07441 0.018 -0.08</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="semi-cap-sklthx (left)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.03789 0.0347 0.01602</location>
+        </attachment>
+        <attachment>
+          <link>8</link>
+          <location>-0.07671 0.0111 -0.08</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="semi-cerv-c3thx (left)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.04146 0.02607 -0.01133</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>-0.04064 0.0024 -0.00322</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="splen-cap-sklc6 (left)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>2</link>
+          <location>-0.0486 0.00305 0.01647</location>
+        </attachment>
+        <attachment>
+          <link>8</link>
+          <location>-0.06164 0.044 -0.08082</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="splen-cap-sklthx (left)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.05634 0.003 -0.02228</location>
+        </attachment>
+        <attachment>
+          <link>8</link>
+          <location>-0.04016 0.05423 -0.089</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="splen-cerv-c3thx (left)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.08098 0.0041 -0.09908</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>-0.00787 0.02365 0.01005</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="stern-mast (left)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.0468 0.0096 -0.0344</location>
+        </attachment>
+        <attachment>
+          <link>8</link>
+          <location>-0.0051 0.0643 -0.09307</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="supmult-C4/5-C2 (left)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>3</link>
+          <location>-0.01341 0.02297 0.01994</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>-0.03301 0.00489 -0.01135</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="supmult-C5/6-C2 (left)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>2</link>
+          <location>-0.01155 0.02512 0.02078</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>-0.03395 0.00471 -0.01049</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="supmult-C5/6-C2 (left)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>1</link>
+          <location>-0.01217 0.02668 0.02111</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>-0.03398 0.0047 -0.01046</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="supmult-T1-C4 (left)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.03623 0.03185 0.01225</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>-0.03041 0.00449 0.00081</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="supmult-T1-C5 (left)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.03505 0.02985 0.01008</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>-0.03549 0.00507 0.00983</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="supmult-T2-C6 (left)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.04129 0.02764 -0.01</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>-0.03704 0.00491 0.01113</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="trap-acr (left)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.01289 0.17634 -0.00816</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>-0.0477 0.00305 0.019</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="trap-cl (left)">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.0063 0.1089 -0.0028</location>
+        </attachment>
+        <attachment>
+          <link>8</link>
+          <location>-0.08031 0.01324 -0.07396</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+  </cable_set>
+</cables>

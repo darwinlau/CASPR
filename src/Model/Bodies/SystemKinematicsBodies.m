@@ -280,9 +280,8 @@ classdef SystemKinematicsBodies < handle
     
     methods (Static)
         function b = LoadXmlObj(body_prop_xmlobj)
-            rootNode = body_prop_xmlobj.getDocumentElement;
-            assert(strcmp(rootNode.getNodeName, 'links'), 'Root elemnt should be <links>');
-            allLinkItems = rootNode.getChildNodes;
+            assert(strcmp(body_prop_xmlobj.getNodeName, 'links'), 'Root element should be <links>');
+            allLinkItems = body_prop_xmlobj.getChildNodes;
                         
             num_links = allLinkItems.getLength;
             num_dofs = 0;

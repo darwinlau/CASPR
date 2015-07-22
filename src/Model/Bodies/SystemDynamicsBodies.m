@@ -2,11 +2,11 @@ classdef SystemDynamicsBodies < handle
     %BODYSYSTEMKINEMATICS Summary of this class goes here
     %   Detailed explanation goes here
     
-    properties (SetAccess = protected)          
-        bodies                  % Cell array of BodyDynamics objects        
+    properties (SetAccess = protected)
+        bodies                  % Cell array of BodyDynamics objects
         
-        % M_b*q_ddot + C_b = G_b + forces in body space (external forces, interaction forces, cable forces (-L_b^T*f)) 
-        M_b                         % Body mass-inertia matrix 
+        % M_b*q_ddot + C_b = G_b + forces in body space (external forces, interaction forces, cable forces (-L_b^T*f))
+        M_b                         % Body mass-inertia matrix
         C_b                         % Body C matrix
         G_b                         % Body G matrix
         
@@ -40,8 +40,8 @@ classdef SystemDynamicsBodies < handle
             obj.G_b = zeros(6*obj.numLinks, 1);
             for k = 1:obj.numLinks
                 obj.G_b(6*k-5:6*k-3) = bodyKinematics.bodies{k}.R_0k.'*[0; 0; -obj.bodies{k}.m*SystemKinematicsDynamics.GRAVITY_CONSTANT];
-            end        
-        
+            end
+            
             obj.M =   bodyKinematics.W.' * obj.M_b;
             obj.C =   bodyKinematics.W.' * obj.C_b;
             obj.G = - bodyKinematics.W.' * obj.G_b;
@@ -60,8 +60,8 @@ classdef SystemDynamicsBodies < handle
             obj.G_b = sym(zeros(6*obj.numLinks, 1));
             for k = 1:obj.numLinks
                 obj.G_b(6*k-5:6*k-3) = bodyKinematics.bodies{k}.R_0k.'*[0; 0; -obj.bodies{k}.m*SystemKinematicsDynamics.GRAVITY_CONSTANT];
-            end        
-        
+            end
+            
             obj.M =   simplify(bodyKinematics.W.' * obj.M_b);
             obj.C =   simplify(bodyKinematics.W.' * obj.C_b);
             obj.G = - simplify(bodyKinematics.W.' * obj.G_b);
@@ -153,7 +153,7 @@ classdef SystemDynamicsBodies < handle
             end
             
             %% Compute N
-            N = C1 + C2 + C3 + C4; 
+            N = C1 + C2 + C3 + C4;
             if(flag)
                 N = simplify(N);
                 V = MatrixOperations.Initialise(n_q,1,flag);
@@ -172,10 +172,9 @@ classdef SystemDynamicsBodies < handle
     
     methods (Static)
         function b = LoadXmlObj(body_prop_xmlobj)
-            rootNode = body_prop_xmlobj.getDocumentElement;
-            assert(strcmp(rootNode.getNodeName, 'links'), 'Root elemnt should be <links>');
-            allLinkItems = rootNode.getChildNodes;
-                        
+            assert(strcmp(body_prop_xmlobj.getNodeName, 'links'), 'Root elemnt should be <links>');
+            allLinkItems = body_prop_xmlobj.getChildNodes;
+            
             num_links = allLinkItems.getLength;
             links = cell(1,num_links);
             
@@ -186,7 +185,7 @@ classdef SystemDynamicsBodies < handle
                 
                 num_k = str2double(char(currentLinkItem.getAttribute('num')));
                 assert(num_k == k, sprintf('Link number does not correspond to its order, order: %d, specified num: %d ', k, num_k));
-                     
+                
                 type = char(currentLinkItem.getNodeName);
                 if (strcmp(type, 'link_rigid'))
                     links{k} = BodyDynamicsRigid.LoadXmlObj(currentLinkItem);
@@ -198,6 +197,6 @@ classdef SystemDynamicsBodies < handle
             % Create the actual object to return
             b = SystemDynamicsBodies(links);
         end
-    end    
+    end
 end
 

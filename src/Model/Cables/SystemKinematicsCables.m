@@ -121,10 +121,8 @@ classdef SystemKinematicsCables < handle
     
     methods (Static)
         function c = LoadXmlObj(cable_prop_xmlobj, num_links)
-            rootNode = cable_prop_xmlobj.getDocumentElement;
-            assert(strcmp(rootNode.getNodeName, 'cables'), 'Root element should be <cables>');
-            allCableItems = rootNode.getChildNodes;
-                        
+            assert(strcmp(cable_prop_xmlobj.getNodeName, 'cable_set'), 'Root element should be <cable_set>');
+            allCableItems = cable_prop_xmlobj.getChildNodes;
             num_cables = allCableItems.getLength;
             xml_cables = cell(1,num_cables);
             

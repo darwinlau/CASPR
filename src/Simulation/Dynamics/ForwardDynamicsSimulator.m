@@ -16,6 +16,7 @@ classdef ForwardDynamicsSimulator < DynamicsSimulator
             obj.cableForces = cable_forces;
             
             obj.trajectory = JointTrajectory;
+            obj.trajectory.timeVector = obj.timeVector;
             obj.trajectory.q = cell(1, length(obj.timeVector));
             obj.trajectory.q_dot = cell(1, length(obj.timeVector));
             obj.trajectory.q_ddot = cell(1, length(obj.timeVector));

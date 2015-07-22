@@ -27,10 +27,10 @@ classdef SystemKinematics < handle
     end
     
     methods (Static)
-        function k = LoadXmlObj(body_xmlobj, cable_xmlobj)
+        function k = LoadXmlObj(body_xmlobj, cables_xmlobj)
             k = SystemKinematics();
             k.bodyKinematics = SystemKinematicsBodies.LoadXmlObj(body_xmlobj);
-            k.cableKinematics = SystemKinematicsCables.LoadXmlObj(cable_xmlobj, k.numLinks);
+            k.cableKinematics = SystemKinematicsCables.LoadXmlObj(cables_xmlobj, k.numLinks);
             k.update(zeros(k.numDofs,1), zeros(k.numDofs,1), zeros(k.numDofs,1));
         end
     end
