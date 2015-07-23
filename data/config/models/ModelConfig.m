@@ -38,6 +38,10 @@ classdef ModelConfig
                     c.bodyPropertiesFilename = [c.root_folder, '\spherical_joint\spherical_joint_bodies.xml'];
                     c.cablesPropertiesFilename = [c.root_folder, '\spherical_joint\spherical_joint_cables.xml'];
                     c.trajectoriesFilename = [c.root_folder, '\spherical_joint\spherical_joint_trajectories.xml'];
+                case ModelConfigType.M_MYOROB_SHOULDER
+                    c.bodyPropertiesFilename = [c.root_folder, '\myorob_shoulder\myorob_shoulder_bodies.xml'];
+                    c.cablesPropertiesFilename = [c.root_folder, '\myorob_shoulder\myorob_shoulder_cables.xml'];
+                    c.trajectoriesFilename = [c.root_folder, '\myorob_shoulder\myorob_shoulder_trajectories.xml'];
                 otherwise
                     error('ModelConfig type is not defined');
             end

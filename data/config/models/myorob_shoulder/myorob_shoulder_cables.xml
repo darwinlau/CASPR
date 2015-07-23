@@ -1,0 +1,162 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE cables [
+  <!ATTLIST cable_set id ID #REQUIRED>
+]>
+
+<cables>
+  <cable_set id="myorob_shoulder">
+    <cable_ideal name="Cable 1">
+      <properties>
+        <force_min>0.1</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.060 0.045 -0.100</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0 0 0.180</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="Cable 2">
+      <properties>
+        <force_min>0.1</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.060 0.080 -0.050</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0 0 0.195</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="Cable 3">
+      <properties>
+        <force_min>0.1</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.060 0.082 0.010</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0 0 0.050</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="Cable 4">
+      <properties>
+        <force_min>0.1</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.015 0.045 0.038</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0 0 -0.210</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="Cable 5">
+      <properties>
+        <force_min>0.1</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.050 0 0.040</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0 0 0.050</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="Cable 6">
+      <properties>
+        <force_min>0.1</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.015 -0.045 0.005</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0 0 0.050</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="Cable 7">
+      <properties>
+        <force_min>0.1</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.060 -0.080 0.01</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0 0 0.195</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="Cable 8">
+      <properties>
+        <force_min>0.1</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.060 -0.082 -0.050</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0 0 0.175</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="Cable 9">
+      <properties>
+        <force_min>0.1</force_min>
+        <force_max>1000</force_max>
+        <force_error>1500</force_error>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.060 -0.055 -0.100</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0 0 0.180</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+  </cable_set>
+</cables>
