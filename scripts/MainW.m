@@ -10,44 +10,24 @@ clc; clear; warning off; %close all;
 % addpath(genpath('C:\Users\Eden\Dropbox\mcdm-analysis.matlab'));
 
 % Jonathan's Laptop
-% addpath(genpath('/home/jonathan/Dropbox/mcdm-analysis.matlab'))
+addpath(genpath('/home/jonathan/Dropbox/mcdm-analysis.matlab'))
 % folder = '/home/jonathan/Dropbox/mcdm-analysis.matlab';
 
-% Jonathan's Uni Computer
-addpath(genpath('C:\Users\jpeden\Dropbox\mcdm-analysis.matlab'))
-folder = 'C:\Users\jpeden\Dropbox\mcdm-analysis.matlab';
-subfolder = 'data\config\models';
+%% Initialise objects
+model_config = ModelConfig(ModelConfigType.M_2R_PLANAR_XZ);
+cable_set_id = 'basic_4_cables';
 
 if(isunix)
     dlm = '/';
 else
     dlm = '\';
 end
+bodies_xmlobj = model_config.getBodiesProperiesXmlObj();
+cableset_xmlobj = model_config.getCableSetXmlObj(cable_set_id);
 
-% 2R_planar Model 4 Cables
-model_folder 	= 	'2R_planar';
-cable_file 	 	= 	'2R_planar_cable_properties.xml';
-body_file 	 	= 	'2R_planar_body_properties.xml';
-
-% Ball and Socket Model 4 Cables
-% model_folder 	= 	'ball_and_socket';
-% cable_file 	 	= 	'ball_and_socket_cable_properties.xml';
-% body_file 	 	= 	'ball_and_socket_body_properties.xml';
-
-% Planar Robot
-% model_folder    =   'planar';
-% cable_file 	 	= 	'planar_cable_properties.xml';
-% body_file 	 	= 	'planar_body_properties.xml';
-
-%% Set up the file paths
-cable_prop_filepath = [folder,dlm,subfolder,dlm,model_folder,dlm,cable_file];
-body_prop_filepath = [folder,dlm,subfolder,dlm,model_folder,dlm,body_file];
-
-body_xmlobj = XmlOperations.XmlReadRemoveIndents(body_prop_filepath);
-cable_xmlobj = XmlOperations.XmlReadRemoveIndents(cable_prop_filepath);
 
 %% Initialisation
-dynObj = SystemKinematicsDynamics.LoadXmlObj(body_xmlobj, cable_xmlobj);
+dynObj = SystemKinematicsDynamics.LoadXmlObj(bodies_xmlobj, cableset_xmlobj);
 % Define the workspace condition
 % Workspace conditions
 % wcondition = WorkspaceStub();
@@ -72,7 +52,7 @@ metric = CapacityMarginAccelerationMetric();
 disp('Start Setup Simulation');
 start_tic       =   tic;
 wsim            =   WorkspaceSimulator(dynObj,wcondition,metric);
-q_step          =   pi/90;
+q_step          =   pi/18;
 n_dim           =   2;
 uGrid           =   UniformGrid(-pi*ones(n_dim,1),(pi-q_step)*ones(n_dim,1),q_step*ones(n_dim,1));
 % uGrid           =   UniformGrid(-[pi*ones(n_dim-1,1);q_step/5],[(pi-q_step)*ones(n_dim-1,1);q_step/5],[q_step*ones(n_dim-1,1);q_step/5]);
