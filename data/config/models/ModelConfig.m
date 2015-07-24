@@ -21,6 +21,7 @@ classdef ModelConfig
         function c = ModelConfig(type)
             c.type = type;
             c.root_folder = fileparts(mfilename('fullpath'));
+            
             switch type
                 case ModelConfigType.M_PLANAR_XY
                     c.bodyPropertiesFilename = [c.root_folder, '\planar_xy\planar_xy_bodies.xml'];
@@ -44,6 +45,12 @@ classdef ModelConfig
                     c.trajectoriesFilename = [c.root_folder, '\myorob_shoulder\myorob_shoulder_trajectories.xml'];
                 otherwise
                     error('ModelConfig type is not defined');
+            end
+            
+            if(isunix)
+                c.bodyPropertiesFilename = strrep(c.bodyPropertiesFilename, '\', '/');
+                c.cablesPropertiesFilename = strrep(c.cablesPropertiesFilename, '\', '/');
+                c.trajectoriesFilename = strrep(c.trajectoriesFilename, '\', '/');
             end
             
             c.bodiesXmlObj =  XmlOperations.XmlReadRemoveIndents(c.bodyPropertiesFilename);
