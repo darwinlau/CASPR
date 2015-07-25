@@ -1,21 +1,44 @@
-classdef SystemKinematicsCables < handle
-    %CABLESYSTEMKINEMATICS Summary of this class goes here
-    %   Detailed explanation goes here
+% System kinematics of the cables for the system
+% 
+% Please cite the following paper when using this for multilink cable
+% robots:
+% D. Lau, D. Oetomo, and S. K. Halgamuge, "Generalized Modeling of
+% Multilink Cable-Driven Manipulators with Arbitrary Routing Using the
+% Cable-Routing Matrix," IEEE Trans. Robot., vol. 29, no. 5, pp. 1102–1113,
+% Oct. 2013.
+% 
+% Author        : Darwin LAU
+% Created       : 2011
+% Description	:
+%	Data structure that represents the kinematics for the cables of the
+% system. It contains the kinematics of the set of cables, encapsulated
+% within the CableKinematics object.
+%   When the kinematics are updated, the V matrix (l_dot = V x_dot) also
+%   gets updated and stored. 
+classdef SystemKinematicsCables < handle    
     
     properties (SetAccess = private)
-        V
+        % This matrix should probably be computed as needed (dependent
+        % variable), but if it is a commonly used matrix (i.e. accessed
+        % multiple times even if the system state does not change) then
+        % storing it would be more efficient. However this means that
+        % update must be performed through this class' update function and
+        % not on the body's update directly. This makes sense since just
+        % updating one cable without updating the others would cause
+        % inconsistency anyway. 
+        V                       % Cable Jacobian l_dot = V x_dot
     end
     
     properties (SetAccess = protected)
-        cables = {};                 % cell array of CableKinematics object
+        cables = {};            % cell array of CableKinematics object
         
         numCables = 0;
         numLinks = 0;
     end
     
     properties (Dependent)
-        numSegmentsMax
-        lengths                      % vector of forces from cables
+        numSegmentsMax          % Maximum number of segments out of all of the cables
+        lengths                 % vector of lengths for all of the cables
     end
     
     methods
@@ -95,11 +118,12 @@ classdef SystemKinematicsCables < handle
         %         end
         
         % NOT SURE HOW THIS IS USED YET, but just a demo of what can be
-        % done
+        % done. This may be useful when automating the design of the cable
+        % attachments?
         function clearCableSegments(obj)
             % remove all cables
             for i = 1:obj.numCables
-                obj.cables{i}.clearSegments(); % = CableKinematics(sprintf('Cable %d', i), obj.numLinks);
+                obj.cables{i}.clearSegments();
             end
         end
         

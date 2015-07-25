@@ -1,6 +1,24 @@
+% System kinematics and dynamics of the entire cable robot system
+%
+% Please cite the following paper when using this for multilink cable
+% robots:
+% D. Lau, D. Oetomo, and S. K. Halgamuge, "Generalized Modeling of
+% Multilink Cable-Driven Manipulators with Arbitrary Routing Using the
+% Cable-Routing Matrix," IEEE Trans. Robot., vol. 29, no. 5, pp. 1102–1113,
+% Oct. 2013.
+%
+% Author        : Darwin LAU
+% Created       : 2011
+% Description	:
+%	Data structure that represents the both the kinematics and dynamics of 
+% the cable robot system. This object inherits from SystemKinematics, the
+% kinematics and dynamics are stored within SystemKinematicsBodies, 
+% SystemKinematicsCables, SystemDynamicsBodies and SystemDynamicsCables.
+%   This class also provides direct access to a range of data and matrices. 
+% In addition to that from SystemKinematics, the matrices and vectors for
+% the equations of motion (M, C, G etc.), the interaction wrenches and its 
+% magnitudes are available.
 classdef SystemKinematicsDynamics < SystemKinematics
-    %SystemKinematics Contains the information for the kinematic state for
-    %the entire cable-driven system
     
     properties (SetAccess = protected)            
         bodyDynamics              % SystemDynamicsBodies object
@@ -12,21 +30,28 @@ classdef SystemKinematicsDynamics < SystemKinematics
     end
     
     properties (Dependent)
-        % M*q_ddot + C + G = external forces in joint space (external forces, cable forces (-L^T*f))
+        % The equations of motion with the interaction wrench w_p
+        % P^T ( M_b * q_ddot + C_b ) = P^T ( G_b - V^T f ) + w_p
+        interactionWrench               % Joint interaction wrenches (w_p)
+        interactionForceMagnitudes      % Magnitudes of the interaction force at each joint
+        interactionMomentMagnitudes     % Magnitudes of the interaction moments at each joint
+        
+        % Since S^T w_p = 0 and S^T P^T = W^T
+        % W^T ( M_b * q_ddot + C_b ) = W^T ( G_b - V^T f )
+        % The equations of motion can then be expressed in the form
+        % M * q_ddot + C + G = - L^T f
         M
         C
         G
         
-        interactionWrench             % Vector of joint interaction wrenches
-        
-        interactionForceMagnitudes
-        interactionMomentMagnitudes
-        %jointForceAngles
-        
 %         B                         % Linearised B matrix
         
-        q_ddot_dynamics           % q_ddot from the system dynamics
+        % Instead of q_ddot being passed as input to the system, it could
+        % also be determined from:
+        % M * q_ddot + C + G = - L^T f
+        q_ddot_dynamics
         
+        % The set of cable forces f = [f_1; f_2; ... ; f_m]
         cableForces               % cable forces 
     end
     
@@ -45,25 +70,23 @@ classdef SystemKinematicsDynamics < SystemKinematics
         function b = SystemKinematicsDynamics()
         end
         
-        
-        function update(obj, q, q_dot, q_ddot)
-            % Assign the system states q, q_dot, q_ddot
-            % Calls set state for BodyKinematics and CableKinematics, and
-            % sets the system Jacobian matrix                
+        % Function updates the kinematics and dynamics of the bodies and 
+        % cables of the system with the joint state (q, q_dot and q_ddot)
+        function update(obj, q, q_dot, q_ddot)         
             update@SystemKinematics(obj, q, q_dot, q_ddot);
             obj.bodyDynamics.update(obj.bodyKinematics);
             obj.cableDynamics.update(obj.cableKinematics, obj.bodyKinematics);
         end
         
         function sim_update(obj, q, q_dot, q_ddot)
-            % Assign the system states q, q_dot, q_ddot
-            % Calls set state for BodyKinematics and CableKinematics, and
-            % sets the system Jacobian matrix                
             sim_update@SystemKinematics(obj, q, q_dot, q_ddot);
             obj.bodyDynamics.sim_update(obj.bodyKinematics);
             obj.cableDynamics.sim_update(obj.cableKinematics, obj.bodyKinematics);
         end
         
+        % Function computes the interaction wrench between the joint of the
+        % links. 
+        % M_b*q_ddot + C_b = G_b + 
         function value = get.interactionWrench(obj)
             value = obj.P.'*(obj.V.'*obj.cableDynamics.forces + obj.bodyDynamics.M_b*obj.q_ddot + obj.bodyDynamics.C_b - obj.bodyDynamics.G_b);
         end
