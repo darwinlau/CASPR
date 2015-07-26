@@ -59,11 +59,6 @@ classdef SystemKinematics < handle
             obj.bodyKinematics.update(q, q_dot, q_ddot);
             obj.cableKinematics.update(obj.bodyKinematics);
         end
-        
-        function sim_update(obj, q, q_dot, q_ddot)
-            obj.bodyKinematics.sim_update(q, q_dot, q_ddot);
-            obj.cableKinematics.sim_update(obj.bodyKinematics);
-        end
                 
         % The following functions get the dependent variable values
         function value = get.numLinks(obj)

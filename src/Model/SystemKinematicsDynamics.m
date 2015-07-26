@@ -78,12 +78,6 @@ classdef SystemKinematicsDynamics < SystemKinematics
             obj.cableDynamics.update(obj.cableKinematics, obj.bodyKinematics);
         end
         
-        function sim_update(obj, q, q_dot, q_ddot)
-            sim_update@SystemKinematics(obj, q, q_dot, q_ddot);
-            obj.bodyDynamics.sim_update(obj.bodyKinematics);
-            obj.cableDynamics.sim_update(obj.cableKinematics, obj.bodyKinematics);
-        end
-        
         % Function computes the interaction wrench between the joint of the
         % links. 
         % M_b*q_ddot + C_b = G_b + 

@@ -51,7 +51,8 @@ classdef CableSegmentKinematics < handle
         end
         
         function value = get.length(obj)
-            value = norm(obj.segmentVector);
+            value = sqrt(sum(obj.segmentVector.^2));
+%             value = norm(obj.segmentVector);
         end
     end
     
