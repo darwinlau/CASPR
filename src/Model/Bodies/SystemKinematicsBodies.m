@@ -1,12 +1,28 @@
-classdef SystemKinematicsBodies < handle
-    %BODYSYSTEMKINEMATICS Summary of this class goes here
-    %   Detailed explanation goes here
-    
+% System kinematics of the bodies for the system
+% 
+% Please cite the following paper when using this for multilink cable
+% robots:
+% D. Lau, D. Oetomo, and S. K. Halgamuge, "Generalized Modeling of
+% Multilink Cable-Driven Manipulators with Arbitrary Routing Using the
+% Cable-Routing Matrix," IEEE Trans. Robot., vol. 29, no. 5, pp. 1102–1113,
+% Oct. 2013.
+% 
+% Author        : Darwin LAU
+% Created       : 2011
+% Description	:
+%	Data structure that represents the kinematics of the bodies of the
+% system, encapsulated within an array of BodyKinematics object. Also 
+% provides global matrices for the entire rigid body kinematics system.
+classdef SystemKinematicsBodies < handle    
     properties (SetAccess = protected)        
         bodies                  % Cell array of BodyKinematics objects
-        % B Matrix
+        
+        % Generalised coordinates of the system
+        q
+        q_dot
+        q_ddot
+        
         connectivityGraph       % p x p connectivity matrix, if (i,j) = 1 means link i-1 is the parent of link j
-        % D Matrix
         bodiesPathGraph         % p x p matrix that governs how to track to particular bodies, (i,j) = 1 means that to get to link j we must pass through link i 
         
         S                       % S matrix representing relationship between relative body velocities (joint) and generalised coordinates velocities
@@ -14,13 +30,9 @@ classdef SystemKinematicsBodies < handle
         P                       % 6p x 6p matrix representing mapping between absolute body velocities (CoG) and relative body velocities (joint)
         W                       % W = P*S : 6p x n matrix representing mapping \dot{\mathbf{x}} = W \dot{\mathbf{q}}
         
-        q
-        q_dot
-        q_ddot
-        
+        % Absolute CoM velocities and accelerations (linear and angular)
         x_dot                   % Absolute velocities
         x_ddot                  % Absolute accelerations (x_ddot = W(q)*q_ddot + C_a(q,q_dot))
-        
         C_a                     % Relationship between body and joint accelerations \ddot{\mathbf{x}} = W \ddot{\mathbf{q}} + C_a
         
         numDofs

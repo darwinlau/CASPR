@@ -1,9 +1,20 @@
+% System dynamics of the cables for the system
+% 
+% Please cite the following paper when using this for multilink cable
+% robots:
+% D. Lau, D. Oetomo, and S. K. Halgamuge, "Generalized Modeling of
+% Multilink Cable-Driven Manipulators with Arbitrary Routing Using the
+% Cable-Routing Matrix," IEEE Trans. Robot., vol. 29, no. 5, pp. 1102–1113,
+% Oct. 2013.
+% 
+% Author        : Darwin LAU
+% Created       : 2011
+% Description	:
+%	Data structure that represents the dynamics for the cables of the
+% system, encapsulated within an array of CableDynamics object.
+%   The dynamics of cables refer to properties such as: the cable forces,
+% the minimum and maximum cable forces, etc. 
 classdef SystemDynamicsCables < handle
-    %CABLESYSTEMKINEMATICS Summary of this class goes here
-    %   Detailed explanation goes here
-    
-    properties
-    end
     
     properties (SetAccess = private)
     end
