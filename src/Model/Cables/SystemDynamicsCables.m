@@ -30,12 +30,6 @@ classdef SystemDynamicsCables < handle
                 obj.cables{k}.update(cableKinematics, bodyKinematics);
             end
         end
-        
-        function sim_update(obj, cableKinematics, bodyKinematics)
-            for k = 1:obj.numCables
-                obj.cables{k}.update(cableKinematics, bodyKinematics);
-            end
-        end
        
         function value = get.forces(obj)
             value = zeros(obj.numCables, 1);

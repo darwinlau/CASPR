@@ -61,32 +61,7 @@ classdef SystemKinematicsCables < handle
             end
             
             % Determine V
-            for i = 1:obj.numCables
-                for k = 1:obj.numLinks
-                    % linkNum = k - 1
-                    V_ixk_T = [0; 0; 0];
-                    V_itk_T = [0; 0; 0];
-                    for j = 1:obj.cables{i}.numSegments
-                        V_ijk_T = obj.getCRMTerm(i,j,k+1)*bodyKinematics.bodies{k}.R_0k.'*obj.cables{i}.segments{j}.segmentVector/obj.cables{i}.segments{j}.length;
-                        V_ixk_T = V_ixk_T + V_ijk_T;
-                        V_itk_T = V_itk_T + cross(obj.cables{i}.segments{j}.attachmentsLocal{k+1}, V_ijk_T);
-                    end
-                    obj.V(i, 6*k-5:6*k) = [V_ixk_T.' V_itk_T.'];
-                end
-            end
-        end
-        
-        function sim_update(obj, bodyKinematics)
-            assert(bodyKinematics.numLinks == obj.numLinks, 'Number of links between the cable and body kinematics must be consistent');
-            
-            % Set each cable's kinematics (absolute attachment locations
-            % and segment vectors)
-            for i = 1:obj.numCables
-                obj.cables{i}.update(bodyKinematics);
-            end
-            
-            % Determine V
-            obj.V = sym(zeros(size(obj.V)));
+            obj.V = MatrixOperations.Initialise(obj.numCables,6*obj.numLinks,isa(bodyKinematics.q,'sym'));
             for i = 1:obj.numCables
                 for k = 1:obj.numLinks
                     % linkNum = k - 1

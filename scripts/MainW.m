@@ -7,10 +7,10 @@ clc; clear; warning off; %close all;
 
 % Jonathan's Home computer
 % folder = 'C:\Users\Eden\Dropbox\mcdm-analysis.matlab';
-% addpath(genpath('C:\Users\Eden\Dropbox\mcdm-analysis.matlab'));
+addpath(genpath('C:\Users\Eden\Dropbox\mcdm-analysis.matlab'));
 
 % Jonathan's Laptop
-addpath(genpath('/home/jonathan/Dropbox/mcdm-analysis.matlab'))
+% addpath(genpath('/home/jonathan/Dropbox/mcdm-analysis.matlab'))
 % folder = '/home/jonathan/Dropbox/mcdm-analysis.matlab';
 
 %% Initialise objects
