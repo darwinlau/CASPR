@@ -1,16 +1,28 @@
-classdef SystemDynamicsBodies < handle
-    %BODYSYSTEMKINEMATICS Summary of this class goes here
-    %   Detailed explanation goes here
-    
+% System dynamics of the bodies for the system
+% 
+% Please cite the following paper when using this for multilink cable
+% robots:
+% D. Lau, D. Oetomo, and S. K. Halgamuge, "Generalized Modeling of
+% Multilink Cable-Driven Manipulators with Arbitrary Routing Using the
+% Cable-Routing Matrix," IEEE Trans. Robot., vol. 29, no. 5, pp. 1102–1113,
+% Oct. 2013.
+% 
+% Author        : Darwin LAU
+% Created       : 2011
+% Description	:
+%	Data structure that represents the dynamics of the bodies of the
+% system, encapsulated within an array of BodyDynamics object. Also 
+% provides global matrices for the entire body dynamics of the system.
+classdef SystemDynamicsBodies < handle    
     properties (SetAccess = protected)
         bodies                  % Cell array of BodyDynamics objects
         
-        % M_b*q_ddot + C_b = G_b + forces in body space (external forces, interaction forces, cable forces (-L_b^T*f))
+        % M_b * q_ddot + C_b = G_b + w_b - V^T f (forces in body space)
         M_b                         % Body mass-inertia matrix
         C_b                         % Body C matrix
         G_b                         % Body G matrix
         
-        % M*q_ddot + C + G = external forces in joint space (external forces, cable forces (-L^T*f))
+        % M*q_ddot + C + G = - L^T f (forces in joint space)
         M
         C
         G

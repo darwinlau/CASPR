@@ -25,7 +25,7 @@ classdef SystemKinematicsCables < handle
         % update must be performed through this class' update function and
         % not on the body's update directly. This makes sense since just
         % updating one cable without updating the others would cause
-        % inconsistency anyway. 
+        % inconsistency anyway.
         V                       % Cable Jacobian l_dot = V x_dot
     end
     
@@ -46,11 +46,12 @@ classdef SystemKinematicsCables < handle
             ck.cables = cables;
             ck.numCables = length(cables);
             ck.numLinks = numLinks;
-%             for i = 1:ck.numCables
-%                 ck.cables{i} = CableKinematics(sprintf('Cable %d', i), ck.numLinks);
-%             end
         end
         
+        % Update the kinematics of the cables for the entire system using
+        % the body kinematics. This update function should also be called 
+        % to update the entire system, rather than calling the update 
+        % function for each cable directly.
         function update(obj, bodyKinematics)
             assert(bodyKinematics.numLinks == obj.numLinks, 'Number of links between the cable and body kinematics must be consistent');
             

@@ -25,6 +25,14 @@ classdef SystemKinematicsBodies < handle
         connectivityGraph       % p x p connectivity matrix, if (i,j) = 1 means link i-1 is the parent of link j
         bodiesPathGraph         % p x p matrix that governs how to track to particular bodies, (i,j) = 1 means that to get to link j we must pass through link i 
         
+        % These matrices should probably be computed as needed (dependent
+        % variable), but if it is a commonly used matrix (i.e. accessed
+        % multiple times even if the system state does not change) then
+        % storing it would be more efficient. However this means that
+        % update must be performed through this class' update function and
+        % not on the body's update directly. This makes sense since just
+        % updating one body without updating the others would cause
+        % inconsistency anyway. 
         S                       % S matrix representing relationship between relative body velocities (joint) and generalised coordinates velocities
         S_dot                   % Derivative of S
         P                       % 6p x 6p matrix representing mapping between absolute body velocities (CoG) and relative body velocities (joint)
@@ -52,14 +60,23 @@ classdef SystemKinematicsBodies < handle
             b.S = zeros(6*b.numLinks, b.numDofs);
             b.P = zeros(6*b.numLinks, 6*b.numLinks);
             b.W = zeros(6*b.numLinks, b.numDofs);
+            
+            % Connects the objects of the system and create the 
+            % connectivity and body path graphs
+            b.formConnectiveMap();
         end
         
+        % Update the kinematics of the body kinematics for the entire
+        % system using the generalised coordinates, velocity and
+        % acceleration. This update function should also be called to 
+        % update the entire system, rather than calling the update function
+        % for each body directly.
         function update(obj, q, q_dot, q_ddot)
             % Assign q, q_dot, q_ddot
             obj.q = q;
             obj.q_dot = q_dot;
             obj.q_ddot = q_ddot;
-            flag = isa(q,'sym');
+            is_symbolic = isa(q, 'sym');
             
             % Update each body first
             index = 1;
@@ -95,8 +112,8 @@ classdef SystemKinematicsBodies < handle
             
             % Set S (joint state matrix) and S_dot
             index = 1;
-            obj.S = MatrixOperations.Initialise(6*obj.numLinks,obj.numDofs,flag);
-            obj.S_dot = MatrixOperations.Initialise(6*obj.numLinks,obj.numDofs,flag);
+            obj.S = MatrixOperations.Initialise(6*obj.numLinks,obj.numDofs,is_symbolic);
+            obj.S_dot = MatrixOperations.Initialise(6*obj.numLinks,obj.numDofs,is_symbolic);
             for k = 1:obj.numLinks
                 obj.S(6*k-5:6*k, index:index+obj.bodies{k}.joint.numDofs-1) = obj.bodies{k}.joint.S;  
                 obj.S_dot(6*k-5:6*k, index:index+obj.bodies{k}.joint.numDofs-1) = obj.bodies{k}.joint.S_dot;  
@@ -104,7 +121,7 @@ classdef SystemKinematicsBodies < handle
             end
             
             % Set P (relationship with joint propagation)
-            obj.P = MatrixOperations.Initialise(6*obj.numLinks,6*obj.numLinks,flag);
+            obj.P = MatrixOperations.Initialise(6*obj.numLinks,6*obj.numLinks,is_symbolic);
             for k = 1:obj.numLinks
                 for a = 1:k
                     R_ka = obj.bodies{k}.R_0k.'*obj.bodies{a}.R_0k;   
@@ -126,8 +143,7 @@ classdef SystemKinematicsBodies < handle
             end
             
             % Determine x_ddot
-            
-            ang_mat = MatrixOperations.Initialise(6*obj.numLinks,6*obj.numLinks,flag);
+            ang_mat = MatrixOperations.Initialise(6*obj.numLinks,6*obj.numLinks,is_symbolic);
             for k = 1:obj.numLinks
                 kp = obj.bodies{k}.parentLinkId;
                 if (kp > 0)
@@ -151,6 +167,7 @@ classdef SystemKinematicsBodies < handle
             end
             
             obj.x_ddot = obj.P*obj.S*obj.q_ddot + obj.C_a;
+            
             % Extract absolute accelerations
             for k = 1:obj.numLinks
                 obj.bodies{k}.a_OG = obj.x_ddot(6*k-5:6*k-3); 
@@ -158,12 +175,14 @@ classdef SystemKinematicsBodies < handle
             end
         end
         
+        % Supporting function to connect all of the parent and child bodies
         function formConnectiveMap(obj)
             for k = 1:obj.numLinks
                 obj.connectBodies(obj.bodies{k}.parentLinkId, k, obj.bodies{k}.r_Parent);
             end
         end
         
+        % Supporting function to connect a particular child to a parent
         function connectBodies(obj, parent_link_num, child_link_num, r_parent_loc)   
             assert(parent_link_num < child_link_num, 'Parent link number must be smaller than child');
             assert(~isempty(obj.bodies{child_link_num}), 'Child link does not exist');
@@ -211,7 +230,6 @@ classdef SystemKinematicsBodies < handle
                      
                 type = char(currentLinkItem.getNodeName);
                 if (strcmp(type, 'link_rigid'))
-                    %currentLinkItem.getChildNodes.getElementsByTagName('parent').item(0).getChildNodes.getLength
                     links{k} = BodyKinematicsRigid.LoadXmlObj(currentLinkItem);
                 else
                     error('Unknown link type: %s', type);
@@ -221,7 +239,6 @@ classdef SystemKinematicsBodies < handle
             
             % Create the actual object to return
             b = SystemKinematicsBodies(links, num_dofs);
-            b.formConnectiveMap();
         end
     end
 end
