@@ -47,15 +47,12 @@ classdef PlanarXY < Joint
             r_rel = [x; y; 0];
         end
         
-        function S = RelJointMatrix(q)
-            th = PlanarXY.GetTheta(q);
-            S = [cos(th) sin(th) 0; -sin(th) cos(th) 0; 0 0 0; 0 0 0; 0 0 0; 0 0 1];
+        function S = RelJointMatrix(~)
+            S = [1 0 0; 0 1 0; 0 0 0; 0 0 0; 0 0 0; 0 0 1];
         end
         
-        function S_dot = RelJointMatrixD(q, q_dot)
-            th = PlanarXY.GetTheta(q);
-            th_d = PlanarXY.GetThetaDot(q_dot);
-            S_dot = [-th_d*sin(th) th_d*cos(th) 0; -th_d*cos(th) -th_d*sin(th) 0; 0 0 0; 0 0 0; 0 0 0; 0 0 0];
+        function S_dot = RelJointMatrixD(~, ~)
+            S_dot = zeros(6, 3);
         end
         
         function [N_j,A] = QuadMatrix(q)

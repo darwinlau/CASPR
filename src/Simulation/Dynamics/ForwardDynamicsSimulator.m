@@ -39,12 +39,12 @@ classdef ForwardDynamicsSimulator < DynamicsSimulator
                 % Initialise the starting point for the ODE
                 y0 = [obj.model.q; obj.model.q_dot];
                 % Run the ODE function
-                [~, y_out] = ode45(@(time,y) eom(time, y, obj.model, cable_forces{t-1}), [obj.timeVector(t-1) obj.timeVector(t)], y0);
+                [~, y_out] = ode113(@(time,y) eom(time, y, obj.model, cable_forces{t-1}), [obj.timeVector(t-1) obj.timeVector(t)], y0);
                 % The output of the ODE is the solution and y0 for the next iteration
-                s = size(y_out);
+                s_end = size(y_out,1);
                 % Store the q and q_dot values
-                obj.trajectory.q{t} = y_out(s(1), 1:n_dof)';
-                obj.trajectory.q_dot{t} = y_out(s(1), n_dof+1:2*n_dof)';
+                obj.trajectory.q{t} = y_out(s_end, 1:n_dof)';
+                obj.trajectory.q_dot{t} = y_out(s_end, n_dof+1:2*n_dof)';
                 % Update the model with q, q_dot and f so that q_ddot can be determined
                 obj.model.update(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, zeros(n_dof, 1));
                 obj.model.cableForces = cable_forces{t-1};

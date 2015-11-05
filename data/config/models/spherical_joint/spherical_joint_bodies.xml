@@ -4,7 +4,7 @@
     <joint_type>S_EULER_XYZ</joint_type>
     <physical>
       <mass>0.1</mass>
-      <com_location>0.0 0.0 0.1</com_location>
+      <com_location>0.0 0.0 0.0</com_location>
       <end_location>0.0 0.0 0.2</end_location>
       <inertia ref="CoM">
         <Ixx>1.0</Ixx>

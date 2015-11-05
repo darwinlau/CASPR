@@ -57,8 +57,13 @@ classdef (Abstract) Joint < handle
     end
     
     methods (Abstract, Static)
+        % Relative rotation matrix ^p_eR : 
+        % Where "p" is previous frame frame and "e" is end-effector frame
+        % Hence, vector_in_p = ^p_eR * vector_in_e
         R_pe = RelRotationMatrix(q)
+        % Relative translation of the joint
         r_rel = RelTranslation(q)
+        % Relationship between x_{rel}'
         S = RelJointMatrix(q)
         S_dot = RelJointMatrixD(q, q_dot)
     end
