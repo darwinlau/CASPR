@@ -9,7 +9,7 @@ classdef NullMetric < Metric
         
         %% Evaluate Functions
         function v = evaluate(obj,dynamics)
-            v = 0;
+            v = 1;
         end
         
         function v = workspaceCheck(obj,type)

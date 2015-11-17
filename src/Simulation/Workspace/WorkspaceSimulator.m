@@ -1,11 +1,10 @@
-classdef WorkspaceSimulator < MotionSimulator
+classdef WorkspaceSimulator < Simulator
     %DYNAMICSSIMULATOR Summary of this class goes here
     %   Detailed explanation goes here
     
     properties
         grid            % Grid object for brute force workspace (input)
         workspace       % Final Workspace (output)
-        filtered_workspace %Filtered workspace
         WCondition      % The workspace condition
         metric          % The metric
         m_flag          % Flag to indicate whether metric can be used to look at workspace
@@ -13,10 +12,15 @@ classdef WorkspaceSimulator < MotionSimulator
     
     methods        
         function id = WorkspaceSimulator(model,w_condition,metric)
-            id@MotionSimulator(model);
+            id@Simulator(model);
             id.WCondition   =   w_condition;
-            id.metric       =   metric;
-            id.m_flag       =   metric.workspaceCheck(w_condition.type);
+            if(nargin > 2)
+                id.metric       =   metric;
+                id.m_flag       =   metric.workspaceCheck(w_condition.type);
+            else
+                id.metric       =   NullMetric();
+                id.m_flag       =   0;
+            end
         end
         
         function run(obj, grid)
@@ -25,10 +29,11 @@ classdef WorkspaceSimulator < MotionSimulator
             workspace_count =   0;
             % Runs over the grid and evaluates the workspace condition at
             % each point
-            for i = 1:round(obj.grid.n_points)
-                i
+            for i = 1:obj.grid.n_points
+                disp(i)
                 q = obj.grid.getGridPoint(i);
                 obj.model.update(q, zeros(size(q)), zeros(size(q)));
+                %% THIS IS SUBJECT TO CHANGE
                 if(obj.m_flag)
                     metricValue     =   obj.metric.evaluate(obj.model);
                     inWorkspace     =   metricValue>0;
@@ -44,116 +49,61 @@ classdef WorkspaceSimulator < MotionSimulator
             obj.workspace = obj.workspace(:,1:workspace_count);
         end
         
-        function plotWorkspace(obj)
-            assert(obj.grid.n_dimensions<=4,'Dimension of Workspace too large to plot');
-            figure;  hold on;    axis([-180 180 -180 180]);
-            mw = ceil(max(obj.workspace(obj.grid.n_dimensions+1,:).*(obj.workspace(obj.grid.n_dimensions+1,:)~=Inf))+1);
+        function plotWorkspace(obj,workspace)
+            n_d = obj.grid.n_dimensions;
+            assert(n_d<=3,'Dimension of Workspace too large to plot');
+            if(nargin == 1)
+                plotting_workspace = obj.workspace;
+            else
+                plotting_workspace = workspace;
+            end
+            figure;  hold on;    
+            mw = ceil(max(plotting_workspace(n_d+1,:).*(plotting_workspace(n_d+1,:)~=Inf))+10);
             if(isnan(mw))
                 mw = 1;
             end
-            sf = 100/mw;
-            map = colormap(flipud(gray(sf*mw+1)));
-            for i =1:size(obj.workspace,2)
-                if(obj.grid.n_dimensions == 2)
-                    if(obj.workspace(3,i)==Inf)
-                        plot((180/pi)*obj.workspace(1,i),(180/pi)*obj.workspace(2,i),'Color',map(sf*mw,:),'Marker','.')
+            sf = 255/mw;
+            map = colormap(flipud(gray(sf*mw))); % Look if there is a better colour map
+            for i =1:size(plotting_workspace,2)
+                if(n_d == 2)
+                    axis([-180 180 -180 180]);
+                    if(plotting_workspace(3,i)==Inf)
+                        plot((180/pi)*plotting_workspace(1,i),(180/pi)*plotting_workspace(2,i),'Color',map(sf*mw,:),'Marker','.')
                     else
-                        plot((180/pi)*obj.workspace(1,i),(180/pi)*obj.workspace(2,i),'Color',map(int32(sf*obj.workspace(3,i))+1,:),'Marker','.')
+                        plot((180/pi)*plotting_workspace(1,i),(180/pi)*plotting_workspace(2,i),'Color',map(int32(sf*plotting_workspace(3,i))+10,:),'Marker','.')
                     end
-                elseif(obj.grid.n_dimensions == 3)
-                    if(obj.workspace(4,i)==Inf)
-                        plot3((180/pi)*obj.workspace(1,i),(180/pi)*obj.workspace(2,i),(180/pi)*obj.workspace(3,i),'Color',map(mw,:),'Marker','.')
+                elseif(n_d == 3)
+                    axis([-180 180 -180 180 -180 180]);
+                    if(plotting_workspace(4,i)==Inf)
+                        plot3((180/pi)*plotting_workspace(1,i),(180/pi)*plotting_workspace(2,i),(180/pi)*plotting_workspace(3,i),'Color',map(mw,:),'Marker','.')
                     else
-                        plot3((180/pi)*obj.workspace(1,i),(180/pi)*obj.workspace(2,i),(180/pi)*obj.workspace(3,i),'Color',map(int32(obj.workspace(4,i))+1,:),'Marker','.')
+                        plot3((180/pi)*plotting_workspace(1,i),(180/pi)*plotting_workspace(2,i),(180/pi)*plotting_workspace(3,i),'Color',map(int32(plotting_workspace(4,i))+10,:),'Marker','.')
                     end
-                end
-            end 
-            colorbar();
-        end
-        
-        function plotWorkspacePlane(obj)
-            assert(obj.grid.n_dimensions<=3,'Dimension of Workspace too large to plot');
-            figure;  hold on;    axis([-180 180 -180 180]);
-            for i =1:size(obj.workspace,2)
-                if(obj.grid.n_dimensions == 2)
-                    plot((180/pi)*obj.workspace(1,i),(180/pi)*obj.workspace(2,i),'k.')
-                elseif(obj.grid.n_dimensions == 3)
-                    plot3((180/pi)*obj.workspace(1,i),(180/pi)*obj.workspace(2,i),(180/pi)*obj.workspace(3,i),'k.')
                 end
             end 
         end
         
-        function plotFilterWorkspace(obj)
-            assert(obj.grid.n_dimensions<=3,'Dimension of Workspace too large to plot');
-            figure;  hold on;    axis([-180 180 -180 180]);
-            for i =1:size(obj.filtered_workspace,2)
-                if(obj.grid.n_dimensions == 2)
-                    plot((180/pi)*obj.filtered_workspace(1,i),(180/pi)*obj.filtered_workspace(2,i),'k.')
-                elseif(obj.grid.n_dimensions == 3)
-                    plot3((180/pi)*obj.filtered_workspace(1,i),(180/pi)*obj.filtered_workspace(2,i),(180/pi)*obj.filtered_workspace(3,i),'k.')
-                end
-            end 
+        function plotWorkspaceInterior(obj)
+        	assert(obj.grid.n_dimensions<=3,'Dimension of Workspace too large to plot');
+            filtered_workspace = obj.boundary_filter;
+            obj.plotWorkspace(filtered_workspace);
         end
         
         function plotWorkspaceComponents(obj,components)
             assert(obj.grid.n_dimensions<=3,'Dimension of Workspace too large to plot');
-            figure;  hold on;    axis([-180 180 -180 180]);
+            [adjacency_matrix,laplacian_matrix] = obj.toAdjacencyMatrix();
+            components = obj.findConnectedComponents(adjacency_matrix);
+            figure;  hold on;   
             map = colormap(hsv(max(max(components))));
             for i =1:size(obj.workspace,2)
                 if(obj.grid.n_dimensions == 2)
+                    axis([-180 180 -180 180]);
                     plot((180/pi)*obj.workspace(1,i),(180/pi)*obj.workspace(2,i),'Color',map(components(i),:),'Marker','.')
                 elseif(obj.grid.n_dimensions == 3)
+                    axis([-180 180 -180 180 -180 180]);
                     plot3((180/pi)*obj.workspace(1,i),(180/pi)*obj.workspace(2,i),(180/pi)*obj.workspace(3,i),'Color',map(components(i),:),'Marker','.')
                 end
             end 
-        end
-        
-        function boundaryFilter(obj)
-            obj.filtered_workspace = zeros(size(obj.workspace));
-            f_count = 1;
-            n_nodes = size(obj.workspace,2);
-            tol = 1e-6;
-            for i = 1:n_nodes
-                c_count = 0;
-                j = 1;
-                while((j<=n_nodes)&&(c_count<8))
-                    % Check if points are connected
-                    if((i~=j)&&(obj.WCondition.connected(obj.workspace,i,j,obj.grid)))
-%                     if((obj.WCondition.connected(obj.workspace,i,j,obj.grid)))
-                        c_count = c_count + 1;
-                    end
-                    
-                    if(c_count == 8)
-                        obj.filtered_workspace(:,f_count) = obj.workspace(:,i);
-                        f_count = f_count+1;
-                    end
-                    j = j+1;
-                end
-                i
-            end
-            obj.filtered_workspace = obj.filtered_workspace(:,1:f_count-1);
-        end
-        
-        function [adjacency_matrix,laplacian_matrix] = toAdjacencyMatrix(obj)
-            % ADD CHECK FOR WHETHER OR NOT SPARSE MATRIX SHOULD BE USED
-            % FOR TESTING PURPOSES I AM ONLY CURRENTLY WRITING THIS FOR WCC
-            n_nodes = size(obj.workspace,2);
-            laplacian_matrix = zeros(n_nodes);
-            adjacency_matrix = zeros(n_nodes);
-            tol = 1e-6;
-            for i = 1:n_nodes
-                for j = i+1:n_nodes
-                    % Check if points are connected
-                    if(obj.WCondition.connected(obj.workspace,i,j,obj.grid))
-                        adjacency_matrix(i,j) = 1;
-                        adjacency_matrix(j,i) = 1;
-                        laplacian_matrix(i,j) = -1;
-                        laplacian_matrix(j,i) = -1;
-                        laplacian_matrix(i,i) = laplacian_matrix(i,i) + 1;
-                        laplacian_matrix(j,j) = laplacian_matrix(j,j) + 1;
-                    end
-                end
-            end
         end
         
         function wsim_matrix = toMatrix(obj)
@@ -182,6 +132,36 @@ classdef WorkspaceSimulator < MotionSimulator
                 end
             end
             obj.workspace = obj.workspace(:,1:k);
+        end
+        
+        
+    end
+    
+    methods (Static)
+        function boundaryFilter(obj)
+            obj.filtered_workspace = zeros(size(obj.workspace));
+            f_count = 1;
+            n_nodes = size(obj.workspace,2);
+            tol = 1e-6;
+            for i = 1:n_nodes
+                c_count = 0;
+                j = 1;
+                while((j<=n_nodes)&&(c_count<8))
+                    % Check if points are connected
+                    if((i~=j)&&(obj.WCondition.connected(obj.workspace,i,j,obj.grid)))
+%                     if((obj.WCondition.connected(obj.workspace,i,j,obj.grid)))
+                        c_count = c_count + 1;
+                    end
+                    
+                    if(c_count == 8)
+                        obj.filtered_workspace(:,f_count) = obj.workspace(:,i);
+                        f_count = f_count+1;
+                    end
+                    j = j+1;
+                end
+                i
+            end
+            obj.filtered_workspace = obj.filtered_workspace(:,1:f_count-1);
         end
         
         function con_comp = findConnectedComponents(obj,adjacency_matrix)
@@ -223,22 +203,25 @@ classdef WorkspaceSimulator < MotionSimulator
             end 
         end
         
-        %             Components = 0;
-% 
-% Enumerate all vertices, if for vertex number i, marks[i] == 0 then
-% 
-%     ++Components;
-% 
-%     Put this vertex into queue, and 
-% 
-%     while queue is not empty, 
-% 
-%         pop vertex v from q
-% 
-%         marks[v] = Components;
-% 
-%         Put all adjacent vertices with marks equal to zero into queue.
-    end
-    
+        function [adjacency_matrix,laplacian_matrix] = toAdjacencyMatrix(obj)
+            n_nodes = size(obj.workspace,2);
+            laplacian_matrix = zeros(n_nodes);
+            adjacency_matrix = zeros(n_nodes);
+            tol = 1e-6;
+            for i = 1:n_nodes
+                for j = i+1:n_nodes
+                    % Check if points are connected
+                    if(obj.WCondition.connected(obj.workspace,i,j,obj.grid))
+                        adjacency_matrix(i,j) = 1;
+                        adjacency_matrix(j,i) = 1;
+                        laplacian_matrix(i,j) = -1;
+                        laplacian_matrix(j,i) = -1;
+                        laplacian_matrix(i,i) = laplacian_matrix(i,i) + 1;
+                        laplacian_matrix(j,j) = laplacian_matrix(j,j) + 1;
+                    end
+                end
+            end
+        end
+    end    
 end
 

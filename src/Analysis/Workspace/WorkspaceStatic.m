@@ -19,8 +19,8 @@ classdef WorkspaceStatic < WorkspaceCondition
            Aeq     =   [dynamics.M\dynamics.L',dynamics.M\dynamics.G];
            Aeq     =   (abs(Aeq)>1e-6).*Aeq;
            beq     =   zeros(dynamics.numDofs,1);
-           lb      =   [1e-6*ones(dynamics.numCables+1,1)];
-           ub      =   [Inf*ones(dynamics.numCables+1,1)];
+           lb      =   1e-6*ones(dynamics.numCables+1,1);
+           ub      =   Inf*ones(dynamics.numCables+1,1);
            options =   optimset('display','off');
            [~,~,exit_flag] = quadprog(H,f,A,b,Aeq,beq,lb,ub,[],options);
            if(exit_flag == 1)
@@ -37,7 +37,3 @@ classdef WorkspaceStatic < WorkspaceCondition
         end
     end
 end
-
-% Is it An equilibirum
-% If so Linearise
-% Check positive controllability

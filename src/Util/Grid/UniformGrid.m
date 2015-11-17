@@ -34,7 +34,6 @@ classdef UniformGrid < Grid
                 index = index - (q_index(i,1))*q_div;
             end
             q = obj.q_begin + q_index.*obj.delta_q;
-            % THESE WILL NEED TO CHANGE
         end 
     end
     

@@ -2,6 +2,8 @@ classdef PositiveControlContinuous < WorkspaceCondition
     %IDFUNCTION Summary of this class goes here
     %   Detailed explanation goes here
     
+    %% THIS CAN BE REMOVED
+    
     properties (SetAccess = protected, GetAccess = protected)
     end
     

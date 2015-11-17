@@ -27,8 +27,14 @@ classdef WrenchSet < handle
             t_b = zeros(q,1);
             for i = 1:q
                 g = (w(K(i,1),2)-w(K(i,2),2))/(w(K(i,1),1)-w(K(i,2),1));
-                t_b(i) = (-g*w(K(i,1),1) + w(K(i,1),2));
-                t_A(i,:) = [-g,1];
+                if(abs(g)==Inf)
+                    t_b(i) = -sign(g)*w(K(i,1),1);
+                    t_b(i)
+                    t_A(i,:) = [-sign(g),0];
+                else
+                    t_b(i) = (-g*w(K(i,1),1) + w(K(i,1),2));
+                    t_A(i,:) = [-g,1];
+                end
                 if(i==1)
                     if(t_A(i,:)*w(K(q,1),:)'>t_b(i))
                         t_A(i,:) = -t_A(i,:);

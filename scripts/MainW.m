@@ -1,27 +1,14 @@
 % Load configs
-clc; clear; warning off; %close all;
-%% Set up folders
-% Change this
-% Darwin's Computer
-% folder = 'D:\Darwin''s Notebook Documents\Work\Research\Studies\Cable-driven manipulators\Simulations\Kinematics_dynamics';
-
-% Jonathan's Home computer
-% folder = 'C:\Users\Eden\Dropbox\mcdm-analysis.matlab';
-addpath(genpath('C:\Users\Eden\Dropbox\mcdm-analysis.matlab'));
-
-% Jonathan's Laptop
-% addpath(genpath('/home/jonathan/Dropbox/mcdm-analysis.matlab'))
-% folder = '/home/jonathan/Dropbox/mcdm-analysis.matlab';
+clc; clear; warning off; close all;
+%% Temporarily add libraries to the current path
+%  ASK IF THIS SHOULD BE KEPT
+path_string = fileparts(mfilename('fullpath'));
+path_string = path_string(1:strfind(path_string, 'scripts')-2);
+addpath(genpath(path_string));
 
 %% Initialise objects
 model_config = ModelConfig(ModelConfigType.M_2R_PLANAR_XZ);
 cable_set_id = 'basic_4_cables';
-
-if(isunix)
-    dlm = '/';
-else
-    dlm = '\';
-end
 bodies_xmlobj = model_config.getBodiesProperiesXmlObj();
 cableset_xmlobj = model_config.getCableSetXmlObj(cable_set_id);
 
@@ -33,9 +20,10 @@ dynObj = SystemKinematicsDynamics.LoadXmlObj(bodies_xmlobj, cableset_xmlobj);
 % wcondition = WorkspaceStub();
 % wcondition  =   WorkspaceWrenchClosure();
 % wcondition  =   PositiveControlContinuous();
-wcondition  =   WorkspaceStaticClosure();
-% wcondition  =   WorkspaceStatic();
+% wcondition  =   WorkspaceStaticClosure();
+wcondition  =   WorkspaceStatic();
 % wcondition  =   WorkspaceTaskWrenchClosure();
+% wcondition = Example2Workspace()
 %% Define the metric
 % metric = NullMetric();
 % metric = UnilateralDexterityMetric();
@@ -68,25 +56,11 @@ fprintf('End Setup Simulation : %f seconds\n', time_elapsed);
 disp('Start Running Simulation');
 start_tic       =   tic;
 wsim.run(uGrid);
-% wsim.boundaryFilter();
-% [adjacency_matrix,laplacian_matrix] = wsim.toAdjacencyMatrix();
-% con_comp = wsim.findConnectedComponents(adjacency_matrix);
 time_elapsed    =   toc(start_tic);
 fprintf('End Running Simulation : %f seconds\n', time_elapsed);
 
 disp('Start Plotting Simulation');
 start_tic = tic;
 wsim.plotWorkspace();
-% wsim.plotWorkspacePlane();
-% wsim.plotFilterWorkspace();
-% wsim.plotWorkspaceComponents(con_comp);
-% time_elapsed = toc(start_tic);
-% fprintf('End Plotting Simulation : %f seconds\n', time_elapsed);
-
-% [x,y] = meshgrid(-180:180,-180:180);
-% for i = 1:length(x)
-% for j = 1:length(y)
-% z(i,j) = cosd(x(i,j)) + cosd(x(i,j)+y(i,j));
-% end
-% end
-% contour(x,y,z,-2:0.1:2)
+time_elapsed = toc(start_tic);
+fprintf('End Plotting Simulation : %f seconds\n', time_elapsed);

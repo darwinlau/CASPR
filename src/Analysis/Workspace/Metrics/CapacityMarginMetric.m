@@ -10,9 +10,9 @@ classdef CapacityMarginMetric < Metric
         end
         
         %% Evaluate Functions
-        function v = evaluate(obj,dynamics)
+        function v = evaluate(obj,dynamics,sf)
             L   =   dynamics.L;
-            f_u =   dynamics.cableDynamics.forcesMax;
+            f_u =   sf*dynamics.cableDynamics.forcesMax;
             f_l =   dynamics.cableDynamics.forcesMin;
             w   =   WrenchSet(L,f_u,f_l);
             q   =   w.n_faces;

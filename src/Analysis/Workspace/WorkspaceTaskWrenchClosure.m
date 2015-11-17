@@ -1,7 +1,7 @@
 classdef WorkspaceTaskWrenchClosure < WorkspaceCondition
     %IDFUNCTION Summary of this class goes here
     %   Detailed explanation goes here
-    % THIS IS A WORK IN PROGRESS!!!!!!!!!
+    % THIS IS A WORK IN PROGRESS IT NEEDS TO BE CHANGED LONG TERM
     properties (SetAccess = protected, GetAccess = protected)
     end
     
