@@ -11,17 +11,19 @@ clc; clear; close all;
 % Set up the type of model, trajectory and the set of cables to be used
 % Following are some examples (feel free to add more):
 % 1) Planar model
-% model_config = ModelConfig(ModelConfigType.M_PLANAR_XY);
-% trajectory_id = 'x_simple';
-% cable_set_id = 'basic';
+model_config = ModelConfig(ModelConfigType.M_PLANAR_XY);
+trajectory_id = 'general_2';
+cable_set_id = 'basic';
+q0_error = [0.05; 0.05; 2*pi/180];
 % 2) Neck model
 % model_config = ModelConfig(ModelConfigType.M_NECK_8S);
 % trajectory_id = 'roll';
 % cable_set_id = 'opensim_vasavada';
 % 3) TUM Myorob arm model
-model_config = ModelConfig(ModelConfigType.M_MYOROB_SHOULDER);
-trajectory_id = 'traj_1';
-cable_set_id = 'myorob_shoulder';
+% model_config = ModelConfig(ModelConfigType.M_MYOROB_SHOULDER);
+% trajectory_id = 'traj_1';
+% cable_set_id = 'myorob_shoulder';
+% q0_error = [20*pi/180; -30*pi/180; 15*pi/180];
 
 % The XML objects from the model config are created
 bodies_xmlobj = model_config.getBodiesProperiesXmlObj();
@@ -39,7 +41,7 @@ kinObj = SystemKinematics.LoadXmlObj(bodies_xmlobj, cableset_xmlobj);
 disp('Start Setup Simulation');
 start_tic = tic;
 % Initialise the least squares solver for the forward kinematics
-fksolver = FKLeastSquares(FK_LS_ApproxOptionType.FIRST_ORDER_INTEGRATE_QDOT, FK_LS_QdotOptionType.PSEUDO_INV);
+fksolver = FKLeastSquares(FK_LS_ApproxOptionType.FIRST_ORDER_INTEGRATE_PSEUDOINV, FK_LS_QdotOptionType.PSEUDO_INV);
 % Initialise the three inverse/forward kinematics solvers
 iksim_true = InverseKinematicsSimulator(kinObj);
 fksim_error = ForwardKinematicsSimulator(kinObj, fksolver);
@@ -76,12 +78,12 @@ fprintf('End Running Inverse Kinematics Simulation : %f seconds\n', time_elapsed
 q0 = iksim_true.trajectory.q{1};
 l0 = iksim_true.lengths{1};
 % Apply some deviation to q0
-q0_dev = q0 + [20*pi/180; -30*pi/180; 15*pi/180];
+q0_dev = q0 + q0_error;
 kinObj.update(q0_dev, zeros(size(q0_dev)), zeros(size(q0_dev)));
 % Obtain the deviated l0
 l0_dev = kinObj.cableLengths;
-lengths_r = cell(size(iksim_true.lengths{t}));
-lengths_dev = cell(size(iksim_true.lengths{t}));
+lengths_r = cell(size(iksim_true.lengths));
+lengths_dev = cell(size(iksim_true.lengths));
 for t = 1:length(iksim_true.lengths)
     % Determine the relative lengths (what the sensor should read)
     %   Sensor noise can be included here
@@ -118,8 +120,12 @@ time_elapsed = toc(start_tic);
 fprintf('End Running Forward Kinematics Simulation for Solved l0 Lengths : %f seconds\n', time_elapsed);
 
 % Display the results
-fprintf('The true initial length: %f\n', l0);
-fprintf('The solved initial length: %f\n', l0_solved);
+fprintf('The true initial lengths:\n');
+disp(l0);
+fprintf('The incorrect initial lengths:\n');
+disp(l0_dev);
+fprintf('The solved initial lengths:\n');
+disp(l0_solved);
 
 % It is expected that iksim_true and fksim_corrected should be similiar
 iksim_true.plotJointSpace();

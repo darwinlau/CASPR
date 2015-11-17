@@ -10,17 +10,17 @@ clc; clear; close all;
 % Set up the type of model, trajectory and the set of cables to be used
 % Following are some examples (feel free to add more):
 % 1) Planar model
-% model_config = ModelConfig(ModelConfigType.M_PLANAR_XY);
-% trajectory_id = 'x_simple';
-% cable_set_id = 'basic';
+model_config = ModelConfig(ModelConfigType.M_PLANAR_XY);
+trajectory_id = 'x_simple';
+cable_set_id = 'basic';
 % 2) Neck model
 % model_config = ModelConfig(ModelConfigType.M_NECK_8S);
 % trajectory_id = 'roll';
 % cable_set_id = 'opensim_vasavada';
 % 3) TUM Myorob arm model
-model_config = ModelConfig(ModelConfigType.M_MYOROB_SHOULDER);
-trajectory_id = 'traj_1';
-cable_set_id = 'myorob_shoulder';
+% model_config = ModelConfig(ModelConfigType.M_MYOROB_SHOULDER);
+% trajectory_id = 'traj_1';
+% cable_set_id = 'myorob_shoulder';
 
 % The XML objects from the model config are created
 bodies_xmlobj = model_config.getBodiesProperiesXmlObj();
