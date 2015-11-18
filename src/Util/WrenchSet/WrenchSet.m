@@ -26,15 +26,8 @@ classdef WrenchSet < handle
             t_A = zeros(q,n);
             t_b = zeros(q,1);
             for i = 1:q
-                g = (w(K(i,1),2)-w(K(i,2),2))/(w(K(i,1),1)-w(K(i,2),1));
-                if(abs(g)==Inf)
-                    t_b(i) = -sign(g)*w(K(i,1),1);
-                    t_b(i)
-                    t_A(i,:) = [-sign(g),0];
-                else
-                    t_b(i) = (-g*w(K(i,1),1) + w(K(i,1),2));
-                    t_A(i,:) = [-g,1];
-                end
+                t_A(i,:) = (null(w(K(i,1),:)-w(K(i,2),:)).');
+                t_b(i) = t_A(i,:)*w(K(i,1),:).'; %t_b(i) = t_b(i).*(abs(t_b(i))>1e-9);
                 if(i==1)
                     if(t_A(i,:)*w(K(q,1),:)'>t_b(i))
                         t_A(i,:) = -t_A(i,:);
@@ -49,6 +42,20 @@ classdef WrenchSet < handle
             end
             id.A = t_A;
             id.b = t_b;
+            % Code for debuging
+%             figure
+%             hold on
+%             for i = 1:2^m
+%                 plot(w(i,1),w(i,2),'rx')
+%             end
+%             for i = 1:id.n_faces
+%                 x = [-2000;2000];
+%                 y1 = pinv(id.A(i,:))*id.b(i) + null(id.A(i,:)).*x(1);
+%                 y2 = pinv(id.A(i,:))*id.b(i) + null(id.A(i,:)).*x(2);
+%                 plot([y1(1),y2(1)],[y1(2),y2(2)],'b')
+%                 plot([w(K(i,1),1),w(K(i,2),1)],[w(K(i,1),2),w(K(i,2),2)],'c')
+%             end
+%             axis equal
         end
         
         function w_approx_sphere = sphereApproximationCapacity(obj,G)

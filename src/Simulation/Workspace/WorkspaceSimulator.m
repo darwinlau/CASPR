@@ -16,15 +16,15 @@ classdef WorkspaceSimulator < Simulator
             id.WCondition   =   w_condition;
             if(nargin > 2)
                 id.metric       =   metric;
-                id.m_flag       =   metric.workspaceCheck(w_condition.type);
             else
                 id.metric       =   NullMetric();
-                id.m_flag       =   0;
             end
         end
         
         function run(obj, grid)
             obj.grid        =   grid;
+            % Dimension is the dimension of each state in the grid + 1 for
+            % the metric value
             obj.workspace   =   repmat([grid.getGridPoint(1);0],1,obj.grid.n_points);
             workspace_count =   0;
             % Runs over the grid and evaluates the workspace condition at
@@ -33,17 +33,18 @@ classdef WorkspaceSimulator < Simulator
                 disp(i)
                 q = obj.grid.getGridPoint(i);
                 obj.model.update(q, zeros(size(q)), zeros(size(q)));
-                %% THIS IS SUBJECT TO CHANGE
-                if(obj.m_flag)
-                    metricValue     =   obj.metric.evaluate(obj.model);
-                    inWorkspace     =   metricValue>0;
+                inWorkspace     =   obj.WCondition.evaluate(obj.model);
+                if(~isa(obj.metric,'NullMetric'))
+                    if(inWorkspace)
+                        metricValue    =   obj.metric.evaluate(obj.model,obj.WCondition.method,inWorkspace);
+                        workspace_count = workspace_count + 1;
+                        obj.workspace(:,workspace_count) = [q;metricValue];
+                    end
                 else
-                    inWorkspace     =   obj.WCondition.evaluate(obj.model);
-                    metricValue    =   obj.metric.evaluate(obj.model);
-                end
-                if(inWorkspace)
-                    workspace_count = workspace_count + 1;
-                    obj.workspace(:,workspace_count) = [q;metricValue];
+                    if(inWorkspace)
+                        workspace_count = workspace_count + 1;
+                        obj.workspace(:,workspace_count) = [q;1];
+                    end
                 end
             end
             obj.workspace = obj.workspace(:,1:workspace_count);
@@ -70,14 +71,14 @@ classdef WorkspaceSimulator < Simulator
                     if(plotting_workspace(3,i)==Inf)
                         plot((180/pi)*plotting_workspace(1,i),(180/pi)*plotting_workspace(2,i),'Color',map(sf*mw,:),'Marker','.')
                     else
-                        plot((180/pi)*plotting_workspace(1,i),(180/pi)*plotting_workspace(2,i),'Color',map(int32(sf*plotting_workspace(3,i))+10,:),'Marker','.')
+                        plot((180/pi)*plotting_workspace(1,i),(180/pi)*plotting_workspace(2,i),'Color',map(int32(sf*(plotting_workspace(3,i)+10)),:),'Marker','.')
                     end
                 elseif(n_d == 3)
                     axis([-180 180 -180 180 -180 180]);
                     if(plotting_workspace(4,i)==Inf)
                         plot3((180/pi)*plotting_workspace(1,i),(180/pi)*plotting_workspace(2,i),(180/pi)*plotting_workspace(3,i),'Color',map(mw,:),'Marker','.')
                     else
-                        plot3((180/pi)*plotting_workspace(1,i),(180/pi)*plotting_workspace(2,i),(180/pi)*plotting_workspace(3,i),'Color',map(int32(plotting_workspace(4,i))+10,:),'Marker','.')
+                        plot3((180/pi)*plotting_workspace(1,i),(180/pi)*plotting_workspace(2,i),(180/pi)*plotting_workspace(3,i),'Color',map(int32(sf*(plotting_workspace(4,i)+10)),:),'Marker','.')
                     end
                 end
             end 
@@ -137,7 +138,7 @@ classdef WorkspaceSimulator < Simulator
         
     end
     
-    methods (Static)
+    methods (Access=private)
         function boundaryFilter(obj)
             obj.filtered_workspace = zeros(size(obj.workspace));
             f_count = 1;

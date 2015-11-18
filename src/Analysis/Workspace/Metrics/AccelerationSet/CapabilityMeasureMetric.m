@@ -1,12 +1,10 @@
-classdef CapacityMarginAccelerationMetric < Metric
+classdef CapabilityMeasureMetric < WorkspaceMetric
     properties (SetAccess = protected, GetAccess = protected)
-        options                         % The options for the wrench closure
     end
     
     methods
         %% Constructor
-        function m = CapacityMarginAccelerationMetric()
-            m.options   =    	optimset('display','off');
+        function m = CapabilityMeasureMetric()
         end
         
         %% Evaluate Functions
@@ -21,14 +19,6 @@ classdef CapacityMarginAccelerationMetric < Metric
                 s(j) = (w.b(j) - w.A(j,:)*(dynamics.M\dynamics.G))/norm(w.A(j,:));
             end
             v = min(s);
-        end
-        
-        function v = workspaceCheck(obj,type)
-            if((type == WorkspaceType.SW) || (type == WorkspaceType.SCW))
-                v = 1;
-            else
-                v = 0;
-            end
         end
     end
 end

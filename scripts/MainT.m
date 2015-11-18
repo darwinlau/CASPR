@@ -66,9 +66,9 @@ disp('Start Plotting Simulation');
 start_tic = tic;
 figure; hold on; grid on;
 for i = 1:w.n_faces
-    x = [-3000,3000];
-    y = (1/w.A(i,2)).*(w.b(i) - w.A(i,1)*x);
-    plot(x,y,'b')
+    x = [-300,300];
+    y = pinv(w.A(i,:))*w.b(i) + null(w.A(i,:)).*x;
+    plot(y(1),y(2),'b')
 end
 axis([-3000,3000,-3000,3000])
 % Plot the capacity margin approximation

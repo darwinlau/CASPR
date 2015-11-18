@@ -1,11 +1,10 @@
 classdef WorkspaceType
     %WorkspaceType is the enumeration for the type of workspace
     enumeration 
-        WCW                     % Wrench Closure
+        IF                      % Inteference workspace
+        CW                      % Wrench Closure
         SW                      % Static
-        SCW                     % Static Closure
-        OCW                     % Output Closure
-        PCW                     % Positive Controllability
+        FW                      % Feasible workspace 
         NULL                    % Stub Workspace                      
     end
 end

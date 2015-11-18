@@ -1,4 +1,4 @@
-classdef NullMetric < Metric
+classdef NullMetric < WorkspaceMetric
     properties (SetAccess = protected, GetAccess = protected)
         end
     
@@ -8,12 +8,8 @@ classdef NullMetric < Metric
         end
         
         %% Evaluate Functions
-        function v = evaluate(obj,dynamics)
+        function v = evaluate(obj,~,~,~,~)
             v = 1;
-        end
-        
-        function v = workspaceCheck(obj,type)
-            v = 0;
         end
     end
 end
