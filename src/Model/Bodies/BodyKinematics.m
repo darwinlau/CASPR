@@ -33,6 +33,7 @@ classdef (Abstract) BodyKinematics < handle
     
     properties (Dependent)
         numDofs
+        numDofVars
     end
    
     methods
@@ -53,6 +54,10 @@ classdef (Abstract) BodyKinematics < handle
         
         function dofs = get.numDofs(obj)   
             dofs = obj.joint.numDofs;
+        end
+        
+        function dofs = get.numDofVars(obj)   
+            dofs = obj.joint.numVars;
         end
         
         function update(obj, q, q_dot, q_ddot)

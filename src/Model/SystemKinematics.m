@@ -27,6 +27,7 @@ classdef SystemKinematics < handle
     properties (Dependent)
         numLinks                % Number of links
         numDofs                 % Number of degrees of freedom
+        numDofVars              % Number of variables for the DoFs
         numCables               % Number of cables
         cableLengths            % Vector of cable lengths
         cableLengthsDot         % Vector of cable length derivatives
@@ -48,7 +49,7 @@ classdef SystemKinematics < handle
             k = SystemKinematics();
             k.bodyKinematics = SystemKinematicsBodies.LoadXmlObj(body_xmlobj);
             k.cableKinematics = SystemKinematicsCables.LoadXmlObj(cables_xmlobj, k.numLinks);
-            k.update(zeros(k.numDofs,1), zeros(k.numDofs,1), zeros(k.numDofs,1));
+            k.update(k.bodyKinematics.q_default, k.bodyKinematics.q_dot_default, k.bodyKinematics.q_ddot_default);
         end
     end
     
@@ -67,6 +68,10 @@ classdef SystemKinematics < handle
         
         function value = get.numDofs(obj)
             value = obj.bodyKinematics.numDofs;
+        end
+        
+        function value = get.numDofVars(obj)
+            value = obj.bodyKinematics.numDofVars;
         end
         
         function value = get.numCables(obj)

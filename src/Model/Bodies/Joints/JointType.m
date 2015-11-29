@@ -7,5 +7,8 @@ classdef JointType
         PLANAR_XY               % Planar in XY plane
         S_EULER_XYZ             % Spherical xyz-euler
         S_FIXED_XYZ             % Spherical xyz-fixed
+        SPHERICAL               % Spherical joint using quaternion
+        T_XYZ                   % Translational joint XYZ
+        SPATIAL                 % T_XYZ + SPHERICAL
     end
 end

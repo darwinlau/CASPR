@@ -44,16 +44,28 @@ classdef SystemKinematicsBodies < handle
         C_a                     % Relationship between body and joint accelerations \ddot{\mathbf{x}} = W \ddot{\mathbf{q}} + C_a
         
         numDofs
+        numDofVars
     end
     
     properties (Dependent)
         numLinks
+        q_default
+        q_dot_default
+        q_ddot_default
     end
     
     methods
-        function b = SystemKinematicsBodies(bodies, num_dofs)
+        function b = SystemKinematicsBodies(bodies)
+            num_dofs = 0;
+            num_dof_vars = 0;
+            for k = 1:length(bodies)
+                num_dofs = num_dofs + bodies{k}.numDofs;
+                num_dof_vars = num_dof_vars + bodies{k}.numDofVars;
+            end
+            
             b.bodies = bodies;
             b.numDofs = num_dofs;
+            b.numDofVars = num_dof_vars;
             
             b.connectivityGraph = zeros(b.numLinks, b.numLinks);
             b.bodiesPathGraph = zeros(b.numLinks, b.numLinks);
@@ -79,14 +91,16 @@ classdef SystemKinematicsBodies < handle
             is_symbolic = isa(q, 'sym');
             
             % Update each body first
-            index = 1;
+            index_vars = 1;
+            index_dofs = 1;
             for k = 1:obj.numLinks
-                q_k = q(index:index+obj.bodies{k}.joint.numDofs-1);
-                q_dot_k = q_dot(index:index+obj.bodies{k}.joint.numDofs-1);
-                q_ddot_k = q_ddot(index:index+obj.bodies{k}.joint.numDofs-1);
+                q_k = q(index_vars:index_vars+obj.bodies{k}.joint.numVars-1);
+                q_dot_k = q_dot(index_dofs:index_dofs+obj.bodies{k}.joint.numDofs-1);
+                q_ddot_k = q_ddot(index_dofs:index_dofs+obj.bodies{k}.joint.numDofs-1);
                 obj.bodies{k}.update(q_k, q_dot_k, q_ddot_k);
-                %obj.bodies{k}.joint.update(q_k, q_dot_k, q_ddot_k);
-                index = index + obj.bodies{k}.joint.numDofs;
+                
+                index_vars = index_vars + obj.bodies{k}.joint.numVars;
+                index_dofs = index_dofs + obj.bodies{k}.joint.numDofs;
             end
             
             % Now the global system updates
@@ -109,15 +123,14 @@ classdef SystemKinematicsBodies < handle
                 % Determine absolute position of link's ending position
                 obj.bodies{k}.r_OPe = obj.bodies{k}.r_OP + obj.bodies{k}.r_P;
             end
-            
             % Set S (joint state matrix) and S_dot
-            index = 1;
+            index_dofs = 1;
             obj.S = MatrixOperations.Initialise(6*obj.numLinks,obj.numDofs,is_symbolic);
             obj.S_dot = MatrixOperations.Initialise(6*obj.numLinks,obj.numDofs,is_symbolic);
             for k = 1:obj.numLinks
-                obj.S(6*k-5:6*k, index:index+obj.bodies{k}.joint.numDofs-1) = obj.bodies{k}.joint.S;  
-                obj.S_dot(6*k-5:6*k, index:index+obj.bodies{k}.joint.numDofs-1) = obj.bodies{k}.joint.S_dot;  
-                index = index + obj.bodies{k}.joint.numDofs;
+                obj.S(6*k-5:6*k, index_dofs:index_dofs+obj.bodies{k}.joint.numDofs-1) = obj.bodies{k}.joint.S;  
+                obj.S_dot(6*k-5:6*k, index_dofs:index_dofs+obj.bodies{k}.joint.numDofs-1) = obj.bodies{k}.joint.S_dot;  
+                index_dofs = index_dofs + obj.bodies{k}.joint.numDofs;
             end
             
             % Set P (relationship with joint propagation)
@@ -209,6 +222,33 @@ classdef SystemKinematicsBodies < handle
         function n = get.numLinks(obj)
             n = length(obj.bodies);
         end
+        
+        function q = get.q_default(obj)
+            q = zeros(obj.numDofVars, 1);
+            index_vars = 1;
+            for k = 1:obj.numLinks
+                q(index_vars:index_vars+obj.bodies{k}.joint.numVars-1) = obj.bodies{k}.joint.q_default;
+                index_vars = index_vars + obj.bodies{k}.joint.numVars;
+            end
+        end
+        
+        function q_dot = get.q_dot_default(obj)
+            q_dot = zeros(obj.numDofs, 1);
+            index_dofs = 1;
+            for k = 1:obj.numLinks
+                q_dot(index_dofs:index_dofs+obj.bodies{k}.joint.numDofs-1) = obj.bodies{k}.joint.q_dot_default;
+                index_dofs = index_dofs + obj.bodies{k}.joint.numDofs;
+            end
+        end
+        
+        function q_ddot = get.q_ddot_default(obj)
+            q_ddot = zeros(obj.numDofs, 1);
+            index_dofs = 1;
+            for k = 1:obj.numLinks
+                q_ddot(index_dofs:index_dofs+obj.bodies{k}.joint.numDofs-1) = obj.bodies{k}.joint.q_ddot_default;
+                index_dofs = index_dofs + obj.bodies{k}.joint.numDofs;
+            end
+        end
     end
     
     methods (Static)
@@ -217,7 +257,6 @@ classdef SystemKinematicsBodies < handle
             allLinkItems = body_prop_xmlobj.getChildNodes;
                         
             num_links = allLinkItems.getLength;
-            num_dofs = 0;
             links = cell(1,num_links);
             
             % Creates all of the links first
@@ -234,11 +273,10 @@ classdef SystemKinematicsBodies < handle
                 else
                     error('Unknown link type: %s', type);
                 end
-                num_dofs = num_dofs + links{k}.numDofs;
             end
             
             % Create the actual object to return
-            b = SystemKinematicsBodies(links, num_dofs);
+            b = SystemKinematicsBodies(links);
         end
     end
 end
