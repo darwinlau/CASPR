@@ -6,5 +6,6 @@ classdef ModelConfigType
         M_2R_PLANAR_XZ
         M_SPHERICAL_JOINT
         M_MYOROB_SHOULDER
+        M_SPATIAL_JMD
     end
 end

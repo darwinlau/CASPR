@@ -23,7 +23,25 @@ classdef MatrixOperations
             end
         end
         
-        function C = MatrixProdRightQuad(A,B)
+        function C = GenerateMatrixQuadCross(A,B)
+            n_q = size(A,2);
+            M_A = [zeros(n_q,1),-A(3,:).',A(2,:).',A(3,:).',zeros(n_q,1),-A(1,:).',-A(2,:).',A(1,:).',zeros(n_q,1)];
+            C = MatrixOperations.InteriorProdRightQuad(M_A,B);
+        end
+        
+        
+        function C = Initialise(m,n,flag)
+            if(flag == 1)
+                % Symbolic
+                C = sym(zeros(m,n));
+            else
+                C = zeros(m,n);
+            end
+        end
+    end
+    
+    methods (Static, Access = private)
+        function C = InteriorProdRightQuad(A,B)
             ma = size(A,1); na = size(A,2);
             mb = size(B,1); %nb = size(B,2);
             C = MatrixOperations.Initialise(ma,(na*(ma/mb)),isa(A,'sym'));
@@ -37,15 +55,6 @@ classdef MatrixOperations
             for i=1:n2/n1
                 c = (i-1)*n1 + 1:(i-1)*n1 + n1;
                 C(:,c) = 0.5*(C(:,c) + C(:,c).');
-            end
-        end
-        
-        function C = Initialise(m,n,flag)
-            if(flag == 1)
-                % Symbolic
-                C = sym(zeros(m,n));
-            else
-                C = zeros(m,n);
             end
         end
     end

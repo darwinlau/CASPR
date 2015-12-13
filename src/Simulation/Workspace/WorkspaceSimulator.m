@@ -25,6 +25,7 @@ classdef WorkspaceSimulator < Simulator
             obj.grid        =   grid;
             % Dimension is the dimension of each state in the grid + 1 for
             % the metric value
+%             obj.grid.n_points
             obj.workspace   =   repmat([grid.getGridPoint(1);0],1,obj.grid.n_points);
             workspace_count =   0;
             % Runs over the grid and evaluates the workspace condition at
@@ -32,7 +33,7 @@ classdef WorkspaceSimulator < Simulator
             for i = 1:obj.grid.n_points
                 disp(i)
                 q = obj.grid.getGridPoint(i);
-                obj.model.update(q, zeros(size(q)), zeros(size(q)));
+                obj.model.update(q, zeros(obj.model.numDofs,1), zeros(obj.model.numDofs,1));
                 inWorkspace     =   obj.WCondition.evaluate(obj.model);
                 if(~isa(obj.metric,'NullMetric'))
                     if(inWorkspace)
@@ -64,7 +65,7 @@ classdef WorkspaceSimulator < Simulator
                 mw = 1;
             end
             sf = 255/mw;
-            map = colormap(flipud(gray(sf*mw))); % Look if there is a better colour map
+            map = colormap(flipud(gray(floor(sf*mw)))); % Look if there is a better colour map
             for i =1:size(plotting_workspace,2)
                 if(n_d == 2)
                     axis([-180 180 -180 180]);
@@ -80,6 +81,26 @@ classdef WorkspaceSimulator < Simulator
                     else
                         plot3((180/pi)*plotting_workspace(1,i),(180/pi)*plotting_workspace(2,i),(180/pi)*plotting_workspace(3,i),'Color',map(int32(sf*(plotting_workspace(4,i)+10)),:),'Marker','.')
                     end
+                end
+            end 
+        end
+        
+        function plotWorkspaceHigherDimension(obj)
+            % This function will always only plot the first two dimensions
+            n_d = obj.grid.n_dimensions;
+            figure;  hold on;    
+            mw = ceil(max(obj.workspace(n_d+1,:).*(obj.workspace(n_d+1,:)~=Inf))+10);
+            if(isnan(mw))
+                mw = 1;
+            end
+            sf = 255/mw;
+            map = colormap(flipud(gray(floor(sf*mw)))); % Look if there is a better colour map
+            for i =1:size(obj.workspace,2)
+                %                 axis([-180 180 -180 180]);
+                if(obj.workspace(n_d+1,i)==Inf)
+                    plot(obj.workspace(1,i),obj.workspace(2,i),'Color',map(sf*mw,:),'Marker','.')
+                else
+                    plot(obj.workspace(1,i),obj.workspace(2,i),'Color',map(int32(sf*(obj.workspace(n_d+1,i)+10)),:),'Marker','.')
                 end
             end 
         end
@@ -108,14 +129,25 @@ classdef WorkspaceSimulator < Simulator
         end
         
         function wsim_matrix = toMatrix(obj)
-            n_x = obj.grid.q_length(1);
-            n_y = obj.grid.q_length(2);
-            wsim_matrix = zeros(n_x,n_y);
-            if(obj.grid.n_dimensions==2)
+            if(obj.grid.n_dimensions == 2)
+                n_x = obj.grid.q_length(1);
+                n_y = obj.grid.q_length(2);
+                wsim_matrix = zeros(n_x,n_y);
                 for i=1:length(obj.workspace)
                     j = int32((obj.workspace(1,i) - obj.grid.q_begin(1))/obj.grid.delta_q(1) + 1);
                     k = int32((obj.workspace(2,i) - obj.grid.q_begin(2))/obj.grid.delta_q(2) + 1);
                     wsim_matrix(j,k) = obj.workspace(3,i);
+                end
+            elseif(obj.grid.n_dimensions == 3)
+                n_x = obj.grid.q_length(1);
+                n_y = obj.grid.q_length(2);
+                n_z = obj.grid.q_length(3);
+                wsim_matrix = zeros(n_x,n_y,n_z);
+                for i=1:length(obj.workspace)
+                    j = int32((obj.workspace(1,i) - obj.grid.q_begin(1))/obj.grid.delta_q(1) + 1);
+                    k = int32((obj.workspace(2,i) - obj.grid.q_begin(2))/obj.grid.delta_q(2) + 1);
+                    l = int32((obj.workspace(3,i) - obj.grid.q_begin(3))/obj.grid.delta_q(3) + 1);
+                    wsim_matrix(j,k,l) = obj.workspace(4,i);
                 end
             else
                 disp('Dimension is too large');

@@ -18,8 +18,14 @@ classdef UniformGrid < Grid
             id.q_end    =   q_end;
             id.delta_q  =   delta_q;
             id.setNDimensions(size(q_begin,1));
-            id.q_length = (id.q_end - id.q_begin)./id.delta_q + 1;
-            id.setNPoints(round(prod(id.q_length)));
+            for i=1:id.n_dimensions
+                if(delta_q(i)~=0)
+                    id.q_length(i) = (id.q_end(i) - id.q_begin(i))/id.delta_q(i) + 1;
+                else
+                    id.q_length(i) = 1;
+                end
+            end
+            id.setNPoints(round(prod(id.q_length)))
         end
         
         function q = getGridPoint(obj,index)
