@@ -32,7 +32,7 @@ classdef WorkspaceStatic < WorkspaceCondition
            elseif(obj.method == StaticMethods.CMa)
                inWorkspace = static_capacity_margin(dynamics,obj.options);
            else
-               inWorkspace = static_capability_measure(dynamics);
+               inWorkspace = static_capability_measure(dynamics,obj.options);
            end
         end
         

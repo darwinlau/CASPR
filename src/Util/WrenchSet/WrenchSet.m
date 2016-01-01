@@ -14,49 +14,89 @@ classdef WrenchSet < handle
             q = 2^m;
             f = zeros(q,m);
             w = zeros(q,n);
+            % Set up the correct directory for logging
+            str = mfilename('fullpath');
+            s_id = strfind(str,'mcdm-analysis.matlab');
+            str  = str(1:s_id+19);
+            str_logs = [str,'\logs'];
+            if(~exist(str_logs,'dir'))
+                mkdir(str_logs)
+            end
+            str_io1 = [str_logs,'\wrench_set.txt'];
+            fID = fopen(str_io1,'w');
+            fprintf(fID,'%d\n',n);
+            fprintf(fID,'%d\n',q);
             for k=1:q
                 % Convert k to binary
                 beta = double(dec2bin(k-1,m)) - 48;
-                f(k,:) = (ones(m) - diag(beta))*f_l + diag(beta)*f_u;
+                f(k,:) = (eye(m) - diag(beta))*f_l + diag(beta)*f_u;
                 w(k,:) = -L'*f(k,:)';
+                fprintf(fID,'%5.12f\t',w(k,:));
+                fprintf(fID,'\n');
             end
-            [K,id.v] = convhulln(w);
-            id.n_faces = size(K,1);
-            q = id.n_faces;
-            t_A = zeros(q,n);
-            t_b = zeros(q,1);
-            for i = 1:q
-                t_A(i,:) = (null(w(K(i,1),:)-w(K(i,2),:)).');
-                t_b(i) = t_A(i,:)*w(K(i,1),:).'; %t_b(i) = t_b(i).*(abs(t_b(i))>1e-9);
-                if(i==1)
-                    if(t_A(i,:)*w(K(q,1),:)'>t_b(i))
-                        t_A(i,:) = -t_A(i,:);
-                        t_b(i) = -t_b(i);
-                    end
-                else
-                    if(t_A(i,:)*w(K(i-1,1),:)'>t_b(i))
-                        t_A(i,:) = -t_A(i,:);
-                        t_b(i) = -t_b(i);
-                    end
-                end
-            end
-            id.A = t_A;
-            id.b = t_b;
-            % Code for debuging
-%             figure
-%             hold on
-%             for i = 1:2^m
-%                 plot(w(i,1),w(i,2),'rx')
-%             end
-%             for i = 1:id.n_faces
-%                 x = [-2000;2000];
-%                 y1 = pinv(id.A(i,:))*id.b(i) + null(id.A(i,:)).*x(1);
-%                 y2 = pinv(id.A(i,:))*id.b(i) + null(id.A(i,:)).*x(2);
-%                 plot([y1(1),y2(1)],[y1(2),y2(2)],'b')
-%                 plot([w(K(i,1),1),w(K(i,2),1)],[w(K(i,1),2),w(K(i,2),2)],'c')
-%             end
-%             axis equal
+            fclose(fID);
+            % Now offload to qhull
+            str_io2 = [str_logs,'\convhull.txt'];
+            str_qconvex = ['!',str,'\dependencies\qhull-2012.1\bin\qconvex n Qs < ',str_io1,' > ',str_io2];
+            eval(str_qconvex);
+%             ! ..\..\dependencies\qhull-2012.1\bin\qconvex n Qs < ..\..\logs\wrench_set.txt > ..\..\logs\convhull.txt
+            fID2 = fopen(str_io2);
+            % Read the first two lines of the file
+            n_s = fgets(fID2);
+            n_f = fgets(fID2);
+            T = fscanf(fID2,'%f',[n+1,inf])';
+            fclose(fID2);
+            % Convert to A, b form
+            id.A = T(:,1:n);
+            id.b = -T(:,n+1);
         end
+        
+        % External Call Free Version
+%         function id = WrenchSet(L,f_u,f_l)
+%             n = size(L,2); m = size(L,1);
+%             q = 2^m;
+%             f = zeros(q,m);
+%             w = zeros(q,n);
+%             for k=1:q
+%                 % Convert k to binary
+%                 beta = double(dec2bin(k-1,m)) - 48;
+%                 f(k,:) = (eye(m) - diag(beta))*f_l + diag(beta)*f_u;
+%                 w(k,:) = -L'*f(k,:)';
+%             end
+%             [K,id.v] = convhulln(w);
+%             
+%             id.n_faces = size(K,1);
+%             n_shape = size(K,2);
+%             n_f = id.n_faces;
+%             t_A = zeros(n_f,n);
+%             t_b = zeros(n_f,1);
+%             count = 1;
+%             for i = 1:n_f
+%                 W = w(K(i,2:end),:) - repmat(w(K(i,1),:),n_shape-1,1);
+%                 T = null(W)';
+%                 if(rank(T)>1)
+%                 else
+%                     t_A(count,:) = T;
+%                     t_b(count,:) = t_A(count,:)*w(K(i,1),:).'; 
+%                     % Find a new vertext not in the face
+%                     s_flag = 0; j = 1;
+%                     while(s_flag == 0)
+%                         if((sum(j==K(i,:))==0)&&(norm(t_A(count,:)*w(K(j,1),:)'-t_b(count))>1e-6))
+%                             s_flag = 1;
+%                         else
+%                             j = j+1;
+%                         end
+%                     end
+%                     if(t_A(count,:)*w(K(j,1),:)'>t_b(count))
+%                         t_A(count,:) = -t_A(count,:);
+%                         t_b(count) = -t_b(count);
+%                     end
+%                     count = count + 1;
+%                 end
+%             end
+%             id.A = t_A(1:count-1,:);
+%             id.b = t_b(1:count-1);
+%         end
         
         function w_approx_sphere = sphereApproximationCapacity(obj,G)
             q = obj.n_faces;

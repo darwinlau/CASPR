@@ -1,6 +1,5 @@
 classdef TranslationalXYZ < Joint
-    %SphericalXYZ Joint definition for a spherical joint with Euler angles
-    %xyz 
+    %TranslationalXYZ Joint definition for a translational XYZ manipulator
         
     properties (Constant = true)
         numDofs = 3;
@@ -54,7 +53,7 @@ classdef TranslationalXYZ < Joint
         end
         
         function S = RelVelocityMatrix(~)
-            S = [eye(Spherical.numDofs, Spherical.numDofs); zeros(3,3)];
+            S = [eye(TranslationalXYZ.numDofs); zeros(3,3)];
         end
         
         function S_dot = RelVelocityMatrixDeriv(~, ~)
@@ -63,12 +62,8 @@ classdef TranslationalXYZ < Joint
         
         % TO BE COMPLETED
         function [N_j,A] = QuadMatrix(q)
-            b = SphericalEulerXYZ.GetBeta(q);
-            g = SphericalEulerXYZ.GetGamma(q);
-            N_j = [0,-0.5*sin(b)*cos(g),-0.5*cos(b)*sin(g),0,0.5*sin(b)*sin(g),-0.5*cos(b)*cos(g),0,0.5*cos(b),0;...
-                -0.5*sin(q(2))*cos(g),0,0.5*cos(g),0.5*sin(b)*sin(g),0,-0.5*sin(g),0.5*cos(b),0,0;...
-                -0.5*cos(q(2))*sin(g),0.5*cos(g),0,-0.5*cos(b)*cos(g),-0.5*sin(g),0,0,0,0];
-            A = [zeros(3);eye(3)];
+            N_j =   zeros(TranslationalXYZ.numDofs,TranslationalXYZ.numDofs^2);
+            A   =   zeros(6,TranslationalXYZ.numDofs);
         end
         
         function [q, q_dot, q_ddot] = GenerateTrajectory(q_s, q_s_d, q_s_dd, q_e, q_e_d, q_e_dd, total_time, time_step)

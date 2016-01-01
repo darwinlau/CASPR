@@ -178,7 +178,6 @@ classdef SystemKinematicsBodies < handle
                 end
                 obj.C_a(6*k-5:6*k-3) = obj.C_a(6*k-5:6*k-3) + cross(obj.bodies{k}.w, cross(obj.bodies{k}.w, obj.bodies{k}.r_G));
             end
-            
             obj.x_ddot = obj.P*obj.S*obj.q_ddot + obj.C_a;
             
             % Extract absolute accelerations

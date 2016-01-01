@@ -48,6 +48,9 @@ classdef SystemDynamicsBodies < handle
             obj.C_b = obj.massInertiaMatrix*bodyKinematics.C_a;
             for k = 1:obj.numLinks
                 obj.C_b(6*k-2:6*k) = obj.C_b(6*k-2:6*k) + cross(bodyKinematics.bodies{k}.w, obj.bodies{k}.I_G*bodyKinematics.bodies{k}.w);
+                if(isa(obj.C_b,'sym'))
+                    simplify(cross(bodyKinematics.bodies{k}.w, obj.bodies{k}.I_G*bodyKinematics.bodies{k}.w))
+                end
             end
             obj.G_b = MatrixOperations.Initialise(6*obj.numLinks,1,isa(bodyKinematics.q,'sym'));
             for k = 1:obj.numLinks
@@ -75,7 +78,7 @@ classdef SystemDynamicsBodies < handle
             flag = isa(q,'sym');
             MassInertiaMatrix = obj.massInertiaMatrix;
             %% PS_dot term
-            n_q = length(q); n_l = bodyKinematics.numLinks;
+            n_q = length(bodyKinematics.q_dot); n_l = bodyKinematics.numLinks;
             N_j = MatrixOperations.Initialise(n_q,n_q^2,flag);
             A = MatrixOperations.Initialise(6*n_l,n_q,flag);
             offset_x = 1; offset_y = 1;
@@ -91,6 +94,8 @@ classdef SystemDynamicsBodies < handle
             
             %% P_dotS term
             C2 = MatrixOperations.Initialise(n_q,n_q^2,flag);
+            T_t = zeros(6*n_l,3);
+            T_r = zeros(6*n_l,3);
             for i=1:n_l
                 ip = bodyKinematics.bodies{i}.parentLinkId;
                 if (ip > 0)
@@ -98,52 +103,47 @@ classdef SystemDynamicsBodies < handle
                 else
                     W_ip = zeros(3,n_q);
                 end
-                W_i = W(6*(i-1)+4:6*(i-1)+6,:);
-                N_c1 = [zeros(n_q,1),-2*W_ip(3,:).',2*W_ip(2,:).',2*W_ip(3,:).',zeros(n_q,1),-2*W_ip(1,:).',-2*W_ip(2,:).',2*W_ip(1,:).',zeros(n_q,1)];
-                N_c2 = [zeros(n_q,1),-W_i(3,:).',W_i(2,:).',W_i(3,:).',zeros(n_q,1),-W_i(1,:).',-W_i(2,:).',W_i(1,:).',zeros(n_q,1)];
-                N_cr1 = MatrixOperations.MatrixProdRightQuad(N_c1,S(6*(i-1)+1:6*(i-1)+3,:));
-                T_1 = zeros(6*n_l,3);
-                T_1(6*(i-1)+1:6*(i-1)+3,:) = eye(3);
-                N_cr2 = MatrixOperations.MatrixProdRightQuad(N_c2,S(6*(i-1)+4:6*(i-1)+6,:));
-                T_2 = zeros(6*n_l,3);
-                T_2(6*(i-1)+4:6*(i-1)+6,:) = eye(3);
-                C2 = MatrixOperations.MatrixProdLeftQuad(W.'*MassInertiaMatrix*P*T_1,N_cr1) + MatrixOperations.MatrixProdLeftQuad(W.'*MassInertiaMatrix*P*T_2,N_cr2);
+                W_i     =   W(6*(i-1)+4:6*(i-1)+6,:);
+                N_t     =   MatrixOperations.GenerateMatrixQuadCross(2*W_ip,S(6*(i-1)+1:6*(i-1)+3,:));
+                N_r     =   MatrixOperations.GenerateMatrixQuadCross(W_i,S(6*(i-1)+4:6*(i-1)+6,:));
+                T_t(6*(i-1)+1:6*(i-1)+3,:) = eye(3);
+                T_r(6*(i-1)+4:6*(i-1)+6,:) = eye(3);
+                C2 = C2 + MatrixOperations.MatrixProdLeftQuad(W.'*MassInertiaMatrix*P*T_t,N_t) + MatrixOperations.MatrixProdLeftQuad(W.'*MassInertiaMatrix*P*T_r,N_r);
+                T_t(6*(i-1)+1:6*(i-1)+3,:) = zeros(3);
+                T_r(6*(i-1)+4:6*(i-1)+6,:) = zeros(3);
             end
             
-            %% Cross product time
+            %% \omega \times \omega \times r
             C3 = MatrixOperations.Initialise(n_q,n_q^2,flag);
             for i = 1:n_l
-                N_xf = MatrixOperations.Initialise(n_q,3*n_q,flag);
+                N_t = MatrixOperations.Initialise(n_q,3*n_q,flag);
                 for j = 1:i
                     jp = bodyKinematics.bodies{j}.parentLinkId;
                     if (jp > 0 && bodyKinematics.bodiesPathGraph(j,i))
-                        W_ip = W(6*(jp-1)+4:6*(jp-1)+6,:);
-                        N_x = [zeros(n_q,1),-W_ip(3,:).',W_ip(2,:).',W_ip(3,:).',zeros(n_q,1),-W_ip(1,:).',-W_ip(2,:).',W_ip(1,:).',zeros(n_q,1)];
-                        R = MatrixOperations.SkewSymmetric(bodyKinematics.bodies{j}.r_Parent + bodyKinematics.bodies{j}.joint.r_rel)*W_ip;
-                        N_xr = -MatrixOperations.MatrixProdRightQuad(N_x,R);
-                        N_xf = N_xf + MatrixOperations.MatrixProdLeftQuad(bodyKinematics.bodies{i}.R_0k.'*bodyKinematics.bodies{jp}.R_0k,N_xr);
+                        W_jp = W(6*(jp-1)+4:6*(jp-1)+6,:);
+                        R = MatrixOperations.SkewSymmetric(bodyKinematics.bodies{j}.r_Parent + bodyKinematics.bodies{j}.joint.r_rel)*W_jp;
+                        N_tt = -MatrixOperations.GenerateMatrixQuadCross(W_jp,R);
+                        N_t = N_t + MatrixOperations.MatrixProdLeftQuad(bodyKinematics.bodies{i}.R_0k.'*bodyKinematics.bodies{jp}.R_0k,N_tt);
                     end
                 end
                 W_i = W(6*(i-1)+4:6*(i-1)+6,:);
-                N_x = [zeros(n_q,1),-W_i(3,:).',W_i(2,:).',W_i(3,:).',zeros(n_q,1),-W_i(1,:).',-W_i(2,:).',W_i(1,:).',zeros(n_q,1)];
                 R = MatrixOperations.SkewSymmetric(bodyKinematics.bodies{1}.r_G)*W_i;
-                N_xf = N_xf - MatrixOperations.MatrixProdRightQuad(N_x,R);
-                T = zeros(6*n_l,3);
-                T(6*(i-1)+1:6*(i-1)+3,:) = eye(3);
-                C3 = C3 + MatrixOperations.MatrixProdLeftQuad(W.'*MassInertiaMatrix*T,N_xf);
+                N_tt = -MatrixOperations.GenerateMatrixQuadCross(W_i,R);
+                N_t = N_t + N_tt;
+                T_t(6*(i-1)+1:6*(i-1)+3,:) = eye(3);
+                C3 = C3 + MatrixOperations.MatrixProdLeftQuad(W.'*MassInertiaMatrix*T_t,N_t);
+                T_t(6*(i-1)+1:6*(i-1)+3,:) = zeros(3);
             end
             
-            %% Final body related terms
+            %% \omega \times I_G \omega
             C4 = MatrixOperations.Initialise(n_q,n_q^2,flag);
             for i = 1:n_l
                 W_i = W(6*(i-1)+4:6*(i-1)+6,:);
-                N_x = [zeros(n_q,1),-W_i(3,:).',W_i(2,:).',W_i(3,:).',zeros(n_q,1),-W_i(1,:).',-W_i(2,:).',W_i(1,:).',zeros(n_q,1)];
-                N_xf = MatrixOperations.MatrixProdRightQuad(N_x,obj.bodies{i}.I_G*W_i);
-                T = zeros(6*n_l,3);
-                T(6*(i-1)+4:6*(i-1)+6,:) = eye(3);
-                C4 = C4 + MatrixOperations.MatrixProdLeftQuad(W.'*T,N_xf);
+                N_r = MatrixOperations.GenerateMatrixQuadCross(W_i,obj.bodies{i}.I_G*W_i);
+                T_r(6*(i-1)+4:6*(i-1)+6,:) = eye(3);
+                C4 = C4 + MatrixOperations.MatrixProdLeftQuad(W.'*T_r,N_r);
+                T_r(6*(i-1)+4:6*(i-1)+6,:) = zeros(3);
             end
-            
             %% Compute N
             N = C1 + C2 + C3 + C4;
             if(flag)

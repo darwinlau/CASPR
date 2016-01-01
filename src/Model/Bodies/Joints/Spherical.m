@@ -25,7 +25,9 @@ classdef Spherical < Joint
     
     methods        
         function update(obj, q, q_dot, q_ddot)
-            assert(roundn(norm(q),-5) == 1, 'Invalid q, norm of quaternion orientation must equal to one.');
+            if(isa(q,'double'))
+                assert(roundn(norm(q),-5) == 1, 'Invalid q, norm of quaternion orientation must equal to one.');
+            end
             update@Joint(obj, q, q_dot, q_ddot);
         end
         
@@ -77,12 +79,8 @@ classdef Spherical < Joint
         
         % TODO: To complete
         function [N_j,A] = QuadMatrix(q)
-            b = SphericalEulerXYZ.GetBeta(q);
-            g = SphericalEulerXYZ.GetGamma(q);
-            N_j = [0,-0.5*sin(b)*cos(g),-0.5*cos(b)*sin(g),0,0.5*sin(b)*sin(g),-0.5*cos(b)*cos(g),0,0.5*cos(b),0;...
-                -0.5*sin(q(2))*cos(g),0,0.5*cos(g),0.5*sin(b)*sin(g),0,-0.5*sin(g),0.5*cos(b),0,0;...
-                -0.5*cos(q(2))*sin(g),0.5*cos(g),0,-0.5*cos(b)*cos(g),-0.5*sin(g),0,0,0,0];
-            A = [zeros(3);eye(3)];
+            N_j = zeros(Spherical.numDofs,Spherical.numDofs^2);
+            A = zeros(6,Spherical.numDofs);
         end
         
         

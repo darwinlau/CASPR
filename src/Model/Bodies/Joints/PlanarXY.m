@@ -59,12 +59,9 @@ classdef PlanarXY < Joint
             S_dot = zeros(6, 3);
         end
         
-        function [N_j,A] = QuadMatrix(q)
-            th = PlanarXY.GetTheta(q);
-            N_j = [[0,0,-sin(th)/2;0,0,cos(th)/2;-sin(th)/2,cos(th)/2,0],...
-                [0,0,-cos(th)/2;0,0,-sin(th)/2;-cos(th)/2,-sin(th)/2,0],...
-                [0,0,0;0,0,0;0,0,0]];
-            A = [eye(3);zeros(3)];
+        function [N_j,A] = QuadMatrix(~)
+            N_j = zeros(PlanarXY.numDofs,PlanarXY.numDofs^2);
+            A = zeros(6,PlanarXY.numDofs);
         end
         
         % Get variables from the gen coordinates

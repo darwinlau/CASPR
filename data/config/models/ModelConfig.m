@@ -44,6 +44,10 @@ classdef ModelConfig
                     c.bodyPropertiesFilename = [c.root_folder, '\myorob_shoulder\myorob_shoulder_bodies.xml'];
                     c.cablesPropertiesFilename = [c.root_folder, '\myorob_shoulder\myorob_shoulder_cables.xml'];
                     c.trajectoriesFilename = [c.root_folder, '\myorob_shoulder\myorob_shoulder_trajectories.xml'];
+                case ModelConfigType.M_SPATIAL_JMD
+                    c.bodyPropertiesFilename = [c.root_folder, '\spatial_jmd\spatial_jmd_bodies.xml'];
+                    c.cablesPropertiesFilename = [c.root_folder, '\spatial_jmd\spatial_jmd_cables.xml'];
+                    c.trajectoriesFilename = [c.root_folder, '\spatial_jmd\spatial_jmd_trajectories.xml'];
                 otherwise
                     error('ModelConfig type is not defined');
             end

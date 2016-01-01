@@ -112,21 +112,17 @@ classdef Spatial < Joint
         end
         
         function S = RelVelocityMatrix(~)
-            S = [eye(3, 3); eye(3, 3)];
+            S = eye(Spatial.numDofs);
         end
         
         function S_dot = RelVelocityMatrixDeriv(~, ~)
-            S_dot = zeros(6, 3);
+            S_dot = zeros(Spatial.numDofs);
         end
         
         % TO DO
-        function [N_j,A] = QuadMatrix(q)
-            b = SphericalEulerXYZ.GetBeta(q);
-            g = SphericalEulerXYZ.GetGamma(q);
-            N_j = [0,-0.5*sin(b)*cos(g),-0.5*cos(b)*sin(g),0,0.5*sin(b)*sin(g),-0.5*cos(b)*cos(g),0,0.5*cos(b),0;...
-                -0.5*sin(q(2))*cos(g),0,0.5*cos(g),0.5*sin(b)*sin(g),0,-0.5*sin(g),0.5*cos(b),0,0;...
-                -0.5*cos(q(2))*sin(g),0.5*cos(g),0,-0.5*cos(b)*cos(g),-0.5*sin(g),0,0,0,0];
-            A = [zeros(3);eye(3)];
+        function [N_j,A] = QuadMatrix(~)
+            N_j = zeros(Spatial.numDofs,Spatial.numDofs^2);
+            A = zeros(6,Spatial.numDofs);
         end
         
         function [q, q_dot, q_ddot] = GenerateTrajectory(q_s, q_s_d, q_s_dd, q_e, q_e_d, q_e_dd, total_time, time_step)
@@ -139,5 +135,6 @@ classdef Spatial < Joint
             q = [q_trans; q_orient];
             q_dot = [q_trans_dot; q_orient_dot];
             q_ddot = [q_trans_ddot; q_orient_ddot];
+        end
     end
 end

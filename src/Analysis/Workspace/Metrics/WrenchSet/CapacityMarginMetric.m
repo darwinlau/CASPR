@@ -10,15 +10,15 @@ classdef CapacityMarginMetric < WorkspaceMetric
         end
         
         %% Evaluate Functions
-        function v = evaluate(obj,dynamics)
+        function v = evaluate(obj,dynamics,~,method,inWorkspace)
             L   =   dynamics.L;
             f_u =   dynamics.cableDynamics.forcesMax;
             f_l =   dynamics.cableDynamics.forcesMin;
             w   =   WrenchSet(L,f_u,f_l);
-            q   =   w.n_faces;
+            q   =   length(w.b);
             s   =   zeros(q,1);
             for j=1:q
-                s(j) = (w.b(j) - w.A(j,:)*dynamics.G)/norm(w.A(j,:));
+                s(j) = (w.b(j) - w.A(j,:)*dynamics.G)/norm(w.A(j,:),2);
             end
             v = min(s);
         end
