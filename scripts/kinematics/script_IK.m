@@ -5,18 +5,18 @@
 % Description	:
 
 % Clear the variables, command window, and all windows
-clc; clear; close all;
+clear; %clc; close all;
 
 % Set up the type of model, trajectory and the set of cables to be used
 % Following are some examples (feel free to add more):
 % 1) Planar model
-model_config = ModelConfig(ModelConfigType.M_PLANAR_XY);
-trajectory_id = 'x_simple';
-cable_set_id = 'basic';
+% model_config = ModelConfig(ModelConfigType.M_PLANAR_XY);
+% trajectory_id = 'x_simple';
+% cable_set_id = 'basic';
 % 2) Neck model
-% model_config = ModelConfig(ModelConfigType.M_NECK_8S);
-% trajectory_id = 'roll';
-% cable_set_id = 'opensim_vasavada';
+model_config = ModelConfig(ModelConfigType.M_NECK_8S);
+trajectory_id = 'pitch';
+cable_set_id = 'opensim_vasavada';
 
 % The XML objects from the model config are created
 bodies_xmlobj = model_config.getBodiesProperiesXmlObj();
@@ -47,10 +47,10 @@ disp('Start Plotting Simulation');
 start_tic = tic;
 plot_axis = [0 1 0 1 -0.1 0.1];
 % plot_axis = [-0.2 0.2 -0.2 0.2 -0.1 0.3];
-sim.plotMovie(plot_axis, [fileparts(mfilename('fullpath')), '\test.avi'], 2, 500, 640);
-sim.plotJointSpace();
-sim.plotAngularAcceleration();
-sim.plotCableLengths();
+% sim.plotMovie(plot_axis, [fileparts(mfilename('fullpath')), '\test.avi'], 2, 500, 640);
+% sim.plotJointSpace();
+% sim.plotAngularAcceleration();
+% sim.plotCableLengths();
 sim.plotBodyCOG();
 time_elapsed = toc(start_tic);
 fprintf('End Plotting Simulation : %f seconds\n', time_elapsed);

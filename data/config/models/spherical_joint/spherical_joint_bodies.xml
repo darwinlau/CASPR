@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <links>
-  <link_rigid num="1" name="Ball_and_Socket">
-    <joint_type>S_EULER_XYZ</joint_type>
+  <link_rigid num="1" name="link 1">
+    <joint_type>SPHERICAL</joint_type>
     <physical>
-      <mass>0.1</mass>
+      <mass>1</mass>
       <com_location>0.0 0.0 0.0</com_location>
       <end_location>0.0 0.0 0.2</end_location>
       <inertia ref="CoM">

@@ -4,7 +4,7 @@ classdef ModelConfigType
         M_PLANAR_XY
         M_NECK_8S
         M_2R_PLANAR_XZ
-        M_SPHERICAL_JOINT
+        M_SPHERICAL
         M_MYOROB_SHOULDER
     end
 end
