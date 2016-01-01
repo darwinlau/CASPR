@@ -5,12 +5,12 @@
 % Description	:
 
 % Clear the variables, command window, and all windows
-clear; %clc; close all;
+clear; clc; close all;
 
 % Set up the type of model, trajectory and the set of cables to be used
 % Following are some examples (feel free to add more):
 % 1) Planar model
-% model_config = ModelConfig(ModelConfigType.M_PLANAR_XY);
+% model_config = ModelConfig(ModelConfigType.M_SIMPLE_PLANAR_XY);
 % trajectory_id = 'x_simple';
 % cable_set_id = 'basic';
 % 2) Neck model
@@ -48,7 +48,7 @@ start_tic = tic;
 plot_axis = [0 1 0 1 -0.1 0.1];
 % plot_axis = [-0.2 0.2 -0.2 0.2 -0.1 0.3];
 % sim.plotMovie(plot_axis, [fileparts(mfilename('fullpath')), '\test.avi'], 2, 500, 640);
-% sim.plotJointSpace();
+sim.plotJointSpace();
 % sim.plotAngularAcceleration();
 % sim.plotCableLengths();
 sim.plotBodyCOG();

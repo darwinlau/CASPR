@@ -1,15 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <links>
-  <link_rigid num="1" name="Spatial Manipulator JMD">
-    <joint_type>SPATIAL</joint_type>
+  <link_rigid num="1" name="Link 1">
+    <joint_type>PLANAR_XY</joint_type>
     <physical>
       <mass>1</mass>
       <com_location>0.0 0.0 0.0</com_location>
-      <end_location>0.0 0.0 0.15</end_location>
+      <end_location>0.0 0.0 0.0</end_location>
       <inertia ref="CoM">
-        <Ixx>0.0042</Ixx>
-        <Iyy>0.0083</Iyy>
-        <Izz>0.0108</Izz>
+        <Ixx>0.005208333</Ixx>
+        <Iyy>0.005208333</Iyy>
+        <Izz>0.010416667</Izz>
         <Ixy>0.0</Ixy>
         <Ixz>0.0</Ixz>
         <Iyz>0.0</Iyz>
