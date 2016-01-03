@@ -1,4 +1,4 @@
-classdef IDMinLinCableForce < IDFunction
+classdef IDMinLinCableForce < IDSolverFunction
     %IDQUADFUNCTION Summary of this class goes here
     %   Detailed explanation goes here
     

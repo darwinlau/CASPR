@@ -5,7 +5,7 @@
 % Description	:
 
 % Clear the variables, command window, and all windows
-clc; clear; close all;
+clc; clear; %close all;
 
 % Set up the type of model, trajectory and the set of cables to be used
 % Following are some examples (feel free to add more):
@@ -15,7 +15,7 @@ clc; clear; close all;
 % cable_set_id = 'basic';
 % 2) Neck model
 model_config = ModelConfig(ModelConfigType.M_NECK_8S);
-trajectory_id = 'pitch';
+trajectory_id = 'roll';
 cable_set_id = 'opensim_vasavada';
 
 % The XML objects from the model config are created
@@ -26,9 +26,19 @@ trajectory_xmlobj = model_config.getTrajectoryXmlObj(trajectory_id);
 % Load the SystemKinematicsDynamics object from the XML
 dynObj = SystemKinematicsDynamics.LoadXmlObj(bodies_xmlobj, cableset_xmlobj);
 
+id_objective = IDObjectiveMinLinCableForce(ones(dynObj.numCables,1));
+id_solver = IDSolverLinProg(id_objective, ID_LP_SolverType.MATLAB);
+
+%id_objective = IDObjectiveMinQuadCableForce(ones(dynObj.numCables,1));
+%id_objective = IDObjectiveMinInteractions(ones(6*dynObj.numLinks,1));
+%id_solver = IDSolverQuadProg(id_objective, ID_QP_SolverType.OPTITOOLBOX_OOQP);
+
 % Setup an inverse dynamics solver of choice (many examples below)
-%idsolver = IDMinLinCableForce(ones(dynObj.numCables,1));
-idsolver = IDMinQuadCableForce(ones(dynObj.numCables,1));
+idsolver = IDMinLinCableForce(ones(dynObj.numCables,1));
+
+
+
+%idsolver = IDMinQuadCableForce(ones(dynObj.numCables,1));
 %idsolver = IDMinInteraction(ones(6*dynObj.numLinks,1));
 %idsolver = IDMinQuadCableForcesConInteractionAngle(ones(dynObj.numCables,1), 15*pi/180*ones(dynObj.numCables,1));
 %idsolver = IDMinInteractionConInteractionAngle(ones(6*dynObj.numLinks,1), 20*pi/180*ones(dynObj.numLinks, 1));
@@ -39,7 +49,7 @@ idsolver = IDMinQuadCableForce(ones(dynObj.numCables,1));
 % object and the inverse dynamics solver
 disp('Start Setup Simulation');
 start_tic = tic;
-idsim = InverseDynamicsSimulator(dynObj, idsolver);
+idsim = InverseDynamicsSimulator(dynObj, id_solver);
 trajectory = JointTrajectory.LoadXmlObj(trajectory_xmlobj, dynObj);
 time_elapsed = toc(start_tic);
 fprintf('End Setup Simulation : %f seconds\n', time_elapsed);
@@ -52,7 +62,7 @@ time_elapsed = toc(start_tic);
 fprintf('End Running Simulation : %f seconds\n', time_elapsed);
 
 % Display information from the inverse dynamics simulator
-fprintf('Optimisation computational time, mean : %f seconds, std dev : %f seconds, mean iterations : %d\n', mean(idsim.compTime), std(idsim.compTime), round(mean(idsim.compIterations)));
+fprintf('Optimisation computational time, mean : %f seconds, std dev : %f seconds, total: %f seconds\n', mean(idsim.compTime), std(idsim.compTime), sum(idsim.compTime));
 
 % After running the simulator the data can be plotted
 % Refer to the simulator classes to see what can be plotted.

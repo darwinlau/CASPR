@@ -1,4 +1,4 @@
-classdef IDMinQuadCableForce < IDFunction
+classdef IDMinQuadCableForce < IDSolverFunction
     %IDQUADFUNCTION Summary of this class goes here
     %   Detailed explanation goes here
     
@@ -26,7 +26,7 @@ classdef IDMinQuadCableForce < IDFunction
                        
             % Solvers for optitoolbox QP problems : CLP (seems to not
             % work), OOQP, SCIP, MATLAB, IPOPT
-            opts = optiset('solver', 'OOQP', 'maxiter', 100);
+            opts = optiset('solver', 'IPOPT', 'maxiter', 100);
             optisolver = opti('qp', H, f, 'eq', A, b, 'bounds', fmin, fmax, 'options', opts);
             [dynamics.cableForces, Qf, exitflag, id_info] = solve(optisolver, obj.f_previous);
             
