@@ -48,7 +48,7 @@ classdef SystemKinematics < handle
         function k = LoadXmlObj(body_xmlobj, cables_xmlobj)
             k = SystemKinematics();
             k.bodyKinematics = SystemKinematicsBodies.LoadXmlObj(body_xmlobj);
-            k.cableKinematics = SystemKinematicsCables.LoadXmlObj(cables_xmlobj, k.numLinks);
+            k.cableKinematics = SystemKinematicsCables.LoadXmlObj(cables_xmlobj, k.bodyKinematics);
             k.update(k.bodyKinematics.q_default, k.bodyKinematics.q_dot_default, k.bodyKinematics.q_ddot_default);
         end
     end

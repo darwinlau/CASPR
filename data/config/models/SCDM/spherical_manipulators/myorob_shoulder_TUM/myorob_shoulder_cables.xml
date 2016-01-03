@@ -4,8 +4,8 @@
 ]>
 
 <cables>
-  <cable_set id="myorob_shoulder">
-    <cable_ideal name="Cable 1">
+  <cable_set id="default">
+    <cable_ideal name="Cable 1" attachment_reference="com">
       <properties>
         <force_min>0.1</force_min>
         <force_max>1000</force_max>
@@ -22,7 +22,7 @@
         </attachment>
       </attachments>
     </cable_ideal>
-    <cable_ideal name="Cable 2">
+    <cable_ideal name="Cable 2" attachment_reference="com">
       <properties>
         <force_min>0.1</force_min>
         <force_max>1000</force_max>
@@ -39,7 +39,7 @@
         </attachment>
       </attachments>
     </cable_ideal>
-    <cable_ideal name="Cable 3">
+    <cable_ideal name="Cable 3" attachment_reference="com">
       <properties>
         <force_min>0.1</force_min>
         <force_max>1000</force_max>
@@ -56,7 +56,7 @@
         </attachment>
       </attachments>
     </cable_ideal>
-    <cable_ideal name="Cable 4">
+    <cable_ideal name="Cable 4" attachment_reference="com">
       <properties>
         <force_min>0.1</force_min>
         <force_max>1000</force_max>
@@ -73,7 +73,7 @@
         </attachment>
       </attachments>
     </cable_ideal>
-    <cable_ideal name="Cable 5">
+    <cable_ideal name="Cable 5" attachment_reference="com">
       <properties>
         <force_min>0.1</force_min>
         <force_max>1000</force_max>
@@ -90,7 +90,7 @@
         </attachment>
       </attachments>
     </cable_ideal>
-    <cable_ideal name="Cable 6">
+    <cable_ideal name="Cable 6" attachment_reference="com">
       <properties>
         <force_min>0.1</force_min>
         <force_max>1000</force_max>
@@ -107,7 +107,7 @@
         </attachment>
       </attachments>
     </cable_ideal>
-    <cable_ideal name="Cable 7">
+    <cable_ideal name="Cable 7" attachment_reference="com">
       <properties>
         <force_min>0.1</force_min>
         <force_max>1000</force_max>
@@ -124,7 +124,7 @@
         </attachment>
       </attachments>
     </cable_ideal>
-    <cable_ideal name="Cable 8">
+    <cable_ideal name="Cable 8" attachment_reference="com">
       <properties>
         <force_min>0.1</force_min>
         <force_max>1000</force_max>
@@ -141,7 +141,7 @@
         </attachment>
       </attachments>
     </cable_ideal>
-    <cable_ideal name="Cable 9">
+    <cable_ideal name="Cable 9" attachment_reference="com">
       <properties>
         <force_min>0.1</force_min>
         <force_max>1000</force_max>

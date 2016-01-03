@@ -121,7 +121,7 @@ classdef SystemKinematicsBodies < handle
                 % Determine absolute position of COG
                 obj.bodies{k}.r_OG = obj.bodies{k}.r_OP + obj.bodies{k}.r_G;
                 % Determine absolute position of link's ending position
-                obj.bodies{k}.r_OPe = obj.bodies{k}.r_OP + obj.bodies{k}.r_P;
+                obj.bodies{k}.r_OPe = obj.bodies{k}.r_OP + obj.bodies{k}.r_Pe;
             end
             % Set S (joint state matrix) and S_dot
             index_dofs = 1;

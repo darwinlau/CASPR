@@ -46,6 +46,10 @@ classdef ModelConfig
                     c.bodyPropertiesFilename = [c.root_folder, '\SCDM\spatial_manipulators\ACROBOT_IRTJV\ACROBOT_bodies.xml'];
                     c.cablesPropertiesFilename = [c.root_folder, '\SCDM\spatial_manipulators\ACROBOT_IRTJV\ACROBOT_cables.xml'];
                     c.trajectoriesFilename = [c.root_folder, '\SCDM\spatial_manipulators\ACROBOT_IRTJV\ACROBOT_trajectories.xml'];
+                case ModelConfigType.M_IPANEMA_2
+                    c.bodyPropertiesFilename = [c.root_folder, '\SCDM\spatial_manipulators\IPAnema2_FraunhoferIPA\IPAnema2_bodies.xml'];
+                    c.cablesPropertiesFilename = [c.root_folder, '\SCDM\spatial_manipulators\IPAnema2_FraunhoferIPA\IPAnema2_cables.xml'];
+                    c.trajectoriesFilename = [c.root_folder, '\SCDM\spatial_manipulators\IPAnema2_FraunhoferIPA\IPAnema2_trajectories.xml'];
                 % Multi-link Cable Driven Manipulators (MCDM)
                 case ModelConfigType.M_NECK_8S
                     c.bodyPropertiesFilename = [c.root_folder, '\MCDM\8S_neck\8S_neck_bodies.xml'];

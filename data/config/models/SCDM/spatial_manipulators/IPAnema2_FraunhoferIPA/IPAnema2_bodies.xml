@@ -1,11 +1,11 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <links>
-  <link_rigid num="1" name="link 1">
-    <joint_type>SPHERICAL</joint_type>
+  <link_rigid num="1" name="IPAnema 2 (Fraunhofer IPA)">
+    <joint_type>SPATIAL</joint_type>
     <physical>
-      <mass>1</mass>
-      <com_location>0.0 0.0 0.0</com_location>
-      <end_location>0.0 0.0 0.2</end_location>
+      <mass>10.0</mass>
+      <com_location>0.0 0.0 0.5</com_location>
+      <end_location>0.0 0.0 0.0</end_location>
       <inertia ref="com">
         <Ixx>1.0</Ixx>
         <Iyy>1.0</Iyy>

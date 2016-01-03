@@ -6,7 +6,7 @@
       <mass>1.0</mass>
       <com_location>0.1645 0.177 0.149</com_location>
       <end_location>0.0 0.0 0.0</end_location>
-      <inertia ref="CoM">
+      <inertia ref="com">
         <Ixx>1.0</Ixx>
         <Iyy>1.0</Iyy>
         <Izz>1.0</Izz>

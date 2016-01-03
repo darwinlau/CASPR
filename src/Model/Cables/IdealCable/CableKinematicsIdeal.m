@@ -1,7 +1,13 @@
-classdef CableKinematicsIdeal < CableKinematics
-    %CABLEKINEMATICS Summary of this class goes here
-    %   Detailed explanation goes here
-        
+% Kinematic representation for an ideal (massless and rigid) cable
+% 
+% Author        : Darwin LAU
+% Created       : 2011
+% Description	:
+%	This is the simplest type of cable that is massless and rigid. It also
+%	assumes a straight-line model between attachment points. As such, the
+%	only parameters that govern the kinematics of the ideal cable are the
+%	attachment locations of cables at each link
+classdef CableKinematicsIdeal < CableKinematics        
     methods 
         function ck = CableKinematicsIdeal(name, numLinks)
             ck@CableKinematics(name, numLinks);
@@ -13,9 +19,20 @@ classdef CableKinematicsIdeal < CableKinematics
     end
     
     methods (Static)
-        function c = LoadXmlObj(xmlobj, numLinks)
+        function c = LoadXmlObj(xmlobj, bodiesKin)
             name = char(xmlobj.getAttribute('name'));
-            c = CableKinematicsIdeal(name, numLinks);
+            attachRefString = char(xmlobj.getAttribute('attachment_reference'));
+            assert(~isempty(attachRefString), 'Invalid <cable_ideal> XML format: attachment_reference field empty');
+            if (strcmp(attachRefString, 'joint'))
+                attachmentRef = CableAttachmentReferenceType.JOINT;
+            elseif (strcmp(attachRefString, 'com'))
+                attachmentRef = CableAttachmentReferenceType.COM;
+            else
+                %attachmentRef = CableAttachmentReferenceType.COM;
+                error('Unknown cableAttachmentReference type: %s', attachRefString);
+            end
+            
+            c = CableKinematicsIdeal(name, bodiesKin.numLinks);
             
             attachmentObjs = xmlobj.getElementsByTagName('attachments').item(0).getElementsByTagName('attachment');
             
@@ -33,7 +50,7 @@ classdef CableKinematicsIdeal < CableKinematics
                 eLink = str2double(attachmentObj.getElementsByTagName('link').item(0).getFirstChild.getData);
                 eLoc = XmlOperations.StringToVector3(char(attachmentObj.getElementsByTagName('location').item(0).getFirstChild.getData));
                 
-                c.addSegment(sLink, sLoc, eLink, eLoc);
+                c.addSegment(sLink, sLoc, eLink, eLoc, bodiesKin, attachmentRef);
                 
                 sLink = eLink;
                 sLoc = eLoc;                

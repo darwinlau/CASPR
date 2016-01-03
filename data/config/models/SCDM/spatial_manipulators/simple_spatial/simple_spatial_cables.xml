@@ -5,7 +5,7 @@
 
 <cables>
   <cable_set id="basic_7_cables">
-    <cable_ideal name="cable 1">
+    <cable_ideal name="cable 1" attachment_reference="com">
       <properties>
         <force_min>0.0</force_min>
         <force_max>1000</force_max>
@@ -22,7 +22,7 @@
         </attachment>
       </attachments>
     </cable_ideal>
-    <cable_ideal name="cable 2">
+    <cable_ideal name="cable 2" attachment_reference="com">
       <properties>
         <force_min>0.0</force_min>
         <force_max>1000</force_max>
@@ -39,7 +39,7 @@
         </attachment>
       </attachments>
     </cable_ideal>
-    <cable_ideal name="cable 3">
+    <cable_ideal name="cable 3" attachment_reference="com">
       <properties>
         <force_min>0.0</force_min>
         <force_max>1000</force_max>
@@ -56,7 +56,7 @@
         </attachment>
       </attachments>
     </cable_ideal>
-    <cable_ideal name="cable 4">
+    <cable_ideal name="cable 4" attachment_reference="com">
       <properties>
         <force_min>0.0</force_min>
         <force_max>1000</force_max>
@@ -73,7 +73,7 @@
         </attachment>
       </attachments>
     </cable_ideal>
-	<cable_ideal name="cable 5">
+	<cable_ideal name="cable 5" attachment_reference="com">
       <properties>
         <force_min>0.0</force_min>
         <force_max>1000</force_max>
@@ -90,7 +90,7 @@
         </attachment>
       </attachments>
     </cable_ideal>
-	<cable_ideal name="cable 6">
+	<cable_ideal name="cable 6" attachment_reference="com">
       <properties>
         <force_min>0.0</force_min>
         <force_max>1000</force_max>
@@ -107,7 +107,7 @@
         </attachment>
       </attachments>
     </cable_ideal>
-	<cable_ideal name="cable 7">
+	<cable_ideal name="cable 7" attachment_reference="com">
       <properties>
         <force_min>0.0</force_min>
         <force_max>1000</force_max>

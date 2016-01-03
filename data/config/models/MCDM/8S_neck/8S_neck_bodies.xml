@@ -6,7 +6,7 @@
       <mass>0.1</mass>
       <com_location>-0.00684 0.0 0.005655</com_location>
       <end_location>0.006416 0.0 0.018035</end_location>
-      <inertia ref="CoM">
+      <inertia ref="com">
         <Ixx>0.0000075</Ixx>
         <Iyy>0.0000075</Iyy>
         <Izz>0.00001125</Izz>
@@ -26,7 +26,7 @@
       <mass>0.1</mass>
       <com_location>-0.009419 0.0 0.004065</com_location>
       <end_location>0.000430999999999999 0.0 0.013815</end_location>
-      <inertia ref="CoM">
+      <inertia ref="com">
         <Ixx>0.0000075</Ixx>
         <Iyy>0.0000075</Iyy>
         <Izz>0.00001125</Izz>
@@ -46,7 +46,7 @@
       <mass>0.1</mass>
       <com_location>-0.00567 0.0 0.00815</com_location>
       <end_location>0.00276 0.0 0.0156</end_location>
-      <inertia ref="CoM">
+      <inertia ref="com">
         <Ixx>0.0000075</Ixx>
         <Iyy>0.0000075</Iyy>
         <Izz>0.00001125</Izz>
@@ -66,7 +66,7 @@
       <mass>0.1</mass>
       <com_location>-0.00502 0.0 0.01172</com_location>
       <end_location>0.0023 0.0 0.0181</end_location>
-      <inertia ref="CoM">
+      <inertia ref="com">
         <Ixx>0.0000075</Ixx>
         <Iyy>0.0000075</Iyy>
         <Izz>0.00001125</Izz>
@@ -86,7 +86,7 @@
       <mass>0.1</mass>
       <com_location>-0.00471 0.0 0.00902</com_location>
       <end_location>0.000540000000000001 0.0 0.01408</end_location>
-      <inertia ref="CoM">
+      <inertia ref="com">
         <Ixx>0.0000075</Ixx>
         <Iyy>0.0000075</Iyy>
         <Izz>0.00001125</Izz>
@@ -106,7 +106,7 @@
       <mass>0.1</mass>
       <com_location>-0.00543 0.0 0.01123</com_location>
       <end_location>0.00146 0.0 0.03251</end_location>
-      <inertia ref="CoM">
+      <inertia ref="com">
         <Ixx>0.0000075</Ixx>
         <Iyy>0.0000075</Iyy>
         <Izz>0.00001125</Izz>
@@ -126,7 +126,7 @@
       <mass>0.1</mass>
       <com_location>-0.04245 0.0 -0.00352</com_location>
       <end_location>0.000899999999999998 0.0 0.0114</end_location>
-      <inertia ref="CoM">
+      <inertia ref="com">
         <Ixx>0.0000075</Ixx>
         <Iyy>0.0000075</Iyy>
         <Izz>0.00001125</Izz>
@@ -146,7 +146,7 @@
       <mass>1</mass>
       <com_location>0.0 0.0 0.1</com_location>
       <end_location>0.0 0.0 0.2</end_location>
-      <inertia ref="CoM">
+      <inertia ref="com">
         <Ixx>0.001</Ixx>
         <Iyy>0.001</Iyy>
         <Izz>0.001</Izz>

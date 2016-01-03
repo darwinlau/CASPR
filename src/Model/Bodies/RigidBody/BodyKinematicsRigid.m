@@ -28,7 +28,7 @@ classdef BodyKinematicsRigid < BodyKinematics
             
             bk = BodyKinematicsRigid(id, name, JointType.(char(jointTypeObj.getFirstChild.getData)));
             bk.r_G = XmlOperations.StringToVector3(char(physicalObj.getElementsByTagName('com_location').item(0).getFirstChild.getData));
-            bk.r_P = XmlOperations.StringToVector3(char(physicalObj.getElementsByTagName('end_location').item(0).getFirstChild.getData));
+            bk.r_Pe = XmlOperations.StringToVector3(char(physicalObj.getElementsByTagName('end_location').item(0).getFirstChild.getData));
             
             bk.r_Parent = XmlOperations.StringToVector3(char(parentObj.getElementsByTagName('location').item(0).getFirstChild.getData));
             bk.parentLinkId = str2double(char(parentObj.getElementsByTagName('num').item(0).getFirstChild.getData));

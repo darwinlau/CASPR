@@ -60,7 +60,7 @@ classdef SystemKinematicsDynamics < SystemKinematics
             b = SystemKinematicsDynamics;
             b.bodyKinematics = SystemKinematicsBodies.LoadXmlObj(body_xmlobj);
             b.bodyDynamics = SystemDynamicsBodies.LoadXmlObj(body_xmlobj);
-            b.cableKinematics = SystemKinematicsCables.LoadXmlObj(cable_xmlobj, b.numLinks);
+            b.cableKinematics = SystemKinematicsCables.LoadXmlObj(cable_xmlobj, b.bodyKinematics);
             b.cableDynamics = SystemDynamicsCables.LoadXmlObj(cable_xmlobj);
             b.update(b.bodyKinematics.q_default, b.bodyKinematics.q_dot_default, b.bodyKinematics.q_ddot_default);
         end

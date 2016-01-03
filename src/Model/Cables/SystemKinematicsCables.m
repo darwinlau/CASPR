@@ -71,7 +71,7 @@ classdef SystemKinematicsCables < handle
                     for j = 1:obj.cables{i}.numSegments
                         V_ijk_T = obj.getCRMTerm(i,j,k+1)*bodyKinematics.bodies{k}.R_0k.'*obj.cables{i}.segments{j}.segmentVector/obj.cables{i}.segments{j}.length;
                         V_ixk_T = V_ixk_T + V_ijk_T;
-                        V_itk_T = V_itk_T + cross(obj.cables{i}.segments{j}.attachmentsLocal{k+1}, V_ijk_T);
+                        V_itk_T = V_itk_T + cross(obj.cables{i}.segments{j}.r_GA{k+1}, V_ijk_T);
                     end
                     obj.V(i, 6*k-5:6*k) = [V_ixk_T.' V_itk_T.'];
                 end
@@ -120,7 +120,7 @@ classdef SystemKinematicsCables < handle
     
     
     methods (Static)
-        function c = LoadXmlObj(cable_prop_xmlobj, num_links)
+        function c = LoadXmlObj(cable_prop_xmlobj, bodiesKin)
             assert(strcmp(cable_prop_xmlobj.getNodeName, 'cable_set'), 'Root element should be <cable_set>');
             allCableItems = cable_prop_xmlobj.getChildNodes;
             num_cables = allCableItems.getLength;
@@ -133,14 +133,14 @@ classdef SystemKinematicsCables < handle
                 
                 type = char(currentCableItem.getNodeName);
                 if (strcmp(type, 'cable_ideal'))
-                    xml_cables{k} = CableKinematicsIdeal.LoadXmlObj(currentCableItem, num_links);
+                    xml_cables{k} = CableKinematicsIdeal.LoadXmlObj(currentCableItem, bodiesKin);
                 else
                     error('Unknown cables type: %s', type);
                 end
             end
             
             % Create the actual object to return
-            c = SystemKinematicsCables(xml_cables, num_links);
+            c = SystemKinematicsCables(xml_cables, bodiesKin.numLinks);
         end
     end
 end

@@ -4,9 +4,10 @@ classdef ModelConfigType
         M_SIMPLE_PLANAR_XY
         M_SIMPLE_SPHERICAL
         M_SIMPLE_SPATIAL
-        M_MYOROB_SHOULDER
-        M_ACROBOT
         M_NECK_8S
         M_2R_PLANAR_XZ
+        M_ACROBOT
+        M_IPANEMA_2
+        M_MYOROB_SHOULDER
     end
 end
