@@ -5,10 +5,17 @@ classdef InverseDynamicsSimulator < DynamicsSimulator
     properties (SetAccess = protected)
         compTime            % computational time for each time step
         %compIterations      % Number of computational iterations for each time step
+<<<<<<< HEAD
 
         IDFunctionCost      % Cost value for optimisation at each point in time
         IDExitType          % Exit type at each point in time
 
+=======
+                
+        IDFunctionCost      % Cost value for optimisation at each point in time
+        IDExitType          % Exit type at each point in time
+        
+>>>>>>> e893c5821135d54bdc11523761849f2d1c95cb1b
         IDSolver
     end
 
@@ -27,6 +34,7 @@ classdef InverseDynamicsSimulator < DynamicsSimulator
             obj.IDFunctionCost = zeros(length(obj.timeVector), 1);
             obj.IDExitType = cell(length(obj.timeVector), 1);
 %            obj.IDInfo = cell(length(obj.timeVector), 1);
+<<<<<<< HEAD
 
             obj.compTime = zeros(length(obj.timeVector), 1);
 %            obj.compIterations = zeros(length(obj.timeVector), 1);
@@ -34,6 +42,15 @@ classdef InverseDynamicsSimulator < DynamicsSimulator
             for t = 1:length(obj.timeVector)
                 fprintf('Time : %f\n', obj.timeVector(t));
                 obj.model.update(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t});
+=======
+            
+            obj.compTime = zeros(length(obj.timeVector), 1);
+%            obj.compIterations = zeros(length(obj.timeVector), 1);
+            
+            for t = 1:length(obj.timeVector)
+                fprintf('Time : %f\n', obj.timeVector(t));
+                obj.model.update(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t});        
+>>>>>>> e893c5821135d54bdc11523761849f2d1c95cb1b
                 [obj.IDFunctionCost(t), obj.IDExitType{t}, obj.compTime(t)] = obj.IDSolver.resolve(obj.model);
                 obj.interactionWrench{t} = obj.model.interactionWrench;
                 obj.cableForces{t} = obj.model.cableForces;
