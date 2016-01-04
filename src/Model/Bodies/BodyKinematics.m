@@ -7,11 +7,7 @@ classdef (Abstract) BodyKinematics < handle
 
         r_G                     % Position vector from joint to COG
         r_Pe                    % Position vector from joint to location of next joint
-<<<<<<< HEAD
 
-=======
-        
->>>>>>> e893c5821135d54bdc11523761849f2d1c95cb1b
         r_Parent                % Position from joint of parent link to this joint
         parentLinkId            % Link ID of the parent
 
