@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<links>
+  <link_rigid num="1" name="R_Y 1">
+    <joint_type>R_Y</joint_type>
+    <physical>
+      <mass>1</mass>
+      <com_location>0.0 0.0 0.5</com_location>
+      <end_location>0.0 0.0 1.0</end_location>
+      <inertia ref="com">
+        <Ixx>0.083333</Ixx>
+        <Iyy>0.0</Iyy>
+        <Izz>0.083333</Izz>
+        <Ixy>0.0</Ixy>
+        <Ixz>0.0</Ixz>
+        <Iyz>0.0</Iyz>
+      </inertia>
+    </physical>
+    <parent>
+      <num>0</num>
+      <location>0.0 0.0 0.0</location>
+    </parent>
+  </link_rigid>
+  <link_rigid num="2" name="R_Y 2">
+    <joint_type>R_Y</joint_type>
+    <physical>
+      <mass>1</mass>
+      <com_location>0.0 0.0 0.5</com_location>
+      <end_location>0.0 0.0 1.0</end_location>
+      <inertia ref="CoM">
+        <Ixx>0.083333</Ixx>
+        <Iyy>0.0</Iyy>
+        <Izz>0.083333</Izz>
+        <Ixy>0.0</Ixy>
+        <Ixz>0.0</Ixz>
+        <Iyz>0.0</Iyz>
+      </inertia>
+    </physical>
+    <parent>
+      <num>1</num>
+      <location>0.0 0.0 1.0</location>
+    </parent>
+  </link_rigid>
+</links>

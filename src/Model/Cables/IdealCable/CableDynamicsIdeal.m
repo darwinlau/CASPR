@@ -1,3 +1,10 @@
+% Abstract class for the dynamics of a single cable
+% 
+% Author        : Darwin LAU
+% Created       : 2011
+% Description	:
+%	Data structure that contains the dynamces of a cable, such as the force
+%	of the cable, the minimum and maximum forces it can produce
 classdef CableDynamicsIdeal < CableDynamics
     %CABLEKINEMATICS Summary of this class goes here
     %   Detailed explanation goes here

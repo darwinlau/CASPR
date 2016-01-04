@@ -1,8 +1,8 @@
 % Script file to show how to use the foward kinematics simulator
-% 
+%
 % Author        : Darwin LAU
 % Created       : 2015
-% Description	:
+% Description    :
 
 % Clear the variables, command window, and all windows
 clc; clear; close all;
@@ -10,7 +10,7 @@ clc; clear; close all;
 % Set up the type of model, trajectory and the set of cables to be used
 % Following are some examples (feel free to add more):
 % 1) Planar model
-model_config = ModelConfig(ModelConfigType.M_PLANAR_XY);
+model_config = ModelConfig(ModelConfigType.M_SIMPLE_PLANAR_XY);
 trajectory_id = 'x_simple';
 cable_set_id = 'basic';
 % 2) Neck model

@@ -23,30 +23,43 @@ classdef ModelConfig
             c.root_folder = fileparts(mfilename('fullpath'));
             
             switch type
-                case ModelConfigType.M_PLANAR_XY
-                    c.bodyPropertiesFilename = [c.root_folder, '\planar_xy\planar_xy_bodies.xml'];
-                    c.cablesPropertiesFilename = [c.root_folder, '\planar_xy\planar_xy_cables.xml'];
-                    c.trajectoriesFilename = [c.root_folder, '\planar_xy\planar_xy_trajectories.xml'];
-                case ModelConfigType.M_NECK_8S
-                    c.bodyPropertiesFilename = [c.root_folder, '\8S_neck\8S_neck_bodies.xml'];
-                    c.cablesPropertiesFilename = [c.root_folder, '\8S_neck\8S_neck_cables.xml'];
-                    c.trajectoriesFilename = [c.root_folder, '\8S_neck\8S_neck_trajectories.xml'];
-                case ModelConfigType.M_2R_PLANAR_XZ
-                    c.bodyPropertiesFilename = [c.root_folder, '\2R_planar_xz\2R_planar_xz_bodies.xml'];
-                    c.cablesPropertiesFilename = [c.root_folder, '\2R_planar_xz\2R_planar_xz_cables.xml'];
-                    c.trajectoriesFilename = [c.root_folder, '\2R_planar_xz\2R_planar_xz_trajectories.xml'];
-                case ModelConfigType.M_SPHERICAL_JOINT
-                    c.bodyPropertiesFilename = [c.root_folder, '\spherical_joint\spherical_joint_bodies.xml'];
-                    c.cablesPropertiesFilename = [c.root_folder, '\spherical_joint\spherical_joint_cables.xml'];
-                    c.trajectoriesFilename = [c.root_folder, '\spherical_joint\spherical_joint_trajectories.xml'];
+                % Single-link Cable Driven Manipulators (SCDM)
+                % Standard simple SCDMs for reference
+                case ModelConfigType.M_SIMPLE_PLANAR_XY
+                    c.bodyPropertiesFilename = [c.root_folder, '\SCDM\planar_manipulators\simple_planar_xy\simple_planar_xy_bodies.xml'];
+                    c.cablesPropertiesFilename = [c.root_folder, '\SCDM\planar_manipulators\simple_planar_xy\simple_planar_xy_cables.xml'];
+                    c.trajectoriesFilename = [c.root_folder, '\SCDM\planar_manipulators\simple_planar_xy\simple_planar_xy_trajectories.xml'];
+                case ModelConfigType.M_SIMPLE_SPHERICAL
+                    c.bodyPropertiesFilename = [c.root_folder, '\SCDM\spherical_manipulators\simple_spherical\simple_spherical_bodies.xml'];
+                    c.cablesPropertiesFilename = [c.root_folder, '\SCDM\spherical_manipulators\simple_spherical\simple_spherical_cables.xml'];
+                    c.trajectoriesFilename = [c.root_folder, '\SCDM\spherical_manipulators\simple_spherical\simple_spherical_trajectories.xml'];
+                case ModelConfigType.M_SIMPLE_SPATIAL
+                    c.bodyPropertiesFilename = [c.root_folder, '\SCDM\spatial_manipulators\simple_spatial\simple_spatial_bodies.xml'];
+                    c.cablesPropertiesFilename = [c.root_folder, '\SCDM\spatial_manipulators\simple_spatial\simple_spatial_cables.xml'];
+                    c.trajectoriesFilename = [c.root_folder, '\SCDM\spatial_manipulators\simple_spatial\simple_spatial_trajectories.xml'];
+                % SCDMs from different laboratories and hardware
                 case ModelConfigType.M_MYOROB_SHOULDER
-                    c.bodyPropertiesFilename = [c.root_folder, '\myorob_shoulder\myorob_shoulder_bodies.xml'];
-                    c.cablesPropertiesFilename = [c.root_folder, '\myorob_shoulder\myorob_shoulder_cables.xml'];
-                    c.trajectoriesFilename = [c.root_folder, '\myorob_shoulder\myorob_shoulder_trajectories.xml'];
-                case ModelConfigType.M_SPATIAL_JMD
-                    c.bodyPropertiesFilename = [c.root_folder, '\spatial_jmd\spatial_jmd_bodies.xml'];
-                    c.cablesPropertiesFilename = [c.root_folder, '\spatial_jmd\spatial_jmd_cables.xml'];
-                    c.trajectoriesFilename = [c.root_folder, '\spatial_jmd\spatial_jmd_trajectories.xml'];
+                    c.bodyPropertiesFilename = [c.root_folder, '\SCDM\spherical_manipulators\myorob_shoulder_TUM\myorob_shoulder_bodies.xml'];
+                    c.cablesPropertiesFilename = [c.root_folder, '\SCDM\spherical_manipulators\myorob_shoulder_TUM\myorob_shoulder_cables.xml'];
+                    c.trajectoriesFilename = [c.root_folder, '\SCDM\spherical_manipulators\myorob_shoulder_TUM\myorob_shoulder_trajectories.xml'];
+                case ModelConfigType.M_ACROBOT
+                    c.bodyPropertiesFilename = [c.root_folder, '\SCDM\spatial_manipulators\ACROBOT_IRTJV\ACROBOT_bodies.xml'];
+                    c.cablesPropertiesFilename = [c.root_folder, '\SCDM\spatial_manipulators\ACROBOT_IRTJV\ACROBOT_cables.xml'];
+                    c.trajectoriesFilename = [c.root_folder, '\SCDM\spatial_manipulators\ACROBOT_IRTJV\ACROBOT_trajectories.xml'];
+                case ModelConfigType.M_IPANEMA_2
+                    c.bodyPropertiesFilename = [c.root_folder, '\SCDM\spatial_manipulators\IPAnema2_FraunhoferIPA\IPAnema2_bodies.xml'];
+                    c.cablesPropertiesFilename = [c.root_folder, '\SCDM\spatial_manipulators\IPAnema2_FraunhoferIPA\IPAnema2_cables.xml'];
+                    c.trajectoriesFilename = [c.root_folder, '\SCDM\spatial_manipulators\IPAnema2_FraunhoferIPA\IPAnema2_trajectories.xml'];
+                % Multi-link Cable Driven Manipulators (MCDM)
+                case ModelConfigType.M_NECK_8S
+                    c.bodyPropertiesFilename = [c.root_folder, '\MCDM\8S_neck\8S_neck_bodies.xml'];
+                    c.cablesPropertiesFilename = [c.root_folder, '\MCDM\8S_neck\8S_neck_cables.xml'];
+                    c.trajectoriesFilename = [c.root_folder, '\MCDM\8S_neck\8S_neck_trajectories.xml'];
+                    %c.trajectoriesFilename = [c.root_folder, '\MCDM\8S_neck\8S_neck_trajectories_eulerXYZ.xml'];
+                case ModelConfigType.M_2R_PLANAR_XZ
+                    c.bodyPropertiesFilename = [c.root_folder, '\MCDM\2R_planar_xz\2R_planar_xz_bodies.xml'];
+                    c.cablesPropertiesFilename = [c.root_folder, '\MCDM\2R_planar_xz\2R_planar_xz_cables.xml'];
+                    c.trajectoriesFilename = [c.root_folder, '\MCDM\2R_planar_xz\2R_planar_xz_trajectories.xml'];
                 otherwise
                     error('ModelConfig type is not defined');
             end
@@ -56,6 +69,10 @@ classdef ModelConfig
                 c.cablesPropertiesFilename = strrep(c.cablesPropertiesFilename, '\', '/');
                 c.trajectoriesFilename = strrep(c.trajectoriesFilename, '\', '/');
             end
+            
+            assert(exist(c.bodyPropertiesFilename, 'file') == 2, 'Body properties file does not exist.');
+            assert(exist(c.cablesPropertiesFilename, 'file') == 2, 'Cable properties file does not exist.');
+            assert(exist(c.trajectoriesFilename, 'file') == 2, 'Trajectories file does not exist.');
             
             c.bodiesXmlObj =  XmlOperations.XmlReadRemoveIndents(c.bodyPropertiesFilename);
             c.cablesXmlObj =  XmlOperations.XmlReadRemoveIndents(c.cablesPropertiesFilename);

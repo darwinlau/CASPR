@@ -1,9 +1,9 @@
 % Script file to test the use of foward kinematics on a setup where only
 % relative lengths of the cables are available
-% 
+%
 % Author        : Darwin LAU
 % Created       : 2015
-% Description	:
+% Description    :
 
 % Clear the variables, command window, and all windows
 clc; clear; close all;
@@ -11,7 +11,7 @@ clc; clear; close all;
 % Set up the type of model, trajectory and the set of cables to be used
 % Following are some examples (feel free to add more):
 % 1) Planar model
-model_config = ModelConfig(ModelConfigType.M_PLANAR_XY);
+model_config = ModelConfig(ModelConfigType.M_SIMPLE_PLANAR_XY);
 trajectory_id = 'general_2';
 cable_set_id = 'basic';
 q0_error = [0.05; 0.05; 2*pi/180];
@@ -35,7 +35,7 @@ kinObj = SystemKinematics.LoadXmlObj(bodies_xmlobj, cableset_xmlobj);
 
 % Three simulators will be setup for this work to show the forward
 % kinematics working:
-% 1) iksim_true: InverseKinematicsSimulator holding the true trajectory 
+% 1) iksim_true: InverseKinematicsSimulator holding the true trajectory
 % 2) fksim_error: ForwardKinematicsSimulator using erroneous initial state
 % 3) fksim_corrected: ForwardKinematicsSimulator using corrected init state
 disp('Start Setup Simulation');

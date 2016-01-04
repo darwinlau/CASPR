@@ -32,7 +32,7 @@ classdef XmlOperations
         
         function r = StringToVector3(string)
             array = regexp(string, ' ', 'split');
-            assert(length(array) == 3, sprintf('Array string should containt 3 elements: %s', string));
+            assert(length(array) == 3, sprintf('Array string should contain 3 elements: %s', string));
             r = size(3, 1);
             for i = 1:3
                 r(i,1) = str2double(array(i));

@@ -7,4 +7,10 @@ classdef WorkspaceType
         FW                      % Feasible workspace 
         NULL                    % Stub Workspace                      
     end
+    
+    methods (Static)
+        function L = workspace_type_list()
+            L = {'Interference Free','Wrench Closure','Static','Feasible Workspace'};
+        end
+    end
 end

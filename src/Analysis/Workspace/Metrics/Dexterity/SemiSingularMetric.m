@@ -9,7 +9,7 @@ classdef SemiSingularMetric < WorkspaceMetric
         
         %% Evaluate Functions
         function v = evaluate(obj,dynamics,~,method,inWorkspace)
-            if((nargin <=3)||(~(method==StaticMethods.SS)))
+            if((nargin <=3)||(~(method==WrenchClosureMethods.SS)))
                 % Determine necessary variables for test
                 L       =   dynamics.L; % Cable Jacobian
                 L_rank  =   rank(L');   % Cable Jacobian Rank

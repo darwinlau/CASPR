@@ -23,10 +23,17 @@ classdef Quaternion
             q_inv = Quaternion;
             q_conj = conj(q);
             q_norm = norm(q);
-            q_inv.q0 = q_conj.q0/q_norm^2;
-            q_inv.q1 = q_conj.q1/q_norm^2;
-            q_inv.q2 = q_conj.q2/q_norm^2;
-            q_inv.q3 = q_conj.q3/q_norm^2;
+            if q_norm == 0
+                q_inv.q0 = 0;
+                q_inv.q1 = 0;
+                q_inv.q2 = 0;
+                q_inv.q3 = 0;
+            else
+                q_inv.q0 = q_conj.q0/q_norm^2;
+                q_inv.q1 = q_conj.q1/q_norm^2;
+                q_inv.q2 = q_conj.q2/q_norm^2;
+                q_inv.q3 = q_conj.q3/q_norm^2;
+            end
             % Why not q_inv = q_conj; Since always unit vector
             % Otherwise this is wrong anyway
         end

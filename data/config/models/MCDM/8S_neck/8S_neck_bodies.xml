@@ -1,0 +1,163 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<links>
+  <link_rigid num="1" name="C7 bone">
+    <joint_type>SPHERICAL</joint_type>
+    <physical>
+      <mass>0.1</mass>
+      <com_location>-0.00684 0.0 0.005655</com_location>
+      <end_location>0.006416 0.0 0.018035</end_location>
+      <inertia ref="com">
+        <Ixx>0.0000075</Ixx>
+        <Iyy>0.0000075</Iyy>
+        <Izz>0.00001125</Izz>
+        <Ixy>0.0</Ixy>
+        <Ixz>0.0</Ixz>
+        <Iyz>0.0</Iyz>
+      </inertia>
+    </physical>
+    <parent>
+      <num>0</num>
+      <location>0.0 0.0 0.0</location>
+    </parent>
+  </link_rigid>
+  <link_rigid num="2" name="C6 bone">
+    <joint_type>SPHERICAL</joint_type>
+    <physical>
+      <mass>0.1</mass>
+      <com_location>-0.009419 0.0 0.004065</com_location>
+      <end_location>0.000430999999999999 0.0 0.013815</end_location>
+      <inertia ref="com">
+        <Ixx>0.0000075</Ixx>
+        <Iyy>0.0000075</Iyy>
+        <Izz>0.00001125</Izz>
+        <Ixy>0.0</Ixy>
+        <Ixz>0.0</Ixz>
+        <Iyz>0.0</Iyz>
+      </inertia>
+    </physical>
+    <parent>
+      <num>1</num>
+      <location>0.006416 0.0 0.018035</location>
+    </parent>
+  </link_rigid>
+  <link_rigid num="3" name="C5 bone">
+    <joint_type>SPHERICAL</joint_type>
+    <physical>
+      <mass>0.1</mass>
+      <com_location>-0.00567 0.0 0.00815</com_location>
+      <end_location>0.00276 0.0 0.0156</end_location>
+      <inertia ref="com">
+        <Ixx>0.0000075</Ixx>
+        <Iyy>0.0000075</Iyy>
+        <Izz>0.00001125</Izz>
+        <Ixy>0.0</Ixy>
+        <Ixz>0.0</Ixz>
+        <Iyz>0.0</Iyz>
+      </inertia>
+    </physical>
+    <parent>
+      <num>2</num>
+      <location>0.000430999999999999 0.0 0.013815</location>
+    </parent>
+  </link_rigid>
+  <link_rigid num="4" name="C4 bone">
+    <joint_type>SPHERICAL</joint_type>
+    <physical>
+      <mass>0.1</mass>
+      <com_location>-0.00502 0.0 0.01172</com_location>
+      <end_location>0.0023 0.0 0.0181</end_location>
+      <inertia ref="com">
+        <Ixx>0.0000075</Ixx>
+        <Iyy>0.0000075</Iyy>
+        <Izz>0.00001125</Izz>
+        <Ixy>0.0</Ixy>
+        <Ixz>0.0</Ixz>
+        <Iyz>0.0</Iyz>
+      </inertia>
+    </physical>
+    <parent>
+      <num>3</num>
+      <location>0.00276 0.0 0.0156</location>
+    </parent>
+  </link_rigid>
+  <link_rigid num="5" name="C3 bone">
+    <joint_type>SPHERICAL</joint_type>
+    <physical>
+      <mass>0.1</mass>
+      <com_location>-0.00471 0.0 0.00902</com_location>
+      <end_location>0.000540000000000001 0.0 0.01408</end_location>
+      <inertia ref="com">
+        <Ixx>0.0000075</Ixx>
+        <Iyy>0.0000075</Iyy>
+        <Izz>0.00001125</Izz>
+        <Ixy>0.0</Ixy>
+        <Ixz>0.0</Ixz>
+        <Iyz>0.0</Iyz>
+      </inertia>
+    </physical>
+    <parent>
+      <num>4</num>
+      <location>0.0023 0.0 0.0181</location>
+    </parent>
+  </link_rigid>
+  <link_rigid num="6" name="C2 bone">
+    <joint_type>SPHERICAL</joint_type>
+    <physical>
+      <mass>0.1</mass>
+      <com_location>-0.00543 0.0 0.01123</com_location>
+      <end_location>0.00146 0.0 0.03251</end_location>
+      <inertia ref="com">
+        <Ixx>0.0000075</Ixx>
+        <Iyy>0.0000075</Iyy>
+        <Izz>0.00001125</Izz>
+        <Ixy>0.0</Ixy>
+        <Ixz>0.0</Ixz>
+        <Iyz>0.0</Iyz>
+      </inertia>
+    </physical>
+    <parent>
+      <num>5</num>
+      <location>0.000540000000000001 0.0 0.01408</location>
+    </parent>
+  </link_rigid>
+  <link_rigid num="7" name="C1 bone">
+    <joint_type>SPHERICAL</joint_type>
+    <physical>
+      <mass>0.1</mass>
+      <com_location>-0.04245 0.0 -0.00352</com_location>
+      <end_location>0.000899999999999998 0.0 0.0114</end_location>
+      <inertia ref="com">
+        <Ixx>0.0000075</Ixx>
+        <Iyy>0.0000075</Iyy>
+        <Izz>0.00001125</Izz>
+        <Ixy>0.0</Ixy>
+        <Ixz>0.0</Ixz>
+        <Iyz>0.0</Iyz>
+      </inertia>
+    </physical>
+    <parent>
+      <num>6</num>
+      <location>0.00146 0.0 0.03251</location>
+    </parent>
+  </link_rigid>
+  <link_rigid num="8" name="Skull">
+    <joint_type>SPHERICAL</joint_type>
+    <physical>
+      <mass>1</mass>
+      <com_location>0.0 0.0 0.1</com_location>
+      <end_location>0.0 0.0 0.2</end_location>
+      <inertia ref="com">
+        <Ixx>0.001</Ixx>
+        <Iyy>0.001</Iyy>
+        <Izz>0.001</Izz>
+        <Ixy>0.0</Ixy>
+        <Ixz>0.0</Ixz>
+        <Iyz>0.0</Iyz>
+      </inertia>
+    </physical>
+    <parent>
+      <num>7</num>
+      <location>0.000899999999999998 0.0 0.0114</location>
+    </parent>
+  </link_rigid>
+</links>

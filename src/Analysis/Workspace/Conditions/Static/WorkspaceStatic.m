@@ -11,25 +11,25 @@ classdef WorkspaceStatic < WorkspaceCondition
             w.options               =   optimset('display','off','Algorithm','interior-point-convex');
             if(nargin>0)
                 if(strcmp(method,'quad_prog'))
-                    w.method = StaticMethods.QP;
+                    w.method = WorkspaceStaticMethods.QP;
                 elseif(strcmp(method,'capacity_margin'))
-                    w.method = StaticMethods.CMa;
+                    w.method = WorkspaceStaticMethods.CMa;
                 elseif(strcmp(method,'capability_measure'))
-                    w.method = StaticMethods.CMe;
+                    w.method = WorkspaceStaticMethods.CMe;
                 else
                     msg = 'Incorrect static workspace method set';
                     error(msg);
                 end
             % Translate the method into an enum
             else
-                w.method = StaticMethods.QP;
+                w.method = WorkspaceStaticMethods.QP;
             end 
         end
         
         function inWorkspace = evaluate(obj,dynamics)
-           if(obj.method == StaticMethods.QP)
+           if(obj.method == WorkspaceStaticMethods.QP)
                inWorkspace = static_quadprog(dynamics,obj.options);
-           elseif(obj.method == StaticMethods.CMa)
+           elseif(obj.method == WorkspaceStaticMethods.CMa)
                inWorkspace = static_capacity_margin(dynamics,obj.options);
            else
                inWorkspace = static_capability_measure(dynamics,obj.options);
