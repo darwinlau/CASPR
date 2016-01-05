@@ -11,23 +11,19 @@ classdef CapacityMarginMetric < WorkspaceMetric
         
         %% Evaluate Functions
         function v = evaluate(obj,dynamics,~,method,inWorkspace)
-            L   =   dynamics.L;
-            f_u =   dynamics.cableDynamics.forcesMax;
-            f_l =   dynamics.cableDynamics.forcesMin;
-            w   =   WrenchSet(L,f_u,f_l);
-            q   =   length(w.b);
-            s   =   zeros(q,1);
-            for j=1:q
-                s(j) = (w.b(j) - w.A(j,:)*dynamics.G)/norm(w.A(j,:),2);
-            end
-            v = min(s);
-        end
-        
-        function v = workspaceCheck(obj,type)
-            if((type == WorkspaceType.SW) || (type == WorkspaceType.SCW))
-                v = 1;
+            if((nargin <=3)||(~(method==WorkspaceStaticMethods.CMa)))
+                L   =   dynamics.L;
+                f_u =   dynamics.cableDynamics.forcesMax;
+                f_l =   dynamics.cableDynamics.forcesMin;
+                w   =   WrenchSet(L,f_u,f_l);
+                q   =   length(w.b);
+                s   =   zeros(q,1);
+                for j=1:q
+                    s(j) = (w.b(j) - w.A(j,:)*dynamics.G)/norm(w.A(j,:),2);
+                end
+                v = min(s);
             else
-                v = 0;
+                v = inWorkspace;
             end
         end
     end

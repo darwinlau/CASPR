@@ -11,10 +11,11 @@ function [ x_opt, exit_type, comp_time ] = id_qp_matlab(A, b, A_ineq, b_ineq, A_
             exit_type = IDSolverExitType.ITERATION_LIMIT_REACHED;
         case -2
             fprintf('Problem infeasible\n');
-            exit_type = IDSolverExistType.INFEASIBLE;
+            exit_type = IDSolverExitType.INFEASIBLE;
+            x_opt = xmin;
         otherwise
             fprintf('Other error : Code %d\n', exit_flag);
-            exit_type = IDSolverExistType.SOLVER_SPECIFIC_ERROR;
+            exit_type = IDSolverExitType.SOLVER_SPECIFIC_ERROR;
     end
 end
 

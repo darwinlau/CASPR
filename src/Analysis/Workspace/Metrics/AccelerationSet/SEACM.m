@@ -20,24 +20,7 @@ classdef SEACM < WorkspaceMetric
                 for j=1:length(w.b)
                     s(j) = (w.b(j) - w.A(j,:)*(dynamics.M\dynamics.G))/norm(w.A(j,:),2);
                 end
-                if(sum(s<-1e-6)>0)
-                    min(s)
-                    disp('more fail')
-                    sfgdkjsjfhd
-                end
                 v = min(s);
-%                 sdh
-                %Code for debugging
-%                 hold on
-% %                 g = dynamics.M\dynamics.G;
-%                 plot(0,0,'r.')
-%                 t = 0:pi/100:2*pi;
-%                 for i=1:length(t)
-%                     x_c(:,i) = (v*[cos(t(i));sin(t(i))]).';
-%                 end
-%                 plot(x_c(1,:),x_c(2,:),'m')
-%                 xlabel('w_1 (Nm)')
-%                 ylabel('w_2 (Nm)')
             else
                 v = inWorkspace;
             end

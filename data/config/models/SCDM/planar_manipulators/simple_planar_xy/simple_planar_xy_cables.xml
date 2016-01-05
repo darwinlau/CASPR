@@ -4,8 +4,8 @@
 ]>
   
 <cables>
-  <cable_set id="basic" attachment_reference="com">
-    <cable_ideal name="Cable 1">
+  <cable_set id="basic">
+    <cable_ideal name="cable 1" attachment_reference="com">
       <properties>
         <force_min>0.1</force_min>
         <force_max>1000</force_max>
@@ -22,7 +22,7 @@
         </attachment>
       </attachments>
     </cable_ideal>
-    <cable_ideal name="Cable 2" attachment_reference="com">
+    <cable_ideal name="cable 2" attachment_reference="com">
       <properties>
         <force_min>0.1</force_min>
         <force_max>1000</force_max>
@@ -39,7 +39,7 @@
         </attachment>
       </attachments>
     </cable_ideal>
-    <cable_ideal name="Cable 3" attachment_reference="com">
+    <cable_ideal name="cable 3" attachment_reference="com">
       <properties>
         <force_min>0.1</force_min>
         <force_max>1000</force_max>
@@ -56,7 +56,7 @@
         </attachment>
       </attachments>
     </cable_ideal>
-    <cable_ideal name="Cable 4" attachment_reference="com">
+    <cable_ideal name="cable 4" attachment_reference="com">
       <properties>
         <force_min>0.1</force_min>
         <force_max>1000</force_max>

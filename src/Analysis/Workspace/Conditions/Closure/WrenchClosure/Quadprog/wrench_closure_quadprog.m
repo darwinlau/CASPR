@@ -10,6 +10,5 @@ function inWorkspace = wrench_closure_quadprog(dynamics,options)
     lb      =   1e-6*ones(dynamics.numCables,1);
     ub      =   Inf*ones(dynamics.numCables,1);
     [~,~,exit_flag] = quadprog(H,f,[],[],Aeq,beq,lb,ub,[],options);
-    % Test if the Jacobian is full rank
     inWorkspace = (exit_flag==1) && (L_rank == dynamics.numDofs);
 end

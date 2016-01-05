@@ -59,7 +59,8 @@ classdef WorkspaceSimulator < Simulator
             else
                 plotting_workspace = workspace;
             end
-            figure;  hold on;    
+%             figure;
+            hold on;    
             mw = ceil(max(plotting_workspace(n_d+1,:).*(plotting_workspace(n_d+1,:)~=Inf))+10);
             if(isnan(mw))
                 mw = 1;

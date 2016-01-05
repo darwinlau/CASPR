@@ -25,7 +25,7 @@ classdef IDSolverQuadProg < IDSolverFunction
 %             if isempty(obj.f_previous)
 %                 obj.f_previous = zeros(dynamics.numCables, 1);
 %             end
-            
+
             switch (obj.qp_solver_type)
                 case ID_QP_SolverType.MATLAB
                     [dynamics.cableForces, id_exit_type, comp_time] = id_qp_matlab(obj.objective.A, obj.objective.b, [], [], A_eq, b_eq, fmin, fmax, obj.f_previous);

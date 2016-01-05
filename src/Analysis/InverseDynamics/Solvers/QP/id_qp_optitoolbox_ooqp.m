@@ -2,7 +2,6 @@ function [ x_opt, exit_type, comp_time ] = id_qp_optitoolbox_ooqp(A, b, A_ineq, 
     opts = optiset('solver', 'OOQP', 'maxiter', 100);
     optisolver = opti('qp', A, b, 'ineq', A_ineq, b_ineq, 'eq', A_eq, b_eq, 'bounds', xmin, xmax, 'options', opts);
     [x_opt, ~, exitflag, id_info] = solve(optisolver, x0);
-    
     comp_time = id_info.Time;
     
     
@@ -17,9 +16,9 @@ function [ x_opt, exit_type, comp_time ] = id_qp_optitoolbox_ooqp(A, b, A_ineq, 
             exit_type = IDSolverExitType.ITERATION_LIMIT_REACHED;
         case -3
             fprintf('Solver specific error\n');
-            exit_type = IDExitType.SOLVER_SPECIFIC_ERROR;
+            exit_type = IDSolverExitType.SOLVER_SPECIFIC_ERROR;
         otherwise
-            fprintf('Other error : Code %d\n', exit_flag);
-            exit_type = IDExitType.OTHER_ERROR;
+            fprintf('Other error : Code %d\n', exitflag);
+            exit_type = IDSolverExitType.OTHER_ERROR;
     end
 end
