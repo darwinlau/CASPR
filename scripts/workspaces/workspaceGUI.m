@@ -1,3 +1,6 @@
+%--------------------------------------------------------------------------
+%% Constructor
+%--------------------------------------------------------------------------
 function varargout = workspaceGUI(varargin)
     % WORKSPACEGUI MATLAB code for workspaceGUI.fig
     %      WORKSPACEGUI, by itself, creates a new WORKSPACEGUI or raises the existing
@@ -22,12 +25,9 @@ function varargout = workspaceGUI(varargin)
 
     % Edit the above text to modify the response to help workspaceGUI
 
-    % Last Modified by GUIDE v2.5 05-Jan-2016 09:39:26
+    % Last Modified by GUIDE v2.5 08-Jan-2016 14:42:24
 
     % Begin initialization code - DO NOT EDIT
-    path_string = fileparts(mfilename('fullpath'));
-    path_string = path_string(1:strfind(path_string, 'scripts')-2);
-    addpath(genpath(path_string));
     gui_Singleton = 1;
     gui_State = struct('gui_Name',       mfilename, ...
                        'gui_Singleton',  gui_Singleton, ...
@@ -47,6 +47,9 @@ function varargout = workspaceGUI(varargin)
     % End initialization code - DO NOT EDIT
 end
 
+%--------------------------------------------------------------------------
+%% GUI Setup Functions
+%--------------------------------------------------------------------------
 % --- Executes just before workspaceGUI is made visible.
 function workspaceGUI_OpeningFcn(hObject, eventdata, handles, varargin)
     % This function has no output args, see OutputFcn.
@@ -65,7 +68,6 @@ function workspaceGUI_OpeningFcn(hObject, eventdata, handles, varargin)
     % uiwait(handles.figure1);
 end
 
-
 % --- Outputs from this function are returned to the command line.
 function varargout = workspaceGUI_OutputFcn(hObject, eventdata, handles) 
     % varargout  cell array for returning output args (see VARARGOUT);
@@ -77,41 +79,22 @@ function varargout = workspaceGUI_OutputFcn(hObject, eventdata, handles)
     varargout{1} = handles.output;
 end
 
-
-% --- Executes on selection change in model_popup.
-function model_popup_Callback(hObject, eventdata, handles)
-    % hObject    handle to model_popup (see GCBO)
+% --- Executes when user attempts to close figure1.
+function figure1_CloseRequestFcn(hObject, eventdata, handles)
+    % hObject    handle to figure1 (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
 
-    % Hints: contents = cellstr(get(hObject,'String')) returns model_popup contents as cell array
-    %        contents{get(hObject,'Value')} returns selected item from model_popup
-    cableset_popup_update(handles);
+    % Hint: delete(hObject) closes the figure
+    saveState(handles);
+    delete(hObject);
 end
 
 
-% --- Executes during object creation, after setting all properties.
-function model_popup_CreateFcn(hObject, eventdata, handles)
-    % hObject    handle to model_popup (see GCBO)
-    % eventdata  reserved - to be defined in a future version of MATLAB
-    % handles    empty - handles not created until after all CreateFcns called
-
-    % Hint: popupmenu controls usually have a white background on Windows.
-    %       See ISPC and COMPUTER.
-    if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-        set(hObject,'BackgroundColor','white');
-    end
-    e_list      =   enumeration('ModelConfigType');
-    e_n         =   length(e_list);
-    e_list_str  =   cell(1,e_n);
-    for i=1:e_n
-        temp_str = char(e_list(i));
-        e_list_str{i} = temp_str(3:length(temp_str));
-    end
-    set(hObject, 'String', e_list_str);
-end
-
-
+%--------------------------------------------------------------------------
+%% Popups
+%--------------------------------------------------------------------------
+% Workspace Type
 % --- Executes on selection change in workspace_type_popup.
 function workspace_type_popup_Callback(hObject, eventdata, handles)
     % hObject    handle to workspace_type_popup (see GCBO)
@@ -124,7 +107,6 @@ function workspace_type_popup_Callback(hObject, eventdata, handles)
     workspace_condition_popup_Update(handles.workspace_condition_popup,workspace_type_index);
     workspace_generation_popup_Update(handles);
 end
-
 
 % --- Executes during object creation, after setting all properties.
 function workspace_type_popup_CreateFcn(hObject, eventdata, handles)
@@ -141,7 +123,7 @@ function workspace_type_popup_CreateFcn(hObject, eventdata, handles)
     set(hObject, 'String', workspace_condition_list);
 end
 
-
+% Workspace Condition
 % --- Executes on selection change in workspace_condition_popup.
 function workspace_condition_popup_Callback(hObject, eventdata, handles)
     % hObject    handle to workspace_condition_popup (see GCBO)
@@ -152,7 +134,6 @@ function workspace_condition_popup_Callback(hObject, eventdata, handles)
     %        contents{get(hObject,'Value')} returns selected item from workspace_condition_popup
     workspace_generation_popup_Update(handles);
 end
-
 
 function workspace_condition_popup_Update(hObject,workspace_type_index)
     switch workspace_type_index
@@ -186,7 +167,6 @@ function workspace_condition_popup_Update(hObject,workspace_type_index)
     end
 end
 
-
 % --- Executes during object creation, after setting all properties.
 function workspace_condition_popup_CreateFcn(hObject, eventdata, handles)
     % hObject    handle to workspace_condition_popup (see GCBO)
@@ -201,131 +181,7 @@ function workspace_condition_popup_CreateFcn(hObject, eventdata, handles)
     workspace_condition_popup_Update(hObject,1);
 end
 
-
-% --- Executes on button press in Generate_Button.
-function Generate_Button_Callback(hObject, eventdata, handles)
-    % hObject    handle to Generate_Button (see GCBO)
-    % eventdata  reserved - to be defined in a future version of MATLAB
-    % handles    structure with handles and user data (see GUIDATA)
-    %% Clear data
-    clc; warning off; %close all;
-    %% Model setup
-    dynObj = getappdata(handles.cableset_popup,'dynObj');
-    %% Workspace Setup
-    % First the condition
-    contents = cellstr(get(handles.workspace_condition_popup,'String'));
-    cfh = str2func(contents{get(handles.workspace_condition_popup,'Value')});
-    contents = cellstr(get(handles.workspace_generation_popup,'String'));
-    wcondition  = cfh(contents{get(handles.workspace_generation_popup,'Value')});
-    % Then the metric
-    contents = cellstr(get(handles.workspace_metric_popup,'String'));
-    if(strcmp(contents{get(handles.workspace_metric_popup,'Value')},' '))
-        metric = NullMetric();
-    else
-        mfh = str2func(contents{get(handles.workspace_metric_popup,'Value')});
-        metric = mfh();
-    end
-    %% Now initialise the simulation
-    disp('Start Setup Simulation');
-    start_tic       =   tic;
-    wsim            =   WorkspaceSimulator(dynObj,wcondition,metric);
-%     q_step          =   pi/18;
-    q_info = handles.qtable.Data;
-    uGrid           =   UniformGrid(q_info(:,1),q_info(:,2),q_info(:,3));
-    %% Now set up the grid information
-    time_elapsed    =   toc(start_tic);
-    fprintf('End Setup Simulation : %f seconds\n', time_elapsed);
-    
-    disp('Start Running Simulation');
-    start_tic       =   tic;
-    wsim.run(uGrid);
-    time_elapsed    =   toc(start_tic);
-    fprintf('End Running Simulation : %f seconds\n', time_elapsed);
-    
-    disp('Start Plotting Simulation');
-    start_tic = tic;
-    axes(handles.workspace_axes);
-    cla;
-    wsim.plotWorkspace();
-    % wsim.plotWorkspaceHigherDimension()
-    time_elapsed = toc(start_tic);
-    fprintf('End Plotting Simulation : %f seconds\n', time_elapsed);
-    assignin('base','wsim',wsim);
-end
-
-
-function cableset_popup_Callback(hObject, eventdata, handles)
-    % hObject    handle to cableset_popup (see GCBO)
-    % eventdata  reserved - to be defined in a future version of MATLAB
-    % handles    structure with handles and user data (see GUIDATA)
-
-    % Hints: get(hObject,'String') returns contents of cableset_popup as text
-    %        str2double(get(hObject,'String')) returns contents of cableset_popup as a double
-    
-    % This block is for the cable set to be written.
-    % No callback will be evaluated.
-    generate_dynamic_object(handles);
-end
-
-function generate_dynamic_object(handles)
-    % Generate the dynamics object
-    contents = cellstr(get(handles.model_popup,'String'));
-    model_type = contents{get(handles.model_popup,'Value')};
-    model_config = ModelConfig(ModelConfigType.(['M_',model_type]));
-    bodies_xmlobj = model_config.getBodiesProperiesXmlObj();
-    contents = cellstr(get(handles.cableset_popup,'String'));
-    cable_set_id = contents{get(handles.cableset_popup,'Value')};
-    cableset_xmlobj = model_config.getCableSetXmlObj(cable_set_id);
-    dynObj = SystemKinematicsDynamics.LoadXmlObj(bodies_xmlobj, cableset_xmlobj);
-    % Change the grid
-    handles.qtable.Data = zeros(dynObj.numDofs,3);
-    handles.qtable.ColumnWidth = {50};
-    handles.qtable.ColumnEditable = [true,true,true];
-    handles.qtable.ColumnName = {'q_start','q_end','q_step'};
-    handles.qtable.Position(1) = 25;  handles.qtable.Position(2) = 2;
-    if(dynObj.numDofs >2 )
-        handles.qtable.Position(3) = (14/13)*handles.qtable.Extent(3); handles.qtable.Position(4) = 3*handles.qtable.Extent(4)/(dynObj.numDofs+1);
-    else
-        handles.qtable.Position(3) = handles.qtable.Extent(3); handles.qtable.Position(4) = 3*handles.qtable.Extent(4)/(dynObj.numDofs+1);
-    end
-    % Store the dynamics object
-    setappdata(handles.cableset_popup,'dynObj',dynObj);
-end
-
-
-function cableset_popup_update(handles)
-    % Generate the model_config object
-    contents = cellstr(get(handles.model_popup,'String'));
-    model_type = contents{get(handles.model_popup,'Value')};
-    model_config = ModelConfig(ModelConfigType.(['M_',model_type]));
-    % Determine the cable sets
-    cablesetsObj = model_config.cablesXmlObj.getElementsByTagName('cables').item(0).getElementsByTagName('cable_set');
-    cableset_str = cell(1,cablesetsObj.length);
-    % Extract the identifies from the cable sets
-    for i =1 :cablesetsObj.length
-        cablesetObj = cablesetsObj.item(i-1);
-        cableset_str{i} = char(cablesetObj.getAttribute('id'));
-    end
-    set(handles.cableset_popup, 'Value', 1);
-    set(handles.cableset_popup, 'String', cableset_str);
-    generate_dynamic_object(handles);
-end
-
-% --- Executes during object creation, after setting all properties.
-function cableset_popup_CreateFcn(hObject, eventdata, handles)
-    % hObject    handle to cableset_popup (see GCBO)
-    % eventdata  reserved - to be defined in a future version of MATLAB
-    % handles    empty - handles not created until after all CreateFcns called
-
-    % Hint: edit controls usually have a white background on Windows.
-    %       See ISPC and COMPUTER.
-    if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-        set(hObject,'BackgroundColor','white');
-    end
-    set(hObject, 'String', {'Choose a Model'});
-end
-
-
+% Workspace Generation
 % --- Executes on selection change in workspace_generation_popup.
 function workspace_generation_popup_Callback(hObject, eventdata, handles)
     % hObject    handle to workspace_generation_popup (see GCBO)
@@ -349,7 +205,6 @@ function workspace_generation_popup_Update(handles)
     end
 end
 
-
 % --- Executes during object creation, after setting all properties.
 function workspace_generation_popup_CreateFcn(hObject, eventdata, handles)
     % hObject    handle to workspace_generation_popup (see GCBO)
@@ -363,7 +218,7 @@ function workspace_generation_popup_CreateFcn(hObject, eventdata, handles)
     end
 end
 
-
+% Workspace Metric
 % --- Executes on selection change in workspace_metric_popup.
 function workspace_metric_popup_Callback(hObject, eventdata, handles)
     % hObject    handle to workspace_metric_popup (see GCBO)
@@ -412,7 +267,7 @@ function workspace_metric_popup_CreateFcn(hObject, eventdata, handles)
     set(hObject, 'String', dir_files);
 end
 
-
+% Grid - NOT YET SETUP
 % --- Executes on selection change in grid_popup.
 function grid_popup_Callback(hObject, eventdata, handles)
     % hObject    handle to grid_popup (see GCBO)
@@ -422,7 +277,6 @@ function grid_popup_Callback(hObject, eventdata, handles)
     % Hints: contents = cellstr(get(hObject,'String')) returns grid_popup contents as cell array
     %        contents{get(hObject,'Value')} returns selected item from grid_popup
 end
-
 
 % --- Executes during object creation, after setting all properties.
 function grid_popup_CreateFcn(hObject, eventdata, handles)
@@ -435,54 +289,189 @@ function grid_popup_CreateFcn(hObject, eventdata, handles)
     if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
         set(hObject,'BackgroundColor','white');
     end
-    % For the moment
-%     set(hObject, 'String', {'Uniform Grid'});
 end
 
-
-
-
-% --- Executes when user attempts to close figure1.
-function figure1_CloseRequestFcn(hObject, eventdata, handles)
-% hObject    handle to figure1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: delete(hObject) closes the figure
-saveState(handles)
-delete(hObject);
-end
-
-function saveState(handles)
-    % Save all of the settings
-    state.model_popup_value                 =   get(handles.model_popup,'value');
-    state.cable_set_value                   =   get(handles.cableset_popup,'value');
-    state.workspace_type_popup_value        =   get(handles.workspace_type_popup,'value');
-    state.workspace_condition_popup_value   =   get(handles.workspace_condition_popup,'value');
-    state.workspace_generation_popup_value  =   get(handles.workspace_generation_popup,'value');
-    state.workspace_metric_popup_value      =   get(handles.workspace_metric_popup,'value');
-    state.workspace_table                   =   handles.qtable.Data;
+%--------------------------------------------------------------------------
+%% Push Buttons
+%--------------------------------------------------------------------------
+% --- Executes on button press in save_settings.
+function save_settings_Callback(hObject, eventdata, handles)
+    % hObject    handle to save_settings (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    structure with handles and user data (see GUIDATA)
     path_string = fileparts(mfilename('fullpath'));
     path_string = path_string(1:strfind(path_string, 'scripts')-2);
-    save([path_string,'\logs\gui_state.mat'],'state')
+    file_name = [path_string,'\logs\*.mat'];
+    [file,path] = uiputfile(file_name,'Save file name');
+    saveState(handles,[path,file]);
 end
 
-function loadState(handles)
-    % load all of the settings and initialise the values to match
+% --- Executes on button press in load_settings.
+function load_settings_Callback(hObject, eventdata, handles)
+    % hObject    handle to load_settings (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    structure with handles and user data (see GUIDATA)
     path_string = fileparts(mfilename('fullpath'));
     path_string = path_string(1:strfind(path_string, 'scripts')-2);
-    file_name = [path_string,'\logs\gui_state.mat'];
-    if(exist(file_name,'file'))
-        load(file_name);
-        set(handles.model_popup,'value',state.model_popup_value);
-        cableset_popup_update(handles);
-        set(handles.cableset_popup,'value',state.cable_set_value);
+    file_name = [path_string,'\logs\*.mat'];
+    settings = uigetfile(file_name);
+    load(settings)
+    mp_text = get(handles.model_text,'String');
+    cs_text = get(handles.cable_text,'String');
+    if(strcmp(mp_text,state.model_text)&&strcmp(cs_text,state.cable_text))
         set(handles.workspace_type_popup,'value',state.workspace_type_popup_value);
         workspace_condition_popup_Update(handles.workspace_condition_popup,state.workspace_type_popup_value);
         set(handles.workspace_condition_popup,'value',state.workspace_condition_popup_value);
         workspace_generation_popup_Update(handles);
         set(handles.workspace_generation_popup,'value',state.workspace_generation_popup_value);
         set(handles.workspace_metric_popup,'value',state.workspace_metric_popup_value);
-        handles.qtable.Data = state.workspace_table;        
+        handles.qtable.Data = state.workspace_table;
+    else
+        warning('Incorrect Model Type')
     end
 end
+
+% --- Executes on button press in Generate_Button.
+function Generate_Button_Callback(hObject, eventdata, handles)
+    % hObject    handle to Generate_Button (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    structure with handles and user data (see GUIDATA)
+    %% Clear data
+    clc; warning off; %close all;
+    %% Model setup
+    dynObj = getappdata(handles.cable_text,'dynObj');
+    %% Workspace Setup
+    % First the condition
+    contents = cellstr(get(handles.workspace_condition_popup,'String'));
+    cfh = str2func(contents{get(handles.workspace_condition_popup,'Value')});
+    contents = cellstr(get(handles.workspace_generation_popup,'String'));
+    wcondition  = cfh(contents{get(handles.workspace_generation_popup,'Value')});
+    % Then the metric
+    contents = cellstr(get(handles.workspace_metric_popup,'String'));
+    if(strcmp(contents{get(handles.workspace_metric_popup,'Value')},' '))
+        metric = NullMetric();
+    else
+        mfh = str2func(contents{get(handles.workspace_metric_popup,'Value')});
+        metric = mfh();
+    end
+    %% Now initialise the simulation
+    disp('Start Setup Simulation');
+    start_tic       =   tic;
+    wsim            =   WorkspaceSimulator(dynObj,wcondition,metric);
+%     q_step          =   pi/18;
+    q_info = handles.qtable.Data;
+    uGrid           =   UniformGrid(q_info(:,1),q_info(:,2),q_info(:,3));
+    %% Now set up the grid information
+    time_elapsed    =   toc(start_tic);
+    fprintf('End Setup Simulation : %f seconds\n', time_elapsed);
+    
+    disp('Start Running Simulation');
+    start_tic       =   tic;
+    wsim.run(uGrid);
+    time_elapsed    =   toc(start_tic);
+    fprintf('End Running Simulation : %f seconds\n', time_elapsed);
+    
+    disp('Start Plotting Simulation');
+    start_tic = tic;
+    axes(handles.workspace_axes);
+    cla;
+    wsim.plotWorkspace();
+    % wsim.plotWorkspaceHigherDimension()
+    time_elapsed = toc(start_tic);
+    fprintf('End Plotting Simulation : %f seconds\n', time_elapsed);
+    assignin('base','wsim',wsim);
+end
+
+%--------------------------------------------------------------------------
+%% Text Functions
+%--------------------------------------------------------------------------
+function model_text_CreateFcn(hObject, eventdata, handles)
+    % hObject    handle to grid_popup (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    empty - handles not created until after all CreateFcns called
+
+    % Hint: popupmenu controls usually have a white background on Windows.
+    %       See ISPC and COMPUTER.
+    if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+        set(hObject,'BackgroundColor','white');
+    end
+end
+
+function cable_text_CreateFcn(hObject, eventdata, handles)
+    % hObject    handle to grid_popup (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    empty - handles not created until after all CreateFcns called
+
+    % Hint: popupmenu controls usually have a white background on Windows.
+    %       See ISPC and COMPUTER.
+    if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+        set(hObject,'BackgroundColor','white');
+    end
+end
+
+%--------------------------------------------------------------------------
+%% Additional Functions
+%--------------------------------------------------------------------------
+function saveState(handles,file_path)
+    % Save all of the settings
+    state.model_text                        =   get(handles.model_text,'String');
+    state.cable_text                        =   get(handles.cable_text,'String');
+    state.workspace_type_popup_value        =   get(handles.workspace_type_popup,'value');
+    state.workspace_condition_popup_value   =   get(handles.workspace_condition_popup,'value');
+    state.workspace_generation_popup_value  =   get(handles.workspace_generation_popup,'value');
+    state.workspace_metric_popup_value      =   get(handles.workspace_metric_popup,'value');
+    state.workspace_table                   =   handles.qtable.Data;
+    path_string                             =   fileparts(mfilename('fullpath'));
+    path_string                             = path_string(1:strfind(path_string, 'scripts')-2);
+    if(nargin>1)
+        save(file_path,'state');
+    else
+        save([path_string,'\logs\workspace_gui_state.mat'],'state')
+    end
+end
+
+function loadState(handles)
+    % load all of the settings and initialise the values to match
+    path_string = fileparts(mfilename('fullpath'));
+    path_string = path_string(1:strfind(path_string, 'scripts')-2);
+    file_name = [path_string,'\logs\upcra_gui_state.mat'];
+    if(exist(file_name,'file'))
+        load(file_name)
+        set(handles.model_text,'String',state.model_text);
+        set(handles.cable_text,'String',state.cable_text);
+        setappdata(handles.cable_text,'dynObj',state.dynObj);
+        file_name = [path_string,'\logs\workspace_gui_state.mat'];
+        format_q_table(state.dynObj.numDofs,handles.qtable)
+        if(exist(file_name,'file'))
+            load(file_name);
+            mp_text = get(handles.model_text,'String');
+            cs_text = get(handles.cable_text,'String');
+            if(strcmp(mp_text,state.model_text)&&strcmp(cs_text,state.cable_text))
+                set(handles.workspace_type_popup,'value',state.workspace_type_popup_value);
+                workspace_condition_popup_Update(handles.workspace_condition_popup,state.workspace_type_popup_value);
+                set(handles.workspace_condition_popup,'value',state.workspace_condition_popup_value);
+                workspace_generation_popup_Update(handles);
+                set(handles.workspace_generation_popup,'value',state.workspace_generation_popup_value);
+                set(handles.workspace_metric_popup,'value',state.workspace_metric_popup_value);
+                handles.qtable.Data = state.workspace_table;        
+            end
+        end
+    end
+end
+
+function format_q_table(numDofs,qtable)
+    qtable.Data = zeros(numDofs,3);
+    qtable.ColumnWidth = {50};
+    qtable.ColumnEditable = [true,true,true];
+    qtable.ColumnName = {'q_start','q_end','q_step'};
+    qtable.Position(1) = 25;  qtable.Position(2) = 2;
+    if(numDofs>2)
+        qtable.Position(3) = (14/13)*qtable.Extent(3);
+        qtable.Position(4) = 3*qtable.Extent(4)/(numDofs+1);
+    else
+        qtable.Position(3) = qtable.Extent(3); 
+    end
+    qtable.Position(4) = 3*qtable.Extent(4)/(numDofs+1);
+end
+
+
