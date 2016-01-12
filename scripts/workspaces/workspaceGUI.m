@@ -25,7 +25,7 @@ function varargout = workspaceGUI(varargin)
 
     % Edit the above text to modify the response to help workspaceGUI
 
-    % Last Modified by GUIDE v2.5 08-Jan-2016 14:42:24
+    % Last Modified by GUIDE v2.5 10-Jan-2016 11:23:56
 
     % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
@@ -325,7 +325,7 @@ function load_settings_Callback(hObject, eventdata, handles)
         workspace_generation_popup_Update(handles);
         set(handles.workspace_generation_popup,'value',state.workspace_generation_popup_value);
         set(handles.workspace_metric_popup,'value',state.workspace_metric_popup_value);
-        handles.qtable.Data = state.workspace_table;
+        set(handles.qtable,'Data',state.workspace_table);
     else
         warning('Incorrect Model Type')
     end
@@ -359,7 +359,7 @@ function Generate_Button_Callback(hObject, eventdata, handles)
     start_tic       =   tic;
     wsim            =   WorkspaceSimulator(dynObj,wcondition,metric);
 %     q_step          =   pi/18;
-    q_info = handles.qtable.Data;
+    q_info = get(handles.qtable,'Data');
     uGrid           =   UniformGrid(q_info(:,1),q_info(:,2),q_info(:,3));
     %% Now set up the grid information
     time_elapsed    =   toc(start_tic);
@@ -420,7 +420,7 @@ function saveState(handles,file_path)
     state.workspace_condition_popup_value   =   get(handles.workspace_condition_popup,'value');
     state.workspace_generation_popup_value  =   get(handles.workspace_generation_popup,'value');
     state.workspace_metric_popup_value      =   get(handles.workspace_metric_popup,'value');
-    state.workspace_table                   =   handles.qtable.Data;
+    state.workspace_table                   =   get(handles.qtable,'Data');
     path_string                             =   fileparts(mfilename('fullpath'));
     path_string                             = path_string(1:strfind(path_string, 'scripts')-2);
     if(nargin>1)
@@ -453,25 +453,25 @@ function loadState(handles)
                 workspace_generation_popup_Update(handles);
                 set(handles.workspace_generation_popup,'value',state.workspace_generation_popup_value);
                 set(handles.workspace_metric_popup,'value',state.workspace_metric_popup_value);
-                handles.qtable.Data = state.workspace_table;        
+                set(handles.qtable,'Data',state.workspace_table);        
             end
         end
     end
 end
 
 function format_q_table(numDofs,qtable)
-    qtable.Data = zeros(numDofs,3);
-    qtable.ColumnWidth = {50};
-    qtable.ColumnEditable = [true,true,true];
-    qtable.ColumnName = {'q_start','q_end','q_step'};
-    qtable.Position(1) = 25;  qtable.Position(2) = 2;
+    set(qtable,'Data',zeros(numDofs,3));
+    set(qtable,'ColumnWidth',{50});
+    set(qtable,'ColumnEditable',true(1,3));
+    set(qtable,'ColumnName',{'q_start','q_end','q_step'});
+    q_extent = get(qtable,'Extent');
+    q_position = zeros(1,4);
+    q_position(1) = 25;  q_position(2) = 0.5;
     if(numDofs>2)
-        qtable.Position(3) = (14/13)*qtable.Extent(3);
-        qtable.Position(4) = 3*qtable.Extent(4)/(numDofs+1);
+        q_position(3) = (14/13)*q_extent(3);
     else
-        qtable.Position(3) = qtable.Extent(3); 
+        q_position(3) = q_extent(3); 
     end
-    qtable.Position(4) = 3*qtable.Extent(4)/(numDofs+1);
+    q_position(4) = 5.6*q_extent(4)/(numDofs+1);
+    set(qtable,'Position',q_position);
 end
-
-

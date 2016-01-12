@@ -141,7 +141,7 @@ classdef (Abstract) MotionSimulator < Simulator
             % ONLY USED IN DEBUGGING END
         end
 
-        function plotAngularAcceleration(obj, bodies_to_plot)
+        function plotAngularAcceleration(obj, bodies_to_plot,fig_handle)
             assert(~isempty(obj.trajectory), 'Cannot plot since trajectory is empty');
 
             % Plots absolute position, velocity and acceleration of COG
@@ -184,10 +184,11 @@ classdef (Abstract) MotionSimulator < Simulator
     methods (Static)
         function PlotFrame(kinematics, plot_axis, fig_handle)
             if nargin < 3
-                fig_handle = figure;
+                figure;
+            else
+                figure(fig_handle);
             end
-
-            figure(fig_handle);
+            
             axis equal;
             axis(plot_axis);
             hold on;

@@ -12,11 +12,11 @@ classdef IDMinQuadCableForce < IDSolverFunction
         end
 
         function [Qf, id_exit_type, id_info] = resolve(obj, dynamics)
-            id_exit_type = IDExitType.NO_ERROR;
+            id_exit_type = IDSolverExitType.NO_ERROR;
             H = diag(obj.weights);
             f = zeros(length(obj.weights), 1);
             % M\ddot{q} + C + G + F_{ext} = -J^T f (constraint)
-            [A, b] = IDFunction.GetEoMConstraints(dynamics);
+            [A, b] = IDSolverFunction.GetEoMConstraints(dynamics);
             fmin = dynamics.cableDynamics.forcesMin;
             fmax = dynamics.cableDynamics.forcesMax;
 

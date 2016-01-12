@@ -164,7 +164,7 @@ classdef SystemDynamicsBodies < handle
     
     methods (Static)
         function b = LoadXmlObj(body_prop_xmlobj)
-            assert(strcmp(body_prop_xmlobj.getNodeName, 'links'), 'Root elemnt should be <links>');
+            assert(strcmp(body_prop_xmlobj.getNodeName, 'links'), 'Root element should be <links>');
             allLinkItems = body_prop_xmlobj.getChildNodes;
             
             num_links = allLinkItems.getLength;

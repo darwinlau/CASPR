@@ -12,7 +12,7 @@ classdef DynamicsSimulator < MotionSimulator
             ds@MotionSimulator(model);
         end
         
-        function plotCableForces(obj, cables_to_plot)
+        function plotCableForces(obj, cables_to_plot,figure_handles)
             assert(~isempty(obj.cableForces), 'Cannot plot since cableForces is empty');
             
             if nargin == 1 || isempty(cables_to_plot)
@@ -21,7 +21,11 @@ classdef DynamicsSimulator < MotionSimulator
             
             forces = cell2mat(obj.cableForces);
             
-            figure; 
+            if(nargin == 3)
+                figure(figure_handles); cla;
+            else
+                figure;
+            end
             plot(obj.timeVector, forces(cables_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); 
             title('Cable forces'); 
             
@@ -32,7 +36,7 @@ classdef DynamicsSimulator < MotionSimulator
 %             plot(obj.timeVector, forces(cables_to_plot, :), 'LineWidth', 1.5); title('Cable forces');
         end
         
-        function plotInteractionForceMagnitudes(obj, links_to_plot)
+        function plotInteractionForceMagnitudes(obj, links_to_plot,figure_handles)
             assert(~isempty(obj.interactionWrench), 'Cannot plot since interactionWrench is empty');
             
             if nargin == 1 || isempty(links_to_plot)
@@ -51,7 +55,11 @@ classdef DynamicsSimulator < MotionSimulator
                 end
             end
             
-            figure;
+            if(nargin == 3)
+                figure(figure_handles); cla;
+            else
+                figure;
+            end
             plot(obj.timeVector, forcesMag, 'LineWidth', 1.5, 'Color', 'k');
             title('Magnitude of interaction forces'); 
             

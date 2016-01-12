@@ -25,7 +25,7 @@ function varargout = UPCRA(varargin)
 
     % Edit the above text to modify the response to help UPCRA
 
-    % Last Modified by GUIDE v2.5 08-Jan-2016 11:17:31
+    % Last Modified by GUIDE v2.5 11-Jan-2016 12:14:36
 
     % Begin initialization code - DO NOT EDIT
     path_string = fileparts(mfilename('fullpath'));
@@ -120,7 +120,7 @@ function OpenMenuItem_Callback(hObject, eventdata, handles)
     if ~isequal(file, 0)
         open(file);
     end
-end
+end 
     
 % --------------------------------------------------------------------
 function PrintMenuItem_Callback(hObject, eventdata, handles)
@@ -216,6 +216,8 @@ function dynamics_button_Callback(hObject, eventdata, handles)
     % hObject    handle to dynamics_button (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
+    saveState(handles);
+    dynamicsGUI;
 end
 
 % Kinematics
@@ -262,9 +264,9 @@ function cable_popup_update(handles)
     model_config = ModelConfig(ModelConfigType.(['M_',model_type]));
     % Determine the cable sets
     cablesetsObj = model_config.cablesXmlObj.getElementsByTagName('cables').item(0).getElementsByTagName('cable_set');
-    cableset_str = cell(1,cablesetsObj.length);
+    cableset_str = cell(1,cablesetsObj.getLength);
     % Extract the identifies from the cable sets
-    for i =1 :cablesetsObj.length
+    for i =1 :cablesetsObj.getLength
         cablesetObj = cablesetsObj.item(i-1);
         cableset_str{i} = char(cablesetObj.getAttribute('id'));
     end
@@ -303,6 +305,3 @@ function loadState(handles)
         cable_popup_update(handles);
     end
 end
-
-
-
