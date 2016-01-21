@@ -5,12 +5,12 @@
 % Description    :
 
 % Clear the variables, command window, and all windows
-clc; clear; %close all;
+clc; clear; close all;
 
 % Set up the type of model, trajectory and the set of cables to be used
 % Following are some examples (feel free to add more):
 % 1) Planar model
-% model_config = ModelConfig(ModelConfigType.M_PLANAR_XY);
+% model_config = ModelConfig(ModelConfigType.M_SIMPLE_PLANAR_XY);
 % trajectory_id = 'x_simple';
 % cable_set_id = 'basic';
 % 2) Neck model
@@ -26,12 +26,12 @@ trajectory_xmlobj = model_config.getTrajectoryXmlObj(trajectory_id);
 % Load the SystemKinematicsDynamics object from the XML
 dynObj = SystemKinematicsDynamics.LoadXmlObj(bodies_xmlobj, cableset_xmlobj);
 
-%id_objective = IDObjectiveMinLinCableForce(ones(dynObj.numCables,1));
-%id_solver = IDSolverLinProg(id_objective, ID_LP_SolverType.MATLAB);
+id_objective = IDObjectiveMinLinCableForce(ones(dynObj.numCables,1));
+id_solver = IDSolverLinProg(id_objective, ID_LP_SolverType.MATLAB);
 
-id_objective = IDObjectiveMinQuadCableForce(ones(dynObj.numCables,1));
+%id_objective = IDObjectiveMinQuadCableForce(ones(dynObj.numCables,1));
 %id_objective = IDObjectiveMinInteractions(ones(6*dynObj.numLinks,1));
-id_solver = IDSolverQuadProg(id_objective, ID_QP_SolverType.OPTITOOLBOX_OOQP);
+%id_solver = IDSolverQuadProg(id_objective, ID_QP_SolverType.MATLAB);
 
 % Setup an inverse dynamics solver of choice (many examples below)
 %idsolver = IDMinLinCableForce(ones(dynObj.numCables,1));

@@ -12,13 +12,13 @@ clc; clear; close all;
 % Set up the type of model, trajectory and the set of cables to be used
 % Following are some examples (feel free to add more):
 % 1) Planar model
-model_config = ModelConfig(ModelConfigType.M_PLANAR_XY);
-trajectory_id = 'x_simple';
-cable_set_id = 'basic';
+% model_config = ModelConfig(ModelConfigType.M_SIMPLE_PLANAR_XY);
+% trajectory_id = 'x_simple';
+% cable_set_id = 'basic';
 % 2) Neck model
-% model_config = ModelConfig(ModelConfigType.M_NECK_8S);
-% trajectory_id = 'roll';
-% cable_set_id = 'opensim_vasavada';
+model_config = ModelConfig(ModelConfigType.M_NECK_8S);
+trajectory_id = 'roll';
+cable_set_id = 'opensim_vasavada';
 
 % The XML objects from the model config are created
 bodies_xmlobj = model_config.getBodiesProperiesXmlObj();
@@ -29,12 +29,13 @@ trajectory_xmlobj = model_config.getTrajectoryXmlObj(trajectory_id);
 dynObj = SystemKinematicsDynamics.LoadXmlObj(bodies_xmlobj, cableset_xmlobj);
 
 % Setup an inverse dynamics solver of choice (any should do)
-idsolver = IDMinQuadCableForce(ones(dynObj.numCables,1));
+id_objective = IDObjectiveMinQuadCableForce(ones(dynObj.numCables,1));
+id_solver = IDSolverQuadProg(id_objective, ID_QP_SolverType.OPTITOOLBOX_OOQP);
 
 % Setup the inverse dynamics and forward dynamics simulators
 disp('Start Setup Simulation');
 start_tic = tic;
-idsim = InverseDynamicsSimulator(dynObj, idsolver);
+idsim = InverseDynamicsSimulator(dynObj, id_solver);
 fdsim = ForwardDynamicsSimulator(dynObj);
 trajectory = JointTrajectory.LoadXmlObj(trajectory_xmlobj, dynObj);
 time_elapsed = toc(start_tic);
