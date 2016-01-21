@@ -8,6 +8,8 @@ classdef Spherical < Joint
         q_default = [1; 0; 0; 0];   % 0 angle rotation about z axis
         q_dot_default = [0; 0; 0];
         q_ddot_default = [0; 0; 0];
+        q_lb = [-1; -Inf; -Inf; -Inf];
+        q_ub = [1; Inf; Inf; Inf];
     end
     
     properties (Dependent)
@@ -25,10 +27,11 @@ classdef Spherical < Joint
     
     methods        
         function update(obj, q, q_dot, q_ddot)
-            if(isa(q,'double'))
-                assert(roundn(norm(q),-5) == 1, 'Invalid q, norm of quaternion orientation must equal to one.');
+            if(isa(q, 'double') && norm(q) ~= 1)
+                q_quat_norm = Quaternion(q(1), q(2), q(3), q(4)).normalise();
+                assert(roundn(norm(q_quat_norm),-5) == 1, 'Invalid q, norm of quaternion orientation must equal to one.');
             end
-            update@Joint(obj, q, q_dot, q_ddot);
+            update@Joint(obj, q_quat_norm.toVector(), q_dot, q_ddot);
         end
         
         function value = get.e0(obj)
@@ -78,11 +81,18 @@ classdef Spherical < Joint
         end
         
         % TODO: To complete
-        function [N_j,A] = QuadMatrix(q)
+        function [N_j,A] = QuadMatrix(~)
             N_j = zeros(Spherical.numDofs,Spherical.numDofs^2);
             A = zeros(6,Spherical.numDofs);
         end
         
+        % Perform a simple first order integral
+        function q = QIntegrate(q0, q_dot, dt)
+            q0_quat = Quaternion(q0(1), q0(2), q0(3), q0(4));
+            w_quat = Quaternion(0, q_dot(1), q_dot(2), q_dot(3));
+            q_quat = q0_quat * exp(0.5*w_quat*dt);
+            q = q_quat.toVector();
+        end
         
         function [q, q_dot, q_ddot] = GenerateTrajectory(q_s, ~, ~, q_e, ~, ~, total_time, time_step)
             time = 0:time_step:total_time;
@@ -97,8 +107,7 @@ classdef Spherical < Joint
             q_ddot = zeros(3, length(time));
             
             for t = 1:length(time)
-                % WHY NEGATIVE
-                q_0p = -1*quat_sp(t)*quat_0s;
+                q_0p = quat_sp(t)*quat_0s;
                 q_0p_dot = quat_sp_dot(t)*quat_0s;
                                 
                 w_quat = 2*q_0p_dot*inv(q_0p);

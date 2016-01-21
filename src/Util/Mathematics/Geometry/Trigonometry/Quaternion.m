@@ -78,15 +78,44 @@ classdef Quaternion
             q_c.q2 = -q.q2;
             q_c.q3 = -q.q3;
         end
+        
+        function q_e = exp(q)
+            e_p = exp(q.q0);
+            v = [q.q1; q.q2; q.q3];
+            q_0 = e_p * cos(norm(v));
+            if (norm(v) ~= 0)
+                q_1 = e_p * v(1) * sin(norm(v))/norm(v); 
+                q_2 = e_p * v(2) * sin(norm(v))/norm(v); 
+                q_3 = e_p * v(3) * sin(norm(v))/norm(v); 
+            else
+                q_1 = 0;
+                q_2 = 0;
+                q_3 = 0;
+            end
+            q_e = Quaternion(q_0, q_1, q_2, q_3);
+        end
+        
+        function q_vec = toVector(obj)
+            q_vec = [obj.q0; obj.q1; obj.q2; obj.q3];
+        end
+        
+        function q_out = normalise(obj)
+            if (abs(obj.q0) == 1)
+                q_out = Quaternion(obj.q0, 0, 0, 0);
+            else
+                A = sqrt((obj.q1^2 + obj.q2^2 + obj.q2^2)/(1-obj.q0^2));
+                q_out = Quaternion(obj.q0, obj.q1/A, obj.q2/A, obj.q3/A);
+            end
+        end
     end
     
     methods (Static)
         function q_0p = FromRotationMatrix(R_0p)
             q_0p = Quaternion;
             q_0p.q0 = 1/2*sqrt(1 + R_0p(1,1) + R_0p(2,2) + R_0p(3,3));
-            q_0p.q1 = (R_0p(2,3) - R_0p(3,2))/(4*q_0p.q0);
-            q_0p.q2 = (R_0p(3,1) - R_0p(1,3))/(4*q_0p.q0);
-            q_0p.q3 = (R_0p(1,2) - R_0p(2,1))/(4*q_0p.q0);
+            q_0p.q1 = (R_0p(3,2) - R_0p(2,3))/(4*q_0p.q0);
+            q_0p.q2 = (R_0p(1,3) - R_0p(3,1))/(4*q_0p.q0);
+            q_0p.q3 = (R_0p(2,1) - R_0p(1,2))/(4*q_0p.q0);
         end
         
         function q = FromAxisAngle(a)
@@ -114,14 +143,15 @@ classdef Quaternion
             q_dd.q3 = a.kz*(a_dd.th/2*cos(a.th/2) - a_d.th^2/4*sin(a.th/2));
         end
         
+        % Rotation ^0_pR
         function R_0p = ToRotationMatrix(q)
             q_0 = q.q0;
             q_1 = q.q1;
             q_2 = q.q2;
             q_3 = q.q3;
-            R_0p = [1-2*(q_2^2+q_3^2), 2*q_1*q_2+2*q_0*q_3, -2*q_0*q_2+2*q_1*q_3; ...
-                2*q_1*q_2-2*q_0*q_3, 1-2*(q_1^2+q_3^2), 2*q_0*q_1+2*q_2*q_3; ...
-                2*q_0*q_2+2*q_1*q_3, -2*q_0*q_1+2*q_2*q_3, 1-2*(q_1^2+q_2^2)];
+            R_0p = [1-2*(q_2^2+q_3^2), 2*q_1*q_2-2*q_0*q_3, 2*q_0*q_2+2*q_1*q_3; ...
+                2*q_1*q_2+2*q_0*q_3, 1-2*(q_1^2+q_3^2), -2*q_0*q_1+2*q_2*q_3; ...
+                -2*q_0*q_2+2*q_1*q_3, 2*q_0*q_1+2*q_2*q_3, 1-2*(q_1^2+q_2^2)];
         end
         
         function R_0p_d = ToRotationMatrixDeriv(q, qd)
@@ -133,9 +163,9 @@ classdef Quaternion
             q1_d = qd.q1;
             q2_d = qd.q2;
             q3_d = qd.q3;
-            R_0p_d = [-4*q2_d*q_2-4*q3_d*q_3, 2*q1_d*q_2+2*q_1*q2_d+2*q0_d*q_3+2*q_0*q3_d, -2*q0_d*q_2-2*q_0*q2_d+2*q1_d*q_3+2*q_1*q3_d; ...
-                2*q1_d*q_2+2*q_1*q2_d-2*q0_d*q_3-2*q_0*q3_d, -4*q1_d*q_1-4*q3_d*q_3, 2*q0_d*q_1+2*q_0*q1_d+2*q2_d*q_3+2*q_2*q3_d; ...
-                2*q0_d*q_2+2*q_0*q2_d+2*q1_d*q_3+2*q_1*q3_d, -2*q0_d*q_1-2*q_0*q1_d+2*q2_d*q_3+2*q_2*q3_d, -4*q1_d*q_1-4*q2_d*q_2];
+            R_0p_d = [-4*q2_d*q_2-4*q3_d*q_3, 2*q1_d*q_2+2*q_1*q2_d-2*q0_d*q_3-2*q_0*q3_d, 2*q0_d*q_2+2*q_0*q2_d+2*q1_d*q_3+2*q_1*q3_d; ...
+                2*q1_d*q_2+2*q_1*q2_d+2*q0_d*q_3+2*q_0*q3_d, -4*q1_d*q_1-4*q3_d*q_3, -2*q0_d*q_1-2*q_0*q1_d+2*q2_d*q_3+2*q_2*q3_d; ...
+                -2*q0_d*q_2-2*q_0*q2_d+2*q1_d*q_3+2*q_1*q3_d, 2*q0_d*q_1+2*q_0*q1_d+2*q2_d*q_3+2*q_2*q3_d, -4*q1_d*q_1-4*q2_d*q_2];
         end
         
         function R_0p_dd = ToRotationMatrixDoubleDeriv(q, qd, qdd)
@@ -151,9 +181,9 @@ classdef Quaternion
             q1_dd = qdd.q1;
             q2_dd = qdd.q2;
             q3_dd = qdd.q3;
-            R_0p_dd = [-4*q2_dd*q_2-4*q2_d^2-4*q3_dd*q_3-4*q3_d^2, 2*q1_dd*q2_d+4*q1_d*q2_d+2*q_1*q2_dd+2*q0_dd*q_3+4*q0_d*q3_d+2*q_0*q3_dd, -2*q0_dd*q_2-4*q0_d*q2_d-2*q_0*q2_dd+2*q1_dd*q_3+4*q1_d*q3_d+2*q_1*q3_dd; ...
-                2*q1_dd*q_2+4*q1_d*q2_d+2*q_1*q2_dd-2*q0_dd*q_3-4*q0_d*q3_d-2*q_0*q3_dd, -4*q1_dd*q_1-4*q1_d^2-4*q3_dd*q_3-4*q3_d^2, 2*q0_dd*q_1+4*q0_d*q1_d+2*q_0*q1_dd+2*q2_dd*q_3+4*q2_d*q3_d+2*q_2*q3_dd; ...
-                2*q0_dd*q_2+4*q0_d*q2_d+2*q_0*q2_dd+2*q1_dd*q_3+4*q1_d*q3_d+2*q_1*q3_dd, -2*q0_dd*q_1-4*q0_d*q1_d-2*q_0*q1_dd+2*q2_dd*q_3+4*q2_d*q3_d+2*q_2*q3_dd, -4*q1_dd*q_1-4*q1_d^2-4*q2_dd*q_2-4*q2_d^2];
+            R_0p_dd = [-4*q2_dd*q_2-4*q2_d^2-4*q3_dd*q_3-4*q3_d^2, 2*q1_dd*q_2+4*q1_d*q2_d+2*q_1*q2_dd-2*q0_dd*q_3-4*q0_d*q3_d-2*q_0*q3_dd, 2*q0_dd*q_2+4*q0_d*q2_d+2*q_0*q2_dd+2*q1_dd*q_3+4*q1_d*q3_d+2*q_1*q3_dd; ...
+                2*q1_dd*q2_d+4*q1_d*q2_d+2*q_1*q2_dd+2*q0_dd*q_3+4*q0_d*q3_d+2*q_0*q3_dd, -4*q1_dd*q_1-4*q1_d^2-4*q3_dd*q_3-4*q3_d^2, -2*q0_dd*q_1-4*q0_d*q1_d-2*q_0*q1_dd+2*q2_dd*q_3+4*q2_d*q3_d+2*q_2*q3_dd; ...
+                -2*q0_dd*q_2-4*q0_d*q2_d-2*q_0*q2_dd+2*q1_dd*q_3+4*q1_d*q3_d+2*q_1*q3_dd, 2*q0_dd*q_1+4*q0_d*q1_d+2*q_0*q1_dd+2*q2_dd*q_3+4*q2_d*q3_d+2*q_2*q3_dd, -4*q1_dd*q_1-4*q1_d^2-4*q2_dd*q_2-4*q2_d^2];
         end
         
         function [q, q_d, q_dd] = GenerateInterpolation(q_s, q_e, time)
