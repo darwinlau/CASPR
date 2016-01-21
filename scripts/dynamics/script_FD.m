@@ -16,9 +16,18 @@ clc; clear; close all;
 % trajectory_id = 'x_simple';
 % cable_set_id = 'basic';
 % 2) Neck model
-model_config = ModelConfig(ModelConfigType.M_NECK_8S);
-trajectory_id = 'roll';
-cable_set_id = 'opensim_vasavada';
+% model_config = ModelConfig(ModelConfigType.M_NECK_8S);
+% trajectory_id = 'roll';
+% cable_set_id = 'opensim_vasavada';
+% 3) TUM Myorob arm model
+% model_config = ModelConfig(ModelConfigType.M_MYOROB_SHOULDER);
+% trajectory_id = 'traj_1';
+% cable_set_id = 'default';
+% 4) IPAnema model
+model_config = ModelConfig(ModelConfigType.M_IPANEMA_2);
+trajectory_id = 'traj_z_up';
+cable_set_id = 'default';
+
 
 % The XML objects from the model config are created
 bodies_xmlobj = model_config.getBodiesProperiesXmlObj();
@@ -30,7 +39,7 @@ dynObj = SystemKinematicsDynamics.LoadXmlObj(bodies_xmlobj, cableset_xmlobj);
 
 % Setup an inverse dynamics solver of choice (any should do)
 id_objective = IDObjectiveMinQuadCableForce(ones(dynObj.numCables,1));
-id_solver = IDSolverQuadProg(id_objective, ID_QP_SolverType.OPTITOOLBOX_OOQP);
+id_solver = IDSolverQuadProg(id_objective, ID_QP_SolverType.OPTITOOLBOX_IPOPT);
 
 % Setup the inverse dynamics and forward dynamics simulators
 disp('Start Setup Simulation');
@@ -58,3 +67,6 @@ fprintf('End Running Forward Dynamics Simulation : %f seconds\n', time_elapsed);
 % Finally compare the results
 idsim.plotJointSpace();
 fdsim.plotJointSpace();
+% 
+% plot_axis = [-5 5 -5 5 0 5];
+% idsim.plotMovie(plot_axis, [fileparts(mfilename('fullpath')), '\test.avi'], 2, 500, 640);
