@@ -189,12 +189,12 @@ classdef (Abstract) MotionSimulator < Simulator
                 figure(fig_handle);
             end
             
-            axis equal;
             axis(plot_axis);
             hold on;
             grid on;
             xlabel('x');
             ylabel('y');
+            zlabel('z');
 
             body_kinematics = kinematics.bodyKinematics;
             for k = 1:body_kinematics.numLinks
@@ -225,7 +225,6 @@ classdef (Abstract) MotionSimulator < Simulator
                     line([r_OAa0(1) r_OAb0(1)], [r_OAa0(2) r_OAb0(2)], [r_OAa0(3) r_OAb0(3)], 'Color', 'r', 'LineWidth', 1);
                 end
             end
-
             hold off;
         end
     end

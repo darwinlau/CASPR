@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE cables [
+  <!ATTLIST solver_class id ID #REQUIRED>
+]>
+<simulator>
+	<solver_class id="IDSolverLinProg">
+		<solver_type_enum>ID_LP_SolverType</solver_type_enum>
+		<objectives>
+			<objective>IDObjectiveMinLinCableForce</objective>			
+		</objectives>
+		<constraints>
+			<constraint>IDConstraintInteractionAngleCone</constraint>
+		</constraints>
+	</solver_class>
+	<solver_class id="IDSolverQuadProg">
+		<solver_type_enum>ID_QP_SolverType</solver_type_enum>
+		<objectives>
+			<objective>IDObjectiveMinInteractions</objective>			
+			<objective>IDObjectiveMinQuadCableForce</objective>			
+		</objectives>
+		<constraints>
+			<constraint>IDConstraintInteractionAngleCone</constraint>
+		</constraints>
+	</solver_class>
+	<solver_class id="IDSolverFeasiblePolygon">
+		<solver_type_enum>ID_FP_SolverType</solver_type_enum>
+	</solver_class>
+	<plot_functions>
+		<plot_type>plotCableForces</plot_type>
+		<plot_type>plotInteractionForceMagnitudes</plot_type>
+	</plot_functions>
+</simulator>

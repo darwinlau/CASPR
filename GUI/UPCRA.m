@@ -25,11 +25,11 @@ function varargout = UPCRA(varargin)
 
     % Edit the above text to modify the response to help UPCRA
 
-    % Last Modified by GUIDE v2.5 11-Jan-2016 12:14:36
+    % Last Modified by GUIDE v2.5 14-Jan-2016 16:10:19
 
     % Begin initialization code - DO NOT EDIT
     path_string = fileparts(mfilename('fullpath'));
-    path_string = path_string(1:strfind(path_string, 'scripts')-2);
+    path_string = path_string(1:strfind(path_string, 'GUI')-2);
     p = path;
     if(isempty(strfind(p,path_string)))
         addpath(genpath(path_string))
@@ -71,10 +71,9 @@ function UPCRA_OpeningFcn(hObject, ~, handles, varargin)
     % Update handles structure
     guidata(hObject, handles);
     
-    % Load previous information
-    plot(rand(5)); % This is temporarily here for sizing
+%     Load previous information
+    plot(rand(5)); % Hack to fix size.  Ideally removed at some point.
     loadState(handles);
-
     % UIWAIT makes UPCRA wait for user response (see UIRESUME)
     % uiwait(handles.figure1);
 end
@@ -91,7 +90,7 @@ function varargout = UPCRA_OutputFcn(~, ~, handles)
 end
 
 % --- Executes when user attempts to close figure1.
-function figure1_CloseRequestFcn(hObject, eventdata, handles)
+function figure1_CloseRequestFcn(hObject, ~, handles) %#ok<DEFNU>
     % hObject    handle to figure1 (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
@@ -105,14 +104,14 @@ end
 %% Menu Functions
 %--------------------------------------------------------------------------
 % --------------------------------------------------------------------
-function FileMenu_Callback(hObject, eventdata, handles)
+function FileMenu_Callback(~, ~, ~) %#ok<DEFNU>
     % hObject    handle to FileMenu (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
 end
 
 % --------------------------------------------------------------------
-function OpenMenuItem_Callback(hObject, eventdata, handles)
+function OpenMenuItem_Callback(~, ~, ~)  %#ok<DEFNU>
     % hObject    handle to OpenMenuItem (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
@@ -123,7 +122,7 @@ function OpenMenuItem_Callback(hObject, eventdata, handles)
 end 
     
 % --------------------------------------------------------------------
-function PrintMenuItem_Callback(hObject, eventdata, handles)
+function PrintMenuItem_Callback(~, ~, handles) %#ok<DEFNU>
     % hObject    handle to PrintMenuItem (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
@@ -131,7 +130,7 @@ function PrintMenuItem_Callback(hObject, eventdata, handles)
 end
 
 % --------------------------------------------------------------------
-function CloseMenuItem_Callback(hObject, eventdata, handles)
+function CloseMenuItem_Callback(~, ~, handles) %#ok<DEFNU>
     % hObject    handle to CloseMenuItem (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
@@ -149,7 +148,7 @@ end
 %--------------------------------------------------------------------------
 % Model Popup
 % --- Executes on selection change in model_popup.
-function model_popup_Callback(hObject, eventdata, handles)
+function model_popup_Callback(~, ~, handles) %#ok<DEFNU>
     % hObject    handle to model_popup (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
@@ -160,7 +159,7 @@ function model_popup_Callback(hObject, eventdata, handles)
 end
 
 % --- Executes during object creation, after setting all properties.
-function model_popup_CreateFcn(hObject, eventdata, handles)
+function model_popup_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
     % hObject    handle to model_popup (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    empty - handles not created until after all CreateFcns called
@@ -182,19 +181,19 @@ end
 
 % Cable Popup
 % --- Executes on selection change in cable_popup.
-function cable_popup_Callback(hObject, eventdata, handles)
+function cable_popup_Callback(~, ~, handles) %#ok<DEFNU>
     % hObject    handle to cable_popup (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
 
     % Hints: contents = cellstr(get(hObject,'String')) returns cable_popup contents as cell array
     %        contents{get(hObject,'Value')} returns selected item from cable_popup
-    generate_dynamic_object(handles);
+    generate_kinematic_dynamic_object(handles);
     % ADD PLOTTING OF THE OBJECT
 end
 
 % --- Executes during object creation, after setting all properties.
-function cable_popup_CreateFcn(hObject, eventdata, handles)
+function cable_popup_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
     % hObject    handle to cable_popup (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    empty - handles not created until after all CreateFcns called
@@ -212,7 +211,7 @@ end
 %--------------------------------------------------------------------------
 % Dynamics 
 % --- Executes on button press in dynamics_button.
-function dynamics_button_Callback(hObject, eventdata, handles)
+function dynamics_button_Callback(~, ~, handles) %#ok<DEFNU>
     % hObject    handle to dynamics_button (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
@@ -222,15 +221,17 @@ end
 
 % Kinematics
 % --- Executes on button press in kinematics_button.
-function kinematics_button_Callback(hObject, eventdata, handles)
+function kinematics_button_Callback(~, ~, handles) %#ok<DEFNU>
     % hObject    handle to kinematics_button (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
+    saveState(handles);
+    kinematicsGUI;
 end
 
 % Workspace
 % --- Executes on button press in workspace_button.
-function workspace_button_Callback(hObject, eventdata, handles)
+function workspace_button_Callback(~, ~, handles) %#ok<DEFNU>
     % hObject    handle to workspace_button (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
@@ -238,10 +239,22 @@ function workspace_button_Callback(hObject, eventdata, handles)
     workspaceGUI;
 end
 
+% --- Executes on button press in update_button.
+function update_button_Callback(~, ~, handles) %#ok<DEFNU>
+% hObject    handle to update_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    dynObj = getappdata(handles.cable_popup,'dynObj');
+    q_data = get(handles.qtable,'Data');
+    dynObj.update(q_data',zeros(dynObj.numDofVars,1),zeros(dynObj.numDofVars,1));
+    cla;
+    MotionSimulator.PlotFrame(dynObj, [-10,10,-10,10,-10,10],handles.figure1);
+end
+
 %--------------------------------------------------------------------------
 % Additional Functions
 %--------------------------------------------------------------------------
-function generate_dynamic_object(handles)
+function generate_kinematic_dynamic_object(handles)
     % Generate the dynamics object
     contents = cellstr(get(handles.model_popup,'String'));
     model_type = contents{get(handles.model_popup,'Value')};
@@ -251,10 +264,13 @@ function generate_dynamic_object(handles)
     cable_set_id = contents{get(handles.cable_popup,'Value')};
     cableset_xmlobj = model_config.getCableSetXmlObj(cable_set_id);
     dynObj = SystemKinematicsDynamics.LoadXmlObj(bodies_xmlobj, cableset_xmlobj);
+    kinObj = SystemKinematics.LoadXmlObj(bodies_xmlobj, cableset_xmlobj);
     cla;
     MotionSimulator.PlotFrame(dynObj, [-10,10,-10,10,-10,10],handles.figure1);
     % Store the dynamics object
     setappdata(handles.cable_popup,'dynObj',dynObj);
+    setappdata(handles.cable_popup,'kinObj',kinObj);
+    format_q_table(dynObj.numDofs,handles.qtable);
 end
 
 function cable_popup_update(handles)
@@ -272,7 +288,7 @@ function cable_popup_update(handles)
     end
     set(handles.cable_popup, 'Value', 1);
     set(handles.cable_popup, 'String', cableset_str);
-    generate_dynamic_object(handles);
+    generate_kinematic_dynamic_object(handles);
 end
 
 function saveState(handles)
@@ -284,16 +300,18 @@ function saveState(handles)
     contents                    =   get(handles.cable_popup,'String');
     state.cable_text            =   contents{state.cable_popup_value};
     dynObj                      =   getappdata(handles.cable_popup,'dynObj');
+    kinObj                      =   getappdata(handles.cable_popup,'kinObj');
     state.dynObj                =   dynObj;
+    state.kinObj                =   kinObj;
     path_string = fileparts(mfilename('fullpath'));
-    path_string = path_string(1:strfind(path_string, 'scripts')-2);
+    path_string = path_string(1:strfind(path_string, 'GUI')-2);
     save([path_string,'\logs\upcra_gui_state.mat'],'state')
 end
 
 function loadState(handles)
     % load all of the settings and initialise the values to match
     path_string = fileparts(mfilename('fullpath'));
-    path_string = path_string(1:strfind(path_string, 'scripts')-2);
+    path_string = path_string(1:strfind(path_string, 'GUI')-2);
     file_name = [path_string,'\logs\upcra_gui_state.mat'];
     if(exist(file_name,'file'))
         load(file_name);
@@ -304,4 +322,15 @@ function loadState(handles)
         set(handles.model_popup,'value',1);
         cable_popup_update(handles);
     end
+end
+
+function format_q_table(numDofs,qtable)
+    set(qtable,'Data',zeros(1,numDofs));
+    set(qtable,'ColumnWidth',{30});
+    set(qtable,'ColumnEditable',true(1,numDofs));
+    column_name = cell(1,numDofs);
+    for i = 1:numDofs
+        column_name{i} = ['q',num2str(i)];
+    end
+    set(qtable,'ColumnName',column_name);
 end

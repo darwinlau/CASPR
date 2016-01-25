@@ -25,7 +25,7 @@ function varargout = dynamicsGUI(varargin)
 
     % Edit the above text to modify the response to help dynamicsGUI
 
-    % Last Modified by GUIDE v2.5 11-Jan-2016 15:59:14
+    % Last Modified by GUIDE v2.5 14-Jan-2016 15:58:41
 
     % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
@@ -63,12 +63,8 @@ function dynamicsGUI_OpeningFcn(hObject, eventdata, handles, varargin)
 
     % Update handles structure
     guidata(hObject, handles);
-
-    % This sets up the initial plot - only do when we are invisible
-    % so window can get raised using dynamicsGUI.
-    if strcmp(get(hObject,'Visible'),'off')
-        plot(rand(5));
-    end
+    
+    % Load the state
     loadState(handles);
     trajectory_popup_Update(hObject, eventdata, handles);
 
@@ -77,7 +73,7 @@ function dynamicsGUI_OpeningFcn(hObject, eventdata, handles, varargin)
 end
 
 % --- Outputs from this function are returned to the command line.
-function varargout = dynamicsGUI_OutputFcn(hObject, eventdata, handles)
+function varargout = dynamicsGUI_OutputFcn(~, ~, handles)
     % varargout  cell array for returning output args (see VARARGOUT);
     % hObject    handle to figure
     % eventdata  reserved - to be defined in a future version of MATLAB
@@ -88,7 +84,7 @@ function varargout = dynamicsGUI_OutputFcn(hObject, eventdata, handles)
 end
 
 % --- Executes when user attempts to close figure1.
-function figure1_CloseRequestFcn(hObject, eventdata, handles)
+function figure1_CloseRequestFcn(hObject, ~, handles) %#ok<DEFNU>
     % hObject    handle to figure1 (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
@@ -103,14 +99,14 @@ end
 %% Menu Functions
 %--------------------------------------------------------------------------
 % --------------------------------------------------------------------
-function FileMenu_Callback(hObject, eventdata, handles)
+function FileMenu_Callback(~, ~, ~) %#ok<DEFNU>
     % hObject    handle to FileMenu (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
 end
 
 % --------------------------------------------------------------------
-function OpenMenuItem_Callback(hObject, eventdata, handles)
+function OpenMenuItem_Callback(~, ~, ~) %#ok<DEFNU>
     % hObject    handle to OpenMenuItem (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
@@ -121,7 +117,7 @@ function OpenMenuItem_Callback(hObject, eventdata, handles)
 end
 
 % --------------------------------------------------------------------
-function PrintMenuItem_Callback(hObject, eventdata, handles)
+function PrintMenuItem_Callback(~, ~, handles) %#ok<DEFNU>
     % hObject    handle to PrintMenuItem (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
@@ -129,7 +125,7 @@ function PrintMenuItem_Callback(hObject, eventdata, handles)
 end
 
 % --------------------------------------------------------------------
-function CloseMenuItem_Callback(hObject, eventdata, handles)
+function CloseMenuItem_Callback(~, ~, handles) %#ok<DEFNU>
     % hObject    handle to CloseMenuItem (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
@@ -148,7 +144,7 @@ end
 %--------------------------------------------------------------------------
 % --- Executes on selection change in popupmenu1.
 % --- Executes on selection change in trajectory_popup.
-function trajectory_popup_Callback(hObject, eventdata, handles)
+function trajectory_popup_Callback(~, ~, ~) %#ok<DEFNU>
     % hObject    handle to trajectory_popup (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
@@ -158,7 +154,7 @@ function trajectory_popup_Callback(hObject, eventdata, handles)
     
 end
 
-function trajectory_popup_Update(hObject, eventdata, handles)
+function trajectory_popup_Update(~, ~, handles)
     contents = cellstr(get(handles.model_text,'String'));
     model_type = contents{1};
     model_config = ModelConfig(ModelConfigType.(['M_',model_type]));
@@ -176,7 +172,7 @@ function trajectory_popup_Update(hObject, eventdata, handles)
 end
 
 % --- Executes during object creation, after setting all properties.
-function trajectory_popup_CreateFcn(hObject, eventdata, handles)
+function trajectory_popup_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
     % hObject    handle to trajectory_popup (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    empty - handles not created until after all CreateFcns called
@@ -190,7 +186,7 @@ function trajectory_popup_CreateFcn(hObject, eventdata, handles)
 end
 
 % --- Executes on selection change in dynamics_popup.
-function dynamics_popup_Callback(hObject, eventdata, handles)
+function dynamics_popup_Callback(~, ~, ~) %#ok<DEFNU>
     % hObject    handle to dynamics_popup (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
@@ -201,7 +197,7 @@ end
 
 
 % --- Executes during object creation, after setting all properties.
-function dynamics_popup_CreateFcn(hObject, eventdata, handles)
+function dynamics_popup_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
     % hObject    handle to dynamics_popup (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    empty - handles not created until after all CreateFcns called
@@ -216,7 +212,7 @@ function dynamics_popup_CreateFcn(hObject, eventdata, handles)
 end
 
 % --- Executes on selection change in solver_class_popup.
-function solver_class_popup_Callback(hObject, eventdata, handles)
+function solver_class_popup_Callback(~, ~, handles) %#ok<DEFNU>
     % hObject    handle to solver_class_popup (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
@@ -229,7 +225,7 @@ function solver_class_popup_Callback(hObject, eventdata, handles)
 end
 
 % --- Executes during object creation, after setting all properties.
-function solver_class_popup_CreateFcn(hObject, eventdata, handles)
+function solver_class_popup_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
     % hObject    handle to solver_class_popup (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    empty - handles not created until after all CreateFcns called
@@ -240,24 +236,22 @@ function solver_class_popup_CreateFcn(hObject, eventdata, handles)
         set(hObject,'BackgroundColor','white');
     end
     path_string = fileparts(mfilename('fullpath'));
-    path_string = path_string(1:strfind(path_string, 'scripts')-2);
-    dir_files = dir([path_string,'\src\Analysis\InverseDynamics\Solvers']);
-    dir_files_temp = cell(length(dir_files)-3,1); j =0;
-    for i=1:length(dir_files)
-        if((~dir_files(i).isdir)&&(~strcmp(dir_files(i).name,'IDSolverExitType.m')))
-            l_n = length(dir_files(i).name);
-            dir_files_temp{j+1} = char(dir_files(i).name(9:l_n-2));
-            j = j+1;
-        end
+    path_string = path_string(1:strfind(path_string, 'GUI')-2);
+    settingsXMLObj =  XmlOperations.XmlReadRemoveIndents([path_string,'\GUI\XML\dynamicsXML.xml']);
+    setappdata(hObject,'settings',settingsXMLObj);
+    solversObj = settingsXMLObj.getElementsByTagName('simulator').item(0).getElementsByTagName('solver_class');
+    solver_str = cell(1,solversObj.getLength);
+    % Extract the identifies from the cable sets
+    for i =1:solversObj.getLength
+        solverObj = solversObj.item(i-1);
+        solver_str{i} = char(solverObj.getAttribute('id'));
     end
-    dir_files = dir_files_temp(1:j);
-    set(hObject, 'String', dir_files);
-    set(hObject, 'Value', 1);
+    set(hObject, 'String', solver_str);
 end
 
 
 % --- Executes on selection change in objective_popup.
-function objective_popup_Callback(hObject, eventdata, handles)
+function objective_popup_Callback(~, ~, ~) %#ok<DEFNU>
     % hObject    handle to objective_popup (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
@@ -267,35 +261,29 @@ function objective_popup_Callback(hObject, eventdata, handles)
 end
 
 function objective_popup_update(hObject,handles)
-    if(nargin == 1)
-        subfolder = 'Linear';
+    contents = cellstr(get(handles.solver_class_popup,'String'));
+    solver_class_id = contents{get(handles.solver_class_popup,'Value')};
+    settings = getappdata(handles.solver_class_popup,'settings');
+    solverObj = settings.getElementById(solver_class_id);
+    objectivesUnfiltered = solverObj.getElementsByTagName('objectives').item(0);
+    if(isempty(objectivesUnfiltered))
+        set(hObject,'Value',1);
+        set(hObject,'String',{' '});
     else
-        contents = cellstr(get(handles.solver_class_popup,'String'));
-        solver_class = contents{get(handles.solver_class_popup,'Value')};
-        if(strcmp(solver_class,'LinProg'))
-            subfolder = 'Linear';
-        else
-            subfolder = 'Quadratic';
+        objectivesObj = objectivesUnfiltered.getElementsByTagName('objective');
+        objective_str = cell(1,objectivesObj.getLength);
+        % Extract the identifies from the cable sets
+        for i =1:objectivesObj.getLength
+            objectiveObj = objectivesObj.item(i-1);
+            objective_str{i} = char(objectiveObj.getFirstChild.getData);
         end
+        set(hObject,'Value',1);
+        set(hObject, 'String', objective_str);
     end
-    path_string = fileparts(mfilename('fullpath'));
-    path_string = path_string(1:strfind(path_string, 'scripts')-2);
-    dir_files = dir([path_string,'\src\Analysis\InverseDynamics\Formulation\Objectives\',subfolder]);
-    dir_files_temp = cell(length(dir_files)-2,1); j =0;
-    for i=1:length(dir_files)
-        if((~dir_files(i).isdir))
-            l_n = length(dir_files(i).name);
-            dir_files_temp{j+1} = char(dir_files(i).name(12:l_n-2));
-            j = j+1;
-        end
-    end
-    dir_files = dir_files_temp(1:j);
-    set(hObject, 'Value', 1);
-    set(hObject, 'String', dir_files);
 end
 
 % --- Executes during object creation, after setting all properties.
-function objective_popup_CreateFcn(hObject, eventdata, handles)
+function objective_popup_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
     % hObject    handle to objective_popup (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    empty - handles not created until after all CreateFcns called
@@ -305,11 +293,10 @@ function objective_popup_CreateFcn(hObject, eventdata, handles)
     if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
         set(hObject,'BackgroundColor','white');
     end
-    objective_popup_update(hObject);
 end
 
 % --- Executes on selection change in solver_type_popup.
-function solver_type_popup_Callback(hObject, eventdata, handles)
+function solver_type_popup_Callback(~, ~, ~) %#ok<DEFNU>
     % hObject    handle to solver_type_popup (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
@@ -319,28 +306,24 @@ function solver_type_popup_Callback(hObject, eventdata, handles)
 end
 
 function solver_type_popup_update(hObject,handles)
-    if(nargin == 1)
-        e_list      =   enumeration('ID_LP_SolverType');
-    else
-        contents = cellstr(get(handles.solver_class_popup,'String'));
-        solver_class = contents{get(handles.solver_class_popup,'Value')};
-        if(strcmp(solver_class,'LinProg'))
-            e_list      =   enumeration('ID_LP_SolverType');
-        else
-            e_list      =   enumeration('ID_QP_SolverType');
-        end
-    end
+    contents = cellstr(get(handles.solver_class_popup,'String'));
+    solver_class_id = contents{get(handles.solver_class_popup,'Value')};
+    settings = getappdata(handles.solver_class_popup,'settings');
+    solverObj = settings.getElementById(solver_class_id);
+    enum_file = solverObj.getElementsByTagName('solver_type_enum').item(0).getFirstChild.getData;
+    e_list = enumeration(char(enum_file));
     e_n         =   length(e_list);
     e_list_str  =   cell(1,e_n);
     for i=1:e_n
         temp_str = char(e_list(i));
         e_list_str{i} = temp_str(1:length(temp_str));
     end
+    set(hObject,'Value',1);
     set(hObject, 'String', e_list_str);
 end
 
 % --- Executes during object creation, after setting all properties.
-function solver_type_popup_CreateFcn(hObject, eventdata, handles)
+function solver_type_popup_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
     % hObject    handle to solver_type_popup (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    empty - handles not created until after all CreateFcns called
@@ -350,22 +333,22 @@ function solver_type_popup_CreateFcn(hObject, eventdata, handles)
     if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
         set(hObject,'BackgroundColor','white');
     end
-    solver_type_popup_update(hObject)
 end
 
 % --- Executes on selection change in plot_type_popup.
-function plot_type_popup_Callback(hObject, eventdata, handles)
+function plot_type_popup_Callback(~, ~, ~) %#ok<DEFNU>
     % hObject    handle to plot_type_popup (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
 
     % Hints: contents = cellstr(get(hObject,'String')) returns plot_type_popup contents as cell array
     %        contents{get(hObject,'Value')} returns selected item from plot_type_popup
+    
 end
 
 
 % --- Executes during object creation, after setting all properties.
-function plot_type_popup_CreateFcn(hObject, eventdata, handles)
+function plot_type_popup_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
     % hObject    handle to plot_type_popup (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    empty - handles not created until after all CreateFcns called
@@ -375,21 +358,22 @@ function plot_type_popup_CreateFcn(hObject, eventdata, handles)
     if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
         set(hObject,'BackgroundColor','white');
     end
-    % AT A LATER TIME THIS WILL BE CHANGED TO INCLUDE OTHER PLOTS
-    m = methods('InverseDynamicsSimulator');
-    plot_list = cell(length(m),1);j = 0;
-    for i =1:length(m)
-        if(~isempty(strfind(m{i},'plot')))
-            plot_list{j+1} = m{i};
-            j = j+1;
-        end
+    path_string = fileparts(mfilename('fullpath'));
+    path_string = path_string(1:strfind(path_string, 'GUI')-2);
+    settingsXMLObj =  XmlOperations.XmlReadRemoveIndents([path_string,'\GUI\XML\dynamicsXML.xml']);
+    plotsObj = settingsXMLObj.getElementsByTagName('simulator').item(0).getElementsByTagName('plot_functions').item(0).getElementsByTagName('plot_type');
+    plot_str = cell(1,plotsObj.getLength);
+    % Extract the identifies from the cable sets
+    for i =1:plotsObj.getLength
+        plotObj = plotsObj.item(i-1);
+        plot_str{i} = char(plotObj.getFirstChild.getData);
     end
-    plot_list = plot_list(1:j);
-    set(hObject, 'String', plot_list);
+    set(hObject,'Value',1);
+    set(hObject, 'String', plot_str);
 end
 
 % --- Executes on selection change in constraint_popup.
-function constraint_popup_Callback(hObject, eventdata, handles)
+function constraint_popup_Callback(~, ~, ~) %#ok<DEFNU>
     % hObject    handle to constraint_popup (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
@@ -399,28 +383,31 @@ function constraint_popup_Callback(hObject, eventdata, handles)
 end
 
 function constraint_popup_update(hObject,handles)
-    % This will be modified later to be more intelligent
-    subfolder = 'Linear';
-    path_string = fileparts(mfilename('fullpath'));
-    path_string = path_string(1:strfind(path_string, 'scripts')-2);
-    dir_files = dir([path_string,'\src\Analysis\InverseDynamics\Formulation\Constraints\',subfolder]);
-    dir_files_temp = cell(length(dir_files)-3,1); j =1;
-    dir_files_temp(1) = {' '};
-    for i=1:length(dir_files)
-        if((~dir_files(i).isdir))
-            l_n = length(dir_files(i).name);
-            dir_files_temp{j+1} = char(dir_files(i).name(13:l_n-2));
-            j = j+1;
+    contents = cellstr(get(handles.solver_class_popup,'String'));
+    solver_class_id = contents{get(handles.solver_class_popup,'Value')};
+    settings = getappdata(handles.solver_class_popup,'settings');
+    solverObj = settings.getElementById(solver_class_id);
+    constraintsUnfiltered = solverObj.getElementsByTagName('constraints').item(0);
+    if(isempty(constraintsUnfiltered))
+        set(hObject,'Value',1);
+        set(hObject,'String',{' '});
+    else
+        constraintsObj = solverObj.getElementsByTagName('constraints').item(0).getElementsByTagName('constraint');
+        constraint_str = cell(1,constraintsObj.getLength+1);
+        % Extract the identifies from the cable sets
+        constraint_str{1} = ' ';
+        for i =1:constraintsObj.getLength
+            constraintObj = constraintsObj.item(i-1);
+            constraint_str{i+1} = char(constraintObj.getFirstChild.getData);
         end
+        set(hObject,'Value',1);
+        set(hObject, 'String', constraint_str);
     end
-    dir_files = dir_files_temp(1:j);
-    set(hObject, 'Value', 1);
-    set(hObject, 'String', dir_files);
 end
 
 
 % --- Executes during object creation, after setting all properties.
-function constraint_popup_CreateFcn(hObject, eventdata, handles)
+function constraint_popup_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
     % hObject    handle to constraint_popup (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    empty - handles not created until after all CreateFcns called
@@ -430,7 +417,6 @@ function constraint_popup_CreateFcn(hObject, eventdata, handles)
     if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
         set(hObject,'BackgroundColor','white');
     end
-    constraint_popup_update(hObject)
 end 
 
 
@@ -438,7 +424,7 @@ end
 %% Push Buttons
 %--------------------------------------------------------------------------
 % --- Executes on button press in run_button.
-function run_button_Callback(hObject, eventdata, handles)
+function run_button_Callback(~, ~, handles) %#ok<DEFNU>
     % hObject    handle to run_button (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
@@ -460,54 +446,49 @@ function run_button_Callback(hObject, eventdata, handles)
 end
 
 % --- Executes on button press in save_button.
-function save_button_Callback(hObject, eventdata, handles)
+function save_button_Callback(~, ~, handles) %#ok<DEFNU>
     % hObject    handle to save_button (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
     path_string = fileparts(mfilename('fullpath'));
-    path_string = path_string(1:strfind(path_string, 'scripts')-2);
+    path_string = path_string(1:strfind(path_string, 'GUI')-2);
     file_name = [path_string,'\logs\*.mat'];
     [file,path] = uiputfile(file_name,'Save file name');
     saveState(handles,[path,file]);
 end
 
 % --- Executes on button press in load_button.
-function load_button_Callback(hObject, eventdata, handles)
+function load_button_Callback(~, ~, handles) %#ok<DEFNU>
     % hObject    handle to load_button (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
     path_string = fileparts(mfilename('fullpath'));
-    path_string = path_string(1:strfind(path_string, 'scripts')-2);
+    path_string = path_string(1:strfind(path_string, 'GUI')-2);
     file_name = [path_string,'\logs\*.mat'];
-    load(settings)
+    load(file_name);
     mp_text = get(handles.model_text,'String');
     cs_text = get(handles.cable_text,'String');
-    if(exist(file_name,'file'))
-        load(file_name);
-        mp_text = get(handles.model_text,'String');
-        cs_text = get(handles.cable_text,'String');
-        if(strcmp(mp_text,state.model_text)&&strcmp(cs_text,state.cable_text))
-            set(handles.trajectory_popup,'value',state.trajectory_popup_vale);
-            set(handles.dynamics_popup,'value',state.dynamics_popup_vale);
-            set(handles.solver_class_popup,'value',state.solver_class_popup);
-            solver_type_popup_update(handles.solver_type_popup,handles);
-            objective_popup_update(handles.objective_popup,handles);
-            constraint_popup_update(handles.constraint_popup,handles);
-            set(handles.solver_type_popup,'value',state.solver_type_popup);
-            set(handles.objective_popup,'value',state.objective_popup);
-            set(handles.constraint_popup,'value',state.constraint_popup);
-            set(handles.plot_type_popup,'value',state.plot_type_popup);
-            set(handles.radiobutton1,'value',state.r_value);
-            set(handles.QTable,'Data',state.weight_table);
-        end
+    if(strcmp(mp_text,state.model_text)&&strcmp(cs_text,state.cable_text))
+        set(handles.trajectory_popup,'value',state.trajectory_popup_vale);
+        set(handles.dynamics_popup,'value',state.dynamics_popup_vale);
+        set(handles.solver_class_popup,'value',state.solver_class_popup);
+        solver_type_popup_update(handles.solver_type_popup,handles);
+        objective_popup_update(handles.objective_popup,handles);
+        constraint_popup_update(handles.constraint_popup,handles);
+        set(handles.solver_type_popup,'value',state.solver_type_popup);
+        set(handles.objective_popup,'value',state.objective_popup);
+        set(handles.constraint_popup,'value',state.constraint_popup);
+        set(handles.plot_type_popup,'value',state.plot_type_popup);
+        set(handles.radiobutton1,'value',state.r_value);
+        set(handles.QTable,'Data',state.weight_table);
     else
-        warning('Incorrect Model Type')
+        warning('Incorrect Model Type');
     end
 end
 
 
 % --- Executes on button press in plot_button.
-function plot_button_Callback(hObject, eventdata, handles)
+function plot_button_Callback(~, ~, handles) %#ok<DEFNU>
     % hObject    handle to plot_button (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)  
@@ -528,7 +509,7 @@ end
 %% Radio Buttons
 %--------------------------------------------------------------------------
 % --- Executes on button press in radiobutton1.
-function radiobutton1_Callback(hObject, eventdata, handles)
+function radiobutton1_Callback(hObject, ~, handles) %#ok<DEFNU>
     % hObject    handle to radiobutton1 (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
@@ -557,19 +538,25 @@ function run_inverse_dynamics(handles,dynObj,trajectory_xmlobj)
     solver_type = contents{get(handles.solver_type_popup,'Value')};
     contents = cellstr(get(handles.objective_popup,'String'));
     objective = contents{get(handles.objective_popup,'Value')};
-    objective_function = str2func(['IDObjective',objective]);
-    q_data = get(handles.QTable,'Data');
-    id_objective = objective_function(q_data');
-    solver_function = str2func(['IDSolver',solver_class]);
-    if(strcmp(solver_class,'LinProg'))
-        id_solver = solver_function(id_objective,ID_LP_SolverType.(solver_type));
+    settings = getappdata(handles.solver_class_popup,'settings');
+    if(~strcmp(objective,' '))
+        objective_function = str2func(objective);
+        q_data = get(handles.QTable,'Data');
+        id_objective = objective_function(q_data');
+        solver_function = str2func(solver_class);
+        solverObj = settings.getElementById(solver_class);
+        enum_file = solverObj.getElementsByTagName('solver_type_enum').item(0).getFirstChild.getData;
+        id_solver = solver_function(id_objective,eval([char(enum_file),'.',char(solver_type)]));
     else
-        id_solver = solver_function(id_objective,ID_QP_SolverType.(solver_type));
+        solver_function = str2func(solver_class);
+        solverObj = settings.getElementById(solver_class);
+        enum_file = solverObj.getElementsByTagName('solver_type_enum').item(0).getFirstChild.getData;
+        id_solver = solver_function(eval([char(enum_file),'.',char(solver_type)]));
     end
     contents = cellstr(get(handles.plot_type_popup,'String'));
     plot_type = contents{get(handles.plot_type_popup,'Value')};
-%     id_objective = IDObjectiveMinQuadCableForce(ones(dynObj.numCables,1));
-%     id_solver = IDSolverQuadProg(id_objective, ID_QP_SolverType.OPTITOOLBOX_OOQP);
+    
+    
     % Setup the inverse dynamics simulator with the SystemKinematicsDynamics
     % object and the inverse dynamics solver
     disp('Start Setup Simulation');
@@ -603,13 +590,6 @@ function run_inverse_dynamics(handles,dynObj,trajectory_xmlobj)
     % Otherwise here is some simple example
     disp('Start Plotting Simulation');
     start_tic = tic;
-    %plot_axis = [0 1 0 1 -0.1 0.1];
-    plot_axis = [-0.2 0.2 -0.2 0.2 -0.1 0.3];
-    %idsim.plotMovie(plot_axis, [fileparts(mfilename('fullpath')), '\test.avi'], 2, 500, 640);
-    % idsim.plotJointSpace();
-    % idsim.plotAngularAcceleration();
-    % idsim.plotCableLengths();
-    % idsim.plotBodyCOG();
     plot_function = str2func(plot_type);
     figure_handles = handles.figure1;
     plot_function(idsim,[],figure_handles);    
@@ -622,7 +602,7 @@ end
 function loadState(handles)
     % load all of the settings and initialise the values to match
     path_string = fileparts(mfilename('fullpath'));
-    path_string = path_string(1:strfind(path_string, 'scripts')-2);
+    path_string = path_string(1:strfind(path_string, 'GUI')-2);
     file_name = [path_string,'\logs\upcra_gui_state.mat'];
     if(exist(file_name,'file'))
         load(file_name)
@@ -666,11 +646,11 @@ function saveState(handles,file_path)
     state.plot_type_popup                   =   get(handles.plot_type_popup,'value');
     state.r_value                           =   get(handles.radiobutton1,'value');
     state.weight_table                      =   get(handles.QTable,'Data');
-    path_string                             =   fileparts(mfilename('fullpath'));
-    path_string                             = path_string(1:strfind(path_string, 'scripts')-2);
     if(nargin>1)
         save(file_path,'state');
     else
+        path_string                             =   fileparts(mfilename('fullpath'));
+        path_string                             = path_string(1:strfind(path_string, 'GUI')-2);
         save([path_string,'\logs\dynamics_gui_state.mat'],'state')
     end
 end
@@ -681,18 +661,21 @@ end
 
 function format_Q_table(numCables,QTable)
     set(QTable,'Data',ones(1,numCables));
-    set(QTable,'ColumnWidth',{20});
+    set(QTable,'ColumnWidth',{30});
     set(QTable,'ColumnEditable',true(1,numCables));
-    Q_extent = get(QTable,'Extent');
-    Q_position = zeros(1,4);
-    Q_position(1) = 35;  Q_position(2) = 1;
-    if(numCables>2)
-        Q_position(3) = 7*Q_extent(3)/(numCables+1);
+    q_position = get(QTable,'Position');
+    if(numCables>4)
+        q_position(2) = 23;
+        q_position(4) = 57;
+        set(QTable,'Position',q_position);
     else
-        Q_position(3) = Q_extent(3); 
+        q_position(2) = 40;
+        q_position(4) = 40;
+        set(QTable,'Position',q_position);
     end
-    Q_position(4) = 2.6*Q_extent(4);
-    set(QTable,'Position',Q_position);
 end
 
-
+%% TO BE DONE
+% Add more plotting functions
+% Integrate with forward dynamics
+% Determine where best to store settings

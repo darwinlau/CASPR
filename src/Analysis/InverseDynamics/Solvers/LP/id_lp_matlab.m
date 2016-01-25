@@ -9,9 +9,9 @@ function [ x_opt, exit_type ] = id_lp_matlab(b, A_ineq, b_ineq, A_eq, b_eq, xmin
             exit_type = IDSolverExitType.ITERATION_LIMIT_REACHED;
         case -2
             fprintf('Problem infeasible\n');
-            exit_type = IDSolverExistType.INFEASIBLE;
+            exit_type = IDSolverExitType.INFEASIBLE;
         otherwise
             fprintf('Other error : Code %d\n', exit_flag);
-            exit_type = IDSolverExistType.SOLVER_SPECIFIC_ERROR;
+            exit_type = IDSolverExitType.SOLVER_SPECIFIC_ERROR;
     end
 end

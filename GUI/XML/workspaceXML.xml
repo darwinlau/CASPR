@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE cables [
+  <!ATTLIST workspace_condition id ID #REQUIRED>
+]>
+<simulator>
+    <workspace_condition id="WrenchClosure">
+        <generation_method_enum>WrenchClosureMethods</generation_method_enum>
+    </workspace_condition>
+    <workspace_condition id="WorkspaceStatic">
+        <generation_method_enum>WorkspaceStaticMethods</generation_method_enum>
+    </workspace_condition>
+    <workspace_metrics>
+        <workspace_metric>TensionFactorMetric</workspace_metric>
+        <workspace_metric>UnilateralDexterityMetric</workspace_metric>
+        <workspace_metric>SemiSingularMetric</workspace_metric>
+        <workspace_metric>CapacityMarginMetric</workspace_metric>
+        <workspace_metric>SEACM</workspace_metric>
+    </workspace_metrics>    
+    <grid_types>
+        <grid_type>UniformGrid</grid_type>
+    </grid_types>    
+    <plot_functions>
+		<plot_type>plotCableForces</plot_type>
+		<plot_type>plotInteractionForceMagnitudes</plot_type>
+	</plot_functions>
+</simulator>

@@ -25,7 +25,7 @@ function varargout = workspaceGUI(varargin)
 
     % Edit the above text to modify the response to help workspaceGUI
 
-    % Last Modified by GUIDE v2.5 10-Jan-2016 11:23:56
+    % Last Modified by GUIDE v2.5 14-Jan-2016 14:25:24
 
     % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
@@ -51,7 +51,7 @@ end
 %% GUI Setup Functions
 %--------------------------------------------------------------------------
 % --- Executes just before workspaceGUI is made visible.
-function workspaceGUI_OpeningFcn(hObject, eventdata, handles, varargin)
+function workspaceGUI_OpeningFcn(hObject, ~, handles, varargin)
     % This function has no output args, see OutputFcn.
     % hObject    handle to figure
     % eventdata  reserved - to be defined in a future version of MATLAB
@@ -69,7 +69,7 @@ function workspaceGUI_OpeningFcn(hObject, eventdata, handles, varargin)
 end
 
 % --- Outputs from this function are returned to the command line.
-function varargout = workspaceGUI_OutputFcn(hObject, eventdata, handles) 
+function varargout = workspaceGUI_OutputFcn(~, ~, handles) 
     % varargout  cell array for returning output args (see VARARGOUT);
     % hObject    handle to figure
     % eventdata  reserved - to be defined in a future version of MATLAB
@@ -80,7 +80,7 @@ function varargout = workspaceGUI_OutputFcn(hObject, eventdata, handles)
 end
 
 % --- Executes when user attempts to close figure1.
-function figure1_CloseRequestFcn(hObject, eventdata, handles)
+function figure1_CloseRequestFcn(hObject, ~, handles) %#ok<DEFNU>
     % hObject    handle to figure1 (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
@@ -94,81 +94,20 @@ end
 %--------------------------------------------------------------------------
 %% Popups
 %--------------------------------------------------------------------------
-% Workspace Type
-% --- Executes on selection change in workspace_type_popup.
-function workspace_type_popup_Callback(hObject, eventdata, handles)
-    % hObject    handle to workspace_type_popup (see GCBO)
-    % eventdata  reserved - to be defined in a future version of MATLAB
-    % handles    structure with handles and user data (see GUIDATA)
-
-    % Hints: contents = cellstr(get(hObject,'String')) returns workspace_type_popup contents as cell array
-    %        contents{get(hObject,'Value')} returns selected item from workspace_type_popup    
-    workspace_type_index = get(handles.workspace_type_popup, 'Value');
-    workspace_condition_popup_Update(handles.workspace_condition_popup,workspace_type_index);
-    workspace_generation_popup_Update(handles);
-end
-
-% --- Executes during object creation, after setting all properties.
-function workspace_type_popup_CreateFcn(hObject, eventdata, handles)
-    % hObject    handle to workspace_type_popup (see GCBO)
-    % eventdata  reserved - to be defined in a future version of MATLAB
-    % handles    empty - handles not created until after all CreateFcns called
-
-    % Hint: popupmenu controls usually have a white background on Windows.
-    %       See ISPC and COMPUTER.
-    if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-        set(hObject,'BackgroundColor','white');
-    end
-    workspace_condition_list = WorkspaceType.workspace_type_list();
-    set(hObject, 'String', workspace_condition_list);
-end
-
 % Workspace Condition
 % --- Executes on selection change in workspace_condition_popup.
-function workspace_condition_popup_Callback(hObject, eventdata, handles)
+function workspace_condition_popup_Callback(~, ~, handles) %#ok<DEFNU>
     % hObject    handle to workspace_condition_popup (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
 
     % Hints: contents = cellstr(get(hObject,'String')) returns workspace_condition_popup contents as cell array
     %        contents{get(hObject,'Value')} returns selected item from workspace_condition_popup
-    workspace_generation_popup_Update(handles);
-end
-
-function workspace_condition_popup_Update(hObject,workspace_type_index)
-    switch workspace_type_index
-        case 1
-            subfolder = 'Interference';
-        case 2
-            subfolder = 'Closure';
-        case 3
-            subfolder = 'Static';
-        case 4
-            subfolder = 'Feasible';
-    end
-    path_string = fileparts(mfilename('fullpath'));
-    path_string = path_string(1:strfind(path_string, 'scripts')-2);
-    dir_files = dir([path_string,'\src\Analysis\Workspace\Conditions\',subfolder]);
-    dir_files_temp = cell(fliplr(size(dir_files))); j =0;
-    for i=1:length(dir_files)
-        if((~dir_files(i).isdir))
-            l_n = length(dir_files(i).name);
-            dir_files_temp{j+1} = char(dir_files(i).name(1:l_n-2));
-            j = j+1;
-        end
-    end
-    dir_files = dir_files_temp(1:j);
-    if(isempty(dir_files))
-        set(hObject, 'Value', 1);
-        set(hObject, 'String', {'No File'});
-    else
-        set(hObject, 'Value', 1);
-        set(hObject, 'String', dir_files);
-    end
+    workspace_generation_popup_Update(handles.workspace_generation_popup,handles);
 end
 
 % --- Executes during object creation, after setting all properties.
-function workspace_condition_popup_CreateFcn(hObject, eventdata, handles)
+function workspace_condition_popup_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
     % hObject    handle to workspace_condition_popup (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    empty - handles not created until after all CreateFcns called
@@ -178,12 +117,23 @@ function workspace_condition_popup_CreateFcn(hObject, eventdata, handles)
     if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
         set(hObject,'BackgroundColor','white');
     end
-    workspace_condition_popup_Update(hObject,1);
+    path_string = fileparts(mfilename('fullpath'));
+    path_string = path_string(1:strfind(path_string, 'GUI')-2);
+    settingsXMLObj =  XmlOperations.XmlReadRemoveIndents([path_string,'\GUI\XML\workspaceXML.xml']); 
+    setappdata(hObject,'settings',settingsXMLObj);
+    workspacesObj = settingsXMLObj.getElementsByTagName('simulator').item(0).getElementsByTagName('workspace_condition');
+    workspace_str = cell(1,workspacesObj.getLength);
+    % Extract the identifies from the cable sets
+    for i =1:workspacesObj.getLength
+        workspaceObj = workspacesObj.item(i-1);
+        workspace_str{i} = char(workspaceObj.getAttribute('id'));
+    end
+    set(hObject, 'String', workspace_str);
 end
 
 % Workspace Generation
 % --- Executes on selection change in workspace_generation_popup.
-function workspace_generation_popup_Callback(hObject, eventdata, handles)
+function workspace_generation_popup_Callback(~, ~, ~) %#ok<DEFNU>
     % hObject    handle to workspace_generation_popup (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
@@ -192,21 +142,19 @@ function workspace_generation_popup_Callback(hObject, eventdata, handles)
     %        contents{get(hObject,'Value')} returns selected item from workspace_generation_popup
 end
 
-function workspace_generation_popup_Update(handles)
+function workspace_generation_popup_Update(hObject,handles)
     contents = cellstr(get(handles.workspace_condition_popup,'String'));
-    if(strcmp(contents,'No File'))
-        set(handles.workspace_generation_popup, 'Value', 1);
-        set(handles.workspace_generation_popup, 'String', {'No File'});
-    else
-        fh = str2func([contents{get(handles.workspace_condition_popup,'Value')},'Methods.workspace_method_list']);
-        list = fh();
-        set(handles.workspace_generation_popup, 'Value', 1);
-        set(handles.workspace_generation_popup, 'String', list);
-    end
+    workspace_condition_id = contents{get(handles.workspace_condition_popup,'Value')};
+    settings = getappdata(handles.workspace_condition_popup,'settings');
+    workspaceObj = settings.getElementById(workspace_condition_id);
+    enum_file = workspaceObj.getElementsByTagName('generation_method_enum').item(0).getFirstChild.getData;
+    workspace_generation_list = eval([char(enum_file),'.workspace_method_list()']);
+    set(hObject,'Value',1);
+    set(hObject, 'String', workspace_generation_list);
 end
 
 % --- Executes during object creation, after setting all properties.
-function workspace_generation_popup_CreateFcn(hObject, eventdata, handles)
+function workspace_generation_popup_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
     % hObject    handle to workspace_generation_popup (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    empty - handles not created until after all CreateFcns called
@@ -220,7 +168,7 @@ end
 
 % Workspace Metric
 % --- Executes on selection change in workspace_metric_popup.
-function workspace_metric_popup_Callback(hObject, eventdata, handles)
+function workspace_metric_popup_Callback(~, ~, ~) %#ok<DEFNU>
     % hObject    handle to workspace_metric_popup (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
@@ -230,7 +178,7 @@ function workspace_metric_popup_Callback(hObject, eventdata, handles)
 end
 
 % --- Executes during object creation, after setting all properties.
-function workspace_metric_popup_CreateFcn(hObject, eventdata, handles)
+function workspace_metric_popup_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
     % hObject    handle to workspace_metric_popup (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    empty - handles not created until after all CreateFcns called
@@ -241,35 +189,21 @@ function workspace_metric_popup_CreateFcn(hObject, eventdata, handles)
         set(hObject,'BackgroundColor','white');
     end
     path_string = fileparts(mfilename('fullpath'));
-    path_string = path_string(1:strfind(path_string, 'scripts')-2);
-    str_dir = [path_string,'\src\Analysis\Workspace\Metrics'];
-    dirinfo = dir(str_dir);
-    % Remove m files
-    dirinfo(~[dirinfo.isdir])=[];
-    % Go through each subdirectory and determine all m files
-    dir_files = cell(1,20); k = 1;
-    dir_files{1} = ' ';
-    for i = 1:length(dirinfo)
-        if(strcmp(dirinfo(i).name(1),'.'))
-        else
-            thisdir = [str_dir,'\',dirinfo(i).name];
-            subdir = dir(thisdir);
-            for j=1:length(subdir)
-                if(~subdir(j).isdir)
-                    l_n = length(subdir(j).name);
-                    dir_files{k+1} = subdir(j).name(1:l_n-2);
-                    k = k+1;
-                end
-            end
-        end
+    path_string = path_string(1:strfind(path_string, 'GUI')-2);
+    settingsXMLObj =  XmlOperations.XmlReadRemoveIndents([path_string,'\GUI\XML\workspaceXML.xml']);
+    workspacesObj = settingsXMLObj.getElementsByTagName('simulator').item(0).getElementsByTagName('workspace_metrics').item(0).getElementsByTagName('workspace_metric');
+    workspace_str = cell(1,workspacesObj.getLength+1);
+    % Extract the identifies from the cable sets
+    workspace_str{1} = ' ';
+    for i =1:workspacesObj.getLength
+        workspaceObj = workspacesObj.item(i-1);
+        workspace_str{i+1} = char(workspaceObj.getFirstChild.getData);
     end
-    dir_files = dir_files(1:k);
-    set(hObject, 'String', dir_files);
+    set(hObject, 'String', workspace_str);
 end
 
-% Grid - NOT YET SETUP
 % --- Executes on selection change in grid_popup.
-function grid_popup_Callback(hObject, eventdata, handles)
+function grid_popup_Callback(hObject, ~, handles) %#ok<INUSD,DEFNU>
     % hObject    handle to grid_popup (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
@@ -279,7 +213,7 @@ function grid_popup_Callback(hObject, eventdata, handles)
 end
 
 % --- Executes during object creation, after setting all properties.
-function grid_popup_CreateFcn(hObject, eventdata, handles)
+function grid_popup_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
     % hObject    handle to grid_popup (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    empty - handles not created until after all CreateFcns called
@@ -289,55 +223,64 @@ function grid_popup_CreateFcn(hObject, eventdata, handles)
     if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
         set(hObject,'BackgroundColor','white');
     end
+    path_string = fileparts(mfilename('fullpath'));
+    path_string = path_string(1:strfind(path_string, 'GUI')-2);
+    settingsXMLObj =  XmlOperations.XmlReadRemoveIndents([path_string,'\GUI\XML\workspaceXML.xml']);
+    workspacesObj = settingsXMLObj.getElementsByTagName('simulator').item(0).getElementsByTagName('grid_types').item(0).getElementsByTagName('grid_type');
+    workspace_str = cell(1,workspacesObj.getLength);
+    % Extract the identifies from the cable sets
+    for i =1:workspacesObj.getLength
+        workspaceObj = workspacesObj.item(i-1);
+        workspace_str{i} = char(workspaceObj.getFirstChild.getData);
+    end
+    set(hObject, 'String', workspace_str);
 end
 
 %--------------------------------------------------------------------------
 %% Push Buttons
 %--------------------------------------------------------------------------
-% --- Executes on button press in save_settings.
-function save_settings_Callback(hObject, eventdata, handles)
-    % hObject    handle to save_settings (see GCBO)
+% --- Executes on button press in save_button.
+function save_button_Callback(~, ~, handles) %#ok<DEFNU>
+    % hObject    handle to save_button (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
     path_string = fileparts(mfilename('fullpath'));
-    path_string = path_string(1:strfind(path_string, 'scripts')-2);
+    path_string = path_string(1:strfind(path_string, 'GUI')-2);
     file_name = [path_string,'\logs\*.mat'];
     [file,path] = uiputfile(file_name,'Save file name');
     saveState(handles,[path,file]);
 end
 
-% --- Executes on button press in load_settings.
-function load_settings_Callback(hObject, eventdata, handles)
-    % hObject    handle to load_settings (see GCBO)
+% --- Executes on button press in load_button.
+function load_button_Callback(~, ~, handles) %#ok<DEFNU>
+    % hObject    handle to load_button (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
     path_string = fileparts(mfilename('fullpath'));
-    path_string = path_string(1:strfind(path_string, 'scripts')-2);
+    path_string = path_string(1:strfind(path_string, 'GUI')-2);
     file_name = [path_string,'\logs\*.mat'];
     settings = uigetfile(file_name);
     load(settings)
     mp_text = get(handles.model_text,'String');
     cs_text = get(handles.cable_text,'String');
     if(strcmp(mp_text,state.model_text)&&strcmp(cs_text,state.cable_text))
-        set(handles.workspace_type_popup,'value',state.workspace_type_popup_value);
-        workspace_condition_popup_Update(handles.workspace_condition_popup,state.workspace_type_popup_value);
         set(handles.workspace_condition_popup,'value',state.workspace_condition_popup_value);
-        workspace_generation_popup_Update(handles);
+        workspace_generation_popup_Update(handles.workspace_generation_popup,handles);
         set(handles.workspace_generation_popup,'value',state.workspace_generation_popup_value);
         set(handles.workspace_metric_popup,'value',state.workspace_metric_popup_value);
         set(handles.qtable,'Data',state.workspace_table);
     else
-        warning('Incorrect Model Type')
+        warning('Incorrect Model Type');
     end
 end
 
 % --- Executes on button press in Generate_Button.
-function Generate_Button_Callback(hObject, eventdata, handles)
+function Generate_Button_Callback(~, ~, handles) %#ok<DEFNU>
     % hObject    handle to Generate_Button (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
     %% Clear data
-    clc; warning off; %close all;
+    clc; warning off; %#ok<WNOFF> %close all;
     %% Model setup
     dynObj = getappdata(handles.cable_text,'dynObj');
     %% Workspace Setup
@@ -382,10 +325,17 @@ function Generate_Button_Callback(hObject, eventdata, handles)
     assignin('base','wsim',wsim);
 end
 
+% --- Executes on button press in plot_button.
+function plot_button_Callback(~, ~, ~) %#ok<DEFNU>
+    % hObject    handle to plot_button (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    structure with handles and user data (see GUIDATA)
+end
+
 %--------------------------------------------------------------------------
 %% Text Functions
 %--------------------------------------------------------------------------
-function model_text_CreateFcn(hObject, eventdata, handles)
+function model_text_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
     % hObject    handle to grid_popup (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    empty - handles not created until after all CreateFcns called
@@ -397,7 +347,7 @@ function model_text_CreateFcn(hObject, eventdata, handles)
     end
 end
 
-function cable_text_CreateFcn(hObject, eventdata, handles)
+function cable_text_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
     % hObject    handle to grid_popup (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    empty - handles not created until after all CreateFcns called
@@ -416,16 +366,15 @@ function saveState(handles,file_path)
     % Save all of the settings
     state.model_text                        =   get(handles.model_text,'String');
     state.cable_text                        =   get(handles.cable_text,'String');
-    state.workspace_type_popup_value        =   get(handles.workspace_type_popup,'value');
     state.workspace_condition_popup_value   =   get(handles.workspace_condition_popup,'value');
     state.workspace_generation_popup_value  =   get(handles.workspace_generation_popup,'value');
     state.workspace_metric_popup_value      =   get(handles.workspace_metric_popup,'value');
     state.workspace_table                   =   get(handles.qtable,'Data');
-    path_string                             =   fileparts(mfilename('fullpath'));
-    path_string                             = path_string(1:strfind(path_string, 'scripts')-2);
     if(nargin>1)
         save(file_path,'state');
     else
+        path_string                             =   fileparts(mfilename('fullpath'));
+        path_string                             =   path_string(1:strfind(path_string, 'GUI')-2);
         save([path_string,'\logs\workspace_gui_state.mat'],'state')
     end
 end
@@ -433,7 +382,7 @@ end
 function loadState(handles)
     % load all of the settings and initialise the values to match
     path_string = fileparts(mfilename('fullpath'));
-    path_string = path_string(1:strfind(path_string, 'scripts')-2);
+    path_string = path_string(1:strfind(path_string, 'GUI')-2);
     file_name = [path_string,'\logs\upcra_gui_state.mat'];
     if(exist(file_name,'file'))
         load(file_name)
@@ -447,13 +396,13 @@ function loadState(handles)
             mp_text = get(handles.model_text,'String');
             cs_text = get(handles.cable_text,'String');
             if(strcmp(mp_text,state.model_text)&&strcmp(cs_text,state.cable_text))
-                set(handles.workspace_type_popup,'value',state.workspace_type_popup_value);
-                workspace_condition_popup_Update(handles.workspace_condition_popup,state.workspace_type_popup_value);
                 set(handles.workspace_condition_popup,'value',state.workspace_condition_popup_value);
-                workspace_generation_popup_Update(handles);
+                workspace_generation_popup_Update(handles.workspace_generation_popup,handles);
                 set(handles.workspace_generation_popup,'value',state.workspace_generation_popup_value);
                 set(handles.workspace_metric_popup,'value',state.workspace_metric_popup_value);
-                set(handles.qtable,'Data',state.workspace_table);        
+                set(handles.qtable,'Data',state.workspace_table);
+            else
+                workspace_generation_popup_Update(handles.workspace_generation_popup,handles);
             end
         end
     end
@@ -464,14 +413,21 @@ function format_q_table(numDofs,qtable)
     set(qtable,'ColumnWidth',{50});
     set(qtable,'ColumnEditable',true(1,3));
     set(qtable,'ColumnName',{'q_start','q_end','q_step'});
-    q_extent = get(qtable,'Extent');
-    q_position = zeros(1,4);
-    q_position(1) = 25;  q_position(2) = 0.5;
+    q_position = get(qtable,'Position');
     if(numDofs>2)
-        q_position(3) = (14/13)*q_extent(3);
+        q_position(1) = 103;
+        q_position(3) = 200;
+        set(qtable,'Position',q_position);
     else
-        q_position(3) = q_extent(3); 
+        q_position(1) = 118;
+        q_position(3) = 185;
+        set(qtable,'Position',q_position);
     end
-    q_position(4) = 5.6*q_extent(4)/(numDofs+1);
-    set(qtable,'Position',q_position);
 end
+
+
+
+%% TO BE DONE
+% Generate Workspace Plotting Functions
+% Add new Methods for computing Wrench Closure
+% Determine where best to store settings

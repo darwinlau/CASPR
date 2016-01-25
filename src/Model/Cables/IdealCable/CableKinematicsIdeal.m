@@ -41,7 +41,6 @@ classdef CableKinematicsIdeal < CableKinematics
             
             % Beginning attachment of segment 1
             attachmentObj = attachmentObjs.item(0);
-            
             sLink = str2double(attachmentObj.getElementsByTagName('link').item(0).getFirstChild.getData);
             sLoc = XmlOperations.StringToVector3(char(attachmentObj.getElementsByTagName('location').item(0).getFirstChild.getData));
             
