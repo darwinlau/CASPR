@@ -9,7 +9,7 @@ classdef IDObjective < handle
     end
     
     methods (Abstract)
-        updateParameters(obj, dynamics);
+        updateObjective(obj, dynamics);
         f = evaluateFunction(obj, x);
     end
     

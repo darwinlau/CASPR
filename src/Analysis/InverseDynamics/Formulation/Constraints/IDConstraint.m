@@ -8,7 +8,7 @@ classdef IDConstraint < handle
     end
     
     methods (Abstract)
-        updateParameters(obj, dynamics);
+        updateConstraint(obj, dynamics);
         satisfied = verifyConstraint(obj, x);
     end
     

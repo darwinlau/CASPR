@@ -1,8 +1,9 @@
-function [ x_opt, exit_type, comp_time ] = id_qp_optitoolbox_ipopt(A, b, A_ineq, b_ineq, A_eq, b_eq, xmin, xmax, x0)    
+function [ x_opt, exit_type ] = id_qp_optitoolbox_ipopt(A, b, A_ineq, b_ineq, A_eq, b_eq, xmin, xmax, x0)    
     opts = optiset('solver', 'IPOPT', 'maxiter', 100);
     optisolver = opti('qp', A, b, 'ineq', A_ineq, b_ineq, 'eq', A_eq, b_eq, 'bounds', xmin, xmax, 'options', opts);
-    [x_opt, ~, exitflag, id_info] = solve(optisolver, x0);
-    comp_time = id_info.Time;
+    [x_opt, ~, exitflag] = solve(optisolver, x0);
+    %[x_opt, ~, exitflag, id_info] = solve(optisolver, x0);
+    %comp_time = id_info.Time;
     
     
     switch exitflag

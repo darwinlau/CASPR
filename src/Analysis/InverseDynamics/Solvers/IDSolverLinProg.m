@@ -3,8 +3,9 @@ classdef IDSolverLinProg < IDSolverFunction
     %   Detailed explanation goes here
     
     properties (SetAccess = private)
-        objective
         lp_solver_type
+        objective
+        constraints = {}
     end
     methods
         function q = IDSolverLinProg(objective, lp_solver_type)
@@ -12,7 +13,7 @@ classdef IDSolverLinProg < IDSolverFunction
             q.lp_solver_type = lp_solver_type;
         end
         
-        function [Q_opt, id_exit_type, comp_time] = resolve(obj, dynamics)            
+        function [Q_opt, id_exit_type] = resolveFunction(obj, dynamics)            
             % Form the linear EoM constraint
             % M\ddot{q} + C + G + F_{ext} = -J^T f (constraint)
             [A_eq, b_eq] = IDSolverFunction.GetEoMConstraints(dynamics);  
@@ -20,13 +21,21 @@ classdef IDSolverLinProg < IDSolverFunction
             fmin = dynamics.cableDynamics.forcesMin;
             fmax = dynamics.cableDynamics.forcesMax;
             % Get objective function
-            obj.objective.updateParameters(dynamics);
+            obj.objective.updateObjective(dynamics);
                         
+            A_ineq = [];
+            b_ineq = [];
+            for i = 1:length(obj.constraints)
+                obj.constraints{i}.updateConstraint(dynamics);
+                A_ineq = [A_ineq; obj.constraints{i}.A];
+                b_ineq = [b_ineq; obj.constraints{i}.b];                
+            end
+            
             switch (obj.lp_solver_type)
                 case ID_LP_SolverType.MATLAB
-                    [dynamics.cableForces, id_exit_type, comp_time] = id_lp_matlab(obj.objective.b, [], [], A_eq, b_eq, fmin, fmax, obj.f_previous);
+                    [dynamics.cableForces, id_exit_type] = id_lp_matlab(obj.objective.b, A_ineq, A_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous);
                 case ID_LP_SolverType.OPTITOOLBOX_CLP
-                    [dynamics.cableForces, id_exit_type, comp_time] = id_lp_optitoolbox_clp(obj.objective.b, [], [], A_eq, b_eq, fmin, fmax, obj.f_previous);
+                    [dynamics.cableForces, id_exit_type] = id_lp_optitoolbox_clp(obj.objective.b, A_ineq, A_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous);
                 otherwise
                     error('ID_LP_SolverType type is not defined');
             end

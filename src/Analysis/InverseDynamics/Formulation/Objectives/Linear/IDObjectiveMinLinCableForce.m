@@ -14,7 +14,7 @@ classdef IDObjectiveMinLinCableForce < IDObjectiveLinear
             o.weights = weights;
         end
         
-        function updateParameters(obj, ~)
+        function updateObjective(obj, ~)
             obj.b = obj.weights;
             obj.c = 0;
         end
