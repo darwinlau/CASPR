@@ -14,7 +14,7 @@ classdef IDObjectiveMinQuadCableForce < IDObjectiveQuadratic
             o.weights = weights;
         end
         
-        function updateParameters(obj, ~)
+        function updateObjective(obj, ~)
             % This is because the general form is
             % (1/2) x^T A x + b^T x + c
             obj.A = 2*diag(obj.weights);

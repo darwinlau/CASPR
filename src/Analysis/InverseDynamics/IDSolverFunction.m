@@ -6,8 +6,16 @@ classdef IDSolverFunction < handle
         f_previous = []
     end
     
+    methods 
+        function [Q_opt, id_exit_type, comp_time] = resolve(obj, dynamics)
+            start_tic = tic;
+            [Q_opt, id_exit_type] = obj.resolveFunction(dynamics);
+            comp_time = toc(start_tic);
+        end
+    end
+    
     methods (Abstract)
-        f = resolve(obj, dynamics);
+        [Q_opt, id_exit_type] = resolveFunction(obj, dynamics);
     end
     
     methods (Static)

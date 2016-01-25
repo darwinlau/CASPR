@@ -19,7 +19,7 @@ classdef IDObjectiveMinInteractions < IDObjectiveQuadratic
             o.weights = weights;
         end
         
-        function updateParameters(obj, dynamics)
+        function updateObjective(obj, dynamics)
             obj.A = zeros(dynamics.numCables, dynamics.numCables);
             obj.b = zeros(dynamics.numCables,1);
             obj.c = 0;
