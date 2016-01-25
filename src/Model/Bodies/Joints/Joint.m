@@ -22,6 +22,8 @@ classdef (Abstract) Joint < handle
         q_default
         q_dot_default
         q_ddot_default
+        q_lb
+        q_ub
     end
     
     methods
@@ -34,6 +36,7 @@ classdef (Abstract) Joint < handle
             obj.S = obj.RelVelocityMatrix(q);
             obj.S_dot = obj.RelVelocityMatrixDeriv(q, q_dot);
         end
+        
     end
         
     methods (Static)
@@ -57,11 +60,18 @@ classdef (Abstract) Joint < handle
                     j = TranslationalXYZ;
                 case JointType.SPATIAL
                     j = Spatial;
+                case JointType.SPATIAL_EULER_XYZ
+                    j = SpatialEulerXYZ;
                 otherwise
                     error('Joint type is not defined');
             end
             j.type = jointType;
             j.update(j.q_default, j.q_dot_default, j.q_ddot_default);
+        end
+        
+        % Perform a simple first order integral
+        function q = QIntegrate(q0, q_dot, dt)
+            q = q0 + q_dot * dt;
         end
     end
     

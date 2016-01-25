@@ -12,6 +12,8 @@ classdef Spatial < Joint
         q_default = [TranslationalXYZ.q_default; Spherical.q_default];
         q_dot_default = [TranslationalXYZ.q_dot_default; Spherical.q_dot_default];
         q_ddot_default = [TranslationalXYZ.q_ddot_default; Spherical.q_ddot_default];
+        q_lb = [TranslationalXYZ.q_lb; Spherical.q_lb];
+        q_ub = [TranslationalXYZ.q_ub; Spherical.q_ub];
     end
     
     properties (Dependent)
@@ -43,7 +45,7 @@ classdef Spatial < Joint
         end
         
         function update(obj, q, q_dot, q_ddot)
-            obj.translation.update(Spatial.GetTranslationQ(q), Spatial.GetTranslationQ(q_dot), Spatial.GetTranslationQ(q_ddot));
+            obj.translation.update(Spatial.GetTranslationQ(q), Spatial.GetTranslationQd(q_dot), Spatial.GetTranslationQd(q_ddot));
             obj.orientation.update(Spatial.GetOrientationQ(q), Spatial.GetOrientationQd(q_dot), Spatial.GetOrientationQd(q_ddot));
             update@Joint(obj, q, q_dot, q_ddot);
         end
@@ -94,13 +96,16 @@ classdef Spatial < Joint
         % The q vector for spatial is [x; y; z; e0; e1; e2; e3]
         % The q_d vector for spatial is [x_d; y_d; z_d; wx; wy; wz]
         function q_t = GetTranslationQ(q)
-            q_t = q(1:3);
+            q_t = q(1:TranslationalXYZ.numVars);
+        end
+        function q_t = GetTranslationQd(q_d)
+            q_t = q_d(1:TranslationalXYZ.numVars);
         end
         function q_t = GetOrientationQ(q)
-            q_t = q(4:7);
+            q_t = q(TranslationalXYZ.numVars+1:Spatial.numVars);
         end
         function q_t_d = GetOrientationQd(q_d)
-            q_t_d = q_d(4:6);
+            q_t_d = q_d(TranslationalXYZ.numDofs+1:Spatial.numDofs);
         end
         
         function R_pe = RelRotationMatrix(q)
@@ -111,13 +116,15 @@ classdef Spatial < Joint
             r_rel = TranslationalXYZ.RelTranslationVector(Spatial.GetTranslationQ(q));
         end
         
-        function S = RelVelocityMatrix(~)
-            S = eye(Spatial.numDofs);
+        function S = RelVelocityMatrix(q)
+            S = [TranslationalXYZ.RelVelocityMatrix(Spatial.GetTranslationQ(q)) zeros(3, Spherical.numVars); ...
+                zeros(3, TranslationalXYZ.numVars) Spherical.RelVelocityMatrix(Spatial.GetOrientationQ(q))];
         end
         
-        function S_dot = RelVelocityMatrixDeriv(~, ~)
-            S_dot = zeros(Spatial.numDofs);
-        end
+        function S_dot = RelVelocityMatrixDeriv(q, q_d)
+            S_dot = [TranslationalXYZ.RelVelocityMatrixDeriv(Spatial.GetTranslationQ(q), Spatial.GetTranslationQd(q_d)) zeros(3, Spherical.numVars); ...
+                zeros(3, TranslationalXYZ.numVars) Spherical.RelVelocityMatrixDeriv(Spatial.GetOrientationQ(q), Spatial.GetOrientationQd(q_d))];
+        end        
         
         % TO DO
         function [N_j,A] = QuadMatrix(~)
@@ -129,9 +136,9 @@ classdef Spatial < Joint
             [q_trans, q_trans_dot, q_trans_ddot] = TranslationalXYZ.GenerateTrajectory( ...
                 Spatial.GetTranslationQ(q_s), Spatial.GetTranslationQ(q_s_d), Spatial.GetTranslationQ(q_s_dd), ...
                 Spatial.GetTranslationQ(q_e), Spatial.GetTranslationQ(q_e_d), Spatial.GetTranslationQ(q_e_dd), total_time, time_step);
-            [q_orient, q_orient_dot, q_orient_ddot] = TranslationalXYZ.GenerateTrajectory( ...
-                Spatial.GetTranslationQ(q_s), Spatial.GetTranslationQ(q_s_d), Spatial.GetTranslationQ(q_s_dd), ...
-                Spatial.GetTranslationQ(q_e), Spatial.GetTranslationQ(q_e_d), Spatial.GetTranslationQ(q_e_dd), total_time, time_step);
+            [q_orient, q_orient_dot, q_orient_ddot] = Spherical.GenerateTrajectory( ...
+                Spatial.GetOrientationQ(q_s), Spatial.GetOrientationQd(q_s_d), Spatial.GetOrientationQd(q_s_dd), ...
+                Spatial.GetOrientationQ(q_e), Spatial.GetOrientationQd(q_e_d), Spatial.GetOrientationQd(q_e_dd), total_time, time_step);
             q = [q_trans; q_orient];
             q_dot = [q_trans_dot; q_orient_dot];
             q_ddot = [q_trans_ddot; q_orient_ddot];

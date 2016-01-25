@@ -52,6 +52,8 @@ classdef SystemKinematicsBodies < handle
         q_default
         q_dot_default
         q_ddot_default
+        q_lb
+        q_ub
     end
 
     methods
@@ -146,7 +148,6 @@ classdef SystemKinematicsBodies < handle
 
             % W = P*S
             obj.W = obj.P*obj.S;
-
             % Determine x_dot
             obj.x_dot = obj.W*obj.q_dot;
             % Extract absolute velocities
@@ -217,6 +218,15 @@ classdef SystemKinematicsBodies < handle
                 obj.bodiesPathGraph(:, child_link_num) = obj.bodiesPathGraph(:, child_link_num) | obj.bodiesPathGraph(:, parent_link_num);
             end
         end
+        
+        function q = qIntegrate(obj, q0, q_dot, dt)
+            index_vars = 1;
+            q = zeros(size(q0));
+            for k = 1:obj.numLinks
+                q(index_vars:index_vars+obj.bodies{k}.joint.numVars-1) = obj.bodies{k}.joint.QIntegrate(q0, q_dot, dt);
+                index_vars = index_vars + obj.bodies{k}.joint.numVars;
+            end
+        end
 
         function n = get.numLinks(obj)
             n = length(obj.bodies);
@@ -246,6 +256,24 @@ classdef SystemKinematicsBodies < handle
             for k = 1:obj.numLinks
                 q_ddot(index_dofs:index_dofs+obj.bodies{k}.joint.numDofs-1) = obj.bodies{k}.joint.q_ddot_default;
                 index_dofs = index_dofs + obj.bodies{k}.joint.numDofs;
+            end
+        end
+        
+        function q_lb = get.q_lb(obj)
+            q_lb = zeros(obj.numDofVars, 1);
+            index_vars = 1;
+            for k = 1:obj.numLinks
+                q_lb(index_vars:index_vars+obj.bodies{k}.joint.numVars-1) = obj.bodies{k}.joint.q_lb;
+                index_vars = index_vars + obj.bodies{k}.joint.numVars;
+            end
+        end
+        
+        function q_ub = get.q_ub(obj)
+            q_ub = zeros(obj.numDofVars, 1);
+            index_vars = 1;
+            for k = 1:obj.numLinks
+                q_ub(index_vars:index_vars+obj.bodies{k}.joint.numVars-1) = obj.bodies{k}.joint.q_ub;
+                index_vars = index_vars + obj.bodies{k}.joint.numVars;
             end
         end
     end

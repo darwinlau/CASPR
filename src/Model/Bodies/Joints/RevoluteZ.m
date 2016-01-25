@@ -7,6 +7,8 @@ classdef RevoluteZ < Joint
         q_default = [0];
         q_dot_default = [0];
         q_ddot_default = [0];
+        q_lb = [-pi];
+        q_ub = [pi];
     end
     
     properties (Dependent)

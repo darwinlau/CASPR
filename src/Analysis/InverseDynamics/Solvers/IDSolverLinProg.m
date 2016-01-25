@@ -24,7 +24,7 @@ classdef IDSolverLinProg < IDSolverFunction
                         
             switch (obj.lp_solver_type)
                 case ID_LP_SolverType.MATLAB
-                    [dynamics.cableForces, id_exit_type, comp_time] = id_lp_optitoolbox_clp(obj.objective.b, [], [], A_eq, b_eq, fmin, fmax, obj.f_previous);
+                    [dynamics.cableForces, id_exit_type, comp_time] = id_lp_matlab(obj.objective.b, [], [], A_eq, b_eq, fmin, fmax, obj.f_previous);
                 case ID_LP_SolverType.OPTITOOLBOX_CLP
                     [dynamics.cableForces, id_exit_type, comp_time] = id_lp_optitoolbox_clp(obj.objective.b, [], [], A_eq, b_eq, fmin, fmax, obj.f_previous);
                 otherwise

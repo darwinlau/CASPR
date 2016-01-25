@@ -8,6 +8,8 @@ classdef SphericalEulerXYZ < Joint
         q_default = [0; 0; 0];
         q_dot_default = [0; 0; 0];
         q_ddot_default = [0; 0; 0];
+        q_lb = [-pi; -pi; -pi];
+        q_ub = [pi; pi; pi];
     end
     
     properties (Dependent)

@@ -13,36 +13,42 @@ classdef FKLeastSquares < FKFunction
             fkls.qDotMethod = qDotType;            
         end
         
-        function [q, q_dot] = compute(obj, length, lengths_prev_2, q_prev, q_d_prev, delta_t, kin_model)
+        function [q, q_dot] = compute(obj, len, len_prev_2, q_prev, q_d_prev, delta_t, kin_model)
             switch obj.approxMethod
                 case FK_LS_ApproxOptionType.USE_PREVIOUS_Q
                     q_approx = q_prev;
                 case FK_LS_ApproxOptionType.FIRST_ORDER_INTEGRATE_QDOT
-                    q_approx = q_prev + delta_t * q_d_prev;
+                    q_approx = kin_model.qIntegrate(q_prev, q_d_prev, delta_t);
                 case FK_LS_ApproxOptionType.FIRST_ORDER_INTEGRATE_PSEUDOINV
-                    kin_model.update(q_prev, zeros(size(q_prev)), zeros(size(q_prev)));
-                    q_approx = q_prev + pinv(kin_model.L) * (length - lengths_prev_2)/(2);
+                    kin_model.update(q_prev, zeros(kin_model.numDofs,1), zeros(kin_model.numDofs,1));
+                    if delta_t ~= 0
+                        q_approx = kin_model.bodyKinematics.qIntegrate(q_prev, pinv(kin_model.L) * (len - len_prev_2)/(2*delta_t), delta_t);
+                    else
+                        q_approx = kin_model.bodyKinematics.qIntegrate(q_prev, zeros(kin_model.numDofs,1), 0);
+                    end
             end
-            func = @(q_f) FKLeastSquares.ComputeErrorVector(q_f, length, kin_model);
+            func = @(q_f) FKFunction.ComputeLengthErrorVector(q_f, len, kin_model);
             
+            % TODO THE JACOBIAN MATRIX IS DIFFERENT FOR SPHERICAL JOINT
             options = optimoptions(@lsqnonlin, 'Display', 'none', 'Jacobian', 'on');
             [q, resnorm, ~, ~, output] = lsqnonlin(func, q_approx, [], [], options);
             
             display(sprintf('Function lsqnonlin completed. Fitting error: %f. Number of function calls: %d', resnorm, output.funcCount));
             
+            % TODO HERE TO MAKE DERIVATIVE GENERIC TOO
             switch obj.qDotMethod
                 case FK_LS_QdotOptionType.FIRST_ORDER_DERIV
                     if delta_t ~= 0
                         q_dot = (q - q_prev)/delta_t;
                     else
-                        q_dot = zeros(size(q));
+                        q_dot = zeros(kin_model.numDofs,1);
                     end
                 case FK_LS_QdotOptionType.PSEUDO_INV
                     if delta_t ~= 0
                         kin_model.update(q, zeros(size(q)), zeros(size(q)));
-                        q_dot = pinv(kin_model.L) * (length - lengths_prev_2)/(2*delta_t);
+                        q_dot = pinv(kin_model.L) * (len - len_prev_2)/(2*delta_t);
                     else
-                        q_dot = zeros(size(q));
+                        q_dot = zeros(kin_model.numDofs,1);
                     end
             end
         end        
@@ -72,12 +78,6 @@ classdef FKLeastSquares < FKFunction
             display(sprintf('Function lsqnonlin completed. Fitting error: %f. Number of function calls: %d', resnorm, output.funcCount));
             
             l0 = X(1:numCables);
-        end
-        
-        function [errorVector, jacobian] = ComputeErrorVector(q, l, model)
-            model.update(q, zeros(size(q)), zeros(size(q)));
-            errorVector = l - model.cableLengths;
-            jacobian = - model.L;
         end
         
         function [errorVector, jacobian] = ComputeInitialLengthsErrorVector(X, l_r, model)

@@ -21,10 +21,11 @@ classdef ForwardDynamicsSimulator < DynamicsSimulator
             obj.trajectory.q_dot = cell(1, length(obj.timeVector));
             obj.trajectory.q_ddot = cell(1, length(obj.timeVector));
             
-            n_dof = length(q0);
+            n_vars = obj.model.numDofVars;
+            n_dofs = obj.model.numDofs;
             
             % Setup initial pose
-            obj.model.update(q0, q0_dot, zeros(size(q0)));
+            obj.model.update(q0, q0_dot, zeros(size(q0_dot)));
             q0_ddot = obj.model.q_ddot_dynamics;
             obj.model.update(q0, q0_dot, q0_ddot);
             
@@ -43,10 +44,10 @@ classdef ForwardDynamicsSimulator < DynamicsSimulator
                 % The output of the ODE is the solution and y0 for the next iteration
                 s_end = size(y_out,1);
                 % Store the q and q_dot values
-                obj.trajectory.q{t} = y_out(s_end, 1:n_dof)';
-                obj.trajectory.q_dot{t} = y_out(s_end, n_dof+1:2*n_dof)';
+                obj.trajectory.q{t} = y_out(s_end, 1:n_vars)';
+                obj.trajectory.q_dot{t} = y_out(s_end, n_vars+1:length(y0))';
                 % Update the model with q, q_dot and f so that q_ddot can be determined
-                obj.model.update(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, zeros(n_dof, 1));
+                obj.model.update(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, zeros(n_dofs, 1));
                 obj.model.cableForces = cable_forces{t-1};
                 % Determine this using the dynamics of the system and the
                 % cable forces
@@ -55,39 +56,20 @@ classdef ForwardDynamicsSimulator < DynamicsSimulator
             end
         end        
     end
-    
-%     methods (Static)
-%         function [nKinematics, nDynamics] = ForwardDynamics(cKinematics, f, t, t_span)
-%             n_dof = cKinematics.n_dof;
-%             y0 = [cKinematics.q; cKinematics.q_dot];
-%             
-%             [~, out] = ode45(@(time,y) eom(time,y, cKinematics.BodyKinematics.BodiesProp, cKinematics.CableKinematics.CablesProp, f), [t t+t_span], y0);
-%             
-%             s = size(out);
-%             q = out(s(1), 1:n_dof)';
-%             q_dot = out(s(1), n_dof+1:2*n_dof)';
-%             
-%             nKinematics = SystemKinematics(cKinematics.BodyKinematics.BodiesProp, cKinematics.CableKinematics.CablesProp);
-%             nKinematics.SetState(q, q_dot, zeros(n_dof, 1));
-%             nDynamics = SystemDynamics(nKinematics);
-%             nDynamics.CableForces = f;          
-%             q_ddot = nDynamics.q_ddot_dynamics;
-%             nKinematics.SetState(q, q_dot, q_ddot);
-%         end
-%     end
 end
     
 function y_dot = eom(~, y, model, f)
-    n_dof = length(y)/2;
-    q = y(1:n_dof);
-    q_dot = y(n_dof+1:2*n_dof);
+    n_vars = model.numDofVars;
+    n_dofs = model.numDofs;
+    q = y(1:n_vars);
+    q_dot = y(n_vars+1:length(y));
     
-    y_dot = zeros(2*n_dof, 1);
+    y_dot = zeros(size(y));
     
-    model.update(q, q_dot, zeros(n_dof, 1));
+    model.update(q, q_dot, zeros(n_dofs, 1));
     model.cableForces = f;
         
-    y_dot(1:n_dof) = q_dot;
-    y_dot(n_dof+1:2*n_dof) = model.q_ddot_dynamics;
+    y_dot(1:n_vars) = q_dot;
+    y_dot(n_vars+1:length(y)) = model.q_ddot_dynamics;
 end
 

@@ -10,5 +10,6 @@ classdef JointType
         SPHERICAL               % Spherical joint using quaternion
         T_XYZ                   % Translational joint XYZ
         SPATIAL                 % T_XYZ + SPHERICAL
+        SPATIAL_EULER_XYZ       % T_XYZ + S_EULER_XYZ
     end
 end

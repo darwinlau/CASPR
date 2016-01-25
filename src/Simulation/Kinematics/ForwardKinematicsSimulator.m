@@ -3,6 +3,8 @@ classdef ForwardKinematicsSimulator < MotionSimulator
     %resolution)
     
     properties (SetAccess = protected) 
+        lengthError
+        lengthErrorNorm
         FKSolver
     end
     
@@ -21,6 +23,9 @@ classdef ForwardKinematicsSimulator < MotionSimulator
             obj.trajectory.timeVector = obj.timeVector;
             obj.trajectory.q = cell(1, length(obj.timeVector));
             obj.trajectory.q_dot = cell(1, length(obj.timeVector));
+            obj.lengthError = cell(1, length(obj.timeVector));
+            obj.lengthError(:) = {zeros(size(q0_approx))};
+            obj.lengthErrorNorm = zeros(length(obj.timeVector), 1);
             % Does not compute q_ddot (set it to be empty)
             obj.trajectory.q_ddot = cell(1, length(obj.timeVector));
             obj.trajectory.q_ddot(:) = {zeros(size(q0_approx))};
@@ -36,7 +41,6 @@ classdef ForwardKinematicsSimulator < MotionSimulator
             for t = 1:length(obj.trajectory.timeVector)
                 fprintf('Time : %f\n', obj.trajectory.timeVector(t));
                 [q, q_dot] = obj.FKSolver.compute(lengths{t}, lengths_prev_2, q_prev, q_d_prev, obj.trajectory.timeVector(t) - time_prev, obj.model);
-                
                 obj.trajectory.q{t} = q;
                 obj.trajectory.q_dot{t} = q_dot;
                 
@@ -45,6 +49,8 @@ classdef ForwardKinematicsSimulator < MotionSimulator
                 time_prev =  obj.trajectory.timeVector(t);
                 lengths_prev_2 = lengths_prev;
                 lengths_prev = lengths{t};
+                obj.lengthError{t} = FKFunction.ComputeLengthErrorVector(q, lengths{t}, obj.model);
+                obj.lengthErrorNorm(t) = norm(obj.lengthError{t});
             end
         end
     end

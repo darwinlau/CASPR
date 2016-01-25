@@ -54,8 +54,8 @@ classdef ModelConfig
                 case ModelConfigType.M_NECK_8S
                     c.bodyPropertiesFilename = [c.root_folder, '\MCDM\8S_neck\8S_neck_bodies.xml'];
                     c.cablesPropertiesFilename = [c.root_folder, '\MCDM\8S_neck\8S_neck_cables.xml'];
-                    c.trajectoriesFilename = [c.root_folder, '\MCDM\8S_neck\8S_neck_trajectories.xml'];
-                    %c.trajectoriesFilename = [c.root_folder, '\MCDM\8S_neck\8S_neck_trajectories_eulerXYZ.xml'];
+                    %c.trajectoriesFilename = [c.root_folder, '\MCDM\8S_neck\8S_neck_trajectories.xml'];
+                    c.trajectoriesFilename = [c.root_folder, '\MCDM\8S_neck\8S_neck_trajectories_eulerXYZ.xml'];
                 case ModelConfigType.M_2R_PLANAR_XZ
                     c.bodyPropertiesFilename = [c.root_folder, '\MCDM\2R_planar_xz\2R_planar_xz_bodies.xml'];
                     c.cablesPropertiesFilename = [c.root_folder, '\MCDM\2R_planar_xz\2R_planar_xz_cables.xml'];
