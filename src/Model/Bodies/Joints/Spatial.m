@@ -117,13 +117,11 @@ classdef Spatial < Joint
         end
         
         function S = RelVelocityMatrix(q)
-            S = [TranslationalXYZ.RelVelocityMatrix(Spatial.GetTranslationQ(q)) zeros(3, Spherical.numVars); ...
-                zeros(3, TranslationalXYZ.numVars) Spherical.RelVelocityMatrix(Spatial.GetOrientationQ(q))];
+            S = [TranslationalXYZ.RelVelocityMatrix(Spatial.GetTranslationQ(q)) Spherical.RelVelocityMatrix(Spatial.GetOrientationQ(q))];
         end
         
         function S_dot = RelVelocityMatrixDeriv(q, q_d)
-            S_dot = [TranslationalXYZ.RelVelocityMatrixDeriv(Spatial.GetTranslationQ(q), Spatial.GetTranslationQd(q_d)) zeros(3, Spherical.numVars); ...
-                zeros(3, TranslationalXYZ.numVars) Spherical.RelVelocityMatrixDeriv(Spatial.GetOrientationQ(q), Spatial.GetOrientationQd(q_d))];
+            S_dot = [TranslationalXYZ.RelVelocityMatrixDeriv(Spatial.GetTranslationQ(q), Spatial.GetTranslationQd(q_d)) Spherical.RelVelocityMatrixDeriv(Spatial.GetOrientationQ(q), Spatial.GetOrientationQd(q_d))];
         end        
         
         % TO DO

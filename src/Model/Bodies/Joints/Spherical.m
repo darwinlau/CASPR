@@ -30,6 +30,8 @@ classdef Spherical < Joint
             if(isa(q, 'double') && norm(q) ~= 1)
                 q_quat_norm = Quaternion(q(1), q(2), q(3), q(4)).normalise();
                 assert(roundn(norm(q_quat_norm),-5) == 1, 'Invalid q, norm of quaternion orientation must equal to one.');
+            else
+                q_quat_norm = Quaternion(q(1), q(2), q(3), q(4));
             end
             update@Joint(obj, q_quat_norm.toVector(), q_dot, q_ddot);
         end

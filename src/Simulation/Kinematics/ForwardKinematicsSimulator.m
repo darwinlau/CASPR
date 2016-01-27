@@ -53,6 +53,11 @@ classdef ForwardKinematicsSimulator < MotionSimulator
                 obj.lengthErrorNorm(t) = norm(obj.lengthError{t});
             end
         end
+        
+        function plotCableLengthError(obj)
+            lengthError_array = cell2mat(obj.lengthError);
+            plot(obj.timeVector, lengthError_array, 'Color', 'k', 'LineWidth', 1.5);
+        end
     end
 end
 
