@@ -4,6 +4,7 @@ classdef IDSolverFunction < handle
     
     properties (SetAccess = protected, GetAccess = protected)
         f_previous = []
+        active_set = []
     end
     
     methods 

@@ -6,11 +6,14 @@ classdef IDSolverQuadProg < IDSolverFunction
         qp_solver_type
         objective
         constraints = {}
+        options
     end
     methods
         function q = IDSolverQuadProg(objective, qp_solver_type)
             q.objective = objective;
             q.qp_solver_type = qp_solver_type;
+            q.active_set = [];
+            q.options = [];
         end
         
         function [Q_opt, id_exit_type] = resolveFunction(obj, dynamics)            
@@ -33,7 +36,15 @@ classdef IDSolverQuadProg < IDSolverFunction
 
             switch (obj.qp_solver_type)
                 case ID_QP_SolverType.MATLAB
-                    [dynamics.cableForces, id_exit_type] = id_qp_matlab(obj.objective.A, obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous);
+                    if(isempty(obj.options))
+                        obj.options = optimoptions('quadprog', 'Display', 'off', 'MaxIter', 100);
+                    end 
+                    [dynamics.cableForces, id_exit_type] = id_qp_matlab(obj.objective.A, obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);
+                case ID_QP_SolverType.MATLAB_EFFICIENT
+                    if(isempty(obj.options))
+                        obj.options = optimoptions('quadprog', 'Display', 'off', 'MaxIter', 100);
+                    end 
+                    [dynamics.cableForces, id_exit_type,obj.active_set] = id_qp_matlab_efficient(obj.objective.A, obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.active_set,obj.options);
                 case ID_QP_SolverType.OPTITOOLBOX_IPOPT
                     [dynamics.cableForces, id_exit_type] = id_qp_optitoolbox_ipopt(obj.objective.A, obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous);
                 case ID_QP_SolverType.OPTITOOLBOX_OOQP

@@ -1,19 +1,22 @@
-classdef IDSolverFeasiblePolygon < IDSolverFunction
+classdef IDSolverOptimallySafe < IDSolverFunction
     %IDFUNCTIONQP Summary of this class goes here
     %   Detailed explanation goes here
     
     properties (SetAccess = private)
-        fp_solver_type
+        os_solver_type
+        x_prev
+        alpha
     end
     methods
-        function q = IDSolverFeasiblePolygon(fp_solver_type)
-            q.fp_solver_type = fp_solver_type;
+        function q = IDSolverOptimallySafe(os_solver_type)
+            q.os_solver_type = os_solver_type;
+            q.x_prev = [];
+            q.alpha = 1;
         end
         
         function [Q_opt, id_exit_type] = resolveFunction(obj, dynamics)            
-            % Ensure that the resolve function should be applied for this
-            % class of problem
-            assert(dynamics.numCables == dynamics.numDofs + 2,'Number of cables must be equal the number of degrees of freedom plus 2');
+            % ASK DARWIN REGARDING IF THIS SHOULD BE SEPERATE OR PART OF
+            % LINPROG. If so add alpha as a variable
             
             % Form the linear EoM constraint
             % M\ddot{q} + C + G + F_{ext} = -J^T f (constraint)
@@ -22,18 +25,19 @@ classdef IDSolverFeasiblePolygon < IDSolverFunction
             fmin = dynamics.cableDynamics.forcesMin;
             fmax = dynamics.cableDynamics.forcesMax;
 
-            switch (obj.fp_solver_type)
-                case ID_FP_SolverType.NORM_1
-                    [dynamics.cableForces, id_exit_type] = id_fp_1_norm(A_eq, b_eq, fmin, fmax);
+            % Ensure that the resolve function should be applied for this
+            % class of problem
+            assert(sum(fmin-fmin(1)*ones(size(fmin))) + sum(fmax-fmax(1)*ones(size(fmax))) == 0,'Minimum and maximum cable forces should be the same for all cables.');
+            
+            switch (obj.os_solver_type)
+                case ID_OS_SolverType.MATLAB
+                    [dynamics.cableForces, id_exit_type] = id_os_matlab(A_eq, b_eq, fmin, fmax,obj.alpha);
                     Q_opt = norm(dynamics.cableForces,1);
-                case ID_FP_SolverType.NORM_2
-                    [dynamics.cableForces, id_exit_type] = id_fp_2_norm(A_eq, b_eq, fmin, fmax);
+                case ID_OS_SolverType.EFFICIENT
+                    [dynamics.cableForces, id_exit_type,obj.x_prev,obj.active_set] = id_os_efficient(A_eq, b_eq, fmin, fmax,obj.alpha,obj.x_prev,obj.active_set);
                     Q_opt = norm(dynamics.cableForces);
-                case ID_FP_SolverType.CENTROID
-                    [dynamics.cableForces, id_exit_type] = id_fp_centroid(A_eq, b_eq, fmin, fmax);
-                    Q_opt = 0;
                 otherwise
-                    error('ID_FP_SolverType type is not defined');
+                    error('ID_OS_SolverType type is not defined');
             end
             
             if (id_exit_type ~= IDSolverExitType.NO_ERROR)
