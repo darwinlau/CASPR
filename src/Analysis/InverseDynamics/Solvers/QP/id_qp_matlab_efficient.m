@@ -14,6 +14,7 @@ function [ x_opt, exit_type,active_set_new] = id_qp_matlab_efficient(A, b, A_ine
         Pbar    =   eye(m) - AWinv*A_eq;
         x0  =   AWinv*b_eq + Pbar*q_n;
         mu = -Pbar'*x0;
+        
         if(sum(x0-xmin<-1e-6)||sum(xmax-x0<-1e-6)||sum(-mu.*(q_n==xmin) + mu.*(q_n==xmax)<-1e-6))
             if(sum(x0-xmin<-1e-6)||sum(xmax - x0<-1e-6))
                 % For the moment call qp
