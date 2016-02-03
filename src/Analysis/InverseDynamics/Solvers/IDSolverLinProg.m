@@ -1,6 +1,12 @@
+% Basic Inverse Dynamics solver for problems in the Linear Program form
+% This is a well-studied form of inverse dynamics solver for CDPRs.
+%
+% Author        : Darwin LAU
+% Created       : 2015
+% Description   : Only a linear objective function and linear 
+% constraints can be used with this solver. There are multiple types of LP
+% solver implementations that can be used with this solver.
 classdef IDSolverLinProg < IDSolverFunction
-    %IDFUNCTIONQP Summary of this class goes here
-    %   Detailed explanation goes here
     
     properties (SetAccess = private)
         lp_solver_type
@@ -50,7 +56,10 @@ classdef IDSolverLinProg < IDSolverFunction
             
             obj.f_previous = dynamics.cableForces;
         end
+        
+        function addConstraint(obj, linConstraint)
+            obj.constraints{length(obj.constraints)+1} = linConstraint;
+        end
     end
-    
 end
 

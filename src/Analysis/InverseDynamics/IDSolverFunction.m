@@ -1,7 +1,11 @@
+% Base class for inverse dynamics solvers to inherit from when creating new
+% solvers for inverse dynamics
+%
+% Author        : Darwin LAU
+% Created       : 2015
+% Description    : The function that must be implemented by the child class
+% is the "resolveFunction" function
 classdef IDSolverFunction < handle
-    %IDFUNCTION Summary of this class goes here
-    %   Detailed explanation goes here
-    
     properties (SetAccess = protected, GetAccess = protected)
         f_previous = []
         active_set = []

@@ -1,7 +1,14 @@
+% An efficient inverse dynamics solver for CDPR systems.
+%
+% Please cite the following paper when using this algorithm:
+% A. Pott, "An Improved Force Distribution Algorithm for Over-Constrained
+% Cable-Driven Parallel Robots", Proceedings of the 6th International
+% Workshop on Computational Kinematics (CK2013), pp. 139-146, 2014.
+%
+% Author        : Jonathan EDEN
+% Created       : 2016
+% Description   : 
 classdef IDSolverClosedForm < IDSolverFunction
-    %IDFUNCTIONQP Summary of this class goes here
-    %   Detailed explanation goes here
-    
     properties (SetAccess = private)
         cf_solver_type
         options

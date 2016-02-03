@@ -1,6 +1,12 @@
+% Basic Inverse Dynamics solver for problems in the Quadratic Program form
+% This is a well-studied form of inverse dynamics solver for CDPRs.
+%
+% Author        : Darwin LAU
+% Created       : 2015
+% Description   : Only a quadratic objective function and linear 
+% constraints can be used with this solver. There are multiple types of QP
+% solver implementations that can be used with this solver.
 classdef IDSolverQuadProg < IDSolverFunction
-    %IDFUNCTIONQP Summary of this class goes here
-    %   Detailed explanation goes here
     
     properties (SetAccess = private)
         qp_solver_type
@@ -56,7 +62,6 @@ classdef IDSolverQuadProg < IDSolverFunction
             if (id_exit_type ~= IDSolverExitType.NO_ERROR)
                 dynamics.cableForces = dynamics.cableDynamics.forcesInvalid;
                 Q_opt = inf;
-                %id_exit_type = IDFunction.DisplayOptiToolboxError(exitflag);
             else
                 Q_opt = obj.objective.evaluateFunction(dynamics.cableForces);
             end            

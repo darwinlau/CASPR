@@ -1,7 +1,16 @@
-classdef IDSolverOptimallySafe < IDSolverFunction
-    %IDFUNCTIONQP Summary of this class goes here
-    %   Detailed explanation goes here
-    
+% An efficient inverse dynamics solver for CDPR systems with the objective
+% to achieve optimally safe cable forces (avoiding cable force limits)
+%
+% Please cite the following paper when using this algorithm:
+% P. H. Borgstrom, B. L. Jordan, G. S. Sukhatme, M. A. Batalin, and W. J.
+% Kaiser, "Rapid Computation of Optimally Safe Tension Distributions for
+% Parallel Cable-Driven Robots", IEEE Trans. Robot., vol. 25, no. 6, pp.
+% 1271-1281.
+%
+% Author        : Jonathan EDEN
+% Created       : 2016
+% Description   : 
+classdef IDSolverOptimallySafe < IDSolverFunction    
     properties (SetAccess = private)
         os_solver_type
         x_prev

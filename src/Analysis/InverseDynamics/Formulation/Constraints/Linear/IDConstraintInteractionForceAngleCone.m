@@ -1,5 +1,20 @@
+% Constraint definition for the interaction force of a particular joint
+% where the constraint is a cone constraint that the interaction force must
+% lie within.
+%
+% Please cite the following paper when using this:
+% D. Lau, D. Oetomo, and S. K. Halgamuge, "Inverse Dynamics of Multilink
+% Cable-Driven Manipulators With the Consideration of Joint Interaction 
+% Forces and Moments," IEEE Trans. Robot., vol. 31, no. 2, pp. 479–488, 2015.
+% 
+% Author        : Darwin LAU
+% Created       : 2016
+% Description	: The constraint is constructed by the joint number, the
+% centre vector for the interaction force and the critical angle of the
+% cone. This constraint should be a quadratic constraint, but it is
+% possible to represent it as a set of linear constraints. Hence the number
+% of sides for the approximated linear cone must also be specified.
 classdef IDConstraintInteractionForceAngleCone < IDConstraintLinear
-    
     properties (SetAccess = private)
         jointNum
         F_centre

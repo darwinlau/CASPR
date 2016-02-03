@@ -1,7 +1,18 @@
-classdef IDSolverFeasiblePolygon < IDSolverFunction
-    %IDFUNCTIONQP Summary of this class goes here
-    %   Detailed explanation goes here
-    
+% An efficient inverse dynamics solver for CDPR systems with n+2 cables
+% (where n is the number of DOFs). 
+%
+% Please cite the following paper when using this algorithm:
+% M. Gouttefarde, J. Lamaury, C. Reichert and T. Bruckmann, "A Versatile
+% Tension Distribution Algorithm for n-DOF Parallel Robots Driven by n+2
+% Cables", IEEE Trans. Robot., vol. 31, no. 6, pp. 1444-1457, 2015.
+%
+% Author        : Jonathan EDEN and Jihong ZHU
+% Created       : 2016
+% Description   : This approach allows for three types of objective
+% functions to be considered, to minimise the 1-norm of cable forces, to 
+% minimise the 2-norm of cable forces, and to produce a wrench closest to 
+% centroid of the wrench polytope.
+classdef IDSolverFeasiblePolygon < IDSolverFunction    
     properties (SetAccess = private)
         fp_solver_type
     end

@@ -8,7 +8,7 @@
 % 
 % Author        : Darwin LAU
 % Created       : 2016
-% Description	: The weights are for each 
+% Description	: The weights are for each joint force/moment component
 classdef IDObjectiveMinInteractions < IDObjectiveQuadratic
     properties (SetAccess = protected)
         weights
