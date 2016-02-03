@@ -465,6 +465,7 @@ function load_button_Callback(~, ~, handles) %#ok<DEFNU>
     path_string = fileparts(mfilename('fullpath'));
     path_string = path_string(1:strfind(path_string, 'GUI')-2);
     file_name = [path_string,'\logs\*.mat'];
+    settings = uigetfile(file_name);
     load(file_name);
     mp_text = get(handles.model_text,'String');
     cs_text = get(handles.cable_text,'String');
@@ -628,6 +629,10 @@ function loadState(handles)
                 set(handles.plot_type_popup,'value',state.plot_type_popup);
                 set(handles.radiobutton1,'value',state.r_value);
                 set(handles.QTable,'Data',state.weight_table);
+            else
+                solver_type_popup_update(handles.solver_type_popup,handles);
+                objective_popup_update(handles.objective_popup,handles);
+                constraint_popup_update(handles.constraint_popup,handles);
             end
         end
     end
@@ -657,6 +662,38 @@ end
 
 function run_forward_dynamics(handles,dynObj,trajectory_xmlobj)
     % This will be added once script_FD has been fixed
+    % First read the solver form from the GUI
+    id_objective = IDObjectiveMinQuadCableForce(ones(dynObj.numCables,1));
+    id_solver = IDSolverQuadProg(id_objective, ID_QP_SolverType.OPTITOOLBOX_IPOPT);
+    
+    
+    % Setup the inverse dynamics simulator with the SystemKinematicsDynamics
+    % object and the inverse dynamics solver
+    disp('Start Setup Simulation');
+    start_tic = tic;
+    idsim = InverseDynamicsSimulator(dynObj, id_solver);
+    fdsim = ForwardDynamicsSimulator(dynObj);
+    trajectory = JointTrajectory.LoadXmlObj(trajectory_xmlobj, dynObj);
+    time_elapsed = toc(start_tic);
+    fprintf('End Setup Simulation : %f seconds\n', time_elapsed);
+    
+    % First run the inverse dynamics
+    disp('Start Running Inverse Dynamics Simulation');
+    start_tic = tic;
+    idsim.run(trajectory);
+    time_elapsed = toc(start_tic);
+    fprintf('End Running Inverse Dynamics Simulation : %f seconds\n', time_elapsed);
+    
+    % Then run the forward dynamics
+    disp('Start Running Forward Dynamics Simulation');
+    start_tic = tic;
+    fdsim.run(idsim.cableForces, trajectory.timeVector, trajectory.q{1}, trajectory.q_dot{1});
+    time_elapsed = toc(start_tic);
+    fprintf('End Running Forward Dynamics Simulation : %f seconds\n', time_elapsed);
+    
+    % Finally compare the results
+    idsim.plotJointSpace();
+    fdsim.plotJointSpace();
 end
 
 function format_Q_table(numCables,QTable)
@@ -677,5 +714,4 @@ end
 
 %% TO BE DONE
 % Add more plotting functions
-% Integrate with forward dynamics
 % Determine where best to store settings

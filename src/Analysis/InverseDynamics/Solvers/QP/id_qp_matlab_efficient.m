@@ -1,20 +1,59 @@
 function [ x_opt, exit_type,active_set_new] = id_qp_matlab_efficient(A, b, A_ineq, b_ineq, A_eq, b_eq, xmin, xmax, x0,active_set,options)
-%     options = optimoptions('quadprog', 'Display', 'off', 'MaxIter', 100);
+    assert(det(A)>=1e-6,'Efficient Method does not work for singular A');
     if(isempty(active_set))
         [x_opt, ~, exitflag,~,lambda] = quadprog(A, b, A_ineq, b_ineq, A_eq, b_eq, xmin, xmax, x0, options);
         active_set_new = [lambda.lower > 1e-6; lambda.upper > 1e-6];
-    else
+    elseif((sum(b ~=0)==0)&&isdiag(A))
         % Use the active set to get the optimal solution
-        m = length(xmin);
+        m = length(xmin); Ainv = eye(m)/A;
         joint_saturated =   active_set(1:m) |  active_set(m+1:2*m);
         q_n             =   active_set(1:m).*xmin + active_set(m+1:2*m).*xmax;
         W       =   diag(~joint_saturated);
         AW = A_eq*W;
-        AWinv = pinv(AW);
+        AWinv = Ainv*AW'/(AW*Ainv*AW');
         Pbar    =   eye(m) - AWinv*A_eq;
         x0  =   AWinv*b_eq + Pbar*q_n;
-        mu = -Pbar'*x0;
-        
+        mu = -Pbar'*A*x0;
+        if(sum(x0-xmin<-1e-6)||sum(xmax-x0<-1e-6)||sum(-mu.*(q_n==xmin) + mu.*(q_n==xmax)<-1e-6))
+            if(sum(x0-xmin<-1e-6)||sum(xmax - x0<-1e-6))
+                % For the moment call qp
+                [x_opt, ~, exitflag,~,lambda] = quadprog(A, b, A_ineq, b_ineq, A_eq, b_eq, xmin, xmax, x0, options);
+                active_set_new = [lambda.lower > 1e-6; lambda.upper > 1e-6];
+            else
+                % The issue is with optimality
+                joint_saturated = (~diag(W)).*(-mu.*(q_n==xmin) + mu.*(q_n==xmax)>-1e-6);
+                q_n = joint_saturated.*q_n; 
+                W       =   diag(~joint_saturated);
+                AW = A_eq*W;
+                AWinv = Ainv*(AW)'/(AW*Ainv*AW');
+                Pbar    =   eye(m) - AWinv*A_eq;
+                x_opt  =   AWinv*b_eq + Pbar*q_n;
+                active_set_new = [joint_saturated.*(q_n==xmin);joint_saturated.*(q_n==xmax)];
+                exitflag = 1;
+%                 [x_opt_quad, ~, ~,~,lambda] = quadprog(A, b, A_ineq, b_ineq, A_eq, b_eq, xmin, xmax, x0, options);
+%                 W = diag(diag(W).*)
+            end
+        else
+            x_opt = x0;
+            active_set_new = active_set;
+            exitflag = 1;
+        end
+    else
+        % Solve for lambda and x
+        % THIS COMPONENT NEEDS TO BE BETTER TESTED WHEN A WIDER RANGE OF
+        % OBJECTIVES HAVE BEEN ADDED
+        m = length(xmin); 
+        joint_saturated =   active_set(1:m) |  active_set(m+1:2*m);
+        q_n             =   active_set(1:m).*xmin + active_set(m+1:2*m).*xmax;
+        W = ~joint_saturated;
+        AW = A_eq(:,W);
+        HW = A(W,W);
+        HWinv = eye(m-sum(joint_saturated))/HW;
+        AWHWAWinv = eye(length(b_eq))/(AW*HWinv*AW');
+        x_sub = -(HWinv - HWinv*AW'*AWHWAWinv*AW*HWinv)*(b(W) + A(W,~W)*q_n(~W)) + HWinv*AW'*AWHWAWinv*(b_eq - A_eq(:,~W)*q_n(~W));
+        lambda = -AWHWAWinv*AW*HWinv*(b(W) + A(W,~W)*q_n(~W)) - AWHWAWinv*(b_eq - A_eq(:,~W)*q_n(~W));
+        x0 = q_n; x0(W) = x_sub;
+        mu = -A*x0 - A_eq'*lambda;  
         if(sum(x0-xmin<-1e-6)||sum(xmax-x0<-1e-6)||sum(-mu.*(q_n==xmin) + mu.*(q_n==xmax)<-1e-6))
             if(sum(x0-xmin<-1e-6)||sum(xmax - x0<-1e-6))
                 % For the moment call qp
@@ -24,13 +63,15 @@ function [ x_opt, exit_type,active_set_new] = id_qp_matlab_efficient(A, b, A_ine
                 % The issue is with optimality
 %                 [x_opt, ~, exitflag,~,lambda] = quadprog(A, b, A_ineq, b_ineq, A_eq, b_eq, xmin, xmax, x0, options);
 %                 active_set_new = [lambda.lower > 1e-6; lambda.upper > 1e-6];
-                joint_saturated = (~diag(W)).*(-mu.*(q_n==xmin) + mu.*(q_n==xmax)>-1e-6);
-                W       =   diag(~joint_saturated);
-                AW = A_eq*W;
-                AWinv = pinv(AW);
-                Pbar    =   eye(m) - AWinv*A_eq;
-                x_opt  =   AWinv*b_eq + Pbar*q_n;
-                active_set_new = [joint_saturated.*(q_n==xmin);joint_saturated.*(q_n==xmax)];
+                joint_saturated = (~W).*(-mu.*(q_n==xmin) + mu.*(q_n==xmax)>-1e-6);
+                W = ~joint_saturated;
+                AW = A_eq(:,W);
+                HW = A(W,W);
+                HWinv = inv(HW);
+                AWHWAWinv = inv(AW*HWinv*AW');
+                x_sub = -(HWinv - HWinv*AW'*AWHWAWinv*AW*HWinv)*(b(W) + A(W,~W)*q_n(~W)) + HWinv*AW'*AWHWAWinv*(b_eq - A_eq(:,~W)*q_n(~W));
+%                 lambda = -AWHWAWinv*AW*HWinv*(b(W) + A(W,~W)*q_n(~W)) - AWHWAWinv*(b_eq - A_eq(:,~W)*q_n(~W));
+                x_opt = q_n; x_opt(W) = x_sub;
                 exitflag = 1;
 %                 W = diag(diag(W).*)
             end

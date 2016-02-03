@@ -16,17 +16,17 @@ clc; clear; close all;
 % trajectory_id = 'x_simple';
 % cable_set_id = 'basic';
 % 2) Neck model
-% model_config = ModelConfig(ModelConfigType.M_NECK_8S);
-% trajectory_id = 'roll';
-% cable_set_id = 'opensim_vasavada';
+model_config = ModelConfig(ModelConfigType.M_NECK_8S);
+trajectory_id = 'roll';
+cable_set_id = 'opensim_vasavada';
 % 3) TUM Myorob arm model
 % model_config = ModelConfig(ModelConfigType.M_MYOROB_SHOULDER);
 % trajectory_id = 'traj_1';
 % cable_set_id = 'default';
 % 4) IPAnema model
-model_config = ModelConfig(ModelConfigType.M_IPANEMA_2);
-trajectory_id = 'traj_z_up';
-cable_set_id = 'default';
+% model_config = ModelConfig(ModelConfigType.M_IPANEMA_2);
+% trajectory_id = 'traj_z_up';
+% cable_set_id = 'default';
 
 % The XML objects from the model config are created
 bodies_xmlobj = model_config.getBodiesProperiesXmlObj();
