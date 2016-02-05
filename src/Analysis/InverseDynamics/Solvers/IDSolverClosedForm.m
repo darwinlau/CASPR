@@ -5,6 +5,12 @@
 % Cable-Driven Parallel Robots", Proceedings of the 6th International
 % Workshop on Computational Kinematics (CK2013), pp. 139-146, 2014.
 %
+% If the puncture method is also utilised please cite:
+% Müller, Katharina, Christopher Reichert, and Tobias Bruckmann. 
+% "Analysis of a real-time capable cable force computation method." 
+% In Cable-Driven Parallel Robots, pp. 227-238. Springer International 
+% Publishing, 2015.
+%
 % Author        : Jonathan EDEN
 % Created       : 2016
 % Description   : 

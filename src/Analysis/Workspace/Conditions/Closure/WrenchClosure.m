@@ -19,6 +19,8 @@ classdef WrenchClosure < WorkspaceCondition
                     w.method = WrenchClosureMethods.UD;
                 elseif(strcmp(method,'semi_singular'))
                     w.method = WrenchClosureMethods.SS;
+                elseif(strcmp(method,'Shang_2015'))
+                    w.method = WrenchClosureMethods.S2015;
                 else
                     msg = 'Incorrect wrench method set';
                     error(msg);
@@ -37,8 +39,10 @@ classdef WrenchClosure < WorkspaceCondition
                inWorkspace = wrench_closure_tension_factor(dynamics,obj.options);
            elseif(obj.method == WrenchClosureMethods.UD)
                inWorkspace = wrench_closure_unilateral_dexterity(dynamics,obj.options);
-           else
+           elseif(obj.method == WrenchClosureMethods.SS)
                inWorkspace = wrench_closure_semi_singular(dynamics);
+           elseif(obj.method == WrenchClosureMethods.S2015)
+               inWorkspace = wrench_closure_shang(dynamics,obj.options);
            end
         end
         
