@@ -3,21 +3,8 @@ function [ x_opt, exit_type, x_prev_new, active_set_new] = id_os_efficient(A_eq,
     m = length(xmin); n = size(A_eq,1); r = m-n;
     f = [zeros(m-n,1);-1];
     assert(rank(A_eq)==n,'Algorithm does not work for singular matrices')
-    % QR
-    [~,R] = qr(A_eq);
-    indices = false(m,1);
-    % Use QR to determine a set of linearly independent columns
-    for i=1:n
-        % find a vector that is non-zero for the first i vectors
-        for j=1:m
-            if((~indices(j))&&(sum(R(:,j)~=0)==i))
-                indices(j) = true;
-                break;
-            end
-        end
-    end
-    B = A_eq(:,indices);
-    H = A_eq(:,~indices); BinvH = B\H; 
+    [B,H] = MatrixOperations.FindLinearlyIndependentSet(A_eq);
+    BinvH = B\H; 
     A_ineq = [-eye(r),ones(r,1);BinvH,ones(n,1);eye(r),alpha*ones(r,1);-BinvH,alpha*ones(n,1)];
     b_ineq = [-xmin(1)*ones(r,1);-xmin(1)*ones(n,1) + B\b_eq;xmax(1)*ones(r,1);xmax(1)*ones(n,1) - B\b_eq];
     if(isempty(active_set))

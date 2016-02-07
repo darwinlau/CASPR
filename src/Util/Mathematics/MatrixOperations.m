@@ -10,6 +10,23 @@ classdef MatrixOperations
             s = [0 -v(3) v(2); v(3) 0 -v(1); -v(2) v(1) 0];
         end
         
+        function [L,M] = FindLinearlyIndependentSet(A)
+            [~,R] = qr(A); [n,m] = size(A);
+            indices = false(m,1);
+            % Use QR to determine a set of linearly independent columns
+            for i=1:n
+                % find a vector that is non-zero for the first i vectors
+                for j=1:m
+                    if((~indices(j))&&(sum(R(:,j)~=0)==i))
+                        indices(j) = true;
+                        break;
+                    end
+                end
+            end
+            L = A(:,indices);
+            M = A(:,~indices);
+        end    
+        
         function C = MatrixProdLeftQuad(A,B)
             ma = size(A,1); na = size(A,2);
             mb = size(B,1); %nb = size(B,2);

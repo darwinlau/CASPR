@@ -21,6 +21,8 @@ classdef WrenchClosure < WorkspaceCondition
                     w.method = WrenchClosureMethods.SS;
                 elseif(strcmp(method,'Shang_2015'))
                     w.method = WrenchClosureMethods.S2015;
+                elseif(strcmp(method,'Lim_2011'))
+                    w.method = WrenchClosureMethods.L2011;
                 else
                     msg = 'Incorrect wrench method set';
                     error(msg);
@@ -43,6 +45,8 @@ classdef WrenchClosure < WorkspaceCondition
                inWorkspace = wrench_closure_semi_singular(dynamics);
            elseif(obj.method == WrenchClosureMethods.S2015)
                inWorkspace = wrench_closure_shang(dynamics,obj.options);
+           elseif(obj.method == WrenchClosureMethods.L2011)
+               inWorkspace = wrench_closure_lim(dynamics,obj.options);
            end
         end
         
