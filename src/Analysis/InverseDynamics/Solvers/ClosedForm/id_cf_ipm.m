@@ -1,11 +1,27 @@
+% An efficient inverse dynamics solver for CDPR systems.
+%
+% Please cite the following paper when using this algorithm:
+% A. Pott and T. Bruckmann and L. Mikelsons "Closed-form force 
+% distribution for parallel wire robots. In Computational kinematics,
+% pp 25-34. Springer, Berlin, 2009.
+%
+% Author        : Jonathan EDEN
+% Created       : 2016
+% Description   : This is an implementation of the puncture method for that
+%                 is to be applied to the solution of the closed form
+%                 method.
 function [ x_opt, exit_type] = id_cf_ipm(A_eq, b_eq, x_min, x_max)
      % This is the minimum norm solution if there are no constraints
-    A_pinv = pinv(A_eq); x_unconstrained_opt = A_pinv*b_eq;
+    Ap = A_eq'/(A_eq*A_eq'); x_unconstrained_opt = Ap*b_eq;
     if((sum(x_unconstrained_opt - x_min < -1e-6)>0)||(sum(x_unconstrained_opt - x_max > 1e-6)>0))
-        m = length(x_min);
-        x_m = 0.5*(x_min + x_max); w_prime = b_eq;
-        x_temp = x_m + A_pinv*(w_prime - A_eq*x_m);
-        index = true(m,1); x_fixed = zeros(m,1);
+        x_m = 0.5*(x_min + x_max);  
+        [n,m] = size(A_eq);
+        x_shift = A_eq*x_m;  
+        N = eye(m) - Ap*A_eq;
+        x_temp = x_m + Ap*(b_eq - x_shift);
+        index = true(m,1); 
+        x_fixed = x_m;  
+        A_temp = A_eq;
         while((sum(x_temp - x_min < -1e-6)>0)||(sum(x_temp - x_max > 1e-6)>0))
             % Find the most violated constraint
             [min_violation,min_i] = max(x_min - x_temp);
@@ -18,25 +34,34 @@ function [ x_opt, exit_type] = id_cf_ipm(A_eq, b_eq, x_min, x_max)
                 x_fixed(i) = x_min(i);
             end
             index(i) = false;
-            if(sum(index)<length(b_eq))
+            if(sum(index)<n)
                 % No redundancy return infeasible solution
                 x_opt = x_temp;
                 exit_type = IDSolverExitType.INFEASIBLE;
                 return;
             end    
             % Update the solution    
-            w_prime     =   w_prime - A_eq(:,i)*x_fixed(i);
-            x_prime     =   x_m(index) + pinv(A_eq(:,index))*(w_prime - A_eq(:,index)*x_m(index));
-            x_temp      =   x_fixed; x_temp(index) = x_prime;
+            c = -A_temp(:,i); 
+            x_shift = x_shift - c*(x_fixed(i) - x_m(i));
+            v = Ap*c;
+            beta = 1 + v(i); 
+            w = N(i,:)';
+            G = (1/beta)*w*v'*Ap;
+            Ap = Ap + G; A_temp(:,i) = zeros(n,1);
+            N = eye(m) - Ap*A_temp;
+            x_temp = x_fixed + Ap*(b_eq - x_shift);
         end
-        % These two lines are not in the original paper
-        x_free = pinv(A_eq(:,index))*w_prime;
-        x_unconstrained_opt = x_fixed; x_unconstrained_opt(index) = x_free;
+        %------------------------------------------------------------------
+        % The next two lines do not appear in the original paper. They do
+        % appear to provide improved results.
+        %------------------------------------------------------------------
+        x_opt_fixed = x_fixed.*(~(x_fixed == x_m));
+        x_unconstrained_opt = x_opt_fixed + Ap*(b_eq - A_eq*x_opt_fixed);
         % The rest is consistent with original paper
         x_offset = x_temp - x_unconstrained_opt;
         s = 0;
         for i=1:m
-            if(x_unconstrained_opt(i) - x_min(i)<0)
+            if(x_unconstrained_opt(i) - x_min(i)<-1e-6)
                 s_temp = (x_min(i)-x_unconstrained_opt(i))/x_offset(i);
                 if(s_temp > s)
                     s = s_temp;
@@ -50,7 +75,3 @@ function [ x_opt, exit_type] = id_cf_ipm(A_eq, b_eq, x_min, x_max)
         exit_type = IDSolverExitType.NO_ERROR;
     end
 end
-
-% POSSIBLE CHANGE
-% Given that A_pinv is computed, a rank one update can be applied to the
-% inverse Jacobian

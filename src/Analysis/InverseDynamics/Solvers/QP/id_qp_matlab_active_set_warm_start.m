@@ -1,4 +1,4 @@
-function [ x_opt, exit_type,active_set_new] = id_qp_matlab_efficient(A, b, A_ineq, b_ineq, A_eq, b_eq, xmin, xmax, x0,active_set,options)
+function [ x_opt, exit_type,active_set_new] = id_qp_matlab_active_set_warm_start(A, b, A_ineq, b_ineq, A_eq, b_eq, xmin, xmax, x0,active_set,options)
     assert(det(A)>=1e-6,'Efficient Method does not work for singular A');
     if(isempty(active_set))
         [x_opt, ~, exitflag,~,lambda] = quadprog(A, b, A_ineq, b_ineq, A_eq, b_eq, xmin, xmax, x0, options);

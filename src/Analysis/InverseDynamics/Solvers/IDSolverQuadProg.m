@@ -46,11 +46,11 @@ classdef IDSolverQuadProg < IDSolverFunction
                         obj.options = optimoptions('quadprog', 'Display', 'off', 'MaxIter', 100);
                     end 
                     [dynamics.cableForces, id_exit_type] = id_qp_matlab(obj.objective.A, obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);
-                case ID_QP_SolverType.MATLAB_EFFICIENT
+                case ID_QP_SolverType.MATLAB_ACTIVE_SET_WARM_START
                     if(isempty(obj.options))
                         obj.options = optimoptions('quadprog', 'Display', 'off', 'MaxIter', 100);
                     end 
-                    [dynamics.cableForces, id_exit_type,obj.active_set] = id_qp_matlab_efficient(obj.objective.A, obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.active_set,obj.options);
+                    [dynamics.cableForces, id_exit_type,obj.active_set] = id_qp_matlab_active_set_warm_start(obj.objective.A, obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.active_set,obj.options);
                 case ID_QP_SolverType.OPTITOOLBOX_IPOPT
                     [dynamics.cableForces, id_exit_type] = id_qp_optitoolbox_ipopt(obj.objective.A, obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous);
                 case ID_QP_SolverType.OPTITOOLBOX_OOQP

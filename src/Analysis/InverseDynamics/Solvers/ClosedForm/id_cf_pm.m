@@ -1,19 +1,28 @@
+% An efficient inverse dynamics solver for CDPR systems.
+%
+% Please cite the following paper when using this algorithm:
+% K. Müller and C. Reichert and T. Bruckmann. 
+% "Analysis of a real-time capable cable force computation method." 
+% In Cable-Driven Parallel Robots, pp. 227-238. Springer International 
+% Publishing, 2015.
+%
+% Author        : Jonathan EDEN
+% Created       : 2016
+% Description   : This is an implementation of the puncture method for,
+%                 is to be applied to the solution of the closed form
+%                 method.
 function [ x_opt, exit_type ] = id_cf_pm(A_eq, b_eq, x_min, x_max)
     % This is the minimum norm solution if there are no constraints
-    A_pinv = pinv(A_eq); x_unconstrained_opt = A_pinv*b_eq;
+    x_unconstrained_opt = pinv(A_eq)*b_eq; m = length(b_eq);
     if((sum(x_unconstrained_opt - x_min < -1e-6)>0)||(sum(x_unconstrained_opt - x_max > 1e-6)>0))
         % Unconstrained minimum is not feasible
-        m = length(x_min);
-        x_m = 0.5*(x_min + x_max); A_pinv = pinv(A_eq);
-        x_offset = (eye(m)-A_pinv*A_eq)*x_m; 
-        x_temp = x_offset + x_unconstrained_opt;
-        if((sum(x_temp - x_min < -1e-6)>0)||(sum(x_temp - x_max > 1e-6)>0))
-            % Solution is not feasible
+        [x_temp, exit_type] = id_cf_cfm(A_eq, b_eq, x_min, x_max);
+        if(exit_type == IDSolverExitType.INFEASIBLE)
             x_opt = x_temp;
-            exit_type = IDSolverExitType.INFEASIBLE;
         else
             % Determine the point of intersection
             s = 0;
+            x_offset = x_temp - x_unconstrained_opt;
             for i=1:m
                 if(x_unconstrained_opt(i) - x_min(i)<0)
                     s_temp = (x_min(i)-x_unconstrained_opt(i))/x_offset(i);
@@ -23,7 +32,6 @@ function [ x_opt, exit_type ] = id_cf_pm(A_eq, b_eq, x_min, x_max)
                 end
             end
             x_opt = s*x_offset + x_unconstrained_opt;
-            exit_type = IDSolverExitType.NO_ERROR;
         end
     else
         x_opt = x_unconstrained_opt;
