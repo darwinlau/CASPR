@@ -100,7 +100,6 @@ classdef SystemKinematicsBodies < handle
                 q_dot_k = q_dot(index_dofs:index_dofs+obj.bodies{k}.joint.numDofs-1);
                 q_ddot_k = q_ddot(index_dofs:index_dofs+obj.bodies{k}.joint.numDofs-1);
                 obj.bodies{k}.update(q_k, q_dot_k, q_ddot_k);
-
                 index_vars = index_vars + obj.bodies{k}.joint.numVars;
                 index_dofs = index_dofs + obj.bodies{k}.joint.numDofs;
             end
@@ -138,9 +137,11 @@ classdef SystemKinematicsBodies < handle
             % Set P (relationship with joint propagation)
             obj.P = MatrixOperations.Initialise(6*obj.numLinks,6*obj.numLinks,is_symbolic);
             for k = 1:obj.numLinks
+                body_k = obj.bodies{k};
                 for a = 1:k
-                    R_ka = obj.bodies{k}.R_0k.'*obj.bodies{a}.R_0k;
-                    Pak = obj.bodiesPathGraph(a,k)*[R_ka*obj.bodies{a}.joint.R_pe.' -R_ka*MatrixOperations.SkewSymmetric(-obj.bodies{a}.r_OP + R_ka.'*obj.bodies{k}.r_OG); ...
+                    body_a = obj.bodies{a};
+                    R_ka = body_k.R_0k.'*body_a.R_0k;
+                    Pak = obj.bodiesPathGraph(a,k)*[R_ka*body_a.joint.R_pe.' -R_ka*MatrixOperations.SkewSymmetric(-body_a.r_OP + R_ka.'*body_k.r_OG); ...
                         zeros(3,3) R_ka];
                     obj.P(6*k-5:6*k, 6*a-5:6*a) = Pak;
                 end

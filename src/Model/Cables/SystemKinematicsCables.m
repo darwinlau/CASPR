@@ -54,29 +54,29 @@ classdef SystemKinematicsCables < handle
         % function for each cable directly.
         function update(obj, bodyKinematics)
             assert(bodyKinematics.numLinks == obj.numLinks, 'Number of links between the cable and body kinematics must be consistent');
-
             % Set each cable's kinematics (absolute attachment locations
-            % and segment vectors)
-            for i = 1:obj.numCables
-                obj.cables{i}.update(bodyKinematics);
-            end
-
-            % Determine V
+            % and segment vectors) and Determine V
             obj.V = MatrixOperations.Initialise(obj.numCables,6*obj.numLinks,isa(bodyKinematics.q,'sym'));
             for i = 1:obj.numCables
+                obj.cables{i}.update(bodyKinematics);
+                cable = obj.cables{i};
+                num_cable_segments = cable.numSegments;
                 for k = 1:obj.numLinks
                     % linkNum = k - 1
                     V_ixk_T = [0; 0; 0];
                     V_itk_T = [0; 0; 0];
-                    for j = 1:obj.cables{i}.numSegments
-                        V_ijk_T = obj.getCRMTerm(i,j,k+1)*bodyKinematics.bodies{k}.R_0k.'*obj.cables{i}.segments{j}.segmentVector/obj.cables{i}.segments{j}.length;
+                    body = bodyKinematics.bodies{k};
+                    for j = 1:num_cable_segments
+                        segment = cable.segments{j};
+                        V_ijk_T = obj.getCRMTerm(i,j,k+1)*body.R_0k.'*segment.segmentVector/segment.length;
                         V_ixk_T = V_ixk_T + V_ijk_T;
-                        V_itk_T = V_itk_T + cross(obj.cables{i}.segments{j}.r_GA{k+1}, V_ijk_T);
+                        V_itk_T = V_itk_T + cross(segment.r_GA{k+1}, V_ijk_T);
                     end
                     obj.V(i, 6*k-5:6*k) = [V_ixk_T.' V_itk_T.'];
                 end
             end
         end
+        
 
         % Returns the c_{ijk} element of the CRM
         % CRM is m x s x (p+1) matrix representing the cable-routing

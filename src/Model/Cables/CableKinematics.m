@@ -53,24 +53,26 @@ classdef (Abstract) CableKinematics < handle
         function update(obj, bodyKinematics)
             for j = 1:obj.numSegments
                 % cycle through links 0 to p, linkNum = k-1
-                obj.segments{j}.segmentVector = [0;0;0];
+                segment = obj.segments{j};
+                segment.segmentVector = [0;0;0];
                 for k = 1:obj.numLinks+1
+                    CRMTerm = obj.getCRMTerm(j,k);
                     % First : compute absolute attachment locations
-                    if obj.getCRMTerm(j,k) ~= 0
+                    if CRMTerm ~= 0
                         % k == 1 is base link
                         if k == 1
-                            obj.segments{j}.r_OA{k} = obj.segments{j}.r_PA{k};
+                            segment.r_OA{k} = segment.r_PA{k};
                         else
                             % bodies{k-1} because bodyNum = k - 1;
-                            obj.segments{j}.r_OA{k} = bodyKinematics.bodies{k-1}.r_OG + obj.segments{j}.r_GA{k};
+                            segment.r_OA{k} = bodyKinematics.bodies{k-1}.r_OG + segment.r_GA{k};
                         end
                     end
                     % Second : compute cable segment vectors
                     % k == 1 is base link
                     if k == 1
-                        obj.segments{j}.segmentVector = obj.segments{j}.segmentVector + obj.getCRMTerm(j,k)*obj.segments{j}.r_OA{k};
+                        segment.segmentVector = segment.segmentVector + CRMTerm*segment.r_OA{k};
                     else
-                        obj.segments{j}.segmentVector = obj.segments{j}.segmentVector + obj.getCRMTerm(j,k)*(bodyKinematics.bodies{k-1}.R_0k*obj.segments{j}.r_OA{k});
+                        segment.segmentVector = segment.segmentVector + CRMTerm*(bodyKinematics.bodies{k-1}.R_0k*segment.r_OA{k});
                     end
                 end
             end
