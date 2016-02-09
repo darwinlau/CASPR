@@ -26,21 +26,17 @@ trajectory_xmlobj = model_config.getTrajectoryXmlObj(trajectory_id);
 % Load the SystemKinematicsDynamics object from the XML
 dynObj = SystemKinematicsDynamics.LoadXmlObj(bodies_xmlobj, cableset_xmlobj);
 
-id_objective = IDObjectiveMinLinCableForce(ones(dynObj.numCables,1));
-id_solver = IDSolverLinProg(id_objective, ID_LP_SolverType.MATLAB);
+%id_objective = IDObjectiveMinLinCableForce(ones(dynObj.numCables,1));
+%id_solver = IDSolverLinProg(id_objective, ID_LP_SolverType.MATLAB);
 
-%id_objective = IDObjectiveMinQuadCableForce(ones(dynObj.numCables,1));
+id_objective = IDObjectiveMinQuadCableForce(ones(dynObj.numCables,1));
 %id_objective = IDObjectiveMinInteractions(ones(6*dynObj.numLinks,1));
-%id_solver = IDSolverQuadProg(id_objective, ID_QP_SolverType.MATLAB);
+%id_solver = IDSolverQuadProg(id_objective, ID_QP_SolverType.MATLAB_ACTIVE_SET_WARM_START);
+id_solver = IDSolverOperationalNullSpace(id_objective, ID_QP_SolverType.MATLAB_ACTIVE_SET_WARM_START, 2*eye(dynObj.numCables));
+% for i = 1:dynObj.numLinks
+%     id_solver.addConstraint(IDConstraintInteractionForceAngleCone(i, [0;0;-1], 15*pi/180, 8));
+% end
 
-% Setup an inverse dynamics solver of choice (many examples below)
-%idsolver = IDMinLinCableForce(ones(dynObj.numCables,1));
-%idsolver = IDMinQuadCableForce(ones(dynObj.numCables,1));
-%idsolver = IDMinInteraction(ones(6*dynObj.numLinks,1));
-%idsolver = IDMinQuadCableForcesConInteractionAngle(ones(dynObj.numCables,1), 15*pi/180*ones(dynObj.numCables,1));
-%idsolver = IDMinInteractionConInteractionAngle(ones(6*dynObj.numLinks,1), 20*pi/180*ones(dynObj.numLinks, 1));
-%idsolver = IDNullSpaceMinQuadCableForce(dynObj.numCables);
-%idsolver = IDNullSpaceMinInteraction(dynObj.numCables);
 
 % Setup the inverse dynamics simulator with the SystemKinematicsDynamics
 % object and the inverse dynamics solver
