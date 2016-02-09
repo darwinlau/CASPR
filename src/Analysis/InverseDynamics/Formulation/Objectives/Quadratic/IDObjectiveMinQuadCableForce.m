@@ -12,18 +12,20 @@ classdef IDObjectiveMinQuadCableForce < IDObjectiveQuadratic
     methods
         function o = IDObjectiveMinQuadCableForce(weights)
             o.weights = weights;
-        end
-        
-        function updateObjective(obj, ~)
             % This is because the general form is
             % (1/2) x^T A x + b^T x + c
-            obj.A = 2*diag(obj.weights);
-            obj.b = zeros(length(obj.weights), 1);
-            obj.c = 0;
+            o.A = 2*diag(weights);
+            o.b = zeros(length(weights), 1);
+            o.c = 0;
+        end
+        
+        function updateObjective(~, ~)
         end
         
         function updateWeights(obj, weights)
             obj.weights = weights;
+            obj.A = 2*diag(weights);
+            obj.b = zeros(length(weights), 1);
         end
     end    
 end

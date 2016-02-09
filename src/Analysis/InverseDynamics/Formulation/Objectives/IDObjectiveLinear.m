@@ -13,8 +13,9 @@ classdef IDObjectiveLinear < IDObjective
     end
     
     methods
-        function f = evaluateFunction(obj, x)
+        function [f, grad_f] = evaluateFunction(obj, x)
             f = obj.b.'*x + obj.c;
+            grad_f = obj.b;
         end
     end
     

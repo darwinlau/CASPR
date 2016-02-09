@@ -10,7 +10,7 @@ classdef IDObjective < handle
     
     methods (Abstract)
         updateObjective(obj, dynamics);
-        f = evaluateFunction(obj, x);
+        [f, grad_f] = evaluateFunction(obj, x);
     end
     
 end

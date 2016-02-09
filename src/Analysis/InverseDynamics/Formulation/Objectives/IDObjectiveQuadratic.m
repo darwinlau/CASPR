@@ -15,8 +15,9 @@ classdef IDObjectiveQuadratic < IDObjective
     end
     
     methods
-        function f = evaluateFunction(obj, x)
+        function [f, grad_f] = evaluateFunction(obj, x)
             f = (1/2) * x.' * obj.A * x + obj.b.' * x + obj.c;
+            grad_f = (1/2) * (obj.A' + obj.A) * x + obj.b;
         end
     end
     
