@@ -1,7 +1,7 @@
 classdef ID_OS_SolverType
     enumeration
-        MATLAB
-        EFFICIENT
+        LP
+        EFFICIENT_LP
     end
 end
 

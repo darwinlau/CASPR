@@ -60,7 +60,7 @@ function [ x_opt, exit_type, comp_time ] = id_fp_1_norm(A_eq, b_eq, xmin, xmax)
         else
             if  ~(abs(v_f(1) - v_li(1))<delta && abs(v_f(2) - v_li(2))<delta), % ~strcmp(num2str(v_f),num2str(v_li))==0,
                 if(sum(Indexset)==l_N)
-                    Cond = KKT_vertex2(N,l,i,bl,bi,v_li);
+                    Cond = KKT_vertex_1_norm(N,l,i,bl,bi);
                     if(Cond == 1)
                         x_opt = x_p + N*v_li;
                         exit_type = IDSolverExitType.NO_ERROR;

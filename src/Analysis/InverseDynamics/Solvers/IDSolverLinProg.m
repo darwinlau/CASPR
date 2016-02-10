@@ -12,11 +12,13 @@ classdef IDSolverLinProg < IDSolverFunction
         lp_solver_type
         objective
         constraints = {}
+        options
     end
     methods
         function q = IDSolverLinProg(objective, lp_solver_type)
             q.objective = objective;
             q.lp_solver_type = lp_solver_type;
+            q.options = [];
         end
         
         function [Q_opt, id_exit_type] = resolveFunction(obj, dynamics)            
@@ -39,7 +41,10 @@ classdef IDSolverLinProg < IDSolverFunction
             
             switch (obj.lp_solver_type)
                 case ID_LP_SolverType.MATLAB
-                    [dynamics.cableForces, id_exit_type] = id_lp_matlab(obj.objective.b, A_ineq, A_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous);
+                    if(isempty(obj.options))
+                        obj.options = optimoptions('linprog', 'Display', 'off', 'Algorithm', 'interior-point');
+                    end
+                    [dynamics.cableForces, id_exit_type] = id_lp_matlab(obj.objective.b, A_ineq, A_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);
                 case ID_LP_SolverType.OPTITOOLBOX_CLP
                     [dynamics.cableForces, id_exit_type] = id_lp_optitoolbox_clp(obj.objective.b, A_ineq, A_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous);
                 otherwise

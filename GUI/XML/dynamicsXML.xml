@@ -34,5 +34,9 @@
 	<plot_functions>
 		<plot_type>plotCableForces</plot_type>
 		<plot_type>plotInteractionForceMagnitudes</plot_type>
+        <plot_type>plotAngularAcceleration</plot_type>
+		<plot_type>plotBodyCOG</plot_type>
+        <plot_type>plotJointSpace</plot_type>
+		<plot_type>plotCableLengths</plot_type>
 	</plot_functions>
 </simulator>

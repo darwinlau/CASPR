@@ -55,10 +55,6 @@ classdef IDSolverClosedForm < IDSolverFunction
             
             obj.f_previous = dynamics.cableForces;
         end
-        
-        function addConstraint(obj, linConstraint)
-            obj.constraints{length(obj.constraints)+1} = linConstraint;
-        end
     end
     
 end

@@ -40,7 +40,7 @@ classdef (Abstract) MotionSimulator < Simulator
             close(plot_handle);
         end
 
-        function plotCableLengths(obj, cables_to_plot)
+        function plotCableLengths(obj, cables_to_plot, tab_group)
             assert(~isempty(obj.lengths), 'Cannot plot since lengths vector is empty');
             assert(~isempty(obj.lengths_dot), 'Cannot plot since lengths_dot vector is empty');
 
@@ -49,14 +49,25 @@ classdef (Abstract) MotionSimulator < Simulator
             end
             length_array = cell2mat(obj.lengths);
             length_dot_array = cell2mat(obj.lengths_dot);
+    
+            if(nargin == 3)
+                tab1 = uitab(tab_group,'Title','Cable Lengths');
+                ax = axes;
+                set(ax,'Parent',tab1,'OuterPosition',[0,0,1,1])
+                plot(ax,obj.timeVector, length_array(cables_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); 
+                tab2 = uitab(tab_group,'Title','Cable Length Derivatives');
+                ax = axes;
+                set(ax,'Parent',tab2,'OuterPosition',[0,0,1,1])
+                plot(ax,obj.timeVector, length_array(cables_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); 
+            else
+                figure;
+                plot(obj.timeVector, length_dot_array(cables_to_plot, :), 'LineWidth', 1.5, 'Color', 'k');
+                title('Cable Lengths');
 
-            figure;
-            plot(obj.timeVector, length_array(cables_to_plot, :), 'LineWidth', 1.5, 'Color', 'k');
-            title('Cable Lengths');
-
-            figure;
-            plot(obj.timeVector, length_dot_array(cables_to_plot, :), 'LineWidth', 1.5, 'Color', 'k');
-            title('Cable Lengths Derivative');
+                figure;
+                plot(obj.timeVector, length_dot_array(cables_to_plot, :), 'LineWidth', 1.5, 'Color', 'k');
+                title('Cable Lengths Derivative');
+            end
 
             % ONLY USED IN DEBUGGING START
 %             lengths_dot_num = zeros(obj.model.numCables, length(obj.timeVector));
@@ -69,7 +80,7 @@ classdef (Abstract) MotionSimulator < Simulator
             % ONLY USED IN DEBUGGING END
         end
 
-        function plotJointSpace(obj, states_to_plot)
+        function plotJointSpace(obj, states_to_plot,tab_group)
             assert(~isempty(obj.trajectory), 'Cannot plot since trajectory is empty');
 
             n_dof = obj.model.numDofs;
@@ -81,18 +92,29 @@ classdef (Abstract) MotionSimulator < Simulator
             q_array = cell2mat(obj.trajectory.q);
             q_dot_array = cell2mat(obj.trajectory.q_dot);
 
-            % Plots joint space variables q(t)
-            figure;
-            plot(obj.timeVector, q_array(states_to_plot, :), 'Color', 'k', 'LineWidth', 1.5);
-            title('Joint space variables');
+            if(nargin == 3)
+                tab1 = uitab(tab_group,'Title','Joint space variables');
+                ax = axes;
+                set(ax,'Parent',tab1,'OuterPosition',[0,0,1,1])
+                plot(ax,obj.timeVector, q_array(states_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); 
+                tab2 = uitab(tab_group,'Title','Joint space derivatives');
+                ax = axes;
+                set(ax,'Parent',tab2,'OuterPosition',[0,0,1,1])
+                plot(ax,obj.timeVector, q_dot_array(states_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); 
+            else
+                % Plots joint space variables q(t)
+                figure;
+                plot(obj.timeVector, q_array(states_to_plot, :), 'Color', 'k', 'LineWidth', 1.5);
+                title('Joint space variables');
 
-            % Plots derivative joint space variables q_dot(t)
-            figure;
-            plot(obj.timeVector, q_dot_array(states_to_plot, :), 'Color', 'k', 'LineWidth', 1.5);
-            title('Joint space derivatives');
+                % Plots derivative joint space variables q_dot(t)
+                figure;
+                plot(obj.timeVector, q_dot_array(states_to_plot, :), 'Color', 'k', 'LineWidth', 1.5);
+                title('Joint space derivatives');
+            end
         end
 
-        function plotBodyCOG(obj, bodies_to_plot)
+        function plotBodyCOG(obj, bodies_to_plot,tab_group)
             assert(~isempty(obj.trajectory), 'Cannot plot since trajectory is empty');
 
             % Plots absolute position, velocity and acceleration of COG
@@ -112,17 +134,34 @@ classdef (Abstract) MotionSimulator < Simulator
                     pos0_ddot(3*ki-2:3*ki, t) = obj.model.bodyKinematics.bodies{bodies_to_plot(ki)}.R_0k*obj.model.bodyKinematics.bodies{bodies_to_plot(ki)}.a_OG;
                 end
             end
-            figure;
-            plot(obj.timeVector, pos0, 'Color', 'k', 'LineWidth', 1.5);
-            title('Position of CoG');
-
-            figure;
-            plot(obj.timeVector, pos0_dot, 'Color', 'k', 'LineWidth', 1.5);
-            title('Velocity of CoG');
-
-            figure;
-            plot(obj.timeVector, pos0_ddot, 'Color', 'k', 'LineWidth', 1.5);
-            title('Acceleration of CoG');
+            
+            if(nargin == 3)
+                tab1 = uitab(tab_group,'Title','Position of CoG');
+                ax = axes;
+                set(ax,'Parent',tab1,'OuterPosition',[0,0,1,1])
+                plot(ax,obj.timeVector, pos0, 'LineWidth', 1.5, 'Color', 'k'); 
+                tab2 = uitab(tab_group,'Title','Velocity of CoG');
+                ax = axes;
+                set(ax,'Parent',tab2,'OuterPosition',[0,0,1,1])
+                plot(ax,obj.timeVector, pos0_dot, 'LineWidth', 1.5, 'Color', 'k'); 
+                tab3 = uitab(tab_group,'Title','Acceleration of CoG');
+                ax = axes;
+                set(ax,'Parent',tab3,'OuterPosition',[0,0,1,1])
+                plot(ax,obj.timeVector, pos0_ddot, 'LineWidth', 1.5, 'Color', 'k'); 
+            else
+                figure;
+                plot(obj.timeVector, pos0, 'Color', 'k', 'LineWidth', 1.5);
+                title('Position of CoG');
+                
+                figure;
+                plot(obj.timeVector, pos0_dot, 'Color', 'k', 'LineWidth', 1.5);
+                title('Velocity of CoG');
+                
+                figure;
+                plot(obj.timeVector, pos0_ddot, 'Color', 'k', 'LineWidth', 1.5);
+                title('Acceleration of CoG');
+            end
+            
 
             % ONLY USED IN DEBUGGING START
             % Numerical derivative must be performed in frame {0}
@@ -141,7 +180,7 @@ classdef (Abstract) MotionSimulator < Simulator
             % ONLY USED IN DEBUGGING END
         end
 
-        function plotAngularAcceleration(obj, bodies_to_plot,fig_handle)
+        function plotAngularAcceleration(obj, bodies_to_plot, tab_group)
             assert(~isempty(obj.trajectory), 'Cannot plot since trajectory is empty');
 
             % Plots absolute position, velocity and acceleration of COG
@@ -160,13 +199,24 @@ classdef (Abstract) MotionSimulator < Simulator
                 end
             end
 
-            figure;
-            plot(obj.timeVector, ang0, 'Color', 'k', 'LineWidth', 1.5);
-            title('Angular velocity of rigid bodies');
+            if(nargin == 3)
+                tab1 = uitab(tab_group,'Title','Angular velocity of rigid bodies');
+                ax = axes;
+                set(ax,'Parent',tab1,'OuterPosition',[0,0,1,1])
+                plot(ax,obj.timeVector, ang0, 'LineWidth', 1.5, 'Color', 'k'); 
+                tab2 = uitab(tab_group,'Title','Angular acceleration of rigid bodies');
+                ax = axes;
+                set(ax,'Parent',tab2,'OuterPosition',[0,0,1,1])
+                plot(ax,obj.timeVector, ang0_dot, 'LineWidth', 1.5, 'Color', 'k'); 
+            else
+                figure;
+                plot(obj.timeVector, ang0, 'Color', 'k', 'LineWidth', 1.5);
+                title('Angular velocity of rigid bodies');
 
-            figure;
-            plot(obj.timeVector, ang0_dot, 'Color', 'k', 'LineWidth', 1.5);
-            title('Angular acceleration of rigid bodies');
+                figure;
+                plot(obj.timeVector, ang0_dot, 'Color', 'k', 'LineWidth', 1.5);
+                title('Angular acceleration of rigid bodies');
+            end
 
             % ONLY USED IN DEBUGGING START
 %             % Numerical derivative must be performed in frame {0}

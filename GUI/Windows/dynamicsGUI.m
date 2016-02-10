@@ -25,7 +25,7 @@ function varargout = dynamicsGUI(varargin)
 
     % Edit the above text to modify the response to help dynamicsGUI
 
-    % Last Modified by GUIDE v2.5 14-Jan-2016 15:58:41
+    % Last Modified by GUIDE v2.5 10-Feb-2016 16:28:10
 
     % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
@@ -67,6 +67,8 @@ function dynamicsGUI_OpeningFcn(hObject, eventdata, handles, varargin)
     % Load the state
     loadState(handles);
     trajectory_popup_Update(hObject, eventdata, handles);
+    tabgp = uitabgroup(handles.uipanel3,'Position',[0 0 1 1]);
+    setappdata(handles.figure1,'tabgp',tabgp);
 
     % UIWAIT makes dynamicsGUI wait for user response (see UIRESUME)
     % uiwait(handles.figure1);
@@ -500,11 +502,66 @@ function plot_button_Callback(~, ~, handles) %#ok<DEFNU>
         contents = cellstr(get(handles.plot_type_popup,'String'));
         plot_type = contents{get(handles.plot_type_popup,'Value')};
         plot_function = str2func(plot_type);
-        figure_handles = handles.figure1;
-        plot_function(sim,[],figure_handles);    
+        tab_toggle = get(handles.undock_box,'Value');
+        if(tab_toggle)
+            plot_function(idsim);
+        else
+            tabgp = getappdata(handles.figure1,'tabgp');
+            plot_function(idsim,[],tabgp);
+        end  
     end
 end
 
+%--------------------------------------------------------------------------
+%% Toolbar buttons
+%--------------------------------------------------------------------------
+% --------------------------------------------------------------------
+function save_file_tool_ClickedCallback(~, ~, handles)
+    % hObject    handle to save_file_tool (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    structure with handles and user data (see GUIDATA)
+    tabgp = getappdata(handles.figure1,'tabgp');
+    s_tab = get(tabgp,'SelectedTab');
+    ax = get(s_tab,'Children');
+    f1 = figure; % Open a new figure with handle f1
+    copyobj(ax,f1); % Copy axes object h into figure f1
+    set(gca,'ActivePositionProperty','outerposition')
+    set(gca,'Units','normalized')
+    set(gca,'OuterPosition',[0 0 1 1])
+    set(gca,'position',[0.1300 0.1100 0.7750 0.8150])
+    [file,path] = uiputfile({'*.fig';'*.bmp';'*.eps';'*.emf';'*.jpg';'*.pcx';...
+        '*.pbm';'*.pdf';'*.pgm';'*.png';'*.ppm';'*.svg';'*.tif'},'Save file name');
+    if(path ~= 0)
+        saveas(gcf,[path,file]);
+    end
+    close(f1);
+end
+
+% --------------------------------------------------------------------
+function undock_figure_tool_ClickedCallback(~, ~, handles)
+    % hObject    handle to undock_figure_tool (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    structure with handles and user data (see GUIDATA)
+    tabgp = getappdata(handles.figure1,'tabgp');
+    s_tab = get(tabgp,'SelectedTab');
+    ax = get(s_tab,'Children');
+    f1 = figure; % Open a new figure with handle f1
+    copyobj(ax,f1); % Copy axes object h into figure f1
+    set(gca,'ActivePositionProperty','outerposition')
+    set(gca,'Units','normalized')
+    set(gca,'OuterPosition',[0 0 1 1])
+    set(gca,'position',[0.1300 0.1100 0.7750 0.8150])
+end
+
+% --------------------------------------------------------------------
+function delete_figure_tool_ClickedCallback(hObject, eventdata, handles)
+    % hObject    handle to delete_figure_tool (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    structure with handles and user data (see GUIDATA)
+    tabgp = getappdata(handles.figure1,'tabgp');
+    s_tab = get(tabgp,'SelectedTab');
+    delete(s_tab);
+end
 
 %--------------------------------------------------------------------------
 %% Radio Buttons
@@ -526,6 +583,18 @@ function radiobutton1_Callback(hObject, ~, handles) %#ok<DEFNU>
         
         set(handles.QTable,'ColumnEditable',true(1,Q_n));
     end
+end
+
+%--------------------------------------------------------------------------
+%% Toggle Buttons
+%--------------------------------------------------------------------------
+% --- Executes on button press in undock_box.
+function undock_box_Callback(hObject, eventdata, handles)
+    % hObject    handle to undock_box (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    structure with handles and user data (see GUIDATA)
+
+    % Hint: get(hObject,'Value') returns toggle state of undock_box
 end
 
 %--------------------------------------------------------------------------
@@ -577,23 +646,18 @@ function run_inverse_dynamics(handles,dynObj,trajectory_xmlobj)
     % Display information from the inverse dynamics simulator
     fprintf('Optimisation computational time, mean : %f seconds, std dev : %f seconds, total: %f seconds\n', mean(idsim.compTime), std(idsim.compTime), sum(idsim.compTime));
 
-    % After running the simulator the data can be plotted
-    % Refer to the simulator classes to see what can be plotted.
-
-    % The neck model has many cables/muscles, so it is possible to plot a
-    % subset of them only
-
-    % % Right muscles
-    % idsim.PlotCableForces(1:38); xlabel('time [s]'); ylabel('cable forces [N]'); title('Forces (right)');
-    % % Left muscles
-    % idsim.PlotCableForces(39:76); xlabel('time [s]'); ylabel('cable forces [N]'); title('Forces (left)');
-
     % Otherwise here is some simple example
     disp('Start Plotting Simulation');
     start_tic = tic;
     plot_function = str2func(plot_type);
-    figure_handles = handles.figure1;
-    plot_function(idsim,[],figure_handles);    
+    tab_toggle = get(handles.undock_box,'Value');
+    if(tab_toggle)
+        plot_function(idsim);    
+    else
+        tabgp = getappdata(handles.figure1,'tabgp');
+        plot_function(idsim,[],tabgp);    
+    end
+    
     % Store the simutor
     setappdata(handles.figure1,'sim',idsim);
     time_elapsed = toc(start_tic);
@@ -692,8 +756,15 @@ function run_forward_dynamics(handles,dynObj,trajectory_xmlobj)
     fprintf('End Running Forward Dynamics Simulation : %f seconds\n', time_elapsed);
     
     % Finally compare the results
-    idsim.plotJointSpace();
-    fdsim.plotJointSpace();
+    tab_toggle = get(handles.undock_box,'Value');
+    if(tab_toggle)
+        idsim.plotJointSpace();
+        fdsim.plotJointSpace();
+    else
+        tabgp = getappdata(handles.figure1,'tabgp');
+        idsim.plotJointSpace([],tabgp);
+        fdsim.plotJointSpace([],tabgp);
+    end
 end
 
 function format_Q_table(numCables,QTable)
@@ -713,5 +784,4 @@ function format_Q_table(numCables,QTable)
 end
 
 %% TO BE DONE
-% Add more plotting functions
-% Determine where best to store settings
+% Modify the constraints and objectives

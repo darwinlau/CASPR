@@ -1,12 +1,12 @@
 classdef CapacityMarginMetric < WorkspaceMetric
     properties (SetAccess = protected, GetAccess = protected)
-        options                         % The options for the wrench closure
+        desired_wrench_set
     end
     
     methods
         %% Constructor
-        function m = CapacityMarginMetric()
-            m.options   =    	optimset('display','off');
+        function m = CapacityMarginMetric(desired_wrench_set)
+            m.desired_wrench_set = desired_wrench_set;
         end
         
         %% Evaluate Functions
@@ -17,11 +17,14 @@ classdef CapacityMarginMetric < WorkspaceMetric
                 f_l =   dynamics.cableDynamics.forcesMin;
                 w   =   WrenchSet(L,f_u,f_l);
                 q   =   length(w.b);
-                s   =   zeros(q,1);
-                for j=1:q
-                    s(j) = (w.b(j) - w.A(j,:)*dynamics.G)/norm(w.A(j,:),2);
+                p   =   size(obj.desired_wrench_set,2);
+                s   =   zeros(p,q);
+                for i = 1:p
+                    for j=1:q
+                        s(i,j) = (w.b(j) - w.A(j,:)*obj.desired_wrench_set(:,i))/norm(w.A(j,:),2);
+                    end
                 end
-                v = min(s);
+                v = min(min(s));
             else
                 v = inWorkspace;
             end

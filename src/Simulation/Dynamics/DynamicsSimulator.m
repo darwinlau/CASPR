@@ -12,7 +12,7 @@ classdef DynamicsSimulator < MotionSimulator
             ds@MotionSimulator(model);
         end
         
-        function plotCableForces(obj, cables_to_plot,figure_handles)
+        function plotCableForces(obj, cables_to_plot,tab_group)
             assert(~isempty(obj.cableForces), 'Cannot plot since cableForces is empty');
             
             if nargin == 1 || isempty(cables_to_plot)
@@ -22,12 +22,16 @@ classdef DynamicsSimulator < MotionSimulator
             forces = cell2mat(obj.cableForces);
             
             if(nargin == 3)
-                figure(figure_handles); cla;
+                tab1 = uitab(tab_group,'Title','Cable Forces');
+                ax = axes;
+                set(ax,'Parent',tab1,'OuterPosition',[0,0,1,1])
+                plot(ax,obj.timeVector, forces(cables_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); 
             else
                 figure;
+                plot(obj.timeVector, forces(cables_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); 
+                title('Cable forces');                 
             end
-            plot(obj.timeVector, forces(cables_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); 
-            title('Cable forces'); 
+            
             
 %             line_color_order = [1 0 0; 0 1 0; 0 0 1; 0 1 1; 1 0 1; 1 1 0; 0 0 0; 1 165/255 0; 139/255 69/255 19/255];
 %             line_style_order = '-|--|:|-.';
@@ -36,7 +40,7 @@ classdef DynamicsSimulator < MotionSimulator
 %             plot(obj.timeVector, forces(cables_to_plot, :), 'LineWidth', 1.5); title('Cable forces');
         end
         
-        function plotInteractionForceMagnitudes(obj, links_to_plot,figure_handles)
+        function plotInteractionForceMagnitudes(obj, links_to_plot,tab_group)
             assert(~isempty(obj.interactionWrench), 'Cannot plot since interactionWrench is empty');
             
             if nargin == 1 || isempty(links_to_plot)
@@ -56,12 +60,16 @@ classdef DynamicsSimulator < MotionSimulator
             end
             
             if(nargin == 3)
-                figure(figure_handles); cla;
+                tab1 = uitab(tab_group,'Title','Magnitude of interaction forces');
+                ax = axes;
+                set(ax,'Parent',tab1,'OuterPosition',[0,0,1,1])
+                plot(ax,obj.timeVector, forcesMag, 'LineWidth', 1.5, 'Color', 'k');
             else
                 figure;
+                plot(obj.timeVector, forcesMag, 'LineWidth', 1.5, 'Color', 'k');
+                title('Magnitude of interaction forces');
             end
-            plot(obj.timeVector, forcesMag, 'LineWidth', 1.5, 'Color', 'k');
-            title('Magnitude of interaction forces'); 
+            
             
 %             line_color_order = [1 0 0; 0 1 0; 0 0 1; 0 1 1; 1 0 1; 1 1 0; 0 0 0; 1 165/255 0; 139/255 69/255 19/255];
 %             line_style_order = '-|--|:|-.';

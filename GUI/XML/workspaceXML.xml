@@ -6,6 +6,9 @@
     <workspace_condition id="WrenchClosure">
         <generation_method_enum>WrenchClosureMethods</generation_method_enum>
     </workspace_condition>
+    <workspace_condition id="WrenchFeasible">
+        <generation_method_enum>WrenchFeasibleMethods</generation_method_enum>
+    </workspace_condition>
     <workspace_condition id="WorkspaceStatic">
         <generation_method_enum>WorkspaceStaticMethods</generation_method_enum>
     </workspace_condition>

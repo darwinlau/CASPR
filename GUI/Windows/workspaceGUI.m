@@ -289,6 +289,7 @@ function Generate_Button_Callback(~, ~, handles) %#ok<DEFNU>
     cfh = str2func(contents{get(handles.workspace_condition_popup,'Value')});
     contents = cellstr(get(handles.workspace_generation_popup,'String'));
     wcondition  = cfh(contents{get(handles.workspace_generation_popup,'Value')});
+%     wcondition  = cfh(contents{get(handles.workspace_generation_popup,'Value')},[-1,1,0,0;0,0,-1,1]);
     % Then the metric
     contents = cellstr(get(handles.workspace_metric_popup,'String'));
     if(strcmp(contents{get(handles.workspace_metric_popup,'Value')},' '))

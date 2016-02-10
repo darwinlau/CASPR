@@ -70,12 +70,7 @@ classdef IDSolverOperationalNullSpace < IDSolverFunction
                         obj.options = optimoptions('quadprog', 'Display', 'off', 'MaxIter', 100);
                     end 
                     [f0_soln, id_exit_type] = id_qp_matlab(QP_A, QP_b, A_ineq, b_ineq, [], [], [], [], obj.f0_previous, obj.options);
-                case ID_QP_SolverType.MATLAB_ACTIVE_SET_WARM_START
-                    if(isempty(obj.options))
-                        obj.options = optimoptions('quadprog', 'Display', 'off', 'MaxIter', 100);
-                    end 
-                    [f0_soln, id_exit_type,obj.active_set] = id_qp_matlab_active_set_warm_start(QP_A, QP_b, A_ineq, b_ineq, [], [], [], [], obj.f0_previous,obj.active_set,obj.options);
-                case ID_QP_SolverType.OPTITOOLBOX_IPOPT
+               case ID_QP_SolverType.OPTITOOLBOX_IPOPT
                     [f0_soln, id_exit_type] = id_qp_optitoolbox_ipopt(QP_A, QP_b, A_ineq, b_ineq, [], [], [], [], obj.f0_previous);
                 case ID_QP_SolverType.OPTITOOLBOX_OOQP
                     [f0_soln, id_exit_type] = id_qp_optitoolbox_ooqp(QP_A, QP_b, A_ineq, b_ineq, [], [], [], [], obj.f0_previous);
@@ -92,10 +87,6 @@ classdef IDSolverOperationalNullSpace < IDSolverFunction
             end            
             obj.f0_previous = f0_soln;
             obj.f_previous = dynamics.cableForces;
-        end
-        
-        function addConstraint(obj, linConstraint)
-            obj.constraints{length(obj.constraints)+1} = linConstraint;
         end
     end
     

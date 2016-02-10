@@ -39,10 +39,10 @@ classdef IDSolverOptimallySafe < IDSolverFunction
             assert(sum(fmin-fmin(1)*ones(size(fmin))) + sum(fmax-fmax(1)*ones(size(fmax))) == 0,'Minimum and maximum cable forces should be the same for all cables.');
             
             switch (obj.os_solver_type)
-                case ID_OS_SolverType.MATLAB
+                case ID_OS_SolverType.LP
                     [dynamics.cableForces, id_exit_type] = id_os_matlab(A_eq, b_eq, fmin, fmax,obj.alpha);
                     Q_opt = norm(dynamics.cableForces,1);
-                case ID_OS_SolverType.EFFICIENT
+                case ID_OS_SolverType.EFFICIENT_LP
                     [dynamics.cableForces, id_exit_type,obj.x_prev,obj.active_set] = id_os_efficient(A_eq, b_eq, fmin, fmax,obj.alpha,obj.x_prev,obj.active_set);
                     Q_opt = norm(dynamics.cableForces);
                 otherwise
