@@ -8,26 +8,29 @@ classdef FKLeastSquares < FKAnalysisBase
     end
     
     methods
-        function fkls = FKLeastSquares(approxType, qDotType)
+        function fkls = FKLeastSquares(kin_model, approxType, qDotType)
+            fkls@FKAnalysisBase(kin_model);
             fkls.approxMethod = approxType;
             fkls.qDotMethod = qDotType;            
         end
         
-        function [q, q_dot] = compute(obj, len, len_prev_2, q_prev, q_d_prev, delta_t, kin_model)
+        function [q, q_dot] = compute(obj, len, len_prev_2, q_prev, q_d_prev, delta_t)
             switch obj.approxMethod
                 case FK_LS_ApproxOptionType.USE_PREVIOUS_Q
                     q_approx = q_prev;
                 case FK_LS_ApproxOptionType.FIRST_ORDER_INTEGRATE_QDOT
-                    q_approx = kin_model.qIntegrate(q_prev, q_d_prev, delta_t);
+                    q_approx = obj.model.qIntegrate(q_prev, q_d_prev, delta_t);
                 case FK_LS_ApproxOptionType.FIRST_ORDER_INTEGRATE_PSEUDOINV
-                    kin_model.update(q_prev, zeros(kin_model.numDofs,1), zeros(kin_model.numDofs,1));
+                    obj.model.update(q_prev, zeros(obj.model.numDofs,1), zeros(obj.model.numDofs,1));
                     if delta_t ~= 0
-                        q_approx = kin_model.bodyKinematics.qIntegrate(q_prev, pinv(kin_model.L) * (len - len_prev_2)/(2*delta_t), delta_t);
+                        q_approx = obj.model.bodyKinematics.qIntegrate(q_prev, pinv(obj.model.L) * (len - len_prev_2)/(2*delta_t), delta_t);
                     else
-                        q_approx = kin_model.bodyKinematics.qIntegrate(q_prev, zeros(kin_model.numDofs,1), 0);
+                        q_approx = obj.model.bodyKinematics.qIntegrate(q_prev, zeros(obj.model.numDofs,1), 0);
                     end
+                otherwise 
+                    error('approxMethod type is not defined');
             end
-            func = @(q_f) FKFunction.ComputeLengthErrorVector(q_f, len, kin_model);
+            func = @(q_f) obj.ComputeLengthErrorVector(q_f, len, obj.model);
             
             % TODO THE JACOBIAN MATRIX IS DIFFERENT FOR SPHERICAL JOINT
             options = optimoptions(@lsqnonlin, 'Display', 'none', 'Jacobian', 'on');
@@ -41,14 +44,14 @@ classdef FKLeastSquares < FKAnalysisBase
                     if delta_t ~= 0
                         q_dot = (q - q_prev)/delta_t;
                     else
-                        q_dot = zeros(kin_model.numDofs,1);
+                        q_dot = zeros(obj.model.numDofs,1);
                     end
                 case FK_LS_QdotOptionType.PSEUDO_INV
                     if delta_t ~= 0
-                        kin_model.update(q, zeros(size(q)), zeros(size(q)));
-                        q_dot = pinv(kin_model.L) * (len - len_prev_2)/(2*delta_t);
+                        obj.model.update(q, zeros(size(q)), zeros(size(q)));
+                        q_dot = pinv(obj.model.L) * (len - len_prev_2)/(2*delta_t);
                     else
-                        q_dot = zeros(kin_model.numDofs,1);
+                        q_dot = zeros(obj.model.numDofs,1);
                     end
             end
         end        

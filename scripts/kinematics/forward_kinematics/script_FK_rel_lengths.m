@@ -41,7 +41,7 @@ kinObj = SystemKinematics.LoadXmlObj(bodies_xmlobj, cableset_xmlobj);
 disp('Start Setup Simulation');
 start_tic = tic;
 % Initialise the least squares solver for the forward kinematics
-fksolver = FKLeastSquares(FK_LS_ApproxOptionType.FIRST_ORDER_INTEGRATE_PSEUDOINV, FK_LS_QdotOptionType.PSEUDO_INV);
+fksolver = FKLeastSquares(kinObj, FK_LS_ApproxOptionType.FIRST_ORDER_INTEGRATE_PSEUDOINV, FK_LS_QdotOptionType.PSEUDO_INV);
 % Initialise the three inverse/forward kinematics solvers
 iksim_true = InverseKinematicsSimulator(kinObj);
 fksim_error = ForwardKinematicsSimulator(kinObj, fksolver);

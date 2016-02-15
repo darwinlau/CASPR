@@ -10,9 +10,9 @@ clc; clear; close all;
 % Set up the type of model, trajectory and the set of cables to be used
 % Following are some examples (feel free to add more):
 % 1) Planar model
-model_config = ModelConfig(ModelConfigType.M_SIMPLE_PLANAR_XY);
-trajectory_id = 'x_simple';
-cable_set_id = 'basic';
+% model_config = ModelConfig(ModelConfigType.M_SIMPLE_PLANAR_XY);
+% trajectory_id = 'general_1';
+% cable_set_id = 'basic';
 % 2) Neck model
 % model_config = ModelConfig(ModelConfigType.M_NECK_8S);
 % trajectory_id = 'roll';
@@ -20,7 +20,11 @@ cable_set_id = 'basic';
 % 3) TUM Myorob arm model
 % model_config = ModelConfig(ModelConfigType.M_MYOROB_SHOULDER);
 % trajectory_id = 'traj_1';
-% cable_set_id = 'myorob_shoulder';
+% cable_set_id = 'default';
+% 4) IPAnema model
+model_config = ModelConfig(ModelConfigType.M_IPANEMA_2);
+trajectory_id = 'traj_1';
+cable_set_id = 'default';
 
 % The XML objects from the model config are created
 bodies_xmlobj = model_config.getBodiesProperiesXmlObj();
@@ -35,7 +39,9 @@ kinObj = SystemKinematics.LoadXmlObj(bodies_xmlobj, cableset_xmlobj);
 disp('Start Setup Simulation');
 start_tic = tic;
 % Initialise the least squares solver for the forward kinematics
-fksolver = FKLeastSquares(FK_LS_ApproxOptionType.FIRST_ORDER_INTEGRATE_QDOT, FK_LS_QdotOptionType.PSEUDO_INV);
+fksolver = FKLeastSquares(kinObj, FK_LS_ApproxOptionType.FIRST_ORDER_INTEGRATE_PSEUDOINV, FK_LS_QdotOptionType.FIRST_ORDER_DERIV);
+%fksolver = FKDifferential();
+%fksolver = FKDifferential2();
 % Initialise the three inverse/forward kinematics solvers
 iksim = InverseKinematicsSimulator(kinObj);
 fksim = ForwardKinematicsSimulator(kinObj, fksolver);
@@ -61,3 +67,4 @@ fprintf('End Running Forward Kinematics Simulation : %f seconds\n', time_elapsed
 % result of fksim)
 iksim.plotJointSpace();
 fksim.plotJointSpace();
+fksim.plotCableLengthError();
