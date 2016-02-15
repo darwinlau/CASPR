@@ -120,6 +120,10 @@ classdef SpatialEulerXYZ < Joint
                 SphericalEulerXYZ.RelVelocityMatrixDeriv(SpatialEulerXYZ.GetOrientationQ(q), SpatialEulerXYZ.GetOrientationQd(q_d))];
         end
         
+        function q_deriv = QDeriv(q, q_d)
+            q_deriv = [TranslationalXYZ.QDeriv(SpatialEulerXYZ.GetTranslationQ(q), SpatialEulerXYZ.GetTranslationQd(q_d)); ...
+                SphericalEulerXYZ.QDeriv(SpatialEulerXYZ.GetOrientationQ(q), SpatialEulerXYZ.GetOrientationQd(q_d))];
+        end
         
         % TO DO
         function [N_j,A] = QuadMatrix(~)

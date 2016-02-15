@@ -69,7 +69,7 @@ function y_dot = eom(~, y, model, f)
     model.update(q, q_dot, zeros(n_dofs, 1));
     model.cableForces = f;
         
-    y_dot(1:n_vars) = q_dot;
+    y_dot(1:n_vars) = model.q_deriv;
     y_dot(n_vars+1:length(y)) = model.q_ddot_dynamics;
 end
 

@@ -15,6 +15,12 @@ classdef (Abstract) Joint < handle
         S_dot
     end
     
+    properties (Dependent)
+        % This is useful particularly if the derivative of q is not the
+        % same as q_dot, but in most cases they are the same
+        q_deriv
+    end
+    
     properties (Abstract, Constant)
         numDofs
         numVars
@@ -37,7 +43,10 @@ classdef (Abstract) Joint < handle
             obj.S_dot = obj.RelVelocityMatrixDeriv(q, q_dot);
         end
         
-    end
+        function value = get.q_deriv(obj)
+            value = obj.QDeriv(obj.q, obj.q_dot);
+        end
+	end
         
     methods (Static)
         function j = CreateJoint(jointType)
@@ -72,6 +81,12 @@ classdef (Abstract) Joint < handle
         % Perform a simple first order integral
         function q = QIntegrate(q0, q_dot, dt)
             q = q0 + q_dot * dt;
+        end
+        
+        % This is useful particularly if the derivative of q is not the
+        % same as q_dot, but in most cases they are the same
+        function q_deriv = QDeriv(~, q_dot)
+            q_deriv = q_dot;
         end
     end
     

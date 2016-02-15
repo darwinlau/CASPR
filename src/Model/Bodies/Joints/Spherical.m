@@ -96,6 +96,13 @@ classdef Spherical < Joint
             q = q_quat.toVector();
         end
         
+        function q_deriv = QDeriv(q, q_dot)
+            w_quat = Quaternion(0, q_dot(1), q_dot(2), q_dot(3));
+            q_quat = Quaternion(q(1), q(2), q(3), q(4));
+            q_deriv_quat = 1/2 * w_quat * q_quat;
+            q_deriv = [q_deriv_quat.q0; q_deriv_quat.q1; q_deriv_quat.q2; q_deriv_quat.q3];
+        end
+        
         function [q, q_dot, q_ddot] = GenerateTrajectory(q_s, ~, ~, q_e, ~, ~, total_time, time_step)
             time = 0:time_step:total_time;
                         

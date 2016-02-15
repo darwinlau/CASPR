@@ -130,6 +130,10 @@ classdef Spatial < Joint
             A = zeros(6,Spatial.numDofs);
         end
         
+        function q_deriv = QDeriv(q, q_d)
+            q_deriv = [TranslationalXYZ.QDeriv(Spatial.GetTranslationQ(q), Spatial.GetTranslationQd(q_d)); Spherical.QDeriv(Spatial.GetOrientationQ(q), Spatial.GetOrientationQd(q_d))];
+        end
+        
         function [q, q_dot, q_ddot] = GenerateTrajectory(q_s, q_s_d, q_s_dd, q_e, q_e_d, q_e_dd, total_time, time_step)
             [q_trans, q_trans_dot, q_trans_ddot] = TranslationalXYZ.GenerateTrajectory( ...
                 Spatial.GetTranslationQ(q_s), Spatial.GetTranslationQ(q_s_d), Spatial.GetTranslationQ(q_s_dd), ...

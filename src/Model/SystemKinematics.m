@@ -40,6 +40,7 @@ classdef SystemKinematics < handle
         P                       % Body P matrix
 
         q                       % Generalised coordinates state vector
+        q_deriv                 % Generalised coordinates time derivative (for special cases q_dot does not equal q_deriv)
         q_dot                   % Generalised coordinates derivative
         q_ddot                  % Generalised coordinates double derivative
     end
@@ -91,6 +92,10 @@ classdef SystemKinematics < handle
 
         function value = get.q(obj)
             value = obj.bodyKinematics.q;
+        end
+        
+        function value = get.q_deriv(obj)
+            value = obj.bodyKinematics.q_deriv;
         end
 
         function value = get.q_dot(obj)

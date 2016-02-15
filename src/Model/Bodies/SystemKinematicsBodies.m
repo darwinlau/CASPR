@@ -54,6 +54,8 @@ classdef SystemKinematicsBodies < handle
         q_ddot_default
         q_lb
         q_ub
+        % Generalised coordinates time derivative (for special cases q_dot does not equal q_deriv)
+        q_deriv
     end
 
     methods
@@ -274,6 +276,15 @@ classdef SystemKinematicsBodies < handle
             index_vars = 1;
             for k = 1:obj.numLinks
                 q_ub(index_vars:index_vars+obj.bodies{k}.joint.numVars-1) = obj.bodies{k}.joint.q_ub;
+                index_vars = index_vars + obj.bodies{k}.joint.numVars;
+            end
+        end
+        
+        function q_deriv = get.q_deriv(obj)
+            q_deriv = zeros(obj.numDofVars, 1);
+            index_vars = 1;
+            for k = 1:obj.numLinks
+                q_deriv(index_vars:index_vars+obj.bodies{k}.joint.numVars-1) = obj.bodies{k}.joint.q_deriv;
                 index_vars = index_vars + obj.bodies{k}.joint.numVars;
             end
         end
