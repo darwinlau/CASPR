@@ -44,7 +44,6 @@ classdef IDSolverBase < handle
 %                     fprintf('Other error : Code %d\n', exit_flag);
 %                     exit_type = IDExitType.OTHER_ERROR;
 %             end
-        end
     end
 end
 
