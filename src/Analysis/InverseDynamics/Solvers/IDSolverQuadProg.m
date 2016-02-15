@@ -6,7 +6,7 @@
 % Description   : Only a quadratic objective function and linear 
 % constraints can be used with this solver. There are multiple types of QP
 % solver implementations that can be used with this solver.
-classdef IDSolverQuadProg < IDSolverFunction
+classdef IDSolverQuadProg < IDSolverBase
     
     properties (SetAccess = private)
         qp_solver_type
@@ -25,7 +25,7 @@ classdef IDSolverQuadProg < IDSolverFunction
         function [Q_opt, id_exit_type] = resolveFunction(obj, dynamics)            
             % Form the linear EoM constraint
             % M\ddot{q} + C + G + F_{ext} = -J^T f (constraint)
-            [A_eq, b_eq] = IDSolverFunction.GetEoMConstraints(dynamics);  
+            [A_eq, b_eq] = IDSolverBase.GetEoMConstraints(dynamics);  
             % Form the lower and upper bound force constraints
             fmin = dynamics.cableDynamics.forcesMin;
             fmax = dynamics.cableDynamics.forcesMax;

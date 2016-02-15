@@ -14,7 +14,7 @@
 % Author        : Jonathan EDEN
 % Created       : 2016
 % Description   : 
-classdef IDSolverClosedForm < IDSolverFunction
+classdef IDSolverClosedForm < IDSolverBase
     properties (SetAccess = private)
         cf_solver_type
         options

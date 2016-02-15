@@ -10,7 +10,7 @@
 % Author        : Jonathan EDEN
 % Created       : 2016
 % Description   : 
-classdef IDSolverOptimallySafe < IDSolverFunction    
+classdef IDSolverOptimallySafe < IDSolverBase    
     properties (SetAccess = private)
         os_solver_type
         x_prev

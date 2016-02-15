@@ -12,7 +12,7 @@
 %       
 %       In the modified solution, the f_0 term is modified to ensure the
 %       cable force and other constraints are satisfied.
-classdef IDSolverOperationalNullSpace < IDSolverFunction
+classdef IDSolverOperationalNullSpace < IDSolverBase
     
     properties (SetAccess = private)
         W0

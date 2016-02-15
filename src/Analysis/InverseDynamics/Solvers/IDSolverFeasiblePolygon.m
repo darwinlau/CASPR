@@ -12,7 +12,7 @@
 % functions to be considered, to minimise the 1-norm of cable forces, to 
 % minimise the 2-norm of cable forces, and to produce a wrench closest to 
 % centroid of the wrench polytope.
-classdef IDSolverFeasiblePolygon < IDSolverFunction    
+classdef IDSolverFeasiblePolygon < IDSolverBase    
     properties (SetAccess = private)
         fp_solver_type
     end

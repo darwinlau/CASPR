@@ -1,4 +1,4 @@
-classdef FKFunction < handle
+classdef FKAnalysisBase < handle
     %IDFUNCTION Summary of this class goes here
     %   Detailed explanation goes here
     
@@ -8,7 +8,7 @@ classdef FKFunction < handle
     end
     
     methods (Abstract)
-        f = compute(obj, len, len_prev_2, q_prev, q_d_prev, delta_t, kin_model);
+        q = compute(obj, len, len_prev_2, q_prev, q_d_prev, delta_t, kin_model);
     end
         
     methods (Static)

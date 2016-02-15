@@ -6,7 +6,7 @@
 % Description   : Only a linear objective function and linear 
 % constraints can be used with this solver. There are multiple types of LP
 % solver implementations that can be used with this solver.
-classdef IDSolverLinProg < IDSolverFunction
+classdef IDSolverLinProg < IDSolverBase
     
     properties (SetAccess = private)
         lp_solver_type

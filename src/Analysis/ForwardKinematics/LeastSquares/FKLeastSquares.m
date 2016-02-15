@@ -1,4 +1,4 @@
-classdef FKLeastSquares < FKFunction
+classdef FKLeastSquares < FKAnalysisBase
     %IDFUNCTION Summary of this class goes here
     %   Detailed explanation goes here
     
