@@ -17,19 +17,17 @@ classdef IDSolverOptimallySafe < IDSolverBase
         alpha
     end
     methods
-        function q = IDSolverOptimallySafe(os_solver_type)
-            q.os_solver_type = os_solver_type;
-            q.x_prev = [];
-            q.alpha = 1;
+        function id = IDSolverOptimallySafe(model,alpha,os_solver_type)
+            id@IDSolverBase(model);
+            id.os_solver_type = os_solver_type;
+            id.x_prev = [];
+            id.alpha = alpha;
         end
         
-        function [Q_opt, id_exit_type] = resolveFunction(obj, dynamics)            
-            % ASK DARWIN REGARDING IF THIS SHOULD BE SEPERATE OR PART OF
-            % LINPROG. If so add alpha as a variable
-            
+        function [cable_forces,Q_opt, id_exit_type] = resolveFunction(obj, dynamics)            
             % Form the linear EoM constraint
             % M\ddot{q} + C + G + F_{ext} = -J^T f (constraint)
-            [A_eq, b_eq] = IDSolverFunction.GetEoMConstraints(dynamics);  
+            [A_eq, b_eq] = IDSolverBase.GetEoMConstraints(dynamics);  
             % Form the lower and upper bound force constraints
             fmin = dynamics.cableDynamics.forcesMin;
             fmax = dynamics.cableDynamics.forcesMax;
@@ -40,22 +38,22 @@ classdef IDSolverOptimallySafe < IDSolverBase
             
             switch (obj.os_solver_type)
                 case ID_OS_SolverType.LP
-                    [dynamics.cableForces, id_exit_type] = id_os_matlab(A_eq, b_eq, fmin, fmax,obj.alpha);
-                    Q_opt = norm(dynamics.cableForces,1);
+                    [cable_forces, id_exit_type] = id_os_matlab(A_eq, b_eq, fmin, fmax,obj.alpha);
+                    Q_opt = norm(cable_forces,1);
                 case ID_OS_SolverType.EFFICIENT_LP
-                    [dynamics.cableForces, id_exit_type,obj.x_prev,obj.active_set] = id_os_efficient(A_eq, b_eq, fmin, fmax,obj.alpha,obj.x_prev,obj.active_set);
-                    Q_opt = norm(dynamics.cableForces);
+                    [cable_forces, id_exit_type,obj.x_prev,obj.active_set] = id_os_efficient(A_eq, b_eq, fmin, fmax,obj.alpha,obj.x_prev,obj.active_set);
+                    Q_opt = norm(cable_forces);
                 otherwise
                     error('ID_OS_SolverType type is not defined');
             end
             
             if (id_exit_type ~= IDSolverExitType.NO_ERROR)
-                dynamics.cableForces = dynamics.cableDynamics.forcesInvalid;
+                cable_forces = dynamics.cableDynamics.forcesInvalid;
                 Q_opt = inf;
                 %id_exit_type = IDFunction.DisplayOptiToolboxError(exitflag);
             end            
             
-            obj.f_previous = dynamics.cableForces;
+            obj.f_previous = cable_forces;
         end
         
         function addConstraint(obj, linConstraint)

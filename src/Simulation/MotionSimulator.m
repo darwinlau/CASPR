@@ -40,28 +40,22 @@ classdef (Abstract) MotionSimulator < Simulator
             close(plot_handle);
         end
 
-        function plotCableLengths(obj, cables_to_plot, tab_group)
+        function plotCableLengths(obj, cables_to_plot, plot_axis)
             assert(~isempty(obj.lengths), 'Cannot plot since lengths vector is empty');
             assert(~isempty(obj.lengths_dot), 'Cannot plot since lengths_dot vector is empty');
 
-            if nargin == 1 || isempty(cables_to_plot)
+            if isempty(cables_to_plot)
                 cables_to_plot = 1:obj.model.numCables;
             end
             length_array = cell2mat(obj.lengths);
             length_dot_array = cell2mat(obj.lengths_dot);
     
-            if(nargin == 3)
-                tab1 = uitab(tab_group,'Title','Cable Lengths');
-                ax = axes;
-                set(ax,'Parent',tab1,'OuterPosition',[0,0,1,1])
-                plot(ax,obj.timeVector, length_array(cables_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); 
-                tab2 = uitab(tab_group,'Title','Cable Length Derivatives');
-                ax = axes;
-                set(ax,'Parent',tab2,'OuterPosition',[0,0,1,1])
-                plot(ax,obj.timeVector, length_array(cables_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); 
+            if(~isempty(plot_axis))
+                plot(plot_axis(1),obj.timeVector, length_array(cables_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); 
+                plot(plot_axis(2),obj.timeVector, length_dot_array(cables_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); 
             else
                 figure;
-                plot(obj.timeVector, length_dot_array(cables_to_plot, :), 'LineWidth', 1.5, 'Color', 'k');
+                plot(obj.timeVector, length_array(cables_to_plot, :), 'LineWidth', 1.5, 'Color', 'k');
                 title('Cable Lengths');
 
                 figure;
@@ -80,27 +74,21 @@ classdef (Abstract) MotionSimulator < Simulator
             % ONLY USED IN DEBUGGING END
         end
 
-        function plotJointSpace(obj, states_to_plot,tab_group)
+        function plotJointSpace(obj, states_to_plot,plot_axis)
             assert(~isempty(obj.trajectory), 'Cannot plot since trajectory is empty');
 
             n_dof = obj.model.numDofs;
 
-            if nargin == 1 || isempty(states_to_plot)
+            if isempty(states_to_plot)
                 states_to_plot = 1:n_dof;
             end
 
             q_array = cell2mat(obj.trajectory.q);
             q_dot_array = cell2mat(obj.trajectory.q_dot);
 
-            if(nargin == 3)
-                tab1 = uitab(tab_group,'Title','Joint space variables');
-                ax = axes;
-                set(ax,'Parent',tab1,'OuterPosition',[0,0,1,1])
-                plot(ax,obj.timeVector, q_array(states_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); 
-                tab2 = uitab(tab_group,'Title','Joint space derivatives');
-                ax = axes;
-                set(ax,'Parent',tab2,'OuterPosition',[0,0,1,1])
-                plot(ax,obj.timeVector, q_dot_array(states_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); 
+            if(~isempty(plot_axis))
+                plot(plot_axis(1),obj.timeVector, q_array(states_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); 
+                plot(plot_axis(2),obj.timeVector, q_dot_array(states_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); 
             else
                 % Plots joint space variables q(t)
                 figure;
@@ -114,12 +102,12 @@ classdef (Abstract) MotionSimulator < Simulator
             end
         end
 
-        function plotBodyCOG(obj, bodies_to_plot,tab_group)
+        function plotBodyCOG(obj, bodies_to_plot,plot_axis)
             assert(~isempty(obj.trajectory), 'Cannot plot since trajectory is empty');
 
             % Plots absolute position, velocity and acceleration of COG
             % with respect to {0}
-            if nargin == 1 || isempty(bodies_to_plot)
+            if isempty(bodies_to_plot)
                 bodies_to_plot = 1:obj.model.numLinks;
             end
 
@@ -135,19 +123,10 @@ classdef (Abstract) MotionSimulator < Simulator
                 end
             end
             
-            if(nargin == 3)
-                tab1 = uitab(tab_group,'Title','Position of CoG');
-                ax = axes;
-                set(ax,'Parent',tab1,'OuterPosition',[0,0,1,1])
-                plot(ax,obj.timeVector, pos0, 'LineWidth', 1.5, 'Color', 'k'); 
-                tab2 = uitab(tab_group,'Title','Velocity of CoG');
-                ax = axes;
-                set(ax,'Parent',tab2,'OuterPosition',[0,0,1,1])
-                plot(ax,obj.timeVector, pos0_dot, 'LineWidth', 1.5, 'Color', 'k'); 
-                tab3 = uitab(tab_group,'Title','Acceleration of CoG');
-                ax = axes;
-                set(ax,'Parent',tab3,'OuterPosition',[0,0,1,1])
-                plot(ax,obj.timeVector, pos0_ddot, 'LineWidth', 1.5, 'Color', 'k'); 
+            if(~isempty(plot_axis))
+                plot(plot_axis(1),obj.timeVector, pos0, 'LineWidth', 1.5, 'Color', 'k'); 
+                plot(plot_axis(2),obj.timeVector, pos0_dot, 'LineWidth', 1.5, 'Color', 'k'); 
+                plot(plot_axis(3),obj.timeVector, pos0_ddot, 'LineWidth', 1.5, 'Color', 'k'); 
             else
                 figure;
                 plot(obj.timeVector, pos0, 'Color', 'k', 'LineWidth', 1.5);
@@ -180,12 +159,12 @@ classdef (Abstract) MotionSimulator < Simulator
             % ONLY USED IN DEBUGGING END
         end
 
-        function plotAngularAcceleration(obj, bodies_to_plot, tab_group)
+        function plotAngularAcceleration(obj, bodies_to_plot, plot_axis)
             assert(~isempty(obj.trajectory), 'Cannot plot since trajectory is empty');
 
             % Plots absolute position, velocity and acceleration of COG
             % with respect to {0}
-            if nargin == 1 || isempty(bodies_to_plot)
+            if isempty(bodies_to_plot)
                 bodies_to_plot = 1:obj.model.numLinks;
             end
 
@@ -199,15 +178,9 @@ classdef (Abstract) MotionSimulator < Simulator
                 end
             end
 
-            if(nargin == 3)
-                tab1 = uitab(tab_group,'Title','Angular velocity of rigid bodies');
-                ax = axes;
-                set(ax,'Parent',tab1,'OuterPosition',[0,0,1,1])
-                plot(ax,obj.timeVector, ang0, 'LineWidth', 1.5, 'Color', 'k'); 
-                tab2 = uitab(tab_group,'Title','Angular acceleration of rigid bodies');
-                ax = axes;
-                set(ax,'Parent',tab2,'OuterPosition',[0,0,1,1])
-                plot(ax,obj.timeVector, ang0_dot, 'LineWidth', 1.5, 'Color', 'k'); 
+            if(~isempty(plot_axis))
+                plot(plot_axis(1),obj.timeVector, ang0, 'LineWidth', 1.5, 'Color', 'k'); 
+                plot(plot_axis(2),obj.timeVector, ang0_dot, 'LineWidth', 1.5, 'Color', 'k'); 
             else
                 figure;
                 plot(obj.timeVector, ang0, 'Color', 'k', 'LineWidth', 1.5);

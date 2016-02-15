@@ -31,11 +31,11 @@ dynObj = SystemKinematicsDynamics.LoadXmlObj(bodies_xmlobj, cableset_xmlobj);
 
 id_objective = IDObjectiveMinQuadCableForce(ones(dynObj.numCables,1));
 %id_objective = IDObjectiveMinInteractions(ones(6*dynObj.numLinks,1));
-%id_solver = IDSolverQuadProg(id_objective, ID_QP_SolverType.MATLAB_ACTIVE_SET_WARM_START);
-id_solver = IDSolverOperationalNullSpace(id_objective, ID_QP_SolverType.MATLAB_ACTIVE_SET_WARM_START, 2*eye(dynObj.numCables));
-% for i = 1:dynObj.numLinks
-%     id_solver.addConstraint(IDConstraintInteractionForceAngleCone(i, [0;0;-1], 15*pi/180, 8));
-% end
+id_solver = IDSolverQuadProg(dynObj,id_objective, ID_QP_SolverType.MATLAB);
+% id_solver = IDSolverOperationalNullSpace(id_objective, ID_QP_SolverType.MATLAB_ACTIVE_SET_WARM_START, 2*eye(dynObj.numCables));
+for i = 1:dynObj.numLinks
+    id_solver.addConstraint(IDConstraintInteractionForceAngleCone(i, [0;0;-1], 15*pi/180, 8));
+end
 
 
 % Setup the inverse dynamics simulator with the SystemKinematicsDynamics
@@ -78,6 +78,6 @@ plot_axis = [-0.2 0.2 -0.2 0.2 -0.1 0.3];
 % idsim.plotAngularAcceleration();
 % idsim.plotCableLengths();
 % idsim.plotBodyCOG();
-idsim.plotCableForces();
+idsim.plotCableForces([],[]);
 time_elapsed = toc(start_tic);
 fprintf('End Plotting Simulation : %f seconds\n', time_elapsed);

@@ -12,20 +12,17 @@ classdef DynamicsSimulator < MotionSimulator
             ds@MotionSimulator(model);
         end
         
-        function plotCableForces(obj, cables_to_plot,tab_group)
+        function plotCableForces(obj, cables_to_plot,plot_axis)
             assert(~isempty(obj.cableForces), 'Cannot plot since cableForces is empty');
             
-            if nargin == 1 || isempty(cables_to_plot)
+            if isempty(cables_to_plot)
                 cables_to_plot = 1:obj.model.numCables;
             end
             
             forces = cell2mat(obj.cableForces);
             
-            if(nargin == 3)
-                tab1 = uitab(tab_group,'Title','Cable Forces');
-                ax = axes;
-                set(ax,'Parent',tab1,'OuterPosition',[0,0,1,1])
-                plot(ax,obj.timeVector, forces(cables_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); 
+            if(~isempty(plot_axis))
+                plot(plot_axis,obj.timeVector, forces(cables_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); 
             else
                 figure;
                 plot(obj.timeVector, forces(cables_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); 
@@ -40,10 +37,10 @@ classdef DynamicsSimulator < MotionSimulator
 %             plot(obj.timeVector, forces(cables_to_plot, :), 'LineWidth', 1.5); title('Cable forces');
         end
         
-        function plotInteractionForceMagnitudes(obj, links_to_plot,tab_group)
+        function plotInteractionForceMagnitudes(obj, links_to_plot,plot_axis)
             assert(~isempty(obj.interactionWrench), 'Cannot plot since interactionWrench is empty');
             
-            if nargin == 1 || isempty(links_to_plot)
+            if isempty(links_to_plot)
                 links_to_plot = 1:obj.model.numLinks;
             end
             
@@ -59,11 +56,8 @@ classdef DynamicsSimulator < MotionSimulator
                 end
             end
             
-            if(nargin == 3)
-                tab1 = uitab(tab_group,'Title','Magnitude of interaction forces');
-                ax = axes;
-                set(ax,'Parent',tab1,'OuterPosition',[0,0,1,1])
-                plot(ax,obj.timeVector, forcesMag, 'LineWidth', 1.5, 'Color', 'k');
+            if(~isempty(plot_axis))
+                plot(plot_axis,obj.timeVector, forcesMag, 'LineWidth', 1.5, 'Color', 'k');
             else
                 figure;
                 plot(obj.timeVector, forcesMag, 'LineWidth', 1.5, 'Color', 'k');

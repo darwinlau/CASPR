@@ -6,21 +6,30 @@
 % Description    : The function that must be implemented by the child class
 % is the "resolveFunction" function
 classdef IDSolverBase < handle
+    properties
+        model
+    end
+    
     properties (SetAccess = protected, GetAccess = protected)
         f_previous = []
         active_set = []
     end
     
     methods 
-        function [Q_opt, id_exit_type, comp_time] = resolve(obj, dynamics)
+        function id = IDSolverBase(dyn_model)
+            id.model = dyn_model;
+        end
+        
+        function [cable_forces,Q_opt, id_exit_type, comp_time] = resolve(obj, q, q_d, q_dd)
+            obj.model.update(q,q_d,q_dd);
             start_tic = tic;
-            [Q_opt, id_exit_type] = obj.resolveFunction(dynamics);
+            [cable_forces,Q_opt, id_exit_type] = obj.resolveFunction(obj.model);
             comp_time = toc(start_tic);
         end
     end
     
     methods (Abstract)
-        [Q_opt, id_exit_type] = resolveFunction(obj, dynamics);
+        [cable_forces,Q_opt, id_exit_type] = resolveFunction(obj, dynamics);
     end
     
     methods (Static)

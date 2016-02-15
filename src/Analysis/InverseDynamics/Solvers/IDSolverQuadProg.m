@@ -15,14 +15,15 @@ classdef IDSolverQuadProg < IDSolverBase
         options
     end
     methods
-        function q = IDSolverQuadProg(objective, qp_solver_type)
-            q.objective = objective;
-            q.qp_solver_type = qp_solver_type;
-            q.active_set = [];
-            q.options = [];
+        function id = IDSolverQuadProg(model, objective, qp_solver_type)
+            id@IDSolverBase(model);
+            id.objective = objective;
+            id.qp_solver_type = qp_solver_type;
+            id.active_set = [];
+            id.options = [];
         end
         
-        function [Q_opt, id_exit_type] = resolveFunction(obj, dynamics)            
+        function [cable_forces,Q_opt, id_exit_type] = resolveFunction(obj, dynamics)            
             % Form the linear EoM constraint
             % M\ddot{q} + C + G + F_{ext} = -J^T f (constraint)
             [A_eq, b_eq] = IDSolverBase.GetEoMConstraints(dynamics);  
@@ -45,32 +46,32 @@ classdef IDSolverQuadProg < IDSolverBase
                     if(isempty(obj.options))
                         obj.options = optimoptions('quadprog', 'Display', 'off', 'MaxIter', 100);
                     end 
-                    [dynamics.cableForces, id_exit_type] = id_qp_matlab(obj.objective.A, obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);
+                    [cable_forces, id_exit_type] = id_qp_matlab(obj.objective.A, obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);
                 case ID_QP_SolverType.MATLAB_ACTIVE_SET_WARM_START
                     if(isempty(obj.options))
                         obj.options = optimoptions('quadprog', 'Display', 'off', 'MaxIter', 100);
 %                         obj.options = optiset('solver', 'OOQP', 'maxiter', 100);
                     end 
-                    [dynamics.cableForces, id_exit_type,obj.active_set] = id_qp_matlab_active_set_warm_start(obj.objective.A, obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.active_set,obj.options);
+                    [cable_forces, id_exit_type,obj.active_set] = id_qp_matlab_active_set_warm_start(obj.objective.A, obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.active_set,obj.options);
                 case ID_QP_SolverType.OPTITOOLBOX_IPOPT
-                    [dynamics.cableForces, id_exit_type] = id_qp_optitoolbox_ipopt(obj.objective.A, obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous);
+                    [cable_forces, id_exit_type] = id_qp_optitoolbox_ipopt(obj.objective.A, obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous);
                 case ID_QP_SolverType.OPTITOOLBOX_OOQP
                     if(isempty(obj.options))
                         obj.options = optiset('solver', 'OOQP', 'maxiter', 100);
                     end
-                    [dynamics.cableForces, id_exit_type] = id_qp_optitoolbox_ooqp(obj.objective.A, obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);
+                    [cable_forces, id_exit_type] = id_qp_optitoolbox_ooqp(obj.objective.A, obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);
                 otherwise
                     error('ID_QP_SolverType type is not defined');
             end
             
             if (id_exit_type ~= IDSolverExitType.NO_ERROR)
-                dynamics.cableForces = dynamics.cableDynamics.forcesInvalid;
+                cable_forces = dynamics.cableDynamics.forcesInvalid;
                 Q_opt = inf;
             else
-                Q_opt = obj.objective.evaluateFunction(dynamics.cableForces);
+                Q_opt = obj.objective.evaluateFunction(cable_forces);
             end            
             
-            obj.f_previous = dynamics.cableForces;
+            obj.f_previous = cable_forces;
         end
         
         function addConstraint(obj, linConstraint)

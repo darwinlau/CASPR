@@ -23,18 +23,19 @@ classdef IDSolverOperationalNullSpace < IDSolverBase
         f0_previous = []
     end
     methods
-        function q = IDSolverOperationalNullSpace(objective, qp_solver_type, W0)
-            q.objective = objective;
-            q.qp_solver_type = qp_solver_type;
-            q.W0 = W0;
-            q.active_set = [];
-            q.options = [];
+        function id = IDSolverOperationalNullSpace(model,objective, qp_solver_type, W0)
+            id@IDSolverBase(model);
+            id.objective = objective;
+            id.qp_solver_type = qp_solver_type;
+            id.W0 = W0;
+            id.active_set = [];
+            id.options = [];
         end
         
-        function [Q_opt, id_exit_type] = resolveFunction(obj, dynamics)            
+        function [cable_forces,Q_opt, id_exit_type] = resolveFunction(obj, dynamics)            
             % Form the linear EoM constraint
             % M\ddot{q} + C + G + F_{ext} = -J^T f (constraint)
-            [A_eom, b_eom] = IDSolverFunction.GetEoMConstraints(dynamics);  
+            [A_eom, b_eom] = IDSolverBase.GetEoMConstraints(dynamics);  
             % Form the lower and upper bound force constraints
             fmin = dynamics.cableDynamics.forcesMin;
             fmax = dynamics.cableDynamics.forcesMax;
@@ -79,14 +80,14 @@ classdef IDSolverOperationalNullSpace < IDSolverBase
             end
             
             if (id_exit_type ~= IDSolverExitType.NO_ERROR)
-                dynamics.cableForces = dynamics.cableDynamics.forcesInvalid;
+                cable_forces = dynamics.cableDynamics.forcesInvalid;
                 Q_opt = inf;
             else
-                dynamics.cableForces = f_task + A_null * f0_soln;
-                Q_opt = obj.objective.evaluateFunction(dynamics.cableForces);
+                cable_forces = f_task + A_null * f0_soln;
+                Q_opt = obj.objective.evaluateFunction(cable_forces);
             end            
             obj.f0_previous = f0_soln;
-            obj.f_previous = dynamics.cableForces;
+            obj.f_previous = cable_forces;
         end
     end
     

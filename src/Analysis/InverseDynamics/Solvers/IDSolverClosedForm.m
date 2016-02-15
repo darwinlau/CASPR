@@ -20,40 +20,41 @@ classdef IDSolverClosedForm < IDSolverBase
         options
     end
     methods
-        function q = IDSolverClosedForm(cf_solver_type)
-            q.cf_solver_type = cf_solver_type;
+        function id = IDSolverClosedForm(model,cf_solver_type)
+            id@IDSolverBase(model);
+            id.cf_solver_type = cf_solver_type;
         end
         
-        function [Q_opt, id_exit_type] = resolveFunction(obj, dynamics)            
+        function [cable_forces,Q_opt, id_exit_type] = resolveFunction(obj, dynamics)            
             % Form the linear EoM constraint
             % M\ddot{q} + C + G + F_{ext} = -J^T f (constraint)
-            [A_eq, b_eq] = IDSolverFunction.GetEoMConstraints(dynamics);  
+            [A_eq, b_eq] = IDSolverBase.GetEoMConstraints(dynamics);  
             % Form the lower and upper bound force constraints
             fmin = dynamics.cableDynamics.forcesMin;
             fmax = dynamics.cableDynamics.forcesMax;
 
             switch (obj.cf_solver_type)
                 case ID_CF_SolverType.CLOSED_FORM
-                    [dynamics.cableForces, id_exit_type] = id_cf_cfm(A_eq, b_eq, fmin, fmax);
+                    [cable_forces, id_exit_type] = id_cf_cfm(A_eq, b_eq, fmin, fmax);
                 case ID_CF_SolverType.ICFM
-                    [dynamics.cableForces, id_exit_type] = id_cf_icfm(A_eq, b_eq, fmin, fmax);
+                    [cable_forces, id_exit_type] = id_cf_icfm(A_eq, b_eq, fmin, fmax);
                 case ID_CF_SolverType.PUNCTURE_METHOD
-                    [dynamics.cableForces, id_exit_type] = id_cf_pm(A_eq, b_eq, fmin, fmax);
+                    [cable_forces, id_exit_type] = id_cf_pm(A_eq, b_eq, fmin, fmax);
                 case ID_CF_SolverType.IPM
-                    [dynamics.cableForces, id_exit_type] = id_cf_ipm(A_eq, b_eq, fmin, fmax);
+                    [cable_forces, id_exit_type] = id_cf_ipm(A_eq, b_eq, fmin, fmax);
                 otherwise
                     error('ID_CF_SolverType type is not defined');
             end
             
             if (id_exit_type ~= IDSolverExitType.NO_ERROR)
-                dynamics.cableForces = dynamics.cableDynamics.forcesInvalid;
+                cable_forces = dynamics.cableDynamics.forcesInvalid;
                 Q_opt = inf;
                 %id_exit_type = IDFunction.DisplayOptiToolboxError(exitflag);
             else
-                Q_opt = norm(dynamics.cableForces);
+                Q_opt = norm(cable_forces);
             end            
             
-            obj.f_previous = dynamics.cableForces;
+            obj.f_previous = cable_forces;
         end
     end
     
