@@ -24,9 +24,9 @@ function inWorkspace = static_quadprog(dynamics,options)
 %     end
     weights = ones(dynamics.numCables,1);
     o = IDObjectiveMinQuadCableForce(weights);
-    q = IDSolverQuadProg(o, ID_QP_SolverType.OPTITOOLBOX_OOQP);
+    q = IDSolverQuadProg(dynamics,o, ID_QP_SolverType.MATLAB);
 %     exit_flag
-    [~,id_exit_type,~] = q.resolve(dynamics);
+    [~,~,id_exit_type,~] = q.resolve(dynamics.q,dynamics.q_dot,dynamics.q_ddot);
     if(id_exit_type == IDSolverExitType.NO_ERROR)
         inWorkspace = 1;
     else

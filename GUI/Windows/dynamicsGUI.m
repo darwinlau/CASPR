@@ -882,6 +882,8 @@ function run_inverse_dynamics(handles,dynObj,trajectory_xmlobj)
     % Setup the inverse dynamics simulator with the SystemKinematicsDynamics
     % object and the inverse dynamics solver
     disp('Start Setup Simulation');
+    set(handles.status_text,'String','Setting up simulation');
+    drawnow;
     start_tic = tic;
     idsim = InverseDynamicsSimulator(dynObj, id_solver);
     trajectory = JointTrajectory.LoadXmlObj(trajectory_xmlobj, dynObj);
@@ -890,6 +892,8 @@ function run_inverse_dynamics(handles,dynObj,trajectory_xmlobj)
 
     % Run the solver on the desired trajectory
     disp('Start Running Simulation');
+    set(handles.status_text,'String','Simulation running');
+    drawnow;
     start_tic = tic;
     idsim.run(trajectory);
     time_elapsed = toc(start_tic);
@@ -900,15 +904,14 @@ function run_inverse_dynamics(handles,dynObj,trajectory_xmlobj)
 
     % Plot the data
     disp('Start Plotting Simulation');
+    set(handles.status_text,'String','Simulation plotting');
+    drawnow;
     start_tic = tic;
-    
     plot_for_GUI(plot_type,idsim,handles,str2double(getappdata(handles.plot_type_popup,'num_plots')));
-    
-    
-    % Store the simulator information
-    setappdata(handles.figure1,'sim',idsim);
     time_elapsed = toc(start_tic);
     fprintf('End Plotting Simulation : %f seconds\n', time_elapsed);
+    set(handles.status_text,'String','No simulation running');
+    setappdata(handles.figure1,'sim',idsim);
 end
 
 function plot_for_GUI(plot_type,sim,handles,figure_quantity)
@@ -932,6 +935,7 @@ function loadState(handles)
     path_string = fileparts(mfilename('fullpath'));
     path_string = path_string(1:strfind(path_string, 'GUI')-2);
     file_name = [path_string,'\logs\upcra_gui_state.mat'];
+    set(handles.status_text,'String','No simulation running');
     if(exist(file_name,'file'))
         load(file_name)
         set(handles.model_text,'String',state.model_text);
@@ -1008,6 +1012,8 @@ function run_forward_dynamics(handles,dynObj,trajectory_xmlobj)
     % Setup the inverse dynamics simulator with the SystemKinematicsDynamics
     % object and the inverse dynamics solver
     disp('Start Setup Simulation');
+    set(handles.status_text,'String','Setting up simulation');
+    drawnow;
     start_tic = tic;
     idsim = InverseDynamicsSimulator(dynObj, id_solver);
     fdsim = ForwardDynamicsSimulator(dynObj);
@@ -1017,21 +1023,28 @@ function run_forward_dynamics(handles,dynObj,trajectory_xmlobj)
     
     % First run the inverse dynamics
     disp('Start Running Inverse Dynamics Simulation');
+    
     start_tic = tic;
     idsim.run(trajectory);
     time_elapsed = toc(start_tic);
     fprintf('End Running Inverse Dynamics Simulation : %f seconds\n', time_elapsed);
-    
+    set(handles.status_text,'String','Running inverse dynamics');
+    drawnow;
     % Then run the forward dynamics
     disp('Start Running Forward Dynamics Simulation');
+    set(handles.status_text,'String','Running forward dynamics');
+    drawnow;
     start_tic = tic;
     fdsim.run(idsim.cableForces, trajectory.timeVector, trajectory.q{1}, trajectory.q_dot{1});
     time_elapsed = toc(start_tic);
     fprintf('End Running Forward Dynamics Simulation : %f seconds\n', time_elapsed);
     
     % Finally compare the results
+    set(handles.status_text,'String','Plotting results');
+    drawnow;
     plot_for_GUI('plotJointSpace',idsim,handles,2);
     plot_for_GUI('plotJointSpace',fdsim,handles,2);
+    set(handles.status_text,'String','No simulation running');
 end
 
 function toggle_visibility(dynamics_method,handles)
