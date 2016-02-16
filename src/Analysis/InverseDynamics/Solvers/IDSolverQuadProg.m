@@ -23,7 +23,7 @@ classdef IDSolverQuadProg < IDSolverBase
             id.options = [];
         end
         
-        function [cable_forces,Q_opt, id_exit_type] = resolveFunction(obj, dynamics)            
+        function [cable_forces, Q_opt, id_exit_type] = resolveFunction(obj, dynamics)            
             % Form the linear EoM constraint
             % M\ddot{q} + C + G + F_{ext} = -J^T f (constraint)
             [A_eq, b_eq] = IDSolverBase.GetEoMConstraints(dynamics);  

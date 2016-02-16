@@ -20,11 +20,13 @@ classdef IDSolverBase < handle
             id.model = dyn_model;
         end
         
-        function [cable_forces,Q_opt, id_exit_type, comp_time] = resolve(obj, q, q_d, q_dd)
-            obj.model.update(q,q_d,q_dd);
+        function [cable_forces, Q_opt, id_exit_type, comp_time, model] = resolve(obj, q, q_d, q_dd)
+            obj.model.update(q, q_d, q_dd);
             start_tic = tic;
-            [cable_forces,Q_opt, id_exit_type] = obj.resolveFunction(obj.model);
+            [obj.model.cableForces, Q_opt, id_exit_type] = obj.resolveFunction(obj.model);
             comp_time = toc(start_tic);
+            model = obj.model;
+            cable_forces = obj.model.cableForces;
         end
     end
     

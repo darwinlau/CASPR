@@ -4,11 +4,8 @@ classdef InverseDynamicsSimulator < DynamicsSimulator
 
     properties (SetAccess = protected)
         compTime            % computational time for each time step
-        %compIterations      % Number of computational iterations for each time step
-
         IDFunctionCost      % Cost value for optimisation at each point in time
         IDExitType          % Exit type at each point in time
-
         IDSolver
     end
 
@@ -33,14 +30,11 @@ classdef InverseDynamicsSimulator < DynamicsSimulator
 
             for t = 1:length(obj.timeVector)
                 fprintf('Time : %f\n', obj.timeVector(t));
-                [obj.model.cableForces,obj.IDFunctionCost(t), obj.IDExitType{t}, obj.compTime(t)] = obj.IDSolver.resolve(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t});
-                obj.cableForces{t} = obj.model.cableForces;
-                obj.model.update(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t});
+                % The model is already updated within the resolve function
+                [obj.cableForces{t}, obj.IDFunctionCost(t), obj.IDExitType{t}, obj.compTime(t), obj.model] = obj.IDSolver.resolve(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t});
                 obj.interactionWrench{t} = obj.model.interactionWrench;
                 obj.lengths{t} = obj.model.cableLengths;
                 obj.lengths_dot{t} = obj.model.cableLengthsDot;
-%                 obj.compTime(t) = obj.IDInfo{t}.Time;
-%                 obj.compIterations(t) = obj.IDInfo{t}.Iterations;
             end
         end
 
