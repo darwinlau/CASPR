@@ -20,8 +20,6 @@ classdef SystemKinematicsBodies < handle
         % Generalised coordinates of the system
         q
         q_dot
-        q_ddot
-
         connectivityGraph       % p x p connectivity matrix, if (i,j) = 1 means link i-1 is the parent of link j
         bodiesPathGraph         % p x p matrix that governs how to track to particular bodies, (i,j) = 1 means that to get to link j we must pass through link i
 
@@ -56,6 +54,10 @@ classdef SystemKinematicsBodies < handle
         q_ub
         % Generalised coordinates time derivative (for special cases q_dot does not equal q_deriv)
         q_deriv
+    end
+    
+    properties
+        q_ddot
     end
 
     methods

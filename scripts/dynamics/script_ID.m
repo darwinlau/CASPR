@@ -31,10 +31,10 @@ dynObj = SystemKinematicsDynamics.LoadXmlObj(bodies_xmlobj, cableset_xmlobj);
 
 id_objective = IDObjectiveMinQuadCableForce(ones(dynObj.numCables,1));
 %id_objective = IDObjectiveMinInteractions(ones(6*dynObj.numLinks,1));
-id_solver = IDSolverQuadProg(dynObj,id_objective, ID_QP_SolverType.MATLAB);
+id_solver = IDSolverQuadProg(dynObj, id_objective, ID_QP_SolverType.MATLAB);
 % id_solver = IDSolverOperationalNullSpace(id_objective, ID_QP_SolverType.MATLAB_ACTIVE_SET_WARM_START, 2*eye(dynObj.numCables));
 for i = 1:dynObj.numLinks
-    id_solver.addConstraint(IDConstraintInteractionForceAngleCone(i, [0;0;-1], 15*pi/180, 8));
+    id_solver.addConstraint(IDConstraintInteractionForceAngleCone(i, [0;0;-1], 15*pi/180, 16));
 end
 
 

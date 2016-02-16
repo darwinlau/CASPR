@@ -114,7 +114,8 @@ classdef SystemKinematicsDynamics < SystemKinematics
 %         end
 
         function value = get.q_ddot_dynamics(obj)
-            value =  obj.M\(-obj.L.'*obj.cableDynamics.forces - obj.C - obj.G);
+            obj.bodyKinematics.q_ddot = obj.M\(-obj.L.'*obj.cableDynamics.forces - obj.C - obj.G);
+            value = obj.q_ddot;
         end
 
         function value = get.M(obj)
