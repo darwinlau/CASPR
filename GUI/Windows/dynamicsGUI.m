@@ -25,7 +25,7 @@ function varargout = dynamicsGUI(varargin)
 
     % Edit the above text to modify the response to help dynamicsGUI
 
-    % Last Modified by GUIDE v2.5 15-Feb-2016 18:56:30
+    % Last Modified by GUIDE v2.5 16-Feb-2016 11:42:11
 
     % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
@@ -179,7 +179,7 @@ function trajectory_popup_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
 end
 
 % --- Executes on selection change in dynamics_popup.
-function dynamics_popup_Callback(hObject, ~, handles) %#ok<DEFNU>
+function dynamics_popup_Callback(hObject, ~, handles) 
     % hObject    handle to dynamics_popup (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
@@ -580,24 +580,29 @@ function load_button_Callback(~, ~, handles) %#ok<DEFNU>
     path_string = fileparts(mfilename('fullpath'));
     path_string = path_string(1:strfind(path_string, 'GUI')-2);
     file_name = [path_string,'\logs\*.mat'];
-    settings = uigetfile(file_name); %#ok<NASGU>
-    load(file_name);
+    settings = uigetfile(file_name);
+    load(settings);
     mp_text = get(handles.model_text,'String');
     cs_text = get(handles.cable_text,'String');
     if(strcmp(mp_text,state.model_text)&&strcmp(cs_text,state.cable_text))
-        set(handles.trajectory_popup,'value',state.trajectory_popup_vale);
-        set(handles.dynamics_popup,'value',state.dynamics_popup_vale);
+        set(handles.trajectory_popup,'value',state.trajectory_popup);
+        set(handles.dynamics_popup,'value',state.dynamics_popup);
         set(handles.solver_class_popup,'value',state.solver_class_popup);
         solver_type_popup_update(handles.solver_type_popup,handles);
-        objective_popup_Update(handles.objective_popup,handles);
-        constraint_popup_Update(handles.constraint_popup,handles);
-        tuning_parameter_popup_Update(handles.tuning_parameter_update,handles);
+        dynamics_popup_Callback(handles.dynamics_popup, [], handles);
         set(handles.solver_type_popup,'value',state.solver_type_popup);
         set(handles.objective_popup,'value',state.objective_popup);
         set(handles.constraint_popup,'value',state.constraint_popup);
+        set(handles.tuning_parameter_popup,'value',state.tuning_parameter_popup);
         set(handles.plot_type_popup,'value',state.plot_type_popup);
-        set(handles.objective_radio,'value',state.r_value);
-        set(handles.objective_table,'Data',state.weight_table);
+        set(handles.objective_table,'Data',state.objective_table);
+        set(handles.constraint_table,'Data',state.constraint_table);
+        set(handles.tuning_parameter_table,'Data',state.tuning_parameter_table);
+        % Callback
+        plot_type_popup_Callback(handles.plot_type_popup,[],handles);
+        objective_popup_Callback(handles.objective_popup,[],handles);
+        constraint_popup_Callback(handles.constraint_popup,[],handles);
+        tuning_parameter_popup_Callback(handles.tuning_parameter_popup, [], handles);
     else
         warning('Incorrect Model Type');
     end
@@ -669,6 +674,7 @@ function delete_figure_tool_ClickedCallback(~, ~, handles) %#ok<DEFNU>
     s_tab = get(tabgp,'SelectedTab');
     delete(s_tab);
 end
+
 
 %--------------------------------------------------------------------------
 %% Radio Buttons
@@ -844,7 +850,30 @@ function run_inverse_dynamics(handles,dynObj,trajectory_xmlobj)
         id_solver = solver_function(dynObj,id_objective,eval([char(enum_file),'.',char(solver_type)]));
     else
         % There are both constraints and objectives
-        stop
+        objective_function = str2func(objective);
+        q_data = get(handles.objective_table,'Data');
+        id_objective = objective_function(q_data');
+        solver_function = str2func(solver_class);
+        solverObj = settings.getElementById(solver_class);
+        enum_file = solverObj.getElementsByTagName('solver_type_enum').item(0).getFirstChild.getData;
+        id_solver = solver_function(dynObj,id_objective,eval([char(enum_file),'.',char(solver_type)]));
+        % Obtain the constaints
+        constraint_function = str2func(constraint);
+        q_data = get(handles.constraint_table,'Data');
+        contents = cellstr(get(handles.solver_class_popup,'String'));
+        solver_class_id = contents{get(handles.solver_class_popup,'Value')};
+        settings = getappdata(handles.solver_class_popup,'settings');
+        solverObj = settings.getElementById(solver_class_id);
+        constraintUnfiltered = solverObj.getElementsByTagName('constraints').item(0);
+        constraintObj = constraintUnfiltered.getElementsByTagName('constraint');
+        constraintNumber = get(handles.constraint_popup,'Value');
+        constraint = constraintObj.item(constraintNumber-2);
+        weight_constants = str2num(constraint.getElementsByTagName('weight_constants').item(0).getFirstChild.getData); %#ok<ST2NM>
+        for i = 1:size(q_data,1)
+            id_solver.addConstraint(constraint_function(i, q_data(i,1:weight_constants(1))',...
+                q_data(i,weight_constants(1)+1:weight_constants(1)+weight_constants(2)), ...
+                q_data(i,weight_constants(1)+weight_constants(2)+1:weight_constants(1)+weight_constants(2)+weight_constants(3))));
+        end
     end
     contents = cellstr(get(handles.plot_type_popup,'String'));
     plot_type = contents{get(handles.plot_type_popup,'Value')};
@@ -915,54 +944,51 @@ function loadState(handles)
             mp_text = get(handles.model_text,'String');
             cs_text = get(handles.cable_text,'String');
             if(strcmp(mp_text,state.model_text)&&strcmp(cs_text,state.cable_text))
-                set(handles.trajectory_popup,'value',state.trajectory_popup_vale);
-                set(handles.dynamics_popup,'value',state.dynamics_popup_vale);
+                set(handles.trajectory_popup,'value',state.trajectory_popup);
+                set(handles.dynamics_popup,'value',state.dynamics_popup);
                 set(handles.solver_class_popup,'value',state.solver_class_popup);
                 solver_type_popup_update(handles.solver_type_popup,handles);
-                objective_popup_Update(handles.objective_popup,handles);
-                constraint_popup_Update(handles.constraint_popup,handles);
-                tuning_parameter_popup_Update(handles.tuning_parameter_popup,handles);
+                dynamics_popup_Callback(handles.dynamics_popup, [], handles);
                 set(handles.solver_type_popup,'value',state.solver_type_popup);
                 set(handles.objective_popup,'value',state.objective_popup);
                 set(handles.constraint_popup,'value',state.constraint_popup);
+                set(handles.tuning_parameter_popup,'value',state.tuning_parameter_popup);
                 set(handles.plot_type_popup,'value',state.plot_type_popup);
-                set(handles.objective_radio,'value',state.r_value);
-                set(handles.objective_table,'Data',state.weight_table);
+                set(handles.objective_table,'Data',state.objective_table);
+                set(handles.constraint_table,'Data',state.constraint_table);
+                set(handles.tuning_parameter_table,'Data',state.tuning_parameter_table);
                 % Callback
                 plot_type_popup_Callback(handles.plot_type_popup,[],handles);
                 objective_popup_Callback(handles.objective_popup,[],handles);
                 constraint_popup_Callback(handles.constraint_popup,[],handles);
                 tuning_parameter_popup_Callback(handles.tuning_parameter_popup, [], handles);
             else
-                % Updates
-                solver_type_popup_update(handles.solver_type_popup,handles);
-                objective_popup_Update(handles.objective_popup,handles);
-                constraint_popup_Update(handles.constraint_popup,handles);
-                tuning_parameter_popup_Update(handles.tuning_parameter_popup,handles);
-                % Needed callbacks
-                plot_type_popup_Callback(handles.plot_type_popup,[],handles);
-                objective_popup_Callback(handles.objective_popup,[],handles);
-                constraint_popup_Callback(handles.constraint_popup,[],handles);
-                tuning_parameter_popup_Callback(handles.tuning_parameter_popup, [], handles);
+                initialise_popups(handles);
             end
+        else
+            initialise_popups(handles);
         end
     end
 end
 
 function saveState(handles,file_path)
     % Save all of the settings
+    % Texts
     state.model_text                        =   get(handles.model_text,'String');
     state.cable_text                        =   get(handles.cable_text,'String');
-    state.trajectory_popup_vale             =   get(handles.trajectory_popup,'value');
-    state.dynamics_popup_vale               =   get(handles.dynamics_popup,'value');
+    % Popups
+    state.trajectory_popup                  =   get(handles.trajectory_popup,'value');
+    state.dynamics_popup                    =   get(handles.dynamics_popup,'value');
     state.solver_class_popup                =   get(handles.solver_class_popup,'value');
     state.solver_type_popup                 =   get(handles.solver_type_popup,'value');
     state.objective_popup                   =   get(handles.objective_popup,'value');
     state.constraint_popup                  =   get(handles.constraint_popup,'value');
     state.plot_type_popup                   =   get(handles.plot_type_popup,'value');
-    state.num_plots                         =   getappdata(handles.plot_type_popup,'num_plots');
-    state.r_value                           =   get(handles.objective_radio,'value');
-    state.weight_table                      =   get(handles.objective_table,'Data');
+    state.tuning_parameter_popup            =   get(handles.tuning_parameter_popup,'value');
+    % Tables
+    state.objective_table                   =   get(handles.objective_table,'Data');
+    state.constraint_table                  =   get(handles.constraint_table,'Data');
+    state.tuning_parameter_table            =   get(handles.tuning_parameter_table,'Data');
     if(nargin>1)
         save(file_path,'state');
     else
@@ -976,7 +1002,7 @@ function run_forward_dynamics(handles,dynObj,trajectory_xmlobj)
     % This will be added once script_FD has been fixed
     % First read the solver form from the GUI
     id_objective = IDObjectiveMinQuadCableForce(ones(dynObj.numCables,1));
-    id_solver = IDSolverQuadProg(id_objective, ID_QP_SolverType.OPTITOOLBOX_IPOPT);
+    id_solver = IDSolverQuadProg(dynObj,id_objective, ID_QP_SolverType.MATLAB);
     
     
     % Setup the inverse dynamics simulator with the SystemKinematicsDynamics
@@ -1062,6 +1088,20 @@ function str_cell_array = xmlObj2stringCellArray(xmlObj,str)
         tempXMLObj = xmlObj.item(i-1);
         str_cell_array{i} = char(tempXMLObj.getAttribute(str));
     end
+end
+
+function initialise_popups(handles)
+    % Updates
+    solver_type_popup_update(handles.solver_type_popup,handles);
+    dynamics_popup_Callback(handles.dynamics_popup, [], handles);
+    objective_popup_Update(handles.objective_popup,handles);
+    constraint_popup_Update(handles.constraint_popup,handles);
+    tuning_parameter_popup_Update(handles.tuning_parameter_popup,handles);
+    % Needed callbacks
+    plot_type_popup_Callback(handles.plot_type_popup,[],handles);
+    objective_popup_Callback(handles.objective_popup,[],handles);
+    constraint_popup_Callback(handles.constraint_popup,[],handles);
+    tuning_parameter_popup_Callback(handles.tuning_parameter_popup, [], handles);
 end
 
 %% TO BE DONE

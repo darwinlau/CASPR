@@ -12,7 +12,7 @@ function [ x_opt, exit_type ] = id_qp_matlab(A, b, A_ineq, b_ineq, A_eq, b_eq, x
             exit_type = IDSolverExitType.INFEASIBLE;
             x_opt = xmin;
         otherwise
-            fprintf('Other error : Code %d\n', exit_flag);
+            fprintf('Other error : Code %d\n', exitflag);
             exit_type = IDSolverExitType.SOLVER_SPECIFIC_ERROR;
     end
 end

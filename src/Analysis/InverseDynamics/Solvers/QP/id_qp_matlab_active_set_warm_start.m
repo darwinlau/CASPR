@@ -1,6 +1,9 @@
 function [ x_opt, exit_type,active_set_new] = id_qp_matlab_active_set_warm_start(A, b, A_ineq, b_ineq, A_eq, b_eq, xmin, xmax, x0,active_set,options)
     assert(det(A)>=1e-6,'Efficient Method does not work for singular A');
     assert(isempty(A_ineq)&&isempty(b_ineq),'Efficient method cannot handle inequality constraints');
+%     [n,m] = size(A_eq);
+%     C = [eye(m);-eye(m)]; d = [xmin;-xmax];
+%     [x_opt,exitflag,active_set_new] = mpcqpsolver(A,b,C,d,A_eq,b_eq,active_set,options);
     if(isempty(active_set))
         [x_opt, ~, exitflag,~,lambda] = quadprog(A, b, A_ineq, b_ineq, A_eq, b_eq, xmin, xmax, x0, options);
         active_set_new = [lambda.lower > 1e-6; lambda.upper > 1e-6];
@@ -86,7 +89,6 @@ function [ x_opt, exit_type,active_set_new] = id_qp_matlab_active_set_warm_start
             exitflag = 1;
         end
     end
-        
     switch exitflag
         case 1
             exit_type = IDSolverExitType.NO_ERROR;

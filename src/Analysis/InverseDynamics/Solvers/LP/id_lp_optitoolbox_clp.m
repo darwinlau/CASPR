@@ -10,15 +10,15 @@ function [ x_opt, exit_type ] = id_lp_optitoolbox_clp(b, A_ineq, b_ineq, A_eq, b
             exit_type = IDSolverExitType.NO_ERROR;
         case -1
             fprintf('Problem infeasible\n');
-            exit_type = IDSolverExistType.INFEASIBLE;
+            exit_type = IDSolverExitType.INFEASIBLE;
         case 0
             fprintf('Max iteration limit reached\n');
             exit_type = IDSolverExitType.ITERATION_LIMIT_REACHED;
         case -3
             fprintf('Solver specific error\n');
-            exit_type = IDExitType.SOLVER_SPECIFIC_ERROR;
+            exit_type = IDSolverExitType.SOLVER_SPECIFIC_ERROR;
         otherwise
             fprintf('Other error : Code %d\n', exit_flag);
-            exit_type = IDExitType.OTHER_ERROR;
+            exit_type = IDSolverExitType.OTHER_ERROR;
     end
 end

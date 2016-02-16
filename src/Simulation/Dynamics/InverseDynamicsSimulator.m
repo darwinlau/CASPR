@@ -33,9 +33,9 @@ classdef InverseDynamicsSimulator < DynamicsSimulator
 
             for t = 1:length(obj.timeVector)
                 fprintf('Time : %f\n', obj.timeVector(t));
-%                 obj.model.update(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t});
-                [f,obj.IDFunctionCost(t), obj.IDExitType{t}, obj.compTime(t)] = obj.IDSolver.resolve(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t});
-                obj.cableForces{t} = f;
+                [obj.model.cableForces,obj.IDFunctionCost(t), obj.IDExitType{t}, obj.compTime(t)] = obj.IDSolver.resolve(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t});
+                obj.cableForces{t} = obj.model.cableForces;
+                obj.model.update(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t});
                 obj.interactionWrench{t} = obj.model.interactionWrench;
                 obj.lengths{t} = obj.model.cableLengths;
                 obj.lengths_dot{t} = obj.model.cableLengthsDot;
