@@ -38,7 +38,7 @@ dynObj = SystemKinematicsDynamics.LoadXmlObj(bodies_xmlobj, cableset_xmlobj);
 
 % Setup an inverse dynamics solver of choice (any should do)
 id_objective = IDObjectiveMinQuadCableForce(ones(dynObj.numCables,1));
-id_solver = IDSolverQuadProg(id_objective, ID_QP_SolverType.OPTITOOLBOX_IPOPT);
+id_solver = IDSolverQuadProg(dynObj,id_objective, ID_QP_SolverType.MATLAB);
 
 % Setup the inverse dynamics and forward dynamics simulators
 disp('Start Setup Simulation');
@@ -64,8 +64,8 @@ time_elapsed = toc(start_tic);
 fprintf('End Running Forward Dynamics Simulation : %f seconds\n', time_elapsed);
 
 % Finally compare the results
-idsim.plotJointSpace();
-fdsim.plotJointSpace();
+idsim.plotJointSpace([],[]);
+fdsim.plotJointSpace([],[]);
 % 
 % plot_axis = [-5 5 -5 5 0 5];
 % idsim.plotMovie(plot_axis, [fileparts(mfilename('fullpath')), '\test.avi'], 2, 500, 640);

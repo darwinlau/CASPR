@@ -10,7 +10,7 @@ function [ x_opt, exit_type ] = id_lp_matlab(b, A_ineq, b_ineq, A_eq, b_eq, xmin
             fprintf('Problem infeasible\n');
             exit_type = IDSolverExitType.INFEASIBLE;
         otherwise
-            fprintf('Other error : Code %d\n', exit_flag);
+            fprintf('Other error : Code %d\n', exitflag);
             exit_type = IDSolverExitType.SOLVER_SPECIFIC_ERROR;
     end
 end

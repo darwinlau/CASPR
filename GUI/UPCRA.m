@@ -316,7 +316,11 @@ function saveState(handles)
     state.kinObj                =   kinObj;
     path_string = fileparts(mfilename('fullpath'));
     path_string = path_string(1:strfind(path_string, 'GUI')-2);
-    save([path_string,'\logs\upcra_gui_state.mat'],'state')
+    % Check if the log folder exists
+    if(exist([path_string,'\logs'],'dir')~=7)
+        mkdir([path_string,'\logs']);        
+    end
+    save([path_string,'\logs\upcra_gui_state.mat'],'state');
 end
 
 function loadState(handles)

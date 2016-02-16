@@ -1,4 +1,4 @@
-% Basic Inverse Dynamics solver for problems in the Linear Program form
+% Basic Inverse Dynamics solver for problems infinite norm problems.
 % This is a well-studied form of inverse dynamics solver for CDPRs.
 %
 % Author        : Darwin LAU
@@ -6,7 +6,7 @@
 % Description   : Only a linear objective function and linear 
 % constraints can be used with this solver. There are multiple types of LP
 % solver implementations that can be used with this solver.
-classdef IDSolverLinProg < IDSolverBase
+classdef IDSolverMinInfNorm < IDSolverBase
     
     properties (SetAccess = private)
         lp_solver_type
@@ -15,7 +15,7 @@ classdef IDSolverLinProg < IDSolverBase
         options
     end
     methods
-        function id = IDSolverLinProg(model,objective, lp_solver_type)
+        function id = IDSolverMinInfNorm(model, objective, lp_solver_type)
             id@IDSolverBase(model);
             id.objective = objective;
             id.lp_solver_type = lp_solver_type;
@@ -37,17 +37,28 @@ classdef IDSolverLinProg < IDSolverBase
             for i = 1:length(obj.constraints)
                 obj.constraints{i}.updateConstraint(dynamics);
                 A_ineq = [A_ineq; obj.constraints{i}.A];
-                b_ineq = [b_ineq; obj.constraints{i}.b];                
+                b_ineq = [b_ineq; obj.constraints{i}.b];
             end
+            
+            % Modify the info norm
+            [n,m] = size(A_eq);
+            f = [zeros(m,1);1];
+            W = diag(obj.objective.b);
+            A_ineq = [A_ineq,zeros(size(A_ineq,1),1);W,-ones(m,1)];
+            b_ineq = [b_ineq;zeros(m,1)];
+            A_eq = [A_eq,zeros(n,1)];
+            fmin = [fmin;-Inf];
+            fmax = [fmax;Inf];
+            f0 = [obj.f_previous;0];
             
             switch (obj.lp_solver_type)
                 case ID_LP_SolverType.MATLAB
                     if(isempty(obj.options))
                         obj.options = optimoptions('linprog', 'Display', 'off', 'Algorithm', 'interior-point');
                     end
-                    [cable_forces, id_exit_type] = id_lp_matlab(obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);
+                    [cable_forces, id_exit_type] = id_lp_matlab(f, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, f0,obj.options);
                 case ID_LP_SolverType.OPTITOOLBOX_CLP
-                    [cable_forces, id_exit_type] = id_lp_optitoolbox_clp(obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous);
+                    [cable_forces, id_exit_type] = id_lp_optitoolbox_clp(f, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, f0);
                 otherwise
                     error('ID_LP_SolverType type is not defined');
             end
@@ -57,7 +68,7 @@ classdef IDSolverLinProg < IDSolverBase
                 Q_opt = inf;
                 %id_exit_type = IDFunction.DisplayOptiToolboxError(exitflag);
             else
-                Q_opt = obj.objective.evaluateFunction(cable_forces);
+                Q_opt = max(cable_forces);
             end            
             
             obj.f_previous = cable_forces;

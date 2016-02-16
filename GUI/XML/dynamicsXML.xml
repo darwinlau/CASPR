@@ -13,7 +13,7 @@
             </objective>			
 		</objectives>
 		<constraints>
-			<constraint type="IDConstraintInteractionAngleCone">
+			<constraint type="IDConstraintInteractionForceAngleCone">
                 <weight_links_multiplier>0</weight_links_multiplier>
                 <weight_cables_multiplier>0</weight_cables_multiplier>
                 <weight_constants>3 1 1</weight_constants>
@@ -35,7 +35,7 @@
             </objective>			
 		</objectives>
 		<constraints>
-			<constraint type="IDConstraintInteractionAngleCone">
+			<constraint type="IDConstraintInteractionForceAngleCone">
                 <weight_links_multiplier>0</weight_links_multiplier>
                 <weight_cables_multiplier>0</weight_cables_multiplier>
                 <weight_constants>3 1 1</weight_constants>
@@ -57,6 +57,23 @@
 	</solver_class>
     <solver_class id="IDSolverClosedForm">
 		<solver_type_enum>ID_CF_SolverType</solver_type_enum>
+	</solver_class>
+    <solver_class id="IDSolverMinInfNorm">
+		<solver_type_enum>ID_LP_SolverType</solver_type_enum>
+		<objectives>
+			<objective type="IDObjectiveMinLinCableForce">
+                <weight_links_multiplier>0</weight_links_multiplier>
+                <weight_cables_multiplier>1</weight_cables_multiplier>
+                <weight_constants>0</weight_constants>
+            </objective>			
+		</objectives>
+		<constraints>
+			<constraint type="IDConstraintInteractionForceAngleCone">
+                <weight_links_multiplier>0</weight_links_multiplier>
+                <weight_cables_multiplier>0</weight_cables_multiplier>
+                <weight_constants>3 1 1</weight_constants>
+            </constraint>
+		</constraints>
 	</solver_class>
 	<plot_functions>
         <plot_function type="plotCableForces">

@@ -44,7 +44,7 @@ classdef IDSolverQuadProg < IDSolverBase
             switch (obj.qp_solver_type)
                 case ID_QP_SolverType.MATLAB
                     if(isempty(obj.options))
-                        obj.options = optimoptions('quadprog', 'Display', 'off', 'MaxIter', 100);
+                        obj.options = optimoptions('quadprog', 'Display', 'off', 'MaxIter', 100,'Algorithm','interior-point-convex');
                     end 
                     [cable_forces, id_exit_type] = id_qp_matlab(obj.objective.A, obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);
                 case ID_QP_SolverType.MATLAB_ACTIVE_SET_WARM_START

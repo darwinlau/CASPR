@@ -35,6 +35,7 @@ classdef IDSolverOptimallySafe < IDSolverBase
             % Ensure that the resolve function should be applied for this
             % class of problem
             assert(sum(fmin-fmin(1)*ones(size(fmin))) + sum(fmax-fmax(1)*ones(size(fmax))) == 0,'Minimum and maximum cable forces should be the same for all cables.');
+            assert((obj.alpha >= 0) && ~isinf(obj.alpha),'alpha must be non-negative and finite.');
             
             switch (obj.os_solver_type)
                 case ID_OS_SolverType.LP
