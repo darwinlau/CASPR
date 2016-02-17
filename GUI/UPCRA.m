@@ -31,7 +31,7 @@ function varargout = UPCRA(varargin)
     path_string = fileparts(mfilename('fullpath'));
     path_string = path_string(1:strfind(path_string, 'GUI')-2);
     p = path;
-    if(isempty(strfind(p,path_string)))
+    if(isempty(strfind(p,[path_string,'\str'])))
         addpath(genpath(path_string))
     end
     
@@ -266,17 +266,6 @@ function generate_kinematic_dynamic_object(handles)
     dynObj = SystemKinematicsDynamics.LoadXmlObj(bodies_xmlobj, cableset_xmlobj);
     kinObj = SystemKinematics.LoadXmlObj(bodies_xmlobj, cableset_xmlobj);
     cla;
-%     displayFilename = 'C:\Users\Eden\Dropbox\mcdm-analysis.matlab\data\config\models\MCDM\2R_planar_xz\2R_planar_xz_display.xml';
-%     display_range_bool = exist(displayFilename, 'file') == 2;
-%     if(display_range_bool)
-%         displayXML = XmlOperations.XmlReadRemoveIndents(displayFilename)
-%         display_range_array = regexp(char(displayXML.getElementsByTagName('display_range').item(0).getFirstChild.getData), ' ','split')
-%         display_range = size(6, 1);
-%         for i = 1:6
-%             display_range(i,1) = str2double(display_range_array(i));
-%         end
-%         MotionSimulator.PlotFrame(dynObj, display_range,handles.figure1);
-%     end
     MotionSimulator.PlotFrame(dynObj, [-10,10,-10,10,-10,10],handles.figure1);
     % Store the dynamics object
     setappdata(handles.cable_popup,'dynObj',dynObj);
