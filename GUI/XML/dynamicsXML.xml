@@ -66,11 +66,16 @@
     <solver_class id="IDSolverMinInfNorm">
 		<solver_type_enum>ID_LP_SolverType</solver_type_enum>
 		<objectives>
-			<objective type="IDObjectiveMinLinCableForce">
+			<objective type="IDObjectiveMinInfCableForce">
                 <weight_links_multiplier>0</weight_links_multiplier>
                 <weight_cables_multiplier>1</weight_cables_multiplier>
                 <weight_constants>0</weight_constants>
-            </objective>			
+            </objective>
+            <objective type="IDObjectiveInfOptimallySafe">
+                <weight_links_multiplier>0</weight_links_multiplier>
+                <weight_cables_multiplier>1</weight_cables_multiplier>
+                <weight_constants>0</weight_constants>
+            </objective>
 		</objectives>
 		<constraints>
 			<constraint type="IDConstraintInteractionForceAngleCone">

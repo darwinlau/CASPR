@@ -19,10 +19,10 @@ classdef WrenchClosure < WorkspaceCondition
                     w.method = WrenchClosureMethods.UD;
                 elseif(strcmp(method,'semi_singular'))
                     w.method = WrenchClosureMethods.SS;
-                elseif(strcmp(method,'Shang_2015'))
-                    w.method = WrenchClosureMethods.S2015;
-                elseif(strcmp(method,'Lim_2011'))
-                    w.method = WrenchClosureMethods.L2011;
+                elseif(strcmp(method,'combinatoric_null_space'))
+                    w.method = WrenchClosureMethods.CNS;
+                elseif(strcmp(method,'combinatoric_positive_span'))
+                    w.method = WrenchClosureMethods.CPS;
                 else
                     msg = 'Incorrect wrench method set';
                     error(msg);
@@ -43,10 +43,10 @@ classdef WrenchClosure < WorkspaceCondition
                inWorkspace = wrench_closure_unilateral_dexterity(dynamics,obj.options);
            elseif(obj.method == WrenchClosureMethods.SS)
                inWorkspace = wrench_closure_semi_singular(dynamics);
-           elseif(obj.method == WrenchClosureMethods.S2015)
-               inWorkspace = wrench_closure_shang(dynamics,obj.options);
-           elseif(obj.method == WrenchClosureMethods.L2011)
-               inWorkspace = wrench_closure_lim(dynamics,obj.options);
+           elseif(obj.method == WrenchClosureMethods.CNS)
+               inWorkspace = wrench_closure_combinatoric_null_space(dynamics,obj.options);
+           elseif(obj.method == WrenchClosureMethods.CPS)
+               inWorkspace = wrench_closure_combinatoric_positive_span(dynamics,obj.options);
            end
         end
         

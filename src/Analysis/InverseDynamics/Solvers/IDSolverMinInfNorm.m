@@ -43,9 +43,8 @@ classdef IDSolverMinInfNorm < IDSolverBase
             % Modify the info norm
             [n,m] = size(A_eq);
             f = [zeros(m,1);1];
-            W = diag(obj.objective.b);
-            A_ineq = [A_ineq,zeros(size(A_ineq,1),1);W,-ones(m,1)];
-            b_ineq = [b_ineq;zeros(m,1)];
+            A_ineq = [A_ineq,zeros(size(A_ineq,1),1);obj.objective.A,-ones(m,1);-obj.objective.A,-ones(m,1)];
+            b_ineq = [b_ineq;-obj.objective.b;obj.objective.b];
             A_eq = [A_eq,zeros(n,1)];
             fmin = [fmin;-Inf];
             fmax = [fmax;Inf];

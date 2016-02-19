@@ -10,7 +10,7 @@
 % Author        : Jonathan EDEN
 % Created       : 2016
 % Description   : 
-function inWorkspace = wrench_closure_lim(dynamics,options)
+function inWorkspace = wrench_closure_combinatoric_positive_span(dynamics,options)
     % Determine necessary variables for test
     A       =   -dynamics.L'; % Cable Jacobian
     n = size(A,1); m = size(A,2); % Size variables
@@ -23,7 +23,8 @@ function inWorkspace = wrench_closure_lim(dynamics,options)
         combinations    =   nchoosek(1:m,n);
         for i = 1:size(combinations,1)
            G = A(:,combinations(i,:));
-           if(rank(G) == n)
+%            if(rank(G) == n)
+            if(abs(det(G)) >1e-8)
                 k        =   G\a_t;
                 k_pos    =   k>0;
                 k_nonneg =   k>=0;

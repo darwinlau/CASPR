@@ -32,7 +32,7 @@ classdef IDSolverQuadProg < IDSolverBase
             fmax = dynamics.cableDynamics.forcesMax;
             % Get objective function
             obj.objective.updateObjective(dynamics);
-
+            
             A_ineq = [];
             b_ineq = [];
             for i = 1:length(obj.constraints)
@@ -44,22 +44,24 @@ classdef IDSolverQuadProg < IDSolverBase
             switch (obj.qp_solver_type)
                 case ID_QP_SolverType.MATLAB
                     if(isempty(obj.options))
-                        obj.options = optimoptions('quadprog', 'Display', 'off', 'MaxIter', 100,'Algorithm','interior-point-convex');
+                        obj.options = optimoptions('quadprog', 'Display', 'off', 'MaxIter', 100);
                     end 
                     [cable_forces, id_exit_type] = id_qp_matlab(obj.objective.A, obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);
                 case ID_QP_SolverType.MATLAB_ACTIVE_SET_WARM_START
                     if(isempty(obj.options))
                         obj.options = optimoptions('quadprog', 'Display', 'off', 'MaxIter', 100);
-%                         obj.options = optiset('solver', 'OOQP', 'maxiter', 100);
                     end 
                     [cable_forces, id_exit_type,obj.active_set] = id_qp_matlab_active_set_warm_start(obj.objective.A, obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.active_set,obj.options);
                 case ID_QP_SolverType.OPTITOOLBOX_IPOPT
-                    [cable_forces, id_exit_type] = id_qp_optitoolbox_ipopt(obj.objective.A, obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous);
+                    if(isempty(obj.options))
+                        obj.options = optiset('solver', 'IPOPT', 'maxiter', 100);
+                    end 
+                    [cable_forces, id_exit_type] = id_qp_opti(obj.objective.A, obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);
                 case ID_QP_SolverType.OPTITOOLBOX_OOQP
                     if(isempty(obj.options))
                         obj.options = optiset('solver', 'OOQP', 'maxiter', 100);
-                    end
-                    [cable_forces, id_exit_type] = id_qp_optitoolbox_ooqp(obj.objective.A, obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);
+                    end                    
+                    [cable_forces, id_exit_type] = id_qp_opti(obj.objective.A, obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);
                 otherwise
                     error('ID_QP_SolverType type is not defined');
             end

@@ -46,8 +46,16 @@ classdef IDSolverLinProg < IDSolverBase
                         obj.options = optimoptions('linprog', 'Display', 'off', 'Algorithm', 'interior-point');
                     end
                     [cable_forces, id_exit_type] = id_lp_matlab(obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);
-                case ID_LP_SolverType.OPTITOOLBOX_CLP
-                    [cable_forces, id_exit_type] = id_lp_optitoolbox_clp(obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous);
+                case ID_LP_SolverType.OPTITOOLBOX_OOQP
+                    if(isempty(obj.options))
+                        obj.options = optiset('solver', 'OOQP', 'maxiter', 100);
+                    end 
+                    [cable_forces, id_exit_type] = id_lp_opti(obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);
+                case ID_LP_SolverType.OPTITOOLBOX_LP_SOLVE
+                    if(isempty(obj.options))
+                        obj.options = optiset('solver', 'LP_SOLVE', 'maxiter', 100,'display','off','warnings','none');
+                    end
+                    [cable_forces, id_exit_type] = id_lp_opti(obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);
                 otherwise
                     error('ID_LP_SolverType type is not defined');
             end
