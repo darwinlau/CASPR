@@ -32,8 +32,10 @@ classdef ForwardDynamicsSimulator < DynamicsSimulator
             
             for t = 2:length(obj.timeVector)
                 fprintf('Simulation time : %f\n', obj.timeVector(t));
-                [obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t}, dynObj] = ForwardDynamics.Compute(obj.model.q, obj.model.q_dot, cable_forces{t-1}, obj.timeVector(t)-obj.timeVector(t-1), obj.model);
-                obj.interactionWrench{t} = dynObj.interactionWrench;
+                [obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t}, obj.model] = ForwardDynamics.Compute(obj.model.q, obj.model.q_dot, cable_forces{t-1}, obj.timeVector(t)-obj.timeVector(t-1), obj.model);
+                obj.interactionWrench{t} = obj.model.interactionWrench;
+                obj.cableLengths{t} = obj.model.cableLengths;
+                obj.cableLengthsDot{t} = obj.model.cableLengthsDot;
             end
         end        
     end

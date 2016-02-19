@@ -5,8 +5,8 @@ classdef (Abstract) MotionSimulator < Simulator
     properties
         timeVector          % time vector
         trajectory          % Trajectory object for inverse problems only
-        lengths             % cell array of cable lengths
-        lengths_dot         % cell array of cable lengths dot
+        cableLengths        % cell array of cable lengths
+        cableLengthsDot     % cell array of cable lengths dot
     end
 
     methods
@@ -41,14 +41,14 @@ classdef (Abstract) MotionSimulator < Simulator
         end
 
         function plotCableLengths(obj, cables_to_plot, plot_axis)
-            assert(~isempty(obj.lengths), 'Cannot plot since lengths vector is empty');
-            assert(~isempty(obj.lengths_dot), 'Cannot plot since lengths_dot vector is empty');
+            assert(~isempty(obj.cableLengths), 'Cannot plot since lengths vector is empty');
+            assert(~isempty(obj.cableLengthsDot), 'Cannot plot since lengths_dot vector is empty');
 
             if isempty(cables_to_plot)
                 cables_to_plot = 1:obj.model.numCables;
             end
-            length_array = cell2mat(obj.lengths);
-            length_dot_array = cell2mat(obj.lengths_dot);
+            length_array = cell2mat(obj.cableLengths);
+            length_dot_array = cell2mat(obj.cableLengthsDot);
     
             if(~isempty(plot_axis))
                 plot(plot_axis(1),obj.timeVector, length_array(cables_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); 
