@@ -248,7 +248,8 @@ function update_button_Callback(~, ~, handles) %#ok<DEFNU>
     q_data = get(handles.qtable,'Data');
     dynObj.update(q_data',zeros(dynObj.numDofVars,1),zeros(dynObj.numDofVars,1));
     cla;
-    MotionSimulator.PlotFrame(dynObj, [-10,10,-10,10,-10,10],handles.figure1);
+    axis_range = getappdata(handles.cable_popup,'axis_range');
+    MotionSimulator.PlotFrame(dynObj, axis_range,handles.figure1);
 end
 
 %--------------------------------------------------------------------------
@@ -266,9 +267,17 @@ function generate_kinematic_dynamic_object(handles)
     dynObj = SystemKinematicsDynamics.LoadXmlObj(bodies_xmlobj, cableset_xmlobj);
     kinObj = SystemKinematics.LoadXmlObj(bodies_xmlobj, cableset_xmlobj);
     cla;
-    MotionSimulator.PlotFrame(dynObj, [-10,10,-10,10,-10,10],handles.figure1);
+    display_range = bodies_xmlobj.getElementsByTagName('display_range').item(0);
+    if(isempty(display_range))
+        axis_range = [-10,10,-10,10,-10,10];
+        MotionSimulator.PlotFrame(dynObj, [-10,10,-10,10,-10,10],handles.figure1);
+    else
+        axis_range = str2num(display_range.getFirstChild.getData); %#ok<ST2NM>
+        MotionSimulator.PlotFrame(dynObj, axis_range,handles.figure1);
+    end
     % Store the dynamics object
     setappdata(handles.cable_popup,'dynObj',dynObj);
+    setappdata(handles.cable_popup,'axis_range',axis_range);
     setappdata(handles.cable_popup,'kinObj',kinObj);
     format_q_table(dynObj.numDofs,handles.qtable);
 end

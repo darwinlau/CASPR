@@ -40,4 +40,5 @@
       <location>0.0 0.0 1.0</location>
     </parent>
   </link_rigid>
+  <display_range>-2.0 2.0 -2.0 2.0 -2.0 2.0</display_range>
 </links>

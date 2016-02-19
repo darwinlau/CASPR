@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <links>
   <link_rigid num="1" name="link 1">
-    <joint_type>SPHERICAL</joint_type>
+    <joint_type>S_EULER_XYZ</joint_type>
     <physical>
       <mass>1</mass>
       <com_location>0.0 0.0 0.0</com_location>
@@ -20,4 +20,5 @@
       <location>0.0 0.0 0.0</location>
     </parent>
   </link_rigid>
+  <display_range>-0.2 0.2 -0.2 0.2 -0.2 0.2</display_range>
 </links>

@@ -20,4 +20,5 @@
       <location>0.0 0.0 0.0</location>
     </parent>
   </link_rigid>
+  <display_range>-0.5 0.5 -0.5 0.5 -0.5 0.5</display_range>
 </links>
