@@ -1,38 +1,38 @@
 %--------------------------------------------------------------------------
 %% Constructor
 %--------------------------------------------------------------------------
-function varargout = workspaceGUI(varargin)
-    % WORKSPACEGUI MATLAB code for workspaceGUI.fig
-    %      WORKSPACEGUI, by itself, creates a new WORKSPACEGUI or raises the existing
+function varargout = workspace_GUI(varargin)
+    % WORKSPACE_GUI MATLAB code for workspace_GUI.fig
+    %      WORKSPACE_GUI, by itself, creates a new WORKSPACE_GUI or raises the existing
     %      singleton*.
     %
-    %      H = WORKSPACEGUI returns the handle to a new WORKSPACEGUI or the handle to
+    %      H = WORKSPACE_GUI returns the handle to a new WORKSPACE_GUI or the handle to
     %      the existing singleton*.
     %
-    %      WORKSPACEGUI('CALLBACK',hObject,eventData,handles,...) calls the local
-    %      function named CALLBACK in WORKSPACEGUI.M with the given input arguments.
+    %      WORKSPACE_GUI('CALLBACK',hObject,eventData,handles,...) calls the local
+    %      function named CALLBACK in WORKSPACE_GUI.M with the given input arguments.
     %
-    %      WORKSPACEGUI('Property','Value',...) creates a new WORKSPACEGUI or raises the
+    %      WORKSPACE_GUI('Property','Value',...) creates a new WORKSPACE_GUI or raises the
     %      existing singleton*.  Starting from the left, property value pairs are
-    %      applied to the GUI before workspaceGUI_OpeningFcn gets called.  An
+    %      applied to the GUI before workspace_GUI_OpeningFcn gets called.  An
     %      unrecognized property name or invalid value makes property application
-    %      stop.  All inputs are passed to workspaceGUI_OpeningFcn via varargin.
+    %      stop.  All inputs are passed to workspace_GUI_OpeningFcn via varargin.
     %
     %      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
     %      instance to run (singleton)".
     %
     % See also: GUIDE, GUIDATA, GUIHANDLES
 
-    % Edit the above text to modify the response to help workspaceGUI
+    % Edit the above text to modify the response to help workspace_GUI
 
-    % Last Modified by GUIDE v2.5 14-Jan-2016 14:25:24
+    % Last Modified by GUIDE v2.5 22-Feb-2016 16:26:45
 
     % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
     gui_State = struct('gui_Name',       mfilename, ...
                        'gui_Singleton',  gui_Singleton, ...
-                       'gui_OpeningFcn', @workspaceGUI_OpeningFcn, ...
-                       'gui_OutputFcn',  @workspaceGUI_OutputFcn, ...
+                       'gui_OpeningFcn', @workspace_GUI_OpeningFcn, ...
+                       'gui_OutputFcn',  @workspace_GUI_OutputFcn, ...
                        'gui_LayoutFcn',  [] , ...
                        'gui_Callback',   []);
     if nargin && ischar(varargin{1})
@@ -50,26 +50,27 @@ end
 %--------------------------------------------------------------------------
 %% GUI Setup Functions
 %--------------------------------------------------------------------------
-% --- Executes just before workspaceGUI is made visible.
-function workspaceGUI_OpeningFcn(hObject, ~, handles, varargin)
+% --- Executes just before workspace_GUI is made visible.
+function workspace_GUI_OpeningFcn(hObject, ~, handles, varargin)
     % This function has no output args, see OutputFcn.
     % hObject    handle to figure
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
-    % varargin   command line arguments to workspaceGUI (see VARARGIN)
+    % varargin   command line arguments to workspace_GUI (see VARARGIN)
 
-    % Choose default command line output for workspaceGUI    
+    % Choose default command line output for workspace_GUI    
     handles.output = hObject;
     
     % Update handles structure
     guidata(hObject, handles);
     loadState(handles);
-    % UIWAIT makes workspaceGUI wait for user response (see UIRESUME)
+    GUIOperations.CreateTabGroup(handles);
+    % UIWAIT makes workspace_GUI wait for user response (see UIRESUME)
     % uiwait(handles.figure1);
 end
 
 % --- Outputs from this function are returned to the command line.
-function varargout = workspaceGUI_OutputFcn(~, ~, handles) 
+function varargout = workspace_GUI_OutputFcn(~, ~, handles) 
     % varargout  cell array for returning output args (see VARARGOUT);
     % hObject    handle to figure
     % eventdata  reserved - to be defined in a future version of MATLAB
@@ -89,7 +90,6 @@ function figure1_CloseRequestFcn(hObject, ~, handles) %#ok<DEFNU>
     saveState(handles);
     delete(hObject);
 end
-
 
 %--------------------------------------------------------------------------
 %% Popups
@@ -117,17 +117,10 @@ function workspace_condition_popup_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
     if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
         set(hObject,'BackgroundColor','white');
     end
-    path_string = fileparts(mfilename('fullpath'));
-    path_string = path_string(1:strfind(path_string, 'GUI')-2);
-    settingsXMLObj =  XmlOperations.XmlReadRemoveIndents([path_string,'\GUI\XML\workspaceXML.xml']); 
+    settingsXMLObj =  GUIOperations.GetSettings('/GUI/XML/workspaceXML.xml');
     setappdata(hObject,'settings',settingsXMLObj);
-    workspacesObj = settingsXMLObj.getElementsByTagName('simulator').item(0).getElementsByTagName('workspace_condition');
-    workspace_str = cell(1,workspacesObj.getLength);
-    % Extract the identifies from the cable sets
-    for i =1:workspacesObj.getLength
-        workspaceObj = workspacesObj.item(i-1);
-        workspace_str{i} = char(workspaceObj.getAttribute('id'));
-    end
+    workspace_str = GUIOperations.XmlObj2StringCellArray(settingsXMLObj.getElementsByTagName('simulator').item(0).getElementsByTagName('workspace_condition')...
+                    ,'id');
     set(hObject, 'String', workspace_str);
 end
 
@@ -188,17 +181,10 @@ function workspace_metric_popup_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
     if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
         set(hObject,'BackgroundColor','white');
     end
-    path_string = fileparts(mfilename('fullpath'));
-    path_string = path_string(1:strfind(path_string, 'GUI')-2);
-    settingsXMLObj =  XmlOperations.XmlReadRemoveIndents([path_string,'\GUI\XML\workspaceXML.xml']);
-    workspacesObj = settingsXMLObj.getElementsByTagName('simulator').item(0).getElementsByTagName('workspace_metrics').item(0).getElementsByTagName('workspace_metric');
-    workspace_str = cell(1,workspacesObj.getLength+1);
-    % Extract the identifies from the cable sets
-    workspace_str{1} = ' ';
-    for i =1:workspacesObj.getLength
-        workspaceObj = workspacesObj.item(i-1);
-        workspace_str{i+1} = char(workspaceObj.getFirstChild.getData);
-    end
+    settingsXMLObj = GUIOperations.GetSettings('/GUI/XML/workspaceXML.xml');
+    workspace_str = GUIOperations.XmlObj2StringCellArray(settingsXMLObj.getElementsByTagName('simulator').item(0).getElementsByTagName('workspace_metrics').item(0).getElementsByTagName('workspace_metric')...
+        ,[]);
+    workspace_str = [{' '},workspace_str];
     set(hObject, 'String', workspace_str);
 end
 
@@ -223,17 +209,49 @@ function grid_popup_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
     if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
         set(hObject,'BackgroundColor','white');
     end
-    path_string = fileparts(mfilename('fullpath'));
-    path_string = path_string(1:strfind(path_string, 'GUI')-2);
-    settingsXMLObj =  XmlOperations.XmlReadRemoveIndents([path_string,'\GUI\XML\workspaceXML.xml']);
-    workspacesObj = settingsXMLObj.getElementsByTagName('simulator').item(0).getElementsByTagName('grid_types').item(0).getElementsByTagName('grid_type');
-    workspace_str = cell(1,workspacesObj.getLength);
-    % Extract the identifies from the cable sets
-    for i =1:workspacesObj.getLength
-        workspaceObj = workspacesObj.item(i-1);
-        workspace_str{i} = char(workspaceObj.getFirstChild.getData);
-    end
+    settingsXMLObj = GUIOperations.GetSettings('/GUI/XML/workspaceXML.xml');
+    workspace_str = GUIOperations.XmlObj2StringCellArray(settingsXMLObj.getElementsByTagName('simulator').item(0).getElementsByTagName('grid_types').item(0).getElementsByTagName('grid_type')...
+        ,[]);
     set(hObject, 'String', workspace_str);
+end
+
+% --- Executes on selection change in plot_type_popup.
+function plot_type_popup_Callback(hObject, ~, handles) %#ok<DEFNU>
+    % hObject    handle to plot_type_popup (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    structure with handles and user data (see GUIDATA)
+
+    % Hints: contents = cellstr(get(hObject,'String')) returns plot_type_popup contents as cell array
+    %        contents{get(hObject,'Value')} returns selected item from plot_type_popup
+    settingsXMLObj = getappdata(handles.workspace_condition_popup,'settings');
+    plotsObj = settingsXMLObj.getElementsByTagName('simulator').item(0).getElementsByTagName('plot_functions').item(0).getElementsByTagName('plot_function');
+    contents = get(hObject,'Value');
+    plotObj = plotsObj.item(contents-1);
+    setappdata(hObject,'num_plots',plotObj.getElementsByTagName('figure_quantity').item(0).getFirstChild.getData);
+end
+
+% --- Executes during object creation, after setting all properties.
+function plot_type_popup_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
+    % hObject    handle to plot_type_popup (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    empty - handles not created until after all CreateFcns called
+
+    % Hint: popupmenu controls usually have a white background on Windows.
+    %       See ISPC and COMPUTER.
+    if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+        set(hObject,'BackgroundColor','white');
+    end
+    settingsXMLObj = GUIOperations.GetSettings('/GUI/XML/workspaceXML.xml');
+    plotsObj = settingsXMLObj.getElementsByTagName('simulator').item(0).getElementsByTagName('plot_functions').item(0).getElementsByTagName('plot_function');
+    plot_str = cell(1,plotsObj.getLength);
+    % Extract the identifies from the cable sets
+    for i =1:plotsObj.getLength
+        plotObj = plotsObj.item(i-1);
+        plot_str{i} = char(plotObj.getAttribute('type'));
+    end
+    set(hObject,'Value',1);
+    set(hObject, 'String', plot_str);
+    setappdata(hObject,'num_plots',1);
 end
 
 %--------------------------------------------------------------------------
@@ -263,20 +281,24 @@ function load_button_Callback(~, ~, handles) %#ok<DEFNU>
     load(settings)
     mp_text = get(handles.model_text,'String');
     cs_text = get(handles.cable_text,'String');
-    if(strcmp(mp_text,state.model_text)&&strcmp(cs_text,state.cable_text))
-        set(handles.workspace_condition_popup,'value',state.workspace_condition_popup_value);
-        workspace_generation_popup_Update(handles.workspace_generation_popup,handles);
-        set(handles.workspace_generation_popup,'value',state.workspace_generation_popup_value);
-        set(handles.workspace_metric_popup,'value',state.workspace_metric_popup_value);
-        set(handles.qtable,'Data',state.workspace_table);
+    if(strcmp(state.simulator,'workspace'))
+        if(strcmp(mp_text,state.model_text)&&strcmp(cs_text,state.cable_text))
+            set(handles.workspace_condition_popup,'value',state.workspace_condition_popup_value);
+            workspace_generation_popup_Update(handles.workspace_generation_popup,handles);
+            set(handles.workspace_generation_popup,'value',state.workspace_generation_popup_value);
+            set(handles.workspace_metric_popup,'value',state.workspace_metric_popup_value);
+            set(handles.qtable,'Data',state.workspace_table);
+        else
+            warning('Incorrect Model Type');
+        end
     else
-        warning('Incorrect Model Type');
+        warning('File is not the correct file type'); %#ok<WNTAG>
     end
 end
 
-% --- Executes on button press in Generate_Button.
-function Generate_Button_Callback(~, ~, handles) %#ok<DEFNU>
-    % hObject    handle to Generate_Button (see GCBO)
+% --- Executes on button press in generate_button.
+function generate_button_Callback(~, ~, handles) %#ok<DEFNU>
+    % hObject    handle to generate_button (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
     %% Clear data
@@ -300,30 +322,40 @@ function Generate_Button_Callback(~, ~, handles) %#ok<DEFNU>
     end
     %% Now initialise the simulation
     disp('Start Setup Simulation');
+    set(handles.status_text,'String','Setting up simulation');
+    drawnow;
     start_tic       =   tic;
     wsim            =   WorkspaceSimulator(dynObj,wcondition,metric);
-%     q_step          =   pi/18;
     q_info = get(handles.qtable,'Data');
     uGrid           =   UniformGrid(q_info(:,1),q_info(:,2),q_info(:,3));
+    contents = cellstr(get(handles.plot_type_popup,'String'));
+    plot_type = contents{get(handles.plot_type_popup,'Value')};
     %% Now set up the grid information
     time_elapsed    =   toc(start_tic);
     fprintf('End Setup Simulation : %f seconds\n', time_elapsed);
     
     disp('Start Running Simulation');
+    set(handles.status_text,'String','Simulation running');
+    drawnow;
     start_tic       =   tic;
     wsim.run(uGrid);
     time_elapsed    =   toc(start_tic);
     fprintf('End Running Simulation : %f seconds\n', time_elapsed);
     
     disp('Start Plotting Simulation');
+    set(handles.status_text,'String','Simulation plotting');
+    drawnow;
     start_tic = tic;
-    axes(handles.workspace_axes);
-    cla;
-    wsim.plotWorkspace();
+    GUIOperations.GUIPlot(plot_type,wsim,handles,str2double(getappdata(handles.plot_type_popup,'num_plots')),get(handles.undock_box,'Value'));
+%     axes(handles.workspace_axes);
+%     cla;
+%     wsim.plotWorkspace();
     % wsim.plotWorkspaceHigherDimension()
     time_elapsed = toc(start_tic);
     fprintf('End Plotting Simulation : %f seconds\n', time_elapsed);
-    assignin('base','wsim',wsim);
+    set(handles.status_text,'String','No simulation running');
+    setappdata(handles.figure1,'sim',wsim);
+%     assignin('base','wsim',wsim);
 end
 
 % --- Executes on button press in plot_button.
@@ -331,7 +363,80 @@ function plot_button_Callback(~, ~, ~) %#ok<DEFNU>
     % hObject    handle to plot_button (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
+    sim = getappdata(handles.figure1,'sim');
+    if(isempty(sim))
+        warning('No simulator has been generated. Please press run first'); %#ok<WNTAG>
+    else
+        contents = cellstr(get(handles.plot_type_popup,'String'));
+        plot_type = contents{get(handles.plot_type_popup,'Value')};
+        GUIOperations.GUIPlot(plot_type,sim,handles,str2double(getappdata(handles.plot_type_popup,'num_plots')),get(handles.undock_box,'Value'))
+    end
 end
+
+%--------------------------------------------------------------------------
+%% Toolbar buttons
+%--------------------------------------------------------------------------
+% --------------------------------------------------------------------
+function save_figure_tool_ClickedCallback(~, ~, handles) %#ok<DEFNU>
+    % hObject    handle to save_figure_tool (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    structure with handles and user data (see GUIDATA)
+    tabgp = getappdata(handles.figure1,'tabgp');
+    s_tab = get(tabgp,'SelectedTab');
+    ax = get(s_tab,'Children');
+    f1 = figure; % Open a new figure with handle f1
+    copyobj(ax,f1); % Copy axes object h into figure f1
+    set(gca,'ActivePositionProperty','outerposition')
+    set(gca,'Units','normalized')
+    set(gca,'OuterPosition',[0 0 1 1])
+    set(gca,'position',[0.1300 0.1100 0.7750 0.8150])
+    [file,path] = uiputfile({'*.fig';'*.bmp';'*.eps';'*.emf';'*.jpg';'*.pcx';...
+        '*.pbm';'*.pdf';'*.pgm';'*.png';'*.ppm';'*.svg';'*.tif'},'Save file name');
+    if(path ~= 0)
+        saveas(gcf,[path,file]);
+    end
+    close(f1);
+end
+
+% --------------------------------------------------------------------
+function undock_figure_tool_ClickedCallback(~, ~, handles) %#ok<DEFNU>
+    % hObject    handle to undock_figure_tool (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    structure with handles and user data (see GUIDATA)
+    tabgp = getappdata(handles.figure1,'tabgp');
+    s_tab = get(tabgp,'SelectedTab');
+    ax = get(s_tab,'Children');
+    f1 = figure; % Open a new figure with handle f1
+    copyobj(ax,f1); % Copy axes object h into figure f1
+    set(gca,'ActivePositionProperty','outerposition')
+    set(gca,'Units','normalized')
+    set(gca,'OuterPosition',[0 0 1 1])
+    set(gca,'position',[0.1300 0.1100 0.7750 0.8150])
+end   
+
+
+% --------------------------------------------------------------------
+function delete_figure_tool_ClickedCallback(~, ~, handles) %#ok<DEFNU>
+    % hObject    handle to delete_figure_tool (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    structure with handles and user data (see GUIDATA)
+    tabgp = getappdata(handles.figure1,'tabgp');
+    s_tab = get(tabgp,'SelectedTab');
+    delete(s_tab);
+end
+
+%--------------------------------------------------------------------------
+%% Toggle Buttons
+%--------------------------------------------------------------------------
+% --- Executes on button press in undock_box.
+function undock_box_Callback(~, ~, ~) %#ok<DEFNU>
+    % hObject    handle to undock_box (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    structure with handles and user data (see GUIDATA)
+
+    % Hint: get(hObject,'Value') returns toggle state of undock_box
+end
+
 
 %--------------------------------------------------------------------------
 %% Text Functions
@@ -365,6 +470,7 @@ end
 %--------------------------------------------------------------------------
 function saveState(handles,file_path)
     % Save all of the settings
+    state.simulator                         =   'workspace';
     state.model_text                        =   get(handles.model_text,'String');
     state.cable_text                        =   get(handles.cable_text,'String');
     state.workspace_condition_popup_value   =   get(handles.workspace_condition_popup,'value');
@@ -426,9 +532,9 @@ function format_q_table(numDofs,qtable)
     end
 end
 
-
-
 %% TO BE DONE
 % Generate Workspace Plotting Functions
 % Add new Methods for computing Wrench Closure
 % Determine where best to store settings
+
+

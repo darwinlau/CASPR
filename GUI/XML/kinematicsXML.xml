@@ -8,6 +8,17 @@
 		<q_dot_type_enum>FK_LS_QdotOptionType</q_dot_type_enum>
 	</solver_class>
 	<plot_functions>
-		<plot_type>plotJointSpace</plot_type>
+		<plot_function type="plotAngularAcceleration">
+            <figure_quantity>2</figure_quantity>
+        </plot_function>
+        <plot_function type="plotBodyCOG">
+            <figure_quantity>3</figure_quantity>
+        </plot_function>
+        <plot_function type="plotJointSpace">
+            <figure_quantity>2</figure_quantity>
+        </plot_function>
+        <plot_function type="plotCableLengths">
+            <figure_quantity>2</figure_quantity>
+        </plot_function>
 	</plot_functions>
 </simulator>

@@ -1,4 +1,4 @@
-classdef CapacityMarginMetric < WorkspaceMetric
+classdef CapacityMarginMetric < WorkspaceMetricBase
     properties (SetAccess = protected, GetAccess = protected)
         desired_wrench_set
     end

@@ -1,4 +1,4 @@
-classdef TensionFactorMetric < WorkspaceMetric
+classdef TensionFactorMetric < WorkspaceMetricBase
     properties (SetAccess = protected, GetAccess = protected)
     end
     

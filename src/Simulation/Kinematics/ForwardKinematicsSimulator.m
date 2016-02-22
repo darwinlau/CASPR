@@ -16,8 +16,8 @@ classdef ForwardKinematicsSimulator < MotionSimulator
         
         function run(obj, lengths, lengths_dot, time_vector, q0_approx, q0_prev_approx)
             obj.timeVector = time_vector;
-            obj.lengths = lengths;
-            obj.lengths_dot = lengths_dot;
+            obj.cableLengths = lengths;
+            obj.cableLengthsDot = lengths_dot;
             
             obj.trajectory = JointTrajectory;
             obj.trajectory.timeVector = obj.timeVector;
@@ -54,9 +54,15 @@ classdef ForwardKinematicsSimulator < MotionSimulator
             end
         end
         
-        function plotCableLengthError(obj)
+        function plotCableLengthError(obj,~,plot_axis)
             lengthError_array = cell2mat(obj.lengthError);
-            plot(obj.timeVector, lengthError_array, 'Color', 'k', 'LineWidth', 1.5);
+            if(~isempty(plot_axis))
+                plot(plot_axis,obj.timeVector, lengthError_array, 'Color', 'k', 'LineWidth', 1.5);
+            else
+                figure;
+                plot(obj.timeVector, lengthError_array, 'Color', 'k', 'LineWidth', 1.5);
+                title('Cable Length Error');
+            end
         end
     end
 end

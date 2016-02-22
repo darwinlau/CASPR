@@ -1,38 +1,38 @@
 %--------------------------------------------------------------------------
 %% Constructor
 %--------------------------------------------------------------------------
-function varargout = kinematicsGUI(varargin)
-    % KINEMATICSGUI MATLAB code for kinematicsGUI.fig
-    %      KINEMATICSGUI, by itself, creates a new KINEMATICSGUI or raises the existing
+function varargout = kinematics_GUI(varargin)
+    % KINEMATICS_GUI MATLAB code for kinematics_GUI.fig
+    %      KINEMATICS_GUI, by itself, creates a new KINEMATICS_GUI or raises the existing
     %      singleton*.
     %
-    %      H = KINEMATICSGUI returns the handle to a new KINEMATICSGUI or the handle to
+    %      H = KINEMATICS_GUI returns the handle to a new KINEMATICS_GUI or the handle to
     %      the existing singleton*.
     %
-    %      KINEMATICSGUI('CALLBACK',hObject,eventData,handles,...) calls the local
-    %      function named CALLBACK in KINEMATICSGUI.M with the given input arguments.
+    %      KINEMATICS_GUI('CALLBACK',hObject,eventData,handles,...) calls the local
+    %      function named CALLBACK in KINEMATICS_GUI.M with the given input arguments.
     %
-    %      KINEMATICSGUI('Property','Value',...) creates a new KINEMATICSGUI or raises the
+    %      KINEMATICS_GUI('Property','Value',...) creates a new KINEMATICS_GUI or raises the
     %      existing singleton*.  Starting from the left, property value pairs are
-    %      applied to the GUI before kinematicsGUI_OpeningFcn gets called.  An
+    %      applied to the GUI before kinematics_GUI_OpeningFcn gets called.  An
     %      unrecognized property name or invalid value makes property application
-    %      stop.  All inputs are passed to kinematicsGUI_OpeningFcn via varargin.
+    %      stop.  All inputs are passed to kinematics_GUI_OpeningFcn via varargin.
     %
     %      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
     %      instance to run (singleton)".
     %
     % See also: GUIDE, GUIDATA, GUIHANDLES
 
-    % Edit the above text to modify the response to help kinematicsGUI
+    % Edit the above text to modify the response to help kinematics_GUI
 
-    % Last Modified by GUIDE v2.5 14-Jan-2016 17:05:49
+    % Last Modified by GUIDE v2.5 21-Feb-2016 12:02:04
 
     % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
     gui_State = struct('gui_Name',       mfilename, ...
                        'gui_Singleton',  gui_Singleton, ...
-                       'gui_OpeningFcn', @kinematicsGUI_OpeningFcn, ...
-                       'gui_OutputFcn',  @kinematicsGUI_OutputFcn, ...
+                       'gui_OpeningFcn', @kinematics_GUI_OpeningFcn, ...
+                       'gui_OutputFcn',  @kinematics_GUI_OutputFcn, ...
                        'gui_LayoutFcn',  [] , ...
                        'gui_Callback',   []);
     if nargin && ischar(varargin{1})
@@ -50,28 +50,29 @@ end
 %--------------------------------------------------------------------------
 %% GUI Setup Functions
 %--------------------------------------------------------------------------
-% --- Executes just before kinematicsGUI is made visible.
-function kinematicsGUI_OpeningFcn(hObject, eventdata, handles, varargin)
+% --- Executes just before kinematics_GUI is made visible.
+function kinematics_GUI_OpeningFcn(hObject, ~, handles, varargin)
     % This function has no output args, see OutputFcn.
     % hObject    handle to figure
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
-    % varargin   command line arguments to kinematicsGUI (see VARARGIN)
+    % varargin   command line arguments to kinematics_GUI (see VARARGIN)
 
-    % Choose default command line output for kinematicsGUI
+    % Choose default command line output for kinematics_GUI
     handles.output = hObject;
 
     % Update handles structure
     guidata(hObject, handles);
     % Load the state
     loadState(handles);
+    GUIOperations.CreateTabGroup(handles);
 
-    % UIWAIT makes kinematicsGUI wait for user response (see UIRESUME)
+    % UIWAIT makes kinematics_GUI wait for user response (see UIRESUME)
     % uiwait(handles.figure1);
 end
 
 % --- Outputs from this function are returned to the command line.
-function varargout = kinematicsGUI_OutputFcn(~, ~, handles)
+function varargout = kinematics_GUI_OutputFcn(~, ~, handles)
     % varargout  cell array for returning output args (see VARARGOUT);
     % hObject    handle to figure
     % eventdata  reserved - to be defined in a future version of MATLAB
@@ -101,7 +102,6 @@ function FileMenu_Callback(~, ~, ~) %#ok<DEFNU>
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
 end
-
 
 % --------------------------------------------------------------------
 function OpenMenuItem_Callback(~, ~, ~) %#ok<DEFNU>
@@ -142,26 +142,18 @@ end
 %--------------------------------------------------------------------------
 % --- Executes on selection change in popupmenu1.
 % --- Executes on selection change in plot_type_popup.
-function plot_type_popup_Callback(~, ~, ~) %#ok<DEFNU>
+function plot_type_popup_Callback(hObject, ~, ~) 
     % hObject    handle to plot_type_popup (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
 
     % Hints: contents = cellstr(get(hObject,'String')) returns plot_type_popup contents as cell array
     %        contents{get(hObject,'Value')} returns selected item from plot_type_popup
-end
-
-function plot_type_popup_update(hObject,handles)
-    settings = getappdata(handles.figure1,'settings');
-    plotsObj = settings.getElementsByTagName('simulator').item(0).getElementsByTagName('plot_functions').item(0).getElementsByTagName('plot_type');
-    plot_str = cell(1,plotsObj.getLength);
-    % Extract the identifies from the cable sets
-    for i =1:plotsObj.getLength
-        plotObj = plotsObj.item(i-1);
-        plot_str{i} = char(plotObj.getFirstChild.getData);
-    end
-    set(hObject,'Value',1);
-    set(hObject, 'String', plot_str);
+    settingsXMLObj = GUIOperations.GetSettings('/GUI/XML/kinematicsXML.xml');
+    plotsObj = settingsXMLObj.getElementsByTagName('simulator').item(0).getElementsByTagName('plot_functions').item(0).getElementsByTagName('plot_function');
+    contents = get(hObject,'Value');
+    plotObj = plotsObj.item(contents-1);
+    setappdata(hObject,'num_plots',plotObj.getElementsByTagName('figure_quantity').item(0).getFirstChild.getData);
 end
 
 % --- Executes during object creation, after setting all properties.
@@ -175,8 +167,11 @@ function plot_type_popup_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
     if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
         set(hObject,'BackgroundColor','white');
     end
+    settingsXMLObj = GUIOperations.GetSettings('/GUI/XML/kinematicsXML.xml');
+    plot_str = GUIOperations.XmlObj2StringCellArray(settingsXMLObj.getElementsByTagName('simulator').item(0).getElementsByTagName('plot_functions').item(0).getElementsByTagName('plot_function'),'type');
+    set(hObject,'Value',1);    set(hObject, 'String', plot_str);
+    setappdata(hObject,'num_plots',1);
 end
-
 
 % --- Executes on selection change in trajectory_popup.
 function trajectory_popup_Callback(~, ~, ~) %#ok<DEFNU>
@@ -188,21 +183,14 @@ function trajectory_popup_Callback(~, ~, ~) %#ok<DEFNU>
     %        contents{get(hObject,'Value')} returns selected item from trajectory_popup
 end
 
-function trajectory_popup_Update(hObject, handles)
+function trajectory_popup_Update(~, handles)
     contents = cellstr(get(handles.model_text,'String'));
     model_type = contents{1};
     model_config = ModelConfig(ModelConfigType.(['M_',model_type]));
     setappdata(handles.trajectory_popup,'model_config',model_config);
     % Determine the cable sets
-    trajectoriesObj = model_config.trajectoriesXmlObj.getElementsByTagName('trajectories').item(0).getElementsByTagName('trajectory');
-    trajectories_str = cell(1,trajectoriesObj.getLength);
-    % Extract the identifies from the cable sets
-    for i =1:trajectoriesObj.getLength
-        trajectoryObj = trajectoriesObj.item(i-1);
-        trajectories_str{i} = char(trajectoryObj.getAttribute('id'));
-    end
-    set(hObject, 'Value', 1);
-    set(hObject, 'String', trajectories_str);
+    trajectories_str = GUIOperations.XmlObj2StringCellArray(model_config.trajectoriesXmlObj.getElementsByTagName('trajectories').item(0).getElementsByTagName('trajectory'),'id');
+    set(handles.trajectory_popup, 'Value', 1);   set(handles.trajectory_popup, 'String', trajectories_str);
 end
 
 % --- Executes during object creation, after setting all properties.
@@ -229,13 +217,17 @@ function approximation_type_popup_Callback(~, ~, ~) %#ok<DEFNU>
     %        contents{get(hObject,'Value')} returns selected item from approximation_type_popup
 end
 
-function approximation_type_popup_update(hObject,handles)
+function approximation_type_popup_Update(hObject,handles)
     contents = cellstr(get(handles.kinematics_popup,'String'));
     kinematics_id = contents{get(handles.kinematics_popup,'Value')};
     if(strcmp(kinematics_id,'Inverse Kinematics'))
         set(hObject,'value',1);
         set(hObject, 'String', {' '});
+        set(hObject,'Visible','off');
+        set(handles.approximation_text,'Visible','off');
     else
+        set(hObject,'Visible','on');
+        set(handles.approximation_text,'Visible','on');
         contents = cellstr(get(handles.solver_class_popup,'String'));
         solver_class_id = contents{get(handles.solver_class_popup,'Value')};
         settings = getappdata(handles.figure1,'settings');
@@ -276,13 +268,17 @@ function q_dot_popup_Callback(~, ~, ~) %#ok<DEFNU>
     %        contents{get(hObject,'Value')} returns selected item from q_dot_popup
 end
 
-function q_dot_popup_update(hObject,handles)
+function q_dot_popup_Update(hObject,handles)
     contents = cellstr(get(handles.kinematics_popup,'String'));
     kinematics_id = contents{get(handles.kinematics_popup,'Value')};
     if(strcmp(kinematics_id,'Inverse Kinematics'))
         set(hObject,'value',1);
         set(hObject, 'String', {' '});
+        set(hObject,'Visible','off');
+        set(handles.q_dot_text,'Visible','off');
     else
+        set(hObject,'Visible','on');
+        set(handles.q_dot_text,'Visible','on');
         contents = cellstr(get(handles.solver_class_popup,'String'));
         solver_class_id = contents{get(handles.solver_class_popup,'Value')};
         settings = getappdata(handles.figure1,'settings');
@@ -322,26 +318,24 @@ function solver_class_popup_Callback(~, ~, handles) %#ok<DEFNU>
 
     % Hints: contents = cellstr(get(hObject,'String')) returns solver_class_popup contents as cell array
     %        contents{get(hObject,'Value')} returns selected item from solver_class_popup
-    approximation_type_popup_update(handles.approximation_type_popup,handles);
-    q_dot_popup_update(handles.q_dot_popup,handles);
+    approximation_type_popup_Update(handles.approximation_type_popup,handles);
+    q_dot_popup_Update(handles.q_dot_popup,handles);
 end
 
-function solver_class_popup_update(hObject,handles)
+function solver_class_popup_Update(hObject,handles)
     contents = cellstr(get(handles.kinematics_popup,'String'));
     kinematics_id = contents{get(handles.kinematics_popup,'Value')};
     if(strcmp(kinematics_id,'Inverse Kinematics'))
         set(hObject,'value',1);
         set(hObject, 'String', {' '});
+        set(hObject,'Visible','off');
+        set(handles.solver_class_text,'Visible','off');
     else
+        set(hObject,'Visible','on');
+        set(handles.solver_class_text,'Visible','on');
         settings = getappdata(handles.figure1,'settings');
-        solversObj = settings.getElementsByTagName('simulator').item(0).getElementsByTagName('solver_class');
-        solver_str = cell(1,solversObj.getLength);
-        % Extract the identifies from the cable sets
-        for i =1:solversObj.getLength
-            solverObj = solversObj.item(i-1);
-            solver_str{i} = char(solverObj.getAttribute('id'));
-        end
-        set(hObject,'value',1);
+        solver_str = GUIOperations.XmlObj2StringCellArray(settings.getElementsByTagName('simulator').item(0).getElementsByTagName('solver_class'),'id');
+        set(hObject,'Value',1);
         set(hObject, 'String', solver_str);
     end
 end
@@ -356,21 +350,19 @@ function solver_class_popup_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
     %       See ISPC and COMPUTER.
     if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
         set(hObject,'BackgroundColor','white');
-    end
-    
+    end 
 end
 
 % --- Executes on selection change in kinematics_popup.
-function kinematics_popup_Callback(~, ~, handles) %#ok<DEFNU>
+function kinematics_popup_Callback(hObject, ~, handles) %#ok<DEFNU>
     % hObject    handle to kinematics_popup (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
 
     % Hints: contents = cellstr(get(hObject,'String')) returns kinematics_popup contents as cell array
     %        contents{get(hObject,'Value')} returns selected item from kinematics_popup
-    solver_class_popup_update(handles.solver_class_popup,handles);
-    approximation_type_popup_update(handles.approximation_type_popup,handles);
-    q_dot_popup_update(handles.q_dot_popup,handles);
+    contents = cellstr(get(hObject,'String'));
+    toggle_visibility(contents{get(hObject,'Value')},handles);
 end
 
 % --- Executes during object creation, after setting all properties.
@@ -411,39 +403,41 @@ function load_button_Callback(~, ~, handles) %#ok<DEFNU>
     path_string = fileparts(mfilename('fullpath'));
     path_string = path_string(1:strfind(path_string, 'GUI')-2);
     file_name = [path_string,'\logs\*.mat'];
-    load(file_name);    
+    settings = uigetfile(file_name);
+    load(settings);    
     mp_text = get(handles.model_text,'String');
     cs_text = get(handles.cable_text,'String');
-    if(strcmp(mp_text,state.model_text)&&strcmp(cs_text,state.cable_text))
-        set(handles.trajectory_popup,'value',state.trajectory_popup_vale);
-        set(handles.kinematics_popup,'value',state.kinematics_popup_vale);
-        solver_class_popup_update(handles.solver_class_popup,handles);
-        set(handles.solver_class_popup,'value',state.solver_class_popup);
-        approximation_type_popup_update(handles.approximation_type_popup,handles);
-        q_dot_popup_update(handles.q_dot_popup,handles);
-        set(handles.approximation_type_popup,'value',state.approximation_type_popup);
-        set(handles.q_dot_popup,'value',state.q_dot_popup);
-        set(handles.plot_type_popup,'value',state.plot_type_popup);
+    if(strcmp(state.simulator,'kinematics'))
+        if(strcmp(mp_text,state.model_text)&&strcmp(cs_text,state.cable_text))
+            set(handles.trajectory_popup,'value',state.trajectory_popup_vale);
+            set(handles.kinematics_popup,'value',state.kinematics_popup_vale);
+            solver_class_popup_Update(handles.solver_class_popup,handles);
+            set(handles.solver_class_popup,'value',state.solver_class_popup);
+            approximation_type_popup_Update(handles.approximation_type_popup,handles);
+            q_dot_popup_Update(handles.q_dot_popup,handles);
+            set(handles.approximation_type_popup,'value',state.approximation_type_popup);
+            set(handles.q_dot_popup,'value',state.q_dot_popup);
+            set(handles.plot_type_popup,'value',state.plot_type_popup);
+            plot_type_popup_Callback(handles.plot_type_popup,[],handles);
+        else
+            warning('Incorrect Model Type'); %#ok<WNTAG>
+        end
     else
-        warning('Incorrect Model Type');
+        warning('File is not the correct file type'); %#ok<WNTAG>
     end
 end
 
-
-% --- Executes on button press in plot_button.
 function plot_button_Callback(~, ~, handles) %#ok<DEFNU>
     % hObject    handle to plot_button (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
     sim = getappdata(handles.figure1,'sim');
     if(isempty(sim))
-        warning('No simulator has been generated. Please press run first');
+        warning('No simulator has been generated. Please press run first'); %#ok<WNTAG>
     else
         contents = cellstr(get(handles.plot_type_popup,'String'));
         plot_type = contents{get(handles.plot_type_popup,'Value')};
-        plot_function = str2func(plot_type);
-        figure_handles = handles.figure1;
-        plot_function(sim,[],figure_handles);    
+        GUIOperations.GUIPlot(plot_type,sim,handles,str2double(getappdata(handles.plot_type_popup,'num_plots')),get(handles.undock_box,'Value'))
     end
 end
 
@@ -470,11 +464,80 @@ function run_button_Callback(~, ~, handles) %#ok<DEFNU>
 end
 
 %--------------------------------------------------------------------------
+% Checkboxes
+%--------------------------------------------------------------------------
+% --- Executes on button press in undock_box.
+function undock_box_Callback(~, ~, ~) %#ok<DEFNU>
+    % hObject    handle to undock_box (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    structure with handles and user data (see GUIDATA)
+
+    % Hint: get(hObject,'Value') returns toggle state of undock_box
+    % --- Executes on button press in plot_button.
+end
+
+%--------------------------------------------------------------------------
+%% Toolbar buttons
+%--------------------------------------------------------------------------
+% --------------------------------------------------------------------
+function save_figure_tool_ClickedCallback(~, ~, handles) %#ok<DEFNU>
+    % hObject    handle to save_figure_tool (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    structure with handles and user data (see GUIDATA)
+    tabgp = getappdata(handles.figure1,'tabgp');
+    s_tab = get(tabgp,'SelectedTab');
+    ax = get(s_tab,'Children');
+    f1 = figure; % Open a new figure with handle f1
+    copyobj(ax,f1); % Copy axes object h into figure f1
+    set(gca,'ActivePositionProperty','outerposition')
+    set(gca,'Units','normalized')
+    set(gca,'OuterPosition',[0 0 1 1])
+    set(gca,'position',[0.1300 0.1100 0.7750 0.8150])
+    [file,path] = uiputfile({'*.fig';'*.bmp';'*.eps';'*.emf';'*.jpg';'*.pcx';...
+        '*.pbm';'*.pdf';'*.pgm';'*.png';'*.ppm';'*.svg';'*.tif'},'Save file name');
+    if(path ~= 0)
+        saveas(gcf,[path,file]);
+    end
+    close(f1);
+end
+
+% --------------------------------------------------------------------
+function undock_figure_tool_ClickedCallback(~, ~, handles) %#ok<DEFNU>
+    % hObject    handle to undock_figure_tool (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    structure with handles and user data (see GUIDATA)
+    tabgp = getappdata(handles.figure1,'tabgp');
+    s_tab = get(tabgp,'SelectedTab');
+    ax = get(s_tab,'Children');
+    f1 = figure; % Open a new figure with handle f1
+    copyobj(ax,f1); % Copy axes object h into figure f1
+    set(gca,'ActivePositionProperty','outerposition')
+    set(gca,'Units','normalized')
+    set(gca,'OuterPosition',[0 0 1 1])
+    set(gca,'position',[0.1300 0.1100 0.7750 0.8150])
+end
+
+% --------------------------------------------------------------------
+function delete_figure_tool_ClickedCallback(~, ~, handles) %#ok<DEFNU>
+    % hObject    handle to delete_figure_tool (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    structure with handles and user data (see GUIDATA)
+    tabgp = getappdata(handles.figure1,'tabgp');
+    s_tab = get(tabgp,'SelectedTab');
+    delete(s_tab);
+end
+
+%--------------------------------------------------------------------------
 % Additional Functions
 %--------------------------------------------------------------------------
 function run_inverse_kinematics(handles,kinObj,trajectory_xmlobj)
+    % plotting information
+    contents = cellstr(get(handles.plot_type_popup,'String'));
+    plot_type = contents{get(handles.plot_type_popup,'Value')};
     % Setup the inverse kinematics simulator with the SystemKinematics object
     disp('Start Setup Simulation');
+    set(handles.status_text,'String','Setting up simulation');
+    drawnow;
     start_tic = tic;
     sim = InverseKinematicsSimulator(kinObj);
     trajectory = JointTrajectory.LoadXmlObj(trajectory_xmlobj, kinObj);
@@ -483,6 +546,8 @@ function run_inverse_kinematics(handles,kinObj,trajectory_xmlobj)
 
     % Run the kinematics on the desired trajectory
     disp('Start Running Simulation');
+    set(handles.status_text,'String','Simulation running');
+    drawnow;
     start_tic = tic;
     sim.run(trajectory);
     time_elapsed = toc(start_tic);
@@ -492,11 +557,13 @@ function run_inverse_kinematics(handles,kinObj,trajectory_xmlobj)
     % Refer to the simulator classes to see what can be plotted.
     disp('Start Plotting Simulation');
     start_tic = tic;
-    
-    sim.plotJointSpace();
-    sim.plotBodyCOG();
+    set(handles.status_text,'String','Simulation plotting');
+    drawnow;
+    GUIOperations.GUIPlot(plot_type,sim,handles,str2double(getappdata(handles.plot_type_popup,'num_plots')),get(handles.undock_box,'Value'));
     time_elapsed = toc(start_tic);
     fprintf('End Plotting Simulation : %f seconds\n', time_elapsed);
+    set(handles.status_text,'String','No simulation running');
+    setappdata(handles.figure1,'sim',sim);
 end
 
 function run_forward_kinematics(handles,kinObj,trajectory_xmlobj)
@@ -512,16 +579,15 @@ function run_forward_kinematics(handles,kinObj,trajectory_xmlobj)
     solverObj = settings.getElementById(solver_class);
     approx_enum_file = solverObj.getElementsByTagName('approximation_type_enum').item(0).getFirstChild.getData;
     q_dot_enum_file = solverObj.getElementsByTagName('q_dot_type_enum').item(0).getFirstChild.getData;
-    contents = cellstr(get(handles.plot_type_popup,'String'));
-    plot_type = contents{get(handles.plot_type_popup,'Value')};
-
-
+    
     % An inverse kinematics and forward kinematics simulator will be run to
     % show that the results are consistent.
     disp('Start Setup Simulation');
+    set(handles.status_text,'String','Setting up simulation');
+    drawnow;
     start_tic = tic;
     % Initialise the least squares solver for the forward kinematics
-    fksolver = solver_function(eval([char(approx_enum_file),'.',char(approximation_type)]),eval([char(q_dot_enum_file),'.',char(q_dot_approximation)]));
+    fksolver = solver_function(kinObj,eval([char(approx_enum_file),'.',char(approximation_type)]),eval([char(q_dot_enum_file),'.',char(q_dot_approximation)]));
     % Initialise the three inverse/forward kinematics solvers
     iksim = InverseKinematicsSimulator(kinObj);
     fksim = ForwardKinematicsSimulator(kinObj, fksolver);
@@ -531,6 +597,8 @@ function run_forward_kinematics(handles,kinObj,trajectory_xmlobj)
 
     % Run inverse kinematics
     disp('Start Running Inverse Kinematics Simulation');
+    set(handles.status_text,'String','Running inverse kinematics');
+    drawnow;
     start_tic = tic;
     iksim.run(trajectory);
     time_elapsed = toc(start_tic);
@@ -538,58 +606,68 @@ function run_forward_kinematics(handles,kinObj,trajectory_xmlobj)
 
     % Run forward kinematics
     disp('Start Running Forward Kinematics Simulation');
+    set(handles.status_text,'String','Running forward kinematics');
+    drawnow;
     start_tic = tic;
-    fksim.run(iksim.lengths, iksim.lengths_dot, iksim.timeVector, iksim.trajectory.q{1}, iksim.trajectory.q_dot{1});
+    fksim.run(iksim.cableLengths, iksim.cableLengthsDot, iksim.timeVector, iksim.trajectory.q{1}, iksim.trajectory.q_dot{1});
     time_elapsed = toc(start_tic);
     fprintf('End Running Forward Kinematics Simulation : %f seconds\n', time_elapsed);
 
     % It is expected that iksim and fksim should have the same joint space (the
     % result of fksim)
-    iksim.plotJointSpace();
-    fksim.plotJointSpace();
+    disp('Start Plotting Simulation');
+    set(handles.status_text,'String','Simulation plotting');
+    drawnow;
+    start_tic = tic;
+    GUIOperations.GUIPlot('plotJointSpace',iksim,handles,2,get(handles.undock_box,'Value'));
+    GUIOperations.GUIPlot('plotJointSpace',fksim,handles,2,get(handles.undock_box,'Value'));
+    GUIOperations.GUIPlot('plotCableLengthError',fksim,handles,1,get(handles.undock_box,'Value'));
+    time_elapsed = toc(start_tic);
+    fprintf('End Plotting Simulation : %f seconds\n', time_elapsed);
 end
 
 function loadState(handles)
     % load all of the settings and initialise the values to match
     path_string = fileparts(mfilename('fullpath'));
     path_string = path_string(1:strfind(path_string, 'GUI')-2);
-    settingsXMLObj =  XmlOperations.XmlReadRemoveIndents([path_string,'\GUI\XML\kinematicsXML.xml']);
+    settingsXMLObj =  XmlOperations.XmlReadRemoveIndents([path_string,'/GUI/XML/kinematicsXML.xml']);
     setappdata(handles.figure1,'settings',settingsXMLObj);
-    file_name = [path_string,'\logs\upcra_gui_state.mat'];
+    file_name = [path_string,'/logs/upcra_gui_state.mat'];
+    set(handles.status_text,'String','No simulation running');
     if(exist(file_name,'file'))
         load(file_name)
         set(handles.model_text,'String',state.model_text);
         set(handles.cable_text,'String',state.cable_text);
         setappdata(handles.cable_text,'kinObj',state.kinObj);
+        trajectory_popup_Update([], handles);
         file_name = [path_string,'\logs\kinematics_gui_state.mat'];
         if(exist(file_name,'file'))
             load(file_name);
             mp_text = get(handles.model_text,'String');
             cs_text = get(handles.cable_text,'String');
             if(strcmp(mp_text,state.model_text)&&strcmp(cs_text,state.cable_text))
-                trajectory_popup_Update(handles.trajectory_popup, handles);
                 set(handles.trajectory_popup,'value',state.trajectory_popup_vale);
                 set(handles.kinematics_popup,'value',state.kinematics_popup_vale);
-                solver_class_popup_update(handles.solver_class_popup,handles);
+                solver_class_popup_Update(handles.solver_class_popup,handles);
                 set(handles.solver_class_popup,'value',state.solver_class_popup);
-                approximation_type_popup_update(handles.approximation_type_popup,handles);
-                q_dot_popup_update(handles.q_dot_popup,handles);
+                approximation_type_popup_Update(handles.approximation_type_popup,handles);
+                q_dot_popup_Update(handles.q_dot_popup,handles);
                 set(handles.approximation_type_popup,'value',state.approximation_type_popup);
                 set(handles.q_dot_popup,'value',state.q_dot_popup);
-                plot_type_popup_update(handles.plot_type_popup,handles);
                 set(handles.plot_type_popup,'value',state.plot_type_popup);
+                plot_type_popup_Callback(handles.plot_type_popup,[],handles);
             else
-                solver_class_popup_update(handles.solver_class_popup,handles);
-                approximation_type_popup_update(handles.approximation_type_popup,handles);
-                q_dot_popup_update(handles.q_dot_popup,handles);
-                plot_type_popup_update(handles.plot_type_popup,handles);
+                initialise_popups(handles);
             end
+        else
+            initialise_popups(handles);
         end
     end
 end
 
 function saveState(handles,file_path)
     % Save all of the settings
+    state.simulator                         =   'kinematics';
     state.model_text                        =   get(handles.model_text,'String');
     state.cable_text                        =   get(handles.cable_text,'String');
     state.trajectory_popup_vale             =   get(handles.trajectory_popup,'value');
@@ -605,4 +683,40 @@ function saveState(handles,file_path)
         path_string                             = path_string(1:strfind(path_string, 'GUI')-2);
         save([path_string,'\logs\kinematics_gui_state.mat'],'state');
     end
+end
+
+function toggle_visibility(dynamics_method,handles)
+    if(strcmp(dynamics_method,'Inverse Kinematics'))
+        % Forward kinematics so hide all of the options
+        set(handles.solver_class_text,'Visible','off');
+        set(handles.solver_class_popup,'Visible','off');
+        set(handles.approximation_text,'Visible','off');
+        set(handles.approximation_type_popup,'Visible','off');
+        set(handles.q_dot_text,'Visible','off');
+        set(handles.q_dot_popup,'Visible','off');
+        set(handles.plot_type_text,'Visible','on');
+        set(handles.plot_type_popup,'Visible','on');
+    else
+        % Inverse kinematics so let all of the options be viewed
+        set(handles.solver_class_text,'Visible','on');
+        set(handles.solver_class_popup,'Visible','on');
+        set(handles.approximation_text,'Visible','on');
+        set(handles.approximation_type_popup,'Visible','on');
+        set(handles.q_dot_text,'Visible','on');
+        set(handles.q_dot_popup,'Visible','on');
+        set(handles.plot_type_text,'Visible','off');
+        set(handles.plot_type_popup,'Visible','off');
+        solver_class_popup_Update(handles.solver_class_popup,handles);
+        approximation_type_popup_Update(handles.approximation_type_popup,handles);
+        q_dot_popup_Update(handles.q_dot_popup,handles);
+    end
+end
+
+function initialise_popups(handles)
+    % Updates
+    solver_class_popup_Update(handles.solver_class_popup,handles);
+    approximation_type_popup_Update(handles.approximation_type_popup,handles);
+    q_dot_popup_Update(handles.q_dot_popup,handles);
+    % Needed callbacks
+    plot_type_popup_Callback(handles.plot_type_popup,[],handles);
 end

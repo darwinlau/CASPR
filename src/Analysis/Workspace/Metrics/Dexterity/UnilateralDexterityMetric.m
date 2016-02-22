@@ -1,4 +1,4 @@
-classdef UnilateralDexterityMetric < WorkspaceMetric
+classdef UnilateralDexterityMetric < WorkspaceMetricBase
     properties (SetAccess = protected, GetAccess = protected)
     end
     

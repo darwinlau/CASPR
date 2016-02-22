@@ -1,4 +1,4 @@
-classdef SemiSingularMetric < WorkspaceMetric
+classdef SemiSingularMetric < WorkspaceMetricBase
     properties (SetAccess = protected, GetAccess = protected)
     end
     

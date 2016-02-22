@@ -1,4 +1,4 @@
-classdef SEACM < WorkspaceMetric
+classdef SEACM < WorkspaceMetricBase
     properties (SetAccess = protected, GetAccess = protected)
     end
     

@@ -23,7 +23,8 @@
         <grid_type>UniformGrid</grid_type>
     </grid_types>    
     <plot_functions>
-		<plot_type>plotCableForces</plot_type>
-		<plot_type>plotInteractionForceMagnitudes</plot_type>
+		<plot_function type="plotWorkspace">
+            <figure_quantity>1</figure_quantity>
+        </plot_function>
 	</plot_functions>
 </simulator>
