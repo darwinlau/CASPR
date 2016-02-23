@@ -50,6 +50,10 @@ classdef ModelConfig
                     c.bodyPropertiesFilename = [c.root_folder, '\SCDM\spatial_manipulators\IPAnema2_FraunhoferIPA\IPAnema2_bodies.xml'];
                     c.cablesPropertiesFilename = [c.root_folder, '\SCDM\spatial_manipulators\IPAnema2_FraunhoferIPA\IPAnema2_cables.xml'];
                     c.trajectoriesFilename = [c.root_folder, '\SCDM\spatial_manipulators\IPAnema2_FraunhoferIPA\IPAnema2_trajectories.xml'];
+                case ModelConfigType.M_NIST_ROBOCRANE
+                    c.bodyPropertiesFilename = [c.root_folder, '\SCDM\spatial_manipulators\NIST_ROBOCRANE\NIST_bodies.xml'];
+                    c.cablesPropertiesFilename = [c.root_folder, '\SCDM\spatial_manipulators\NIST_ROBOCRANE\NIST_cables.xml'];
+                    c.trajectoriesFilename = [c.root_folder, '\SCDM\spatial_manipulators\NIST_ROBOCRANE\NIST_trajectories.xml'];
                 % Multi-link Cable Driven Manipulators (MCDM)
                 case ModelConfigType.M_NECK_8S
                     c.bodyPropertiesFilename = [c.root_folder, '\MCDM\8S_neck\8S_neck_bodies.xml'];

@@ -9,5 +9,6 @@ classdef ModelConfigType
         M_ACROBOT
         M_IPANEMA_2
         M_MYOROB_SHOULDER
+        M_NIST_ROBOCRANE
     end
 end
