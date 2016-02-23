@@ -33,7 +33,7 @@ classdef WorkspaceSimulator < Simulator
             for i = 1:obj.grid.n_points
                 disp(i)
                 q = obj.grid.getGridPoint(i);
-                obj.model.update(q, zeros(obj.model.numDofs,1), zeros(obj.model.numDofs,1));
+                obj.model.update(q, zeros(obj.model.numDofs,1), zeros(obj.model.numDofs,1),zeros(obj.model.numDofs,1));
                 inWorkspace     =   obj.WCondition.evaluate(obj.model);
                 if(~isa(obj.metric,'NullMetric'))
                     if(inWorkspace)
@@ -134,8 +134,8 @@ classdef WorkspaceSimulator < Simulator
         
         function wsim_matrix = toMatrix(obj)
             if(obj.grid.n_dimensions == 2)
-                n_x = obj.grid.q_length(1);
-                n_y = obj.grid.q_length(2);
+                n_x = int32(obj.grid.q_length(1));
+                n_y = int32(obj.grid.q_length(2));
                 wsim_matrix = zeros(n_x,n_y);
                 for i=1:length(obj.workspace)
                     j = int32((obj.workspace(1,i) - obj.grid.q_begin(1))/obj.grid.delta_q(1) + 1);

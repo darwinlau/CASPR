@@ -68,6 +68,10 @@ classdef ModelConfig
                     c.bodyPropertiesFilename = [c.root_folder, '\MCDM\2R_planar_xz\2R_planar_xz_bodies.xml'];
                     c.cablesPropertiesFilename = [c.root_folder, '\MCDM\2R_planar_xz\2R_planar_xz_cables.xml'];
                     c.trajectoriesFilename = [c.root_folder, '\MCDM\2R_planar_xz\2R_planar_xz_trajectories.xml'];
+                case ModelConfigType.M_CAREX
+                    c.bodyPropertiesFilename = [c.root_folder, '\MCDM\CAREX\CAREX_bodies.xml'];
+                    c.cablesPropertiesFilename = [c.root_folder, '\MCDM\CAREX\CAREX_cables.xml'];
+                    c.trajectoriesFilename = [c.root_folder, '\MCDM\CAREX\CAREX_trajectories.xml'];
                 otherwise
                     error('ModelConfig type is not defined');
             end

@@ -1,14 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <links>
-  <link_rigid num="1" name="R_Y 1">
-    <joint_type>R_Y</joint_type>
+  <link_rigid num="1" name="Upper Arm">
+    <joint_type>S_EULER_XYZ</joint_type>
     <physical>
-      <mass>1</mass>
-      <com_location>0.0 0.0 0.5</com_location>
-      <end_location>0.0 0.0 1.0</end_location>
+      <mass>3.0</mass>
+      <com_location>0.0 0.0 -0.13</com_location>
+      <end_location>0.0 0.0 -0.3</end_location>
       <inertia ref="com">
-        <Ixx>0.083333</Ixx>
-        <Iyy>0.083333</Iyy>
+        <Ixx>0.0225</Ixx>
+        <Iyy>0.0225</Iyy>
         <Izz>0.0</Izz>
         <Ixy>0.0</Ixy>
         <Ixz>0.0</Ixz>
@@ -20,15 +20,15 @@
       <location>0.0 0.0 0.0</location>
     </parent>
   </link_rigid>
-  <link_rigid num="2" name="R_Y 2">
+  <link_rigid num="2" name="Forearm">
     <joint_type>R_Y</joint_type>
     <physical>
-      <mass>1</mass>
-      <com_location>0.0 0.0 0.5</com_location>
-      <end_location>0.0 0.0 1.0</end_location>
+      <mass>2.0</mass>
+      <com_location>0.0 0.0 -0.12</com_location>
+      <end_location>0.0 0.0 -0.28</end_location>
       <inertia ref="CoM">
-        <Ixx>0.083333</Ixx>
-        <Iyy>0.083333</Iyy>
+        <Ixx>0.0131</Ixx>
+        <Iyy>0.0131</Iyy>
         <Izz>0.0</Izz>
         <Ixy>0.0</Ixy>
         <Ixz>0.0</Ixz>
@@ -37,8 +37,8 @@
     </physical>
     <parent>
       <num>1</num>
-      <location>0.0 0.0 1.0</location>
+      <location>0.0 0.0 -0.3</location>
     </parent>
   </link_rigid>
-  <display_range>-2.0 2.0 -2.0 2.0 -2.0 2.0</display_range>
+  <display_range>-1.0 1.0 -1.0 1.0 -1.0 1.0</display_range>
 </links>

@@ -4,6 +4,7 @@ classdef JointType
         R_X                     % Revolute in X
         R_Y                     % Revolute in Y
         R_Z                     % Revolute in Z
+        U_XY                    % Universal with xy-euler
         PLANAR_XY               % Planar in XY plane
         S_EULER_XYZ             % Spherical xyz-euler
         S_FIXED_XYZ             % Spherical xyz-fixed

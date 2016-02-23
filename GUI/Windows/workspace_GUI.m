@@ -355,7 +355,7 @@ function generate_button_Callback(~, ~, handles) %#ok<DEFNU>
     fprintf('End Plotting Simulation : %f seconds\n', time_elapsed);
     set(handles.status_text,'String','No simulation running');
     setappdata(handles.figure1,'sim',wsim);
-%     assignin('base','wsim',wsim);
+    assignin('base','wsim',wsim);
 end
 
 % --- Executes on button press in plot_button.

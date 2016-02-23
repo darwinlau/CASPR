@@ -25,7 +25,7 @@ function inWorkspace = wrench_closure_combinatoric_null_space(dynamics,~)
         % Check the sign of DP
         index = DP<=0; l_neg = sum(index);
         if(l_neg==m)
-            inWorkspace = 0;
+            inWorkspace = false;
         else
             % Determine all of the possible combinations
             A_pos = A(:,~index);
@@ -80,16 +80,16 @@ function inWorkspace = wrench_closure_combinatoric_null_space(dynamics,~)
                         if(positivity_condition_failed)
                             positivity_condition_failed = 0;
                         elseif(ratio_pos <= ratio_neg)
-                            inWorkspace = 1;
+                            inWorkspace = true;
                             return;
                         end
                     end
                 end
             end
-            inWorkspace = 0;
+            inWorkspace = false;
         end
     else
-        inWorkspace = 0;
+        inWorkspace = false;
     end
 end
 

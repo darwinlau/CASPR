@@ -57,6 +57,8 @@ classdef (Abstract) Joint < handle
                     j = RevoluteY;
                 case JointType.R_Z
                     j = RevoluteZ;
+                case JointType.U_XY
+                    j = UniversalXY;
                 case JointType.PLANAR_XY
                     j = PlanarXY;
                 case JointType.S_EULER_XYZ

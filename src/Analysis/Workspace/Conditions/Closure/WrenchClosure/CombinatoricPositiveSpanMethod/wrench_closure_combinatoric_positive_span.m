@@ -29,14 +29,14 @@ function inWorkspace = wrench_closure_combinatoric_positive_span(dynamics,option
                 k_pos    =   k>0;
                 k_nonneg =   k>=0;
                 if((sum(k_nonneg) == n) && (sum(k_pos) > 0))
-                    inWorkspace = 1;
+                    inWorkspace = true;
                     return;
                 end
            end
         end
-        inWorkspace = 0;
+        inWorkspace = false;
     else
-        inWorkspace = 0;
+        inWorkspace = false;
     end
 end
 

@@ -246,7 +246,7 @@ function update_button_Callback(~, ~, handles) %#ok<DEFNU>
 % handles    structure with handles and user data (see GUIDATA)
     dynObj = getappdata(handles.cable_popup,'dynObj');
     q_data = get(handles.qtable,'Data');
-    dynObj.update(q_data',zeros(dynObj.numDofVars,1),zeros(dynObj.numDofVars,1));
+    dynObj.update(q_data',zeros(dynObj.numDofVars,1),zeros(dynObj.numDofVars,1),zeros(dynObj.numDofVars,1));
     cla;
     axis_range = getappdata(handles.cable_popup,'axis_range');
     MotionSimulator.PlotFrame(dynObj, axis_range,handles.figure1);

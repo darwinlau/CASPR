@@ -11,5 +11,6 @@ classdef ModelConfigType
         M_MYOROB_SHOULDER
         M_NIST_ROBOCRANE
 		M_COGIRO
+        M_CAREX
     end
 end
