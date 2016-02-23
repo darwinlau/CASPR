@@ -1,4 +1,21 @@
-classdef CapacityMarginMetric < WorkspaceMetric
+% Measures the robustness of the CDPR in producing a given workspace 
+% condition.
+%
+% Please cite the following:
+% 
+% Measures the robustness of the CDPR in producing a given workspace 
+% condition.
+%
+% Please cite the following paper when using this algorithm:
+% A. L. Cruz-Ruizy, S. Caro, P. Cardou and F.Guay "ARACHNIS: Analysis
+% of robots actuated by cables with handy and neat interface software", 
+% in Proceedings of the Cable-Driven Paralle Robots, 2015.
+%
+% Author        : Jonathan EDEN
+% Created       : 2016
+% Description   : 
+
+classdef CapacityMarginMetric < WorkspaceMetricBase
     properties (SetAccess = protected, GetAccess = protected)
         desired_wrench_set
     end

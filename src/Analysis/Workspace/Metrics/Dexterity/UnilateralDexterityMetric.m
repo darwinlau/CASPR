@@ -1,4 +1,17 @@
-classdef UnilateralDexterityMetric < WorkspaceMetric
+% An approximation of the dexterity measure which applies to 
+% systems subject to unilateral constraints.
+%
+% Please cite the following paper when using this algorithm:
+% R. Kurtz and V. Hayward, "Dexterity measures with unilateral actuation 
+% constraints: the n+ 1 case", Advanced Robotics, vol. 9, no. 5, pp.
+% 561-577, 1994.
+%
+% This method has been modified to consider arbitrary cable numbers.
+%
+% Author        : Jonathan EDEN
+% Created       : 2016
+% Description   : 
+classdef UnilateralDexterityMetric < WorkspaceMetricBase
     properties (SetAccess = protected, GetAccess = protected)
     end
     

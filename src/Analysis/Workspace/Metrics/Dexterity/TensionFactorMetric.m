@@ -1,4 +1,18 @@
-classdef TensionFactorMetric < WorkspaceMetric
+% A measure of the relative tension distribution for the cables which can
+% be used to evaluate the quality of wrench closure at a specific
+% configuration.
+%
+% Please cite the following paper when using this algorithm:
+% C.B Pham, S.H Yeo, G. Yang and I. Chen, "Workspace analysis of fully
+% restrained cable-driven manipulators", Robotics and Autonomous Systems, 
+% vol. 57, no. 9, pp. 901-912, 2009.
+%
+% This method has been modified to consider arbitrary cable numbers.
+%
+% Author        : Jonathan EDEN
+% Created       : 2016
+% Description   : 
+classdef TensionFactorMetric < WorkspaceMetricBase
     properties (SetAccess = protected, GetAccess = protected)
     end
     

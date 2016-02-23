@@ -51,16 +51,19 @@ classdef WorkspaceSimulator < Simulator
             obj.workspace = obj.workspace(:,1:workspace_count);
         end
         
-        function plotWorkspace(obj,workspace)
+        function plotWorkspace(obj,workspace,plot_axis)
             n_d = obj.grid.n_dimensions;
             assert(n_d<=3,'Dimension of Workspace too large to plot');
-            if(nargin == 1)
+            if(isempty(workspace))
                 plotting_workspace = obj.workspace;
             else
                 plotting_workspace = workspace;
             end
 %             figure;
-            hold on;    
+            if(isempty(plot_axis))
+                figure; plot_axis = axes; 
+            end
+            hold(plot_axis,'on');
             mw = ceil(max(plotting_workspace(n_d+1,:).*(plotting_workspace(n_d+1,:)~=Inf))+10);
             if(isnan(mw))
                 mw = 1;
@@ -71,16 +74,16 @@ classdef WorkspaceSimulator < Simulator
                 if(n_d == 2)
                     axis([-180 180 -180 180]);
                     if(plotting_workspace(3,i)==Inf)
-                        plot((180/pi)*plotting_workspace(1,i),(180/pi)*plotting_workspace(2,i),'Color',map(sf*mw,:),'Marker','.')
+                        plot(plot_axis,(180/pi)*plotting_workspace(1,i),(180/pi)*plotting_workspace(2,i),'Color',map(sf*mw,:),'Marker','.')
                     else
-                        plot((180/pi)*plotting_workspace(1,i),(180/pi)*plotting_workspace(2,i),'Color',map(int32(sf*(plotting_workspace(3,i)+10)),:),'Marker','.')
+                        plot(plot_axis,(180/pi)*plotting_workspace(1,i),(180/pi)*plotting_workspace(2,i),'Color',map(int32(sf*(plotting_workspace(3,i)+10)),:),'Marker','.')
                     end
                 elseif(n_d == 3)
                     axis([-180 180 -180 180 -180 180]);
                     if(plotting_workspace(4,i)==Inf)
-                        plot3((180/pi)*plotting_workspace(1,i),(180/pi)*plotting_workspace(2,i),(180/pi)*plotting_workspace(3,i),'Color',map(mw,:),'Marker','.')
+                        plot3(plot_axis,(180/pi)*plotting_workspace(1,i),(180/pi)*plotting_workspace(2,i),(180/pi)*plotting_workspace(3,i),'Color',map(mw,:),'Marker','.')
                     else
-                        plot3((180/pi)*plotting_workspace(1,i),(180/pi)*plotting_workspace(2,i),(180/pi)*plotting_workspace(3,i),'Color',map(int32(sf*(plotting_workspace(4,i)+10)),:),'Marker','.')
+                        plot3(plot_axis,(180/pi)*plotting_workspace(1,i),(180/pi)*plotting_workspace(2,i),(180/pi)*plotting_workspace(3,i),'Color',map(int32(sf*(plotting_workspace(4,i)+10)),:),'Marker','.')
                     end
                 end
             end 

@@ -1,4 +1,4 @@
-classdef WrenchClosure < WorkspaceCondition
+classdef WrenchClosure < WorkspaceConditionBase
     %IDFUNCTION Summary of this class goes here
     %   Detailed explanation goes here
     

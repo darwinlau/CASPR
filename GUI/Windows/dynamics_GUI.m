@@ -1,38 +1,38 @@
 %--------------------------------------------------------------------------
 %% Constructor
 %--------------------------------------------------------------------------
-function varargout = dynamicsGUI(varargin)
-    % DYNAMICSGUI MATLAB code for dynamicsGUI.fig
-    %      DYNAMICSGUI, by itself, creates a new DYNAMICSGUI or raises the existing
+function varargout = dynamics_GUI(varargin)
+    % DYNAMICS_GUI MATLAB code for dynamics_GUI.fig
+    %      DYNAMICS_GUI, by itself, creates a new DYNAMICS_GUI or raises the existing
     %      singleton*.
     %
-    %      H = DYNAMICSGUI returns the handle to a new DYNAMICSGUI or the handle to
+    %      H = DYNAMICS_GUI returns the handle to a new DYNAMICS_GUI or the handle to
     %      the existing singleton*.
     %
-    %      DYNAMICSGUI('CALLBACK',hObject,eventData,handles,...) calls the local
-    %      function named CALLBACK in DYNAMICSGUI.M with the given input arguments.
+    %      DYNAMICS_GUI('CALLBACK',hObject,eventData,handles,...) calls the local
+    %      function named CALLBACK in DYNAMICS_GUI.M with the given input arguments.
     %
-    %      DYNAMICSGUI('Property','Value',...) creates a new DYNAMICSGUI or raises the
+    %      DYNAMICS_GUI('Property','Value',...) creates a new DYNAMICS_GUI or raises the
     %      existing singleton*.  Starting from the left, property value pairs are
-    %      applied to the GUI before dynamicsGUI_OpeningFcn gets called.  An
+    %      applied to the GUI before dynamics_GUI_OpeningFcn gets called.  An
     %      unrecognized property name or invalid value makes property application
-    %      stop.  All inputs are passed to dynamicsGUI_OpeningFcn via varargin.
+    %      stop.  All inputs are passed to dynamics_GUI_OpeningFcn via varargin.
     %
     %      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
     %      instance to run (singleton)".
     %
     % See also: GUIDE, GUIDATA, GUIHANDLES
 
-    % Edit the above text to modify the response to help dynamicsGUI
+    % Edit the above text to modify the response to help dynamics_GUI
 
-    % Last Modified by GUIDE v2.5 16-Feb-2016 11:42:11
+    % Last Modified by GUIDE v2.5 22-Feb-2016 15:21:32
 
     % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
     gui_State = struct('gui_Name',       mfilename, ...
                        'gui_Singleton',  gui_Singleton, ...
-                       'gui_OpeningFcn', @dynamicsGUI_OpeningFcn, ...
-                       'gui_OutputFcn',  @dynamicsGUI_OutputFcn, ...
+                       'gui_OpeningFcn', @dynamics_GUI_OpeningFcn, ...
+                       'gui_OutputFcn',  @dynamics_GUI_OutputFcn, ...
                        'gui_LayoutFcn',  [] , ...
                        'gui_Callback',   []);
     if nargin && ischar(varargin{1})
@@ -50,15 +50,15 @@ end
 %--------------------------------------------------------------------------
 %% GUI Setup Functions
 %--------------------------------------------------------------------------
-% --- Executes just before dynamicsGUI is made visible.
-function dynamicsGUI_OpeningFcn(hObject, ~, handles, varargin)
+% --- Executes just before dynamics_GUI is made visible.
+function dynamics_GUI_OpeningFcn(hObject, ~, handles, varargin)
     % This function has no output args, see OutputFcn.
     % hObject    handle to figure
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
-    % varargin   command line arguments to dynamicsGUI (see VARARGIN)
+    % varargin   command line arguments to dynamics_GUI (see VARARGIN)
 
-    % Choose default command line output for dynamicsGUI
+    % Choose default command line output for dynamics_GUI
     handles.output = hObject;
 
     % Update handles structure
@@ -66,13 +66,13 @@ function dynamicsGUI_OpeningFcn(hObject, ~, handles, varargin)
     
     % Load the state
     loadState(handles);
-    create_tab_group(handles);
-    % UIWAIT makes dynamicsGUI wait for user response (see UIRESUME)
+    GUIOperations.CreateTabGroup(handles);
+    % UIWAIT makes dynamics_GUI wait for user response (see UIRESUME)
     % uiwait(handles.figure1);
 end
 
 % --- Outputs from this function are returned to the command line.
-function varargout = dynamicsGUI_OutputFcn(~, ~, handles)
+function varargout = dynamics_GUI_OutputFcn(~, ~, handles)
     % varargout  cell array for returning output args (see VARARGOUT);
     % hObject    handle to figure
     % eventdata  reserved - to be defined in a future version of MATLAB
@@ -92,7 +92,6 @@ function figure1_CloseRequestFcn(hObject, ~, handles) %#ok<DEFNU>
     saveState(handles);
     delete(hObject);
 end
-
 
 %--------------------------------------------------------------------------
 %% Menu Functions
@@ -159,7 +158,7 @@ function trajectory_popup_Update(~, ~, handles)
     model_config = ModelConfig(ModelConfigType.(['M_',model_type]));
     setappdata(handles.trajectory_popup,'model_config',model_config);
     % Determine the cable sets
-    trajectories_str = xmlObj2stringCellArray(model_config.trajectoriesXmlObj.getElementsByTagName('trajectories').item(0).getElementsByTagName('trajectory'),'id');
+    trajectories_str = GUIOperations.XmlObj2StringCellArray(model_config.trajectoriesXmlObj.getElementsByTagName('trajectories').item(0).getElementsByTagName('trajectory'),'id');
     set(handles.trajectory_popup, 'Value', 1);
     set(handles.trajectory_popup, 'String', trajectories_str);
 end
@@ -237,14 +236,11 @@ function solver_class_popup_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
     if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
         set(hObject,'BackgroundColor','white');
     end
-    path_string = fileparts(mfilename('fullpath'));
-    path_string = path_string(1:strfind(path_string, 'GUI')-2);
-    settingsXMLObj =  XmlOperations.XmlReadRemoveIndents([path_string,'/GUI/XML/dynamicsXML.xml']);
+    settingsXMLObj = GUIOperations.GetSettings('/GUI/XML/dynamicsXML.xml');
     setappdata(hObject,'settings',settingsXMLObj);
-    solver_str = xmlObj2stringCellArray(settingsXMLObj.getElementsByTagName('simulator').item(0).getElementsByTagName('solver_class'),'id');
+    solver_str = GUIOperations.XmlObj2StringCellArray(settingsXMLObj.getElementsByTagName('simulator').item(0).getElementsByTagName('solver_class'),'id');
     set(hObject, 'String', solver_str);
 end
-
 
 % --- Executes on selection change in objective_popup.
 function objective_popup_Callback(hObject, ~, handles) 
@@ -259,17 +255,12 @@ function objective_popup_Callback(hObject, ~, handles)
     settings = getappdata(handles.solver_class_popup,'settings');
     solverObj = settings.getElementById(solver_class_id);
     objectivesUnfiltered = solverObj.getElementsByTagName('objectives').item(0);
-    if(isempty(objectivesUnfiltered))
-        
-    else
+    if(~isempty(objectivesUnfiltered))
         objectivesObj = objectivesUnfiltered.getElementsByTagName('objective');
         objectiveNumber = get(hObject,'Value');
         objective = objectivesObj.item(objectiveNumber-1);
-        weight_links = str2double(objective.getElementsByTagName('weight_links_multiplier').item(0).getFirstChild.getData);
-        weight_cables = str2double(objective.getElementsByTagName('weight_cables_multiplier').item(0).getFirstChild.getData);
-        weight_constants = str2double(objective.getElementsByTagName('weight_constants').item(0).getFirstChild.getData);
         dynObj = getappdata(handles.cable_text,'dynObj');
-        weight_number = weight_links*dynObj.numLinks + weight_cables*dynObj.numCables + weight_constants;
+        weight_number = get_weight_number(objective,dynObj);
         objective_table_Update(weight_number,handles.objective_table);
     end
 end
@@ -292,7 +283,7 @@ function objective_popup_Update(hObject,handles)
         set(handles.objective_text,'Visible','on');
         set(handles.objective_radio,'Visible','on');
         set(handles.objective_table,'Visible','on');
-        objective_str = xmlObj2stringCellArray(objectivesUnfiltered.getElementsByTagName('objective'),'type');
+        objective_str = GUIOperations.XmlObj2StringCellArray(objectivesUnfiltered.getElementsByTagName('objective'),'type');
         set(hObject,'Value',1);
         set(hObject, 'String', objective_str);
     end
@@ -334,8 +325,7 @@ function solver_type_popup_update(hObject,handles)
         temp_str = char(e_list(i));
         e_list_str{i} = temp_str(1:length(temp_str));
     end
-    set(hObject,'Value',1);
-    set(hObject, 'String', e_list_str);
+    set(hObject,'Value',1);    set(hObject, 'String', e_list_str);
 end
 
 % --- Executes during object creation, after setting all properties.
@@ -359,15 +349,12 @@ function plot_type_popup_Callback(hObject, ~, ~)
 
     % Hints: contents = cellstr(get(hObject,'String')) returns plot_type_popup contents as cell array
     %        contents{get(hObject,'Value')} returns selected item from plot_type_popup
-    path_string = fileparts(mfilename('fullpath'));
-    path_string = path_string(1:strfind(path_string, 'GUI')-2);
-    settingsXMLObj =  XmlOperations.XmlReadRemoveIndents([path_string,'/GUI/XML/dynamicsXML.xml']);
+    settingsXMLObj = GUIOperations.GetSettings('/GUI/XML/dynamicsXML.xml');
     plotsObj = settingsXMLObj.getElementsByTagName('simulator').item(0).getElementsByTagName('plot_functions').item(0).getElementsByTagName('plot_function');
     contents = get(hObject,'Value');
     plotObj = plotsObj.item(contents-1);
     setappdata(hObject,'num_plots',plotObj.getElementsByTagName('figure_quantity').item(0).getFirstChild.getData);
 end
-
 
 % --- Executes during object creation, after setting all properties.
 function plot_type_popup_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
@@ -380,18 +367,9 @@ function plot_type_popup_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
     if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
         set(hObject,'BackgroundColor','white');
     end
-    path_string = fileparts(mfilename('fullpath'));
-    path_string = path_string(1:strfind(path_string, 'GUI')-2);
-    settingsXMLObj =  XmlOperations.XmlReadRemoveIndents([path_string,'/GUI/XML/dynamicsXML.xml']);
-    plotsObj = settingsXMLObj.getElementsByTagName('simulator').item(0).getElementsByTagName('plot_functions').item(0).getElementsByTagName('plot_function');
-    plot_str = cell(1,plotsObj.getLength);
-    % Extract the identifies from the cable sets
-    for i =1:plotsObj.getLength
-        plotObj = plotsObj.item(i-1);
-        plot_str{i} = char(plotObj.getAttribute('type'));
-    end
-    set(hObject,'Value',1);
-    set(hObject, 'String', plot_str);
+    settingsXMLObj = GUIOperations.GetSettings('/GUI/XML/dynamicsXML.xml');
+    plot_str = GUIOperations.XmlObj2StringCellArray(settingsXMLObj.getElementsByTagName('simulator').item(0).getElementsByTagName('plot_functions').item(0).getElementsByTagName('plot_function'),'type');
+    set(hObject,'Value',1);    set(hObject, 'String', plot_str);
     setappdata(hObject,'num_plots',1);
 end
 
@@ -409,17 +387,12 @@ function constraint_popup_Callback(hObject, ~, handles)
         settings = getappdata(handles.solver_class_popup,'settings');
         solverObj = settings.getElementById(solver_class_id);
         constraintsUnfiltered = solverObj.getElementsByTagName('constraints').item(0);
-        if(isempty(constraintsUnfiltered))
-
-        else
+        if(~isempty(constraintsUnfiltered))
             constraintsObj = constraintsUnfiltered.getElementsByTagName('constraint');
             constraintNumber = get(hObject,'Value');
             constraint = constraintsObj.item(constraintNumber-2);
-            weight_links = str2double(constraint.getElementsByTagName('weight_links_multiplier').item(0).getFirstChild.getData);
-            weight_cables = str2double(constraint.getElementsByTagName('weight_cables_multiplier').item(0).getFirstChild.getData);
-            weight_constants = str2num(constraint.getElementsByTagName('weight_constants').item(0).getFirstChild.getData); %#ok<ST2NM>
             dynObj = getappdata(handles.cable_text,'dynObj');
-            weight_number = weight_links*dynObj.numLinks + weight_cables*dynObj.numCables + sum(weight_constants);
+            weight_number = get_weight_number(constraint,dynObj);
             num_constraints = str2double(get(handles.constraint_number_edit,'String'));
             if(isnan(num_constraints))
                 num_constraints = 1;
@@ -447,13 +420,12 @@ function constraint_popup_Update(hObject,handles)
         set(handles.constraint_text,'Visible','on');
         set(handles.constraint_table,'Visible','on');
         set(handles.constraint_number_edit,'Visible','on');
-        constraint_str = xmlObj2stringCellArray(constraintsUnfiltered.getElementsByTagName('constraint'),'type');
+        constraint_str = GUIOperations.XmlObj2StringCellArray(constraintsUnfiltered.getElementsByTagName('constraint'),'type');
         constraint_str = [{' '},constraint_str];
         set(hObject,'Value',1);
         set(hObject, 'String', constraint_str);
     end
 end
-
 
 % --- Executes during object creation, after setting all properties.
 function constraint_popup_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
@@ -481,17 +453,12 @@ function tuning_parameter_popup_Callback(hObject, ~, handles)
     settings = getappdata(handles.solver_class_popup,'settings');
     solverObj = settings.getElementById(solver_class_id);
     tuningUnfiltered = solverObj.getElementsByTagName('tuning_parameters').item(0);
-    if(isempty(tuningUnfiltered))
-        
-    else
+    if(~isempty(tuningUnfiltered))
         tuningObj = tuningUnfiltered.getElementsByTagName('tuning_parameter');
         tuningNumber = get(hObject,'Value');
         tuning = tuningObj.item(tuningNumber-1);
-        weight_links = str2double(tuning.getElementsByTagName('weight_links_multiplier').item(0).getFirstChild.getData);
-        weight_cables = str2double(tuning.getElementsByTagName('weight_cables_multiplier').item(0).getFirstChild.getData);
-        weight_constants = str2double(tuning.getElementsByTagName('weight_constants').item(0).getFirstChild.getData);
         dynObj = getappdata(handles.cable_text,'dynObj');
-        weight_number = weight_links*dynObj.numLinks + weight_cables*dynObj.numCables + weight_constants;
+        weight_number = get_weight_number(tuning,dynObj);
         tuning_parameter_table_Update(weight_number,handles.tuning_parameter_table);
     end
 end
@@ -503,8 +470,7 @@ function tuning_parameter_popup_Update(hObject,handles)
     solverObj = settings.getElementById(solver_class_id);
     tuningUnfiltered = solverObj.getElementsByTagName('tuning_parameters').item(0);
     if(isempty(tuningUnfiltered))
-        set(hObject,'Value',1);
-        set(hObject,'String',{' '});
+        set(hObject,'Value',1); set(hObject,'String',{' '});
         set(hObject,'Visible','off');
         set(handles.tuning_parameter_text,'Visible','off');
         set(handles.tuning_parameter_radio,'Visible','off');
@@ -514,9 +480,8 @@ function tuning_parameter_popup_Update(hObject,handles)
         set(handles.tuning_parameter_text,'Visible','on');
         set(handles.tuning_parameter_radio,'Visible','on');
         set(handles.tuning_parameter_table,'Visible','on');
-        objective_str = xmlObj2stringCellArray(tuningUnfiltered.getElementsByTagName('tuning_parameter'),'type');
-        set(hObject,'Value',1);
-        set(hObject, 'String', objective_str);
+        objective_str = GUIOperations.XmlObj2StringCellArray(tuningUnfiltered.getElementsByTagName('tuning_parameter'),'type');
+        set(hObject,'Value',1); set(hObject, 'String', objective_str);
     end
 end
 
@@ -532,8 +497,6 @@ function tuning_parameter_popup_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
         set(hObject,'BackgroundColor','white');
     end
 end
-
-
 
 %--------------------------------------------------------------------------
 %% Push Buttons
@@ -584,27 +547,31 @@ function load_button_Callback(~, ~, handles) %#ok<DEFNU>
     load(settings);
     mp_text = get(handles.model_text,'String');
     cs_text = get(handles.cable_text,'String');
-    if(strcmp(mp_text,state.model_text)&&strcmp(cs_text,state.cable_text))
-        set(handles.trajectory_popup,'value',state.trajectory_popup);
-        set(handles.dynamics_popup,'value',state.dynamics_popup);
-        set(handles.solver_class_popup,'value',state.solver_class_popup);
-        solver_type_popup_update(handles.solver_type_popup,handles);
-        dynamics_popup_Callback(handles.dynamics_popup, [], handles);
-        set(handles.solver_type_popup,'value',state.solver_type_popup);
-        set(handles.objective_popup,'value',state.objective_popup);
-        set(handles.constraint_popup,'value',state.constraint_popup);
-        set(handles.tuning_parameter_popup,'value',state.tuning_parameter_popup);
-        set(handles.plot_type_popup,'value',state.plot_type_popup);
-        set(handles.objective_table,'Data',state.objective_table);
-        set(handles.constraint_table,'Data',state.constraint_table);
-        set(handles.tuning_parameter_table,'Data',state.tuning_parameter_table);
-        % Callback
-        plot_type_popup_Callback(handles.plot_type_popup,[],handles);
-        objective_popup_Callback(handles.objective_popup,[],handles);
-        constraint_popup_Callback(handles.constraint_popup,[],handles);
-        tuning_parameter_popup_Callback(handles.tuning_parameter_popup, [], handles);
+    if(strcmp(state.simulator,'dynamics'))
+        if(strcmp(mp_text,state.model_text)&&strcmp(cs_text,state.cable_text))
+            set(handles.trajectory_popup,'value',state.trajectory_popup);
+            set(handles.dynamics_popup,'value',state.dynamics_popup);
+            set(handles.solver_class_popup,'value',state.solver_class_popup);
+            solver_type_popup_update(handles.solver_type_popup,handles);
+            dynamics_popup_Callback(handles.dynamics_popup, [], handles);
+            set(handles.solver_type_popup,'value',state.solver_type_popup);
+            set(handles.objective_popup,'value',state.objective_popup);
+            set(handles.constraint_popup,'value',state.constraint_popup);
+            set(handles.tuning_parameter_popup,'value',state.tuning_parameter_popup);
+            set(handles.plot_type_popup,'value',state.plot_type_popup);
+            set(handles.objective_table,'Data',state.objective_table);
+            set(handles.constraint_table,'Data',state.constraint_table);
+            set(handles.tuning_parameter_table,'Data',state.tuning_parameter_table);
+            % Callback
+            plot_type_popup_Callback(handles.plot_type_popup,[],handles);
+            objective_popup_Callback(handles.objective_popup,[],handles);
+            constraint_popup_Callback(handles.constraint_popup,[],handles);
+            tuning_parameter_popup_Callback(handles.tuning_parameter_popup, [], handles);
+        else
+            warning('Incorrect Model Type'); %#ok<WNTAG>
+        end
     else
-        warning('Incorrect Model Type');
+        warning('File is not the correct file type'); %#ok<WNTAG>
     end
 end
 
@@ -616,11 +583,11 @@ function plot_button_Callback(~, ~, handles) %#ok<DEFNU>
     % handles    structure with handles and user data (see GUIDATA)  
     sim = getappdata(handles.figure1,'sim');
     if(isempty(sim))
-        warning('No simulator has been generated. Please press run first');
+        warning('No simulator has been generated. Please press run first'); %#ok<WNTAG>
     else
         contents = cellstr(get(handles.plot_type_popup,'String'));
         plot_type = contents{get(handles.plot_type_popup,'Value')};
-        plot_for_GUI(plot_type,sim,handles,str2double(getappdata(handles.plot_type_popup,'num_plots')))
+        GUIOperations.GUIPlot(plot_type,sim,handles,str2double(getappdata(handles.plot_type_popup,'num_plots')),get(handles.undock_box,'value'));
     end
 end
 
@@ -628,8 +595,8 @@ end
 %% Toolbar buttons
 %--------------------------------------------------------------------------
 % --------------------------------------------------------------------
-function save_file_tool_ClickedCallback(~, ~, handles) %#ok<DEFNU>
-    % hObject    handle to save_file_tool (see GCBO)
+function save_figure_tool_ClickedCallback(~, ~, handles) %#ok<DEFNU>
+    % hObject    handle to save_figure_tool (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
     tabgp = getappdata(handles.figure1,'tabgp');
@@ -716,7 +683,6 @@ function tuning_parameter_radio_Callback(hObject,~, handles) %#ok<DEFNU>
     end
 end
 
-
 %--------------------------------------------------------------------------
 %% Toggle Buttons
 %--------------------------------------------------------------------------
@@ -742,7 +708,6 @@ function constraint_number_edit_Callback(~, ~, handles) %#ok<DEFNU>
     constraint_popup_Callback(handles.constraint_popup,[],handles);
 end
 
-
 % --- Executes during object creation, after setting all properties.
 function constraint_number_edit_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
     % hObject    handle to constraint_number_edit (see GCBO)
@@ -765,12 +730,12 @@ function objective_table_Update(dimension,hObject)
     set(hObject,'ColumnEditable',true(1,dimension));
     q_position = get(hObject,'Position');
     if(dimension>4)
-        q_position(2) = 133;
-        q_position(4) = 57;
+        q_position(2) = 0.38;
+        q_position(4) = 0.15;
         set(hObject,'Position',q_position);
     else
-        q_position(2) = 150;
-        q_position(4) = 40;
+        q_position(2) = 0.38;
+        q_position(4) = 0.106;
         set(hObject,'Position',q_position);
     end
 end
@@ -781,12 +746,12 @@ function constraint_table_Update(dimension,hObject)
     set(hObject,'ColumnEditable',true(1,dimension(2)));
     q_position = get(hObject,'Position');
     if(dimension(2)>4)
-        q_position(2) = 23;
-        q_position(4) = 57;
+        q_position(2) = 0.04;
+        q_position(4) = 0.15;
         set(hObject,'Position',q_position);
     else
-        q_position(2) = 40;
-        q_position(4) = 40;
+        q_position(2) = 0.04;
+        q_position(4) = 0.106;
         set(hObject,'Position',q_position);
     end
 end
@@ -797,12 +762,12 @@ function tuning_parameter_table_Update(dimension,hObject)
     set(hObject,'ColumnEditable',true(1,dimension));
     q_position = get(hObject,'Position');
     if(dimension>4)
-        q_position(2) = 133;
-        q_position(4) = 57;
+        q_position(2) = 0.38;
+        q_position(4) = 0.15;
         set(hObject,'Position',q_position);
     else
-        q_position(2) = 150;
-        q_position(4) = 40;
+        q_position(2) = 0.38;
+        q_position(4) = 0.106;
         set(hObject,'Position',q_position);
     end
 end
@@ -811,7 +776,48 @@ end
 % Additional Functions
 %--------------------------------------------------------------------------
 function run_inverse_dynamics(handles,dynObj,trajectory_xmlobj)
-    % First read the solver form from the GUI
+    % Determine the solver
+    id_solver = load_idsolver(handles,dynObj);
+    % Read the type of plot
+    contents = cellstr(get(handles.plot_type_popup,'String'));
+    plot_type = contents{get(handles.plot_type_popup,'Value')};
+        
+    % Setup the inverse dynamics simulator with the SystemKinematicsDynamics
+    % object and the inverse dynamics solver
+    disp('Start Setup Simulation');
+    set(handles.status_text,'String','Setting up simulation');
+    drawnow;
+    start_tic = tic;
+    idsim = InverseDynamicsSimulator(dynObj, id_solver);
+    trajectory = JointTrajectory.LoadXmlObj(trajectory_xmlobj, dynObj);
+    time_elapsed = toc(start_tic);
+    fprintf('End Setup Simulation : %f seconds\n', time_elapsed);
+
+    % Run the solver on the desired trajectory
+    disp('Start Running Simulation');
+    set(handles.status_text,'String','Simulation running');
+    drawnow;
+    start_tic = tic;
+    idsim.run(trajectory);
+    time_elapsed = toc(start_tic);
+    fprintf('End Running Simulation : %f seconds\n', time_elapsed);
+
+    % Display information from the inverse dynamics simulator
+    fprintf('Optimisation computational time, mean : %f seconds, std dev : %f seconds, total: %f seconds\n', mean(idsim.compTime), std(idsim.compTime), sum(idsim.compTime));
+
+    % Plot the data
+    disp('Start Plotting Simulation');
+    set(handles.status_text,'String','Simulation plotting');
+    drawnow;
+    start_tic = tic;
+    GUIOperations.GUIPlot(plot_type,idsim,handles,str2double(getappdata(handles.plot_type_popup,'num_plots')),get(handles.undock_box,'Value'));
+    time_elapsed = toc(start_tic);
+    fprintf('End Plotting Simulation : %f seconds\n', time_elapsed);
+    set(handles.status_text,'String','No simulation running');
+    setappdata(handles.figure1,'sim',idsim);
+end
+
+function id_solver = load_idsolver(handles,dynObj)
     solver_class_contents = cellstr(get(handles.solver_class_popup,'String'));
     solver_class = solver_class_contents{get(handles.solver_class_popup,'Value')};
     solver_type_contents = cellstr(get(handles.solver_type_popup,'String'));
@@ -875,59 +881,6 @@ function run_inverse_dynamics(handles,dynObj,trajectory_xmlobj)
                 q_data(i,weight_constants(1)+weight_constants(2)+1:weight_constants(1)+weight_constants(2)+weight_constants(3))));
         end
     end
-    contents = cellstr(get(handles.plot_type_popup,'String'));
-    plot_type = contents{get(handles.plot_type_popup,'Value')};
-    
-    
-    % Setup the inverse dynamics simulator with the SystemKinematicsDynamics
-    % object and the inverse dynamics solver
-    disp('Start Setup Simulation');
-    set(handles.status_text,'String','Setting up simulation');
-    drawnow;
-    start_tic = tic;
-    idsim = InverseDynamicsSimulator(dynObj, id_solver);
-    trajectory = JointTrajectory.LoadXmlObj(trajectory_xmlobj, dynObj);
-    time_elapsed = toc(start_tic);
-    fprintf('End Setup Simulation : %f seconds\n', time_elapsed);
-
-    % Run the solver on the desired trajectory
-    disp('Start Running Simulation');
-    set(handles.status_text,'String','Simulation running');
-    drawnow;
-    start_tic = tic;
-    idsim.run(trajectory);
-    time_elapsed = toc(start_tic);
-    fprintf('End Running Simulation : %f seconds\n', time_elapsed);
-
-    % Display information from the inverse dynamics simulator
-    fprintf('Optimisation computational time, mean : %f seconds, std dev : %f seconds, total: %f seconds\n', mean(idsim.compTime), std(idsim.compTime), sum(idsim.compTime));
-
-    % Plot the data
-    disp('Start Plotting Simulation');
-    set(handles.status_text,'String','Simulation plotting');
-    drawnow;
-    start_tic = tic;
-    plot_for_GUI(plot_type,idsim,handles,str2double(getappdata(handles.plot_type_popup,'num_plots')));
-    time_elapsed = toc(start_tic);
-    fprintf('End Plotting Simulation : %f seconds\n', time_elapsed);
-    set(handles.status_text,'String','No simulation running');
-    setappdata(handles.figure1,'sim',idsim);
-end
-
-function plot_for_GUI(plot_type,sim,handles,figure_quantity)
-    plot_function = str2func(plot_type);
-    tab_toggle = get(handles.undock_box,'Value');
-    if(tab_toggle)
-        plot_function(sim,[],[]);    
-    else
-        tabgp = getappdata(handles.figure1,'tabgp');
-        for i = 1:figure_quantity
-            tab(i) = uitab(tabgp,'Title',plot_type); %#ok<AGROW>
-            ax(i) = axes; %#ok<AGROW>
-            set(ax(i),'Parent',tab(i),'OuterPosition',[0,0,1,1])
-        end
-        plot_function(sim,[],ax);    
-    end
 end
 
 function loadState(handles)
@@ -977,6 +930,7 @@ end
 
 function saveState(handles,file_path)
     % Save all of the settings
+    state.simulator                         =   'dynamics';
     % Texts
     state.model_text                        =   get(handles.model_text,'String');
     state.cable_text                        =   get(handles.cable_text,'String');
@@ -1007,8 +961,7 @@ function run_forward_dynamics(handles,dynObj,trajectory_xmlobj)
     % First read the solver form from the GUI
     id_objective = IDObjectiveMinQuadCableForce(ones(dynObj.numCables,1));
     id_solver = IDSolverQuadProg(dynObj,id_objective, ID_QP_SolverType.MATLAB);
-    
-    
+        
     % Setup the inverse dynamics simulator with the SystemKinematicsDynamics
     % object and the inverse dynamics solver
     disp('Start Setup Simulation');
@@ -1042,8 +995,8 @@ function run_forward_dynamics(handles,dynObj,trajectory_xmlobj)
     % Finally compare the results
     set(handles.status_text,'String','Plotting results');
     drawnow;
-    plot_for_GUI('plotJointSpace',idsim,handles,2);
-    plot_for_GUI('plotJointSpace',fdsim,handles,2);
+    GUIOperations.GUIPlot('plotJointSpace',idsim,handles,2,get(handles.undock_box,'Value'));
+    GUIOperations.GUIPlot('plotJointSpace',fdsim,handles,2,get(handles.undock_box,'Value'));
     set(handles.status_text,'String','No simulation running');
 end
 
@@ -1084,25 +1037,6 @@ function toggle_visibility(dynamics_method,handles)
     end
 end
 
-function create_tab_group(handles)
-    tabgp = uitabgroup(handles.uipanel3,'Position',[0 0 1 1]);
-    % A temporary hack to make the figures plot correctly
-    tab1 = uitab(tabgp);
-    ax = axes;
-    set(ax,'Parent',tab1,'OuterPosition',[0,0,1,1])
-    delete(tab1);
-    setappdata(handles.figure1,'tabgp',tabgp);
-end
-
-function str_cell_array = xmlObj2stringCellArray(xmlObj,str)
-    str_cell_array = cell(1,xmlObj.getLength);
-    % Extract the identifies from the cable sets
-    for i =1:xmlObj.getLength
-        tempXMLObj = xmlObj.item(i-1);
-        str_cell_array{i} = char(tempXMLObj.getAttribute(str));
-    end
-end
-
 function initialise_popups(handles)
     % Updates
     solver_type_popup_update(handles.solver_type_popup,handles);
@@ -1117,5 +1051,9 @@ function initialise_popups(handles)
     tuning_parameter_popup_Callback(handles.tuning_parameter_popup, [], handles);
 end
 
-%% TO BE DONE
-% Modify the constraints and objectives
+function weight_number = get_weight_number(xmlObj,dynObj)
+    weight_links = str2double(xmlObj.getElementsByTagName('weight_links_multiplier').item(0).getFirstChild.getData);
+    weight_cables = str2double(xmlObj.getElementsByTagName('weight_cables_multiplier').item(0).getFirstChild.getData);
+    weight_constants = str2num(xmlObj.getElementsByTagName('weight_constants').item(0).getFirstChild.getData); %#ok<ST2NM>
+    weight_number = weight_links*dynObj.numLinks + weight_cables*dynObj.numCables + sum(weight_constants);
+end

@@ -1,4 +1,4 @@
-classdef NullMetric < WorkspaceMetric
+classdef NullMetric < WorkspaceMetricBase
     properties (SetAccess = protected, GetAccess = protected)
         end
     

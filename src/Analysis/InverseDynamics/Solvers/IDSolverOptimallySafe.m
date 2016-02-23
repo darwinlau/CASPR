@@ -5,7 +5,7 @@
 % P. H. Borgstrom, B. L. Jordan, G. S. Sukhatme, M. A. Batalin, and W. J.
 % Kaiser, "Rapid Computation of Optimally Safe Tension Distributions for
 % Parallel Cable-Driven Robots", IEEE Trans. Robot., vol. 25, no. 6, pp.
-% 1271-1281.
+% 1271-1281, 2011.
 %
 % Author        : Jonathan EDEN
 % Created       : 2016

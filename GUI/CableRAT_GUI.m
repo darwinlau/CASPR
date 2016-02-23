@@ -1,31 +1,31 @@
 %--------------------------------------------------------------------------
 %% Constructor
 %--------------------------------------------------------------------------
-function varargout = UPCRA(varargin)
-    % UPCRA MATLAB code for UPCRA.fig
-    %      UPCRA, by itself, creates a new UPCRA or raises the existing
+function varargout = CableRAT_GUI(varargin)
+    % CableRAT_GUI MATLAB code for CableRAT_GUI.fig
+    %      CableRAT_GUI, by itself, creates a new CableRAT_GUI or raises the existing
     %      singleton*.
     %
-    %      H = UPCRA returns the handle to a new UPCRA or the handle to
+    %      H = CableRAT_GUI returns the handle to a new CableRAT_GUI or the handle to
     %      the existing singleton*.
     %
-    %      UPCRA('CALLBACK',hObject,eventData,handles,...) calls the local
-    %      function named CALLBACK in UPCRA.M with the given input arguments.
+    %      CableRAT_GUI('CALLBACK',hObject,eventData,handles,...) calls the local
+    %      function named CALLBACK in CableRAT_GUI.M with the given input arguments.
     %
-    %      UPCRA('Property','Value',...) creates a new UPCRA or raises the
+    %      CableRAT_GUI('Property','Value',...) creates a new CableRAT_GUI or raises the
     %      existing singleton*.  Starting from the left, property value pairs are
-    %      applied to the GUI before UPCRA_OpeningFcn gets called.  An
+    %      applied to the GUI before CableRAT_GUI_OpeningFcn gets called.  An
     %      unrecognized property name or invalid value makes property application
-    %      stop.  All inputs are passed to UPCRA_OpeningFcn via varargin.
+    %      stop.  All inputs are passed to CableRAT_GUI_OpeningFcn via varargin.
     %
     %      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
     %      instance to run (singleton)".
     %
     % See also: GUIDE, GUIDATA, GUIHANDLES
 
-    % Edit the above text to modify the response to help UPCRA
+    % Edit the above text to modify the response to help CableRAT_GUI
 
-    % Last Modified by GUIDE v2.5 14-Jan-2016 16:10:19
+    % Last Modified by GUIDE v2.5 19-Feb-2016 17:27:49
 
     % Begin initialization code - DO NOT EDIT
     path_string = fileparts(mfilename('fullpath'));
@@ -38,8 +38,8 @@ function varargout = UPCRA(varargin)
     gui_Singleton = 1;
     gui_State = struct('gui_Name',       mfilename, ...
                        'gui_Singleton',  gui_Singleton, ...
-                       'gui_OpeningFcn', @UPCRA_OpeningFcn, ...
-                       'gui_OutputFcn',  @UPCRA_OutputFcn, ...
+                       'gui_OpeningFcn', @CableRAT_GUI_OpeningFcn, ...
+                       'gui_OutputFcn',  @CableRAT_GUI_OutputFcn, ...
                        'gui_LayoutFcn',  [] , ...
                        'gui_Callback',   []);
     if nargin && ischar(varargin{1})
@@ -57,15 +57,15 @@ end
 %--------------------------------------------------------------------------
 %% GUI Setup Functions
 %--------------------------------------------------------------------------
-% --- Executes just before UPCRA is made visible.
-function UPCRA_OpeningFcn(hObject, ~, handles, varargin)
+% --- Executes just before CableRAT_GUI is made visible.
+function CableRAT_GUI_OpeningFcn(hObject, ~, handles, varargin)
     % This function has no output args, see OutputFcn.
     % hObject    handle to figure
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
-    % varargin   command line arguments to UPCRA (see VARARGIN)
+    % varargin   command line arguments to CableRAT_GUI (see VARARGIN)
 
-    % Choose default command line output for UPCRA
+    % Choose default command line output for CableRAT_GUI
     handles.output = hObject;
 
     % Update handles structure
@@ -74,12 +74,12 @@ function UPCRA_OpeningFcn(hObject, ~, handles, varargin)
 %     Load previous information
     plot(rand(5)); % Hack to fix size.  Ideally removed at some point.
     loadState(handles);
-    % UIWAIT makes UPCRA wait for user response (see UIRESUME)
+    % UIWAIT makes CableRAT_GUI wait for user response (see UIRESUME)
     % uiwait(handles.figure1);
 end
 
 % --- Outputs from this function are returned to the command line.
-function varargout = UPCRA_OutputFcn(~, ~, handles)
+function varargout = CableRAT_GUI_OutputFcn(~, ~, handles)
     % varargout  cell array for returning output args (see VARARGOUT);
     % hObject    handle to figure
     % eventdata  reserved - to be defined in a future version of MATLAB
@@ -216,7 +216,7 @@ function dynamics_button_Callback(~, ~, handles) %#ok<DEFNU>
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
     saveState(handles);
-    dynamicsGUI;
+    dynamics_GUI;
 end
 
 % Kinematics
@@ -226,7 +226,7 @@ function kinematics_button_Callback(~, ~, handles) %#ok<DEFNU>
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
     saveState(handles);
-    kinematicsGUI;
+    kinematics_GUI;
 end
 
 % Workspace
@@ -236,7 +236,7 @@ function workspace_button_Callback(~, ~, handles) %#ok<DEFNU>
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
     saveState(handles);
-    workspaceGUI;
+    workspace_GUI;
 end
 
 % --- Executes on button press in update_button.
@@ -250,6 +250,15 @@ function update_button_Callback(~, ~, handles) %#ok<DEFNU>
     cla;
     axis_range = getappdata(handles.cable_popup,'axis_range');
     MotionSimulator.PlotFrame(dynObj, axis_range,handles.figure1);
+end
+
+% --- Executes on button press in control_button.
+function control_button_Callback(~, ~, handles) %#ok<DEFNU>
+    % hObject    handle to control_button (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    structure with handles and user data (see GUIDATA)
+    saveState(handles);
+    control_GUI;
 end
 
 %--------------------------------------------------------------------------
@@ -315,8 +324,8 @@ function saveState(handles)
     path_string = fileparts(mfilename('fullpath'));
     path_string = path_string(1:strfind(path_string, 'GUI')-2);
     % Check if the log folder exists
-    if(exist([path_string,'\logs'],'dir')~=7)
-        mkdir([path_string,'\logs']);        
+    if(exist([path_string,'/logs'],'dir')~=7)
+        mkdir([path_string,'/logs']);        
     end
     save([path_string,'\logs\upcra_gui_state.mat'],'state');
 end
