@@ -10,9 +10,7 @@ classdef CableSegmentKinematics < handle
         r_OA = {}                   % Cell array of absolute attachment locations ^kr_{OA_{ijk}} for cable i segment j in local frame
         r_GA = {}                   % Cell array of relative attachment locations ^kr_{G_kA_{ijk}} from COG to attachment location for cable i segment j in local frame
         r_PA = {}                   % Cell array of relative attachment locations ^kr_{P_kA_{ijk}} from joint to attachment location for cable i segment j in local frame
-%         attachmentsLocal = {}       % Cell array of relative attachment locations ^kr_{G_kA_{ijk}} for cable i segment j in local frame
-%         attachmentsAbs = {}         % Cell array of absolute attachment locations ^kr_{OA_{ijk}} for cable i segment j in local frame
-        segmentVector = []          % vectors \mathbf{l}_{ij} in frame {0}
+        segmentVector = []          % vector \mathbf{l}_{ij} in frame {0}
         CRM = []                    % Cable Routing Matrix for this cable and segment
     end
     

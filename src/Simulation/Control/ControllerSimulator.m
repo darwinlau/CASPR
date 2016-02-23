@@ -37,7 +37,7 @@ classdef ControllerSimulator < DynamicsSimulator
                 obj.cableForces{t} = obj.controller.executeFunction(obj.trajectory.q{t},  obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t}, ref_trajectory.q{t}, ref_trajectory.q_dot{t}, ref_trajectory.q_ddot{t});
                 obj.stateError{t} = ref_trajectory.q{t} - obj.trajectory.q{t};
                 if t < length(obj.timeVector)
-                    [obj.trajectory.q{t+1}, obj.trajectory.q_dot{t+1}, obj.trajectory.q_ddot{t+1}, obj.model] = ForwardDynamics.Compute(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.cableForces{t}, obj.timeVector(t+1)-obj.timeVector(t), obj.model);
+                    [obj.trajectory.q{t+1}, obj.trajectory.q_dot{t+1}, obj.trajectory.q_ddot{t+1}, obj.model] = ForwardDynamics.Compute(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.cableForces{t}, zeros(obj.model.numDofs,1), obj.timeVector(t+1)-obj.timeVector(t), obj.model);
                 end
             end
         end
@@ -45,6 +45,48 @@ classdef ControllerSimulator < DynamicsSimulator
         function plotTrackingError(obj)
             trackingError_array = cell2mat(obj.stateError);
             plot(obj.timeVector, trackingError_array, 'Color', 'k', 'LineWidth', 1.5);
+        end
+        
+        function plotJointSpaceTracking(obj, states_to_plot,plot_axis)
+            assert(~isempty(obj.trajectory), 'Cannot plot since trajectory is empty');
+
+            n_dof = obj.model.numDofs;
+
+            if isempty(states_to_plot)
+                states_to_plot = 1:n_dof;
+            end
+
+            q_array = cell2mat(obj.trajectory.q);
+            q_dot_array = cell2mat(obj.trajectory.q_dot);
+            q_ref_array = cell2mat(obj.refTrajectory.q);
+            q_ref_dot_array = cell2mat(obj.refTrajectory.q_dot);
+
+            if(~isempty(plot_axis))
+                plot(plot_axis(1),obj.timeVector, q_ref_array(states_to_plot, :), 'LineWidth', 1.5, 'LineStyle', '--', 'Color', 'r'); 
+                hold on;
+                plot(plot_axis(1),obj.timeVector, q_array(states_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); 
+                hold off;
+                plot(plot_axis(2),obj.timeVector, q_ref_dot_array(states_to_plot, :), 'LineWidth', 'LineStyle', '--', 1.5, 'Color', 'r'); 
+                hold on;
+                plot(plot_axis(2),obj.timeVector, q_dot_array(states_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); 
+                hold off;
+            else
+                % Plots joint space variables q(t)
+                figure;
+                hold on;
+                plot(obj.timeVector, q_ref_array(states_to_plot, :), 'Color', 'r', 'LineStyle', '--', 'LineWidth', 1.5);
+                plot(obj.timeVector, q_array(states_to_plot, :), 'Color', 'k', 'LineWidth', 1.5);
+                hold off;
+                title('Joint space variables');
+
+                % Plots derivative joint space variables q_dot(t)
+                figure;
+                hold on;
+                plot(obj.timeVector, q_ref_dot_array(states_to_plot, :), 'Color', 'r', 'LineStyle', '--', 'LineWidth', 1.5);
+                plot(obj.timeVector, q_dot_array(states_to_plot, :), 'Color', 'k', 'LineWidth', 1.5);
+                hold off;
+                title('Joint space derivatives');
+            end
         end
     end
 end

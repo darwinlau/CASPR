@@ -59,12 +59,12 @@ fprintf('End Running Inverse Kinematics Simulation : %f seconds\n', time_elapsed
 % Run forward kinematics
 disp('Start Running Forward Kinematics Simulation');
 start_tic = tic;
-fksim.run(iksim.lengths, iksim.lengths_dot, iksim.timeVector, iksim.trajectory.q{1}, iksim.trajectory.q_dot{1});
+fksim.run(iksim.cableLengths, iksim.cableLengthsDot, iksim.timeVector, iksim.trajectory.q{1}, iksim.trajectory.q_dot{1});
 time_elapsed = toc(start_tic);
 fprintf('End Running Forward Kinematics Simulation : %f seconds\n', time_elapsed);
 
 % It is expected that iksim and fksim should have the same joint space (the
 % result of fksim)
-iksim.plotJointSpace();
-fksim.plotJointSpace();
+iksim.plotJointSpace([], []);
+fksim.plotJointSpace([] , []);
 fksim.plotCableLengthError();

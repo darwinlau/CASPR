@@ -39,16 +39,17 @@ classdef SystemKinematicsDynamics < SystemKinematics
         % Since S^T w_p = 0 and S^T P^T = W^T
         % W^T ( M_b * q_ddot + C_b ) = W^T ( G_b - V^T f )
         % The equations of motion can then be expressed in the form
-        % M * q_ddot + C + G = - L^T f
+        % M * q_ddot + C + G + W_e = - L^T f
         M
         C
         G
+        W_e
 
 %         B                         % Linearised B matrix
 
         % Instead of q_ddot being passed as input to the system, it could
         % also be determined from:
-        % M * q_ddot + C + G = - L^T f
+        % M * q_ddot + C + G + W_e = - L^T f
         q_ddot_dynamics
 
         % The set of cable forces f = [f_1; f_2; ... ; f_m]
@@ -62,7 +63,7 @@ classdef SystemKinematicsDynamics < SystemKinematics
             b.bodyDynamics = SystemDynamicsBodies.LoadXmlObj(body_xmlobj);
             b.cableKinematics = SystemKinematicsCables.LoadXmlObj(cable_xmlobj, b.bodyKinematics);
             b.cableDynamics = SystemDynamicsCables.LoadXmlObj(cable_xmlobj);
-            b.update(b.bodyKinematics.q_default, b.bodyKinematics.q_dot_default, b.bodyKinematics.q_ddot_default);
+            b.update(b.bodyKinematics.q_default, b.bodyKinematics.q_dot_default, b.bodyKinematics.q_ddot_default, zeros(b.numDofs,1));
         end
     end
 
@@ -72,9 +73,9 @@ classdef SystemKinematicsDynamics < SystemKinematics
 
         % Function updates the kinematics and dynamics of the bodies and
         % cables of the system with the joint state (q, q_dot and q_ddot)
-        function update(obj, q, q_dot, q_ddot)
+        function update(obj, q, q_dot, q_ddot, w_ext)
             update@SystemKinematics(obj, q, q_dot, q_ddot);
-            obj.bodyDynamics.update(obj.bodyKinematics);
+            obj.bodyDynamics.update(obj.bodyKinematics, w_ext);
             obj.cableDynamics.update(obj.cableKinematics, obj.bodyKinematics);
         end
 
@@ -114,7 +115,7 @@ classdef SystemKinematicsDynamics < SystemKinematics
 %         end
 
         function value = get.q_ddot_dynamics(obj)
-            obj.bodyKinematics.q_ddot = obj.M\(-obj.L.'*obj.cableDynamics.forces - obj.C - obj.G);
+            obj.bodyKinematics.q_ddot = obj.M\(-obj.L.'*obj.cableDynamics.forces - obj.C - obj.G - obj.W_e);
             value = obj.q_ddot;
         end
 
@@ -128,6 +129,10 @@ classdef SystemKinematicsDynamics < SystemKinematics
 
         function value = get.G(obj)
             value = obj.bodyDynamics.G;
+        end
+        
+        function value = get.W_e(obj)
+            value = obj.bodyDynamics.W_e;
         end
 
         function set.cableForces(obj, f)

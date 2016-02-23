@@ -22,10 +22,11 @@ classdef SystemDynamicsBodies < handle
         C_b                         % Body C matrix
         G_b                         % Body G matrix
         
-        % M*q_ddot + C + G = - L^T f (forces in joint space)
+        % M*q_ddot + C + G + w_e = - L^T f (forces in joint space)
         M
         C
         G
+        W_e
     end
     
     properties (Dependent)
@@ -39,7 +40,7 @@ classdef SystemDynamicsBodies < handle
         end
         
         % bodyKinematics an SystemKinematicsBodies object
-        function update(obj, bodyKinematics)
+        function update(obj, bodyKinematics, w_ext)
             for k = 1:obj.numLinks
                 obj.bodies{k}.update(bodyKinematics);
             end
@@ -60,6 +61,7 @@ classdef SystemDynamicsBodies < handle
             obj.M =   bodyKinematics.W.' * obj.M_b;
             obj.C =   bodyKinematics.W.' * obj.C_b;
             obj.G = - bodyKinematics.W.' * obj.G_b;
+            obj.W_e = w_ext;
         end
         
         function M = get.massInertiaMatrix(obj)

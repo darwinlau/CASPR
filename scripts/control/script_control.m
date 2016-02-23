@@ -32,9 +32,12 @@ dynObj = SystemKinematicsDynamics.LoadXmlObj(bodies_xmlobj, cableset_xmlobj);
 
 id_objective = IDObjectiveMinQuadCableForce(ones(dynObj.numCables,1));
 id_solver = IDSolverQuadProg(dynObj, id_objective, ID_QP_SolverType.MATLAB);
-Kp = diag([250 250 250]);
-Kd = diag([25 25 25]);
-controller = ComputedTorqueController(dynObj, id_solver, Kp, Kd);
+Kp_computedtorque = diag([100 100 100]);
+Kd_computedtorque = diag([15 15 15]);
+Kp_lyapunov = diag([250 250 250]);
+Kd_lyapunov = diag([50 50 50]);
+controller = ComputedTorqueController(dynObj, id_solver, Kp_computedtorque, Kd_computedtorque);
+%controller = LyapunovStaticCompensation(dynObj, id_solver, Kp_lyapunov, Kd_lyapunov);
 
 % Setup the inverse dynamics simulator with the SystemKinematicsDynamics
 % object and the inverse dynamics solver
@@ -48,9 +51,13 @@ fprintf('End Setup Simulation : %f seconds\n', time_elapsed);
 % Run the solver on the desired trajectory
 disp('Start Running Simulation');
 start_tic = tic;
-control_sim.run(trajectory_ref, trajectory_ref.q{1} + [0.02; -0.02; 0.01], trajectory_ref.q_dot{1}, trajectory_ref.q_ddot{1});
+control_sim.run(trajectory_ref, trajectory_ref.q{1} + [0.3; -0.1; 0.2], trajectory_ref.q_dot{1}, trajectory_ref.q_ddot{1});
 time_elapsed = toc(start_tic);
 fprintf('End Running Simulation : %f seconds\n', time_elapsed);
+
+
+control_sim.plotTrackingError();
+
 % % Display information from the inverse dynamics simulator
 % fprintf('Optimisation computational time, mean : %f seconds, std dev : %f seconds, total: %f seconds\n', mean(idsim.compTime), std(idsim.compTime), sum(idsim.compTime));
 % 

@@ -16,8 +16,8 @@ classdef ForwardKinematicsSimulator < MotionSimulator
         
         function run(obj, lengths, lengths_dot, time_vector, q0_approx, q0_prev_approx)
             obj.timeVector = time_vector;
-            obj.lengths = lengths;
-            obj.lengths_dot = lengths_dot;
+            obj.cableLengths = lengths;
+            obj.cableLengthsDot = lengths_dot;
             
             obj.trajectory = JointTrajectory;
             obj.trajectory.timeVector = obj.timeVector;

@@ -20,8 +20,8 @@ classdef IDSolverBase < handle
             id.model = dyn_model;
         end
         
-        function [cable_forces, Q_opt, id_exit_type, comp_time, model] = resolve(obj, q, q_d, q_dd)
-            obj.model.update(q, q_d, q_dd);
+        function [cable_forces, Q_opt, id_exit_type, comp_time, model] = resolve(obj, q, q_d, q_dd, w_ext)
+            obj.model.update(q, q_d, q_dd, w_ext);
             start_tic = tic;
             [obj.model.cableForces, Q_opt, id_exit_type] = obj.resolveFunction(obj.model);
             comp_time = toc(start_tic);
@@ -37,7 +37,7 @@ classdef IDSolverBase < handle
     methods (Static)
         function [A, b] = GetEoMConstraints(dynamics)
             A = -dynamics.L';
-            b = dynamics.M*dynamics.q_ddot + dynamics.C + dynamics.G; 
+            b = dynamics.M*dynamics.q_ddot + dynamics.C + dynamics.G + dynamics.W_e; 
         end
         
 %         function exit_type = DisplayOptiToolboxError(exit_flag)

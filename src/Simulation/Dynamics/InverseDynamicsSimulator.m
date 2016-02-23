@@ -31,7 +31,7 @@ classdef InverseDynamicsSimulator < DynamicsSimulator
             for t = 1:length(obj.timeVector)
                 fprintf('Time : %f\n', obj.timeVector(t));
                 % The model is already updated within the resolve function
-                [obj.cableForces{t}, obj.IDFunctionCost(t), obj.IDExitType{t}, obj.compTime(t), obj.model] = obj.IDSolver.resolve(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t});
+                [obj.cableForces{t}, obj.IDFunctionCost(t), obj.IDExitType{t}, obj.compTime(t), obj.model] = obj.IDSolver.resolve(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t}, zeros(obj.model.numDofs,1));
                 obj.interactionWrench{t} = obj.model.interactionWrench;
                 obj.cableLengths{t} = obj.model.cableLengths;
                 obj.cableLengthsDot{t} = obj.model.cableLengthsDot;
