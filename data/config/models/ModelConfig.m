@@ -95,7 +95,7 @@ classdef ModelConfig
             c.trajectoriesXmlObj =  XmlOperations.XmlReadRemoveIndents(c.trajectoriesFilename);
         end
         
-        function v = getBodiesProperiesXmlObj(obj)
+        function v = getBodiesPropertiesXmlObj(obj)
             v = obj.bodiesXmlObj.getDocumentElement;
         end
         

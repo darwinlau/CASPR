@@ -269,7 +269,7 @@ function generate_kinematic_dynamic_object(handles)
     contents = cellstr(get(handles.model_popup,'String'));
     model_type = contents{get(handles.model_popup,'Value')};
     model_config = ModelConfig(ModelConfigType.(['M_',model_type]));
-    bodies_xmlobj = model_config.getBodiesProperiesXmlObj();
+    bodies_xmlobj = model_config.getBodiesPropertiesXmlObj();
     contents = cellstr(get(handles.cable_popup,'String'));
     cable_set_id = contents{get(handles.cable_popup,'Value')};
     cableset_xmlobj = model_config.getCableSetXmlObj(cable_set_id);

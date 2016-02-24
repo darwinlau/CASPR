@@ -26,7 +26,7 @@ q0_error = [0.05; 0.05; 2*pi/180];
 % q0_error = [20*pi/180; -30*pi/180; 15*pi/180];
 
 % The XML objects from the model config are created
-bodies_xmlobj = model_config.getBodiesProperiesXmlObj();
+bodies_xmlobj = model_config.getBodiesPropertiesXmlObj();
 cableset_xmlobj = model_config.getCableSetXmlObj(cable_set_id);
 trajectory_xmlobj = model_config.getTrajectoryXmlObj(trajectory_id);
 

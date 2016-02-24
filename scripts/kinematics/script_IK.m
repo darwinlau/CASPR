@@ -19,7 +19,7 @@ trajectory_id = 'pitch';
 cable_set_id = 'opensim_vasavada';
 
 % The XML objects from the model config are created
-bodies_xmlobj = model_config.getBodiesProperiesXmlObj();
+bodies_xmlobj = model_config.getBodiesPropertiesXmlObj();
 cableset_xmlobj = model_config.getCableSetXmlObj(cable_set_id);
 trajectory_xmlobj = model_config.getTrajectoryXmlObj(trajectory_id);
 

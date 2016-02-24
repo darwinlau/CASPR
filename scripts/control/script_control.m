@@ -23,14 +23,13 @@ trajectory_id = 'traj_1';
 cable_set_id = 'default';
 
 % The XML objects from the model config are created
-bodies_xmlobj = model_config.getBodiesProperiesXmlObj();
+bodies_xmlobj = model_config.getBodiesPropertiesXmlObj();
 cableset_xmlobj = model_config.getCableSetXmlObj(cable_set_id);
 trajectory_xmlobj = model_config.getTrajectoryXmlObj(trajectory_id);
 
 % Load the SystemKinematicsDynamics object from the XML
 dynObj = SystemKinematicsDynamics.LoadXmlObj(bodies_xmlobj, cableset_xmlobj);
 
-id_solver = load_idsolver(handles,dynObj);
 id_objective = IDObjectiveMinQuadCableForce(ones(dynObj.numCables,1));
 id_solver = IDSolverQuadProg(dynObj, id_objective, ID_QP_SolverType.MATLAB);
 Kp_computedtorque = diag([100 100 100]);
