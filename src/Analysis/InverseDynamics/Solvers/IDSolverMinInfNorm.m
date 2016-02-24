@@ -61,8 +61,17 @@ classdef IDSolverMinInfNorm < IDSolverBase
                     end
                     [temp_cable_forces, id_exit_type] = id_lp_matlab(f, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, f0,obj.options);
                     cable_forces = temp_cable_forces(1:m);
-                case ID_LP_SolverType.OPTITOOLBOX_CLP
-                    [temp_cable_forces, id_exit_type] = id_lp_optitoolbox_clp(f, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, f0);
+                case ID_LP_SolverType.OPTITOOLBOX_OOQP
+                    if(isempty(obj.options))
+                        obj.options = optiset('solver', 'OOQP', 'maxiter', 100);
+                    end 
+                    [temp_cable_forces, id_exit_type] = id_lp_opti(f, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, f0,obj.options);
+                    cable_forces = temp_cable_forces(1:m);
+                case ID_LP_SolverType.OPTITOOLBOX_LP_SOLVE
+                    if(isempty(obj.options))
+                        obj.options = optiset('solver', 'LP_SOLVE', 'maxiter', 100,'display','off','warnings','none');
+                    end
+                    [temp_cable_forces, id_exit_type] = id_lp_opti(f, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, f0,obj.options);
                     cable_forces = temp_cable_forces(1:m);
                 otherwise
                     error('ID_LP_SolverType type is not defined');

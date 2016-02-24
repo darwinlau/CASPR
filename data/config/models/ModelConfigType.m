@@ -12,5 +12,6 @@ classdef ModelConfigType
         M_NIST_ROBOCRANE
 		M_COGIRO
         M_CAREX
+        M_KNTU_PLANAR
     end
 end

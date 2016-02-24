@@ -25,7 +25,7 @@ function varargout = workspace_GUI(varargin)
 
     % Edit the above text to modify the response to help workspace_GUI
 
-    % Last Modified by GUIDE v2.5 22-Feb-2016 16:26:45
+    % Last Modified by GUIDE v2.5 24-Feb-2016 19:07:40
 
     % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
@@ -536,5 +536,3 @@ end
 % Generate Workspace Plotting Functions
 % Add new Methods for computing Wrench Closure
 % Determine where best to store settings
-
-
