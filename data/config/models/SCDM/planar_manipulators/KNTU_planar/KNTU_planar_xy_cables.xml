@@ -8,7 +8,7 @@
     <cable_ideal name="cable 1" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
+        <force_max>60</force_max>
         <force_error>1500</force_error>
       </properties>
       <attachments>
@@ -25,7 +25,7 @@
     <cable_ideal name="cable 2" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
+        <force_max>60</force_max>
         <force_error>1500</force_error>
       </properties>
       <attachments>
@@ -42,7 +42,7 @@
     <cable_ideal name="cable 3" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
+        <force_max>60</force_max>
         <force_error>1500</force_error>
       </properties>
       <attachments>
@@ -59,7 +59,7 @@
     <cable_ideal name="cable 4" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
+        <force_max>60</force_max>
         <force_error>1500</force_error>
       </properties>
       <attachments>

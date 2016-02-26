@@ -8,8 +8,8 @@
     <cable_ideal name="cleid-mast (right)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -25,8 +25,8 @@
     <cable_ideal name="cleid-occ (right)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -42,8 +42,8 @@
     <cable_ideal name="deepmult-C4/5-C2 (right)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -59,8 +59,8 @@
     <cable_ideal name="deepmult-C5/6-C3 (right)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -76,8 +76,8 @@
     <cable_ideal name="deepmult-C6/7-C4 (right)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -93,8 +93,8 @@
     <cable_ideal name="deepmult-T1-C5 (right)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -110,8 +110,8 @@
     <cable_ideal name="deepmult-T1-C6 (right)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -127,8 +127,8 @@
     <cable_ideal name="deepmult-T2-C7 (right)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -144,8 +144,8 @@
     <cable_ideal name="iliocost-cerv-c5rib (right)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -161,8 +161,8 @@
     <cable_ideal name="levator-scap (right)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -178,8 +178,8 @@
     <cable_ideal name="long-cap-sklc4 (right)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -207,8 +207,8 @@
     <cable_ideal name="long-col-c1c5 (right)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -232,8 +232,8 @@
     <cable_ideal name="long-col-c1thx (right)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -273,8 +273,8 @@
     <cable_ideal name="long-col-c5thx (right)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -298,8 +298,8 @@
     <cable_ideal name="longissi-cap-sklc6 (right)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -315,8 +315,8 @@
     <cable_ideal name="longissi-cerv-c4thx (right)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -332,8 +332,8 @@
     <cable_ideal name="obl-cap-inf (right)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -349,8 +349,8 @@
     <cable_ideal name="obl-cap-sup (right)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -366,8 +366,8 @@
     <cable_ideal name="rectcap-post-maj (right)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -383,8 +383,8 @@
     <cable_ideal name="rectcap-post-min (right)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -400,8 +400,8 @@
     <cable_ideal name="scalenus-ant (right)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -417,8 +417,8 @@
     <cable_ideal name="scalenus-med (right)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -434,8 +434,8 @@
     <cable_ideal name="scalenus-post (right)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -451,8 +451,8 @@
     <cable_ideal name="semi-cap-sklc5 (right)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -468,8 +468,8 @@
     <cable_ideal name="semi-cap-sklthx (right)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -485,8 +485,8 @@
     <cable_ideal name="semi-cerv-c3thx (right)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -502,8 +502,8 @@
     <cable_ideal name="splen-cap-sklc6 (right)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -519,8 +519,8 @@
     <cable_ideal name="splen-cap-sklthx (right)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -536,8 +536,8 @@
     <cable_ideal name="splen-cerv-c3thx (right)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -553,8 +553,8 @@
     <cable_ideal name="stern-mast (right)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -570,8 +570,8 @@
     <cable_ideal name="supmult-C4/5-C2 (right)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -587,8 +587,8 @@
     <cable_ideal name="supmult-C5/6-C2 (right)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -604,8 +604,8 @@
     <cable_ideal name="supmult-C5/6-C2 (right)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -621,8 +621,8 @@
     <cable_ideal name="supmult-T1-C4 (right)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -638,8 +638,8 @@
     <cable_ideal name="supmult-T1-C5 (right)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -655,8 +655,8 @@
     <cable_ideal name="supmult-T2-C6 (right)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -672,8 +672,8 @@
     <cable_ideal name="trap-acr (right)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -689,8 +689,8 @@
     <cable_ideal name="trap-cl (right)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -706,8 +706,8 @@
     <cable_ideal name="cleid-mast (left)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -723,8 +723,8 @@
     <cable_ideal name="cleid-occ (left)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -740,8 +740,8 @@
     <cable_ideal name="deepmult-C4/5-C2 (left)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -757,8 +757,8 @@
     <cable_ideal name="deepmult-C5/6-C3 (left)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -774,8 +774,8 @@
     <cable_ideal name="deepmult-C6/7-C4 (left)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -791,8 +791,8 @@
     <cable_ideal name="deepmult-T1-C5 (left)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -808,8 +808,8 @@
     <cable_ideal name="deepmult-T1-C6 (left)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -825,8 +825,8 @@
     <cable_ideal name="deepmult-T2-C7 (left)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -842,8 +842,8 @@
     <cable_ideal name="iliocost-cerv-c5rib (left)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -859,8 +859,8 @@
     <cable_ideal name="levator-scap (left)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -876,8 +876,8 @@
     <cable_ideal name="long-cap-sklc4 (left)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -905,8 +905,8 @@
     <cable_ideal name="long-col-c1c5 (left)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -930,8 +930,8 @@
     <cable_ideal name="long-col-c1thx (left)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -971,8 +971,8 @@
     <cable_ideal name="long-col-c5thx (left)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -996,8 +996,8 @@
     <cable_ideal name="longissi-cap-sklc6 (left)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -1013,8 +1013,8 @@
     <cable_ideal name="longissi-cerv-c4thx (left)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -1030,8 +1030,8 @@
     <cable_ideal name="obl-cap-inf (left)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -1047,8 +1047,8 @@
     <cable_ideal name="obl-cap-sup (left)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -1064,8 +1064,8 @@
     <cable_ideal name="rectcap-post-maj (left)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -1081,8 +1081,8 @@
     <cable_ideal name="rectcap-post-min (left)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -1098,8 +1098,8 @@
     <cable_ideal name="scalenus-ant (left)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -1115,8 +1115,8 @@
     <cable_ideal name="scalenus-med (left)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -1132,8 +1132,8 @@
     <cable_ideal name="scalenus-post (left)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -1149,8 +1149,8 @@
     <cable_ideal name="semi-cap-sklc5 (left)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -1166,8 +1166,8 @@
     <cable_ideal name="semi-cap-sklthx (left)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -1183,8 +1183,8 @@
     <cable_ideal name="semi-cerv-c3thx (left)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -1200,8 +1200,8 @@
     <cable_ideal name="splen-cap-sklc6 (left)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -1217,8 +1217,8 @@
     <cable_ideal name="splen-cap-sklthx (left)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -1234,8 +1234,8 @@
     <cable_ideal name="splen-cerv-c3thx (left)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -1251,8 +1251,8 @@
     <cable_ideal name="stern-mast (left)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -1268,8 +1268,8 @@
     <cable_ideal name="supmult-C4/5-C2 (left)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -1285,8 +1285,8 @@
     <cable_ideal name="supmult-C5/6-C2 (left)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -1302,8 +1302,8 @@
     <cable_ideal name="supmult-C5/6-C2 (left)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -1319,8 +1319,8 @@
     <cable_ideal name="supmult-T1-C4 (left)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -1336,8 +1336,8 @@
     <cable_ideal name="supmult-T1-C5 (left)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -1353,8 +1353,8 @@
     <cable_ideal name="supmult-T2-C6 (left)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -1370,8 +1370,8 @@
     <cable_ideal name="trap-acr (left)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -1387,8 +1387,8 @@
     <cable_ideal name="trap-cl (left)" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>1000</force_max>
-        <force_error>1500</force_error>
+        <force_max>60</force_max>
+        <force_error>150</force_error>
       </properties>
       <attachments>
         <attachment>
