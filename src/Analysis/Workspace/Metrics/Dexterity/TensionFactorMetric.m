@@ -22,7 +22,7 @@ classdef TensionFactorMetric < WorkspaceMetricBase
         end
         
         %% Evaluate Functions
-        function v = evaluate(obj,dynamics,options,method,inWorkspace)
+        function v = evaluateFunction(obj,dynamics,options,method,inWorkspace)
             if((nargin <=3)||(~(method==WrenchClosureMethods.TF)))
                 if(nargin == 2)
                     options = optimset('Display','off');

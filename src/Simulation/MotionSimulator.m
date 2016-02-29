@@ -85,7 +85,6 @@ classdef (Abstract) MotionSimulator < Simulator
 
             q_array = cell2mat(obj.trajectory.q);
             q_dot_array = cell2mat(obj.trajectory.q_dot);
-
             if(~isempty(plot_axis))
                 plot(plot_axis(1),obj.timeVector, q_array(states_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); 
                 plot(plot_axis(2),obj.timeVector, q_dot_array(states_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); 

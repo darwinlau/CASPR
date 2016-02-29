@@ -8,7 +8,7 @@ classdef SEACM < WorkspaceMetricBase
         end
         
         %% Evaluate Functions
-        function v = evaluate(obj,dynamics,~,method,inWorkspace)
+        function v = evaluateFunction(obj,dynamics,~,method,inWorkspace)
             if((nargin <=3)||(~(method==WorkspaceStaticMethods.CMe)))
                 L   =   transpose(dynamics.M\dynamics.L');
                 f_u =   dynamics.cableDynamics.forcesMax;

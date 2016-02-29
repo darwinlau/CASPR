@@ -67,4 +67,4 @@ fprintf('End Running Forward Kinematics Simulation : %f seconds\n', time_elapsed
 % result of fksim)
 iksim.plotJointSpace([], []);
 fksim.plotJointSpace([] , []);
-fksim.plotCableLengthError();
+fksim.plotCableLengthError([],[]);

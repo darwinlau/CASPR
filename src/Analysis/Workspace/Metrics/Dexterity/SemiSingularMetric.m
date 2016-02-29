@@ -8,7 +8,7 @@ classdef SemiSingularMetric < WorkspaceMetricBase
         end
         
         %% Evaluate Functions
-        function v = evaluate(obj,dynamics,~,method,inWorkspace)
+        function v = evaluateFunction(obj,dynamics,~,method,inWorkspace)
             if((nargin <=3)||(~(method==WrenchClosureMethods.SS)))
                 % Determine necessary variables for test
                 L       =   dynamics.L; % Cable Jacobian

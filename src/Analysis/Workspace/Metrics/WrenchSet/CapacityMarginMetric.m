@@ -27,7 +27,7 @@ classdef CapacityMarginMetric < WorkspaceMetricBase
         end
         
         %% Evaluate Functions
-        function v = evaluate(obj,dynamics,~,method,inWorkspace)
+        function v = evaluateFunction(obj,dynamics,~,method,inWorkspace)
             if((nargin <=3)||(~(method==WorkspaceStaticMethods.CMa)))
                 L   =   dynamics.L;
                 f_u =   dynamics.cableDynamics.forcesMax;

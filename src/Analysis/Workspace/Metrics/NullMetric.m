@@ -8,7 +8,7 @@ classdef NullMetric < WorkspaceMetricBase
         end
         
         %% Evaluate Functions
-        function v = evaluate(obj,~,~,~,~)
+        function v = evaluateFunction(obj,~,~,~,~)
             v = 1;
         end
     end

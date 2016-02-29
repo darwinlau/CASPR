@@ -1,9 +1,9 @@
 classdef ID_CF_SolverType
     enumeration
         CLOSED_FORM
-        ICFM
+        IMPROVED_CLOSED_FORM
         PUNCTURE_METHOD
-        IPM
+        IMPROVED_PUNCTURE_METHOD
     end
 end
 

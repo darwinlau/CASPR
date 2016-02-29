@@ -34,7 +34,7 @@ classdef WrenchClosure < WorkspaceConditionBase
         end
         
         %% Evaluate the wrench closure condition return true if satisfied 
-        function inWorkspace = evaluate(obj,dynamics)
+        function inWorkspace = evaluateFunction(obj,dynamics)
            if(obj.method == WrenchClosureMethods.QP)
                inWorkspace = wrench_closure_quadprog(dynamics,obj.options);
            elseif(obj.method == WrenchClosureMethods.TF)

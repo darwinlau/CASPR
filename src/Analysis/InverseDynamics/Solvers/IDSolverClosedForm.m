@@ -36,11 +36,11 @@ classdef IDSolverClosedForm < IDSolverBase
             switch (obj.cf_solver_type)
                 case ID_CF_SolverType.CLOSED_FORM
                     [cable_forces, id_exit_type] = id_cf_cfm(A_eq, b_eq, fmin, fmax);
-                case ID_CF_SolverType.ICFM
+                case ID_CF_SolverType.IMPROVED_CLOSED_FORM
                     [cable_forces, id_exit_type] = id_cf_icfm(A_eq, b_eq, fmin, fmax);
                 case ID_CF_SolverType.PUNCTURE_METHOD
                     [cable_forces, id_exit_type] = id_cf_pm(A_eq, b_eq, fmin, fmax);
-                case ID_CF_SolverType.IPM
+                case ID_CF_SolverType.IMPROVED_PUNCTURE_METHOD
                     [cable_forces, id_exit_type] = id_cf_ipm(A_eq, b_eq, fmin, fmax);
                 otherwise
                     error('ID_CF_SolverType type is not defined');

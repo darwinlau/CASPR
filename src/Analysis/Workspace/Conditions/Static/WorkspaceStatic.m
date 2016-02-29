@@ -26,7 +26,7 @@ classdef WorkspaceStatic < WorkspaceConditionBase
             end 
         end
         
-        function inWorkspace = evaluate(obj,dynamics)
+        function inWorkspace = evaluateFunction(obj,dynamics)
            if(obj.method == WorkspaceStaticMethods.QP)
                inWorkspace = static_quadprog(dynamics,obj.options);
            elseif(obj.method == WorkspaceStaticMethods.CMa)

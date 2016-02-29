@@ -14,7 +14,7 @@ classdef FKLeastSquares < FKAnalysisBase
             fkls.qDotMethod = qDotType;            
         end
         
-        function [q, q_dot] = compute(obj, len, len_prev_2, q_prev, q_d_prev, delta_t)
+        function [q, q_dot] = computeFunction(obj, len, len_prev_2, q_prev, q_d_prev, delta_t)
             switch obj.approxMethod
                 case FK_LS_ApproxOptionType.USE_PREVIOUS_Q
                     q_approx = q_prev;

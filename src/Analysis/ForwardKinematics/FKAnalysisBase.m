@@ -15,10 +15,16 @@ classdef FKAnalysisBase < handle
         function fk = FKAnalysisBase(kin_model)
             fk.model = kin_model;
         end
+        
+        function [q, q_dot, comp_time] = compute(obj, len, len_prev_2, q_prev, q_d_prev, delta_t)
+            start_tic = tic;
+            [q, q_dot] = obj.computeFunction(len, len_prev_2, q_prev, q_d_prev, delta_t);
+            comp_time = toc(start_tic);
+        end
     end
     
     methods (Abstract)
-        q = compute(obj, len, len_prev_2, q_prev, q_d_prev, delta_t);
+        [q,q_dot] = computeFunction(obj, len, len_prev_2, q_prev, q_d_prev, delta_t);
     end
         
     methods (Static)

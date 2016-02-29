@@ -624,6 +624,7 @@ function run_forward_kinematics(handles,kinObj,trajectory_xmlobj)
     GUIOperations.GUIPlot('plotCableLengthError',fksim,handles,1,get(handles.undock_box,'Value'));
     time_elapsed = toc(start_tic);
     fprintf('End Plotting Simulation : %f seconds\n', time_elapsed);
+    set(handles.status_text,'String','No simulation running');
 end
 
 function loadState(handles)
