@@ -342,6 +342,7 @@ function loadState(handles)
         set(handles.model_popup,'value',state.model_popup_value);
         cable_popup_update(handles);
         set(handles.cable_popup,'value',state.cable_popup_value);
+        generate_kinematic_dynamic_object(handles);
     else
         set(handles.model_popup,'value',1);
         cable_popup_update(handles);

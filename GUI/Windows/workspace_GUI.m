@@ -477,6 +477,7 @@ function saveState(handles,file_path)
     state.workspace_generation_popup_value  =   get(handles.workspace_generation_popup,'value');
     state.workspace_metric_popup_value      =   get(handles.workspace_metric_popup,'value');
     state.workspace_table                   =   get(handles.qtable,'Data');
+    state.plot_type_popup                   =   get(handles.plot_type_popup,'value');
     if(nargin>1)
         save(file_path,'state');
     else
@@ -508,8 +509,11 @@ function loadState(handles)
                 set(handles.workspace_generation_popup,'value',state.workspace_generation_popup_value);
                 set(handles.workspace_metric_popup,'value',state.workspace_metric_popup_value);
                 set(handles.qtable,'Data',state.workspace_table);
+                set(handles.plot_type_popup,'value',state.plot_type_popup);
+                plot_type_popup_Callback(handles.plot_type_popup,[],handles);
             else
                 workspace_generation_popup_Update(handles.workspace_generation_popup,handles);
+                plot_type_popup_Callback(handles.plot_type_popup,[],handles);
             end
         end
     end
