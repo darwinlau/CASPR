@@ -290,6 +290,7 @@ function generate_kinematic_dynamic_object(handles)
     setappdata(handles.cable_popup,'dynObj',dynObj);
     setappdata(handles.cable_popup,'axis_range',axis_range);
     setappdata(handles.cable_popup,'kinObj',kinObj);
+    set(handles.model_label_text,'String',model_type);
     format_q_table(dynObj.numDofs,handles.qtable);
 end
 
