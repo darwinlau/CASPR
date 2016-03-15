@@ -7,9 +7,7 @@ addpath(genpath(path_string));
 
 %% Initialise objects
 model_config = ModelConfig(ModelConfigType.M_2R_PLANAR_XZ);
-% model_config = ModelConfig(ModelConfigType.M_SIMPLE_SPATIAL);
 cable_set_id = 'basic_4_cables';
-% cable_set_id = 'basic_7_cables';
 bodies_xmlobj = model_config.getBodiesPropertiesXmlObj();
 cableset_xmlobj = model_config.getCableSetXmlObj(cable_set_id);
 
@@ -19,10 +17,7 @@ dynObj = SystemKinematicsDynamics.LoadXmlObj(bodies_xmlobj, cableset_xmlobj);
 % Workspace conditions
 % wcondition = WorkspaceStub();
 % wcondition  =   WrenchClosure('quad_prog');
-% wcondition  =   WorkspaceStatic('quad_prog');
-wcondition  =   WorkspaceStatic('capability_measure');
-% wcondition  =   WorkspaceStatic('capacity_margin');
-% wcondition = Example2Workspace()
+wcondition  =   WorkspaceStatic('quad_prog');
 %% Define the metric
 % metric = NullMetric();
 metric = SEACM();
