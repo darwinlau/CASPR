@@ -14,6 +14,8 @@ classdef (Abstract) CableDynamics < handle
         % Minimum and maximum allowable cable force
         forceMin
         forceMax
+        % Stiffness of the cable
+        K
         % This value is used to represent the force when invalid. For
         % example, it can be set as -1 to indicate that no solution is/was
         % obtained, or set to a high value above forceMax if this is used

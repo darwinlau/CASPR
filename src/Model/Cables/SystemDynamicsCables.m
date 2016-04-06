@@ -98,6 +98,8 @@ classdef SystemDynamicsCables < handle
                 type = char(currentCableItem.getNodeName);
                 if (strcmp(type, 'cable_ideal'))
                     xml_cables{k} = CableDynamicsIdeal.LoadXmlObj(currentCableItem);
+                elseif (strcmp(type, 'cable_linear_spring'))
+                    xml_cables{k} = CableDynamicsLinearSpring.LoadXmlObj(currentCableItem);
                 else
                     error('Unknown cables type: %s', type);
                 end

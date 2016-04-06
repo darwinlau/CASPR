@@ -29,7 +29,7 @@ classdef (Abstract) MotionSimulator < Simulator
                 if t == 0
                     t = 1;
                 end
-                obj.model.update(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t});
+                obj.model.update(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t}, []);
                 MotionSimulator.PlotFrame(obj.model, plot_axis, plot_handle)
                 frame = getframe(plot_handle);
                 writerObj.writeVideo(frame);

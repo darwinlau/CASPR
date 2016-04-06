@@ -12,6 +12,7 @@ classdef CableDynamicsIdeal < CableDynamics
     methods 
         function cd = CableDynamicsIdeal(name)
             cd@CableDynamics(name);
+            cd.K = Inf;
         end
         
         function update(obj, cableKinematics, bodyKinematics)

@@ -14,9 +14,13 @@ clc; clear; close all;
 % trajectory_id = 'x_simple';
 % cable_set_id = 'basic';
 % 2) Neck model
-model_config = ModelConfig(ModelConfigType.M_NECK_8S);
-trajectory_id = 'roll';
-cable_set_id = 'opensim_vasavada';
+% model_config = ModelConfig(ModelConfigType.M_NECK_8S);
+% trajectory_id = 'roll';
+% cable_set_id = 'opensim_vasavada';
+% 3) IPAnema model
+model_config = ModelConfig(ModelConfigType.M_IPANEMA_2);
+trajectory_id = 'traj_z_up';
+cable_set_id = 'default';
 
 % The XML objects from the model config are created
 bodies_xmlobj = model_config.getBodiesPropertiesXmlObj();
@@ -32,10 +36,10 @@ dynObj = SystemKinematicsDynamics.LoadXmlObj(bodies_xmlobj, cableset_xmlobj);
 id_objective = IDObjectiveMinQuadCableForce(ones(dynObj.numCables,1));
 %id_objective = IDObjectiveMinInteractions(ones(6*dynObj.numLinks,1));
 id_solver = IDSolverQuadProg(dynObj, id_objective, ID_QP_SolverType.MATLAB);
-% id_solver = IDSolverOperationalNullSpace(id_objective, ID_QP_SolverType.MATLAB_ACTIVE_SET_WARM_START, 2*eye(dynObj.numCables));
-for i = 1:dynObj.numLinks
-    id_solver.addConstraint(IDConstraintInteractionForceAngleCone(i, [0;0;-1], 15*pi/180, 16));
-end
+%id_solver = IDSolverOperationalNullSpace(id_objective, ID_QP_SolverType.MATLAB_ACTIVE_SET_WARM_START, 2*eye(dynObj.numCables));
+% for i = 1:dynObj.numLinks
+%     id_solver.addConstraint(IDConstraintInteractionForceAngleCone(i, [0;0;-1], 15*pi/180, 16));
+% end
 
 
 % Setup the inverse dynamics simulator with the SystemKinematicsDynamics
