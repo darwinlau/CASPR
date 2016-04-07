@@ -23,6 +23,12 @@ classdef SystemKinematicsBodies < handle
         connectivityGraph       % p x p connectivity matrix, if (i,j) = 1 means link i-1 is the parent of link j
         bodiesPathGraph         % p x p matrix that governs how to track to particular bodies, (i,j) = 1 means that to get to link j we must pass through link i
 
+        % Operational Space coordinates of the system
+        y
+        y_dot
+        y_ddot
+        
+        
         % These matrices should probably be computed as needed (dependent
         % variable), but if it is a commonly used matrix (i.e. accessed
         % multiple times even if the system state does not change) then
@@ -35,6 +41,9 @@ classdef SystemKinematicsBodies < handle
         S_dot                   % Derivative of S
         P                       % 6p x 6p matrix representing mapping between absolute body velocities (CoG) and relative body velocities (joint)
         W                       % W = P*S : 6p x n matrix representing mapping \dot{\mathbf{x}} = W \dot{\mathbf{q}}
+        J                       % J matrix representing relationship between generalised coordinate velocities and operational space coordinates
+        J_dot                   % Derivative of J
+        T                       % Projection of operational coordinates
 
         % Absolute CoM velocities and accelerations (linear and angular)
         x_dot                   % Absolute velocities
@@ -43,6 +52,7 @@ classdef SystemKinematicsBodies < handle
 
         numDofs
         numDofVars
+        numOPDofs
     end
 
     properties (Dependent)
@@ -64,20 +74,22 @@ classdef SystemKinematicsBodies < handle
         function b = SystemKinematicsBodies(bodies)
             num_dofs = 0;
             num_dof_vars = 0;
+            num_op_dofs = 0;
             for k = 1:length(bodies)
                 num_dofs = num_dofs + bodies{k}.numDofs;
                 num_dof_vars = num_dof_vars + bodies{k}.numDofVars;
             end
-
             b.bodies = bodies;
             b.numDofs = num_dofs;
             b.numDofVars = num_dof_vars;
+            b.numOPDofs = num_op_dofs;
 
             b.connectivityGraph = zeros(b.numLinks, b.numLinks);
             b.bodiesPathGraph = zeros(b.numLinks, b.numLinks);
             b.S = zeros(6*b.numLinks, b.numDofs);
             b.P = zeros(6*b.numLinks, 6*b.numLinks);
             b.W = zeros(6*b.numLinks, b.numDofs);
+            b.T = MatrixOperations.Initialise(0,6*b.numLinks,0);
 
             % Connects the objects of the system and create the
             % connectivity and body path graphs
@@ -124,10 +136,25 @@ classdef SystemKinematicsBodies < handle
                     obj.bodies{k}.r_OP = obj.bodies{k}.joint.R_pe.'*(obj.bodies{k}.r_Parent + obj.bodies{k}.joint.r_rel);
                 end
                 % Determine absolute position of COG
-                obj.bodies{k}.r_OG = obj.bodies{k}.r_OP + obj.bodies{k}.r_G;
+                obj.bodies{k}.r_OG  = obj.bodies{k}.r_OP + obj.bodies{k}.r_G;
                 % Determine absolute position of link's ending position
                 obj.bodies{k}.r_OPe = obj.bodies{k}.r_OP + obj.bodies{k}.r_Pe;
+                % Determine absolute position of the operational space
+                if(~isempty(obj.bodies{k}.r_y))
+                    obj.bodies{k}.r_Oy  = obj.bodies{k}.r_OP + obj.bodies{k}.r_y;
+                end
             end
+            
+            % Now determine the operational space vector y
+            obj.y = MatrixOperations.Initialise(obj.numOPDofs,1,is_symbolic); l = 1;
+            for k = 1:obj.numLinks
+                if(~isempty(obj.bodies{k}.op_space))
+                    n_y = obj.bodies{k}.numOPDofs;
+                    obj.y(l:l+n_y-1) = obj.bodies{k}.op_space.extractOPSpace(obj.bodies{k}.r_Oy,obj.bodies{k}.R_0k);
+                    l = l + n_y;                    
+                end
+            end
+            
             % Set S (joint state matrix) and S_dot
             index_dofs = 1;
             obj.S = MatrixOperations.Initialise(6*obj.numLinks,obj.numDofs,is_symbolic);
@@ -150,6 +177,19 @@ classdef SystemKinematicsBodies < handle
                     obj.P(6*k-5:6*k, 6*a-5:6*a) = Pak;
                 end
             end
+            
+            % Set Q (relationship with joint propagation for operational space)
+            Q = MatrixOperations.Initialise(6*obj.numLinks,6*obj.numLinks,is_symbolic);
+            for k = 1:obj.numLinks
+                body_k = obj.bodies{k};
+                for a = 1:k
+                    body_a = obj.bodies{a};
+                    R_ka = body_k.R_0k.'*body_a.R_0k;
+                    Qak = [body_k.R_0k,zeros(3);zeros(3),body_k.R_0k]*(obj.bodiesPathGraph(a,k)*[R_ka*body_a.joint.R_pe.' -R_ka*MatrixOperations.SkewSymmetric(-body_a.r_OP + R_ka.'*body_k.r_Oy); ...
+                        zeros(3,3) R_ka]);
+                    Q(6*k-5:6*k, 6*a-5:6*a) = Qak;
+                end
+            end
 
             % W = P*S
             obj.W = obj.P*obj.S;
@@ -160,6 +200,10 @@ classdef SystemKinematicsBodies < handle
                 obj.bodies{k}.v_OG = obj.x_dot(6*k-5:6*k-3);
                 obj.bodies{k}.w = obj.x_dot(6*k-2:6*k);
             end
+            % J = T*Q*S
+            obj.J = obj.T*Q*obj.S;
+            % Determine y_dot
+            obj.y_dot = obj.J*obj.q_dot;            
 
             % Determine x_ddot
             ang_mat = MatrixOperations.Initialise(6*obj.numLinks,6*obj.numLinks,is_symbolic);
@@ -185,6 +229,21 @@ classdef SystemKinematicsBodies < handle
                 obj.C_a(6*k-5:6*k-3) = obj.C_a(6*k-5:6*k-3) + cross(obj.bodies{k}.w, cross(obj.bodies{k}.w, obj.bodies{k}.r_G));
             end
             obj.x_ddot = obj.P*obj.S*obj.q_ddot + obj.C_a;
+            
+            % Determine J_dot
+            temp_j_dot = Q*obj.S_dot + Q*ang_mat*obj.S;            
+            for k = 1:obj.numLinks
+                for a = 1:k
+                    ap = obj.bodies{a}.parentLinkId;
+                    if (ap > 0 && obj.bodiesPathGraph(a,k))
+                        temp_j_dot(6*k-5:6*k-3,:) = temp_j_dot(6*k-5:6*k-3,:) - ...
+                            obj.bodies{k}.R_0k*obj.bodies{k}.R_0k.'*obj.bodies{ap}.R_0k*MatrixOperations.SkewSymmetric(obj.bodies{ap}.w)*MatrixOperations.SkewSymmetric(obj.bodies{a}.r_Parent + obj.bodies{a}.joint.r_rel)*obj.W(6*ap-2:6*ap,:);
+                    end
+                end
+                temp_j_dot(6*k-5:6*k-3,:) = temp_j_dot(6*k-5:6*k-3,:) - obj.bodies{k}.R_0k*MatrixOperations.SkewSymmetric(obj.bodies{k}.w)*MatrixOperations.SkewSymmetric(obj.bodies{k}.r_y)*obj.W(6*k-2:6*k,:);
+            end
+            obj.J_dot = obj.T*temp_j_dot;
+            obj.y_ddot = obj.J_dot*q_dot + obj.J*obj.q_ddot;
 
             % Extract absolute accelerations
             for k = 1:obj.numLinks
@@ -289,11 +348,52 @@ classdef SystemKinematicsBodies < handle
                 q_deriv(index_vars:index_vars+obj.bodies{k}.joint.numVars-1) = obj.bodies{k}.joint.q_deriv;
                 index_vars = index_vars + obj.bodies{k}.joint.numVars;
             end
+        end  
+        
+        function loadOpXmlObj(obj,op_space_xmlobj)
+            %% Load the op space
+            assert(strcmp(op_space_xmlobj.getNodeName, 'op_set'), 'Root element should be <op_set>');
+            % Go into the cable set
+            allOPItems = op_space_xmlobj.getChildNodes;
+            
+            num_ops = allOPItems.getLength;
+            % Creates all of the operational spaces first first
+            for k = 1:num_ops
+                % Java uses 0 indexing
+                currentOPItem = allOPItems.item(k-1);
+
+                type = char(currentOPItem.getNodeName);
+                if (strcmp(type, 'position'))
+                    op_space = OpPosition.LoadXmlObj(currentOPItem);
+                else
+                    error('Unknown link type: %s', type);
+                end
+                parent_link = op_space.link;
+                obj.bodies{parent_link}.attachOPSpace(op_space);
+                % Should add some protection to ensure that one OP_Space
+                % per link
+            end
+            num_op_dofs = 0;
+            for k = 1:length(obj.bodies)
+                num_op_dofs = num_op_dofs + obj.bodies{k}.numOPDofs;
+            end
+            obj.numOPDofs = num_op_dofs;
+            
+            obj.T = MatrixOperations.Initialise(obj.numOPDofs,6*obj.numLinks,0);
+            l = 1; 
+            for k = 1:length(obj.bodies)
+                if(~isempty(obj.bodies{k}.op_space))
+                    n_y = obj.bodies{k}.numOPDofs;
+                    obj.T(l:l+n_y-1,6*k-5:6*k) = obj.bodies{k}.op_space.getSelectionMatrix();
+                    l = l + n_y;
+                end
+            end
         end
     end
 
     methods (Static)
         function b = LoadXmlObj(body_prop_xmlobj)
+            %% Load the body
             assert(strcmp(body_prop_xmlobj.getNodeName, 'links'), 'Root element should be <links>');
             
 %             allLinkItems = body_prop_xmlobj.getChildNodes;

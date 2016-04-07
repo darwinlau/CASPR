@@ -7,10 +7,12 @@ classdef ModelConfig
         bodyPropertiesFilename
         cablesPropertiesFilename
         trajectoriesFilename
+        opFilename
         
         bodiesXmlObj
         cablesXmlObj
         trajectoriesXmlObj
+        opXmlObj
     end
     
     properties (Access = private)
@@ -72,6 +74,7 @@ classdef ModelConfig
                     c.bodyPropertiesFilename = [c.root_folder, '\MCDM\2R_planar_xz\2R_planar_xz_bodies.xml'];
                     c.cablesPropertiesFilename = [c.root_folder, '\MCDM\2R_planar_xz\2R_planar_xz_cables.xml'];
                     c.trajectoriesFilename = [c.root_folder, '\MCDM\2R_planar_xz\2R_planar_xz_trajectories.xml'];
+                    c.opFilename = [c.root_folder, '\MCDM\2R_planar_xz\2R_planar_xz_op.xml'];
                 case ModelConfigType.M_CAREX
                     c.bodyPropertiesFilename = [c.root_folder, '\MCDM\CAREX\CAREX_bodies.xml'];
                     c.cablesPropertiesFilename = [c.root_folder, '\MCDM\CAREX\CAREX_cables.xml'];
@@ -84,15 +87,18 @@ classdef ModelConfig
                 c.bodyPropertiesFilename = strrep(c.bodyPropertiesFilename, '\', '/');
                 c.cablesPropertiesFilename = strrep(c.cablesPropertiesFilename, '\', '/');
                 c.trajectoriesFilename = strrep(c.trajectoriesFilename, '\', '/');
+                c.opFilename = strrep(c.opFilename, '\', '/');
             end
             
             assert(exist(c.bodyPropertiesFilename, 'file') == 2, 'Body properties file does not exist.');
             assert(exist(c.cablesPropertiesFilename, 'file') == 2, 'Cable properties file does not exist.');
             assert(exist(c.trajectoriesFilename, 'file') == 2, 'Trajectories file does not exist.');
+            assert(exist(c.opFilename, 'file') == 2, 'Operational space coordinates file does not exist.');
             
             c.bodiesXmlObj =  XmlOperations.XmlReadRemoveIndents(c.bodyPropertiesFilename);
             c.cablesXmlObj =  XmlOperations.XmlReadRemoveIndents(c.cablesPropertiesFilename);
             c.trajectoriesXmlObj =  XmlOperations.XmlReadRemoveIndents(c.trajectoriesFilename);
+            c.opXmlObj  =    XmlOperations.XmlReadRemoveIndents(c.opFilename);
         end
         
         function v = getBodiesPropertiesXmlObj(obj)
@@ -107,6 +113,11 @@ classdef ModelConfig
         function v = getTrajectoryXmlObj(obj, id)
             v = obj.trajectoriesXmlObj.getElementById(id);
             assert(~isempty(v), sprintf('Id ''%s'' does not exist in the trajectories XML file', id));
+        end
+        
+        function v = getOPXmlObj(obj, id)
+            v = obj.opXmlObj.getElementById(id);
+            assert(~isempty(v), sprintf('Id ''%s'' does not exist in the operation XML file', id));
         end
     end
 end

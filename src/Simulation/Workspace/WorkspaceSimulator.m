@@ -76,8 +76,8 @@ classdef WorkspaceSimulator < Simulator
                     if(plotting_workspace(3,i)==Inf)
                         plot(plot_axis,(180/pi)*plotting_workspace(1,i),(180/pi)*plotting_workspace(2,i),'Color',map(sf*mw,:),'Marker','.')
                     else
-                        plot(plot_axis,plotting_workspace(1,i),plotting_workspace(2,i),'k.')
-%                         plot(plot_axis,(180/pi)*plotting_workspace(1,i),(180/pi)*plotting_workspace(2,i),'Color',map(int32(sf*(plotting_workspace(3,i)+10)),:),'Marker','.')
+%                         plot(plot_axis,plotting_workspace(1,i),plotting_workspace(2,i),'k.')
+                        plot(plot_axis,(180/pi)*plotting_workspace(1,i),(180/pi)*plotting_workspace(2,i),'Color',map(int32(sf*(plotting_workspace(3,i)+10)),:),'Marker','.')
                     end
                 elseif((n_d == 3)||(n_d == 6))
 %                     axis([-180 180 -180 180 -180 180]);

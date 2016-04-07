@@ -4,7 +4,7 @@
 % robots:
 % D. Lau, D. Oetomo, and S. K. Halgamuge, "Generalized Modeling of
 % Multilink Cable-Driven Manipulators with Arbitrary Routing Using the
-% Cable-Routing Matrix," IEEE Trans. Robot., vol. 29, no. 5, pp. 1102–1113,
+% Cable-Routing Matrix," IEEE Trans. Robot., vol. 29, no. 5, pp. 1102ï¿½1113,
 % Oct. 2013.
 % 
 % Author        : Darwin LAU
@@ -16,6 +16,11 @@
 classdef SystemDynamicsBodies < handle    
     properties (SetAccess = protected)
         bodies                  % Cell array of BodyDynamics objects
+        
+        % M_y y_ddot + C_y + G_y = W (operational space)
+        M_y
+        C_y
+        G_y
         
         % M_b * q_ddot + C_b = G_b + w_b - V^T f (forces in body space)
         M_b                         % Body mass-inertia matrix
@@ -45,6 +50,7 @@ classdef SystemDynamicsBodies < handle
                 obj.bodies{k}.update(bodyKinematics);
             end
             
+            % Body equation of motion terms
             obj.M_b = obj.massInertiaMatrix*bodyKinematics.W;
             obj.C_b = obj.massInertiaMatrix*bodyKinematics.C_a;
             for k = 1:obj.numLinks
@@ -58,10 +64,19 @@ classdef SystemDynamicsBodies < handle
                 obj.G_b(6*k-5:6*k-3) = bodyKinematics.bodies{k}.R_0k.'*[0; 0; -obj.bodies{k}.m*SystemKinematicsDynamics.GRAVITY_CONSTANT];
             end
             
+            % Joint space equation of motion terms
             obj.M =   bodyKinematics.W.' * obj.M_b;
             obj.C =   bodyKinematics.W.' * obj.C_b;
             obj.G = - bodyKinematics.W.' * obj.G_b;
             obj.W_e = w_ext;
+            
+            % Operational space equation of motion terms
+            if(~isempty(bodyKinematics.J))
+                obj.M_y = inv(bodyKinematics.J*inv(obj.M)*bodyKinematics.J'); %#ok<MINV>
+                Jpinv   = bodyKinematics.J'/(bodyKinematics.J*bodyKinematics.J');
+                obj.C_y = Jpinv'*obj.C - obj.M_y*bodyKinematics.J_dot*bodyKinematics.q_dot;
+                obj.G_y = Jpinv'*obj.G;
+            end
         end
         
         function M = get.massInertiaMatrix(obj)

@@ -142,5 +142,9 @@ classdef SystemKinematicsDynamics < SystemKinematics
         function value = get.cableForces(obj)
             value = obj.cableDynamics.forces;
         end
+        
+        function loadOpXmlObj(obj,op_space_xmlobj)
+            obj.bodyKinematics.loadOpXmlObj(op_space_xmlobj);
+        end
     end
 end

@@ -4,9 +4,11 @@ classdef (Abstract) BodyKinematics < handle
 
     properties
         joint                   % Joint object
+        op_space                % Operation Space object
 
         r_G                     % Position vector from joint to COG
         r_Pe                    % Position vector from joint to end point (only for display purpose)
+        r_y = zeros(3,1);       % Position vector from joint to OP space reference point
 
         r_Parent                % Position from joint of parent link to this joint
         parentLinkId            % Link ID of the parent
@@ -18,6 +20,7 @@ classdef (Abstract) BodyKinematics < handle
         r_OG = zeros(3,1);      % Absolute position vector to centre of gravity in {k}
         r_OP = zeros(3,1);      % Absolute position vector to joint location in (k)
         r_OPe = zeros(3,1);     % Absolute position vector to end of link in {k}
+        r_Oy = zeros(3,1);      % Absolute position vector to the OP space reference point in {k}
 
         v_OG = zeros(3,1);      % Absolute velocity vector to centre of gravity in {k}
         w = zeros(3,1);         % Absolute angular velocity vector in {k}
@@ -34,6 +37,7 @@ classdef (Abstract) BodyKinematics < handle
     properties (Dependent)
         numDofs
         numDofVars
+        numOPDofs
     end
 
     methods
@@ -41,6 +45,8 @@ classdef (Abstract) BodyKinematics < handle
             bk.id = id;
             bk.name = name;
             bk.joint = Joint.CreateJoint(jointType);
+            % Operation Space creation
+            bk.op_space = [];
         end
 
         function addParent(obj, parent, r_parent_loc)
@@ -51,6 +57,11 @@ classdef (Abstract) BodyKinematics < handle
                 obj.parentLink = parent;
             end
         end
+        
+        function attachOPSpace(obj,op_space)
+            obj.op_space = op_space;
+            obj.r_y = op_space.offset;
+        end
 
         function dofs = get.numDofs(obj)
             dofs = obj.joint.numDofs;
@@ -58,6 +69,14 @@ classdef (Abstract) BodyKinematics < handle
 
         function dofs = get.numDofVars(obj)
             dofs = obj.joint.numVars;
+        end
+        
+        function dofs = get.numOPDofs(obj)
+            if(~isempty(obj.op_space))
+                dofs = obj.op_space.numOPDofs;
+            else
+                dofs = 0;
+            end
         end
 
         function update(obj, q, q_dot, q_ddot)

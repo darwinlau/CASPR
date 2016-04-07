@@ -28,6 +28,7 @@ classdef SystemKinematics < handle
         numLinks                % Number of links
         numDofs                 % Number of degrees of freedom
         numDofVars              % Number of variables for the DoFs
+        numOPDofs               % Number of operational space degrees of freedom
         numCables               % Number of cables
         cableLengths            % Vector of cable lengths
         cableLengthsDot         % Vector of cable length derivatives
@@ -38,11 +39,17 @@ classdef SystemKinematics < handle
         S                       % Body S matrix
         S_dot                   % Body S_dot matrix
         P                       % Body P matrix
+        J                       % Body J matrix
+        J_dot                   % Body J_dot matrix
 
         q                       % Generalised coordinates state vector
         q_deriv                 % Generalised coordinates time derivative (for special cases q_dot does not equal q_deriv)
         q_dot                   % Generalised coordinates derivative
         q_ddot                  % Generalised coordinates double derivative
+        
+        y                       % Operational space coordinate vector
+        y_dot                   % Operational space coordinate derivative
+        y_ddot                  % Operational space coordinate double derivative
     end
 
     methods (Static)
@@ -69,6 +76,10 @@ classdef SystemKinematics < handle
 
         function value = get.numDofs(obj)
             value = obj.bodyKinematics.numDofs;
+        end
+        
+        function value = get.numOPDofs(obj)
+            value = obj.bodyKinematics.numOPDofs;
         end
 
         function value = get.numDofVars(obj)
@@ -128,6 +139,30 @@ classdef SystemKinematics < handle
 
         function value = get.L(obj)
             value = obj.V*obj.W;
+        end
+        
+        function value = get.J(obj)
+            value = obj.bodyKinematics.J;
+        end
+        
+        function value = get.J_dot(obj)
+            value = obj.bodyKinematics.J_dot;
+        end
+        
+        function value = get.y(obj)
+            value = obj.bodyKinematics.y;
+        end
+        
+        function value = get.y_dot(obj)
+            value = obj.bodyKinematics.y_dot;
+        end
+        
+        function value = get.y_ddot(obj)
+            value = obj.bodyKinematics.y_ddot;
+        end
+        
+        function loadOpXmlObj(obj,op_space_xmlobj)
+            obj.bodyKinematics.loadOpXmlObj(op_space_xmlobj);
         end
     end
 end
