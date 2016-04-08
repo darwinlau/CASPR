@@ -30,8 +30,8 @@ classdef CapacityMarginMetric < WorkspaceMetricBase
         function v = evaluateFunction(obj,dynamics,~,method,inWorkspace)
             if((nargin <=3)||(~(method==WorkspaceStaticMethods.CMa)))
                 L   =   dynamics.L;
-                f_u =   dynamics.cableDynamics.forcesMax;
-                f_l =   dynamics.cableDynamics.forcesMin;
+                f_u =   dynamics.forcesMax;
+                f_l =   dynamics.forcesMin;
                 w   =   WrenchSet(L,f_u,f_l);
                 q   =   length(w.b);
                 p   =   size(obj.desired_wrench_set,2);

@@ -455,11 +455,11 @@ function run_button_Callback(~, ~, handles) %#ok<DEFNU>
     % Then read the form of dynamics
     contents = cellstr(get(handles.kinematics_popup,'String'));
     kinematics_id = contents{get(handles.kinematics_popup,'Value')};
-    kinObj = getappdata(handles.cable_text,'kinObj');
+    modObj = getappdata(handles.cable_text,'modObj');
     if(strcmp(kinematics_id,'Inverse Kinematics'))
-        run_inverse_kinematics(handles,kinObj,trajectory_xmlobj);
+        run_inverse_kinematics(handles,modObj,trajectory_xmlobj);
     else
-        run_forward_kinematics(handles,kinObj,trajectory_xmlobj);
+        run_forward_kinematics(handles,modObj,trajectory_xmlobj);
     end
 end
 
@@ -530,7 +530,7 @@ end
 %--------------------------------------------------------------------------
 % Additional Functions
 %--------------------------------------------------------------------------
-function run_inverse_kinematics(handles,kinObj,trajectory_xmlobj)
+function run_inverse_kinematics(handles,modObj,trajectory_xmlobj)
     % plotting information
     contents = cellstr(get(handles.plot_type_popup,'String'));
     plot_type = contents{get(handles.plot_type_popup,'Value')};
@@ -539,8 +539,8 @@ function run_inverse_kinematics(handles,kinObj,trajectory_xmlobj)
     set(handles.status_text,'String','Setting up simulation');
     drawnow;
     start_tic = tic;
-    sim = InverseKinematicsSimulator(kinObj);
-    trajectory = JointTrajectory.LoadXmlObj(trajectory_xmlobj, kinObj);
+    sim = InverseKinematicsSimulator(modObj);
+    trajectory = JointTrajectory.LoadXmlObj(trajectory_xmlobj, modObj);
     time_elapsed = toc(start_tic);
     fprintf('End Setup Simulation : %f seconds\n', time_elapsed);
 
@@ -566,7 +566,7 @@ function run_inverse_kinematics(handles,kinObj,trajectory_xmlobj)
     setappdata(handles.figure1,'sim',sim);
 end
 
-function run_forward_kinematics(handles,kinObj,trajectory_xmlobj)
+function run_forward_kinematics(handles,modObj,trajectory_xmlobj)
     % First load all the necessary informatino
     contents = cellstr(get(handles.solver_class_popup,'String'));
     solver_class = contents{get(handles.solver_class_popup,'Value')};
@@ -587,11 +587,11 @@ function run_forward_kinematics(handles,kinObj,trajectory_xmlobj)
     drawnow;
     start_tic = tic;
     % Initialise the least squares solver for the forward kinematics
-    fksolver = solver_function(kinObj,eval([char(approx_enum_file),'.',char(approximation_type)]),eval([char(q_dot_enum_file),'.',char(q_dot_approximation)]));
+    fksolver = solver_function(modObj,eval([char(approx_enum_file),'.',char(approximation_type)]),eval([char(q_dot_enum_file),'.',char(q_dot_approximation)]));
     % Initialise the three inverse/forward kinematics solvers
-    iksim = InverseKinematicsSimulator(kinObj);
-    fksim = ForwardKinematicsSimulator(kinObj, fksolver);
-    trajectory = JointTrajectory.LoadXmlObj(trajectory_xmlobj, kinObj);
+    iksim = InverseKinematicsSimulator(modObj);
+    fksim = ForwardKinematicsSimulator(modObj, fksolver);
+    trajectory = JointTrajectory.LoadXmlObj(trajectory_xmlobj, modObj);
     time_elapsed = toc(start_tic);
     fprintf('End Setup Simulation : %f seconds\n', time_elapsed);
 
@@ -639,7 +639,7 @@ function loadState(handles)
         load(file_name)
         set(handles.model_text,'String',state.model_text);
         set(handles.cable_text,'String',state.cable_text);
-        setappdata(handles.cable_text,'kinObj',state.kinObj);
+        setappdata(handles.cable_text,'modObj',state.modObj);
         trajectory_popup_Update([], handles);
         file_name = [path_string,'\logs\kinematics_gui_state.mat'];
         if(exist(file_name,'file'))

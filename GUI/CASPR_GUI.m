@@ -188,7 +188,7 @@ function cable_popup_Callback(~, ~, handles) %#ok<DEFNU>
 
     % Hints: contents = cellstr(get(hObject,'String')) returns cable_popup contents as cell array
     %        contents{get(hObject,'Value')} returns selected item from cable_popup
-    generate_kinematic_dynamic_object(handles);
+    generate_model_object(handles);
     % ADD PLOTTING OF THE OBJECT
 end
 
@@ -244,12 +244,12 @@ function update_button_Callback(~, ~, handles) %#ok<DEFNU>
 % hObject    handle to update_button (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-    dynObj = getappdata(handles.cable_popup,'dynObj');
+    modObj = getappdata(handles.cable_popup,'modObj');
     q_data = get(handles.qtable,'Data');
-    dynObj.update(q_data',zeros(dynObj.numDofVars,1),zeros(dynObj.numDofVars,1),zeros(dynObj.numDofVars,1));
+    modObj.update(q_data',zeros(modObj.numDofVars,1),zeros(modObj.numDofVars,1),zeros(modObj.numDofVars,1));
     cla;
     axis_range = getappdata(handles.cable_popup,'axis_range');
-    MotionSimulator.PlotFrame(dynObj, axis_range,handles.figure1);
+    MotionSimulator.PlotFrame(modObj, axis_range,handles.figure1);
 end
 
 % --- Executes on button press in control_button.
@@ -264,7 +264,7 @@ end
 %--------------------------------------------------------------------------
 % Additional Functions
 %--------------------------------------------------------------------------
-function generate_kinematic_dynamic_object(handles)
+function generate_model_object(handles)
     % Generate the dynamics object
     contents = cellstr(get(handles.model_popup,'String'));
     model_type = contents{get(handles.model_popup,'Value')};
@@ -273,25 +273,23 @@ function generate_kinematic_dynamic_object(handles)
     contents = cellstr(get(handles.cable_popup,'String'));
     cable_set_id = contents{get(handles.cable_popup,'Value')};
     cableset_xmlobj = model_config.getCableSetXmlObj(cable_set_id);
-    dynObj = SystemKinematicsDynamics.LoadXmlObj(bodies_xmlobj, cableset_xmlobj);
-    kinObj = SystemKinematics.LoadXmlObj(bodies_xmlobj, cableset_xmlobj);
+    modObj = SystemModel.LoadXmlObj(bodies_xmlobj, cableset_xmlobj);
     cla;
     display_range = bodies_xmlobj.getElementsByTagName('display_range').item(0);
     if(isempty(display_range))
         axis_range = [-10,10,-10,10,-10,10];
-        MotionSimulator.PlotFrame(dynObj, [-10,10,-10,10,-10,10],handles.figure1);
+        MotionSimulator.PlotFrame(modObj, [-10,10,-10,10,-10,10],handles.figure1);
     else
         axis_range = str2num(display_range.getFirstChild.getData); %#ok<ST2NM>
-        MotionSimulator.PlotFrame(dynObj, axis_range,handles.figure1);
+        MotionSimulator.PlotFrame(modObj, axis_range,handles.figure1);
 %         f = figure;
-%         MotionSimulator.PlotFrame(dynObj, axis_range,f);
+%         MotionSimulator.PlotFrame(modObj, axis_range,f);
     end
     % Store the dynamics object
-    setappdata(handles.cable_popup,'dynObj',dynObj);
+    setappdata(handles.cable_popup,'modObj',modObj);
     setappdata(handles.cable_popup,'axis_range',axis_range);
-    setappdata(handles.cable_popup,'kinObj',kinObj);
     set(handles.model_label_text,'String',model_type);
-    format_q_table(dynObj.numDofs,handles.qtable);
+    format_q_table(modObj.numDofs,handles.qtable);
 end
 
 function cable_popup_update(handles)
@@ -309,7 +307,7 @@ function cable_popup_update(handles)
     end
     set(handles.cable_popup, 'Value', 1);
     set(handles.cable_popup, 'String', cableset_str);
-    generate_kinematic_dynamic_object(handles);
+    generate_model_object(handles);
 end
 
 function saveState(handles)
@@ -320,10 +318,8 @@ function saveState(handles)
     state.model_text            =   contents{state.model_popup_value};
     contents                    =   get(handles.cable_popup,'String');
     state.cable_text            =   contents{state.cable_popup_value};
-    dynObj                      =   getappdata(handles.cable_popup,'dynObj');
-    kinObj                      =   getappdata(handles.cable_popup,'kinObj');
-    state.dynObj                =   dynObj;
-    state.kinObj                =   kinObj;
+    modObj                      =   getappdata(handles.cable_popup,'modObj');
+    state.modObj                =   modObj;
     path_string = fileparts(mfilename('fullpath'));
     path_string = path_string(1:strfind(path_string, 'GUI')-2);
     % Check if the log folder exists
@@ -343,7 +339,7 @@ function loadState(handles)
         set(handles.model_popup,'value',state.model_popup_value);
         cable_popup_update(handles);
         set(handles.cable_popup,'value',state.cable_popup_value);
-        generate_kinematic_dynamic_object(handles);
+        generate_model_object(handles);
     else
         set(handles.model_popup,'value',1);
         cable_popup_update(handles);

@@ -14,7 +14,7 @@ cableset_xmlobj = model_config.getCableSetXmlObj(cable_set_id);
 opset_xmlobj = model_config.getOPXmlObj(op_set_id);
 
 %% Initialisation
-dynObj = SystemKinematicsDynamics.LoadXmlObj(bodies_xmlobj, cableset_xmlobj, opset_xmlobj);
+dynObj = SystemModel.LoadXmlObj(bodies_xmlobj, cableset_xmlobj);
 % Define the workspace condition
 % Workspace conditions
 % wcondition = WorkspaceStub();
@@ -29,9 +29,9 @@ metric = NullMetric();
 disp('Start Setup Simulation');
 start_tic       =   tic;
 wsim            =   WorkspaceSimulator(dynObj,wcondition,metric);
-q_step          =   pi/36;
+q_step          =   pi/8;
 n_dim           =   2;
-% uGrid           =   UniformGrid(-pi*ones(n_dim,1),(pi-q_step)*ones(n_dim,1),q_step*ones(n_dim,1));
+uGrid           =   UniformGrid(-pi*ones(n_dim,1),(pi-q_step)*ones(n_dim,1),q_step*ones(n_dim,1));
 % q_step = 0.01;
 % uGrid           =   UniformGrid([0;0;0.1;1;0;0;0],[1;1;0.1;1;0;0;0],[q_step;q_step;0;0;0;0;0]);
 % uGrid            =   UniformGrid([0;0;0.8;1;0;0;0],[1;1;1.0;1;0;0;0],[q_step;q_step;q_step;0;0;0;0]);

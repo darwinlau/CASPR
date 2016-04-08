@@ -304,7 +304,7 @@ function generate_button_Callback(~, ~, handles) %#ok<DEFNU>
     %% Clear data
     clc; warning off; %#ok<WNOFF> %close all;
     %% Model setup
-    dynObj = getappdata(handles.cable_text,'dynObj');
+    modObj = getappdata(handles.cable_text,'modObj');
     %% Workspace Setup
     % First the condition
     contents = cellstr(get(handles.workspace_condition_popup,'String'));
@@ -325,7 +325,7 @@ function generate_button_Callback(~, ~, handles) %#ok<DEFNU>
     set(handles.status_text,'String','Setting up simulation');
     drawnow;
     start_tic       =   tic;
-    wsim            =   WorkspaceSimulator(dynObj,wcondition,metric);
+    wsim            =   WorkspaceSimulator(modObj,wcondition,metric);
     q_info = get(handles.qtable,'Data');
     uGrid           =   UniformGrid(q_info(:,1),q_info(:,2),q_info(:,3));
     contents = cellstr(get(handles.plot_type_popup,'String'));
@@ -496,9 +496,9 @@ function loadState(handles)
         load(file_name)
         set(handles.model_text,'String',state.model_text);
         set(handles.cable_text,'String',state.cable_text);
-        setappdata(handles.cable_text,'dynObj',state.dynObj);
+        setappdata(handles.cable_text,'modObj',state.modObj);
         file_name = [path_string,'\logs\workspace_gui_state.mat'];
-        format_q_table(state.dynObj.numDofs,handles.qtable)
+        format_q_table(state.modObj.numDofs,handles.qtable)
         if(exist(file_name,'file'))
             load(file_name);
             mp_text = get(handles.model_text,'String');

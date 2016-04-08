@@ -32,7 +32,7 @@ cableset_xmlobj = model_config.getCableSetXmlObj(cable_set_id);
 trajectory_xmlobj = model_config.getTrajectoryXmlObj(trajectory_id);
 
 % Load the SystemKinematics object from the XML
-kinObj = SystemKinematics.LoadXmlObj(bodies_xmlobj, cableset_xmlobj);
+kinObj = SystemModel.LoadXmlObj(bodies_xmlobj, cableset_xmlobj);
 
 % An inverse kinematics and forward kinematics simulator will be run to
 % show that the results are consistent.

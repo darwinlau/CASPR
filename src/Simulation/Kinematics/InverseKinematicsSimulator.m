@@ -21,7 +21,7 @@ classdef InverseKinematicsSimulator < MotionSimulator
             
             for t = 1:length(obj.trajectory.timeVector)
                 fprintf('Time : %f\n', obj.trajectory.timeVector(t));
-                obj.model.update(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t});
+                obj.model.update(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t},zeros(size(obj.trajectory.q_dot{t})));
                 obj.cableLengths{t} = obj.model.cableLengths;
                 obj.cableLengthsDot{t} = obj.model.cableLengthsDot;
             end

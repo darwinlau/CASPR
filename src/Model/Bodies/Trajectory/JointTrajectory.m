@@ -78,9 +78,9 @@ classdef JointTrajectory < handle
             index_var = 1;
             for k = 1:kin.numLinks
                 ind_k_s_dof = index_dof;
-                ind_k_e_dof = index_dof+kin.bodyKinematics.bodies{k}.joint.numDofs-1;
+                ind_k_e_dof = index_dof+kin.bodyModel.bodies{k}.joint.numDofs-1;
                 ind_k_s_var = index_var;
-                ind_k_e_var = index_var+kin.bodyKinematics.bodies{k}.joint.numVars-1;
+                ind_k_e_var = index_var+kin.bodyModel.bodies{k}.joint.numVars-1;
                 qk_s = q_s(ind_k_s_var:ind_k_e_var);
                 qk_e = q_e(ind_k_s_var:ind_k_e_var);
                 qk_s_d = q_s_d(ind_k_s_dof:ind_k_e_dof);
@@ -88,13 +88,13 @@ classdef JointTrajectory < handle
                 qk_s_dd = q_s_dd(ind_k_s_dof:ind_k_e_dof);
                 qk_e_dd = q_e_dd(ind_k_s_dof:ind_k_e_dof);
                 
-                [qk, qk_dot, qk_ddot] = kin.bodyKinematics.bodies{k}.joint.GenerateTrajectory(qk_s, qk_s_d, qk_s_dd, qk_e, qk_e_d, qk_e_dd, total_time, time_step);
+                [qk, qk_dot, qk_ddot] = kin.bodyModel.bodies{k}.joint.GenerateTrajectory(qk_s, qk_s_d, qk_s_dd, qk_e, qk_e_d, qk_e_dd, total_time, time_step);
 
                 q_array(ind_k_s_var:ind_k_e_var, :) = qk;
                 qd_array(ind_k_s_dof:ind_k_e_dof, :) = qk_dot;
                 qdd_array(ind_k_s_dof:ind_k_e_dof, :) = qk_ddot;
-                index_dof = index_dof+kin.bodyKinematics.bodies{k}.joint.numDofs;
-                index_var = index_var+kin.bodyKinematics.bodies{k}.joint.numVars;
+                index_dof = index_dof+kin.bodyModel.bodies{k}.joint.numDofs;
+                index_var = index_var+kin.bodyModel.bodies{k}.joint.numVars;
             end
             s_q = size(q_array);
             s_q_d = size(qd_array);

@@ -37,8 +37,8 @@ classdef IDSolverOperationalNullSpace < IDSolverBase
             % M\ddot{q} + C + G + F_{ext} = -J^T f (constraint)
             [A_eom, b_eom] = IDSolverBase.GetEoMConstraints(dynamics);  
             % Form the lower and upper bound force constraints
-            fmin = dynamics.cableDynamics.forcesMin;
-            fmax = dynamics.cableDynamics.forcesMax;
+            fmin = dynamics.forcesMin;
+            fmax = dynamics.forcesMax;
             
             % Get objective function
             obj.objective.updateObjective(dynamics);
@@ -80,7 +80,7 @@ classdef IDSolverOperationalNullSpace < IDSolverBase
             end
             
             if (id_exit_type ~= IDSolverExitType.NO_ERROR)
-                cable_forces = dynamics.cableDynamics.forcesInvalid;
+                cable_forces = dynamics.forcesInvalid;
                 Q_opt = inf;
             else
                 cable_forces = f_task + A_null * f0_soln;

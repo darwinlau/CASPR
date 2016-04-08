@@ -31,45 +31,55 @@ classdef ModelConfig
                     c.bodyPropertiesFilename = [c.root_folder, '\SCDM\planar_manipulators\simple_planar_xy\simple_planar_xy_bodies.xml'];
                     c.cablesPropertiesFilename = [c.root_folder, '\SCDM\planar_manipulators\simple_planar_xy\simple_planar_xy_cables.xml'];
                     c.trajectoriesFilename = [c.root_folder, '\SCDM\planar_manipulators\simple_planar_xy\simple_planar_xy_trajectories.xml'];
+                    c.opFilename = [c.root_folder, '\SCDM\planar_manipulators\simple_planar_xy\simple_planar_xy_op.xml'];
                 case ModelConfigType.M_SIMPLE_SPHERICAL
                     c.bodyPropertiesFilename = [c.root_folder, '\SCDM\spherical_manipulators\simple_spherical\simple_spherical_bodies.xml'];
                     c.cablesPropertiesFilename = [c.root_folder, '\SCDM\spherical_manipulators\simple_spherical\simple_spherical_cables.xml'];
                     c.trajectoriesFilename = [c.root_folder, '\SCDM\spherical_manipulators\simple_spherical\simple_spherical_trajectories.xml'];
+                    c.opFilename = [c.root_folder, '\SCDM\spherical_manipulators\simple_spherical\simple_spherical_op.xml'];
                 case ModelConfigType.M_SIMPLE_SPATIAL
                     c.bodyPropertiesFilename = [c.root_folder, '\SCDM\spatial_manipulators\simple_spatial\simple_spatial_bodies.xml'];
                     c.cablesPropertiesFilename = [c.root_folder, '\SCDM\spatial_manipulators\simple_spatial\simple_spatial_cables.xml'];
                     c.trajectoriesFilename = [c.root_folder, '\SCDM\spatial_manipulators\simple_spatial\simple_spatial_trajectories.xml'];
+                    c.opFilename = [c.root_folder, '\SCDM\spatial_manipulators\simple_spatial\simple_spatial_op.xml'];
                 % SCDMs from different laboratories and hardware
                 case ModelConfigType.M_MYOROB_SHOULDER
                     c.bodyPropertiesFilename = [c.root_folder, '\SCDM\spherical_manipulators\myorob_shoulder_TUM\myorob_shoulder_bodies.xml'];
                     c.cablesPropertiesFilename = [c.root_folder, '\SCDM\spherical_manipulators\myorob_shoulder_TUM\myorob_shoulder_cables.xml'];
                     c.trajectoriesFilename = [c.root_folder, '\SCDM\spherical_manipulators\myorob_shoulder_TUM\myorob_shoulder_trajectories.xml'];
+                    c.opFilename = [c.root_folder, '\SCDM\spherical_manipulators\myorob_shoulder_TUM\myorob_shoulder_op.xml'];
                 case ModelConfigType.M_ACROBOT
                     c.bodyPropertiesFilename = [c.root_folder, '\SCDM\spatial_manipulators\ACROBOT_IRTJV\ACROBOT_bodies.xml'];
                     c.cablesPropertiesFilename = [c.root_folder, '\SCDM\spatial_manipulators\ACROBOT_IRTJV\ACROBOT_cables.xml'];
                     c.trajectoriesFilename = [c.root_folder, '\SCDM\spatial_manipulators\ACROBOT_IRTJV\ACROBOT_trajectories.xml'];
+                    c.opFilename = [c.root_folder, '\SCDM\spatial_manipulators\ACROBOT_IRTJV\ACROBOT_op.xml'];
                 case ModelConfigType.M_IPANEMA_2
                     c.bodyPropertiesFilename = [c.root_folder, '\SCDM\spatial_manipulators\IPAnema2_FraunhoferIPA\IPAnema2_bodies.xml'];
                     c.cablesPropertiesFilename = [c.root_folder, '\SCDM\spatial_manipulators\IPAnema2_FraunhoferIPA\IPAnema2_cables.xml'];
                     c.trajectoriesFilename = [c.root_folder, '\SCDM\spatial_manipulators\IPAnema2_FraunhoferIPA\IPAnema2_trajectories.xml'];
+                    c.opFilename = [c.root_folder, '\SCDM\spatial_manipulators\IPAnema2_FraunhoferIPA\IPAnema2_op.xml'];
                 case ModelConfigType.M_NIST_ROBOCRANE
                     c.bodyPropertiesFilename = [c.root_folder, '\SCDM\spatial_manipulators\NIST_ROBOCRANE\NIST_bodies.xml'];
                     c.cablesPropertiesFilename = [c.root_folder, '\SCDM\spatial_manipulators\NIST_ROBOCRANE\NIST_cables.xml'];
                     c.trajectoriesFilename = [c.root_folder, '\SCDM\spatial_manipulators\NIST_ROBOCRANE\NIST_trajectories.xml'];
+                    c.opFilename = [c.root_folder, '\SCDM\spatial_manipulators\NIST_ROBOCRANE\NIST_op.xml'];
 				case ModelConfigType.M_COGIRO
                     c.bodyPropertiesFilename = [c.root_folder, '\SCDM\spatial_manipulators\CoGiRo\CoGiRo_bodies.xml'];
                     c.cablesPropertiesFilename = [c.root_folder, '\SCDM\spatial_manipulators\CoGiRo\CoGiRo_cables.xml'];
                     c.trajectoriesFilename = [c.root_folder, '\SCDM\spatial_manipulators\CoGiRo\CoGiRo_trajectories.xml'];
+                    c.opFilename = [c.root_folder, '\SCDM\spatial_manipulators\CoGiRo\CoGiRo_op.xml'];
                 case ModelConfigType.M_KNTU_PLANAR
                     c.bodyPropertiesFilename = [c.root_folder, '\SCDM\planar_manipulators\KNTU_planar\KNTU_planar_xy_bodies.xml'];
                     c.cablesPropertiesFilename = [c.root_folder, '\SCDM\planar_manipulators\KNTU_planar\KNTU_planar_xy_cables.xml'];
                     c.trajectoriesFilename = [c.root_folder, '\SCDM\planar_manipulators\KNTU_planar\KNTU_planar_xy_trajectories.xml'];
+                    c.opFilename = [c.root_folder, '\SCDM\planar_manipulators\KNTU_planar\KNTU_planar_xy_op.xml'];
                 % Multi-link Cable Driven Manipulators (MCDM)
                 case ModelConfigType.M_NECK_8S
                     c.bodyPropertiesFilename = [c.root_folder, '\MCDM\8S_neck\8S_neck_bodies.xml'];
                     c.cablesPropertiesFilename = [c.root_folder, '\MCDM\8S_neck\8S_neck_cables.xml'];
                     %c.trajectoriesFilename = [c.root_folder, '\MCDM\8S_neck\8S_neck_trajectories.xml'];
                     c.trajectoriesFilename = [c.root_folder, '\MCDM\8S_neck\8S_neck_trajectories_eulerXYZ.xml'];
+                    c.opFilename = [c.root_folder, '\MCDM\8S_neck\8S_neck_op.xml'];
                 case ModelConfigType.M_2R_PLANAR_XZ
                     c.bodyPropertiesFilename = [c.root_folder, '\MCDM\2R_planar_xz\2R_planar_xz_bodies.xml'];
                     c.cablesPropertiesFilename = [c.root_folder, '\MCDM\2R_planar_xz\2R_planar_xz_cables.xml'];
@@ -79,6 +89,7 @@ classdef ModelConfig
                     c.bodyPropertiesFilename = [c.root_folder, '\MCDM\CAREX\CAREX_bodies.xml'];
                     c.cablesPropertiesFilename = [c.root_folder, '\MCDM\CAREX\CAREX_cables.xml'];
                     c.trajectoriesFilename = [c.root_folder, '\MCDM\CAREX\CAREX_trajectories.xml'];
+                    c.opFilename = [c.root_folder, '\MCDM\CAREX\CAREX_op.xml'];
                 otherwise
                     error('ModelConfig type is not defined');
             end

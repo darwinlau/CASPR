@@ -29,7 +29,7 @@ classdef (Abstract) MotionSimulator < Simulator
                 if t == 0
                     t = 1;
                 end
-                obj.model.update(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t}, []);
+                obj.model.update(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t}, zeros(size(obj.trajectory.q_dot{t})));
                 MotionSimulator.PlotFrame(obj.model, plot_axis, plot_handle)
                 frame = getframe(plot_handle);
                 writerObj.writeVideo(frame);
@@ -114,11 +114,11 @@ classdef (Abstract) MotionSimulator < Simulator
             pos0_dot = zeros(3*length(bodies_to_plot), length(obj.timeVector));
             pos0_ddot = zeros(3*length(bodies_to_plot), length(obj.timeVector));
             for t = 1:length(obj.timeVector)
-                obj.model.bodyKinematics.update(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t});
+                obj.model.bodyModel.update(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t},zeros(size(obj.trajectory.q_dot{t})));
                 for ki = 1:length(bodies_to_plot)
-                    pos0(3*ki-2:3*ki, t) = obj.model.bodyKinematics.bodies{bodies_to_plot(ki)}.R_0k*obj.model.bodyKinematics.bodies{bodies_to_plot(ki)}.r_OG;
-                    pos0_dot(3*ki-2:3*ki, t) = obj.model.bodyKinematics.bodies{bodies_to_plot(ki)}.R_0k*obj.model.bodyKinematics.bodies{bodies_to_plot(ki)}.v_OG;
-                    pos0_ddot(3*ki-2:3*ki, t) = obj.model.bodyKinematics.bodies{bodies_to_plot(ki)}.R_0k*obj.model.bodyKinematics.bodies{bodies_to_plot(ki)}.a_OG;
+                    pos0(3*ki-2:3*ki, t) = obj.model.bodyModel.bodies{bodies_to_plot(ki)}.R_0k*obj.model.bodyModel.bodies{bodies_to_plot(ki)}.r_OG;
+                    pos0_dot(3*ki-2:3*ki, t) = obj.model.bodyModel.bodies{bodies_to_plot(ki)}.R_0k*obj.model.bodyModel.bodies{bodies_to_plot(ki)}.v_OG;
+                    pos0_ddot(3*ki-2:3*ki, t) = obj.model.bodyModel.bodies{bodies_to_plot(ki)}.R_0k*obj.model.bodyModel.bodies{bodies_to_plot(ki)}.a_OG;
                 end
             end
             
@@ -170,10 +170,10 @@ classdef (Abstract) MotionSimulator < Simulator
             ang0 = zeros(3*length(bodies_to_plot), length(obj.timeVector));
             ang0_dot = zeros(3*length(bodies_to_plot), length(obj.timeVector));
             for t = 1:length(obj.timeVector)
-                obj.model.bodyKinematics.update(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t});
+                obj.model.bodyModel.update(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t},zeros(size(obj.trajectory.q_ddot{t})));
                 for ki = 1:length(bodies_to_plot)
-                    ang0(3*ki-2:3*ki, t) = obj.model.bodyKinematics.bodies{bodies_to_plot(ki)}.R_0k*obj.model.bodyKinematics.bodies{bodies_to_plot(ki)}.w;
-                    ang0_dot(3*ki-2:3*ki, t) = obj.model.bodyKinematics.bodies{bodies_to_plot(ki)}.R_0k*obj.model.bodyKinematics.bodies{bodies_to_plot(ki)}.w_dot;
+                    ang0(3*ki-2:3*ki, t) = obj.model.bodyModel.bodies{bodies_to_plot(ki)}.R_0k*obj.model.bodyModel.bodies{bodies_to_plot(ki)}.w;
+                    ang0_dot(3*ki-2:3*ki, t) = obj.model.bodyModel.bodies{bodies_to_plot(ki)}.R_0k*obj.model.bodyModel.bodies{bodies_to_plot(ki)}.w_dot;
                 end
             end
 
@@ -218,29 +218,29 @@ classdef (Abstract) MotionSimulator < Simulator
             ylabel('y');
             zlabel('z');
 
-            body_kinematics = kinematics.bodyKinematics;
-            for k = 1:body_kinematics.numLinks
-                r_OP0 = body_kinematics.bodies{k}.R_0k*body_kinematics.bodies{k}.r_OP;
-                r_OG0 = body_kinematics.bodies{k}.R_0k*body_kinematics.bodies{k}.r_OG;
-                r_OPe0 = body_kinematics.bodies{k}.R_0k*body_kinematics.bodies{k}.r_OPe;
+            body_model = kinematics.bodyModel;
+            for k = 1:body_model.numLinks
+                r_OP0 = body_model.bodies{k}.R_0k*body_model.bodies{k}.r_OP;
+                r_OG0 = body_model.bodies{k}.R_0k*body_model.bodies{k}.r_OG;
+                r_OPe0 = body_model.bodies{k}.R_0k*body_model.bodies{k}.r_OPe;
                 plot3(r_OP0(1), r_OP0(2), r_OP0(3), 'Color', 'k', 'Marker', 'o', 'LineWidth', 2);
                 plot3(r_OG0(1), r_OG0(2), r_OG0(3), 'Color', 'b', 'Marker', 'o', 'LineWidth', 2);
                 line([r_OP0(1) r_OPe0(1)], [r_OP0(2) r_OPe0(2)], [r_OP0(3) r_OPe0(3)], 'Color', 'k', 'LineWidth', 3);
             end
 
-            cable_kinematics = kinematics.cableKinematics;
-            for i = 1:cable_kinematics.numCables
-                for j = 1:cable_kinematics.cables{i}.numSegments
-                    for k = 1:cable_kinematics.numLinks+1
-                        if cable_kinematics.getCRMTerm(i,j,k) == -1
-                            r_OAa0 = cable_kinematics.cables{i}.segments{j}.r_OA{k};
+            cable_model = kinematics.cableModel;
+            for i = 1:cable_model.numCables
+                for j = 1:cable_model.cables{i}.numSegments
+                    for k = 1:cable_model.numLinks+1
+                        if cable_model.getCRMTerm(i,j,k) == -1
+                            r_OAa0 = cable_model.cables{i}.segments{j}.r_OA{k};
                             if k > 1
-                                r_OAa0 = body_kinematics.bodies{k-1}.R_0k*r_OAa0;
+                                r_OAa0 = body_model.bodies{k-1}.R_0k*r_OAa0;
                             end
-                        elseif cable_kinematics.getCRMTerm(i,j,k) == 1
-                            r_OAb0 = cable_kinematics.cables{i}.segments{j}.r_OA{k};
+                        elseif cable_model.getCRMTerm(i,j,k) == 1
+                            r_OAb0 = cable_model.cables{i}.segments{j}.r_OA{k};
                             if k > 1
-                                r_OAb0 = body_kinematics.bodies{k-1}.R_0k*r_OAb0;
+                                r_OAb0 = body_model.bodies{k-1}.R_0k*r_OAb0;
                             end
                         end
                     end

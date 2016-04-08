@@ -30,8 +30,8 @@ classdef IDSolverClosedForm < IDSolverBase
             % M\ddot{q} + C + G + F_{ext} = -J^T f (constraint)
             [A_eq, b_eq] = IDSolverBase.GetEoMConstraints(dynamics);  
             % Form the lower and upper bound force constraints
-            fmin = dynamics.cableDynamics.forcesMin;
-            fmax = dynamics.cableDynamics.forcesMax;
+            fmin = dynamics.forcesMin;
+            fmax = dynamics.forcesMax;
 
             switch (obj.cf_solver_type)
                 case ID_CF_SolverType.CLOSED_FORM
@@ -47,7 +47,7 @@ classdef IDSolverClosedForm < IDSolverBase
             end
             
             if (id_exit_type ~= IDSolverExitType.NO_ERROR)
-                cable_forces = dynamics.cableDynamics.forcesInvalid;
+                cable_forces = dynamics.forcesInvalid;
                 Q_opt = inf;
                 %id_exit_type = IDFunction.DisplayOptiToolboxError(exitflag);
             else

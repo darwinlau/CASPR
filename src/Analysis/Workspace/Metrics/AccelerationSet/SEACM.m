@@ -11,8 +11,8 @@ classdef SEACM < WorkspaceMetricBase
         function v = evaluateFunction(obj,dynamics,~,method,inWorkspace)
             if((nargin <=3)||(~(method==WorkspaceStaticMethods.CMe)))
                 L   =   transpose(dynamics.M\dynamics.L');
-                f_u =   dynamics.cableDynamics.forcesMax;
-                f_l =   dynamics.cableDynamics.forcesMin;
+                f_u =   dynamics.forcesMax;
+                f_l =   dynamics.forcesMin;
 %                 w   =   WrenchSet(L,f_u,f_l,dynamics.M\dynamics.G);
                 w   =   WrenchSet(L,f_u,f_l);
                 q   =   length(w.b);

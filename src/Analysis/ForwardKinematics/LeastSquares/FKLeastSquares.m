@@ -21,11 +21,11 @@ classdef FKLeastSquares < FKAnalysisBase
                 case FK_LS_ApproxOptionType.FIRST_ORDER_INTEGRATE_QDOT
                     q_approx = obj.model.qIntegrate(q_prev, q_d_prev, delta_t);
                 case FK_LS_ApproxOptionType.FIRST_ORDER_INTEGRATE_PSEUDOINV
-                    obj.model.update(q_prev, zeros(obj.model.numDofs,1), zeros(obj.model.numDofs,1));
+                    obj.model.update(q_prev, zeros(obj.model.numDofs,1), zeros(obj.model.numDofs,1),zeros(obj.model.numDofs,1));
                     if delta_t ~= 0
-                        q_approx = obj.model.bodyKinematics.qIntegrate(q_prev, pinv(obj.model.L) * (len - len_prev_2)/(2*delta_t), delta_t);
+                        q_approx = obj.model.bodyModel.qIntegrate(q_prev, pinv(obj.model.L) * (len - len_prev_2)/(2*delta_t), delta_t);
                     else
-                        q_approx = obj.model.bodyKinematics.qIntegrate(q_prev, zeros(obj.model.numDofs,1), 0);
+                        q_approx = obj.model.bodyModel.qIntegrate(q_prev, zeros(obj.model.numDofs,1), 0);
                     end
                 otherwise 
                     error('approxMethod type is not defined');
@@ -96,7 +96,7 @@ classdef FKLeastSquares < FKAnalysisBase
                 lr_k = l_r{k};
                 qk = X(model.numCables + (k-1) * model.numDofs + 1:model.numCables + k * model.numDofs);
                 
-                model.update(qk, zeros(size(qk)), zeros(size(qk)))
+                model.update(qk, zeros(size(qk)), zeros(size(qk)),zeros(size(qk)))
                 errorVector((k-1)*numCables+1:k*numCables) = lr_k + l0 - model.cableLengths;
                 jacobian((k-1)*numCables + 1:k*numCables, 1:numCables) = eye(numCables, numCables);
                 jacobian((k-1)*numCables + 1:k*numCables, numCables + (k-1)*numDofs + 1:numCables + k*numDofs) = -model.L;

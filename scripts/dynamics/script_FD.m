@@ -34,7 +34,7 @@ cableset_xmlobj = model_config.getCableSetXmlObj(cable_set_id);
 trajectory_xmlobj = model_config.getTrajectoryXmlObj(trajectory_id);
 
 % Load the SystemKinematicsDynamics object from the XML
-dynObj = SystemKinematicsDynamics.LoadXmlObj(bodies_xmlobj, cableset_xmlobj);
+dynObj = SystemModel.LoadXmlObj(bodies_xmlobj, cableset_xmlobj);
 
 % Setup an inverse dynamics solver of choice (any should do)
 id_objective = IDObjectiveMinQuadCableForce(ones(dynObj.numCables,1));

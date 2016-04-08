@@ -29,7 +29,7 @@ classdef FKAnalysisBase < handle
         
     methods (Static)
         function [errorVector, jacobian] = ComputeLengthErrorVector(q, l, model)
-            model.update(q, zeros(model.numDofs,1), zeros(model.numDofs,1));
+            model.update(q, zeros(model.numDofs,1), zeros(model.numDofs,1),zeros(model.numDofs,1));
             errorVector = l - model.cableLengths;
             jacobian = - model.L;
         end

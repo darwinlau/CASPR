@@ -259,8 +259,8 @@ function objective_popup_Callback(hObject, ~, handles)
         objectivesObj = objectivesUnfiltered.getElementsByTagName('objective');
         objectiveNumber = get(hObject,'Value');
         objective = objectivesObj.item(objectiveNumber-1);
-        dynObj = getappdata(handles.cable_text,'dynObj');
-        weight_number = get_weight_number(objective,dynObj);
+        modObj = getappdata(handles.cable_text,'modObj');
+        weight_number = get_weight_number(objective,modObj);
         objective_table_Update(weight_number,handles.objective_table);
     end
 end
@@ -393,8 +393,8 @@ function constraint_popup_Callback(hObject, ~, handles)
             constraintsObj = constraintsUnfiltered.getElementsByTagName('constraint');
             constraintNumber = get(hObject,'Value');
             constraint = constraintsObj.item(constraintNumber-2);
-            dynObj = getappdata(handles.cable_text,'dynObj');
-            weight_number = get_weight_number(constraint,dynObj);
+            modObj = getappdata(handles.cable_text,'modObj');
+            weight_number = get_weight_number(constraint,modObj);
             num_constraints = str2double(get(handles.constraint_number_edit,'String'));
             if(isnan(num_constraints))
                 num_constraints = 1;
@@ -459,8 +459,8 @@ function tuning_parameter_popup_Callback(hObject, ~, handles)
         tuningObj = tuningUnfiltered.getElementsByTagName('tuning_parameter');
         tuningNumber = get(hObject,'Value');
         tuning = tuningObj.item(tuningNumber-1);
-        dynObj = getappdata(handles.cable_text,'dynObj');
-        weight_number = get_weight_number(tuning,dynObj);
+        modObj = getappdata(handles.cable_text,'modObj');
+        weight_number = get_weight_number(tuning,modObj);
         tuning_parameter_table_Update(weight_number,handles.tuning_parameter_table);
     end
 end
@@ -517,10 +517,10 @@ function run_button_Callback(~, ~, handles) %#ok<DEFNU>
     model_config = getappdata(handles.trajectory_popup,'model_config');
     trajectory_xmlobj = model_config.getTrajectoryXmlObj(trajectory_id);
     % Then read the form of dynamics
-    dynObj = getappdata(handles.cable_text,'dynObj');
+    modObj = getappdata(handles.cable_text,'modObj');
     
     % Get the inverse dynamics object
-    id_solver = load_idsolver(handles,dynObj);
+    id_solver = load_idsolver(handles,modObj);
     
     % Get the controller
     control_class_contents = cellstr(get(handles.control_class_popup,'String'));
@@ -528,7 +528,7 @@ function run_button_Callback(~, ~, handles) %#ok<DEFNU>
     ctrl_func = str2func(control_class);
     Kp = diag(get(handles.kp_table,'Data'));
     Kd = diag(get(handles.kd_table,'Data'));
-    controller = ctrl_func(dynObj, id_solver, Kp, Kd);
+    controller = ctrl_func(modObj, id_solver, Kp, Kd);
 
     % Setup the inverse dynamics simulator with the SystemKinematicsDynamics
     % object and the inverse dynamics solver
@@ -536,8 +536,8 @@ function run_button_Callback(~, ~, handles) %#ok<DEFNU>
     set(handles.status_text,'String','Setting up simulation');
     drawnow;
     start_tic = tic;
-    control_sim = ControllerSimulator(dynObj, controller);
-    trajectory_ref = JointTrajectory.LoadXmlObj(trajectory_xmlobj, dynObj);
+    control_sim = ControllerSimulator(modObj, controller);
+    trajectory_ref = JointTrajectory.LoadXmlObj(trajectory_xmlobj, modObj);
     time_elapsed = toc(start_tic);
     fprintf('End Setup Simulation : %f seconds\n', time_elapsed);
 
@@ -815,7 +815,7 @@ end
 %--------------------------------------------------------------------------
 % Additional Functions
 %--------------------------------------------------------------------------
-function id_solver = load_idsolver(handles,dynObj)
+function id_solver = load_idsolver(handles,modObj)
     solver_class_contents = cellstr(get(handles.solver_class_popup,'String'));
     solver_class = solver_class_contents{get(handles.solver_class_popup,'Value')};
     solver_type_contents = cellstr(get(handles.solver_type_popup,'String'));
@@ -835,14 +835,14 @@ function id_solver = load_idsolver(handles,dynObj)
         solver_function = str2func(solver_class);
         solverObj = settings.getElementById(solver_class);
         enum_file = solverObj.getElementsByTagName('solver_type_enum').item(0).getFirstChild.getData;
-        id_solver = solver_function(dynObj,eval([char(enum_file),'.',char(solver_type)]));
+        id_solver = solver_function(modObj,eval([char(enum_file),'.',char(solver_type)]));
     elseif(empty_constraint&&empty_objective)
         % Only have tuning parameters
         solver_function = str2func(solver_class);
         solverObj = settings.getElementById(solver_class);
         enum_file = solverObj.getElementsByTagName('solver_type_enum').item(0).getFirstChild.getData;
         q_data = get(handles.tuning_parameter_table,'Data');
-        id_solver = solver_function(dynObj,q_data,eval([char(enum_file),'.',char(solver_type)]));
+        id_solver = solver_function(modObj,q_data,eval([char(enum_file),'.',char(solver_type)]));
     elseif(empty_constraint)
         % Optimisation without constraints
         objective_function = str2func(objective);
@@ -851,7 +851,7 @@ function id_solver = load_idsolver(handles,dynObj)
         solver_function = str2func(solver_class);
         solverObj = settings.getElementById(solver_class);
         enum_file = solverObj.getElementsByTagName('solver_type_enum').item(0).getFirstChild.getData;
-        id_solver = solver_function(dynObj,id_objective,eval([char(enum_file),'.',char(solver_type)]));
+        id_solver = solver_function(modObj,id_objective,eval([char(enum_file),'.',char(solver_type)]));
     else
         % There are both constraints and objectives
         objective_function = str2func(objective);
@@ -860,7 +860,7 @@ function id_solver = load_idsolver(handles,dynObj)
         solver_function = str2func(solver_class);
         solverObj = settings.getElementById(solver_class);
         enum_file = solverObj.getElementsByTagName('solver_type_enum').item(0).getFirstChild.getData;
-        id_solver = solver_function(dynObj,id_objective,eval([char(enum_file),'.',char(solver_type)]));
+        id_solver = solver_function(modObj,id_objective,eval([char(enum_file),'.',char(solver_type)]));
         % Obtain the constaints
         constraint_function = str2func(constraint);
         q_data = get(handles.constraint_table,'Data');
@@ -891,7 +891,7 @@ function loadState(handles)
         load(file_name)
         set(handles.model_text,'String',state.model_text);
         set(handles.cable_text,'String',state.cable_text);
-        setappdata(handles.cable_text,'dynObj',state.dynObj);
+        setappdata(handles.cable_text,'modObj',state.modObj);
         trajectory_popup_Update([], [], handles);
         file_name = [path_string,'\logs\control_gui_state.mat'];
         if(exist(file_name,'file'))
@@ -958,8 +958,8 @@ function saveState(handles,file_path)
 end
 
 function initialise_gain_table(hObject,handles)
-    dynObj = getappdata(handles.cable_text,'dynObj');
-    n = dynObj.numDofs;
+    modObj = getappdata(handles.cable_text,'modObj');
+    n = modObj.numDofs;
     set(hObject,'Data',zeros(1,n));
     set(hObject,'ColumnEditable',true(1,n));
 end
@@ -980,11 +980,11 @@ function initialise_popups(handles)
     tuning_parameter_popup_Callback(handles.tuning_parameter_popup, [], handles);
 end
 
-function weight_number = get_weight_number(xmlObj,dynObj)
+function weight_number = get_weight_number(xmlObj,modObj)
     weight_links = str2double(xmlObj.getElementsByTagName('weight_links_multiplier').item(0).getFirstChild.getData);
     weight_cables = str2double(xmlObj.getElementsByTagName('weight_cables_multiplier').item(0).getFirstChild.getData);
     weight_constants = str2num(xmlObj.getElementsByTagName('weight_constants').item(0).getFirstChild.getData);
-    weight_number = weight_links*dynObj.numLinks + weight_cables*dynObj.numCables + sum(weight_constants);
+    weight_number = weight_links*modObj.numLinks + weight_cables*modObj.numCables + sum(weight_constants);
 end
 %% TO BE DONE
 % Modify the constraints and objectives
