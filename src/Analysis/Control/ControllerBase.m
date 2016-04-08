@@ -17,7 +17,7 @@ classdef ControllerBase < handle
     end
     
     methods (Abstract)
-         [cable_forces] = executeFunction(obj, q, q_d, q_dd, q_ref, q_ref_d, q_ref_dd);
+         [cable_forces] = executeFunction(obj, q, q_d, q_dd, q_ref, q_ref_d, q_ref_dd,t);
     end
     
 end
