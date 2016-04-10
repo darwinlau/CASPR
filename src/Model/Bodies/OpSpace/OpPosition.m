@@ -1,6 +1,9 @@
-classdef OpPosition < OpSpace
-    %OpPosition OpSpace definition for position
-        
+% Represents the operational space position for a particular link
+%
+% Author        : Jonathan EDEN
+% Created       : 2016
+% Description   :
+classdef OpPosition < OpSpace        
     properties (SetAccess = private)
         offset
     end    

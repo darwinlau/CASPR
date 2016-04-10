@@ -1,6 +1,9 @@
+% Utilities to operate on the GUI
+%
+% Author        : Jonathan EDEN
+% Created       : 2016
+% Description   :
 classdef GUIOperations
-    %CELLOPERATIONS Summary of this class goes here
-    %   Detailed explanation goes here
     
     methods (Static)
         % childNodes is a java type and hence is a handle class (no need to

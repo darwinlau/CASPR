@@ -1,3 +1,8 @@
+% Enum of the types of solvers for the forward dynamics integration
+%
+% Author        : Darwin LAU
+% Created       : 2016
+% Description    : 
 classdef FDSolverType
     enumeration 
         ODE45
@@ -7,6 +12,5 @@ classdef FDSolverType
         ODE23S
         ODE23T
         ODE23TB
-        ODE15I
     end
 end

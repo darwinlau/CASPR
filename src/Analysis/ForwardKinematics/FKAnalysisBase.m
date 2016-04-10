@@ -1,6 +1,14 @@
+% Base class for the forward kinematics analysis of CDPRs
+%
+% Author        : Darwin LAU
+% Created       : 2015
+% Description    : 
+%   Child classes must implement the "computeFunction" with the desired
+%   method of resolving the forward kinematics. This class provides some
+%   basic functionality, such as:
+%       - Determining the computational of the "computeFunction"
+%       - Computing the error in length and Jacobian of the error function
 classdef FKAnalysisBase < handle
-    %IDFUNCTION Summary of this class goes here
-    %   Detailed explanation goes here
     
     properties
         model;

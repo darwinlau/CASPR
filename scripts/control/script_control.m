@@ -43,7 +43,8 @@ controller = ComputedTorqueController(dynObj, id_solver, Kp_computedtorque, Kd_c
 % object and the inverse dynamics solver
 disp('Start Setup Simulation');
 start_tic = tic;
-control_sim = ControllerSimulator(dynObj, controller);
+fdSolver = ForwardDynamics(FDSolverType.ODE113);
+control_sim = ControllerSimulator(dynObj, controller, fdSolver);
 trajectory_ref = JointTrajectory.LoadXmlObj(trajectory_xmlobj, dynObj);
 time_elapsed = toc(start_tic);
 fprintf('End Setup Simulation : %f seconds\n', time_elapsed);

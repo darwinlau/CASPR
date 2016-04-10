@@ -1,11 +1,9 @@
-% Base quadratic cost function class for inverse dynamics
+% Base infinity norm cost function class for inverse dynamics
 % 
-% Author        : Darwin LAU
+% Author        : Jonathan EDEN
 % Created       : 2016
-% Description	: The quadratic function for ID is of the form:
+% Description	: The function for ID is of the form:
 %                   min(A*(x+b))
-% where x is the variable, A is the Hessian matrix, b is the vector of 
-% weights on x and c is a constant
 classdef IDObjectiveInfinity < IDObjective
     
     properties (SetAccess = protected)

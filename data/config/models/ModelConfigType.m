@@ -1,5 +1,12 @@
+% Enumeration for the different CDPRs
+%
+% Author        : Darwin LAU
+% Created       : 2015
+% Description    :
+%    Enumeration for the ModelConfig in order to initialise the appropriate
+%    CDPR for simulations. Users must add the enum for their robots added
+%    to the library. 
 classdef ModelConfigType
-    %JointType is the enumeration for type of joint a link has
     enumeration 
         M_SIMPLE_PLANAR_XY
         M_SIMPLE_SPHERICAL

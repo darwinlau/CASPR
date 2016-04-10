@@ -1,6 +1,11 @@
+% Represents the kinematics and dynamics of a single cable segment
+% 
+% Author        : Darwin LAU
+% Created       : 2011
+% Description	:
+%   Cable segments are fundamental for MCDMs since cables can pass through
+%   multiple links and hence have multiple segments.
 classdef CableSegmentModel < handle
-    %CABLEKINEMATICS Summary of this class goes here
-    %   Detailed explanation goes here
     properties
         r_OA            = {}          % Cell array of absolute attachment locations ^kr_{OA_{ijk}} for cable i segment j in local frame
         segmentVector   = []          % vector \mathbf{l}_{ij} in frame {0}

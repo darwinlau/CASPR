@@ -1,6 +1,9 @@
+% Represents a trajectory in joint space
+%
+% Author        : Darwin LAU
+% Created       : 2014
+% Description   :
 classdef JointTrajectory < handle
-    %TRAJECTORYINTERPOLATOR Summary of this class goes here
-    %   Detailed explanation goes here
     
     properties
         q
@@ -12,6 +15,7 @@ classdef JointTrajectory < handle
     end
     
     methods
+        % Function plots the joint trajectory, velocity and acceleration
         function plotJointSpace(obj, states_to_plot)
             n_dof = length(obj.q{1});
             
@@ -38,6 +42,7 @@ classdef JointTrajectory < handle
     end
     
     methods (Static)
+        % Loads trajectory from XML configuration
         function trajectory = LoadXmlObj(xmlObj, kin)
             assert(strcmp(xmlObj.getNodeName, 'trajectory'), 'Element should be <trajectory>');
             total_time = str2double(xmlObj.getElementsByTagName('time_total').item(0).getFirstChild.getData);
@@ -52,6 +57,7 @@ classdef JointTrajectory < handle
             q_e_d = XmlOperations.StringToVector(char(endObj.getElementsByTagName('q_dot').item(0).getFirstChild.getData));
             q_e_dd = XmlOperations.StringToVector(char(endObj.getElementsByTagName('q_ddot').item(0).getFirstChild.getData));
             
+            % Error checking on whether the XML file is valid
             assert(length(q_s) == kin.numDofVars, sprintf('Trajectory config does not contain correct number of DoF vars for q begin, desired : %d, specified : %d', kin.numDofVars, length(q_s)));
             assert(length(q_s_d) == kin.numDofs, sprintf('Trajectory config does not contain correct number of DoFs for q_dot begin, desired : %d, specified : %d', kin.numDofs, length(q_s_d)));
             assert(length(q_s_dd) == kin.numDofs, sprintf('Trajectory config does not contain correct number of DoFs for q_ddot begin, desired : %d, specified : %d', kin.numDofs, length(q_s_dd)));
@@ -62,6 +68,9 @@ classdef JointTrajectory < handle
             trajectory = JointTrajectory.GenerateTrajectory(kin, q_s, q_s_d, q_s_dd, q_e, q_e_d, q_e_dd, total_time, time_step);
         end
         
+        % Generates trajectory from the starting and ending joint poses for
+        % the entire system. Calls the generate trajectory function of each
+        % type of joint.
         function trajectory = GenerateTrajectory(kin, q_s, q_s_d, q_s_dd, q_e, q_e_d, q_e_dd, total_time, time_step)
             trajectory = JointTrajectory;
             n_dof = kin.numDofs;    

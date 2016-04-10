@@ -1,6 +1,9 @@
+% Quaternion representation and operations
+%
+% Author        : Darwin LAU
+% Created       : 2014
+% Description    :
 classdef Quaternion 
-    %QUATERNION Summary of this class goes here
-    %   Detailed explanation goes here
     
     properties
         q0

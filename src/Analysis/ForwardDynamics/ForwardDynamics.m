@@ -1,19 +1,49 @@
+% Performs the forward dynamics for cable-driven robots
+%
+% Author        : Darwin LAU
+% Created       : 2016
+% Description    : 
+%   The foward dynamics is performed using a simple scheme of
+%   double-integration of the joint acceleration obtained from the
+%   equations of motion. The solver type of the FD can be specified.
+%   Currently, the solver types are limited to the MATLAB ODE solvers.
 classdef ForwardDynamics < handle
-    %FORWARDDYNAMICS Summary of this class goes here
-    %   Detailed explanation goes here
     
     properties
+        solverType
     end
     
-    methods (Static)
-        function [q, q_dot, q_ddot, dynamics] = Compute(qp, qp_d, cable_forces, w_ext, dt, model)
+    methods
+        function fd = ForwardDynamics(solver_type)
+            fd.solverType = solver_type;
+        end
+        
+        function [q, q_dot, q_ddot, dynamics] = compute(obj, qp, qp_d, cable_forces, w_ext, dt, model)
             n_vars = model.numDofVars;
             n_dofs = model.numDofs;
             % The procedure to perform the forward dynamics
             % Initialise the starting point for the ODE
             y0 = [qp; qp_d];
             % Run the ODE function
-            [~, y_out] = ode113(@(~,y) ForwardDynamics.eom(0, y, model, cable_forces, w_ext), [0 dt], y0);
+            switch (obj.solverType)
+                case FDSolverType.ODE45
+                    solverFn = @(f,t,y0) ode45(f,t,y0);
+                case FDSolverType.ODE23
+                    solverFn = @(f,t,y0) ode23(f,t,y0);
+                case FDSolverType.ODE113
+                    solverFn = @(f,t,y0) ode113(f,t,y0);
+                case FDSolverType.ODE15S
+                    solverFn = @(f,t,y0) ode15s(f,t,y0);
+                case FDSolverType.ODE23S
+                    solverFn = @(f,t,y0) ode23s(f,t,y0);
+                case FDSolverType.ODE23T
+                    solverFn = @(f,t,y0) ode23t(f,t,y0);
+                case FDSolverType.ODE23TB
+                    solverFn = @(f,t,y0) ode23tb(f,t,y0);
+            end
+            [~, y_out] = solverFn(@(~,y) ForwardDynamics.eom(0, y, model, cable_forces, w_ext), [0 dt], y0);
+            
+            %[~, y_out] = ode113(@(~,y) ForwardDynamics.eom(0, y, model, cable_forces, w_ext), [0 dt], y0);
             % The output of the ODE is the solution and y0 for the next iteration
             s_end = size(y_out,1);
             % Store the q and q_dot values

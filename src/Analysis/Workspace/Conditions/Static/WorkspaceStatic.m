@@ -1,7 +1,10 @@
-classdef WorkspaceStatic < WorkspaceConditionBase
-    %IDFUNCTION Summary of this class goes here
-    %   Detailed explanation goes here
-    
+% Class to compute whether a pose (dynamics) is within the static workspace
+% (SW)
+%
+% Author        : Jonathan EDEN
+% Created       : 2015
+% Description    : 
+classdef WorkspaceStatic < WorkspaceConditionBase    
     properties (SetAccess = protected, GetAccess = protected)
         options                         % The options for the wrench closure
     end

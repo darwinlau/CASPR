@@ -1,5 +1,9 @@
+% Uniform Grid defined with beginning and end point
+%
+% Author        : Jonathan EDEN
+% Created       : 2015
+% Description    :
 classdef UniformGrid < Grid
-    % UniformGrid Uniform Grid defined with beginning and end point
     
     properties (SetAccess = private)
         q_begin

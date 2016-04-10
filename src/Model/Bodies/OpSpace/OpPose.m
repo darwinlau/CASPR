@@ -1,3 +1,9 @@
+% Represents the operational space pose (position + orientation) for a
+% paticular link
+%
+% Author        : Jonathan EDEN
+% Created       : 2016
+% Description   :
 classdef OpPose < OpSpace
     %OpPose OpSpace definition for pose
         

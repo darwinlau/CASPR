@@ -1,3 +1,9 @@
+% The GUI window for performing workspace analysis
+%
+% Author        : Jonathan EDEN
+% Created       : 2016
+% Description    :
+
 %--------------------------------------------------------------------------
 %% Constructor
 %--------------------------------------------------------------------------

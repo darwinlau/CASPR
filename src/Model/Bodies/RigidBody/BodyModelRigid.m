@@ -1,6 +1,12 @@
+% System kinematics and dynamics of a rigid body
+%
+% Author        : Darwin LAU
+% Created       : 2011
+% Description    :
+%   This class inherits from BodyModel and assumes that the body is a rigid
+%   body. Currently this is the only implementation of the BodyModel as no
+%   elastic/deformable bodies are considered.
 classdef BodyModelRigid < BodyModel
-    %BODYSYSTEMKINEMATICS Summary of this class goes here
-    %   Detailed explanation goes here
 
     methods
         function bk = BodyModelRigid(id, name, jointType)

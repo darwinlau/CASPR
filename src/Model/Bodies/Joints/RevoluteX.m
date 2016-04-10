@@ -1,6 +1,9 @@
-classdef RevoluteX < Joint
-    %RevoluteX Joint definition for a revolute joint in the X-axis
-        
+% Revolute joint in the X axis
+%
+% Author        : Darwin LAU
+% Created       : 2012
+% Description   :
+classdef RevoluteX < Joint        
     properties (Constant = true)
         numDofs = 1;
         numVars = 1;

@@ -44,7 +44,7 @@ id_solver = IDSolverQuadProg(dynObj, id_objective, ID_QP_SolverType.OPTITOOLBOX_
 disp('Start Setup Simulation');
 start_tic = tic;
 idsim = InverseDynamicsSimulator(dynObj, id_solver);
-fdsim = ForwardDynamicsSimulator(dynObj);
+fdsim = ForwardDynamicsSimulator(dynObj, FDSolverType.ODE113);
 trajectory = JointTrajectory.LoadXmlObj(trajectory_xmlobj, dynObj);
 time_elapsed = toc(start_tic);
 fprintf('End Setup Simulation : %f seconds\n', time_elapsed);

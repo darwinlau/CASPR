@@ -1,6 +1,9 @@
+% Spherical joint (3-DOF) using the XYZ-Euler representation
+%
+% Author        : Darwin LAU
+% Created       : 2012
+% Description   :
 classdef SphericalEulerXYZ < Joint
-    %SphericalXYZ Joint definition for a spherical joint with Euler angles
-    %xyz 
         
     properties (Constant = true)
         numDofs = 3;

@@ -1,6 +1,9 @@
+% Spatial (6-DOF) joint using the XYZ-Euler orientation representation
+%
+% Author        : Darwin LAU
+% Created       : 2015
+% Description   :
 classdef SpatialEulerXYZ < Joint
-    %SphericalEulerXYZXYZ Joint definition for a SphericalEulerXYZEulerXYZjoint with Euler angles
-    %xyz 
     properties
         translation
         orientation

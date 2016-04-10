@@ -1,12 +1,24 @@
+% Base class for the type of joint for a link
+%
+% Author        : Darwin LAU
+% Created       : 2014
+% Description   :
+%   All user-defined types of joints should implement this base class and
+%   define the following:
+%       - The rotation matrix from previous frame to this joint's frame
+%       - The translation vector from previous frame to this joint's frame
+%       - The relative velocity relationship (S matrix)
+%       - The derivative of the velocity relationship (S_dot)
+%       - The method to generate a trajectory for the joint
+%   Any new types of joints need to be added to the JointType enum and also
+%   added to the CreateJoint method.
 classdef (Abstract) Joint < handle
-    %JOINT Summary of this class goes here
-    %   Detailed explanation goes here
    
     properties (SetAccess = private)
         type                % Type of joint from JointType enum
-        q
-        q_dot
-        q_ddot
+        q                   % Joint variable q (generalised coordinates)
+        q_dot               % Derivative of q
+        q_ddot              % Double derivative of q
         
         % Dependent but stored values (hence private set)
         R_pe

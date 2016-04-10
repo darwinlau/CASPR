@@ -1,13 +1,21 @@
+% The simulator to run a forward dynamics simulation
+%
+% Author        : Darwin LAU
+% Created       : 2015
+% Description    :
+%   The forward dynamics simulator solves for the generalised coordinates
+%   for a given cable-force trajectory. The FD solver that should be used
+%   to resolve and integrate the EoM is specified to the simulator.
 classdef ForwardDynamicsSimulator < DynamicsSimulator
-    %FORWARDDYNAMICSSIMULATION Summary of this class goes here
-    %   Detailed explanation goes here
     
     properties        
+        fdSolver
     end
     
     methods
-        function id = ForwardDynamicsSimulator(model)
-            id@DynamicsSimulator(model);
+        function fd = ForwardDynamicsSimulator(model, fd_solver_type)
+            fd@DynamicsSimulator(model);
+            fd.fdSolver = ForwardDynamics(fd_solver_type);
         end
         
         
@@ -32,7 +40,7 @@ classdef ForwardDynamicsSimulator < DynamicsSimulator
             
             for t = 2:length(obj.timeVector)
                 fprintf('Simulation time : %f\n', obj.timeVector(t));
-                [obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t}, obj.model] = ForwardDynamics.Compute(obj.model.q, obj.model.q_dot, cable_forces{t-1}, zeros(obj.model.numDofs,1), obj.timeVector(t)-obj.timeVector(t-1), obj.model);
+                [obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t}, obj.model] = obj.fdSolver.compute(obj.model.q, obj.model.q_dot, cable_forces{t-1}, zeros(obj.model.numDofs,1), obj.timeVector(t)-obj.timeVector(t-1), obj.model);
                 obj.interactionWrench{t} = obj.model.interactionWrench;
                 obj.cableLengths{t} = obj.model.cableLengths;
                 obj.cableLengthsDot{t} = obj.model.cableLengthsDot;

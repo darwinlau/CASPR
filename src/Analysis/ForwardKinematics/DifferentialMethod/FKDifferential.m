@@ -1,6 +1,10 @@
+% Solves the forward kinematics using the integration approach by taking
+% the pseudo-inverse solution of the derivative kinematics relationship.
+%
+% Author        : Darwin LAU
+% Created       : 2015
+% Description    : 
 classdef FKDifferential < FKAnalysisBase
-    %IDFUNCTION Summary of this class goes here
-    %   Detailed explanation goes here
     
     properties (Access = private)
     end

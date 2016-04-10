@@ -1,3 +1,9 @@
+% Class to compute whether a pose (dynamics) is within the wrench-closure
+% workspace (WCW)
+%
+% Author        : Jonathan EDEN
+% Created       : 2015
+% Description    : 
 classdef WrenchClosure < WorkspaceConditionBase
     %IDFUNCTION Summary of this class goes here
     %   Detailed explanation goes here

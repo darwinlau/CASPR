@@ -1,5 +1,9 @@
+% Enumeration for the exit type (code) for the inverse dynamics
+%
+% Author        : Darwin LAU
+% Created       : 2014
+% Description   : 
 classdef IDSolverExitType
-    %JointType is the enumeration for type of joint a link has
     enumeration 
         NO_ERROR
         INFEASIBLE

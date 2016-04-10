@@ -1,6 +1,12 @@
+% The simulator to run an inverse dynamics simulation
+%
+% Author        : Darwin LAU
+% Created       : 2013
+% Description    :
+%   The inverse dynamics simulator solves for the cable forces required to
+%   perform a prescribed joint space trajectory. The IDSolver is provided
+%   as an input to the simulator to specify the ID algorithm to be used.
 classdef InverseDynamicsSimulator < DynamicsSimulator
-    %InverseDynamicsSimulation Simulation for Inverse Dynamics (cable force
-    %resolution)
 
     properties (SetAccess = protected)
         compTime            % computational time for each time step
@@ -38,12 +44,16 @@ classdef InverseDynamicsSimulator < DynamicsSimulator
             end
         end
 
+        % Plots the cost associated with the ID solver (for solvers that
+        % aim to minimise some objective cost).
         function plotIDCost(obj)
             figure;
             plot(obj.timeVector, obj.IDFunctionCost, 'LineWidth', 1.5, 'Color', 'k');
             title('ID function cost');
         end
 
+        % Plots the left and right sides of the EoM to show whether the
+        % solution matches the desired EoM.
         function verifyEoMConstraint(obj)
             assert(~isempty(obj.trajectory), 'Cannot verify the EoM since trajectory is empty');
             assert(~isempty(obj.cableForces), 'Cannot verify the EoM since trajectory is empty');

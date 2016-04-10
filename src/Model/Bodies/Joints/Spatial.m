@@ -1,6 +1,9 @@
+% Spatial (6-DOF) joint using the quaternion orientation representation
+%
+% Author        : Darwin LAU
+% Created       : 2015
+% Description   :
 classdef Spatial < Joint
-    %SphericalXYZ Joint definition for a spherical joint with Euler angles
-    %xyz 
     properties
         translation
         orientation

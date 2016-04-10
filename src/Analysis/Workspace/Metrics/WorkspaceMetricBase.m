@@ -1,6 +1,10 @@
+% Base class for different workspace metrics
+%
+% Author        : Jonathan EDEN
+% Created       : 2015
+% Description    : 
+%   Different workspace metrics must simply implement the evaluateFunction
 classdef WorkspaceMetricBase < handle
-    %IDFUNCTION Summary of this class goes here
-    %   Detailed explanation goes here
     
     properties
     end
@@ -15,7 +19,7 @@ classdef WorkspaceMetricBase < handle
     
     methods (Abstract)
         % evalute - This function takes in the workspace dynamics and
-        % returns a boolean for whether the point lies in the workspace.
+        % returns the metric value
         f = evaluateFunction(obj, dynamics,method,inWorkspace);        
     end
 end

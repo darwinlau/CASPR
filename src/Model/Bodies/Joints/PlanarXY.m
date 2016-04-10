@@ -1,6 +1,9 @@
-classdef PlanarXY < Joint
-    %RevoluteX Joint definition for a revolute joint in the X-axis
-        
+% Planar joint in the XY-plane
+%
+% Author        : Darwin LAU
+% Created       : 2015
+% Description   :
+classdef PlanarXY < Joint        
     properties (Constant = true)
         numDofs = 3;
         numVars = 3;

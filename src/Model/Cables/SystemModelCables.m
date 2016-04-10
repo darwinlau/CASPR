@@ -1,4 +1,4 @@
-% System kinematics of the cables for the system
+% System kinematics and dynamics of the cables for the system
 %
 % Please cite the following paper when using this for multilink cable
 % robots:
@@ -9,7 +9,7 @@
 %
 % Author        : Darwin LAU
 % Created       : 2011
-% Description    :
+% Description   :
 %    Data structure that represents the kinematics for the cables of the
 % system. It contains the kinematics of the set of cables, encapsulated
 % within the CableKinematics object.

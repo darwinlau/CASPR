@@ -1,6 +1,9 @@
+% Library of cell operation utilities
+%
+% Author        : Darwin LAU
+% Created       : 2014
+% Description    :
 classdef CellOperations
-    %CELLOPERATIONS Summary of this class goes here
-    %   Detailed explanation goes here
     
     methods (Static)
         function c = CreateCellArray(constructorFn, dim)
@@ -8,8 +11,6 @@ classdef CellOperations
             for idx = 1:numel(c)
                 c(idx) = {constructorFn()};
             end
-            %c = cellfun(constructorFn, empty_c);
-            %c(:) = {constructorFn()};
         end
     end
     

@@ -1,6 +1,10 @@
+% Revolute joint in the Z axis
+%
+% Author        : Darwin LAU
+% Created       : 2012
+% Description   :
 classdef RevoluteZ < Joint
-    %RevoluteZ Joint definition for a revolute joint in the Z-axis
-        
+    
     properties (Constant = true)
         numDofs = 1;
         numVars = 1;

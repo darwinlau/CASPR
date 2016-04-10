@@ -1,11 +1,11 @@
-% Basic Inverse Dynamics solver for problems in the Quadratic Program form
-% This is a well-studied form of inverse dynamics solver for CDPRs.
+% Computed torque controller for CDPRs using the inverse dynamics resolve
+% from the library.
 %
 % Author        : Darwin LAU
 % Created       : 2016
-% Description   : Only a quadratic objective function and linear 
-% constraints can be used with this solver. There are multiple types of QP
-% solver implementations that can be used with this solver.
+% Description    :
+%    This version assumes that Kp and Kd are constant values. The method of
+%    resolving the inverse dynamics is generic by specifying the id_solver.
 classdef ComputedTorqueController < ControllerBase
     
     properties (SetAccess = private)

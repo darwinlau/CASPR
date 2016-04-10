@@ -1,3 +1,8 @@
+% Represents a trajectory in operational space
+%
+% Author        : Jonathan EDEN
+% Created       : 2016
+% Description   :
 classdef OpTrajectory < handle
     %TRAJECTORYINTERPOLATOR Summary of this class goes here
     %   Detailed explanation goes here

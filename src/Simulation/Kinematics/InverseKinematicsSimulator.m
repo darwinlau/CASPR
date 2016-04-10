@@ -1,6 +1,13 @@
+% The simulator to run an inverse kinematics simulation
+%
+% Author        : Darwin LAU
+% Created       : 2013
+% Description    :
+%   The inverse kinematics simulator simply compute the cable lengths for a
+%   specified joint space trajectory. This is trivial for CDPRs (as a type
+%   of parallel robots) and only requires the "update" function of the
+%   SystemModel to be called.
 classdef InverseKinematicsSimulator < MotionSimulator
-    %InverseDynamicsSimulation Simulation for Inverse Dynamics (cable force
-    %resolution)
     
     properties (SetAccess = protected)       
     end

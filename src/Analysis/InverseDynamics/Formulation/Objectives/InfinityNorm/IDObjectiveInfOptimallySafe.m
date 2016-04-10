@@ -1,4 +1,5 @@
-% Objective function for infinity norm of cable forces
+% Objective function for infinity norm of cable forces to achieve an
+% optimally safe cable force distribution
 % 
 % Author        : Jonathan EDEN
 % Created       : 2016

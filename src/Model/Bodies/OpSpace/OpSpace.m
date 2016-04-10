@@ -1,11 +1,14 @@
+% Base class for representing the operational space variables
+%
+% Author        : Jonathan EDEN
+% Created       : 2016
+% Description   :
 classdef (Abstract) OpSpace < handle
-    %OPSpace Summary of this class goes here
-    %   Detailed explanation goes here
    
     properties
         link                % The link that the coordinate system is attached to
         selection_matrix    % A matrix which projects body velocities into the OPSpace terms
-        numOPDofs       % The number of output degrees of freedom
+        numOPDofs           % The number of output degrees of freedom
     end
     
     properties (SetAccess = protected)

@@ -1,6 +1,22 @@
+% Base class for different simulators that deal with the study of motion
+% for CDPRs.
+%
+% Author        : Darwin LAU
+% Created       : 2013
+% Description    :
+%   Motion simulators are essentially simulators that deal with
+%   trajectories, such as IK, FK, ID, FD and control. The simulator
+%   provides a lot of plotting functionality to make the plotting of the
+%   results more convenient. The plotting methods that are available
+%   include:
+%       - plotMovie: to plot an avi animation of the CDPR motion
+%       - plotCableLengths: plot the length of a set (or all) of the cables
+%       - plotJointSpace: plot the joint space variables
+%       - plotBodyCOG: plot the COG position of the CDPR in inertial frame
+%       - plotAngularAcceleration: plot the angular acceleration in {0}
+%       - plotFrame: plots a single frame of the CDPR, can be used to plot
+%       a particular pose or used within the plotMovie
 classdef (Abstract) MotionSimulator < Simulator
-    %DYNAMICSSIMULATION Summary of this class goes here
-    %   Detailed explanation goes here
 
     properties
         timeVector          % time vector
@@ -14,6 +30,12 @@ classdef (Abstract) MotionSimulator < Simulator
             ms@Simulator(model);
         end
 
+        % Plots an avi movie file of the trajector motion of the robot. The
+        % plot axis, filename, width and height of the movie file must be
+        % provided. The "time" variable specifies the total time of the
+        % video. The video will be recorded at 30 fps so the number of
+        % frames will be computed to confirm to the total time of the
+        % video.
         function plotMovie(obj, plot_axis, filename, time, width, height)
             assert(~isempty(obj.trajectory), 'Cannot plot since trajectory is empty');
 
@@ -40,6 +62,10 @@ classdef (Abstract) MotionSimulator < Simulator
             close(plot_handle);
         end
 
+        % Plots the cable lengths of the CDPR over the trajectory. Users
+        % need to specify the plot axis and also which cables (as an array
+        % of numbers) to plot (it is possible to default to plot all cables
+        % if the array is []).
         function plotCableLengths(obj, cables_to_plot, plot_axis)
             assert(~isempty(obj.cableLengths), 'Cannot plot since lengths vector is empty');
             assert(~isempty(obj.cableLengthsDot), 'Cannot plot since lengths_dot vector is empty');
@@ -74,7 +100,11 @@ classdef (Abstract) MotionSimulator < Simulator
             % ONLY USED IN DEBUGGING END
         end
 
-        function plotJointSpace(obj, states_to_plot,plot_axis)
+        % Plots the joint space vars of the CDPR over the trajectory. Users
+        % need to specify the plot axis and also which states (as an array
+        % of numbers) to plot (it is possible to default to plot all states
+        % if the array is []).
+        function plotJointSpace(obj, states_to_plot, plot_axis)
             assert(~isempty(obj.trajectory), 'Cannot plot since trajectory is empty');
 
             n_dof = obj.model.numDofs;
@@ -101,7 +131,11 @@ classdef (Abstract) MotionSimulator < Simulator
             end
         end
 
-        function plotBodyCOG(obj, bodies_to_plot,plot_axis)
+        % Plots the CoG of the links of the CDPR over the trajectory. Users
+        % need to specify the plot axis and also which bodies (as an array
+        % of numbers) to plot (it is possible to default to plot all bodies
+        % if the array is []).
+        function plotBodyCOG(obj, bodies_to_plot, plot_axis)
             assert(~isempty(obj.trajectory), 'Cannot plot since trajectory is empty');
 
             % Plots absolute position, velocity and acceleration of COG
@@ -158,6 +192,10 @@ classdef (Abstract) MotionSimulator < Simulator
             % ONLY USED IN DEBUGGING END
         end
 
+        % Plots the angular acceleration of the links of the CDPR. Users
+        % need to specify the plot axis and also which bodies (as an array
+        % of numbers) to plot (it is possible to default to plot all bodies
+        % if the array is []).
         function plotAngularAcceleration(obj, bodies_to_plot, plot_axis)
             assert(~isempty(obj.trajectory), 'Cannot plot since trajectory is empty');
 
@@ -204,8 +242,12 @@ classdef (Abstract) MotionSimulator < Simulator
 
     end
     methods (Static)
+        % Plots a single image of the CDPR at the specified kinematics.
+        % Users can specify the plotting axis and also which figure handle
+        % to plot too. If no or empty figure handle is specified then a new
+        % figure plot will be created.
         function PlotFrame(kinematics, plot_axis, fig_handle)
-            if nargin < 3
+            if nargin < 3 || isempty(fig_handle)
                 figure;
             else
                 figure(fig_handle);

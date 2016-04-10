@@ -1,3 +1,8 @@
+% Represents the operational space orientation for a paticular link
+%
+% Author        : Jonathan EDEN
+% Created       : 2016
+% Description   :
 classdef OpOrientation < OpSpace
     %OpOrientation OpSpace definition for an orientation
     

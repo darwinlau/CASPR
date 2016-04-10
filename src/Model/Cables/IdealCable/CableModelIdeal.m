@@ -1,4 +1,4 @@
-% Kinematic representation for an ideal (massless and rigid) cable
+% Model for an ideal (massless and rigid) cable
 % 
 % Author        : Darwin LAU
 % Created       : 2011
@@ -6,11 +6,12 @@
 %	This is the simplest type of cable that is massless and rigid. It also
 %	assumes a straight-line model between attachment points. As such, the
 %	only parameters that govern the kinematics of the ideal cable are the
-%	attachment locations of cables at each link
+%	attachment locations of cables at each link.
 classdef CableModelIdeal < CableModel        
     methods 
         function ck = CableModelIdeal(name, numLinks)
             ck@CableModel(name, numLinks);
+            % Ideal cables have infinite stiffness
             ck.K = Inf;
         end
         

@@ -1,19 +1,27 @@
+% The simulator to run a control simulation
+%
+% Author        : Darwin LAU
+% Created       : 2016
+% Description    :
+%   The control problem aims to solve for the cable forces in order to
+%   track a reference trajectory in joint space. The controller algorithm
+%   (ControllerBase object) is specified for the simulator. 
 classdef ControllerSimulator < DynamicsSimulator
-    %InverseDynamicsSimulation Simulation for Inverse Dynamics (cable force
-    %resolution)
 
     properties (SetAccess = protected)
         compTime            % computational time for each time step
+        fdSolver
         controller
         refTrajectory
         stateError
     end
 
     methods
-        function ctrl_sim = ControllerSimulator(model, controller)
+        function ctrl_sim = ControllerSimulator(model, controller, fd_solver)
             ctrl_sim@DynamicsSimulator(model);
             ctrl_sim.model = model;
             ctrl_sim.controller = controller;
+            ctrl_sim.fdSolver = fd_solver;
         end
 
         function run(obj, ref_trajectory, q0, q0_dot, q0_ddot)
@@ -37,17 +45,19 @@ classdef ControllerSimulator < DynamicsSimulator
                 obj.cableForces{t} = obj.controller.executeFunction(obj.trajectory.q{t},  obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t}, ref_trajectory.q{t}, ref_trajectory.q_dot{t}, ref_trajectory.q_ddot{t});
                 obj.stateError{t} = ref_trajectory.q{t} - obj.trajectory.q{t};
                 if t < length(obj.timeVector)
-                    [obj.trajectory.q{t+1}, obj.trajectory.q_dot{t+1}, obj.trajectory.q_ddot{t+1}, obj.model] = ForwardDynamics.Compute(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.cableForces{t}, zeros(obj.model.numDofs,1), obj.timeVector(t+1)-obj.timeVector(t), obj.model);
+                    [obj.trajectory.q{t+1}, obj.trajectory.q_dot{t+1}, obj.trajectory.q_ddot{t+1}, obj.model] = obj.fdSolver.compute(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.cableForces{t}, zeros(obj.model.numDofs,1), obj.timeVector(t+1)-obj.timeVector(t), obj.model);
                 end
             end
         end
         
+        % Plots the tracking error in generalised coordinates
         function plotTrackingError(obj)
             trackingError_array = cell2mat(obj.stateError);
             plot(obj.timeVector, trackingError_array, 'Color', 'k', 'LineWidth', 1.5);
         end
         
-        function plotJointSpaceTracking(obj, states_to_plot,plot_axis)
+        % Plots both the reference and computed trajectory.
+        function plotJointSpaceTracking(obj, states_to_plot, plot_axis)
             assert(~isempty(obj.trajectory), 'Cannot plot since trajectory is empty');
 
             n_dof = obj.model.numDofs;
