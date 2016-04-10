@@ -1,6 +1,9 @@
+% Library of matrix operation utilities
+%
+% Author        : Darwin LAU
+% Created       : 2014
+% Description    :
 classdef MatrixOperations 
-    %MATRIXOPERATIONS Summary of this class goes here
-    %   Detailed explanation goes here
     
     properties
     end
@@ -34,7 +37,6 @@ classdef MatrixOperations
             M_A = [zeros(n_q,1),-A(3,:).',A(2,:).',A(3,:).',zeros(n_q,1),-A(1,:).',-A(2,:).',A(1,:).',zeros(n_q,1)];
             C = MatrixOperations.InteriorProdRightQuad(M_A,B);
         end
-        
         
         function C = Initialise(m,n,flag)
             if(flag == 1)

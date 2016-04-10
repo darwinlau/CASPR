@@ -1,5 +1,9 @@
+% Object representation of the wrench-set sphere
+%
+% Author        : Jonathan EDEN
+% Created       : 2015
+% Description    :
 classdef WrenchSetSphere < handle
-    % WrenchSet Class to store information about the wrench set and 
         
     properties (SetAccess = protected)
         r

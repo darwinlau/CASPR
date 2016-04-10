@@ -1,3 +1,9 @@
+% The GUI window for performing dynamics (forward and inverse) analysis
+%
+% Author        : Jonathan EDEN
+% Created       : 2016
+% Description    :
+
 %--------------------------------------------------------------------------
 %% Constructor
 %--------------------------------------------------------------------------

@@ -1,6 +1,17 @@
+% Base class for different simulators that deal with the study of the
+% dynamics of CDPRs. 
+%
+% Author        : Darwin LAU
+% Created       : 2013
+% Description    :
+%   Dynamics simulator is used in the simulation of ID, FD and control. The
+%   additional class provides more plotting functionality, such as:
+%       - plotCableForces
+%       - plotInteractionForceMagnitudes
+%       - plotInteractionForceAngles
+%       - plotInteractionMomentMagnitudes
+%       - plotInteractionForceZ
 classdef DynamicsSimulator < MotionSimulator
-    %DYNAMICSSIMULATOR Summary of this class goes here
-    %   Detailed explanation goes here
     
     properties
         cableForces         % cell array of cable force vector
@@ -12,7 +23,11 @@ classdef DynamicsSimulator < MotionSimulator
             ds@MotionSimulator(model);
         end
         
-        function plotCableForces(obj, cables_to_plot,plot_axis)
+        % Plots the cable forces of the CDPR over the trajectory. Users
+        % need to specify the plot axis and also which cables (as an array
+        % of numbers) to plot (it is possible to default to plot all cables
+        % if the array is []).
+        function plotCableForces(obj, cables_to_plot, plot_axis)
             assert(~isempty(obj.cableForces), 'Cannot plot since cableForces is empty');
             
             if isempty(cables_to_plot)
@@ -29,7 +44,6 @@ classdef DynamicsSimulator < MotionSimulator
                 title('Cable forces');                 
             end
             
-            
 %             line_color_order = [1 0 0; 0 1 0; 0 0 1; 0 1 1; 1 0 1; 1 1 0; 0 0 0; 1 165/255 0; 139/255 69/255 19/255];
 %             line_style_order = '-|--|:|-.';
 %             gcf = figure;
@@ -37,7 +51,11 @@ classdef DynamicsSimulator < MotionSimulator
 %             plot(obj.timeVector, forces(cables_to_plot, :), 'LineWidth', 1.5); title('Cable forces');
         end
         
-        function plotInteractionForceMagnitudes(obj, links_to_plot,plot_axis)
+        % Plots the magnitude of interaction forces trajectory. Users
+        % need to specify the plot axis and also which links (as an array
+        % of numbers) to plot (it is possible to default to plot all links
+        % if the array is []).
+        function plotInteractionForceMagnitudes(obj, links_to_plot, plot_axis)
             assert(~isempty(obj.interactionWrench), 'Cannot plot since interactionWrench is empty');
             
             if isempty(links_to_plot)
@@ -64,7 +82,6 @@ classdef DynamicsSimulator < MotionSimulator
                 title('Magnitude of interaction forces');
             end
             
-            
 %             line_color_order = [1 0 0; 0 1 0; 0 0 1; 0 1 1; 1 0 1; 1 1 0; 0 0 0; 1 165/255 0; 139/255 69/255 19/255];
 %             line_style_order = '-|--|:|-.';
 %             gcf = figure;
@@ -72,7 +89,11 @@ classdef DynamicsSimulator < MotionSimulator
 %             plot(obj.timeVector, forces(links_to_plot, :), 'LineWidth', 1.5); title('Cable forces');
         end        
         
-        % Plots the interaction angle into the Z axis
+        % Plots the interaction angle into the Z axis.
+        % TODO: This function needs to be made generic since not all 
+        % interaction angles want to be measured with reference to the Z 
+        % axis only. Can refer to IDConstraintInteractionForceAngleCone 
+        % to incorporate the F_centre parameter.
         function plotInteractionForceAngles(obj, links_to_plot)
             assert(~isempty(obj.interactionWrench), 'Cannot plot since interactionWrench is empty');
             
@@ -98,6 +119,10 @@ classdef DynamicsSimulator < MotionSimulator
             title('Interaction angles');           
         end
         
+        % Plots the magnitude of interaction moments trajectory. Users
+        % need to specify the plot axis and also which links (as an array
+        % of numbers) to plot (it is possible to default to plot all links
+        % if the array is []).
         function plotInteractionMomentMagnitudes(obj, links_to_plot)
             assert(~isempty(obj.interactionWrench), 'Cannot plot since interactionWrench is empty');
             
@@ -122,6 +147,10 @@ classdef DynamicsSimulator < MotionSimulator
             title('Magnitude of interaction moments'); 
         end
         
+        % Plots the magnitude of Z dir interaction force trajectory. Users
+        % need to specify the plot axis and also which links (as an array
+        % of numbers) to plot (it is possible to default to plot all links
+        % if the array is []).
         function plotInteractionForceZ(obj, links_to_plot)
             assert(~isempty(obj.interactionWrench), 'Cannot plot since interactionWrench is empty');
             

@@ -1,3 +1,9 @@
+% Class to compute whether a pose (dynamics) is within the wrench feasible
+% workspace (WFW)
+%
+% Author        : Jonathan EDEN
+% Created       : 2015
+% Description    : 
 classdef WrenchFeasible < WorkspaceConditionBase
     %IDFUNCTION Summary of this class goes here
     %   Detailed explanation goes here

@@ -505,10 +505,10 @@ classdef SystemModelBodies < handle
         end
         
         function N = calculate_N(obj)
-            %% Initialisiation
+            % Initialisiation
             flag = isa(obj.q,'sym');
             MassInertiaMatrix = obj.massInertiaMatrix;
-            %% PS_dot term
+            % PS_dot term
             n_q = length(bodyKinematics.q_dot); n_l = bodyKinematics.numLinks;
             N_j = MatrixOperations.Initialise(n_q,n_q^2,flag);
             A = MatrixOperations.Initialise(6*n_l,n_q,flag);
@@ -523,7 +523,7 @@ classdef SystemModelBodies < handle
             % Project correctly
             C1 = MatrixOperations.MatrixProdLeftQuad(obj.W.'*MassInertiaMatrix*obj.P*A,N_j);
             
-            %% P_dotS term
+            % P_dotS term
             C2 = MatrixOperations.Initialise(n_q,n_q^2,flag);
             T_t = zeros(6*n_l,3);
             T_r = zeros(6*n_l,3);
@@ -544,7 +544,7 @@ classdef SystemModelBodies < handle
                 T_r(6*(i-1)+4:6*(i-1)+6,:) = zeros(3);
             end
             
-            %% \omega \times \omega \times r
+            % \omega \times \omega \times r
             C3 = MatrixOperations.Initialise(n_q,n_q^2,flag);
             for i = 1:n_l
                 N_t = MatrixOperations.Initialise(n_q,3*n_q,flag);
@@ -566,7 +566,7 @@ classdef SystemModelBodies < handle
                 T_t(6*(i-1)+1:6*(i-1)+3,:) = zeros(3);
             end
             
-            %% \omega \times I_G \omega
+            % \omega \times I_G \omega
             C4 = MatrixOperations.Initialise(n_q,n_q^2,flag);
             for i = 1:n_l
                 W_i = obj.W(6*(i-1)+4:6*(i-1)+6,:);
@@ -575,7 +575,7 @@ classdef SystemModelBodies < handle
                 C4 = C4 + MatrixOperations.MatrixProdLeftQuad(obj.W.'*T_r,N_r);
                 T_r(6*(i-1)+4:6*(i-1)+6,:) = zeros(3);
             end
-            %% Compute N
+            % Compute N
             N = C1 + C2 + C3 + C4;
             if(flag)
                 N = simplify(N);
@@ -589,7 +589,7 @@ classdef SystemModelBodies < handle
         
         function loadOpXmlObj(obj,op_space_xmlobj)
             obj.occupied.op_space = true;
-            %% Load the op space
+            % Load the op space
             assert(strcmp(op_space_xmlobj.getNodeName, 'op_set'), 'Root element should be <op_set>');
             % Go into the cable set
             allOPItems = op_space_xmlobj.getChildNodes;
@@ -631,7 +631,7 @@ classdef SystemModelBodies < handle
 
     methods (Static)
         function b = LoadXmlObj(body_prop_xmlobj)
-            %% Load the body
+            % Load the body
             assert(strcmp(body_prop_xmlobj.getNodeName, 'links'), 'Root element should be <links>');
             
 %             allLinkItems = body_prop_xmlobj.getChildNodes;

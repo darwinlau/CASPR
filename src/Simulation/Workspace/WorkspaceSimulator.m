@@ -1,6 +1,13 @@
+% The simulator to run a workspace simulation
+%
+% Author        : Jonathan EDEN
+% Created       : 2016
+% Description    :
+%   Workspace simulator generates the workspace over a defined set of space
+%   (currently only a grid of states is accepted). The workspace simulation
+%   performs essentially a numerical brute force approach over the set of
+%   poses for a given workspace condition and/or metric.
 classdef WorkspaceSimulator < Simulator
-    %DYNAMICSSIMULATOR Summary of this class goes here
-    %   Detailed explanation goes here
     
     properties
         grid            % Grid object for brute force workspace (input)

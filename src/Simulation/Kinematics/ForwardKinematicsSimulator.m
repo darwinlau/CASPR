@@ -1,11 +1,20 @@
+% The simulator to run an forward kinematics simulation
+%
+% Author        : Darwin LAU
+% Created       : 2013
+% Description    :
+%   The forward kinematics simulator computes the generalised coordinates
+%   trajectory given the cable length trajectory using the specified FK 
+%   solver. The simulator also computes and stores the resulting length
+%   error by comparing the input length with the length resulting from the
+%   solution generalised coordinates. This can be used as a measure of the
+%   accuracy of the FK approach.
 classdef ForwardKinematicsSimulator < MotionSimulator
-    %InverseDynamicsSimulation Simulation for Inverse Dynamics (cable force
-    %resolution)
     
     properties (SetAccess = protected) 
-        lengthError
-        lengthErrorNorm
-        FKSolver
+        lengthError         % Cell array of the length error vector
+        lengthErrorNorm     % Array of the error norm for the trajectory
+        FKSolver            % The FK solver object (inherits from FKAnalysisBase)
     end
     
     methods
@@ -14,11 +23,14 @@ classdef ForwardKinematicsSimulator < MotionSimulator
             fk.FKSolver = fk_solver;
         end
         
+        % The run function performs the FK at each point in time using the
+        % trajectory of cable lengths
         function run(obj, lengths, lengths_dot, time_vector, q0_approx, q0_prev_approx)
             obj.timeVector = time_vector;
             obj.cableLengths = lengths;
             obj.cableLengthsDot = lengths_dot;
             
+            % Setting up
             obj.trajectory = JointTrajectory;
             obj.trajectory.timeVector = obj.timeVector;
             obj.trajectory.q = cell(1, length(obj.timeVector));
@@ -54,6 +66,9 @@ classdef ForwardKinematicsSimulator < MotionSimulator
             end
         end
         
+        % Plots the error for each cable length by comparing the reference
+        % length with the length as a result of the solution generalised
+        % coordinates.
         function plotCableLengthError(obj,~,plot_axis)
             lengthError_array = cell2mat(obj.lengthError);
             if(~isempty(plot_axis))

@@ -1,4 +1,4 @@
-% Basic Inverse Dynamics solver for problems infinite norm problems.
+% Basic Inverse Dynamics solver for infinite norm problems.
 % This is a well-studied form of inverse dynamics solver for CDPRs.
 %
 % Author        : Darwin LAU

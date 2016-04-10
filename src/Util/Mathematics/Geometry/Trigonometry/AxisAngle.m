@@ -1,6 +1,9 @@
+% Axis angle representation and operations
+%
+% Author        : Darwin LAU
+% Created       : 2014
+% Description    :
 classdef AxisAngle
-    %AXISANGLE Summary of this class goes here
-    %   Detailed explanation goes here
     
     properties
         th

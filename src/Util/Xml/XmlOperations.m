@@ -1,6 +1,9 @@
+% Library of XML operation utilities
+%
+% Author        : Darwin LAU
+% Created       : 2014
+% Description    :
 classdef XmlOperations
-    %CELLOPERATIONS Summary of this class goes here
-    %   Detailed explanation goes here
     
     methods (Static)
         % childNodes is a java type and hence is a handle class (no need to

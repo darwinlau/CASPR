@@ -1,6 +1,9 @@
+% Library of functions to produce splines
+%
+% Author        : Darwin LAU
+% Created       : 2014
+% Description    :
 classdef Spline 
-    %MATRIXOPERATIONS Summary of this class goes here
-    %   Detailed explanation goes here
     
     properties
     end

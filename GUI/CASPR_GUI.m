@@ -1,3 +1,12 @@
+% The main GUI file for CASPR
+%
+% Author        : Jonathan EDEN
+% Created       : 2016
+% Description    :
+%    Creates the main GUI window for users to use CASPR using a more
+%    friendly interface. This is the main interface that connects to the
+%    other GUI windows that perform more specific analyses.
+
 %--------------------------------------------------------------------------
 %% Constructor
 %--------------------------------------------------------------------------

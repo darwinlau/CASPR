@@ -1,5 +1,9 @@
+% Enum for the type of joint
+%
+% Author        : Darwin LAU
+% Created       : 2015
+% Description   :
 classdef JointType
-    %JointType is the enumeration for type of joint a link has
     enumeration 
         R_X                     % Revolute in X
         R_Y                     % Revolute in Y

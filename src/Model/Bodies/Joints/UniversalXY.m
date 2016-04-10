@@ -1,6 +1,9 @@
+% Universal joint in the XY axes
+%
+% Author        : Darwin LAU
+% Created       : 2016
+% Description   :
 classdef UniversalXY < Joint
-    %SphericalXYZ Joint definition for a spherical joint with Euler angles
-    %xyz 
         
     properties (Constant = true)
         numDofs = 2;

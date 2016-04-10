@@ -1,3 +1,8 @@
+% System kinematics and dynamics of an individual body
+%
+% Author        : Darwin LAU
+% Created       : 2011
+% Description    :
 classdef (Abstract) BodyModel < handle
     %BODYKINEMATICS Summary of this class goes here
     %   Detailed explanation goes here

@@ -1,5 +1,9 @@
+% Base class for the representation and functions on grids
+%
+% Author        : Jonathan EDEN
+% Created       : 2015
+% Description    :
 classdef Grid < handle
-    % Grid Grid class to allow for both uniform and other grips
         
     properties (SetAccess = protected)
         n_dimensions

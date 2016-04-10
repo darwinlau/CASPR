@@ -1,5 +1,9 @@
+% Revolute joint in the Y axis
+%
+% Author        : Darwin LAU
+% Created       : 2012
+% Description   :
 classdef RevoluteY < Joint
-    %RevoluteY Joint definition for a revolute joint in the Y-axis
     
     properties (Constant = true)
         numDofs = 1;

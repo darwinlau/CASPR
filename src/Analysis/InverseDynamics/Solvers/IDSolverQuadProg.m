@@ -41,22 +41,28 @@ classdef IDSolverQuadProg < IDSolverBase
                 b_ineq = [b_ineq; obj.constraints{i}.b];                
             end
 
+            % Solves the QP ID different depending on the solver type
             switch (obj.qp_solver_type)
+                % Basic version that uses MATLAB's solver
                 case ID_QP_SolverType.MATLAB
                     if(isempty(obj.options))
                         obj.options = optimoptions('quadprog', 'Display', 'off', 'MaxIter', 100);
                     end 
                     [cable_forces, id_exit_type] = id_qp_matlab(obj.objective.A, obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);
+                % Uses MATLAB solver with a warm start strategy on the
+                % active set
                 case ID_QP_SolverType.MATLAB_ACTIVE_SET_WARM_START
                     if(isempty(obj.options))
                         obj.options = optimoptions('quadprog', 'Display', 'off', 'MaxIter', 100);
                     end 
                     [cable_forces, id_exit_type,obj.active_set] = id_qp_matlab_active_set_warm_start(obj.objective.A, obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.active_set,obj.options);
+                % Uses the IPOPT algorithm from OptiToolbox
                 case ID_QP_SolverType.OPTITOOLBOX_IPOPT
                     if(isempty(obj.options))
                         obj.options = optiset('solver', 'IPOPT', 'maxiter', 100);
                     end 
                     [cable_forces, id_exit_type] = id_qp_opti(obj.objective.A, obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);
+                % Uses the OOQP algorithm from the Optitoolbox
                 case ID_QP_SolverType.OPTITOOLBOX_OOQP
                     if(isempty(obj.options))
                         obj.options = optiset('solver', 'OOQP', 'maxiter', 100);
@@ -66,16 +72,20 @@ classdef IDSolverQuadProg < IDSolverBase
                     error('ID_QP_SolverType type is not defined');
             end
             
+            % If there is an error, cable forces will take on the invalid
+            % value and Q_opt is infinity
             if (id_exit_type ~= IDSolverExitType.NO_ERROR)
                 cable_forces = dynamics.forcesInvalid;
                 Q_opt = inf;
+            % Otherwise valid exit, compute Q_opt using the objective
             else
                 Q_opt = obj.objective.evaluateFunction(cable_forces);
             end            
-            
+            % Set f_previous, may be useful for some algorithms
             obj.f_previous = cable_forces;
         end
         
+        % Helps to add an additional constraint to the QP problem
         function addConstraint(obj, linConstraint)
             obj.constraints{length(obj.constraints)+1} = linConstraint;
         end

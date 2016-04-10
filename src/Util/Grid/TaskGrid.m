@@ -1,6 +1,12 @@
+% Grid representation in operational space
+%
+% Author        : Jonathan EDEN
+% Created       : 2015
+% Description    :
+%   This is a work in progress its point will be to take a starting point 
+%   and give the next grid point to achieve a uniform spacing in the task 
+%   space.
 classdef TaskGrid < Grid
-    % UniformGrid Uniform Grid defined with beginning and end point
-    % This is a work in progress its point will be to take a starting point and give the next grid point to achieve a uniform spacing in the task space.
     properties (SetAccess = private)
         q_begin
         q_end

@@ -1,5 +1,9 @@
+% Object representation of the wrench-set
+%
+% Author        : Jonathan EDEN
+% Created       : 2015
+% Description    :
 classdef WrenchSet < handle
-    % WrenchSet Class to store information about the wrench set and 
         
     properties (SetAccess = protected)
         n_faces

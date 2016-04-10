@@ -1,6 +1,9 @@
+% Spherical joint (3-DOF) using the quaternion orientation representation
+%
+% Author        : Darwin LAU
+% Created       : 2015
+% Description   :
 classdef Spherical < Joint
-    %SphericalXYZ Joint definition for a spherical joint with Euler angles
-    %xyz         
     
     properties (Constant = true)
         numDofs = 3;

@@ -1,5 +1,9 @@
+% 3D translation joint in the XYZ axes
+%
+% Author        : Darwin LAU
+% Created       : 2015
+% Description   :
 classdef TranslationalXYZ < Joint
-    %TranslationalXYZ Joint definition for a translational XYZ manipulator
         
     properties (Constant = true)
         numDofs = 3;

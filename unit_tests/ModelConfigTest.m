@@ -6,9 +6,10 @@ classdef ModelConfigTest < matlab.unittest.TestCase
     end
     
     methods (Test)
-        function checkModelConfigFiles(testCase)
-            mSet = enumeration('ModelConfigType');
+        function checkModelConfigFilesExist(testCase)
+            [mSet, mNames] = enumeration('ModelConfigType');
             for i = 1:length(mSet)
+                disp(['Checking ModelConfigType: ', mNames{i}]);
                 m = ModelConfig(mSet(i));
             end
             testCase.assertNotEmpty(m);

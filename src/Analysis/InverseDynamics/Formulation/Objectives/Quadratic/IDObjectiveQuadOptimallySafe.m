@@ -1,8 +1,10 @@
-% Objective function for quadratic sum of cable forces
+% Objective function for the optimally safe distribution, defined as aiming
+% to produce cable forces that are in the middle of the minimum and maximum
+% of cable forces
 % 
-% Author        : Darwin LAU
+% Author        : Jonathan EDEN
 % Created       : 2016
-% Description	: The weights are the diagonals of the Hessian matrix (A)
+% Description	: 
 classdef IDObjectiveQuadOptimallySafe < IDObjectiveQuadratic
     
     properties (SetAccess = protected)

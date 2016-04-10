@@ -1,9 +1,14 @@
+% Base class for different workspace conditions
+%
+% Author        : Jonathan EDEN
+% Created       : 2015
+% Description    : 
+%   Different workspace conditions must simply implement the
+%   evaluateFunction and connected methods
 classdef WorkspaceConditionBase < handle
-    %IDFUNCTION Summary of this class goes here
-    %   Detailed explanation goes here
     
     properties 
-        method                    % Method of implementation
+        method                    % Method of implementation (an enum)
     end
     
     methods

@@ -1,11 +1,16 @@
-% Basic Inverse Dynamics solver for problems in the Quadratic Program form
-% This is a well-studied form of inverse dynamics solver for CDPRs.
+% Lyapunov-based control law with gravity compensation 
+%
+% Please cite the following paper when using this for multilink cable
+% robots:
+% A. B. Alp, and S. K. Agrawal, "Cable Suspended Robots: Design, Planning
+% and Control", in Proc. IEEE Int. Conf. Robot. Autom., pp. 4275-4280,
+% 2002.
 %
 % Author        : Darwin LAU
 % Created       : 2016
-% Description   : Only a quadratic objective function and linear 
-% constraints can be used with this solver. There are multiple types of QP
-% solver implementations that can be used with this solver.
+% Description    :
+%    This version assumes that Kp and Kd are constant values set by the
+%    constructor.
 classdef LyapunovStaticCompensation < ControllerBase
     
     properties (SetAccess = private)

@@ -1,4 +1,4 @@
-% Abstract class for the kinematics of a single cable
+% Abstract class for the kinematics and dynamics of a single cable
 % 
 % Please cite the following paper when using this for multilink cable
 % robots:

@@ -1,12 +1,12 @@
-% Kinematic representation for an ideal (massless and rigid) cable
+% Model for a linearly spring cable
 % 
 % Author        : Darwin LAU
-% Created       : 2011
+% Created       : 2015
 % Description	:
-%	This is the simplest type of cable that is massless and rigid. It also
-%	assumes a straight-line model between attachment points. As such, the
-%	only parameters that govern the kinematics of the ideal cable are the
-%	attachment locations of cables at each link
+%	Extending from the ideal cable model, it is assumed that the cable can
+%	be modelled like a linear spring, either because of its own stretching
+%	or that a spring is put in series in the cable (or both). The main
+%	parameter that needs to be specified is the overall cable stiffness K.
 classdef CableModelLinearSpring < CableModel        
     methods 
         function ck = CableModelLinearSpring(name, numLinks)
