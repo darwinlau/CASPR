@@ -38,12 +38,12 @@ classdef MatrixOperations
             C = MatrixOperations.InteriorProdRightQuad(M_A,B);
         end
         
-        function C = Initialise(m,n,flag)
+        function C = Initialise(s,flag)
             if(flag == 1)
                 % Symbolic
-                C = sym(zeros(m,n));
+                C = sym(zeros(s));
             else
-                C = zeros(m,n);
+                C = zeros(s);
             end
         end
     end

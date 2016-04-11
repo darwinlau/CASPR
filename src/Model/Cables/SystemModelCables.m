@@ -56,7 +56,7 @@ classdef SystemModelCables < handle
             assert(bodyModel.numLinks == obj.numLinks, 'Number of links between the cable and body kinematics must be consistent');
             % Set each cable's kinematics (absolute attachment locations
             % and segment vectors) and Determine V
-            obj.V = MatrixOperations.Initialise(obj.numCables,6*obj.numLinks,isa(bodyModel.q,'sym'));
+            obj.V = MatrixOperations.Initialise([obj.numCables,6*obj.numLinks],isa(bodyModel.q,'sym'));
             for i = 1:obj.numCables
                 obj.cables{i}.update(bodyModel);
                 cable = obj.cables{i};

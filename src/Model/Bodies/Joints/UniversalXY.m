@@ -39,11 +39,11 @@ classdef UniversalXY < Joint
     
     methods (Static)
         function R_pe = RelRotationMatrix(q)
-            alpha = SphericalEulerXYZ.GetAlpha(q);
-            beta = SphericalEulerXYZ.GetBeta(q);
-            R_01 = RevoluteX.RelRotationMatrix(alpha);
-            R_12 = RevoluteY.RelRotationMatrix(beta);
-            R_pe = R_01*R_12;
+            alpha   =   UniversalXY.GetAlpha(q);
+            beta    =   UniversalXY.GetBeta(q);
+            R_01    =   RevoluteX.RelRotationMatrix(alpha);
+            R_12    =   RevoluteY.RelRotationMatrix(beta);
+            R_pe    =   R_01*R_12;
         end
 
         function r_rel = RelTranslationVector(~)
@@ -51,17 +51,23 @@ classdef UniversalXY < Joint
         end
         
         function S = RelVelocityMatrix(q)
-            b = SphericalEulerXYZ.GetBeta(q);
+            b = UniversalXY.GetBeta(q);
             S = [zeros(3,2); cos(b) 0; 0 1; sin(b) 0];    
         end
         
-        function S_dot = RelVelocityMatrixDeriv(q, q_dot)
-            b = SphericalEulerXYZ.GetBeta(q);
-            b_d = SphericalEulerXYZ.GetBeta(q_dot);
-            S_dot = [zeros(3,2); -b_d*sin(b) 0; ...
-                0 0; ...
-                b_d*cos(b) 0];
+        function [S_grad] = RelVelocityMatrixGradient(q)
+            b = UniversalXY.GetBeta(q);
+            S_grad          =   zeros(6,2,2);
+            S_grad(:,:,2)   =   [zeros(3,2); -sin(b) 0; 0 0; cos(b) 0];    
         end
+        
+%         function S_dot = RelVelocityMatrixDeriv(q, q_dot)
+%             b = SphericalEulerXYZ.GetBeta(q);
+%             b_d = SphericalEulerXYZ.GetBeta(q_dot);
+%             S_dot = [zeros(3,2); -b_d*sin(b) 0; ...
+%                 0 0; ...
+%                 b_d*cos(b) 0];
+%         end
         
         function [N_j,A] = QuadMatrix(q)
             b = SphericalEulerXYZ.GetBeta(q);

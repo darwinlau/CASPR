@@ -62,9 +62,13 @@ classdef TranslationalXYZ < Joint
             S = [eye(TranslationalXYZ.numDofs); zeros(3,3)];
         end
         
-        function S_dot = RelVelocityMatrixDeriv(~, ~)
-            S_dot = [zeros(6,3)];
+        function S_grad = RelVelocityMatrixGradient(~)
+            S_grad = zeros(6,3,3);
         end
+        
+%         function S_dot = RelVelocityMatrixDeriv(~, ~)
+%             S_dot = [zeros(6,3)];
+%         end
         
         % TO BE COMPLETED
         function [N_j,A] = QuadMatrix(q)

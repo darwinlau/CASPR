@@ -123,9 +123,13 @@ classdef Spatial < Joint
             S = [TranslationalXYZ.RelVelocityMatrix(Spatial.GetTranslationQ(q)) Spherical.RelVelocityMatrix(Spatial.GetOrientationQ(q))];
         end
         
-        function S_dot = RelVelocityMatrixDeriv(q, q_d)
-            S_dot = [TranslationalXYZ.RelVelocityMatrixDeriv(Spatial.GetTranslationQ(q), Spatial.GetTranslationQd(q_d)) Spherical.RelVelocityMatrixDeriv(Spatial.GetOrientationQ(q), Spatial.GetOrientationQd(q_d))];
-        end        
+        function S_grad = RelVelocityMatrixGradient(~)
+            S_grad = zeros(6,6,6);
+        end
+        
+%         function S_dot = RelVelocityMatrixDeriv(q, q_d)
+%             S_dot = [TranslationalXYZ.RelVelocityMatrixDeriv(Spatial.GetTranslationQ(q), Spatial.GetTranslationQd(q_d)) Spherical.RelVelocityMatrixDeriv(Spatial.GetOrientationQ(q), Spatial.GetOrientationQd(q_d))];
+%         end        
         
         % TO DO
         function [N_j,A] = QuadMatrix(~)

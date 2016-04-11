@@ -43,9 +43,13 @@ classdef RevoluteZ < Joint
             S = [0; 0; 0; 0; 0; 1];
         end
         
-        function [S_dot] = RelVelocityMatrixDeriv(~, ~)
-            S_dot = zeros(6,1);
+        function [S_grad] = RelVelocityMatrixGradient(~)
+            S_grad = zeros(6,1,1);
         end
+        
+%         function [S_dot] = RelVelocityMatrixDeriv(~, ~)
+%             S_dot = zeros(6,1);
+%         end
         
         function [N_j,A] = QuadMatrix(~)
             N_j = 0;

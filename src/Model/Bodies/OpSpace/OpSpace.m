@@ -9,32 +9,17 @@ classdef (Abstract) OpSpace < handle
         link                % The link that the coordinate system is attached to
         selection_matrix    % A matrix which projects body velocities into the OPSpace terms
         numOPDofs           % The number of output degrees of freedom
+        offset              % The offset of the op_space coordinate in the link frame
     end
     
     properties (SetAccess = protected)
         id                  % The coordinate system number
         name                % The coordinate system name
     end
-        
-    methods (Static)
-        function o = CreateOPSpace(OPSpaceType)
-            switch OPSpaceType
-                case OPSpaceType.POSITION
-                    o = Position;
-                case OPSpaceType.ORIENTATION
-                    o = Orientation;
-                case OPSpaceType.POSE
-                    o = Pose;
-                otherwise
-                    error('Operational space type is not defined');
-            end
-            o.type = OPSpaceType;
-        end
-    end
     
     methods (Abstract)
         % Extraction of the output y given a pose description.
-        y = extractOPSpace(obj,x,R)
+        y = extractOpSpace(obj,x,R)
     end
     
     methods (Abstract,Static)

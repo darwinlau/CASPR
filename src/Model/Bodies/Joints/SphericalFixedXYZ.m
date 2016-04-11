@@ -66,13 +66,21 @@ classdef SphericalFixedXYZ < Joint
             S = [zeros(3,3); 1 0 -sin(b); 0 cos(a) sin(a)*cos(b); 0 -sin(a) cos(a)*cos(b)];
         end
         
-        function S = RelVelocityMatrixDeriv(q, q_dot)
-            a = SphericalFixedXYZ.GetAlpha(q);
-            b = SphericalFixedXYZ.GetBeta(q);
-            a_d = SphericalFixedXYZ.GetAlpha(q_dot);
-            b_d = SphericalFixedXYZ.GetBeta(q_dot);
-            S = [zeros(3,3); 0, 0, -b_d*cos(b); 0, -a_d*sin(a), a_d*cos(a)*cos(b)-b_d*sin(a)*sin(b); 0, -a_d*cos(a), -a_d*sin(a)*cos(b)-b_d*cos(a)*sin(b)];
+        function S_grad = RelVelocityMatrixGradient(q)
+            a               =   SphericalFixedXYZ.GetAlpha(q);
+            b               =   SphericalFixedXYZ.GetBeta(q);
+            S_grad          =   MatrixOperations.Initialise([6,3,3],isa(q, 'sym'));
+            S_grad(:,:,1)   =   [zeros(4,3);0,-sin(a),cos(a)*cos(b);0,-cos(a),-sin(a)*cos(b)];
+            S_grad(:,:,2)   =   [zeros(3,3);0,0,-cos(b);0,0,-sin(a)*sin(b);0,0,-cos(a)*sin(b)];
         end
+        
+%         function S = RelVelocityMatrixDeriv(q, q_dot)
+%             a = SphericalFixedXYZ.GetAlpha(q);
+%             b = SphericalFixedXYZ.GetBeta(q);
+%             a_d = SphericalFixedXYZ.GetAlpha(q_dot);
+%             b_d = SphericalFixedXYZ.GetBeta(q_dot);
+%             S = [zeros(3,3); 0, 0, -b_d*cos(b); 0, -a_d*sin(a), a_d*cos(a)*cos(b)-b_d*sin(a)*sin(b); 0, -a_d*cos(a), -a_d*sin(a)*cos(b)-b_d*cos(a)*sin(b)];
+%         end
         
         function [N_j,A] = QuadMatrix(q)
             a = SphericalFixedXYZ.GetAlpha(q);

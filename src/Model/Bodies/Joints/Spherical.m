@@ -81,9 +81,13 @@ classdef Spherical < Joint
             S = [zeros(3,3); eye(3, 3)];
         end
         
-        function S_dot = RelVelocityMatrixDeriv(~, ~)
-            S_dot = zeros(6, 3);
+        function [S_grad] = RelVelocityMatrixGradient(~)
+            S_grad = zeros(6,3,3);
         end
+        
+%         function S_dot = RelVelocityMatrixDeriv(~, ~)
+%             S_dot = zeros(6, 3);
+%         end
         
         % TODO: To complete
         function [N_j,A] = QuadMatrix(~)

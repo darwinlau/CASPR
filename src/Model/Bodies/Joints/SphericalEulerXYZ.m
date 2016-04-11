@@ -66,15 +66,23 @@ classdef SphericalEulerXYZ < Joint
             S = [zeros(3,3); cos(b)*cos(g) sin(g) 0; -cos(b)*sin(g) cos(g) 0; sin(b) 0 1];    
         end
         
-        function S_dot = RelVelocityMatrixDeriv(q, q_dot)
-            b = SphericalEulerXYZ.GetBeta(q);
-            g = SphericalEulerXYZ.GetGamma(q);
-            b_d = SphericalEulerXYZ.GetBeta(q_dot);
-            g_d = SphericalEulerXYZ.GetGamma(q_dot);
-            S_dot = [zeros(3,3); -b_d*sin(b)*cos(g)-g_d*cos(b)*sin(g) g_d*cos(g) 0; ...
-                b_d*sin(b)*sin(g)-g_d*cos(b)*cos(g) -g_d*sin(g) 0; ...
-                b_d*cos(b) 0 0];
+        function S_grad = RelVelocityMatrixGradient(q)
+            b               =   SphericalFixedXYZ.GetBeta(q);
+            g               =   SphericalEulerXYZ.GetGamma(q);
+            S_grad          =   MatrixOperations.Initialise([6,3,3],isa(q, 'sym'));
+            S_grad(:,:,2)   =   [zeros(3,3);-sin(b)*cos(g),0,0;sin(b)*sin(g),0,0;cos(b),0,0];
+            S_grad(:,:,3)   =   [zeros(3,3);-cos(b)*sin(g),cos(g),0;-cos(b)*cos(g),-sin(g),0;0,0,0];
         end
+        
+%         function S_dot = RelVelocityMatrixDeriv(q, q_dot)
+%             b = SphericalEulerXYZ.GetBeta(q);
+%             g = SphericalEulerXYZ.GetGamma(q);
+%             b_d = SphericalEulerXYZ.GetBeta(q_dot);
+%             g_d = SphericalEulerXYZ.GetGamma(q_dot);
+%             S_dot = [zeros(3,3); -b_d*sin(b)*cos(g)-g_d*cos(b)*sin(g) g_d*cos(g) 0; ...
+%                 b_d*sin(b)*sin(g)-g_d*cos(b)*cos(g) -g_d*sin(g) 0; ...
+%                 b_d*cos(b) 0 0];
+%         end
         
         function [N_j,A] = QuadMatrix(q)
             b = SphericalEulerXYZ.GetBeta(q);

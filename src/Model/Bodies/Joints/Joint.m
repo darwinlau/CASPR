@@ -24,13 +24,14 @@ classdef (Abstract) Joint < handle
         R_pe
         r_rel        
         S
-        S_dot
+        S_grad
     end
     
     properties (Dependent)
         % This is useful particularly if the derivative of q is not the
         % same as q_dot, but in most cases they are the same
         q_deriv
+        S_dot
     end
     
     properties (Abstract, Constant)
@@ -52,11 +53,21 @@ classdef (Abstract) Joint < handle
             obj.R_pe = obj.RelRotationMatrix(q);
             obj.r_rel = obj.RelTranslationVector(q);
             obj.S = obj.RelVelocityMatrix(q);
-            obj.S_dot = obj.RelVelocityMatrixDeriv(q, q_dot);
+            obj.S_grad  = obj.RelVelocityMatrixGradient(q);
+%             obj.S_dot = obj.RelVelocityMatrixDeriv(q, q_dot);
         end
         
         function value = get.q_deriv(obj)
             value = obj.QDeriv(obj.q, obj.q_dot);
+        end
+        
+        function value = get.S_dot(obj)
+            % Do we want this here or elsewhere
+            [l_x,l_y] = size(obj.S);
+            value = zeros(l_x,l_y);
+            for i = 1:l_y
+                value = value + obj.S_grad(:,:,i)*obj.q_dot(i);
+            end
         end
 	end
         
@@ -113,7 +124,7 @@ classdef (Abstract) Joint < handle
         r_rel = RelTranslationVector(q)
         % Relationship between x_{rel}'
         S = RelVelocityMatrix(q)
-        S_dot = RelVelocityMatrixDeriv(q, q_dot)
+        S_grad = RelVelocityMatrixGradient(q)
         
         % Generates trajectory
         [q, q_dot, q_ddot] = GenerateTrajectory(q_s, q_s_d, q_s_dd, q_e, q_e_d, q_e_dd, total_time, time_step)

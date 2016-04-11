@@ -1,0 +1,38 @@
+Change Log
+    Needed Changes
+        Remove depreciated workspace classes
+        
+        Add Hessian
+            Steps
+                1. Add a new library for Tensor operations (first operation should be product)    
+                2. Add update_hessian function
+                3. Taken individual S_grads and combine to form larger S_grad (should be diagonal)
+                4. Compute P_grad
+                    - First write out the rotation expression (maybe this should go into the tensor library)
+                    - Then compute what I need for translational vectors
+                5. Compute V_grad
+
+        Add linearisation
+            Steps
+                1. Set up B matrix (this is simply [0;-M^-1L^T])
+                2. Set up A matrix
+                    - Compute gradient of M
+                    - Compute gradient of C (this may be a good point to move N matrix into tensor form)
+                    - Compute gradient of G
+                3. Is C necessary?
+
+        Integrate control and MP
+            Add functions such that MP output is suitable control input
+            Fix the MPC with the correct linearisation functions
+
+    Time permitting
+        Add weighted barycentres to ID
+
+        Add warmstart as a general optimiser options
+
+        Update control GUI to handle all controllers
+
+        Update workspace GUI such that feasible sets can be given a inputs.
+
+        Fix how metrics and conditions are handled. Particularly ensure that computation is only
+        performed once.

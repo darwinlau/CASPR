@@ -116,7 +116,7 @@ classdef SystemModelBodies < handle
             b.S = zeros(6*b.numLinks, b.numDofs);
             b.P = zeros(6*b.numLinks, 6*b.numLinks);
             b.W = zeros(6*b.numLinks, b.numDofs);
-            b.T = MatrixOperations.Initialise(0,6*b.numLinks,0);
+            b.T = MatrixOperations.Initialise([0,6*b.numLinks],0);
 
             % Connects the objects of the system and create the
             % connectivity and body path graphs
@@ -177,8 +177,8 @@ classdef SystemModelBodies < handle
             
             % Set S (joint state matrix) and S_dot
             index_dofs = 1;
-            obj.S = MatrixOperations.Initialise(6*obj.numLinks,obj.numDofs,is_symbolic);
-            obj.S_dot = MatrixOperations.Initialise(6*obj.numLinks,obj.numDofs,is_symbolic);
+            obj.S = MatrixOperations.Initialise([6*obj.numLinks,obj.numDofs],is_symbolic);
+            obj.S_dot = MatrixOperations.Initialise([6*obj.numLinks,obj.numDofs],is_symbolic);
             for k = 1:obj.numLinks
                 obj.S(6*k-5:6*k, index_dofs:index_dofs+obj.bodies{k}.joint.numDofs-1) = obj.bodies{k}.joint.S;
                 obj.S_dot(6*k-5:6*k, index_dofs:index_dofs+obj.bodies{k}.joint.numDofs-1) = obj.bodies{k}.joint.S_dot;
@@ -186,7 +186,7 @@ classdef SystemModelBodies < handle
             end
 
             % Set P (relationship with joint propagation)
-            obj.P = MatrixOperations.Initialise(6*obj.numLinks,6*obj.numLinks,is_symbolic);
+            obj.P = MatrixOperations.Initialise([6*obj.numLinks,6*obj.numLinks],is_symbolic);
             for k = 1:obj.numLinks
                 body_k = obj.bodies{k};
                 for a = 1:k
@@ -209,7 +209,7 @@ classdef SystemModelBodies < handle
             end          
 
             % Determine x_ddot
-            ang_mat = MatrixOperations.Initialise(6*obj.numLinks,6*obj.numLinks,is_symbolic);
+            ang_mat = MatrixOperations.Initialise([6*obj.numLinks,6*obj.numLinks],is_symbolic);
             for k = 1:obj.numLinks
                 kp = obj.bodies{k}.parentLinkId;
                 if (kp > 0)
@@ -242,17 +242,17 @@ classdef SystemModelBodies < handle
             % The operational space variables
             if(obj.occupied.op_space)
                 % Now determine the operational space vector y
-                obj.y = MatrixOperations.Initialise(obj.numOPDofs,1,is_symbolic); l = 1;
+                obj.y = MatrixOperations.Initialise([obj.numOPDofs,1],is_symbolic); l = 1;
                 for k = 1:obj.numLinks
                     if(~isempty(obj.bodies{k}.op_space))
                         n_y = obj.bodies{k}.numOPDofs;
-                        obj.y(l:l+n_y-1) = obj.bodies{k}.op_space.extractOPSpace(obj.bodies{k}.r_Oy,obj.bodies{k}.R_0k);
+                        obj.y(l:l+n_y-1) = obj.bodies{k}.op_space.extractOpSpace(obj.bodies{k}.r_Oy,obj.bodies{k}.R_0k);
                         l = l + n_y;
                     end
                 end
                 
                 % Set Q (relationship with joint propagation for operational space)
-                Q = MatrixOperations.Initialise(6*obj.numLinks,6*obj.numLinks,is_symbolic);
+                Q = MatrixOperations.Initialise([6*obj.numLinks,6*obj.numLinks],is_symbolic);
                 for k = 1:obj.numLinks
                     body_k = obj.bodies{k};
                     for a = 1:k
@@ -300,7 +300,7 @@ classdef SystemModelBodies < handle
                     simplify(cross(obj.bodies{k}.w, obj.bodies{k}.I_G*obj.bodies{k}.w))
                 end
             end
-            obj.G_b = MatrixOperations.Initialise(6*obj.numLinks,1,isa(obj.q,'sym'));
+            obj.G_b = MatrixOperations.Initialise([6*obj.numLinks,1],isa(obj.q,'sym'));
             for k = 1:obj.numLinks
                 obj.G_b(6*k-5:6*k-3) = obj.bodies{k}.R_0k.'*[0; 0; -obj.bodies{k}.m*SystemModel.GRAVITY_CONSTANT];
             end
@@ -510,8 +510,8 @@ classdef SystemModelBodies < handle
             MassInertiaMatrix = obj.massInertiaMatrix;
             % PS_dot term
             n_q = length(bodyKinematics.q_dot); n_l = bodyKinematics.numLinks;
-            N_j = MatrixOperations.Initialise(n_q,n_q^2,flag);
-            A = MatrixOperations.Initialise(6*n_l,n_q,flag);
+            N_j = MatrixOperations.Initialise([n_q,n_q^2],flag);
+            A = MatrixOperations.Initialise([6*n_l,n_q],flag);
             offset_x = 1; offset_y = 1;
             for i=1:n_l
                 [N_jt,A_t] = bodyKinematics.bodies{i}.joint.QuadMatrix(obj.q);
@@ -524,7 +524,7 @@ classdef SystemModelBodies < handle
             C1 = MatrixOperations.MatrixProdLeftQuad(obj.W.'*MassInertiaMatrix*obj.P*A,N_j);
             
             % P_dotS term
-            C2 = MatrixOperations.Initialise(n_q,n_q^2,flag);
+            C2 = MatrixOperations.Initialise([n_q,n_q^2],flag);
             T_t = zeros(6*n_l,3);
             T_r = zeros(6*n_l,3);
             for i=1:n_l
@@ -545,9 +545,9 @@ classdef SystemModelBodies < handle
             end
             
             % \omega \times \omega \times r
-            C3 = MatrixOperations.Initialise(n_q,n_q^2,flag);
+            C3 = MatrixOperations.Initialise([n_q,n_q^2],flag);
             for i = 1:n_l
-                N_t = MatrixOperations.Initialise(n_q,3*n_q,flag);
+                N_t = MatrixOperations.Initialise([n_q,3*n_q],flag);
                 for j = 1:i
                     jp = bodyKinematics.bodies{j}.parentLinkId;
                     if (jp > 0 && bodyKinematics.bodiesPathGraph(j,i))
@@ -567,7 +567,7 @@ classdef SystemModelBodies < handle
             end
             
             % \omega \times I_G \omega
-            C4 = MatrixOperations.Initialise(n_q,n_q^2,flag);
+            C4 = MatrixOperations.Initialise([n_q,n_q^2],flag);
             for i = 1:n_l
                 W_i = obj.W(6*(i-1)+4:6*(i-1)+6,:);
                 N_r = MatrixOperations.GenerateMatrixQuadCross(W_i,obj.bodies{i}.I_G*W_i);
@@ -579,7 +579,7 @@ classdef SystemModelBodies < handle
             N = C1 + C2 + C3 + C4;
             if(flag)
                 N = simplify(N);
-                V = MatrixOperations.Initialise(n_q,1,flag);
+                V = MatrixOperations.Initialise([n_q,1],flag);
                 for i=1:n_q
                     V(i) = bodyKinematics.q_dot.'*N(:,(i-1)*n_q+1:(i-1)*n_q+n_q)*bodyKinematics.q_dot;
                 end
@@ -603,6 +603,10 @@ classdef SystemModelBodies < handle
                 type = char(currentOPItem.getNodeName);
                 if (strcmp(type, 'position'))
                     op_space = OpPosition.LoadXmlObj(currentOPItem);
+                elseif(strcmp(type, 'orientation_euler_xyz'))
+                    op_space = OpOrientationEulerXYZ.LoadXmlObj(currentOPItem);
+                elseif(strcmp(type, 'pose_euler_xyz'))
+                    op_space = OpPoseEulerXYZ.LoadXmlObj(currentOPItem);
                 else
                     error('Unknown link type: %s', type);
                 end
@@ -617,7 +621,7 @@ classdef SystemModelBodies < handle
             end
             obj.numOPDofs = num_op_dofs;
             
-            obj.T = MatrixOperations.Initialise(obj.numOPDofs,6*obj.numLinks,0);
+            obj.T = MatrixOperations.Initialise([obj.numOPDofs,6*obj.numLinks],0);
             l = 1; 
             for k = 1:length(obj.bodies)
                 if(~isempty(obj.bodies{k}.op_space))
