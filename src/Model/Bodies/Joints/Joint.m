@@ -63,11 +63,7 @@ classdef (Abstract) Joint < handle
         
         function value = get.S_dot(obj)
             % Do we want this here or elsewhere
-            [l_x,l_y] = size(obj.S);
-            value = zeros(l_x,l_y);
-            for i = 1:l_y
-                value = value + obj.S_grad(:,:,i)*obj.q_dot(i);
-            end
+            value = TensorOperations.VectorProduct(obj.S_grad,obj.q_dot);
         end
 	end
         

@@ -17,7 +17,7 @@ classdef OpPosition < OpSpace
             o.selection_matrix  =   temp_selection_matrix(logical(diag(selection_matrix)),:);
         end
         
-        function y = extractOPSpace(obj,x,R)
+        function y = extractOpSpace(obj,x,R)
             y = obj.selection_matrix(:,1:3)*R*x;
         end
     end
