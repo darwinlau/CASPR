@@ -22,11 +22,11 @@ classdef WrenchSet < handle
             str = mfilename('fullpath');
             s_id = strfind(str,'mcdm-analysis.matlab');
             str  = str(1:s_id+19);
-            str_logs = [str,'\logs'];
+            str_logs = [str,'/logs'];
             if(~exist(str_logs,'dir'))
                 mkdir(str_logs)
             end
-            str_io1 = [str_logs,'\wrench_set.txt'];
+            str_io1 = [str_logs,'/wrench_set.txt'];
             fID = fopen(str_io1,'w');
             fprintf(fID,'%d\n',n);
             fprintf(fID,'%d\n',q);
@@ -40,8 +40,8 @@ classdef WrenchSet < handle
             end
             fclose(fID);
             % Now offload to qhull
-            str_io2 = [str_logs,'\convhull.txt'];
-            str_qconvex = ['!',str,'\dependencies\qhull-2012.1\bin\qconvex n Qs < ',str_io1,' > ',str_io2];
+            str_io2 = [str_logs,'/convhull.txt'];
+            str_qconvex = ['!',str,'/dependencies/qhull-2012.1/bin/qconvex n Qs < ',str_io1,' > ',str_io2];
             eval(str_qconvex);
 %             ! ..\..\dependencies\qhull-2012.1\bin\qconvex n Qs < ..\..\logs\wrench_set.txt > ..\..\logs\convhull.txt
             fID2 = fopen(str_io2);

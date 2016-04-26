@@ -4,7 +4,7 @@
 % Please cite the following paper when using this:
 % D. Lau, D. Oetomo, and S. K. Halgamuge, "Inverse Dynamics of Multilink
 % Cable-Driven Manipulators With the Consideration of Joint Interaction 
-% Forces and Moments," IEEE Trans. Robot., vol. 31, no. 2, pp. 479–488, 2015.
+% Forces and Moments," IEEE Trans. Robot., vol. 31, no. 2, pp. 479ï¿½488, 2015.
 % 
 % Author        : Darwin LAU
 % Created       : 2016
@@ -24,8 +24,8 @@ classdef IDObjectiveMinInteractions < IDObjectiveQuadratic
             obj.b = zeros(dynamics.numCables,1);
             obj.c = 0;
             
-            a = dynamics.P'*(dynamics.bodyDynamics.M_b*dynamics.q_ddot + dynamics.bodyDynamics.C_b - dynamics.bodyDynamics.G_b);
-            w_T = dynamics.P'*dynamics.V';
+            a = dynamics.bodyModel.P'*(dynamics.bodyModel.M_b*dynamics.q_ddot + dynamics.bodyModel.C_b - dynamics.bodyModel.G_b);
+            w_T = dynamics.bodyModel.P'*dynamics.cableModel.V';
             
             for k = 1:dynamics.numLinks
                 for dof = 1:6

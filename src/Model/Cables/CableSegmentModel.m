@@ -76,8 +76,7 @@ classdef CableSegmentModel < handle
         end
         
         function c_k = getCRMTerm(obj, k)
-            assert(k <= obj.numLinks+1, 'Invalid link number.');
-            
+            assert(k(length(k)) <= obj.numLinks+1, 'Invalid link number.');
             c_k = obj.CRM(k);
         end
         

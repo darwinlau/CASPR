@@ -496,17 +496,17 @@ end
 function loadState(handles)
     % load all of the settings and initialise the values to match
     path_string = fileparts(mfilename('fullpath'));
-    path_string = path_string(1:strfind(path_string, 'GUI')-2);
-    file_name = [path_string,'\logs\upcra_gui_state.mat'];
+    path_string = path_string(1:strfind(path_string, 'GUI')-2)
+    file_name = [path_string,'/logs/upcra_gui_state.mat'];
     if(exist(file_name,'file'))
         load(file_name)
         set(handles.model_text,'String',state.model_text);
         set(handles.cable_text,'String',state.cable_text);
         setappdata(handles.cable_text,'modObj',state.modObj);
-        file_name = [path_string,'\logs\workspace_gui_state.mat'];
+        file_name = [path_string,'/logs/workspace_gui_state.mat'];
         format_q_table(state.modObj.numDofs,handles.qtable)
         if(exist(file_name,'file'))
-            load(file_name);
+            load(file_name)
             mp_text = get(handles.model_text,'String');
             cs_text = get(handles.cable_text,'String');
             if(strcmp(mp_text,state.model_text)&&strcmp(cs_text,state.cable_text))

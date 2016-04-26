@@ -44,6 +44,9 @@ classdef SystemModel < handle
         L                       % cable to joint Jacobian matrix L = VW
         J                       % joint to operational space Jacobian matrix
         J_dot                   % derivative of J
+        
+        % Hessians
+        L_grad                  % The gradient of the jacobian L
 
         % Generalised coordinates
         q                       % Generalised coordinates state vector
@@ -153,6 +156,18 @@ classdef SystemModel < handle
 
         function value = get.L(obj)
             value = obj.cableModel.V*obj.bodyModel.W;
+        end
+        
+        function value = get.L_grad(obj)
+            if(isempty(obj.bodyModel.W_grad))
+                if(~obj.bodyModel.occupied.hessian)
+                    obj.bodyModel.occupied.hessian = true;
+                    obj.bodyModel.update_hessian();
+                    obj.cableModel.update_hessian(obj.bodyModel);
+                end
+            end
+            is_symbolic = isa(obj.q,'sym');
+            value = TensorOperations.LeftMatrixProduct(obj.cableModel.V,obj.bodyModel.W_grad,is_symbolic) + TensorOperations.RightMatrixProduct(obj.cableModel.V_grad,obj.bodyModel.W,is_symbolic);
         end
         
         function value = get.J(obj)

@@ -27,24 +27,20 @@ classdef CapacityMarginMetric < WorkspaceMetricBase
         end
         
         %% Evaluate Functions
-        function v = evaluateFunction(obj,dynamics,~,method,inWorkspace)
-            if((nargin <=3)||(~(method==WorkspaceStaticMethods.CMa)))
-                L   =   dynamics.L;
-                f_u =   dynamics.forcesMax;
-                f_l =   dynamics.forcesMin;
-                w   =   WrenchSet(L,f_u,f_l);
-                q   =   length(w.b);
-                p   =   size(obj.desired_wrench_set,2);
-                s   =   zeros(p,q);
-                for i = 1:p
-                    for j=1:q
-                        s(i,j) = (w.b(j) - w.A(j,:)*obj.desired_wrench_set(:,i))/norm(w.A(j,:),2);
-                    end
+        function v = evaluateFunction(obj,dynamics,~,~,~)
+            L   =   dynamics.L;
+            f_u =   dynamics.forcesMax;
+            f_l =   dynamics.forcesMin;
+            w   =   WrenchSet(L,f_u,f_l);
+            q   =   length(w.b);
+            p   =   size(obj.desired_wrench_set,2);
+            s   =   zeros(p,q);
+            for i = 1:p
+                for j=1:q
+                    s(i,j) = (w.b(j) - w.A(j,:)*obj.desired_wrench_set(:,i))/norm(w.A(j,:),2);
                 end
-                v = min(min(s));
-            else
-                v = inWorkspace;
             end
+            v = min(min(s));
         end
     end
 end

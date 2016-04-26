@@ -10,9 +10,9 @@ classdef WorkspaceMetricBase < handle
     end
     
     methods 
-        function [f, comp_time] = evaluate(obj,dynamics,method,inWorkspace)
+        function [f, comp_time] = evaluate(obj,dynamics,options,method,inWorkspace)
             start_tic = tic;
-            f = obj.evaluateFunction(dynamics,method,inWorkspace);
+            f = obj.evaluateFunction(dynamics,options,method,inWorkspace);
             comp_time = toc(start_tic);
         end
     end
@@ -20,6 +20,6 @@ classdef WorkspaceMetricBase < handle
     methods (Abstract)
         % evalute - This function takes in the workspace dynamics and
         % returns the metric value
-        f = evaluateFunction(obj, dynamics,method,inWorkspace);        
+        f = evaluateFunction(obj, dynamics,options,method,inWorkspace);        
     end
 end

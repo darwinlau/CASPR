@@ -23,7 +23,6 @@ classdef (Abstract) Joint < handle
         % Dependent but stored values (hence private set)
         R_pe
         r_rel        
-        S
         S_grad
     end
     
@@ -32,6 +31,7 @@ classdef (Abstract) Joint < handle
         % same as q_dot, but in most cases they are the same
         q_deriv
         S_dot
+        S
     end
     
     properties (Abstract, Constant)
@@ -52,7 +52,7 @@ classdef (Abstract) Joint < handle
             obj.q_ddot = q_ddot;
             obj.R_pe = obj.RelRotationMatrix(q);
             obj.r_rel = obj.RelTranslationVector(q);
-            obj.S = obj.RelVelocityMatrix(q);
+%             obj.S = obj.RelVelocityMatrix(q);
             obj.S_grad  = obj.RelVelocityMatrixGradient(q);
 %             obj.S_dot = obj.RelVelocityMatrixDeriv(q, q_dot);
         end
@@ -63,7 +63,11 @@ classdef (Abstract) Joint < handle
         
         function value = get.S_dot(obj)
             % Do we want this here or elsewhere
-            value = TensorOperations.VectorProduct(obj.S_grad,obj.q_dot);
+            value = TensorOperations.VectorProduct(obj.S_grad,obj.q_dot,isa(obj.q,'sym'));
+        end
+        
+        function value = get.S(obj)
+            value = obj.RelVelocityMatrix(obj.q);
         end
 	end
         
