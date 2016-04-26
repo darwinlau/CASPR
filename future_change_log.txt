@@ -3,14 +3,6 @@ Change Log
         Remove depreciated workspace classes
         
         Add Hessian
-            Steps
-                1. Add a new library for Tensor operations (first operation should be product)    
-                2. Add update_hessian function
-                3. Taken individual S_grads and combine to form larger S_grad (should be diagonal)
-                4. Compute P_grad
-                    - First write out the rotation expression (maybe this should go into the tensor library)
-                    - Then compute what I need for translational vectors
-                5. Compute V_grad
 
         Add linearisation
             Steps
@@ -33,6 +25,10 @@ Change Log
         Update control GUI to handle all controllers
 
         Update workspace GUI such that feasible sets can be given a inputs.
+
+        Add revolute with arbitrary axis.
+
+        Add dexterity and condition number based metrics.
 
         Fix how metrics and conditions are handled. Particularly ensure that computation is only
         performed once.

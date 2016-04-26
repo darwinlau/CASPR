@@ -31,7 +31,7 @@ function varargout = control_GUI(varargin)
 
     % Edit the above text to modify the response to help control_GUI
 
-    % Last Modified by GUIDE v2.5 21-Feb-2016 19:56:00
+    % Last Modified by GUIDE v2.5 26-Apr-2016 11:24:26
 
     % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
@@ -542,7 +542,8 @@ function run_button_Callback(~, ~, handles) %#ok<DEFNU>
     set(handles.status_text,'String','Setting up simulation');
     drawnow;
     start_tic = tic;
-    control_sim = ControllerSimulator(modObj, controller);
+    fdSolver = ForwardDynamics(FDSolverType.ODE113);
+    control_sim = ControllerSimulator(modObj, controller,fdSolver);
     trajectory_ref = JointTrajectory.LoadXmlObj(trajectory_xmlobj, modObj);
     time_elapsed = toc(start_tic);
     fprintf('End Setup Simulation : %f seconds\n', time_elapsed);
@@ -553,10 +554,12 @@ function run_button_Callback(~, ~, handles) %#ok<DEFNU>
     drawnow;
     start_tic = tic;
     % THIS WILL BE CHANGED AT A LATER TIME
-    control_sim.run(trajectory_ref, trajectory_ref.q{1} + [0.02; -0.02; 0.01], trajectory_ref.q_dot{1}, trajectory_ref.q_ddot{1});
+    control_sim.run(trajectory_ref, trajectory_ref.q{1} + 0.01*ones(modObj.numDofs,1), trajectory_ref.q_dot{1}, trajectory_ref.q_ddot{1});
     time_elapsed = toc(start_tic);
     fprintf('End Running Simulation : %f seconds\n', time_elapsed);
     
+    figure;
+    control_sim.plotTrackingError();
     % To be uncommented after discussions with Darwin
 %     % Plot the data
 %     disp('Start Plotting Simulation');
@@ -968,6 +971,8 @@ function initialise_gain_table(hObject,handles)
     n = modObj.numDofs;
     set(hObject,'Data',zeros(1,n));
     set(hObject,'ColumnEditable',true(1,n));
+    set(hObject,'ColumnWidth',num2cell(35*ones(1,n)));
+%     set(hObject,'ColumnWidth',35*ones(1,n));
 end
 
 function initialise_popups(handles)

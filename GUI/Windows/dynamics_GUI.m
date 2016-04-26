@@ -193,6 +193,8 @@ function dynamics_popup_Callback(hObject, ~, handles)
     %        contents{get(hObject,'Value')} returns selected item from dynamics_popup
     contents = cellstr(get(hObject,'String'));
     toggle_visibility(contents{get(hObject,'Value')},handles);
+    solver_type_popup_update(handles.solver_type_popup,handles);
+    % Maybe update the solver type
 end
 
 
@@ -319,19 +321,34 @@ function solver_type_popup_Callback(~, ~, ~) %#ok<DEFNU>
 end
 
 function solver_type_popup_update(hObject,handles)
-    contents = cellstr(get(handles.solver_class_popup,'String'));
-    solver_class_id = contents{get(handles.solver_class_popup,'Value')};
-    settings = getappdata(handles.solver_class_popup,'settings');
-    solverObj = settings.getElementById(solver_class_id);
-    enum_file = solverObj.getElementsByTagName('solver_type_enum').item(0).getFirstChild.getData;
-    e_list = enumeration(char(enum_file));
-    e_n         =   length(e_list);
-    e_list_str  =   cell(1,e_n);
-    for i=1:e_n
-        temp_str = char(e_list(i));
-        e_list_str{i} = temp_str(1:length(temp_str));
+    % Determine whether forward or inverse dynamics
+    contents = cellstr(get(handles.dynamics_popup,'String'));
+    dynamics_id = contents{get(handles.dynamics_popup,'Value')};
+    if(strcmp(dynamics_id,'Forward Dynamics'))
+        % Populate through the enum list
+        e_list = enumeration(char('FDSolverType'));
+        e_n         =   length(e_list);
+        e_list_str  =   cell(1,e_n);
+        for i=1:e_n
+            temp_str = char(e_list(i));
+            e_list_str{i} = temp_str(1:length(temp_str));
+        end
+        set(hObject,'Value',1);    set(hObject, 'String', e_list_str);
+    else
+        contents = cellstr(get(handles.solver_class_popup,'String'));
+        solver_class_id = contents{get(handles.solver_class_popup,'Value')};
+        settings = getappdata(handles.solver_class_popup,'settings');
+        solverObj = settings.getElementById(solver_class_id);
+        enum_file = solverObj.getElementsByTagName('solver_type_enum').item(0).getFirstChild.getData;
+        e_list = enumeration(char(enum_file));
+        e_n         =   length(e_list);
+        e_list_str  =   cell(1,e_n);
+        for i=1:e_n
+            temp_str = char(e_list(i));
+            e_list_str{i} = temp_str(1:length(temp_str));
+        end
+        set(hObject,'Value',1);    set(hObject, 'String', e_list_str);
     end
-    set(hObject,'Value',1);    set(hObject, 'String', e_list_str);
 end
 
 % --- Executes during object creation, after setting all properties.
@@ -975,7 +992,9 @@ function run_forward_dynamics(handles,modObj,trajectory_xmlobj)
     drawnow;
     start_tic = tic;
     idsim = InverseDynamicsSimulator(modObj, id_solver);
-    fdsim = ForwardDynamicsSimulator(modObj);
+    contents = cellstr(get(handles.solver_type_popup,'String'));
+    solver_type = contents{get(handles.solver_type_popup,'Value')};
+    fdsim = ForwardDynamicsSimulator(modObj,eval(['FDSolverType.',solver_type]));
     trajectory = JointTrajectory.LoadXmlObj(trajectory_xmlobj, modObj);
     time_elapsed = toc(start_tic);
     fprintf('End Setup Simulation : %f seconds\n', time_elapsed);
@@ -1011,8 +1030,8 @@ function toggle_visibility(dynamics_method,handles)
         % Forward dynamics so hide all of the options
         set(handles.solver_class_text,'Visible','off');
         set(handles.solver_class_popup,'Visible','off');
-        set(handles.solver_type_text,'Visible','off');
-        set(handles.solver_type_popup,'Visible','off');
+%         set(handles.solver_type_text,'Visible','off');
+%         set(handles.solver_type_popup,'Visible','off');
         set(handles.objective_text,'Visible','off');
         set(handles.objective_popup,'Visible','off');
         set(handles.constraint_text,'Visible','off');
@@ -1023,14 +1042,16 @@ function toggle_visibility(dynamics_method,handles)
         set(handles.objective_table,'Visible','off');
         set(handles.constraint_table,'Visible','off');
         set(handles.constraint_number_edit,'Visible','off');
+        set(handles.tuning_parameter_text,'Visible','off');
+        set(handles.tuning_parameter_popup,'Visible','off');
         set(handles.tuning_parameter_radio,'Visible','off');
         set(handles.tuning_parameter_table,'Visible','off');
     else
         % Inverse dynamics so let all of the options be viewed
         set(handles.solver_class_text,'Visible','on');
         set(handles.solver_class_popup,'Visible','on');
-        set(handles.solver_type_text,'Visible','on');
-        set(handles.solver_type_popup,'Visible','on');
+%         set(handles.solver_type_text,'Visible','on');
+%         set(handles.solver_type_popup,'Visible','on');
         set(handles.objective_text,'Visible','on');
         set(handles.objective_popup,'Visible','on');
         set(handles.constraint_text,'Visible','on');

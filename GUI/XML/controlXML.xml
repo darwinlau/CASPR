@@ -8,6 +8,11 @@
         for whether to use ID and a description for how to obtain gains.
         -->
     </control_class>
+    <control_class id="LyapunovStaticCompensation">
+        <!-- For the moment this is blank.  It is expected to have a flag 
+        for whether to use ID and a description for how to obtain gains.
+        -->
+    </control_class>
 	<solver_class id="IDSolverLinProg">
 		<solver_type_enum>ID_LP_SolverType</solver_type_enum>
 		<objectives>
