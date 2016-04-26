@@ -25,8 +25,8 @@ classdef CableSegmentModel < handle
         
     methods
         function ck = CableSegmentModel(numLinks, sLink, sLoc, eLink, eLoc, bodiesModel, attachmentRefType)
-            assert(sLink <= numLinks+1, '"sLink" exceeds total number of links');
-            assert(eLink <= numLinks+1, '"eLink" exceeds total number of links');
+            assert(sLink <= numLinks, '"sLink" exceeds total number of links');
+            assert(eLink <= numLinks, '"eLink" exceeds total number of links');
             
             ck.numLinks = numLinks;
             ck.segmentVector = [0;0;0];
