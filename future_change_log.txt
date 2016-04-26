@@ -1,8 +1,10 @@
 Change Log
+    Needed testing
+	Test V
+	Test K
+
     Needed Changes
         Remove depreciated workspace classes
-        
-        Add Hessian
 
         Add linearisation
             Steps
@@ -32,3 +34,4 @@ Change Log
 
         Fix how metrics and conditions are handled. Particularly ensure that computation is only
         performed once.
+
