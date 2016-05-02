@@ -4,5 +4,5 @@
 % vol. 57, no. 9, pp. 901-912, 2009.
 function inWorkspace = wrench_closure_tension_factor(dynamics,options)
     m = TensionFactorMetric();
-    inWorkspace = m.evaluate(dynamics,options)>0;
+    inWorkspace = m.evaluate(dynamics,options,[],[])>0;
 end

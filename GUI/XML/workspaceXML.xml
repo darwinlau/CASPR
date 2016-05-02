@@ -12,7 +12,6 @@
     <workspace_metrics>
         <workspace_metric>TensionFactorMetric</workspace_metric>
         <workspace_metric>UnilateralDexterityMetric</workspace_metric>
-        <workspace_metric>SemiSingularMetric</workspace_metric>
         <workspace_metric>CapacityMarginMetric</workspace_metric>
         <workspace_metric>SEACM</workspace_metric>
     </workspace_metrics>    

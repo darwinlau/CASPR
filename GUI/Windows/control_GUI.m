@@ -285,6 +285,7 @@ function objective_popup_Update(hObject,handles)
         set(handles.objective_radio,'Visible','off');
         set(handles.objective_table,'Visible','off');
     else
+        disp('got it')
         set(hObject,'Visible','on');
         set(handles.objective_text,'Visible','on');
         set(handles.objective_radio,'Visible','on');
@@ -911,7 +912,7 @@ function loadState(handles)
                 set(handles.trajectory_popup,'value',state.trajectory_popup);
                 set(handles.control_class_popup,'value',state.control_class_popup);
                 set(handles.solver_class_popup,'value',state.solver_class_popup);
-                solver_type_popup_update(handles.solver_type_popup,handles);
+                solver_class_popup_Callback(handles.solver_class_popup,[],handles);
                 set(handles.solver_type_popup,'value',state.solver_type_popup);
                 set(handles.objective_popup,'value',state.objective_popup);
                 set(handles.constraint_popup,'value',state.constraint_popup);
@@ -923,6 +924,7 @@ function loadState(handles)
                 set(handles.kp_table,'Data',state.kp_table);
                 set(handles.kd_table,'Data',state.kd_table);
                 % Callback
+                disp('la')
                 plot_type_popup_Callback(handles.plot_type_popup,[],handles);
                 objective_popup_Callback(handles.objective_popup,[],handles);
                 constraint_popup_Callback(handles.constraint_popup,[],handles);
