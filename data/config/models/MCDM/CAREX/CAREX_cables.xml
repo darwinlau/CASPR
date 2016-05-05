@@ -9,7 +9,6 @@
       <properties>
         <force_min>3.0</force_min>
         <force_max>45</force_max>
-        <force_error>1500</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -30,7 +29,6 @@
       <properties>
         <force_min>3.0</force_min>
         <force_max>45</force_max>
-        <force_error>1500</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -47,7 +45,6 @@
       <properties>
         <force_min>3.0</force_min>
         <force_max>45</force_max>
-        <force_error>1500</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -68,7 +65,6 @@
       <properties>
         <force_min>3.0</force_min>
         <force_max>45</force_max>
-        <force_error>1500</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -85,7 +81,6 @@
       <properties>
         <force_min>3.0</force_min>
         <force_max>45</force_max>
-        <force_error>1500</force_error>
       </properties>
       <attachments>
         <attachment>
@@ -102,7 +97,6 @@
       <properties>
         <force_min>3.0</force_min>
         <force_max>45</force_max>
-        <force_error>1500</force_error>
       </properties>
       <attachments>
         <attachment>
