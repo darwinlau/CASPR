@@ -10,7 +10,7 @@ classdef WrenchClosureMethods
     
     methods (Static)
         function L = workspace_method_list()
-            L = {'quad_prog','tension_factor','unilateral_dexterity','semi_singular','combinatoric_null_space','combinatoric_positive_span'};
+            L = {'quad_prog','tension_factor','unilateral_dexterity','combinatoric_null_space','combinatoric_positive_span'};
         end
     end
 end

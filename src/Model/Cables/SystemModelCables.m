@@ -31,6 +31,7 @@ classdef SystemModelCables < handle
         cables = {};                % Cell array of CableKinematics object
         numCables = 0;              % The number of cables
         numLinks = 0;               % The number of links
+        K                           % The matix of cable stiffnesses
     end
 
     properties (Dependent)
@@ -57,6 +58,7 @@ classdef SystemModelCables < handle
             % Set each cable's kinematics (absolute attachment locations
             % and segment vectors) and Determine V
             obj.V = MatrixOperations.Initialise([obj.numCables,6*obj.numLinks],isa(bodyModel.q,'sym'));
+            obj.K = MatrixOperations.Initialise([obj.numCables,obj.numCables],isa(bodyModel.q,'sym'));
             for i = 1:obj.numCables
                 obj.cables{i}.update(bodyModel);
                 cable = obj.cables{i};
@@ -74,7 +76,10 @@ classdef SystemModelCables < handle
                     end
                     obj.V(i, 6*k-5:6*k) = [V_ixk_T.' V_itk_T.'];
                 end
+                obj.K(i,i) = obj.cables{i}.K;
             end
+            
+            
             if(bodyModel.occupied.hessian)
                 obj.update_hessian(bodyModel);
             end

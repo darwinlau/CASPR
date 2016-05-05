@@ -44,6 +44,7 @@ classdef SystemModel < handle
         L                       % cable to joint Jacobian matrix L = VW
         J                       % joint to operational space Jacobian matrix
         J_dot                   % derivative of J
+        K                       % The stiffness matrix
         
         % Hessians
         L_grad                  % The gradient of the jacobian L
@@ -80,7 +81,7 @@ classdef SystemModel < handle
         q_ddot_dynamics
         
         % The cable force information
-        cableForces               % cable forces
+        cableForces                 % cable forces
         forcesMin                   % vector of min forces from cables
         forcesMax                   % vector of max forces from cables
     end
@@ -167,6 +168,11 @@ classdef SystemModel < handle
             end
             is_symbolic = isa(obj.q,'sym');
             value = TensorOperations.LeftMatrixProduct(obj.cableModel.V,obj.bodyModel.W_grad,is_symbolic) + TensorOperations.RightMatrixProduct(obj.cableModel.V_grad,obj.bodyModel.W,is_symbolic);
+        end
+        
+        function value = get.K(obj)
+            is_symbolic = isa(obj.q,'sym');
+            value = obj.L.'*obj.cableModel.K*obj.L + TensorOperations.VectorProduct(obj.L_grad,obj.cableForces,1,is_symbolic);
         end
         
         function value = get.J(obj)

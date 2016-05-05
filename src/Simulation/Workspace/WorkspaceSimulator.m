@@ -44,7 +44,7 @@ classdef WorkspaceSimulator < Simulator
                 inWorkspace     =   obj.WCondition.evaluate(obj.model);
                 if(~isa(obj.metric,'NullMetric'))
                     if(inWorkspace)
-                        metricValue    =   obj.metric.evaluate(obj.model,obj.WCondition.method,inWorkspace);
+                        metricValue    =   obj.metric.evaluate(obj.model,[],obj.WCondition.method,inWorkspace);
                         workspace_count = workspace_count + 1;
                         obj.workspace(:,workspace_count) = [q;metricValue];
                     end
@@ -72,7 +72,7 @@ classdef WorkspaceSimulator < Simulator
             end
             hold(plot_axis,'on');
             mw = ceil(max(plotting_workspace(n_d+1,:).*(plotting_workspace(n_d+1,:)~=Inf))+10);
-            if(isnan(mw))
+            if(isempty(mw)||isnan(mw))
                 mw = 1;
             end
             sf = 255/mw;

@@ -365,7 +365,7 @@ function generate_button_Callback(~, ~, handles) %#ok<DEFNU>
 end
 
 % --- Executes on button press in plot_button.
-function plot_button_Callback(~, ~, ~) %#ok<DEFNU>
+function plot_button_Callback(~, ~, handles) %#ok<DEFNU>
     % hObject    handle to plot_button (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
@@ -496,14 +496,14 @@ end
 function loadState(handles)
     % load all of the settings and initialise the values to match
     path_string = fileparts(mfilename('fullpath'));
-    path_string = path_string(1:strfind(path_string, 'GUI')-2)
-    file_name = [path_string,'/logs/upcra_gui_state.mat'];
+    path_string = path_string(1:strfind(path_string, 'GUI')-2);
+    file_name = [path_string,'\logs\upcra_gui_state.mat'];
     if(exist(file_name,'file'))
         load(file_name)
         set(handles.model_text,'String',state.model_text);
         set(handles.cable_text,'String',state.cable_text);
         setappdata(handles.cable_text,'modObj',state.modObj);
-        file_name = [path_string,'/logs/workspace_gui_state.mat'];
+        file_name = [path_string,'\logs\workspace_gui_state.mat'];
         format_q_table(state.modObj.numDofs,handles.qtable)
         if(exist(file_name,'file'))
             load(file_name)

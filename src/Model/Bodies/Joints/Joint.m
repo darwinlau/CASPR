@@ -63,7 +63,7 @@ classdef (Abstract) Joint < handle
         
         function value = get.S_dot(obj)
             % Do we want this here or elsewhere
-            value = TensorOperations.VectorProduct(obj.S_grad,obj.q_dot,isa(obj.q,'sym'));
+            value = TensorOperations.VectorProduct(obj.S_grad,obj.q_dot,3,isa(obj.q,'sym'));
         end
         
         function value = get.S(obj)

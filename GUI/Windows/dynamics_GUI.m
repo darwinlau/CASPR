@@ -805,7 +805,7 @@ function run_inverse_dynamics(handles,modObj,trajectory_xmlobj)
     contents = cellstr(get(handles.plot_type_popup,'String'));
     plot_type = contents{get(handles.plot_type_popup,'Value')};
         
-    % Setup the inverse dynamics simulator with the SystemKinematicsDynamics
+    % Setup the inverse dynamics simulator with the SystemModel
     % object and the inverse dynamics solver
     disp('Start Setup Simulation');
     set(handles.status_text,'String','Setting up simulation');
@@ -985,7 +985,7 @@ function run_forward_dynamics(handles,modObj,trajectory_xmlobj)
     id_objective = IDObjectiveMinQuadCableForce(ones(modObj.numCables,1));
     id_solver = IDSolverQuadProg(modObj,id_objective, ID_QP_SolverType.MATLAB);
         
-    % Setup the inverse dynamics simulator with the SystemKinematicsDynamics
+    % Setup the inverse dynamics simulator with the SystemModel
     % object and the inverse dynamics solver
     disp('Start Setup Simulation');
     set(handles.status_text,'String','Setting up simulation');

@@ -1,4 +1,4 @@
 function inWorkspace = wrench_closure_semi_singular(dynamics)
     m = SemiSingularMetric();
-    inWorkspace = m.evaluate(dynamics)>0;
+    inWorkspace = m.evaluate(dynamics,[],[],[])>0;
 end

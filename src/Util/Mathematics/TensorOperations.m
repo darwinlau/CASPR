@@ -6,14 +6,31 @@
 % Description    :
 classdef TensorOperations 
     methods (Static)
-        function C = VectorProduct(A_ten,b,flag)
+        function C = VectorProduct(A_ten,b,index,flag)
+            assert((index>=1)&&(index<=3),'index input must be between 1 and 3');
             s = size(A_ten);
             if(length(s) == 2)
                 s(3) = 1;
             end
-            C = MatrixOperations.Initialise(s(1:2),flag);
-            for l = 1:s(3)
-                C = C + A_ten(:,:,l)*b(l);
+            assert(s(index) == length(b),'Invalid multiplication b must be the same length as s(index)');
+            switch index
+                case 1
+                    C = MatrixOperations.Initialise(s(2:3),flag);
+                    for l = 1:s(1)
+                        C = C + A_ten(l,:,:)*b(l);
+                    end
+                case 2
+                    C = MatrixOperations.Initialise(s(1,3),flag);
+                    for l = 1:s(2)
+                        C = C + A_ten(:,l,:)*b(l);
+                    end
+                case 3
+                    C = MatrixOperations.Initialise(s(1:2),flag);
+                    for l = 1:s(3)
+                        C = C + A_ten(:,:,l)*b(l);
+                    end
+                otherwise
+                    disp('This case should not be possible');
             end
         end
         
