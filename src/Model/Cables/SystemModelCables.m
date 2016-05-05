@@ -4,7 +4,7 @@
 % robots:
 % D. Lau, D. Oetomo, and S. K. Halgamuge, "Generalized Modeling of
 % Multilink Cable-Driven Manipulators with Arbitrary Routing Using the
-% Cable-Routing Matrix," IEEE Trans. Robot., vol. 29, no. 5, pp. 1102?1113,
+% Cable-Routing Matrix," IEEE Trans. Robot., vol. 29, no. 5, pp. 1102-1113,
 % Oct. 2013.
 %
 % Author        : Darwin LAU
@@ -39,7 +39,6 @@ classdef SystemModelCables < handle
         forces                      % vector of forces from cables
         forcesMin                   % vector of min forces from cables
         forcesMax                   % vector of max forces from cables
-        forcesInvalid               % vector of invalid forces
     end
 
     methods
@@ -211,13 +210,6 @@ classdef SystemModelCables < handle
             end
         end
         
-        function value = get.forcesInvalid(obj)
-            value = zeros(obj.numCables, 1);
-            for i = 1:obj.numCables
-                value(i) = obj.cables{i}.forceInvalid;
-            end
-        end
-        
         function value = get.numCables(obj)
             value = length(obj.cables);
         end
@@ -306,7 +298,15 @@ classdef SystemModelCables < handle
                 if (strcmp(type, 'cable_ideal'))
                     xml_cables{k} = CableModelIdeal.LoadXmlObj(currentCableItem, bodiesModel);
                 elseif (strcmp(type, 'cable_linear_spring'))
-                    xml_cables{k} = CableModelLinearSpring.LoadXmlObj(currentCableItem);
+                    xml_cables{k} = CableModelLinearSpring.LoadXmlObj(currentCableItem, bodiesModel);
+                elseif (strcmp(type, 'cable_vsd_torsion_spring'))
+                    xml_cables{k} = CableModelVSDTorsionSpring.LoadXmlObj(currentCableItem, bodiesModel);
+                elseif (strcmp(type, 'cable_vsd_flexure_linear'))
+                    xml_cables{k} = CableModelVSDFlexureLinear.LoadXmlObj(currentCableItem, bodiesModel);
+                elseif (strcmp(type, 'muscle_hill_type'))
+                    error('Not implemented yet, please try again later.');
+                elseif (strcmp(type, 'pneumatic_artificial_muscle'))
+                    error('Not implemented yet, please try again later.');
                 else
                     error('Unknown cables type: %s', type);
                 end

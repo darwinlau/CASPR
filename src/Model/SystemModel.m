@@ -83,7 +83,6 @@ classdef SystemModel < handle
         cableForces               % cable forces
         forcesMin                   % vector of min forces from cables
         forcesMax                   % vector of max forces from cables
-        forcesInvalid               % vector of invalid forces
     end
 
     methods (Static)
@@ -260,10 +259,6 @@ classdef SystemModel < handle
         
         function value = get.forcesMax(obj)
             value = obj.cableModel.forcesMax; 
-        end
-        
-        function value = get.forcesInvalid(obj)
-            value = obj.cableModel.forcesInvalid; 
         end
         
         function loadOpXmlObj(obj,op_space_xmlobj)

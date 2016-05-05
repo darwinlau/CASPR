@@ -4,7 +4,7 @@
 % Please cite the following paper when using this:
 % D. Lau, D. Oetomo, and S. K. Halgamuge, "Inverse Dynamics of Multilink
 % Cable-Driven Manipulators With the Consideration of Joint Interaction 
-% Forces and Moments," IEEE Trans. Robot., vol. 31, no. 2, pp. 479�488, 2015.
+% Forces and Moments," IEEE Trans. Robot., vol. 31, no. 2, pp. 479-488, 2015.
 % 
 % Author        : Darwin LAU
 % Created       : 2016

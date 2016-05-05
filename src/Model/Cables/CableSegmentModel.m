@@ -71,8 +71,6 @@ classdef CableSegmentModel < handle
                 otherwise
                     error('CableAttachmentReferenceType type is not defined');
             end
-%             ck.attachmentsLocal{sLink+1} = sLoc;
-%             ck.attachmentsLocal{eLink+1} = eLoc;
         end
         
         function c_k = getCRMTerm(obj, k)
