@@ -75,7 +75,7 @@ classdef IDSolverQuadProg < IDSolverBase
             % If there is an error, cable forces will take on the invalid
             % value and Q_opt is infinity
             if (id_exit_type ~= IDSolverExitType.NO_ERROR)
-                cable_forces = CableModel.INVALID_FORCE * ones(dynamics.numCables, 1);
+                cable_forces = dynamics.cableModel.FORCES_INVALID;
                 Q_opt = inf;
             % Otherwise valid exit, compute Q_opt using the objective
             else

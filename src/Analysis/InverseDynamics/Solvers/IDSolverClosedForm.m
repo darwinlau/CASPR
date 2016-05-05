@@ -47,9 +47,8 @@ classdef IDSolverClosedForm < IDSolverBase
             end
             
             if (id_exit_type ~= IDSolverExitType.NO_ERROR)
-                cable_forces = dynamics.forcesInvalid;
-                Q_opt = inf;
-                %id_exit_type = IDFunction.DisplayOptiToolboxError(exitflag);
+                cable_forces = dynamics.cableModel.FORCES_INVALID;
+                Q_opt = Inf;
             else
                 Q_opt = norm(cable_forces);
             end            

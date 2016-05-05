@@ -49,9 +49,8 @@ classdef IDSolverFeasiblePolygon < IDSolverBase
             end
             
             if (id_exit_type ~= IDSolverExitType.NO_ERROR)
-                cable_forces = dynamics.forcesInvalid;
-                Q_opt = inf;
-                %id_exit_type = IDFunction.DisplayOptiToolboxError(exitflag);
+                cable_forces = dynamics.cableModel.FORCES_INVALID;
+                Q_opt = Inf;
             end            
             
             obj.f_previous = cable_forces;

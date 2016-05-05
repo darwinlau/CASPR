@@ -40,6 +40,7 @@ classdef SystemModelCables < handle
         forces                      % vector of forces from cables
         forcesMin                   % vector of min forces from cables
         forcesMax                   % vector of max forces from cables
+        FORCES_INVALID
     end
 
     methods
@@ -224,6 +225,10 @@ classdef SystemModelCables < handle
                 obj.update_hessian();
             end
             V_grad = obj.V_grad;
+        end
+        
+        function value = get.FORCES_INVALID(obj)
+            value = CableModel.INVALID_FORCE * ones(obj.numCables, 1);
         end
     end
     

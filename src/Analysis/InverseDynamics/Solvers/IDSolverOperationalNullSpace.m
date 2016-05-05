@@ -80,7 +80,7 @@ classdef IDSolverOperationalNullSpace < IDSolverBase
             end
             
             if (id_exit_type ~= IDSolverExitType.NO_ERROR)
-                cable_forces = dynamics.forcesInvalid;
+                cable_forces = dynamics.cableModel.FORCES_INVALID;
                 Q_opt = inf;
             else
                 cable_forces = f_task + A_null * f0_soln;

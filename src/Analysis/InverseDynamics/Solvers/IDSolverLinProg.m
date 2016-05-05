@@ -61,9 +61,8 @@ classdef IDSolverLinProg < IDSolverBase
             end
             
             if (id_exit_type ~= IDSolverExitType.NO_ERROR)
-                cable_forces = dynamics.forcesInvalid;
+                cable_forces = dynamics.cableModel.FORCES_INVALID;
                 Q_opt = inf;
-                %id_exit_type = IDFunction.DisplayOptiToolboxError(exitflag);
             else
                 Q_opt = obj.objective.evaluateFunction(cable_forces);
             end            
