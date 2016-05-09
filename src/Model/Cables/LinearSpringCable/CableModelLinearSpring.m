@@ -8,6 +8,14 @@
 %	or that a spring is put in series in the cable (or both). The main
 %	parameter that needs to be specified is the overall cable stiffness K.
 classdef CableModelLinearSpring < CableModel        
+    properties (SetAccess = private)
+        K_cable
+    end
+    
+    properties (Dependent)
+        K
+    end
+    
     methods 
         function ck = CableModelLinearSpring(name, numLinks)
             ck@CableModel(name, numLinks);
@@ -16,6 +24,10 @@ classdef CableModelLinearSpring < CableModel
         function update(obj, bodyModel)
             update@CableModel(obj, bodyModel);
         end
+        
+        function value = get.K(obj)
+            value = obj.K_cable;
+        end
     end
     
     methods (Static)
@@ -23,29 +35,26 @@ classdef CableModelLinearSpring < CableModel
             % <cable_linear_spring> tag
             name = char(xmlobj.getAttribute('name'));
             attachRefString = char(xmlobj.getAttribute('attachment_reference'));
-            assert(~isempty(attachRefString), 'Invalid <cable_ideal> XML format: attachment_reference field empty');
+            assert(~isempty(attachRefString), 'Invalid <cable_linear_spring> XML format: attachment_reference field empty');
             if (strcmp(attachRefString, 'joint'))
                 attachmentRef = CableAttachmentReferenceType.JOINT;
             elseif (strcmp(attachRefString, 'com'))
                 attachmentRef = CableAttachmentReferenceType.COM;
             else
-                %attachmentRef = CableAttachmentReferenceType.COM;
                 error('Unknown cableAttachmentReference type: %s', attachRefString);
             end
             
             % Generate an ideal cable object
-            c = CableModelIdeal(name, bodiesModel.numLinks);
+            c = CableModelLinearSpring(name, bodiesModel.numLinks);
             
             % <properties> tag
             propertiesObj = xmlobj.getElementsByTagName('properties').item(0);
             % <K>
-            c.K = str2double(propertiesObj.getElementsByTagName('K').item(0).getFirstChild.getData);
+            c.K_cable = str2double(propertiesObj.getElementsByTagName('K').item(0).getFirstChild.getData);
             % <force_min>
             c.forceMin = str2double(propertiesObj.getElementsByTagName('force_min').item(0).getFirstChild.getData);
             % <force_max>
             c.forceMax = str2double(propertiesObj.getElementsByTagName('force_max').item(0).getFirstChild.getData);
-            % <force_error>
-            c.forceInvalid = str2double(propertiesObj.getElementsByTagName('force_error').item(0).getFirstChild.getData);
             
             % <attachments> tag
             attachmentObjs = xmlobj.getElementsByTagName('attachments').item(0).getElementsByTagName('attachment');

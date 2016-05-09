@@ -16,9 +16,13 @@
 %       - update the kinematics (i.e. attachment locations) of each segment
 %       - access the CRM term
 classdef (Abstract) CableModel < handle
+    properties (Constant)
+        INVALID_FORCE = -1
+    end
+    
     properties 
-        % Actual cable force
-        force = 0;
+        % Actual cable force, use -1 to represent invalid forces
+        force = CableModel.INVALID_FORCE;
     end
     
     properties (SetAccess = protected)
@@ -26,13 +30,6 @@ classdef (Abstract) CableModel < handle
         % Minimum and maximum allowable cable force
         forceMin
         forceMax
-        % Stiffness of the cable
-        K
-        % This value is used to represent the force when invalid. For
-        % example, it can be set as -1 to indicate that no solution is/was
-        % obtained, or set to a high value above forceMax if this is used
-        % within some optimisation regime. 
-        forceInvalid
     end    
     
     properties (SetAccess = private)
@@ -43,6 +40,11 @@ classdef (Abstract) CableModel < handle
     
     properties (Dependent)
         length 
+    end
+    
+    properties (Abstract, Dependent)
+        % Stiffness of the cable
+        K
     end
         
     methods
@@ -60,7 +62,7 @@ classdef (Abstract) CableModel < handle
         
         % NOT SURE HOW THIS IS USED YET, but just a demo of what can be
         % done
-        function clearSegments(obj)
+        function clear(obj)
             obj.numSegments = 0;
             obj.segments = {};
         end
