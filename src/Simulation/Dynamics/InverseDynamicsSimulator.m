@@ -45,7 +45,7 @@ classdef InverseDynamicsSimulator < DynamicsSimulator
                 obj.cableLengthsDot{t} = obj.model.cableLengthsDot;
                 
                 if (obj.IDExitType{t} ~= IDSolverExitType.NO_ERROR)
-                    %warning('No feasible solution for the ID');
+                    warning('No feasible solution for the ID');
                     errorFlag = 1;
                 end
             end
