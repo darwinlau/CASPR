@@ -3,16 +3,16 @@
   <link_rigid num="1" name="CoGiRo">
     <joint_type>SPATIAL_EULER_XYZ</joint_type>
     <physical>
-      <mass>10.0</mass>
-      <com_location>0.0 0.0 0.0</com_location>
+      <mass>91.058</mass>
+      <com_location>-0.034 -0.013 0.264</com_location>
       <end_location>0.0 0.0 0.0</end_location>
       <inertia ref="com">
-        <Ixx>1.667</Ixx>
-        <Iyy>1.667</Iyy>
-        <Izz>1.667</Izz>
-        <Ixy>0.0</Ixy>
-        <Ixz>0.0</Ixz>
-        <Iyz>0.0</Iyz>
+        <Ixx>36.598</Ixx>
+        <Iyy>35.982</Iyy>
+        <Izz>25.439</Izz>
+        <Ixy>-0.453</Ixy>
+        <Ixz>3.012</Ixz>
+        <Iyz>-1.539</Iyz>
       </inertia>
     </physical>
     <parent>
