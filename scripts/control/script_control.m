@@ -18,8 +18,12 @@ clc; clear; close all;
 % trajectory_id = 'roll';
 % cable_set_id = 'opensim_vasavada';
 % 3) TUM Myorob arm model
-model_config = ModelConfig(ModelConfigType.M_MYOROB_SHOULDER);
-trajectory_id = 'traj_1';
+% model_config = ModelConfig(ModelConfigType.M_MYOROB_SHOULDER);
+% trajectory_id = 'traj_1';
+% cable_set_id = 'default';
+% 4) IPAnema model
+model_config = ModelConfig(ModelConfigType.M_IPANEMA_2);
+trajectory_id = 'traj_z_up';
 cable_set_id = 'default';
 
 % The XML objects from the model config are created
@@ -32,10 +36,10 @@ dynObj = SystemModel.LoadXmlObj(bodies_xmlobj, cableset_xmlobj);
 
 id_objective = IDObjectiveMinQuadCableForce(ones(dynObj.numCables,1));
 id_solver = IDSolverQuadProg(dynObj, id_objective, ID_QP_SolverType.MATLAB);
-Kp_computedtorque = diag([100 100 100]);
-Kd_computedtorque = diag([15 15 15]);
-Kp_lyapunov = diag([250 250 250]);
-Kd_lyapunov = diag([50 50 50]);
+Kp_computedtorque = 100*eye(dynObj.numDofs);%diag([100 100 100]);
+Kd_computedtorque = 15*eye(dynObj.numDofs);%diag([15 15 15]);
+Kp_lyapunov = 250*eye(dynObj.numDofs);%diag([250 250 250]);
+Kd_lyapunov = 50*eye(dynObj.numDofs);%diag([50 50 50]);
 controller = ComputedTorqueController(dynObj, id_solver, Kp_computedtorque, Kd_computedtorque);
 %controller = LyapunovStaticCompensation(dynObj, id_solver, Kp_lyapunov, Kd_lyapunov);
 
@@ -52,7 +56,8 @@ fprintf('End Setup Simulation : %f seconds\n', time_elapsed);
 % Run the solver on the desired trajectory
 disp('Start Running Simulation');
 start_tic = tic;
-control_sim.run(trajectory_ref, trajectory_ref.q{1} + [0.3; -0.1; 0.2], trajectory_ref.q_dot{1}, trajectory_ref.q_ddot{1});
+%control_sim.run(trajectory_ref, trajectory_ref.q{1} + [0.3; -0.1; 0.2], trajectory_ref.q_dot{1}, trajectory_ref.q_ddot{1});
+control_sim.run(trajectory_ref, trajectory_ref.q{1} + [0.1; -0.1; 0.2; 0; 0; 0], trajectory_ref.q_dot{1}, trajectory_ref.q_ddot{1});
 time_elapsed = toc(start_tic);
 fprintf('End Running Simulation : %f seconds\n', time_elapsed);
 

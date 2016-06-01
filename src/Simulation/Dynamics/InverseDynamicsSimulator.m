@@ -11,7 +11,7 @@ classdef InverseDynamicsSimulator < DynamicsSimulator
     properties (SetAccess = protected)
         compTime            % computational time for each time step
         IDFunctionCost      % Cost value for optimisation at each point in time
-        IDExitType          % Exit type at each point in time
+        IDExitType          % Exit type at each point in time (IDSolverExitType)
         IDSolver
     end
 
@@ -22,6 +22,8 @@ classdef InverseDynamicsSimulator < DynamicsSimulator
         end
 
         function run(obj, trajectory)
+            errorFlag = 0;
+            
             obj.trajectory = trajectory;
             obj.timeVector = obj.trajectory.timeVector;
             % Runs the simulation over the specified trajectory
@@ -41,6 +43,15 @@ classdef InverseDynamicsSimulator < DynamicsSimulator
                 obj.interactionWrench{t} = obj.model.interactionWrench;
                 obj.cableLengths{t} = obj.model.cableLengths;
                 obj.cableLengthsDot{t} = obj.model.cableLengthsDot;
+                
+                if (obj.IDExitType{t} ~= IDSolverExitType.NO_ERROR)
+                    warning('No feasible solution for the ID');
+                    errorFlag = 1;
+                end
+            end
+            
+            if (errorFlag == 1)
+                warning('At least one point on the trajectory resulted in no feasible solution for the ID');
             end
         end
 

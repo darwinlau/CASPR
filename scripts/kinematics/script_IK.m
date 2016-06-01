@@ -14,9 +14,13 @@ clear; clc; close all;
 % trajectory_id = 'x_simple';
 % cable_set_id = 'basic';
 % 2) Neck model
-model_config = ModelConfig(ModelConfigType.M_NECK_8S);
-trajectory_id = 'pitch';
-cable_set_id = 'opensim_vasavada';
+% model_config = ModelConfig(ModelConfigType.M_NECK_8S);
+% trajectory_id = 'pitch';
+% cable_set_id = 'opensim_vasavada';
+% 3) IPAnema model
+model_config = ModelConfig(ModelConfigType.M_IPANEMA_2);
+trajectory_id = 'traj_z_up';
+cable_set_id = 'default';
 
 % The XML objects from the model config are created
 bodies_xmlobj = model_config.getBodiesPropertiesXmlObj();
