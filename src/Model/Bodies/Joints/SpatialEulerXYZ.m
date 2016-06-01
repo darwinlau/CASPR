@@ -123,6 +123,11 @@ classdef SpatialEulerXYZ < Joint
             S_grad(:,4:6,4:6)   =  SphericalEulerXYZ.RelVelocityMatrixGradient(SpatialEulerXYZ.GetOrientationQ(q));
         end
         
+        function [S_dot_grad] = RelVelocityMatrixDerivGradient(q,q_dot)
+            S_dot_grad              =   MatrixOperations.Initialise([6,6,6],isa(q, 'sym'));
+            S_dot_grad(:,4:6,4:6)   =  SphericalEulerXYZ.RelVelocityMatrixDerivGradient(SpatialEulerXYZ.GetOrientationQ(q),SpatialEulerXYZ.GetOrientationQd(q_dot));
+        end
+        
 %         function S_dot = RelVelocityMatrixDeriv(q, q_d)
 %             S_dot = [TranslationalXYZ.RelVelocityMatrixDeriv(SpatialEulerXYZ.GetTranslationQ(q), SpatialEulerXYZ.GetTranslationQd(q_d)) ...
 %                 SphericalEulerXYZ.RelVelocityMatrixDeriv(SpatialEulerXYZ.GetOrientationQ(q), SpatialEulerXYZ.GetOrientationQd(q_d))];

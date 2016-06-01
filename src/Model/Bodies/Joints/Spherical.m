@@ -85,6 +85,10 @@ classdef Spherical < Joint
             S_grad = zeros(6,3,3);
         end
         
+        function [S_dot_grad] = RelVelocityMatrixDerivGradient(~,~)
+            S_dot_grad = zeros(6,3,3);
+        end
+        
 %         function S_dot = RelVelocityMatrixDeriv(~, ~)
 %             S_dot = zeros(6, 3);
 %         end

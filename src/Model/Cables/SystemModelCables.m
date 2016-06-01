@@ -32,6 +32,7 @@ classdef SystemModelCables < handle
         numCables = 0;              % The number of cables
         numLinks = 0;               % The number of links
         K                           % The matix of cable stiffnesses
+        is_symbolic                 % A flag to indicate the need for symbolic computations
     end
 
     properties (Dependent)
@@ -56,10 +57,11 @@ classdef SystemModelCables < handle
         % function for each cable directly.
         function update(obj, bodyModel)
             assert(bodyModel.numLinks == obj.numLinks, 'Number of links between the cable and body kinematics must be consistent');
+            obj.is_symbolic = isa(bodyModel.q,'sym');
             % Set each cable's kinematics (absolute attachment locations
             % and segment vectors) and Determine V
-            obj.V = MatrixOperations.Initialise([obj.numCables,6*obj.numLinks],isa(bodyModel.q,'sym'));
-            obj.K = MatrixOperations.Initialise([obj.numCables,obj.numCables],isa(bodyModel.q,'sym'));
+            obj.V = MatrixOperations.Initialise([obj.numCables,6*obj.numLinks],obj.is_symbolic);
+            obj.K = MatrixOperations.Initialise([obj.numCables,obj.numCables],obj.is_symbolic);
             for i = 1:obj.numCables
                 obj.cables{i}.update(bodyModel);
                 cable = obj.cables{i};
@@ -80,37 +82,36 @@ classdef SystemModelCables < handle
                 obj.K(i,i) = obj.cables{i}.K;
             end
             
-            
             if(bodyModel.occupied.hessian)
                 obj.update_hessian(bodyModel);
             end
         end
         
+        % This function updates V_grad
         function update_hessian(obj,bodyModel)
-            % This function updates V_grad
-            is_symbolic = isa(bodyModel.q,'sym');
-            obj.V_grad = MatrixOperations.Initialise([obj.numCables,6*obj.numLinks,bodyModel.numDofs],is_symbolic);
+            obj.V_grad = MatrixOperations.Initialise([obj.numCables,6*obj.numLinks,bodyModel.numDofs],obj.is_symbolic);
             for i = 1:obj.numCables
                 % Cables are already up to date
                 cable = obj.cables{i};
                 num_cable_segments = cable.numSegments;
                 for k = 1:obj.numLinks
                     body = bodyModel.bodies{k};
-                    V_ik_t_grad = MatrixOperations.Initialise([1,3,bodyModel.numDofs],is_symbolic);
-                    V_ik_r_grad = MatrixOperations.Initialise([1,3,bodyModel.numDofs],is_symbolic);
+                    V_ik_t_grad = MatrixOperations.Initialise([1,3,bodyModel.numDofs],obj.is_symbolic);
+                    V_ik_r_grad = MatrixOperations.Initialise([1,3,bodyModel.numDofs],obj.is_symbolic);
                     for j = 1:num_cable_segments
                         c_ijk = obj.getCRMTerm(i,j,k+1);
                         if(c_ijk)
                             segment = cable.segments{j};
-                            l_ij_grad = MatrixOperations.Initialise([3,bodyModel.numDofs],is_symbolic); %#ok<NASGU>
-                            l_hat_ij_grad = MatrixOperations.Initialise([1,3,bodyModel.numDofs],is_symbolic);
-                            rot_l_hat_ij_grad = MatrixOperations.Initialise([1,3,bodyModel.numDofs],is_symbolic);
+                            % Initialisations
+                            l_ij_grad = MatrixOperations.Initialise([3,bodyModel.numDofs],obj.is_symbolic); %#ok<NASGU>
+                            l_hat_ij_grad = MatrixOperations.Initialise([1,3,bodyModel.numDofs],obj.is_symbolic);
+                            rot_l_hat_ij_grad = MatrixOperations.Initialise([1,3,bodyModel.numDofs],obj.is_symbolic);
+                            [k_A,k_B] = obj.determineAnchorLinks(i,j,k,c_ijk);
                             % Translational term is the same
+                            % THIS CODE SHOULD BE MADE MORE CONSISTENT A
+                            % LOT OF THIS SECTION IS UNNEEDED.
                             if(c_ijk == 1)
                                 % This means that link k is the link of B_ij
-                                k_B = k;
-                                k_A = find(obj.getCRMTerm(i,j,1:obj.numLinks+1)==-1);
-                                k_A = k_A - 1; % To account for CRM indexing
                                 % Compute the Translational term
                                 % First deal with the translation derivative component
                                 l_ij_grad = obj.generateSKATrans(min([k_A,k_B]),max([k_A,k_B]),k,bodyModel);
@@ -123,9 +124,6 @@ classdef SystemModelCables < handle
                                 V_ik_r_grad(1,:,:) = V_ik_r_grad(1,:,:) + rot_l_hat_ij_grad;
                             else
                                 % This means that link k is the link of A_ij
-                                k_A = k;
-                                k_B = find(obj.getCRMTerm(i,j,:)==1);
-                                k_B = k_B - 1; % To account for CRM indexing
                                 % Compute the Translational term
                                 % First deal with the translation derivative component
                                 l_ij_grad = obj.generateSKATrans(min([k_A,k_B]),max([k_A,k_B]),k,bodyModel);
@@ -138,11 +136,23 @@ classdef SystemModelCables < handle
                             end
                         end
                     end
-                    % First translation
+                    % Translation term
                     obj.V_grad(i, 6*k-5:6*k-3,:) = V_ik_t_grad;
+                    % Rotation term
                     obj.V_grad(i, 6*k-2:6*k,:) = V_ik_r_grad;
                 end
             end
+%             disp('1')
+%             V_g = diff(obj.V,bodyModel.q(1));
+%             V_g(1,1)
+%             obj.V_grad(1,1,1)
+%             sgdkjh
+%             simplify(diff(obj.V,bodyModel.q(1))-obj.V_grad(:,:,1))
+%             disp('2')
+%             simplify(diff(obj.V,bodyModel.q(2))-obj.V_grad(:,:,2))
+%             disp('3')
+%             simplify(diff(obj.V,bodyModel.q(3))-obj.V_grad(:,:,3))
+%             kfgjh
         end
         
 
@@ -233,8 +243,7 @@ classdef SystemModelCables < handle
     end
     
     methods (Access = private)
-        function S_K = generateSKACrossRot(~,k_a,k_b,k,bodyModel,r_OA)
-            is_symbolic = isa(bodyModel.q, 'sym');
+        function S_K = generateSKACrossRot(obj,k_a,k_b,k,bodyModel,r_OA)
             % Determine which is the smaller term
             if(k_a < k_b)
                 sign_factor = 1;
@@ -246,7 +255,7 @@ classdef SystemModelCables < handle
                 k_max = k_b;
             end
             R_k0 = bodyModel.bodies{k}.R_0k.';
-            S_K = MatrixOperations.Initialise([3,bodyModel.numDofs],is_symbolic);
+            S_K = MatrixOperations.Initialise([3,bodyModel.numDofs],obj.is_symbolic);
             if(k==k_min)
                 for i = k_min+1:k_max
                     body_i = bodyModel.bodies{i};
@@ -262,9 +271,9 @@ classdef SystemModelCables < handle
             end
         end
         
-        function S_KA = generateSKATrans(~,k_a,k_b,k,bodyModel)   
-            is_symbolic = isa(bodyModel.q, 'sym');
+        function S_KA = generateSKATrans(obj,k_a,k_b,k,bodyModel)   
             if(k_a < k_b)
+                % THIS NEEDS TO BE INVESTIGATED TIME PENDING
                 sign_factor = 1;
                 k_min = k_a;
                 k_max = k_b;
@@ -275,7 +284,7 @@ classdef SystemModelCables < handle
                 k_max = k_a;
             end
             R_k0 = bodyModel.bodies{k}.R_0k.';
-            S_KA = MatrixOperations.Initialise([3,bodyModel.numDofs],is_symbolic);
+            S_KA = MatrixOperations.Initialise([3,bodyModel.numDofs],obj.is_symbolic);
             for i =k_min+1:k_max
                 % At the moment this is assuming a serial mechanism
                 ip = bodyModel.bodies{i}.parentLinkId;
@@ -289,6 +298,19 @@ classdef SystemModelCables < handle
                 S_KA(:,bodyModel.index_k(i):bodyModel.index_k(i)+body_i.numDofs-1) = sign_factor*R_k0*R_0ip*bodyModel.S(6*i-5:6*i-3,bodyModel.index_k(i):bodyModel.index_k(i)+body_i.numDofs-1);
             end
         end
+        
+        function [k_A,k_B] = determineAnchorLinks(obj,i,j,k,c_ijk)
+            assert(abs(c_ijk)==1,'Anchor links can only be determined when c_ijk is unitary');
+            if(c_ijk == 1)
+                k_B = k;
+                k_A = find(obj.getCRMTerm(i,j,1:obj.numLinks+1)==-1);
+                k_A = k_A - 1; % To account for CRM indexing
+            else
+                k_A = k;
+                k_B = find(obj.getCRMTerm(i,j,:)==1);
+                k_B = k_B - 1; % To account for CRM indexing
+            end
+        end 
     end
 
 

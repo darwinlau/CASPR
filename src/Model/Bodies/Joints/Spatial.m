@@ -127,6 +127,10 @@ classdef Spatial < Joint
             S_grad = zeros(6,6,6);
         end
         
+        function [S_dot_grad] = RelVelocityMatrixDerivGradient(~,~)
+            S_dot_grad = zeros(6,6,6);
+        end
+        
 %         function S_dot = RelVelocityMatrixDeriv(q, q_d)
 %             S_dot = [TranslationalXYZ.RelVelocityMatrixDeriv(Spatial.GetTranslationQ(q), Spatial.GetTranslationQd(q_d)) Spherical.RelVelocityMatrixDeriv(Spatial.GetOrientationQ(q), Spatial.GetOrientationQd(q_d))];
 %         end        

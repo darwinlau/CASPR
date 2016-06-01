@@ -59,6 +59,10 @@ classdef SystemModel < handle
         y                       % Operational space coordinate vector
         y_dot                   % Operational space coordinate derivative
         y_ddot                  % Operational space coordinate double derivative
+        
+        % Linearisation Matrices
+        A_lin                   % The state matrix for the system linearisation
+        B_lin                   % The input matrix for the system linearisation
                 
         % The equations of motion with the interaction wrench w_p
         % P^T ( M_b * q_ddot + C_b ) = P^T ( G_b - V^T f ) + w_p
@@ -265,6 +269,37 @@ classdef SystemModel < handle
         
         function value = get.forcesMax(obj)
             value = obj.cableModel.forcesMax; 
+        end
+        
+        function [A,B] = getLinearisedModel(obj)
+            % This function assumes that the state input pair for
+            % linearisation is given by ([q,qdot],cableForces) as stored by
+            % the system.
+            
+            % First compute L_grad (this also sets the hessian flag to
+            % true)
+            L_grad_temp = obj.L_grad;
+            
+            % Had the linearisation been computed previously
+            if(isempty(obj.bodyModel.Minv_grad))
+                obj.bodyModel.occupied.linearisation = true;
+                obj.bodyModel.update_linearisation();
+            end
+            
+            % Determine the A matrix using gradient matrices
+            % Initialise the A matrix
+            A = zeros(2*obj.numDofs);
+            % Top left block is zero
+            % Top right block is I
+            A(1:obj.numDofs,obj.numDofs+1:2*obj.numDofs) = eye(obj.numDofs);
+            % Bottom left corner
+            A(obj.numDofs+1:2*obj.numDofs,1:obj.numDofs) =  -obj.M\(obj.bodyModel.G_grad + obj.bodyModel.C_grad_q + TensorOperations.VectorProduct(L_grad_temp,obj.cableForces,1,isa(obj.q,'symbolic'))) ...
+                                                            - TensorOperations.VectorProduct(obj.bodyModel.Minv_grad,(obj.G + obj.C + obj.L.'*obj.cableForces),2,isa(obj.q,'symbolic'));
+            % Bottom right corner
+            A(obj.numDofs+1:2*obj.numDofs,obj.numDofs+1:2*obj.numDofs) = -obj.M\obj.bodyModel.C_grad_qdot;
+            
+            % The B matrix
+            B = [zeros(obj.numDofs,obj.numCables);-obj.M\obj.L'];
         end
         
         function loadOpXmlObj(obj,op_space_xmlobj)

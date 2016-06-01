@@ -22,6 +22,7 @@ function inWorkspace = static_quadprog(dynamics,options)
 %     else
 %         inWorkspace = 0;
 %     end
+
     weights = ones(dynamics.numCables,1);
     o = IDObjectiveMinQuadCableForce(weights);
     q = IDSolverQuadProg(dynamics,o, ID_QP_SolverType.MATLAB);

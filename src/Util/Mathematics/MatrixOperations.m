@@ -22,7 +22,7 @@ classdef MatrixOperations
         function C = MatrixProdLeftQuad(A,B)
             ma = size(A,1); na = size(A,2);
             mb = size(B,1); %nb = size(B,2);
-            C = MatrixOperations.Initialise(mb,ma*mb,isa(B,'sym'));            
+            C = MatrixOperations.Initialise([mb,ma*mb],isa(B,'sym'));            
             for i=1:ma
                 c = (i-1)*mb+1:(i-1)*mb+mb;
                 for j = 1:na
@@ -52,7 +52,7 @@ classdef MatrixOperations
         function C = InteriorProdRightQuad(A,B)
             ma = size(A,1); na = size(A,2);
             mb = size(B,1); %nb = size(B,2);
-            C = MatrixOperations.Initialise(ma,(na*(ma/mb)),isa(A,'sym'));
+            C = MatrixOperations.Initialise([ma,(na*(ma/mb))],isa(A,'sym'));
             for i = 1:na/mb
                 c = (i-1)*mb + 1:(i-1)*mb + mb;
                 c2 = (i-1)*ma + 1:(i-1)*ma + ma;

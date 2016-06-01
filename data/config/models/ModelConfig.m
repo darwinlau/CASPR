@@ -39,6 +39,12 @@ classdef ModelConfig
                     c.cablesPropertiesFilename = [c.root_folder, cdpr_folder, 'simple_planar_xy_cables.xml'];
                     c.trajectoriesFilename = [c.root_folder, cdpr_folder, 'simple_planar_xy_trajectories.xml'];
                     c.opFilename = [c.root_folder, cdpr_folder, 'simple_planar_xy_op.xml'];
+                case ModelConfigType.M_2DOF_VSD
+                    cdpr_folder = '\SCDM\planar_manipulators\2_Dof_VSD\';
+                    c.bodyPropertiesFilename = [c.root_folder, cdpr_folder, '2_Dof_VSD_bodies.xml'];
+                    c.cablesPropertiesFilename = [c.root_folder, cdpr_folder, '2_Dof_VSD_cables.xml'];
+                    c.trajectoriesFilename = [c.root_folder, cdpr_folder, '2_Dof_VSD_trajectories.xml'];
+                    c.opFilename = [c.root_folder, cdpr_folder, '2_Dof_VSD_op.xml'];
                 case ModelConfigType.M_SIMPLE_SPHERICAL
                     cdpr_folder = '\SCDM\spherical_manipulators\simple_spherical\';
                     c.bodyPropertiesFilename = [c.root_folder, cdpr_folder, 'simple_spherical_bodies.xml'];

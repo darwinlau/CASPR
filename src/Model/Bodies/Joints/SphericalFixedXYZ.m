@@ -74,6 +74,18 @@ classdef SphericalFixedXYZ < Joint
             S_grad(:,:,2)   =   [zeros(3,3);0,0,-cos(b);0,0,-sin(a)*sin(b);0,0,-cos(a)*sin(b)];
         end
         
+        function S_dot_grad = RelVelocityMatrixDerivGradient(q,q_dot)
+            a               =   SphericalFixedXYZ.GetAlpha(q);
+            b               =   SphericalFixedXYZ.GetBeta(q);
+            a_d = SphericalFixedXYZ.GetAlpha(q_dot);
+            b_d = SphericalFixedXYZ.GetBeta(q_dot);
+            S_dot_grad          =   MatrixOperations.Initialise([6,3,3],isa(q, 'sym'));
+            S_dot_grad(:,:,1)   =   [zeros(4,3);0,-a_d*cos(a),-a_d*sin(a)*cos(b) - b_d*cos(a)*sin(b);0,a_d*sin(a),-a_d*cos(a)*cos(b) + b_d*sin(a)*sin(b)];
+            S_dot_grad(:,:,2)   =   [zeros(3,3);0,0,b_d*sin(b);0,0,-a_d*sin(a)*cos(b) - b_d*sin(a)*cos(b);0,0,a_d*sin(a)*sin(b) - b_d*cos(a)*cos(b)];
+        end
+        
+        
+        
 %         function S = RelVelocityMatrixDeriv(q, q_dot)
 %             a = SphericalFixedXYZ.GetAlpha(q);
 %             b = SphericalFixedXYZ.GetBeta(q);

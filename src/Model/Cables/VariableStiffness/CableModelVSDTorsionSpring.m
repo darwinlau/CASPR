@@ -35,7 +35,7 @@ classdef CableModelVSDTorsionSpring < CableModel
         end
         
         function value = get.K(obj)
-            value = 1/(1/obj.K_cable + 1/obj.K_vsd);
+            value = 1/(obj.length/obj.K_cable + 1/obj.K_vsd);
         end
         
         function value = get.K_vsd(obj)
@@ -45,7 +45,7 @@ classdef CableModelVSDTorsionSpring < CableModel
             C_theta = (obj.force * obj.springLength)/(2 * obj.numSprings * obj.springStiffness);
             theta = (1.571 * C_theta^3 + 1.251 * C_theta^2 + 0.696 * C_theta - 0.0000158)/(C_theta^3 + 1.793 * C_theta^2 + 1.271 * C_theta + 0.695);
             L = 2 * obj.springLength * sin(theta);
-            value = 2 * obj.numSprings * obj.springStiffness / (4 * obj.springLength^2 - L^2) * ( 1 + L * asin(L/(2*obj.springLength))/sqrt(4 * obj.springLength^2 - L^2));
+            value = ((4 * obj.numSprings * obj.springStiffness) / (4 * obj.springLength^2 - L^2)) * ( 1 + L * asin(L/(2*obj.springLength))/sqrt(4 * obj.springLength^2 - L^2));
         end
     end
     
@@ -64,7 +64,7 @@ classdef CableModelVSDTorsionSpring < CableModel
             end
             
             % Generate an ideal cable object
-            c = CableModelIdeal(name, bodiesModel.numLinks);
+            c = CableModelVSDTorsionSpring(name, bodiesModel.numLinks);
             
             % <properties> tag
             propertiesObj = xmlobj.getElementsByTagName('properties').item(0);

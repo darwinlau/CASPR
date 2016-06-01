@@ -9,6 +9,7 @@
 classdef ModelConfigType
     enumeration 
         M_SIMPLE_PLANAR_XY
+        M_2DOF_VSD
         M_SIMPLE_SPHERICAL
         M_SIMPLE_SPATIAL
         M_NECK_8S

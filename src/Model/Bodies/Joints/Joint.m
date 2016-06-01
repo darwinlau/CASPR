@@ -24,6 +24,7 @@ classdef (Abstract) Joint < handle
         R_pe
         r_rel        
         S_grad
+        S_dot_grad
     end
     
     properties (Dependent)
@@ -54,6 +55,7 @@ classdef (Abstract) Joint < handle
             obj.r_rel = obj.RelTranslationVector(q);
 %             obj.S = obj.RelVelocityMatrix(q);
             obj.S_grad  = obj.RelVelocityMatrixGradient(q);
+            obj.S_dot_grad = obj.RelVelocityMatrixDerivGradient(q,q_dot);
 %             obj.S_dot = obj.RelVelocityMatrixDeriv(q, q_dot);
         end
         
@@ -82,6 +84,8 @@ classdef (Abstract) Joint < handle
                     j = RevoluteZ;
                 case JointType.U_XY
                     j = UniversalXY;
+                case JointType.P_XY
+                    j = PrismaticXY;
                 case JointType.PLANAR_XY
                     j = PlanarXY;
                 case JointType.S_EULER_XYZ
@@ -125,6 +129,7 @@ classdef (Abstract) Joint < handle
         % Relationship between x_{rel}'
         S = RelVelocityMatrix(q)
         S_grad = RelVelocityMatrixGradient(q)
+        S_dot_grad = RelVelocityMatrixDerivGradient(q,q_dot)
         
         % Generates trajectory
         [q, q_dot, q_ddot] = GenerateTrajectory(q_s, q_s_d, q_s_dd, q_e, q_e_d, q_e_dd, total_time, time_step)

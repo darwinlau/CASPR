@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE trajectories [
+  <!ATTLIST trajectory id ID #REQUIRED>
+]>
+
+<trajectories>
+  <trajectory id="x_simple">
+    <time_total>1</time_total>
+    <time_step>0.01</time_step>
+    <begin>
+      <q>0.3 0.5 0.0</q>
+      <q_dot>0.0 0.0 0.0</q_dot>
+      <q_ddot>0.0 0.0 0.0</q_ddot>
+    </begin>
+    <end>
+      <q>0.7 0.5 0.0</q>
+      <q_dot>0.0 0.0 0.0</q_dot>
+      <q_ddot>0.0 0.0 0.0</q_ddot>
+    </end>
+  </trajectory>
+  <trajectory id="general_1">
+    <time_total>1</time_total>
+    <time_step>0.01</time_step>
+    <begin>
+      <q>0.3 0.8 0.1</q>
+      <q_dot>0.0 0.0 0.0</q_dot>
+      <q_ddot>0.0 0.0 0.0</q_ddot>
+    </begin>
+    <end>
+      <q>0.7 0.2 -0.2</q>
+      <q_dot>0.0 0.0 0.0</q_dot>
+      <q_ddot>0.0 0.0 0.0</q_ddot>
+    </end>
+  </trajectory>
+  <trajectory id="general_2">
+    <time_total>1</time_total>
+    <time_step>0.01</time_step>
+    <begin>
+      <q>0.3 0.8 0.1</q>
+      <q_dot>0.0 0.0 0.0</q_dot>
+      <q_ddot>0.0 0.0 0.0</q_ddot>
+    </begin>
+    <end>
+      <q>0.2 0.2 -0.2</q>
+      <q_dot>0.0 0.0 0.0</q_dot>
+      <q_ddot>0.0 0.0 0.0</q_ddot>
+    </end>
+  </trajectory>
+</trajectories>
