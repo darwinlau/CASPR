@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <links>
   <link_rigid num="1" name="ACROBOT robot (IRTJV)">
-    <joint_type>SPATIAL_EULER_XYZ</joint_type>
+    <joint type="SPATIAL_EULER_XYZ" />
     <physical>
       <mass>1.0</mass>
       <com_location>0.1645 0.177 0.149</com_location>

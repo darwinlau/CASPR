@@ -6,13 +6,36 @@ classdef ModelConfigTest < matlab.unittest.TestCase
     end
     
     methods (Test)
-        function checkModelConfigFilesExist(testCase)
+        function modelConfigFilesExist(testCase)
+            disp('modelConfigFilesExist test');
             [mSet, mNames] = enumeration('ModelConfigType');
             for i = 1:length(mSet)
-                disp(['Checking ModelConfigType: ', mNames{i}]);
+                disp(['Testing ModelConfigType: ', mNames{i}]);
                 m = ModelConfig(mSet(i));
+                testCase.assertNotEmpty(m);
             end
-            testCase.assertNotEmpty(m);
+        end
+        
+        function modelJointCreation(testCase)
+            disp('modelJointCreation test');
+            [mSet, mNames] = enumeration('JointType');
+            for i = 1:length(mSet)
+                disp(['Testing JointType: ', mNames{i}]);
+                j = Joint.CreateJoint(mSet(i));
+                testCase.assertNotEmpty(j);
+            end
+        end
+        
+        function modelBodyCreation(testCase)
+            disp('modelBodyCreation test');
+            [mSet, mNames] = enumeration('ModelConfigType');
+            for i = 1:length(mSet)
+                disp(['Testing ModelConfigType: ', mNames{i}]);
+                m = ModelConfig(mSet(i));
+                body_xmlobj = m.getBodiesPropertiesXmlObj();
+                bodyModel = SystemModelBodies.LoadXmlObj(body_xmlobj);
+                testCase.assertNotEmpty(bodyModel);
+            end
         end
     end
     

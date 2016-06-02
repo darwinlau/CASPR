@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <links>
   <link_rigid num="1" name="R_Y 1">
-    <joint_type>R_Y</joint_type>
+    <joint type="R_Y" />
     <physical>
       <mass>1</mass>
       <com_location>0.0 0.0 0.5</com_location>
@@ -21,7 +21,7 @@
     </parent>
   </link_rigid>
   <link_rigid num="2" name="R_Y 2">
-    <joint_type>R_Y</joint_type>
+    <joint type="R_Y" />
     <physical>
       <mass>1</mass>
       <com_location>0.0 0.0 0.5</com_location>

@@ -1,22 +1,22 @@
-% Spatial (6-DOF) joint using the quaternion orientation representation
+% SpatialQuaternion (6-DOF) joint using the quaternion orientation representation
 %
 % Author        : Darwin LAU
 % Created       : 2015
 % Description   :
-classdef Spatial < Joint
+classdef SpatialQuaternion < Joint
     properties
         translation
         orientation
     end
         
     properties (Constant = true)
-        numDofs = TranslationalXYZ.numDofs + Spherical.numDofs;
-        numVars = TranslationalXYZ.numVars + Spherical.numVars;
-        q_default = [TranslationalXYZ.q_default; Spherical.q_default];
-        q_dot_default = [TranslationalXYZ.q_dot_default; Spherical.q_dot_default];
-        q_ddot_default = [TranslationalXYZ.q_ddot_default; Spherical.q_ddot_default];
-        q_lb = [TranslationalXYZ.q_lb; Spherical.q_lb];
-        q_ub = [TranslationalXYZ.q_ub; Spherical.q_ub];
+        numDofs = TranslationalXYZ.numDofs + SphericalQuaternion.numDofs;
+        numVars = TranslationalXYZ.numVars + SphericalQuaternion.numVars;
+        q_default = [TranslationalXYZ.q_default; SphericalQuaternion.q_default];
+        q_dot_default = [TranslationalXYZ.q_dot_default; SphericalQuaternion.q_dot_default];
+        q_ddot_default = [TranslationalXYZ.q_ddot_default; SphericalQuaternion.q_ddot_default];
+        q_lb = [TranslationalXYZ.q_lb; SphericalQuaternion.q_lb];
+        q_ub = [TranslationalXYZ.q_ub; SphericalQuaternion.q_ub];
     end
     
     properties (Dependent)
@@ -42,14 +42,14 @@ classdef Spatial < Joint
     end
     
     methods
-        function j = Spatial()
+        function j = SpatialQuaternion()
             j.translation = TranslationalXYZ;
-            j.orientation = Spherical;
+            j.orientation = SphericalQuaternion;
         end
         
         function update(obj, q, q_dot, q_ddot)
-            obj.translation.update(Spatial.GetTranslationQ(q), Spatial.GetTranslationQd(q_dot), Spatial.GetTranslationQd(q_ddot));
-            obj.orientation.update(Spatial.GetOrientationQ(q), Spatial.GetOrientationQd(q_dot), Spatial.GetOrientationQd(q_ddot));
+            obj.translation.update(SpatialQuaternion.GetTranslationQ(q), SpatialQuaternion.GetTranslationQd(q_dot), SpatialQuaternion.GetTranslationQd(q_ddot));
+            obj.orientation.update(SpatialQuaternion.GetOrientationQ(q), SpatialQuaternion.GetOrientationQd(q_dot), SpatialQuaternion.GetOrientationQd(q_ddot));
             update@Joint(obj, q, q_dot, q_ddot);
         end
         
@@ -96,8 +96,8 @@ classdef Spatial < Joint
     end
     
     methods (Static)
-        % The q vector for spatial is [x; y; z; e0; e1; e2; e3]
-        % The q_d vector for spatial is [x_d; y_d; z_d; wx; wy; wz]
+        % The q vector for SpatialQuaternion is [x; y; z; e0; e1; e2; e3]
+        % The q_d vector for SpatialQuaternion is [x_d; y_d; z_d; wx; wy; wz]
         function q_t = GetTranslationQ(q)
             q_t = q(1:TranslationalXYZ.numVars);
         end
@@ -105,22 +105,22 @@ classdef Spatial < Joint
             q_t = q_d(1:TranslationalXYZ.numVars);
         end
         function q_t = GetOrientationQ(q)
-            q_t = q(TranslationalXYZ.numVars+1:Spatial.numVars);
+            q_t = q(TranslationalXYZ.numVars+1:SpatialQuaternion.numVars);
         end
         function q_t_d = GetOrientationQd(q_d)
-            q_t_d = q_d(TranslationalXYZ.numDofs+1:Spatial.numDofs);
+            q_t_d = q_d(TranslationalXYZ.numDofs+1:SpatialQuaternion.numDofs);
         end
         
         function R_pe = RelRotationMatrix(q)
-            R_pe = Spherical.RelRotationMatrix(Spatial.GetOrientationQ(q));
+            R_pe = SphericalQuaternion.RelRotationMatrix(SpatialQuaternion.GetOrientationQ(q));
         end
 
         function r_rel = RelTranslationVector(q)
-            r_rel = TranslationalXYZ.RelTranslationVector(Spatial.GetTranslationQ(q));
+            r_rel = TranslationalXYZ.RelTranslationVector(SpatialQuaternion.GetTranslationQ(q));
         end
         
         function S = RelVelocityMatrix(q)
-            S = [TranslationalXYZ.RelVelocityMatrix(Spatial.GetTranslationQ(q)) Spherical.RelVelocityMatrix(Spatial.GetOrientationQ(q))];
+            S = [TranslationalXYZ.RelVelocityMatrix(SpatialQuaternion.GetTranslationQ(q)) SphericalQuaternion.RelVelocityMatrix(SpatialQuaternion.GetOrientationQ(q))];
         end
         
         function S_grad = RelVelocityMatrixGradient(~)
@@ -128,26 +128,26 @@ classdef Spatial < Joint
         end
         
 %         function S_dot = RelVelocityMatrixDeriv(q, q_d)
-%             S_dot = [TranslationalXYZ.RelVelocityMatrixDeriv(Spatial.GetTranslationQ(q), Spatial.GetTranslationQd(q_d)) Spherical.RelVelocityMatrixDeriv(Spatial.GetOrientationQ(q), Spatial.GetOrientationQd(q_d))];
+%             S_dot = [TranslationalXYZ.RelVelocityMatrixDeriv(SpatialQuaternion.GetTranslationQ(q), SpatialQuaternion.GetTranslationQd(q_d)) SphericalQuaternion.RelVelocityMatrixDeriv(SpatialQuaternion.GetOrientationQ(q), SpatialQuaternion.GetOrientationQd(q_d))];
 %         end        
         
         % TO DO
         function [N_j,A] = QuadMatrix(~)
-            N_j = zeros(Spatial.numDofs,Spatial.numDofs^2);
-            A = zeros(6,Spatial.numDofs);
+            N_j = zeros(SpatialQuaternion.numDofs,SpatialQuaternion.numDofs^2);
+            A = zeros(6,SpatialQuaternion.numDofs);
         end
         
         function q_deriv = QDeriv(q, q_d)
-            q_deriv = [TranslationalXYZ.QDeriv(Spatial.GetTranslationQ(q), Spatial.GetTranslationQd(q_d)); Spherical.QDeriv(Spatial.GetOrientationQ(q), Spatial.GetOrientationQd(q_d))];
+            q_deriv = [TranslationalXYZ.QDeriv(SpatialQuaternion.GetTranslationQ(q), SpatialQuaternion.GetTranslationQd(q_d)); SphericalQuaternion.QDeriv(SpatialQuaternion.GetOrientationQ(q), SpatialQuaternion.GetOrientationQd(q_d))];
         end
         
         function [q, q_dot, q_ddot] = GenerateTrajectory(q_s, q_s_d, q_s_dd, q_e, q_e_d, q_e_dd, total_time, time_step)
             [q_trans, q_trans_dot, q_trans_ddot] = TranslationalXYZ.GenerateTrajectory( ...
-                Spatial.GetTranslationQ(q_s), Spatial.GetTranslationQ(q_s_d), Spatial.GetTranslationQ(q_s_dd), ...
-                Spatial.GetTranslationQ(q_e), Spatial.GetTranslationQ(q_e_d), Spatial.GetTranslationQ(q_e_dd), total_time, time_step);
-            [q_orient, q_orient_dot, q_orient_ddot] = Spherical.GenerateTrajectory( ...
-                Spatial.GetOrientationQ(q_s), Spatial.GetOrientationQd(q_s_d), Spatial.GetOrientationQd(q_s_dd), ...
-                Spatial.GetOrientationQ(q_e), Spatial.GetOrientationQd(q_e_d), Spatial.GetOrientationQd(q_e_dd), total_time, time_step);
+                SpatialQuaternion.GetTranslationQ(q_s), SpatialQuaternion.GetTranslationQ(q_s_d), SpatialQuaternion.GetTranslationQ(q_s_dd), ...
+                SpatialQuaternion.GetTranslationQ(q_e), SpatialQuaternion.GetTranslationQ(q_e_d), SpatialQuaternion.GetTranslationQ(q_e_dd), total_time, time_step);
+            [q_orient, q_orient_dot, q_orient_ddot] = SphericalQuaternion.GenerateTrajectory( ...
+                SpatialQuaternion.GetOrientationQ(q_s), SpatialQuaternion.GetOrientationQd(q_s_d), SpatialQuaternion.GetOrientationQd(q_s_dd), ...
+                SpatialQuaternion.GetOrientationQ(q_e), SpatialQuaternion.GetOrientationQd(q_e_d), SpatialQuaternion.GetOrientationQd(q_e_dd), total_time, time_step);
             q = [q_trans; q_orient];
             q_dot = [q_trans_dot; q_orient_dot];
             q_ddot = [q_trans_ddot; q_orient_ddot];

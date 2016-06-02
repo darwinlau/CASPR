@@ -31,11 +31,11 @@ classdef BodyModelRigid < BodyModel
             name = char(xmlobj.getAttribute('name'));
             
             % <joint_type> tag
-            jointTypeObj = xmlobj.getElementsByTagName('joint_type').item(0);
-            joint_type = char(jointTypeObj.getFirstChild.getData);
-            
+            jointXmlObj = xmlobj.getElementsByTagName('joint').item(0);
+            joint = Joint.LoadXmlObj(jointXmlObj);
+                        
             % Generate the rigid body object
-            bk = BodyModelRigid(id, name, JointType.(joint_type));
+            bk = BodyModelRigid(id, name, joint);
             
             % <physical> tag
             physicalObj = xmlobj.getElementsByTagName('physical').item(0);

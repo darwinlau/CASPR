@@ -57,10 +57,10 @@ classdef (Abstract) BodyModel < handle
     end
 
     methods
-        function bk = BodyModel(id, name, jointType)
+        function bk = BodyModel(id, name, joint)
             bk.id = id;
             bk.name = name;
-            bk.joint = Joint.CreateJoint(jointType);
+            bk.joint = joint;
             % Operation Space creation
             bk.op_space = [];
         end

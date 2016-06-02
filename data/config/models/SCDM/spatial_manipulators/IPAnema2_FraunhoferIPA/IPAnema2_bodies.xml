@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <links>
   <link_rigid num="1" name="IPAnema 2 (Fraunhofer IPA)">
-    <joint_type>SPATIAL_EULER_XYZ</joint_type>
+    <joint type="SPATIAL_EULER_XYZ" />
     <physical>
       <mass>10.0</mass>
       <com_location>0.0 0.0 0.5</com_location>

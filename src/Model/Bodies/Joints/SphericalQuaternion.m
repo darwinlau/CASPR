@@ -3,7 +3,7 @@
 % Author        : Darwin LAU
 % Created       : 2015
 % Description   :
-classdef Spherical < Joint
+classdef SphericalQuaternion < Joint
     
     properties (Constant = true)
         numDofs = 3;
@@ -65,10 +65,10 @@ classdef Spherical < Joint
     
     methods (Static)
         function R_pe = RelRotationMatrix(q)
-            e0 = Spherical.GetE0(q);
-            e1 = Spherical.GetE1(q);
-            e2 = Spherical.GetE2(q);
-            e3 = Spherical.GetE3(q);
+            e0 = SphericalQuaternion.GetE0(q);
+            e1 = SphericalQuaternion.GetE1(q);
+            e2 = SphericalQuaternion.GetE2(q);
+            e3 = SphericalQuaternion.GetE3(q);
             
             R_pe = Quaternion.ToRotationMatrix(Quaternion(e0, e1, e2, e3));
         end
@@ -91,8 +91,8 @@ classdef Spherical < Joint
         
         % TODO: To complete
         function [N_j,A] = QuadMatrix(~)
-            N_j = zeros(Spherical.numDofs,Spherical.numDofs^2);
-            A = zeros(6,Spherical.numDofs);
+            N_j = zeros(SphericalQuaternion.numDofs,SphericalQuaternion.numDofs^2);
+            A = zeros(6,SphericalQuaternion.numDofs);
         end
         
         % Perform a simple first order integral

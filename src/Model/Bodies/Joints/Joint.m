@@ -88,12 +88,12 @@ classdef (Abstract) Joint < handle
                     j = SphericalEulerXYZ;
                 case JointType.S_FIXED_XYZ
                     j = SphericalFixedXYZ;
-                case JointType.SPHERICAL
-                    j = Spherical;
+                case JointType.S_QUATERNION
+                    j = SphericalQuaternion;
                 case JointType.T_XYZ
                     j = TranslationalXYZ;
-                case JointType.SPATIAL
-                    j = Spatial;
+                case JointType.SPATIAL_QUATERNION
+                    j = SpatialQuaternion;
                 case JointType.SPATIAL_EULER_XYZ
                     j = SpatialEulerXYZ;
                 otherwise
@@ -101,6 +101,11 @@ classdef (Abstract) Joint < handle
             end
             j.type = jointType;
             j.update(j.q_default, j.q_dot_default, j.q_ddot_default);
+        end
+        
+        function j = LoadXmlObj(xmlObj)
+            jointType = JointType.(char(xmlObj.getAttribute('type')));
+            j = Joint.CreateJoint(jointType);
         end
         
         % Perform a simple first order integral

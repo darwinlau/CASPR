@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <links>
   <link_rigid num="1" name="link 1">
-    <joint_type>S_EULER_XYZ</joint_type>
+    <joint type="S_EULER_XYZ" />
     <physical>
       <mass>1</mass>
       <com_location>0.0 0.0 0.04</com_location>

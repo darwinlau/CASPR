@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <links>
   <link_rigid num="1" name="Upper Arm">
-    <joint_type>S_EULER_XYZ</joint_type>
+    <joint type="S_EULER_XYZ" />
     <physical>
       <mass>3.0</mass>
       <com_location>0.0 0.0 -0.13</com_location>
@@ -21,7 +21,7 @@
     </parent>
   </link_rigid>
   <link_rigid num="2" name="Forearm">
-    <joint_type>R_Y</joint_type>
+    <joint type="R_Y" />
     <physical>
       <mass>2.0</mass>
       <com_location>0.0 0.0 -0.12</com_location>
