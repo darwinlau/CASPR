@@ -180,4 +180,114 @@
       </attachments>
     </cable_vsd_flexure_linear>
   </cable_set>
+  <cable_set id="VSD_6_cables_2">
+    <cable_vsd_flexure_linear name="cable 1" attachment_reference="joint">
+      <properties>
+        <force_min>20</force_min>
+        <force_max>300</force_max>
+        <K_cable>3000000000</K_cable>
+        <vsd_force_deformation_relation>149300000 -35020 19.28</vsd_force_deformation_relation>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.0866 -0.1 0.0</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>-0.0433 -0.05 0.08</location>
+        </attachment>
+      </attachments>
+    </cable_vsd_flexure_linear>
+    <cable_vsd_flexure_linear name="cable 2" attachment_reference="joint">
+      <properties>
+        <force_min>20</force_min>
+        <force_max>300</force_max>
+        <K_cable>3000000000</K_cable>
+        <vsd_force_deformation_relation>149300000 -35020 19.28</vsd_force_deformation_relation>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.0866 -0.1 0.0</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0.0433 0 0.08</location>
+        </attachment>
+      </attachments>
+    </cable_vsd_flexure_linear>
+    <cable_vsd_flexure_linear name="cable 3" attachment_reference="joint">
+      <properties>
+        <force_min>20</force_min>
+        <force_max>300</force_max>
+        <K_cable>3000000000</K_cable>
+        <vsd_force_deformation_relation>149300000 -35020 19.28</vsd_force_deformation_relation>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.0866 0.1 0.0</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0.0433 0 0.08</location>
+        </attachment>
+      </attachments>
+    </cable_vsd_flexure_linear>
+    <cable_vsd_flexure_linear name="cable 4" attachment_reference="joint">
+      <properties>
+        <force_min>20</force_min>
+        <force_max>300</force_max>
+        <K_cable>3000000000</K_cable>
+        <vsd_force_deformation_relation>149300000 -35020 19.28</vsd_force_deformation_relation>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.0866 0.1 0.0</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>-0.0433 0.05 0.08</location>
+        </attachment>
+      </attachments>
+    </cable_vsd_flexure_linear>
+    <cable_vsd_flexure_linear name="cable 5" attachment_reference="joint">
+      <properties>
+        <force_min>20</force_min>
+        <force_max>300</force_max>
+        <K_cable>3000000000</K_cable>
+        <vsd_force_deformation_relation>149300000 -35020 19.28</vsd_force_deformation_relation>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.0866 0.0 0.0</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>-0.0433 0.05 0.08</location>
+        </attachment>
+      </attachments>
+    </cable_vsd_flexure_linear>
+    <cable_vsd_flexure_linear name="cable 6" attachment_reference="joint">
+      <properties>
+        <force_min>20</force_min>
+        <force_max>300</force_max>
+        <K_cable>3000000000</K_cable>
+        <vsd_force_deformation_relation>149300000 -35020 19.28</vsd_force_deformation_relation>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.0866 0.0 0.0</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>-0.0433 -0.05 0.08</location>
+        </attachment>
+      </attachments>
+    </cable_vsd_flexure_linear>
+  </cable_set>  
 </cables>

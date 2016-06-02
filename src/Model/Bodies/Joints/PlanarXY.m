@@ -64,6 +64,10 @@ classdef PlanarXY < Joint
             S_grad = zeros(6,3,3);
         end
         
+        function [S_dot_grad] = RelVelocityMatrixDerivGradient(~,~)
+            S_dot_grad = zeros(6,3,3);
+        end
+        
 %         function S_dot = RelVelocityMatrixDeriv(~, ~)
 %             S_dot = zeros(6, 3);
 %         end
@@ -83,6 +87,8 @@ classdef PlanarXY < Joint
         function theta = GetTheta(q)
             theta = q(3);
         end
+        
+        % Should this be a separate function
         function theta_d = GetThetaDot(q_dot)
             theta_d = q_dot(3);
         end

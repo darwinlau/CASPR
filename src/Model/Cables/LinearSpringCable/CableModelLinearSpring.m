@@ -26,7 +26,7 @@ classdef CableModelLinearSpring < CableModel
         end
         
         function value = get.K(obj)
-            value = obj.K_cable;
+            value = obj.K_cable/obj.length;
         end
     end
     

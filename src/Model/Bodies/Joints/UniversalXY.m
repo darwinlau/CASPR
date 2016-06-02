@@ -61,6 +61,13 @@ classdef UniversalXY < Joint
             S_grad(:,:,2)   =   [zeros(3,2); -sin(b) 0; 0 0; cos(b) 0];    
         end
         
+        function [S_dot_grad] = RelVelocityMatrixDerivGradient(q,q_dot)
+            b = UniversalXY.GetBeta(q);
+            b_d = SphericalEulerXYZ.GetBeta(q_dot);
+            S_dot_grad          =   zeros(6,2,2);
+            S_dot_grad(:,:,2)   =   [zeros(3,2); -b_d*cos(b) 0; 0 0; -b_d*sin(b) 0];    
+        end
+        
 %         function S_dot = RelVelocityMatrixDeriv(q, q_dot)
 %             b = SphericalEulerXYZ.GetBeta(q);
 %             b_d = SphericalEulerXYZ.GetBeta(q_dot);
