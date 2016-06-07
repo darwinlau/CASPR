@@ -29,7 +29,7 @@ metric = SEACM();
 disp('Start Setup Simulation');
 start_tic       =   tic;
 wsim            =   WorkspaceSimulator(dynObj,wcondition,metric);
-q_step          =   pi/180;
+q_step          =   pi/18;
 n_dim           =   2;
 uGrid           =   UniformGrid(-pi*ones(n_dim,1),(pi-q_step)*ones(n_dim,1),q_step*ones(n_dim,1));
 % q_step = 0.01;

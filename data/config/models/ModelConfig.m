@@ -118,7 +118,7 @@ classdef ModelConfig
                     error('ModelConfig type is not defined');
             end
             
-            if(isunix)
+            if(isunix)                
                 c.bodyPropertiesFilename = strrep(c.bodyPropertiesFilename, '\', '/');
                 c.cablesPropertiesFilename = strrep(c.cablesPropertiesFilename, '\', '/');
                 c.trajectoriesFilename = strrep(c.trajectoriesFilename, '\', '/');
