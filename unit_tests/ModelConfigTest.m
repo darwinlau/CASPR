@@ -1,11 +1,12 @@
+% Unit test of the model configuration.
+%
+% Author        : Darwin LAU
+% Created       : 2016
+% Description    :
+%    Unit tests to confirm that the model configuration is correct. 
 classdef ModelConfigTest < matlab.unittest.TestCase
-    %MODELCONFIGTEST Summary of this class goes here
-    %   Detailed explanation goes here
-    
-    properties
-    end
-    
     methods (Test)
+        % Test that the model configuration files exist.
         function modelConfigFilesExist(testCase)
             disp('modelConfigFilesExist test');
             [mSet, mNames] = enumeration('ModelConfigType');
@@ -16,6 +17,7 @@ classdef ModelConfigTest < matlab.unittest.TestCase
             end
         end
         
+        % Test that all defined joints can be instantiated.
         function modelJointCreation(testCase)
             disp('modelJointCreation test');
             [mSet, mNames] = enumeration('JointType');
@@ -26,6 +28,7 @@ classdef ModelConfigTest < matlab.unittest.TestCase
             end
         end
         
+        % Test that all models can be constructed as bodies.
         function modelBodyCreation(testCase)
             disp('modelBodyCreation test');
             [mSet, mNames] = enumeration('ModelConfigType');

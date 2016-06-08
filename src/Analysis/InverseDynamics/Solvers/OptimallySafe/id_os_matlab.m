@@ -1,3 +1,7 @@
+% The MATLAB implementation of the optimally safe solvers
+% Author        : Jonathan EDEN
+% Created       : 2016
+% Description   : MATLAB implementation of optimally safe solvers
 function [ x_opt, exit_type] = id_os_matlab(A_eq, b_eq, xmin, xmax,alpha)
     % Find the optimally safe cable tension by solving a linear progrm
     m = length(xmin);

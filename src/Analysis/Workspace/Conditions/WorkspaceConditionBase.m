@@ -12,6 +12,8 @@ classdef WorkspaceConditionBase < handle
     end
     
     methods
+        % The unified implemetnation of evaluate. This evaluates the object
+        % dynamics to determine if the workspace condition is satisfied.
         function [f, comp_time] = evaluate(obj,dynamics)
             start_tic = tic;
             f = obj.evaluateFunction(dynamics);

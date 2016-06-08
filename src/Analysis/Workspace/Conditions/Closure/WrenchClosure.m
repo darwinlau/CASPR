@@ -5,15 +5,12 @@
 % Created       : 2015
 % Description    : 
 classdef WrenchClosure < WorkspaceConditionBase
-    %IDFUNCTION Summary of this class goes here
-    %   Detailed explanation goes here
-    
     properties (SetAccess = protected, GetAccess = protected)
         options                         % The options for the wrench closure
     end
     
     methods
-        %% Constructor for wrench closure workspace
+        % Constructor for wrench closure workspace
         function w = WrenchClosure(method)
             w.options               =   optimset('display','off');
             if(nargin>0)
@@ -39,7 +36,7 @@ classdef WrenchClosure < WorkspaceConditionBase
             end 
         end
         
-        %% Evaluate the wrench closure condition return true if satisfied 
+        % Evaluate the wrench closure condition return true if satisfied 
         function inWorkspace = evaluateFunction(obj,dynamics)
            if(obj.method == WrenchClosureMethods.QP)
                inWorkspace = wrench_closure_quadprog(dynamics,obj.options);
@@ -56,6 +53,7 @@ classdef WrenchClosure < WorkspaceConditionBase
            end
         end
         
+        % Implementation of the connected function.
         function [isConnected] = connected(obj,workspace,i,j,grid)
             % Connectiveness is evaluated using grid connectivity.
             % THIS FILE MAY NEED A DYNAMICS OBJECT ADDED AT A LATER DATE

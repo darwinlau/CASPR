@@ -6,7 +6,7 @@
 % Workshop on Computational Kinematics (CK2013), pp. 139-146, 2014.
 %
 % If the puncture method is also utilised please cite:
-% K. Müller and C. Reichert and T. Bruckmann. 
+% K. Mï¿½ller and C. Reichert and T. Bruckmann. 
 % "Analysis of a real-time capable cable force computation method." 
 % In Cable-Driven Parallel Robots, pp. 227-238. Springer International 
 % Publishing, 2015.
@@ -20,11 +20,13 @@ classdef IDSolverClosedForm < IDSolverBase
         options
     end
     methods
+        % The constructor for this class
         function id = IDSolverClosedForm(model,cf_solver_type)
             id@IDSolverBase(model);
             id.cf_solver_type = cf_solver_type;
         end
         
+        % The implementation of the resolveFunction.
         function [cable_forces,Q_opt, id_exit_type] = resolveFunction(obj, dynamics)            
             % Form the linear EoM constraint
             % M\ddot{q} + C + G + F_{ext} = -J^T f (constraint)

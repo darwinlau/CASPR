@@ -11,17 +11,20 @@ classdef IDObjectiveInfOptimallySafe < IDObjectiveInfinity
     end
     
     methods
+        % The constructor function for optimally safe infinite norms.
         function o = IDObjectiveInfOptimallySafe(weights)
             o.weights = weights;
             o.A = diag(weights);
             o.b = zeros(length(weights),1);
         end
         
+        % The objective update implementation
         function updateObjective(obj, dynamics)
             f_m     =   0.5*(dynamics.cableDynamics.forcesMin + dynamics.cableDynamics.forcesMax);
             obj.b   =   -diag(obj.weights)*f_m;
         end
         
+        % An update of the weights
         function updateWeights(obj, weights)
             obj.weights = weights;
             obj.A = diag(weights);

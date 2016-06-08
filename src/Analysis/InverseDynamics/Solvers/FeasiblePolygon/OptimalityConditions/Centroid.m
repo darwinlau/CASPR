@@ -1,5 +1,13 @@
-function [c1,c2] = Centroid(Vertices)
 % Calculate the Center of the ploygon
+%
+% Please cite the following paper when using this algorithm:
+% M. Gouttefarde, J. Lamaury, C. Reichert and T. Bruckmann, "A Versatile
+% Tension Distribution Algorithm for n-DOF Parallel Robots Driven by n+2
+% Cables", IEEE Trans. Robot., vol. 31, no. 6, pp. 1444-1457, 2015.
+%
+% Author        : Jihong ZHU
+% Created       : 2016
+function [c1,c2] = Centroid(Vertices)
 temp = 0;
 for i = 1:(length(Vertices)-1),
     temp = temp + (Vertices(1,i)*Vertices(2,i+1) - Vertices(1,i+1)*Vertices(2,i));

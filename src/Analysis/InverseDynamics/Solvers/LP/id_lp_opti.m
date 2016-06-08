@@ -1,3 +1,7 @@
+% Implementation of linear programming using the optitollbox
+% Author        : Jonathan EDEN
+% Created       : 2016
+% Description   : Optitoolbox LP implementation
 function [ x_opt, exit_type ] = id_lp_opti(b, A_ineq, b_ineq, A_eq, b_eq, xmin, xmax, x0,opts) 
     [x_opt, ~, exitflag] = opti_linprog(b, A_ineq, b_ineq, A_eq, b_eq, xmin, xmax, x0, opts);
     

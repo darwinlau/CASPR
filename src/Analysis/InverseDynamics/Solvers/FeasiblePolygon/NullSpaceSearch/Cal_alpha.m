@@ -1,5 +1,14 @@
-function [alpha,l,bl] = Cal_alpha(N,ni_prepend,i,v_ij,t_min,t_max,t_sol)
 % Calculate alpha in order to move to the next intersection
+%
+% Please cite the following paper when using this algorithm:
+% M. Gouttefarde, J. Lamaury, C. Reichert and T. Bruckmann, "A Versatile
+% Tension Distribution Algorithm for n-DOF Parallel Robots Driven by n+2
+% Cables", IEEE Trans. Robot., vol. 31, no. 6, pp. 1444-1457, 2015.
+%
+% Author        : Jihong ZHU
+% Created       : 2016
+function [alpha,l,bl] = Cal_alpha(N,ni_prepend,i,v_ij,t_min,t_max,t_sol)
+
 alpha = inf;
 index = 1:length(N);
 index_new=index(~ismember(index,i));

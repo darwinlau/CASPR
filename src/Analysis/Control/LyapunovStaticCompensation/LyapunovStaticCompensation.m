@@ -14,12 +14,13 @@
 classdef LyapunovStaticCompensation < ControllerBase
     
     properties (SetAccess = private)
-        id_solver
-        Kp
-        Kd
+        id_solver       % The inverse dynamics solver
+        Kp              % The proportional position gain
+        Kd              % The proportional derivative gain
     end
     
     methods
+        % A constructor for a computed torque controller.
         function c = LyapunovStaticCompensation(dyn_model, id_solver, Kp, Kd)
             c@ControllerBase(dyn_model);
             c.id_solver = id_solver;
@@ -27,6 +28,8 @@ classdef LyapunovStaticCompensation < ControllerBase
             c.Kd = Kd;
         end
         
+        % The implementation of the abstract executeFunction for the
+        % controller class.
         function [cable_forces] = executeFunction(obj, q, q_d, ~, q_ref, q_ref_d, ~, ~)
             error_comp = obj.Kp * (q_ref - q) + obj.Kd * (q_ref_d - q_d);
             cable_forces = obj.id_solver.resolve(q, zeros(obj.dynModel.numDofs,1), zeros(obj.dynModel.numDofs,1), error_comp);

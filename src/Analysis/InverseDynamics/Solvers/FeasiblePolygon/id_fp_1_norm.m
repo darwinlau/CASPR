@@ -1,12 +1,18 @@
+% An algorithm to compute the minimum 1 norm solution
+%
+% Please cite the following paper when using this algorithm:
+% M. Gouttefarde, J. Lamaury, C. Reichert and T. Bruckmann, "A Versatile
+% Tension Distribution Algorithm for n-DOF Parallel Robots Driven by n+2
+% Cables", IEEE Trans. Robot., vol. 31, no. 6, pp. 1444-1457, 2015.
+%
+% Author        : Jihong ZHU
+% Created       : 2016
+% Description   : This is an implementation of the minimisation of the 2 
+% norm solution.
+% Required function:
+% Cal_ni: calculate the prependicular vector
+% Cal_alpha: calculate alpha
 function [ x_opt, exit_type, comp_time ] = id_fp_1_norm(A_eq, b_eq, xmin, xmax)
-    % Find 1-Norm optimal solution
-    %--------------------------------------------------------------------------
-    % Jihong Zhu
-    % 2016/01/21
-    % Required function:
-    % Cal_ni: calculate the prependicular vector
-    % Cal_alpha: calculate alpha 
-    %--------------------------------------------------------------------------
     delta = 1e-8;   % Use of delta to aviod numerical error
     m = size(A_eq,1);
     n = size(A_eq,2);

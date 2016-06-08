@@ -1,3 +1,7 @@
+% The enum class for the quadratic program solver types.
+% Author        : Darwin LAU
+% Created       : 2015
+% Description   : An enum class for qp solvers
 classdef ID_QP_SolverType
     enumeration
         MATLAB

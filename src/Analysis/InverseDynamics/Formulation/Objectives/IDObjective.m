@@ -16,7 +16,10 @@ classdef IDObjective < handle
     end
     
     methods (Abstract)
+        % Update the objective to consider the dynamics.
         updateObjective(obj, dynamics);
+        % The evaluation function converts f into an objective value and
+        % its gradient.
         [f, grad_f] = evaluateFunction(obj, x);
     end
     

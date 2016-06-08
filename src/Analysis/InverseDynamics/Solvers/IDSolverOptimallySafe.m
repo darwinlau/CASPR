@@ -17,6 +17,7 @@ classdef IDSolverOptimallySafe < IDSolverBase
         alpha
     end
     methods
+        % The constructor for this class.
         function id = IDSolverOptimallySafe(model,alpha,os_solver_type)
             id@IDSolverBase(model);
             id.os_solver_type = os_solver_type;
@@ -24,6 +25,7 @@ classdef IDSolverOptimallySafe < IDSolverBase
             id.alpha = alpha;
         end
         
+        % The implementation of the abstract resolveFunction
         function [cable_forces,Q_opt, id_exit_type] = resolveFunction(obj, dynamics)            
             % Form the linear EoM constraint
             % M\ddot{q} + C + G + F_{ext} = -J^T f (constraint)
@@ -56,6 +58,7 @@ classdef IDSolverOptimallySafe < IDSolverBase
             obj.f_previous = cable_forces;
         end
         
+        % A function to add constraints.
         function addConstraint(obj, linConstraint)
             obj.constraints{length(obj.constraints)+1} = linConstraint;
         end

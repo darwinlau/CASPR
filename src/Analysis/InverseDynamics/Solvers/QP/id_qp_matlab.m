@@ -1,3 +1,7 @@
+% The MATLAB implementation of quadratic programming solvers
+% Author        : Jonathan EDEN
+% Created       : 2016
+% Description   : MATLAB implementation of QP solvers
 function [ x_opt, exit_type ] = id_qp_matlab(A, b, A_ineq, b_ineq, A_eq, b_eq, xmin, xmax, x0,options)
 %     options = optimoptions('quadprog', 'Display', 'off', 'MaxIter', 100);
     [x_opt, ~, exitflag] = quadprog(A, b, A_ineq, b_ineq, A_eq, b_eq, xmin, xmax, x0, options);

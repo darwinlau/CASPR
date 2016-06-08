@@ -3,13 +3,16 @@
 %
 % Author        : Jonathan EDEN
 % Created       : 2015
-% Description    : 
+% Description    : This class is the class for static workspace evaluation.
+% Different implementations are treated as individual function calls for the
+% evaluate function.
 classdef WorkspaceStatic < WorkspaceConditionBase    
     properties (SetAccess = protected, GetAccess = protected)
         options                         % The options for the wrench closure
     end
     
     methods
+        % The constructor for this class.
         function w = WorkspaceStatic(method)
             w.options               =   optimset('display','off','Algorithm','interior-point-convex');
             if(nargin>0)
@@ -29,6 +32,7 @@ classdef WorkspaceStatic < WorkspaceConditionBase
             end 
         end
         
+        % The implementation of the evaluateFunction method
         function inWorkspace = evaluateFunction(obj,dynamics)
            if(obj.method == WorkspaceStaticMethods.QP)
                inWorkspace = static_quadprog(dynamics,obj.options);
@@ -39,12 +43,14 @@ classdef WorkspaceStatic < WorkspaceConditionBase
            end
         end
         
+        % The implementation of the connected method
         function [isConnected] = connected(obj,workspace,i,j,grid)
             % This file may need a dynamics object added at a later date
             tol = 1e-6;
             isConnected = sum((abs(workspace(:,i) - workspace(:,j)) < grid.delta_q+tol)) + sum((abs(workspace(:,i) - workspace(:,j)-2*pi) < grid.delta_q+tol)) + sum((abs(workspace(:,i) - workspace(:,j)+2*pi) < grid.delta_q+tol)) == grid.n_dimensions;
         end
         
+        % A function to be used to set options.
         function setOptions(obj,options)
             obj.options = options;
         end

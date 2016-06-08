@@ -15,10 +15,12 @@ classdef IDObjectiveMinInteractions < IDObjectiveQuadratic
     end
     
     methods
+        % The constructor function for minimising the interactions
         function o = IDObjectiveMinInteractions(weights)
             o.weights = weights;
         end
         
+        % The objective update implementation
         function updateObjective(obj, dynamics)
             obj.A = zeros(dynamics.numCables, dynamics.numCables);
             obj.b = zeros(dynamics.numCables,1);
@@ -41,6 +43,7 @@ classdef IDObjectiveMinInteractions < IDObjectiveQuadratic
             obj.A = 2*obj.A;
         end
         
+        % An update of the weights
         function updateWeights(obj, weights)
             obj.weights = weights;
         end

@@ -1,3 +1,7 @@
+% Implementation of linear programming using the default MATLAB solvers.
+% Author        : Jonathan EDEN
+% Created       : 2016
+% Description   : MATLAB LP implementation
 function [ x_opt, exit_type ] = id_lp_matlab(b, A_ineq, b_ineq, A_eq, b_eq, xmin, xmax, x0,options)   
     [x_opt, ~, exitflag] = linprog(b, A_ineq, b_ineq, A_eq, b_eq, xmin, xmax, x0, options);
     switch exitflag

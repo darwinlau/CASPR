@@ -14,14 +14,16 @@
 % centroid of the wrench polytope.
 classdef IDSolverFeasiblePolygon < IDSolverBase    
     properties (SetAccess = private)
-        fp_solver_type
+        fp_solver_type      % The type of feasibility polygon sovler
     end
     methods
+        % The constructor for the class
         function id = IDSolverFeasiblePolygon(model,fp_solver_type)
             id@IDSolverBase(model);
             id.fp_solver_type = fp_solver_type;
         end
         
+        % The implementation of the abstract resolveFunction
         function [cable_forces,Q_opt, id_exit_type] = resolveFunction(obj, dynamics)            
             % Ensure that the resolve function should be applied for this
             % class of problem

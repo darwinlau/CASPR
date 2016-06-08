@@ -1,3 +1,8 @@
+% The MATLAB implementation of quadratic programming solvers with warm
+% starting
+% Author        : Jonathan EDEN
+% Created       : 2016
+% Description   : MATLAB implementation of QP solvers with warm starting.
 function [ x_opt, exit_type,active_set_new] = id_qp_matlab_active_set_warm_start(A, b, A_ineq, b_ineq, A_eq, b_eq, xmin, xmax, x0,active_set,options)
     assert(det(A)>=1e-6,'Efficient Method does not work for singular A');
     assert(isempty(A_ineq)&&isempty(b_ineq),'Efficient method cannot handle inequality constraints');

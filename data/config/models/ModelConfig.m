@@ -22,10 +22,12 @@ classdef ModelConfig
     end
     
     properties (Access = private)
-        root_folder
+        root_folder                 % The root folder for the CASPR build
     end
     
     methods
+        % Constructor for the ModelConfig class. This builds the xml
+        % objects.
         function c = ModelConfig(type)
             c.type = type;
             c.root_folder = fileparts(mfilename('fullpath'));
@@ -118,6 +120,7 @@ classdef ModelConfig
                     error('ModelConfig type is not defined');
             end
             
+            % DARWIN check that we can just use the unix style.
             if(isunix)                
                 c.bodyPropertiesFilename = strrep(c.bodyPropertiesFilename, '\', '/');
                 c.cablesPropertiesFilename = strrep(c.cablesPropertiesFilename, '\', '/');
@@ -136,20 +139,24 @@ classdef ModelConfig
             c.opXmlObj  =    XmlOperations.XmlReadRemoveIndents(c.opFilename);
         end
         
+        % Gets the body properties xml object
         function v = getBodiesPropertiesXmlObj(obj)
             v = obj.bodiesXmlObj.getDocumentElement;
         end
         
+        % Gets the cable set properties xml object
         function v = getCableSetXmlObj(obj, id)
             v = obj.cablesXmlObj.getElementById(id);
             assert(~isempty(v), sprintf('Id ''%s'' does not exist in the cables XML file', id));
         end
         
+        % Get the trajectory xml object
         function v = getTrajectoryXmlObj(obj, id)
             v = obj.trajectoriesXmlObj.getElementById(id);
             assert(~isempty(v), sprintf('Id ''%s'' does not exist in the trajectories XML file', id));
         end
         
+        % Get the operational space xml object
         function v = getOPXmlObj(obj, id)
             v = obj.opXmlObj.getElementById(id);
             assert(~isempty(v), sprintf('Id ''%s'' does not exist in the operation XML file', id));

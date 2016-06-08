@@ -1,3 +1,7 @@
+% The optitoolbox implementation of quadratic programming solvers
+% Author        : Jonathan EDEN
+% Created       : 2016
+% Description   : Optitoolbox implementation of QP solvers.
 function [x_opt, exit_type] = id_qp_opti(A, b, A_ineq, b_ineq, A_eq, b_eq, xmin, xmax, x0,options)
     [x_opt, ~, exitflag] = opti_quadprog(A, b, A_ineq, b_ineq, A_eq, b_eq, xmin, xmax, x0, options);
     switch exitflag

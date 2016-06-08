@@ -13,6 +13,7 @@ classdef IDObjectiveLinear < IDObjective
     end
     
     methods
+        % Implementation of the evaluation function for the 1 norm.
         function [f, grad_f] = evaluateFunction(obj, x)
             f = obj.b.'*x + obj.c;
             grad_f = obj.b;

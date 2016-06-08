@@ -15,6 +15,7 @@ classdef IDSolverLinProg < IDSolverBase
         options
     end
     methods
+        % The constructor for this class
         function id = IDSolverLinProg(model,objective, lp_solver_type)
             id@IDSolverBase(model);
             id.objective = objective;
@@ -22,6 +23,7 @@ classdef IDSolverLinProg < IDSolverBase
             id.options = [];
         end
         
+        % The implementation of the resolveFunction
         function [cable_forces,Q_opt, id_exit_type] = resolveFunction(obj, dynamics)            
             % Form the linear EoM constraint
             % M\ddot{q} + C + G + F_{ext} = -J^T f (constraint)
@@ -70,6 +72,7 @@ classdef IDSolverLinProg < IDSolverBase
             obj.f_previous = cable_forces;
         end
         
+        % A function with which to add new constraints.
         function addConstraint(obj, linConstraint)
             obj.constraints{length(obj.constraints)+1} = linConstraint;
         end

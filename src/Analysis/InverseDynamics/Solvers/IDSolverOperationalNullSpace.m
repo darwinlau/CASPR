@@ -23,6 +23,7 @@ classdef IDSolverOperationalNullSpace < IDSolverBase
         f0_previous = []
     end
     methods
+        % A constructor for the class.
         function id = IDSolverOperationalNullSpace(model,objective, qp_solver_type, W0)
             id@IDSolverBase(model);
             id.objective = objective;
@@ -32,6 +33,7 @@ classdef IDSolverOperationalNullSpace < IDSolverBase
             id.options = [];
         end
         
+        % The implementation of the resolveFunction
         function [cable_forces,Q_opt, id_exit_type] = resolveFunction(obj, dynamics)            
             % Form the linear EoM constraint
             % M\ddot{q} + C + G + F_{ext} = -J^T f (constraint)

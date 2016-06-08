@@ -1,3 +1,11 @@
+% Static equilibrium acceleration capability measure implementation for
+% evaluating static workspace.
+%
+% Paper in review
+% Author         : Jonathan EDEN
+% Created        : 2016
+% Description    : Implementation of static workspace analysis using the
+% SEACM metric
 function inWorkspace = static_capability_measure(dynamics,options)
     if(static_quadprog(dynamics,options) == 1)
         m = SEACM();

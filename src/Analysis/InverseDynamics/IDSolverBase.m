@@ -7,19 +7,21 @@
 % is the "resolveFunction" function
 classdef IDSolverBase < handle
     properties
-        model
+        model           % The model of the system
     end
     
     properties (SetAccess = protected, GetAccess = protected)
-        f_previous = []
-        active_set = []
+        f_previous = [] % The previous instance of cable forces
+        active_set = [] % The previous active set for optimisation based methods
     end
     
     methods 
+        % The constructor for the class.
         function id = IDSolverBase(dyn_model)
             id.model = dyn_model;
         end
         
+        % Resolves the system kinematics into the next set of cable forces.
         function [cable_forces, Q_opt, id_exit_type, comp_time, model] = resolve(obj, q, q_d, q_dd, w_ext)
             obj.model.update(q, q_d, q_dd, w_ext);
             start_tic = tic;
@@ -31,10 +33,13 @@ classdef IDSolverBase < handle
     end
     
     methods (Abstract)
+        % The abstract resolution function to be implemented by concrete
+        % implementations of this base class.
         [cable_forces,Q_opt, id_exit_type] = resolveFunction(obj, dynamics);
     end
     
     methods (Static)
+        % The equation of motion constraints in linear terms.
         function [A, b] = GetEoMConstraints(dynamics)
             A = -dynamics.L';
             b = dynamics.M*dynamics.q_ddot + dynamics.C + dynamics.G + dynamics.W_e; 

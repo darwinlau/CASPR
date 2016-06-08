@@ -3,17 +3,14 @@
 %
 % Author        : Jonathan EDEN
 % Created       : 2015
-% Description    : 
+% Description    : Class for evalaution of WFC.
 classdef WrenchFeasible < WorkspaceConditionBase
-    %IDFUNCTION Summary of this class goes here
-    %   Detailed explanation goes here
-    
     properties (SetAccess = protected, GetAccess = protected)
         desired_wrench_set
     end
     
     methods
-        %% Constructor for wrench closure workspace
+        % Constructor for wrench closure workspace
         function w = WrenchFeasible(method,desired_wrench_set)
             if(nargin>1)
                 if(strcmp(method,'capacity_margin'))
@@ -30,13 +27,14 @@ classdef WrenchFeasible < WorkspaceConditionBase
             
         end
         
-        %% Evaluate the wrench closure condition return true if satisfied 
+        % Evaluate the wrench closure condition return true if satisfied 
         function inWorkspace = evaluateFunction(obj,dynamics)
            if(obj.method == WrenchFeasibleMethods.CM)
                inWorkspace = wrench_feasible_capacity_margin(obj.desired_wrench_set,dynamics);
            end
         end
         
+        % Implementation of the connected function
         function [isConnected] = connected(obj,workspace,i,j,grid)
             % Connectiveness is evaluated using grid connectivity.
             % THIS FILE MAY NEED A DYNAMICS OBJECT ADDED AT A LATER DATE

@@ -12,6 +12,7 @@ classdef IDObjectiveInfinity < IDObjective
     end
     
     methods
+        % Implementation of the evaluate function for infinite norms.
         function [f, grad_f] = evaluateFunction(obj, x)
             f = min(obj.A*(x + obj.b));
             % Gradient not well defined for this case

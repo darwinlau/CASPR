@@ -11,19 +11,22 @@
 classdef FKAnalysisBase < handle
     
     properties
-        model;
+        model;      % The model of the system
     end
     
     properties (SetAccess = protected, GetAccess = protected)
-        q_previous = []
-        l_previous = []
+        q_previous = []     % The previous joint positions
+        l_previous = []     % The previous cable lengths
     end
     
     methods
+        % Constructor for forward kinematics objects
         function fk = FKAnalysisBase(kin_model)
             fk.model = kin_model;
         end
         
+        % Computes the joint position information given the cable
+        % information.
         function [q, q_dot, comp_time] = compute(obj, len, len_prev_2, q_prev, q_d_prev, delta_t)
             start_tic = tic;
             [q, q_dot] = obj.computeFunction(len, len_prev_2, q_prev, q_d_prev, delta_t);
@@ -32,10 +35,12 @@ classdef FKAnalysisBase < handle
     end
     
     methods (Abstract)
+        % An abstract function for computation.
         [q,q_dot] = computeFunction(obj, len, len_prev_2, q_prev, q_d_prev, delta_t);
     end
         
     methods (Static)
+        % Computation of the length error as a 1 norm.
         function [errorVector, jacobian] = ComputeLengthErrorVector(q, l, model)
             model.update(q, zeros(model.numDofs,1), zeros(model.numDofs,1),zeros(model.numDofs,1));
             errorVector = l - model.cableLengths;

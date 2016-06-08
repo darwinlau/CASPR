@@ -15,6 +15,7 @@ classdef IDObjectiveQuadratic < IDObjective
     end
     
     methods
+        % Implementatino of the evaluation function for the 2 norm.
         function [f, grad_f] = evaluateFunction(obj, x)
             f = (1/2) * x.' * obj.A * x + obj.b.' * x + obj.c;
             grad_f = (1/2) * (obj.A' + obj.A) * x + obj.b;

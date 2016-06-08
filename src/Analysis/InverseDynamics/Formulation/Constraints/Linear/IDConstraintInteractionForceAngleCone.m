@@ -5,7 +5,7 @@
 % Please cite the following paper when using this:
 % D. Lau, D. Oetomo, and S. K. Halgamuge, "Inverse Dynamics of Multilink
 % Cable-Driven Manipulators With the Consideration of Joint Interaction 
-% Forces and Moments," IEEE Trans. Robot., vol. 31, no. 2, pp. 479–488, 2015.
+% Forces and Moments," IEEE Trans. Robot., vol. 31, no. 2, pp. 479ï¿½488, 2015.
 % 
 % Author        : Darwin LAU
 % Created       : 2016
@@ -16,21 +16,23 @@
 % of sides for the approximated linear cone must also be specified.
 classdef IDConstraintInteractionForceAngleCone < IDConstraintLinear
     properties (SetAccess = private)
-        jointNum
-        F_centre
-        c_angle
-        numSides
+        jointNum % The number of joints that the constraints act on 
+        F_centre % The central force
+        c_angle  % The constrained angle
+        numSides % The number of sides for the linear cone
     end
     
     properties (Access = private)
-        vertices
-        plane_coeff
-        constraintPoints
+        vertices            % The number of vertices
+        plane_coeff 
+        constraintPoints    % The number of points that are constrained
         % A_F * interaction_F <= 0
         A_F
     end
     
     methods
+        % The constraint constructor. Take in the number of joints, central
+        % forces, constraint angle and number of sides.
         function con =  IDConstraintInteractionForceAngleCone(jointNum, F_centre, c_angle, numSides)
             con.jointNum = jointNum;
             con.F_centre = F_centre;
@@ -40,6 +42,7 @@ classdef IDConstraintInteractionForceAngleCone < IDConstraintLinear
             con.computeConstraintPoints();
         end
                        
+        % Updates the constraints to match the dynamics.
         function updateConstraint(obj, dynamics)
             % F = a + R' * f
             a = dynamics.P'*(dynamics.bodyDynamics.M_b*dynamics.q_ddot + dynamics.bodyDynamics.C_b - dynamics.bodyDynamics.G_b);
@@ -50,6 +53,7 @@ classdef IDConstraintInteractionForceAngleCone < IDConstraintLinear
             obj.b = -obj.A_F * a(6*obj.jointNum-5:6*obj.jointNum-3);
         end
         
+        % Compute the constaint points.
         function computeConstraintPoints(obj)
             assert(norm(obj.F_centre) ~= 0, 'The F_centre vector cannot equal to zero');
             obj.vertices = cell(1, obj.numSides+1);

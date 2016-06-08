@@ -6,11 +6,12 @@
 % where x is the variable, A is the LHS linear matrix and b is the RHS vector
 classdef IDConstraintLinear < IDConstraint
     properties
-        A
+        A 
         b
     end
     
     methods
+        % The implementation of constraint verification.
         function satisfied = verifyConstraint(obj, x)
             satisfied = all(obj.A * x <= obj.b);
         end

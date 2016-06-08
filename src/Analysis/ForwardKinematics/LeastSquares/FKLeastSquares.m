@@ -14,12 +14,14 @@ classdef FKLeastSquares < FKAnalysisBase
     end
     
     methods
+        % The constructor for least squares forward kinematics.
         function fkls = FKLeastSquares(kin_model, approxType, qDotType)
             fkls@FKAnalysisBase(kin_model);
             fkls.approxMethod = approxType;
             fkls.qDotMethod = qDotType;            
         end
         
+        % The implementatin of the abstract compute function.
         function [q, q_dot] = computeFunction(obj, len, len_prev_2, q_prev, q_d_prev, delta_t)
             % Step 1: Compute the approximation of q for the optimiser
             switch obj.approxMethod

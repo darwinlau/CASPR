@@ -10,6 +10,7 @@ classdef IDObjectiveMinQuadCableForce < IDObjectiveQuadratic
     end
     
     methods
+        % The constructor function for minimising the cable forces
         function o = IDObjectiveMinQuadCableForce(weights)
             o.weights = weights;
             % This is because the general form is
@@ -19,9 +20,11 @@ classdef IDObjectiveMinQuadCableForce < IDObjectiveQuadratic
             o.c = 0;
         end
         
+        % The objective update implementation
         function updateObjective(~, ~)
         end
         
+        % An update of the weights
         function updateWeights(obj, weights)
             obj.weights = weights;
             obj.A = 2*diag(weights);

@@ -1,14 +1,18 @@
+% An algorithm to compute the centroid point.
+%
+% Please cite the following paper when using this algorithm:
+% M. Gouttefarde, J. Lamaury, C. Reichert and T. Bruckmann, "A Versatile
+% Tension Distribution Algorithm for n-DOF Parallel Robots Driven by n+2
+% Cables", IEEE Trans. Robot., vol. 31, no. 6, pp. 1444-1457, 2015.
+%
+% Author        : Jihong ZHU
+% Created       : 2016
+% Description   : This is an implementation of the centroid feasilibity
+% polygon algorithm presented in Section 3 of the cited paper.
+% Required function:
+% Cal_ni: calculate the prependicular vector
+% Cal_alpha: calculate alpha
 function [ x_opt, exit_type] = id_fp_centroid(A_eq, b_eq, xmin, xmax)
-    % A basic algorithm to demonstrate alg. presented in Section 3 in Paper:
-    % A Versatile Tension Distribution Algorithm for n-DOF Parallel Robots
-    % Driven by n + 2 Cables
-    %--------------------------------------------------------------------------
-    % Jihong Zhu
-    % 2016/01/21
-    % Required function:
-    % Cal_ni: calculate the prependicular vector
-    % Cal_alpha: calculate alpha
-    %--------------------------------------------------------------------------
     delta = 1e-8;   % Use of delta to aviod numerical error
     m = size(A_eq,1);
     n = size(A_eq,2);

@@ -12,6 +12,7 @@ classdef IDObjectiveQuadOptimallySafe < IDObjectiveQuadratic
     end
     
     methods
+        % The constructor function for minimising the optimally safe 2 norm
         function o = IDObjectiveQuadOptimallySafe(weights)
             o.weights = weights;
             % This is because the general form is
@@ -21,11 +22,13 @@ classdef IDObjectiveQuadOptimallySafe < IDObjectiveQuadratic
             o.c = 0;
         end
         
+        % The objective update implementation
         function updateObjective(obj, dynamics)
             f_m     =   0.5*(dynamics.cableDynamics.forcesMin + dynamics.cableDynamics.forcesMax);
             obj.b   =   -2*diag(obj.weights)*f_m;
         end
         
+        % An update of the weights
         function updateWeights(obj, weights)
             obj.weights = weights;
             obj.A = 2*diag(weights);

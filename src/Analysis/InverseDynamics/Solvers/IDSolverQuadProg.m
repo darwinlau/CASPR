@@ -15,6 +15,7 @@ classdef IDSolverQuadProg < IDSolverBase
         options
     end
     methods
+        % The contructor for the class.
         function id = IDSolverQuadProg(model, objective, qp_solver_type)
             id@IDSolverBase(model);
             id.objective = objective;
@@ -23,6 +24,7 @@ classdef IDSolverQuadProg < IDSolverBase
             id.options = [];
         end
         
+        % The implementation of the resolve function.
         function [cable_forces, Q_opt, id_exit_type] = resolveFunction(obj, dynamics)            
             % Form the linear EoM constraint
             % M\ddot{q} + C + G + F_{ext} = -J^T f (constraint)

@@ -1,7 +1,7 @@
 % Basic Inverse Dynamics solver for infinite norm problems.
 % This is a well-studied form of inverse dynamics solver for CDPRs.
 %
-% Author        : Darwin LAU
+% Author        : Jonathan EDEN
 % Created       : 2015
 % Description   : Only a linear objective function and linear 
 % constraints can be used with this solver. There are multiple types of LP
@@ -15,6 +15,7 @@ classdef IDSolverMinInfNorm < IDSolverBase
         options
     end
     methods
+        % The constructor for the class.
         function id = IDSolverMinInfNorm(model, objective, lp_solver_type)
             id@IDSolverBase(model);
             id.objective = objective;
@@ -22,6 +23,7 @@ classdef IDSolverMinInfNorm < IDSolverBase
             id.options = [];
         end
         
+        % The implementation for the resolveFunction
         function [cable_forces,Q_opt, id_exit_type] = resolveFunction(obj, dynamics)            
             % Form the linear EoM constraint
             % M\ddot{q} + C + G + F_{ext} = -J^T f (constraint)
@@ -87,6 +89,7 @@ classdef IDSolverMinInfNorm < IDSolverBase
             obj.f_previous = cable_forces;
         end
         
+        % A function with which to add additional constraaints
         function addConstraint(obj, linConstraint)
             obj.constraints{length(obj.constraints)+1} = linConstraint;
         end

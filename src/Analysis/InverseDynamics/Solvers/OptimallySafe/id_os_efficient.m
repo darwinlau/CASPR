@@ -1,3 +1,8 @@
+% The MATLAB implementation of the optimally safe solvers with warm start
+% Author        : Jonathan EDEN
+% Created       : 2016
+% Description   : MATLAB implementation of optimally safe solvers with warm
+% starting
 function [ x_opt, exit_type, x_prev_new, active_set_new] = id_os_efficient(A_eq, b_eq, xmin, xmax,alpha,x_prev,active_set)
     % Find the optimally safe cable tension by solving a linear progrm
     m = length(xmin); n = size(A_eq,1); r = m-n;

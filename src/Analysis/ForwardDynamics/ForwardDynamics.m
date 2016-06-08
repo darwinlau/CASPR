@@ -10,14 +10,17 @@
 classdef ForwardDynamics < handle
     
     properties
-        solverType
+        solverType          % The type of forward dynamics solver
     end
     
     methods
+        % A constructor for forward dynamics objects
         function fd = ForwardDynamics(solver_type)
             fd.solverType = solver_type;
         end
         
+        % Compute the forward dynamics given a set of desired joint space
+        % positions and cable forces.
         function [q, q_dot, q_ddot, dynamics] = compute(obj, qp, qp_d, cable_forces, w_ext, dt, model)
             n_vars = model.numDofVars;
             n_dofs = model.numDofs;
@@ -59,7 +62,8 @@ classdef ForwardDynamics < handle
         end        
     end
     
-    methods (Static, Access = private)        
+    methods (Static, Access = private)
+        % The equation of motion for integration purposes.
         function y_dot = eom(~, y, model, f, w_ext)
             n_vars = model.numDofVars;
             n_dofs = model.numDofs;

@@ -1,3 +1,8 @@
+% Quadratic programming implementation of wrench closure condition
+% Author         : Jonathan EDEN
+% Created        : 2016
+% Description    : Implementation of wrench closure condition using the
+% quadratic programming
 function inWorkspace = wrench_closure_quadprog(dynamics,options)
     % Determine necessary variables for test
     L       =   dynamics.L; % Cable Jacobian
