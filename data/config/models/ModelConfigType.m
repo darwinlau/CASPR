@@ -8,18 +8,23 @@
 %    to the library. 
 classdef ModelConfigType
     enumeration 
-        M_SIMPLE_PLANAR_XY
+        % Planar manipulators
         M_2DOF_VSD
-        M_SIMPLE_SPHERICAL
-        M_SIMPLE_SPATIAL
-        M_NECK_8S
-        M_2R_PLANAR_XZ
-        M_ACROBOT
-        M_IPANEMA_2
-        M_MYOROB_SHOULDER
-        M_NIST_ROBOCRANE
-		M_COGIRO
-        M_CAREX
         M_KNTU_PLANAR
+        M_SIMPLE_PLANAR_XY
+        % Spatial manipulators
+        M_ACROBOT
+		M_COGIRO
+        M_IPANEMA_2
+        M_NIST_ROBOCRANE
+        M_SEGESTA
+        M_SIMPLE_SPATIAL
+        % Spherical manipulators
+        M_MYOROB_SHOULDER
+        M_SIMPLE_SPHERICAL
+        % MCDMs
+        M_2R_PLANAR_XZ
+        M_NECK_8S
+        M_CAREX
     end
 end

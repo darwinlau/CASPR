@@ -42,6 +42,14 @@ classdef XmlOperations
             end
         end
         
+        function r = StringToVectorN(string)
+            array = regexp(string,' ', 'split');
+            r = size(length(array), 1);
+            for i = 1:length(array)
+                r(i,1) = str2double(array(i));
+            end
+        end
+        
         function r = StringToVector(string)
             array = regexp(string, ' ', 'split');
             r = size(length(array), 1);
