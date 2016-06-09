@@ -1,0 +1,17 @@
+Dependency Installation:
+In addition to the core code base, some analysis techniques within CASPR require the use of additional software dependencies. These dependencies include
+* 'qhull' - This is a convex hull library that is used throughout the *Workspace* analysis module.
+* 'optitoolbox' - This is a MATLAB optimisation toolbox. The toolbox is used within the *Inverse Dynamics* and *Design Optimisation* modules.
+
+Further information for setting up each of these toolboxes is contained below
+
+qhull installation:
+1. Go to the qhull website <http://www.qhull.org/download/> and download the latest version of qhull that is appropriate for your operating system.
+2. Follow the installation instructions provided for your operating system in the file *README.txt*
+3. To allow for CASPR to access the compiled qhull code, move the compiled versionof the code to the subdirectory *dependencies* that is located in your *CASPR* root directory.
+
+optitoolbox installation
+1. Go to the optitoolbox website <http://www.i2c2.aut.ac.nz/Wiki/OPTI/index.php/DL/DownloadOPTI> and download the latest version of the toolbox.
+2. Extract the downloaded folder (preferably into the *dependencies* subdirectory).
+3. Open MATLAB into the directory of the extracted folder.
+4. Run opti_Install to finalise the installation.

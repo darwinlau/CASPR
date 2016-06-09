@@ -158,6 +158,8 @@ classdef ModelConfig
             assert(~isempty(v), sprintf('Id ''%s'' does not exist in the operation XML file', id));
         end
         
+        % Gets the system model given the cable_set_id and trajectory
+        % information
         function [sysModel, traj] = getModel(obj, cable_set_id, trajectory_id, operational_space_id)
             bodies_xmlobj = obj.getBodiesPropertiesXmlObj();
             cableset_xmlobj = obj.getCableSetXmlObj(cable_set_id);
