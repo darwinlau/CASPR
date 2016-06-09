@@ -2,158 +2,157 @@
 <!DOCTYPE cables [
 <!ATTLIST cable_set id ID #REQUIRED>
 ]>
-
-<cables>
-    <cable_set id="basic_linear">
-        <cable_linear_spring name="cable 1" attachment_reference="com">
-            <properties>
-                <K>13000</K>
-                <force_min>3</force_min>
-                <force_max>80</force_max>
-            </properties>
-            <attachments>
-                <attachment>
-                    <link>0</link>
-                    <location>0.0 0.0 0.0</location>
-                </attachment>
-                <attachment>
-                    <link>1</link>
-                    <location>0 0 0</location>
-                </attachment>
-            </attachments>
-        </cable_linear_spring>
-        <cable_linear_spring name="cable 2" attachment_reference="com">
-            <properties>
-                <K>13000</K>
-                <force_min>3</force_min>
-                <force_max>80</force_max>
-            </properties>
-            <attachments>
-                <attachment>
-                    <link>0</link>
-                    <location>0.47 0.0 0.0</location>
-                </attachment>
-                <attachment>
-                    <link>1</link>
-                    <location>0 0 0</location>
-                </attachment>
-            </attachments>
-        </cable_linear_spring>
-        <cable_linear_spring name="cable 3" attachment_reference="com">
-            <properties>
-                <K>13000</K>
-                <force_min>3</force_min>
-                <force_max>80</force_max>
-            </properties>
-            <attachments>
-                <attachment>
-                    <link>0</link>
-                    <location>0.47 0.75 0.0</location>
-                </attachment>
-                <attachment>
-                    <link>1</link>
-                    <location>0 0 0</location>
-                </attachment>
-            </attachments>
-        </cable_linear_spring>
-        <cable_linear_spring name="cable 4" attachment_reference="com">
-            <properties>
-                <K>13000</K>
-                <force_min>3</force_min>
-                <force_max>80</force_max>
-            </properties>
-            <attachments>
-                <attachment>
-                    <link>0</link>
-                    <location>0 0.75 0.0</location>
-                </attachment>
-                <attachment>
-                    <link>1</link>
-                    <location>0.0 0.0 0</location>
-                </attachment>
-            </attachments>
-        </cable_linear_spring>
-    </cable_set>
-    <cable_set id="basic_vsd">
-        <cable_vsd_torsion_spring name="cable 1" attachment_reference="com">
-            <properties>
-                <K_cable>13000</K_cable>
-                <num_torsion_springs>4</num_torsion_springs>
-                <torsion_spring_stiffness>0.00435</torsion_spring_stiffness>
-                <torsion_spring_length>0.01</torsion_spring_length>        
-                <force_min>3</force_min>
-                <force_max>80</force_max>
-            </properties>
-            <attachments>
-                <attachment>
-                    <link>0</link>
-                    <location>0.0 0.0 0.0</location>
-                </attachment>
-                <attachment>
-                    <link>1</link>
-                    <location>0 0 0</location>
-                </attachment>
-            </attachments>
-        </cable_vsd_torsion_spring>
-        <cable_vsd_torsion_spring name="cable 2" attachment_reference="com">
-            <properties>
-                <K_cable>13000</K_cable>
-                <num_torsion_springs>4</num_torsion_springs>
-                <torsion_spring_stiffness>0.00435</torsion_spring_stiffness>
-                <torsion_spring_length>0.01</torsion_spring_length>        
-                <force_min>3</force_min>
-                <force_max>80</force_max>
-            </properties>
-            <attachments>
-                <attachment>
-                    <link>0</link>
-                    <location>0.47 0.0 0.0</location>
-                </attachment>
-                <attachment>
-                    <link>1</link>
-                    <location>0 0 0</location>
-                </attachment>
-            </attachments>
-        </cable_vsd_torsion_spring>
-        <cable_vsd_torsion_spring name="cable 3" attachment_reference="com">
-            <properties>
-                <K_cable>13000</K_cable>
-                <num_torsion_springs>4</num_torsion_springs>
-                <torsion_spring_stiffness>0.00435</torsion_spring_stiffness>
-                <torsion_spring_length>0.01</torsion_spring_length>        
-                <force_min>3</force_min>
-                <force_max>80</force_max>
-            </properties>
-            <attachments>
-                <attachment>
-                    <link>0</link>
-                    <location>0.47 0.75 0.0</location>
-                </attachment>
-                <attachment>
-                    <link>1</link>
-                    <location>0 0 0</location>
-                </attachment>
-            </attachments>
-        </cable_vsd_torsion_spring>
-        <cable_vsd_torsion_spring name="cable 4" attachment_reference="com">
-            <properties>
-                <K_cable>13000</K_cable>
-                <num_torsion_springs>4</num_torsion_springs>
-                <torsion_spring_stiffness>0.00435</torsion_spring_stiffness>
-                <torsion_spring_length>0.01</torsion_spring_length>        
-                <force_min>3</force_min>
-                <force_max>80</force_max>
-            </properties>
-            <attachments>
-                <attachment>
-                    <link>0</link>
-                    <location>0 0.75 0.0</location>
-                </attachment>
-                <attachment>
-                    <link>1</link>
-                    <location>0.0 0.0 0</location>
-                </attachment>
-            </attachments>
-        </cable_vsd_torsion_spring>
-    </cable_set>
+<cables default_cable_set="basic_vsd">
+  <cable_set id="basic_vsd">
+    <cable_vsd_torsion_spring name="cable 1" attachment_reference="com">
+      <properties>
+        <K_cable>13000</K_cable>
+        <num_torsion_springs>4</num_torsion_springs>
+        <torsion_spring_stiffness>0.00435</torsion_spring_stiffness>
+        <torsion_spring_length>0.01</torsion_spring_length>        
+        <force_min>3</force_min>
+        <force_max>80</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.0 0.0 0.0</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0 0 0</location>
+        </attachment>
+      </attachments>
+    </cable_vsd_torsion_spring>
+    <cable_vsd_torsion_spring name="cable 2" attachment_reference="com">
+      <properties>
+        <K_cable>13000</K_cable>
+        <num_torsion_springs>4</num_torsion_springs>
+        <torsion_spring_stiffness>0.00435</torsion_spring_stiffness>
+        <torsion_spring_length>0.01</torsion_spring_length>        
+        <force_min>3</force_min>
+        <force_max>80</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.47 0.0 0.0</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0 0 0</location>
+        </attachment>
+      </attachments>
+    </cable_vsd_torsion_spring>
+    <cable_vsd_torsion_spring name="cable 3" attachment_reference="com">
+      <properties>
+        <K_cable>13000</K_cable>
+        <num_torsion_springs>4</num_torsion_springs>
+        <torsion_spring_stiffness>0.00435</torsion_spring_stiffness>
+        <torsion_spring_length>0.01</torsion_spring_length>        
+        <force_min>3</force_min>
+        <force_max>80</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.47 0.75 0.0</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0 0 0</location>
+        </attachment>
+      </attachments>
+    </cable_vsd_torsion_spring>
+    <cable_vsd_torsion_spring name="cable 4" attachment_reference="com">
+      <properties>
+        <K_cable>13000</K_cable>
+        <num_torsion_springs>4</num_torsion_springs>
+        <torsion_spring_stiffness>0.00435</torsion_spring_stiffness>
+        <torsion_spring_length>0.01</torsion_spring_length>        
+        <force_min>3</force_min>
+        <force_max>80</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 0.75 0.0</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0.0 0.0 0</location>
+        </attachment>
+      </attachments>
+    </cable_vsd_torsion_spring>
+  </cable_set>
+  <cable_set id="basic_linear">
+    <cable_linear_spring name="cable 1" attachment_reference="com">
+      <properties>
+        <K>13000</K>
+        <force_min>3</force_min>
+        <force_max>80</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.0 0.0 0.0</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0 0 0</location>
+        </attachment>
+      </attachments>
+    </cable_linear_spring>
+    <cable_linear_spring name="cable 2" attachment_reference="com">
+      <properties>
+        <K>13000</K>
+        <force_min>3</force_min>
+        <force_max>80</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.47 0.0 0.0</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0 0 0</location>
+        </attachment>
+      </attachments>
+    </cable_linear_spring>
+    <cable_linear_spring name="cable 3" attachment_reference="com">
+      <properties>
+        <K>13000</K>
+        <force_min>3</force_min>
+        <force_max>80</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.47 0.75 0.0</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0 0 0</location>
+        </attachment>
+      </attachments>
+    </cable_linear_spring>
+    <cable_linear_spring name="cable 4" attachment_reference="com">
+      <properties>
+        <K>13000</K>
+        <force_min>3</force_min>
+        <force_max>80</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 0.75 0.0</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0.0 0.0 0</location>
+        </attachment>
+      </attachments>
+    </cable_linear_spring>
+  </cable_set>
 </cables>

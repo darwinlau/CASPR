@@ -3,8 +3,8 @@
   <!ATTLIST cable_set id ID #REQUIRED>
 ]>
 
-<cables>
-  <cable_set id="default">
+<cables default_cable_set="original">
+  <cable_set id="original">
     <cable_ideal name="cable 1" attachment_reference="joint">
       <properties>
         <force_min>0.0</force_min>

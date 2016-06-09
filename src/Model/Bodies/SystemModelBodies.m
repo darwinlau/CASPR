@@ -93,9 +93,6 @@ classdef SystemModelBodies < handle
 
         % Flags
         is_symbolic                  % A flag to indicate whether the current pose is symbolic or a double
-        
-        % Others
-        displayRange                % Display range for plotting data
     end
 
     properties (Dependent)
@@ -1041,8 +1038,6 @@ classdef SystemModelBodies < handle
 
             % Create the actual object to return
             b = SystemModelBodies(links);
-            
-            b.displayRange = XmlOperations.StringToVectorN(char(body_prop_xmlobj.getElementsByTagName('display_range').item(0).getFirstChild.getData));
         end
     end
 end

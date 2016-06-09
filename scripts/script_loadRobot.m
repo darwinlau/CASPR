@@ -9,13 +9,11 @@ clear; clc; close all;
 
 % Set up the type of model:
 model_config = ModelConfig(ModelConfigType.M_SEGESTA);
-cable_set_id = 'default';
 
 % The XML objects from the model config are created
 bodies_xmlobj = model_config.getBodiesPropertiesXmlObj();
-cableset_xmlobj = model_config.getCableSetXmlObj(cable_set_id);
+cableset_xmlobj = model_config.getCableSetXmlObj(model_config.defaultCableSetId);
 
 % Load the SystemKinematics object from the XML
 cdpr = SystemModel.LoadXmlObj(bodies_xmlobj, cableset_xmlobj);
-
-MotionSimulator.PlotFrame(cdpr, cdpr.bodyModel.displayRange);
+MotionSimulator.PlotFrame(cdpr, model_config.displayRange);

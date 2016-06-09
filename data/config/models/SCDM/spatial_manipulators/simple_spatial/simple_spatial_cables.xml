@@ -3,7 +3,7 @@
   <!ATTLIST cable_set id ID #REQUIRED>
 ]>
 
-<cables>
+<cables default_cable_set="basic_7_cables">
   <cable_set id="basic_7_cables">
     <cable_ideal name="cable 1" attachment_reference="com">
       <properties>

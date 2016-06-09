@@ -46,15 +46,6 @@ classdef XmlOperations
         end
         
         % Converts a string into an N dimensional vector.
-        function r = StringToVectorN(string)
-            array = regexp(string,' ', 'split');
-            r = size(length(array), 1);
-            for i = 1:length(array)
-                r(i,1) = str2double(array(i));
-            end
-        end
-        
-        % DARWIN is there a reason this function is repeated.
         function r = StringToVector(string)
             array = regexp(string, ' ', 'split');
             r = size(length(array), 1);

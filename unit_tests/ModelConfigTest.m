@@ -29,15 +29,14 @@ classdef ModelConfigTest < matlab.unittest.TestCase
         end
         
         % Test that all models can be constructed as bodies.
-        function modelBodyCreation(testCase)
+        function modelCreation(testCase)
             disp('modelBodyCreation test');
             [mSet, mNames] = enumeration('ModelConfigType');
             for i = 1:length(mSet)
                 disp(['Testing ModelConfigType: ', mNames{i}]);
                 m = ModelConfig(mSet(i));
-                body_xmlobj = m.getBodiesPropertiesXmlObj();
-                bodyModel = SystemModelBodies.LoadXmlObj(body_xmlobj);
-                testCase.assertNotEmpty(bodyModel);
+                model = m.getModel(m.defaultCableSetId);
+                testCase.assertNotEmpty(model);
             end
         end
     end

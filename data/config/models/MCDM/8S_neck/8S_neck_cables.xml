@@ -3,7 +3,7 @@
   <!ATTLIST cable_set id ID #REQUIRED>
 ]>
 
-<cables>
+<cables default_cable_set="opensim_vasavada">
   <cable_set id="opensim_vasavada">
     <cable_ideal name="cleid-mast (right)" attachment_reference="com">
       <properties>

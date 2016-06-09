@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<links>
+<links display_range="-1.0 1.0 -1.0 1.0 -1.0 1.0">
   <link_rigid num="1" name="Upper Arm">
     <joint type="S_EULER_XYZ" />
     <physical>
@@ -40,5 +40,4 @@
       <location>0.0 0.0 -0.3</location>
     </parent>
   </link_rigid>
-  <display_range>-1.0 1.0 -1.0 1.0 -1.0 1.0</display_range>
 </links>

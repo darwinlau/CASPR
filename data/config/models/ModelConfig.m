@@ -9,7 +9,7 @@
 %    in order for it to be accessible.
 classdef ModelConfig   
     properties (SetAccess = private)
-        type                        % Type of joint from JointType enum
+        type                        % Type of model from ModelConfigType enum
         bodyPropertiesFilename      % Filename for the body properties
         cablesPropertiesFilename    % Filename for the cable properties
         trajectoriesFilename        % Filename for the trajectories
@@ -19,6 +19,9 @@ classdef ModelConfig
         cablesXmlObj                % The DOMNode object for cable props
         trajectoriesXmlObj          % The DOMNode for trajectory props
         opXmlObj                    % The DOMNode for operational space
+        
+        displayRange                % The axis range to display the robot
+        defaultCableSetId           % ID for the default cable set to display first
     end
     
     properties (Access = private)
@@ -31,6 +34,8 @@ classdef ModelConfig
         function c = ModelConfig(type)
             c.type = type;
             c.root_folder = fileparts(mfilename('fullpath'));
+            c.opFilename = '';
+            c.opXmlObj = [];
             
             switch type
                 % Planar SCDM manipulators
@@ -39,69 +44,58 @@ classdef ModelConfig
                     c.bodyPropertiesFilename = [c.root_folder, cdpr_folder, '2_Dof_VSD_bodies.xml'];
                     c.cablesPropertiesFilename = [c.root_folder, cdpr_folder, '2_Dof_VSD_cables.xml'];
                     c.trajectoriesFilename = [c.root_folder, cdpr_folder, '2_Dof_VSD_trajectories.xml'];
-                    c.opFilename = [c.root_folder, cdpr_folder, '2_Dof_VSD_op.xml'];
                 case ModelConfigType.M_KNTU_PLANAR
                     cdpr_folder = '/SCDM/planar_manipulators/KNTU_planar/';
                     c.bodyPropertiesFilename = [c.root_folder, cdpr_folder, 'KNTU_planar_xy_bodies.xml'];
                     c.cablesPropertiesFilename = [c.root_folder, cdpr_folder, 'KNTU_planar_xy_cables.xml'];
                     c.trajectoriesFilename = [c.root_folder, cdpr_folder, 'KNTU_planar_xy_trajectories.xml'];
-                    c.opFilename = [c.root_folder, cdpr_folder, 'KNTU_planar_xy_op.xml'];
                 case ModelConfigType.M_SIMPLE_PLANAR_XY
                     cdpr_folder = '/SCDM/planar_manipulators/simple_planar_xy/';
                     c.bodyPropertiesFilename = [c.root_folder, cdpr_folder, 'simple_planar_xy_bodies.xml'];
                     c.cablesPropertiesFilename = [c.root_folder, cdpr_folder, 'simple_planar_xy_cables.xml'];
                     c.trajectoriesFilename = [c.root_folder, cdpr_folder, 'simple_planar_xy_trajectories.xml'];
-                    c.opFilename = [c.root_folder, cdpr_folder, 'simple_planar_xy_op.xml'];
                 % Spatial SCDM manipulators
                 case ModelConfigType.M_ACROBOT
                     cdpr_folder = '/SCDM/spatial_manipulators/ACROBOT_IRTJV/';
                     c.bodyPropertiesFilename = [c.root_folder, cdpr_folder, 'ACROBOT_bodies.xml'];
                     c.cablesPropertiesFilename = [c.root_folder, cdpr_folder, 'ACROBOT_cables.xml'];
                     c.trajectoriesFilename = [c.root_folder, cdpr_folder, 'ACROBOT_trajectories.xml'];
-                    c.opFilename = [c.root_folder, cdpr_folder, 'ACROBOT_op.xml'];
 				case ModelConfigType.M_COGIRO
                     cdpr_folder = '/SCDM/spatial_manipulators/CoGiRo/';
                     c.bodyPropertiesFilename = [c.root_folder, cdpr_folder, 'CoGiRo_bodies.xml'];
                     c.cablesPropertiesFilename = [c.root_folder, cdpr_folder, 'CoGiRo_cables.xml'];
                     c.trajectoriesFilename = [c.root_folder, cdpr_folder, 'CoGiRo_trajectories.xml'];
-                    c.opFilename = [c.root_folder, cdpr_folder, 'CoGiRo_op.xml'];
                 case ModelConfigType.M_IPANEMA_2
                     cdpr_folder = '/SCDM/spatial_manipulators/IPAnema2_FraunhoferIPA/';
                     c.bodyPropertiesFilename = [c.root_folder, cdpr_folder, 'IPAnema2_bodies.xml'];
                     c.cablesPropertiesFilename = [c.root_folder, cdpr_folder, 'IPAnema2_cables.xml'];
                     c.trajectoriesFilename = [c.root_folder, cdpr_folder, 'IPAnema2_trajectories.xml'];
-                    c.opFilename = [c.root_folder, cdpr_folder, 'IPAnema2_op.xml'];
                 case ModelConfigType.M_NIST_ROBOCRANE
                     cdpr_folder = '/SCDM/spatial_manipulators/NIST_ROBOCRANE/';
                     c.bodyPropertiesFilename = [c.root_folder, cdpr_folder, 'NIST_bodies.xml'];
                     c.cablesPropertiesFilename = [c.root_folder, cdpr_folder, 'NIST_cables.xml'];
                     c.trajectoriesFilename = [c.root_folder, cdpr_folder, 'NIST_trajectories.xml'];
-                    c.opFilename = [c.root_folder, cdpr_folder, 'NIST_op.xml'];
                 case ModelConfigType.M_SEGESTA
                     cdpr_folder = '/SCDM/spatial_manipulators/SEGESTA/';
                     c.bodyPropertiesFilename = [c.root_folder, cdpr_folder, 'SEGESTA_bodies.xml'];
                     c.cablesPropertiesFilename = [c.root_folder, cdpr_folder, 'SEGESTA_cables.xml'];
                     c.trajectoriesFilename = [c.root_folder, cdpr_folder, 'SEGESTA_trajectories.xml'];
-                    c.opFilename = [c.root_folder, cdpr_folder, 'SEGESTA_op.xml'];
                 case ModelConfigType.M_SIMPLE_SPATIAL
                     cdpr_folder = '/SCDM/spatial_manipulators/simple_spatial/';
                     c.bodyPropertiesFilename = [c.root_folder, cdpr_folder, 'simple_spatial_bodies.xml'];
                     c.cablesPropertiesFilename = [c.root_folder, cdpr_folder, 'simple_spatial_cables.xml'];
                     c.trajectoriesFilename = [c.root_folder, cdpr_folder, 'simple_spatial_trajectories.xml'];
-                    c.opFilename = [c.root_folder, cdpr_folder, 'simple_spatial_op.xml'];
                 % Spherical SCDM manipulators
                 case ModelConfigType.M_MYOROB_SHOULDER
                     cdpr_folder = '/SCDM/spherical_manipulators/myorob_shoulder_TUM/';
                     c.bodyPropertiesFilename = [c.root_folder, cdpr_folder, 'myorob_shoulder_bodies.xml'];
                     c.cablesPropertiesFilename = [c.root_folder, cdpr_folder, 'myorob_shoulder_cables.xml'];
                     c.trajectoriesFilename = [c.root_folder, cdpr_folder, 'myorob_shoulder_trajectories.xml'];
-                    c.opFilename = [c.root_folder, cdpr_folder, 'myorob_shoulder_op.xml'];
                 case ModelConfigType.M_SIMPLE_SPHERICAL
                     cdpr_folder = '/SCDM/spherical_manipulators/simple_spherical/';
                     c.bodyPropertiesFilename = [c.root_folder, cdpr_folder, 'simple_spherical_bodies.xml'];
                     c.cablesPropertiesFilename = [c.root_folder, cdpr_folder, 'simple_spherical_cables.xml'];
                     c.trajectoriesFilename = [c.root_folder, cdpr_folder, 'simple_spherical_trajectories.xml'];
-                    c.opFilename = [c.root_folder, cdpr_folder, 'simple_spherical_op.xml'];
                 % Multi-link Cable Driven Manipulators (MCDM)
                 case ModelConfigType.M_2R_PLANAR_XZ
                     cdpr_folder = '/MCDM/2R_planar_xz/';
@@ -115,13 +109,11 @@ classdef ModelConfig
                     c.cablesPropertiesFilename = [c.root_folder, cdpr_folder, '8S_neck_cables.xml'];
                     %c.trajectoriesFilename = [c.root_folder, cdpr_folder, '8S_neck_trajectories.xml'];
                     c.trajectoriesFilename = [c.root_folder, cdpr_folder, '8S_neck_trajectories_eulerXYZ.xml'];
-                    c.opFilename = [c.root_folder, cdpr_folder, '8S_neck_op.xml'];
                 case ModelConfigType.M_CAREX
                     cdpr_folder = '/MCDM/CAREX/';
                     c.bodyPropertiesFilename = [c.root_folder, cdpr_folder, 'CAREX_bodies.xml'];
                     c.cablesPropertiesFilename = [c.root_folder, cdpr_folder, 'CAREX_cables.xml'];
                     c.trajectoriesFilename = [c.root_folder, cdpr_folder, 'CAREX_trajectories.xml'];
-                    c.opFilename = [c.root_folder, cdpr_folder, 'CAREX_op.xml'];
                 otherwise
                     error('ModelConfig type is not defined');
             end
@@ -129,12 +121,18 @@ classdef ModelConfig
             assert(exist(c.bodyPropertiesFilename, 'file') == 2, 'Body properties file does not exist.');
             assert(exist(c.cablesPropertiesFilename, 'file') == 2, 'Cable properties file does not exist.');
             assert(exist(c.trajectoriesFilename, 'file') == 2, 'Trajectories file does not exist.');
-            assert(exist(c.opFilename, 'file') == 2, 'Operational space coordinates file does not exist.');
             
             c.bodiesXmlObj =  XmlOperations.XmlReadRemoveIndents(c.bodyPropertiesFilename);
             c.cablesXmlObj =  XmlOperations.XmlReadRemoveIndents(c.cablesPropertiesFilename);
             c.trajectoriesXmlObj =  XmlOperations.XmlReadRemoveIndents(c.trajectoriesFilename);
-            c.opXmlObj  =    XmlOperations.XmlReadRemoveIndents(c.opFilename);
+            
+            if (~isempty(c.opFilename))
+                assert(exist(c.opFilename, 'file') == 2, 'Operational space properties file does not exist.');
+                XmlOperations.XmlReadRemoveIndents(c.opFilename);
+            end
+            
+            c.defaultCableSetId = char(c.cablesXmlObj.getDocumentElement.getAttribute('default_cable_set'));
+            c.displayRange = XmlOperations.StringToVector(char(c.bodiesXmlObj.getDocumentElement.getAttribute('display_range')));
         end
         
         % Gets the body properties xml object
@@ -158,6 +156,23 @@ classdef ModelConfig
         function v = getOPXmlObj(obj, id)
             v = obj.opXmlObj.getElementById(id);
             assert(~isempty(v), sprintf('Id ''%s'' does not exist in the operation XML file', id));
+        end
+        
+        function [sysModel, traj] = getModel(obj, cable_set_id, trajectory_id, operational_space_id)
+            bodies_xmlobj = obj.getBodiesPropertiesXmlObj();
+            cableset_xmlobj = obj.getCableSetXmlObj(cable_set_id);
+            sysModel = SystemModel.LoadXmlObj(bodies_xmlobj, cableset_xmlobj);
+            traj = [];
+            
+            if (nargin >= 3 && ~isempty(trajectory_id))
+                traj_xmlobj = obj.getTrajectoryXmlObj(trajectory_id);
+                traj = JointTrajectory.LoadXmlObj(traj_xmlobj, sysModel);
+            end
+            
+            if (nargin >= 4 && ~isempty(operational_space_id))
+                op_xmlobj = obj.getOPXmlObj(op_set_id);
+                sysModel.loadOpXmlObj(op_xmlobj);
+            end
         end
     end
 end
