@@ -9,7 +9,9 @@ classdef WorkspaceMetricBase < handle
     properties
     end
     
-    methods 
+    methods
+        % Evalute function returns a quantitative evaluation of a metric
+        % given dynamics information
         function [f, comp_time] = evaluate(obj,dynamics,options,method,inWorkspace)
             start_tic = tic;
             f = obj.evaluateFunction(dynamics,options,method,inWorkspace);

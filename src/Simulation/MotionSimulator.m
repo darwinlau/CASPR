@@ -26,6 +26,7 @@ classdef (Abstract) MotionSimulator < Simulator
     end
 
     methods
+        % The motion simulator constructor
         function ms = MotionSimulator(model)
             ms@Simulator(model);
         end

@@ -8,15 +8,13 @@
 %   of parallel robots) and only requires the "update" function of the
 %   SystemModel to be called.
 classdef InverseKinematicsSimulator < MotionSimulator
-    
-    properties (SetAccess = protected)       
-    end
-    
     methods
+        % Constructors
         function ik = InverseKinematicsSimulator(model)
             ik@MotionSimulator(model);
         end
         
+        % Implementation of the run function.
         function run(obj, trajectory)
             obj.trajectory = trajectory;
             

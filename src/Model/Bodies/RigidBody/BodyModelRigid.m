@@ -9,10 +9,12 @@
 classdef BodyModelRigid < BodyModel
 
     methods
+        % The constructor
         function bk = BodyModelRigid(id, name, jointType)
             bk@BodyModel(id, name, jointType);
         end
 
+        % Updates the joint space
         function update(obj, q, q_dot, q_ddot)
             % Can update states (such as local attachments) first if necessary
             % Since bodies and attachment locations do not change, no need to update anything here
@@ -25,6 +27,7 @@ classdef BodyModelRigid < BodyModel
     end
 
     methods (Static)
+        % Loads the xml object
         function [bk] = LoadXmlObj(xmlobj)
             % <link_rigid> tag
             id = str2double(char(xmlobj.getAttribute('num')));

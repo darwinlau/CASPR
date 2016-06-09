@@ -16,11 +16,13 @@ classdef InverseDynamicsSimulator < DynamicsSimulator
     end
 
     methods
+        % Constructor for the inverse dynamics simulator
         function id = InverseDynamicsSimulator(model, id_solver)
             id@DynamicsSimulator(model);
             id.IDSolver = id_solver;
         end
 
+        % Implementation of the run function
         function run(obj, trajectory)
             errorFlag = 0;
             

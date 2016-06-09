@@ -42,17 +42,22 @@ classdef SpatialQuaternion < Joint
     end
     
     methods
+        % Constructor for the class
         function j = SpatialQuaternion()
             j.translation = TranslationalXYZ;
             j.orientation = SphericalQuaternion;
         end
         
+        % Update the joint space information
         function update(obj, q, q_dot, q_ddot)
             obj.translation.update(SpatialQuaternion.GetTranslationQ(q), SpatialQuaternion.GetTranslationQd(q_dot), SpatialQuaternion.GetTranslationQd(q_ddot));
             obj.orientation.update(SpatialQuaternion.GetOrientationQ(q), SpatialQuaternion.GetOrientationQd(q_dot), SpatialQuaternion.GetOrientationQd(q_ddot));
             update@Joint(obj, q, q_dot, q_ddot);
         end
         
+        % -------
+        % Getters
+        % -------
         function value = get.x(obj)
             value = obj.translation.x;
         end
@@ -111,22 +116,27 @@ classdef SpatialQuaternion < Joint
             q_t_d = q_d(TranslationalXYZ.numDofs+1:SpatialQuaternion.numDofs);
         end
         
+        % Get the relative rotation matrix
         function R_pe = RelRotationMatrix(q)
             R_pe = SphericalQuaternion.RelRotationMatrix(SpatialQuaternion.GetOrientationQ(q));
         end
 
+        % Get the relative translation vector
         function r_rel = RelTranslationVector(q)
             r_rel = TranslationalXYZ.RelTranslationVector(SpatialQuaternion.GetTranslationQ(q));
         end
         
+        % Generate the S matrix
         function S = RelVelocityMatrix(q)
             S = [TranslationalXYZ.RelVelocityMatrix(SpatialQuaternion.GetTranslationQ(q)) SphericalQuaternion.RelVelocityMatrix(SpatialQuaternion.GetOrientationQ(q))];
         end
         
+        % Generate the S gradient tensor
         function S_grad = RelVelocityMatrixGradient(~)
             S_grad = zeros(6,6,6);
         end
         
+        % Generate the \dot{S} gradient tensor
         function [S_dot_grad] = RelVelocityMatrixDerivGradient(~,~)
             S_dot_grad = zeros(6,6,6);
         end
@@ -135,16 +145,18 @@ classdef SpatialQuaternion < Joint
 %             S_dot = [TranslationalXYZ.RelVelocityMatrixDeriv(SpatialQuaternion.GetTranslationQ(q), SpatialQuaternion.GetTranslationQd(q_d)) SphericalQuaternion.RelVelocityMatrixDeriv(SpatialQuaternion.GetOrientationQ(q), SpatialQuaternion.GetOrientationQd(q_d))];
 %         end        
         
-        % TO DO
+        % Generate the N matrix for the joint
         function [N_j,A] = QuadMatrix(~)
             N_j = zeros(SpatialQuaternion.numDofs,SpatialQuaternion.numDofs^2);
             A = zeros(6,SpatialQuaternion.numDofs);
         end
         
+        % Generate the derivative
         function q_deriv = QDeriv(q, q_d)
             q_deriv = [TranslationalXYZ.QDeriv(SpatialQuaternion.GetTranslationQ(q), SpatialQuaternion.GetTranslationQd(q_d)); SphericalQuaternion.QDeriv(SpatialQuaternion.GetOrientationQ(q), SpatialQuaternion.GetOrientationQd(q_d))];
         end
         
+        % Generate the trajectory
         function [q, q_dot, q_ddot] = GenerateTrajectory(q_s, q_s_d, q_s_dd, q_e, q_e_d, q_e_dd, total_time, time_step)
             [q_trans, q_trans_dot, q_trans_ddot] = TranslationalXYZ.GenerateTrajectory( ...
                 SpatialQuaternion.GetTranslationQ(q_s), SpatialQuaternion.GetTranslationQ(q_s_d), SpatialQuaternion.GetTranslationQ(q_s_dd), ...

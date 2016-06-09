@@ -18,7 +18,8 @@ classdef DynamicsSimulator < MotionSimulator
         interactionWrench   % cell array of the interaction wrench vector
     end
     
-    methods        
+    methods   
+        % Constructor fo the dynamics simulator
         function ds = DynamicsSimulator(model)
             ds@MotionSimulator(model);
         end

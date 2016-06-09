@@ -22,6 +22,9 @@ classdef PrismaticXY < Joint
     end
     
     methods 
+        % -------
+        % Getters
+        % -------
         function value = get.x(obj)
             value = obj.GetX(obj.q);
         end
@@ -37,24 +40,29 @@ classdef PrismaticXY < Joint
     end
     
     methods (Static)
+        % Get the relative rotation matrix
         function R_pe = RelRotationMatrix(~)
             R_pe = eye(3,3);
         end
 
+        % Get the relative translation vector
         function r_rel = RelTranslationVector(q)
             x = PrismaticXY.GetX(q);
             y = PrismaticXY.GetY(q);
             r_rel = [x; y; 0];
         end
-        
+
+        % Generate the S matrix
         function S = RelVelocityMatrix(~)
             S = [eye(2);zeros(4,2)];
         end
         
+        % Generate the S gradient tensor
         function [S_grad] = RelVelocityMatrixGradient(~)
             S_grad = zeros(6,2,2);
         end
         
+        % Generate the \dot{S} gradient tensor
         function [S_dot_grad] = RelVelocityMatrixDerivGradient(~,~)
             S_dot_grad = zeros(6,2,2);
         end
@@ -63,6 +71,7 @@ classdef PrismaticXY < Joint
 %             S_dot = zeros(6, 2);
 %         end
         
+        % Generate the N matrix for the joint
         function [N_j,A] = QuadMatrix(~)
             N_j =   zeros(PrismaticXY.numDofs,PrismaticXY.numDofs^2);
             A   =   zeros(6,PrismaticXY.numDofs);
@@ -76,6 +85,7 @@ classdef PrismaticXY < Joint
             y = q(2);
         end
         
+        % Generate trajectories
         function [q, q_dot, q_ddot] = GenerateTrajectory(q_s, q_s_d, q_s_dd, q_e, q_e_d, q_e_dd, total_time, time_step)
             t = 0:time_step:total_time;
             [q(1,:), q_dot(1,:), q_ddot(1,:)] = Spline.QuinticInterpolation(q_s(1), q_s_d(1), q_s_dd(1), q_e(1), q_e_d(1), q_e_dd(1), t);

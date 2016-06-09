@@ -6,6 +6,7 @@
 classdef CellOperations
     
     methods (Static)
+        % Creates a cell array
         function c = CreateCellArray(constructorFn, dim)
             c = cell(dim);
             for idx = 1:numel(c)

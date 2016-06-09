@@ -17,7 +17,8 @@ classdef WorkspaceSimulator < Simulator
         m_flag          % Flag to indicate whether metric can be used to look at workspace
     end
     
-    methods        
+    methods
+        % The constructor for the workspace simulator class.
         function id = WorkspaceSimulator(model,w_condition,metric)
             id@Simulator(model);
             id.WCondition   =   w_condition;
@@ -28,6 +29,7 @@ classdef WorkspaceSimulator < Simulator
             end
         end
         
+        % Implementation of the run function
         function run(obj, grid)
             obj.grid        =   grid;
             % Dimension is the dimension of each state in the grid + 1 for
@@ -58,6 +60,7 @@ classdef WorkspaceSimulator < Simulator
             obj.workspace = obj.workspace(:,1:workspace_count);
         end
         
+        % Plot the workspace for 2 and 3 dimensional objects
         function plotWorkspace(obj,workspace,plot_axis)
             n_d = obj.grid.n_dimensions;
 %             assert(n_d<=3,'Dimension of Workspace too large to plot');
@@ -99,6 +102,7 @@ classdef WorkspaceSimulator < Simulator
             end 
         end
         
+        % For higher dimensional objects plot a slice of the workspace
         function plotWorkspaceHigherDimension(obj)
             % This function will always only plot the first two dimensions
             n_d = obj.grid.n_dimensions;
@@ -119,12 +123,14 @@ classdef WorkspaceSimulator < Simulator
             end 
         end
         
+        % Plot the interior of the workspace
         function plotWorkspaceInterior(obj)
         	assert(obj.grid.n_dimensions<=3,'Dimension of Workspace too large to plot');
             filtered_workspace = obj.boundary_filter;
             obj.plotWorkspace(filtered_workspace);
         end
         
+        % Plot the different components of the workspace
         function plotWorkspaceComponents(obj,components)
             assert(obj.grid.n_dimensions<=3,'Dimension of Workspace too large to plot');
             [adjacency_matrix,laplacian_matrix] = obj.toAdjacencyMatrix();
@@ -142,6 +148,7 @@ classdef WorkspaceSimulator < Simulator
             end 
         end
         
+        % Converts the workspace structure into an array
         function wsim_matrix = toMatrix(obj)
             if(obj.grid.n_dimensions == 2)
                 n_x = int32(obj.grid.q_length(1));
@@ -168,6 +175,7 @@ classdef WorkspaceSimulator < Simulator
             end
         end
         
+        % Converts a matrix back into the workspace object
         function toWorkspace(obj,wsim_matrix)
             k = 1;
             for i = 1:size(wsim_matrix,1)
@@ -185,6 +193,8 @@ classdef WorkspaceSimulator < Simulator
     end
     
     methods (Access=private)
+        % Filters the boundary of the workspace. This results in only the
+        % interior of the workspace remaining.
         function boundaryFilter(obj)
             obj.filtered_workspace = zeros(size(obj.workspace));
             f_count = 1;
@@ -211,6 +221,7 @@ classdef WorkspaceSimulator < Simulator
             obj.filtered_workspace = obj.filtered_workspace(:,1:f_count-1);
         end
         
+        % Finds the connected components within a matrix.
         function con_comp = findConnectedComponents(obj,adjacency_matrix)
             components = 0;
             
@@ -250,6 +261,8 @@ classdef WorkspaceSimulator < Simulator
             end 
         end
         
+        % Determines the adjacency matrix from the workspace object. This
+        % can be used in plotting connected components.
         function [adjacency_matrix,laplacian_matrix] = toAdjacencyMatrix(obj)
             n_nodes = size(obj.workspace,2);
             laplacian_matrix = zeros(n_nodes);

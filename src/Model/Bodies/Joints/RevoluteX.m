@@ -20,6 +20,9 @@ classdef RevoluteX < Joint
     end
     
     methods 
+        % -------
+        % Getters
+        % -------
         function value = get.theta(obj)
             value = obj.GetTheta(obj.q);
         end
@@ -30,23 +33,28 @@ classdef RevoluteX < Joint
     end
     
     methods (Static)
+        % Get the relative rotation matrix
         function R_pe = RelRotationMatrix(q)
             theta = RevoluteX.GetTheta(q);
             R_pe = [1 0 0; 0 cos(theta) -sin(theta); 0 sin(theta) cos(theta)];
         end
 
+        % Get the relative translation vector
         function r_rel = RelTranslationVector(~)
             r_rel = [0; 0; 0];
         end
         
+        % Generate the S matrix
         function [S] = RelVelocityMatrix(~)
             S = [0; 0; 0; 1; 0; 0];
         end
         
+        % Generate the S gradient tensor
         function [S_grad] = RelVelocityMatrixGradient(~)
             S_grad = zeros(6,1,1);
         end
         
+        % Generate the \dot{S} gradient tensor
         function [S_dot_grad] = RelVelocityMatrixDerivGradient(~,~)
             S_dot_grad = zeros(6,1,1);
         end
@@ -55,11 +63,13 @@ classdef RevoluteX < Joint
 %             S_dot = zeros(6,1);
 %         end
         
+        % Generate the N matrix for the joint
         function [N_j,A] = QuadMatrix(~)
             N_j = 0;
             A = zeros(6,1);
         end
         
+        % Generate trajectories
         function [q, q_dot, q_ddot] = GenerateTrajectory(q_s, q_s_d, q_s_dd, q_e, q_e_d, q_e_dd, total_time, time_step)
             t = 0:time_step:total_time;
             [q, q_dot, q_ddot] = Spline.QuinticInterpolation(q_s, q_s_d, q_s_dd, q_e, q_e_d, q_e_dd, t);

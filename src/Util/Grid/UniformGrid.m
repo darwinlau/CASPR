@@ -6,13 +6,14 @@
 classdef UniformGrid < Grid
     
     properties (SetAccess = private)
-        q_begin
-        q_end
-        delta_q
-        q_length
+        q_begin     % The lower bound on grid generalised coordinates
+        q_end       % The upper bound on grid generalised coordinates        
+        delta_q     % The step size in generalised coordinates
+        q_length    % The length of each index
     end
     
     methods
+        % The constructor for the grid.
         function id = UniformGrid(q_begin,q_end,delta_q)
             assert((size(q_begin,2)==1)&&(size(q_end,2)==1)&&(size(delta_q,2)==1),'Input to UniformGrid must be a column vector');
             assert((size(q_begin,1)==size(q_end,1))&&(size(q_begin,1)==size(delta_q,1)),'Inputs must be of the same dimension');
@@ -32,6 +33,7 @@ classdef UniformGrid < Grid
             id.setNPoints(round(prod(id.q_length)))
         end
         
+        % Obtain the grid point from a given index
         function q = getGridPoint(obj,index)
             % Convert the index into a column index
             q_index =   zeros(obj.n_dimensions,1);

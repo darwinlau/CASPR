@@ -13,6 +13,7 @@ classdef BodyFlags < handle
     end
     
     methods
+        % Constructor for the body flags
         function occupied = BodyFlags()
            occupied.dynamics        =   false;
            occupied.op_space        =   false;

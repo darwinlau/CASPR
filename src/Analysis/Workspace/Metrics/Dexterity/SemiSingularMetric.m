@@ -1,13 +1,17 @@
+% A measure of proximity to the unilateral singularity
+% Author        : Jonathan EDEN
+% Created       : 2016
+% Description   : A separating hypersphere based metric
 classdef SemiSingularMetric < WorkspaceMetricBase
     properties (SetAccess = protected, GetAccess = protected)
     end
     
     methods
-        %% Constructor
+        % Constructor
         function m = SemiSingularMetric()
         end
         
-        %% Evaluate Functions
+        % Evaluate Functions
         function v = evaluateFunction(obj,dynamics,~,method,inWorkspace)
             if((nargin <=3)||(~(method==WrenchClosureMethods.SS)))
                 % Determine necessary variables for test

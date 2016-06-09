@@ -23,7 +23,10 @@ classdef PlanarXY < Joint
         theta_dot
     end
     
-    methods 
+    methods
+        % -------
+        % Getters
+        % -------
         function value = get.x(obj)
             value = obj.GetX(obj.q);
         end
@@ -45,25 +48,30 @@ classdef PlanarXY < Joint
     end
     
     methods (Static)
+        % Get the relative rotation matrix
         function R_pe = RelRotationMatrix(q)
             theta = PlanarXY.GetTheta(q);
             R_pe = [cos(theta) -sin(theta) 0; sin(theta) cos(theta) 0; 0 0 1];
         end
 
+        % Get the relative translation vector
         function r_rel = RelTranslationVector(q)
             x = PlanarXY.GetX(q);
             y = PlanarXY.GetY(q);
             r_rel = [x; y; 0];
         end
-        
+
+        % Generate the S matrix
         function S = RelVelocityMatrix(~)
             S = [1 0 0; 0 1 0; 0 0 0; 0 0 0; 0 0 0; 0 0 1];
         end
         
+        % Generate the S gradient tensor
         function [S_grad] = RelVelocityMatrixGradient(~)
             S_grad = zeros(6,3,3);
         end
         
+        % Generate the \dot{S} gradient tensor
         function [S_dot_grad] = RelVelocityMatrixDerivGradient(~,~)
             S_dot_grad = zeros(6,3,3);
         end
@@ -72,6 +80,7 @@ classdef PlanarXY < Joint
 %             S_dot = zeros(6, 3);
 %         end
         
+        % Generate the N matrix for the joint
         function [N_j,A] = QuadMatrix(~)
             N_j = zeros(PlanarXY.numDofs,PlanarXY.numDofs^2);
             A = zeros(6,PlanarXY.numDofs);
@@ -93,6 +102,7 @@ classdef PlanarXY < Joint
             theta_d = q_dot(3);
         end
         
+        % Generate trajectories
         function [q, q_dot, q_ddot] = GenerateTrajectory(q_s, q_s_d, q_s_dd, q_e, q_e_d, q_e_dd, total_time, time_step)
             t = 0:time_step:total_time;
             [q(1,:), q_dot(1,:), q_ddot(1,:)] = Spline.QuinticInterpolation(q_s(1), q_s_d(1), q_s_dd(1), q_e(1), q_e_d(1), q_e_dd(1), t);

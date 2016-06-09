@@ -1,14 +1,19 @@
+% Testing class for metrics
+%
+% Author        : Jonathan EDEN
+% Created       : 2015
+% Description   : Dummy implementation of abstract functions
 classdef NullMetric < WorkspaceMetricBase
     properties (SetAccess = protected, GetAccess = protected)
         end
     
     methods
-        %% Constructor
+        % Constructor
         function m = NullMetric()
         end
         
-        %% Evaluate Functions
-        function v = evaluateFunction(obj,~,~,~,~)
+        % Evaluate function implementation
+        function v = evaluateFunction(~,~,~,~,~)
             v = 1;
         end
     end

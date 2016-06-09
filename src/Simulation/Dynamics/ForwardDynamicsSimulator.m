@@ -13,12 +13,13 @@ classdef ForwardDynamicsSimulator < DynamicsSimulator
     end
     
     methods
+        % Constructor for the forward dynamics
         function fd = ForwardDynamicsSimulator(model, fd_solver_type)
             fd@DynamicsSimulator(model);
             fd.fdSolver = ForwardDynamics(fd_solver_type);
         end
         
-        
+        % Implementation of the run function
         function run(obj, cable_forces, time_vector, q0, q0_dot)
             obj.timeVector = time_vector;
             obj.cableForces = cable_forces;

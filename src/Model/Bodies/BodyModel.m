@@ -51,12 +51,18 @@ classdef (Abstract) BodyModel < handle
     end
 
     properties (Dependent)
-        numDofs
-        numDofVars
-        numOPDofs
+        numDofs         % The number of degrees of freedom
+        numDofVars      % The number of degrees of freedom variables
+        numOPDofs       % The number of operational space degrees of freedom
     end
 
     methods
+        % Updates the joint models
+        function update(obj, q, q_dot, q_ddot)
+            obj.joint.update(q, q_dot, q_ddot);
+        end
+        
+        % Constructor for the body model class
         function bk = BodyModel(id, name, joint)
             bk.id = id;
             bk.name = name;
@@ -65,6 +71,7 @@ classdef (Abstract) BodyModel < handle
             bk.op_space = [];
         end
 
+        % Add the parent for the body
         function addParent(obj, parent, r_parent_loc)
             % Note that link is child
             obj.r_Parent = r_parent_loc;
@@ -74,11 +81,15 @@ classdef (Abstract) BodyModel < handle
             end
         end
         
+        % Attach the operational space rigid body
         function attachOPSpace(obj,op_space)
             obj.op_space = op_space;
             obj.r_y = op_space.offset;
         end
 
+        % -------
+        % Getters
+        % -------
         function dofs = get.numDofs(obj)
             dofs = obj.joint.numDofs;
         end
@@ -93,10 +104,6 @@ classdef (Abstract) BodyModel < handle
             else
                 dofs = 0;
             end
-        end
-
-        function update(obj, q, q_dot, q_ddot)
-            obj.joint.update(q, q_dot, q_ddot);
         end
     end
 end

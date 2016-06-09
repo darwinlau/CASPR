@@ -6,12 +6,12 @@
 classdef JointTrajectory < handle
     
     properties
-        q
-        q_dot
-        q_ddot
-        timeVector
-        totalTime
-        timeStep
+        q           % The joint space coordinate
+        q_dot       % The joint space coordinate derivative
+        q_ddot      % The joint space coordinate double derivative
+        time_vector % The time vector
+        total_time  % The total time step
+        time_step   % The time step
     end
     
     methods

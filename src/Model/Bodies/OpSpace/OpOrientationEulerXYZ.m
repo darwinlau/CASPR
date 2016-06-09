@@ -1,7 +1,11 @@
+% Op Orientation class.  Uses EulerXYZ coordinates
+%
+% Author        : Jonathan EDEN
+% Created       : 2016
+% Description   :
 classdef OpOrientationEulerXYZ < OpSpace
-    %OpOrientation OpSpace definition for an orientation
-    
     methods
+        % Constructor
         function o = OpOrientationEulerXYZ(id,name,link,selection_matrix)
             o.id                =   id;
             o.name              =   name;
@@ -13,6 +17,7 @@ classdef OpOrientationEulerXYZ < OpSpace
             o.selection_matrix  =   temp_selection_matrix(logical(diag(selection_matrix)),:);
         end
         
+        % Implementation of the abstract function
         function y = extractOpSpace(obj,~,R)
             b = asin(R(1,3));
             g = -atan2(R(1,2), R(1,1));
@@ -25,6 +30,7 @@ classdef OpOrientationEulerXYZ < OpSpace
     end
     
     methods(Static)
+        % Implementation of the load xml obj
         function o = LoadXmlObj(xmlobj)
             id = str2double(char(xmlobj.getAttribute('num')));
             name = char(xmlobj.getAttribute('name'));

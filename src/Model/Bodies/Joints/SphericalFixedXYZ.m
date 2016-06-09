@@ -25,6 +25,9 @@ classdef SphericalFixedXYZ < Joint
     end
     
     methods
+        % -------
+        % Getters
+        % -------
         function value = get.alpha(obj)
             value = obj.GetAlpha(obj.q);
         end
@@ -46,6 +49,7 @@ classdef SphericalFixedXYZ < Joint
     end
     
     methods (Static)
+        % Get the relative rotation matrix
         function R_pe = RelRotationMatrix(q)
             alpha = SphericalFixedXYZ.GetAlpha(q);
             beta = SphericalFixedXYZ.GetBeta(q);
@@ -56,16 +60,19 @@ classdef SphericalFixedXYZ < Joint
             R_pe = R_01*R_12*R_23;
         end
 
+        % Get the relative translation vector
         function r_rel = RelTranslationVector(~)
             r_rel = [0; 0; 0];
         end
         
+        % Generate the S matrix
         function S = RelVelocityMatrix(q)
             a = SphericalFixedXYZ.GetAlpha(q);
             b = SphericalFixedXYZ.GetBeta(q);
             S = [zeros(3,3); 1 0 -sin(b); 0 cos(a) sin(a)*cos(b); 0 -sin(a) cos(a)*cos(b)];
         end
         
+        % Generate the S gradient tensor
         function S_grad = RelVelocityMatrixGradient(q)
             a               =   SphericalFixedXYZ.GetAlpha(q);
             b               =   SphericalFixedXYZ.GetBeta(q);
@@ -74,6 +81,7 @@ classdef SphericalFixedXYZ < Joint
             S_grad(:,:,2)   =   [zeros(3,3);0,0,-cos(b);0,0,-sin(a)*sin(b);0,0,-cos(a)*sin(b)];
         end
         
+        % Generate the \dot{S} gradient tensor
         function S_dot_grad = RelVelocityMatrixDerivGradient(q,q_dot)
             a               =   SphericalFixedXYZ.GetAlpha(q);
             b               =   SphericalFixedXYZ.GetBeta(q);
@@ -94,6 +102,7 @@ classdef SphericalFixedXYZ < Joint
 %             S = [zeros(3,3); 0, 0, -b_d*cos(b); 0, -a_d*sin(a), a_d*cos(a)*cos(b)-b_d*sin(a)*sin(b); 0, -a_d*cos(a), -a_d*sin(a)*cos(b)-b_d*cos(a)*sin(b)];
 %         end
         
+        % Generate the N matrix for the joint
         function [N_j,A] = QuadMatrix(q)
             a = SphericalFixedXYZ.GetAlpha(q);
             b = SphericalFixedXYZ.GetBeta(q);
@@ -103,6 +112,7 @@ classdef SphericalFixedXYZ < Joint
             A = [zeros(3);eye(3)];
         end
         
+        % Generate the trajectory for this joint
         function [q, q_dot, q_ddot] = GenerateTrajectory(q_s, ~, ~, q_e, ~, ~, total_time, time_step)          
             time = 0:time_step:total_time;
             quat_s = Quaternion.FromRotationMatrix(SphericalFixedXYZ.RelRotationMatrix(q_s));
@@ -197,6 +207,7 @@ classdef SphericalFixedXYZ < Joint
             gamma = q(3);
         end
         
+        % Conversions between representations
         function [a, b, g] = RotationMatrixToFixedAngles(R_0p)
             % Extract the angles from the rotation matrix
             b = -asin(R_0p(3,1));

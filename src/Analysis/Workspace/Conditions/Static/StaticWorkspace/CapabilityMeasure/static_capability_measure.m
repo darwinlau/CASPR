@@ -1,7 +1,5 @@
 % Static equilibrium acceleration capability measure implementation for
 % evaluating static workspace.
-%
-% Paper in review
 % Author         : Jonathan EDEN
 % Created        : 2016
 % Description    : Implementation of static workspace analysis using the

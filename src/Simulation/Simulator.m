@@ -13,12 +13,14 @@ classdef (Abstract) Simulator < handle
     end
     
     methods 
+        % Constructor
         function s = Simulator(model)
             s.model = model;
         end
     end
     
     methods (Abstract)
+        % The function to run objects
         run(obj)
     end
 end

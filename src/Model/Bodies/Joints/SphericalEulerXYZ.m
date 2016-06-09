@@ -25,6 +25,9 @@ classdef SphericalEulerXYZ < Joint
     end
     
     methods
+        % -------
+        % Getters
+        % -------
         function value = get.alpha(obj)
             value = obj.GetAlpha(obj.q);
         end
@@ -46,6 +49,7 @@ classdef SphericalEulerXYZ < Joint
     end
     
     methods (Static)
+        % Get the relative rotation matrix
         function R_pe = RelRotationMatrix(q)
             alpha = SphericalEulerXYZ.GetAlpha(q);
             beta = SphericalEulerXYZ.GetBeta(q);
@@ -56,16 +60,19 @@ classdef SphericalEulerXYZ < Joint
             R_pe = R_01*R_12*R_23;
         end
 
+        % Get the relative translation vector
         function r_rel = RelTranslationVector(~)
             r_rel = [0; 0; 0];
         end
         
+        % Generate the S matrix
         function S = RelVelocityMatrix(q)
             b = SphericalEulerXYZ.GetBeta(q);
             g = SphericalEulerXYZ.GetGamma(q);
             S = [zeros(3,3); cos(b)*cos(g) sin(g) 0; -cos(b)*sin(g) cos(g) 0; sin(b) 0 1];    
         end
         
+        % Generate the S gradient tensor
         function S_grad = RelVelocityMatrixGradient(q)
             b               =   SphericalFixedXYZ.GetBeta(q);
             g               =   SphericalEulerXYZ.GetGamma(q);
@@ -74,6 +81,7 @@ classdef SphericalEulerXYZ < Joint
             S_grad(:,:,3)   =   [zeros(3,3);-cos(b)*sin(g),cos(g),0;-cos(b)*cos(g),-sin(g),0;0,0,0];
         end
         
+        % Generate the \dot{S} gradient tensor
         function S_dot_grad = RelVelocityMatrixDerivGradient(q,q_dot)
             b                   =   SphericalFixedXYZ.GetBeta(q);
             g                   =   SphericalEulerXYZ.GetGamma(q);
@@ -96,6 +104,7 @@ classdef SphericalEulerXYZ < Joint
 %                 b_d*cos(b) 0 0];
 %         end
         
+        % Generate the N matrix for the joint
         function [N_j,A] = QuadMatrix(q)
             b = SphericalEulerXYZ.GetBeta(q);
             g = SphericalEulerXYZ.GetGamma(q);
@@ -105,6 +114,7 @@ classdef SphericalEulerXYZ < Joint
             A = [zeros(3);eye(3)];
         end
         
+        % Generate the trajectory for this joint
         function [q, q_dot, q_ddot] = GenerateTrajectory(q_s, ~, ~, q_e, ~, ~, total_time, time_step)       
             time = 0:time_step:total_time;
             quat_s = Quaternion.FromRotationMatrix(SphericalEulerXYZ.RelRotationMatrix(q_s));
@@ -199,6 +209,7 @@ classdef SphericalEulerXYZ < Joint
             gamma = q(3);
         end
         
+        % Conversions between representation
         function [a, b, g] = RotationMatrixToEulerAngles(R_0p)
             % Extract the angles from the rotation matrix
             b = asin(R_0p(1,3));

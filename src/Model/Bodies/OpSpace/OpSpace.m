@@ -23,10 +23,12 @@ classdef (Abstract) OpSpace < handle
     end
     
     methods (Abstract,Static)
+        % Function for loading the xml
         o = LoadXmlObj(xmlobj)
     end
     
     methods 
+        % TODO: Remove this
         function T = getSelectionMatrix(obj)
             T = obj.selection_matrix();
         end

@@ -21,10 +21,10 @@ classdef (Abstract) Joint < handle
         q_ddot              % Double derivative of q
         
         % Dependent but stored values (hence private set)
-        R_pe
-        r_rel        
-        S_grad
-        S_dot_grad
+        R_pe                % The relative rotation
+        r_rel               % The relative translation      
+        S_grad              % The gradient of the S matrix
+        S_dot_grad          % The gradient of the \dot{S} matrix
     end
     
     properties (Dependent)
@@ -36,17 +36,18 @@ classdef (Abstract) Joint < handle
     end
     
     properties (Abstract, Constant)
-        numDofs
-        numVars
+        numDofs             % The number of degrees of freedom
+        numVars             % The number of variables to describe the degrees of freedom
         
-        q_default
-        q_dot_default
-        q_ddot_default
-        q_lb
-        q_ub
+        q_default           % The default q
+        q_dot_default       % The default q_dot
+        q_ddot_default      % The default q_ddot
+        q_lb                % The lower bound on joints
+        q_ub                % The upper bound on joints
     end
     
     methods
+        % Updates the joint given the new system kinematics
         function update(obj, q, q_dot, q_ddot)
             obj.q = q;
             obj.q_dot = q_dot;
@@ -59,6 +60,9 @@ classdef (Abstract) Joint < handle
 %             obj.S_dot = obj.RelVelocityMatrixDeriv(q, q_dot);
         end
         
+        % -------
+        % Getters
+        % -------
         function value = get.q_deriv(obj)
             value = obj.QDeriv(obj.q, obj.q_dot);
         end
@@ -74,6 +78,7 @@ classdef (Abstract) Joint < handle
 	end
         
     methods (Static)
+        % Create a new joint
         function j = CreateJoint(jointType)
             switch jointType
                 case JointType.R_X
@@ -107,6 +112,7 @@ classdef (Abstract) Joint < handle
             j.update(j.q_default, j.q_dot_default, j.q_ddot_default);
         end
         
+        % Load new xml objects
         function j = LoadXmlObj(xmlObj)
             jointType = JointType.(char(xmlObj.getAttribute('type')));
             j = Joint.CreateJoint(jointType);

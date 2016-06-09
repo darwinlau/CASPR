@@ -11,17 +11,17 @@
 %
 % Author        : Jonathan EDEN
 % Created       : 2016
-% Description   : 
+% Description   : Implementation of the tension factor metric.
 classdef TensionFactorMetric < WorkspaceMetricBase
     properties (SetAccess = protected, GetAccess = protected)
     end
     
     methods
-        %% Constructor
+        % Constructor
         function m = TensionFactorMetric()
         end
         
-        %% Evaluate Functions
+        % Evaluate function implementation
         function v = evaluateFunction(obj,dynamics,options,~,~)
             if(nargin == 2)
                 options = optimset('Display','off');

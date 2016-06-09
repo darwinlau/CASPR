@@ -5,20 +5,21 @@
 % Description    :
 %   This is a work in progress its point will be to take a starting point 
 %   and give the next grid point to achieve a uniform spacing in the task 
-%   space.
+%   space. TODO: CHANGE task space to op_space
 classdef TaskGrid < Grid
     properties (SetAccess = private)
-        q_begin
-        q_end
-        delta_x
-        x_begin
-        x_end
-        x_length
-        q_length
-        n_task_dimensions
+        q_begin             % The beginning of the generalised coordinates
+        q_end               % The ending of the generalised coordinates
+        delta_x             % The change in the task space
+        x_begin             % The beginning of the task coordinates
+        x_end               % The ending of the task coordinates
+        x_length            % The length of the task space coordinates
+        q_length            % The length of the joint space coordinates
+        n_task_dimensions   % The dimension of the task/opspace
     end
     
     methods
+        % A constructor for the task grid object
         function id = TaskGrid(q_begin,q_end,x_begin,x_end,delta_x)
             assert((size(q_begin,2)==1)&&(size(q_end,2)==1)&&(size(delta_x,2)==1)&&(size(x_begin,2)==1)&&(size(x_end,2)==1),'Input to UniformGrid must be a column vector');
             assert((size(q_begin,1)==size(q_end,1)),'Inputs must be of the same dimension');
@@ -40,6 +41,7 @@ classdef TaskGrid < Grid
             id.setNPoints(prod(id.q_length));
         end
         
+        % Get a point in the grid
         function q = getGridPoint(obj,index)
             % GENERALISE LATER - For now the first index is x the second
             % index is parameter
@@ -92,6 +94,7 @@ classdef TaskGrid < Grid
     
 end
 
+% An objective for the nonlinear evaluation
 function cost = target_kinematics(q,x_target,th_target,q_off)
     cost  = ((x_target - cos(q(1)) - cos(q(1) + q(2)))^2 + (th_target - atan2(q(2),q(1)+q_off))^2);
 end

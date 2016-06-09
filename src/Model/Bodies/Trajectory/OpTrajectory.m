@@ -4,28 +4,27 @@
 % Created       : 2016
 % Description   :
 classdef OpTrajectory < handle
-    %TRAJECTORYINTERPOLATOR Summary of this class goes here
-    %   Detailed explanation goes here
-    
     properties
-        y
-        y_dot
-        y_ddot
-        timeVector
-        totalTime
-        timeStep
+        y           % The op coordinate
+        y_dot       % The op coordinate derivative
+        y_ddot      % The op coordinate double derivative
+        time_vector  % The vector of times
+        total_time   % The total time
+        time_step    % The time step
     end
     
     methods
+        % Constructor 
         function op = OpTrajectory(y_begin,yd_begin,ydd_begin,y_end,yd_end,ydd_end, total_time, time_step)
             % Save the time information
-            op.timeStep         =   time_step;
-            op.totalTime        =   total_time;
-            op.timeVector       =   0:time_step:total_time;
+            op.time_step         =   time_step;
+            op.total_time        =   total_time;
+            op.time_vector       =   0:time_step:total_time;
             % May need to change later
             [op.y,op.y_dot,op.y_ddot]    =   Spline.QuinticInterpolation(y_begin,yd_begin,ydd_begin,y_end,yd_end,ydd_end,op.timeVector);
         end
         
+        % Plots the operational space
         function plotOpSpace(obj, states_to_plot)
             n_op_dof = length(obj.y{1});
             

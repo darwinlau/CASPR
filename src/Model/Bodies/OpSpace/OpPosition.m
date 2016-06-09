@@ -6,6 +6,7 @@
 classdef OpPosition < OpSpace   
     
     methods
+        % Constructor for the class
         function o = OpPosition(id,name,link,offset,selection_matrix)
             o.id                =   id;
             o.name              =   name;
@@ -17,12 +18,14 @@ classdef OpPosition < OpSpace
             o.selection_matrix  =   temp_selection_matrix(logical(diag(selection_matrix)),:);
         end
         
+        % Implementation of the abstract function
         function y = extractOpSpace(obj,x,R)
             y = obj.selection_matrix(:,1:3)*R*x;
         end
     end
     
     methods(Static)
+        % Implementation of the load xml obj
         function o = LoadXmlObj(xmlobj)
             id = str2double(char(xmlobj.getAttribute('num')));
             name = char(xmlobj.getAttribute('name'));

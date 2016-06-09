@@ -29,6 +29,7 @@ classdef SphericalQuaternion < Joint
     end
     
     methods        
+        % Update the joint information
         function update(obj, q, q_dot, q_ddot)
             if(isa(q, 'double') && norm(q) ~= 1)
                 q_quat_norm = Quaternion(q(1), q(2), q(3), q(4)).normalise();
@@ -39,6 +40,9 @@ classdef SphericalQuaternion < Joint
             update@Joint(obj, q_quat_norm.toVector(), q_dot, q_ddot);
         end
         
+        % -------
+        % Getters
+        % -------
         function value = get.e0(obj)
             value = obj.GetE0(obj.q);
         end
@@ -64,6 +68,7 @@ classdef SphericalQuaternion < Joint
     end
     
     methods (Static)
+        % Get the relative rotation matrix
         function R_pe = RelRotationMatrix(q)
             e0 = SphericalQuaternion.GetE0(q);
             e1 = SphericalQuaternion.GetE1(q);
@@ -73,18 +78,22 @@ classdef SphericalQuaternion < Joint
             R_pe = Quaternion.ToRotationMatrix(Quaternion(e0, e1, e2, e3));
         end
 
+        % Get the relative translation vector
         function r_rel = RelTranslationVector(~)
             r_rel = [0; 0; 0];
         end
         
+        % Generate the S matrix
         function S = RelVelocityMatrix(~)
             S = [zeros(3,3); eye(3, 3)];
         end
         
+        % Generate the S gradient tensor
         function [S_grad] = RelVelocityMatrixGradient(~)
             S_grad = zeros(6,3,3);
         end
         
+        % Generate the \dot{S} gradient tensor
         function [S_dot_grad] = RelVelocityMatrixDerivGradient(~,~)
             S_dot_grad = zeros(6,3,3);
         end
@@ -93,7 +102,7 @@ classdef SphericalQuaternion < Joint
 %             S_dot = zeros(6, 3);
 %         end
         
-        % TODO: To complete
+        % Generate the N matrix for the joint
         function [N_j,A] = QuadMatrix(~)
             N_j = zeros(SphericalQuaternion.numDofs,SphericalQuaternion.numDofs^2);
             A = zeros(6,SphericalQuaternion.numDofs);
@@ -107,6 +116,7 @@ classdef SphericalQuaternion < Joint
             q = q_quat.toVector();
         end
         
+        % Obtain the derivative
         function q_deriv = QDeriv(q, q_dot)
             w_quat = Quaternion(0, q_dot(1), q_dot(2), q_dot(3));
             q_quat = Quaternion(q(1), q(2), q(3), q(4));
@@ -114,6 +124,7 @@ classdef SphericalQuaternion < Joint
             q_deriv = [q_deriv_quat.q0; q_deriv_quat.q1; q_deriv_quat.q2; q_deriv_quat.q3];
         end
         
+        % Generate the trajectory for the joint
         function [q, q_dot, q_ddot] = GenerateTrajectory(q_s, ~, ~, q_e, ~, ~, total_time, time_step)
             time = 0:time_step:total_time;
                         

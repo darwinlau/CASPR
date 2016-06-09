@@ -1,13 +1,17 @@
+% A measure of acceleration capability from static equilibrium
+% Author        : Jonathan EDEN
+% Created       : 2016
+% Description   : Implementation of the SEACM
 classdef SEACM < WorkspaceMetricBase
     properties (SetAccess = protected, GetAccess = protected)
     end
     
     methods
-        %% Constructor
+        % Constructor
         function m = SEACM()
         end
         
-        %% Evaluate Functions
+        % Evaluate Functions implementation
         function v = evaluateFunction(obj,dynamics,~,~,~)
             L   =   transpose(dynamics.M\dynamics.L');
             f_u =   dynamics.forcesMax;

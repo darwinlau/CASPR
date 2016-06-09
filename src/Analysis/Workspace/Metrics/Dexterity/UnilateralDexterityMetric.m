@@ -16,11 +16,11 @@ classdef UnilateralDexterityMetric < WorkspaceMetricBase
     end
     
     methods
-        %% Constructor
+        % Constructor
         function m = UnilateralDexterityMetric()
         end
         
-        %% Evaluate Functions
+        % Evaluate function implementation
         function v = evaluateFunction(obj,dynamics,options,~,~)
             % Determine the Jacobian Matrix
             L = dynamics.L;

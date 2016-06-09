@@ -23,6 +23,9 @@ classdef UniversalXY < Joint
     end
     
     methods
+        % -------
+        % Getters
+        % -------
         function value = get.alpha(obj)
             value = obj.GetAlpha(obj.q);
         end
@@ -38,6 +41,7 @@ classdef UniversalXY < Joint
     end
     
     methods (Static)
+        % Get the relative rotation matrix
         function R_pe = RelRotationMatrix(q)
             alpha   =   UniversalXY.GetAlpha(q);
             beta    =   UniversalXY.GetBeta(q);
@@ -46,21 +50,25 @@ classdef UniversalXY < Joint
             R_pe    =   R_01*R_12;
         end
 
+        % Get the relative translation vector
         function r_rel = RelTranslationVector(~)
             r_rel = [0; 0; 0];
         end
         
+        % Generate the S matrix
         function S = RelVelocityMatrix(q)
             b = UniversalXY.GetBeta(q);
             S = [zeros(3,2); cos(b) 0; 0 1; sin(b) 0];    
         end
         
+        % Generate the S gradient tensor
         function [S_grad] = RelVelocityMatrixGradient(q)
             b = UniversalXY.GetBeta(q);
             S_grad          =   zeros(6,2,2);
             S_grad(:,:,2)   =   [zeros(3,2); -sin(b) 0; 0 0; cos(b) 0];    
         end
         
+        % Generate the \dot{S} gradient tensor
         function [S_dot_grad] = RelVelocityMatrixDerivGradient(q,q_dot)
             b = UniversalXY.GetBeta(q);
             b_d = SphericalEulerXYZ.GetBeta(q_dot);
@@ -76,12 +84,14 @@ classdef UniversalXY < Joint
 %                 b_d*cos(b) 0];
 %         end
         
+        % Generate the N matrix for the joint
         function [N_j,A] = QuadMatrix(q)
             b = SphericalEulerXYZ.GetBeta(q);
             N_j = [0,-0.5*sin(b),0,0.5*cos(b);-0.5*sin(b),0,0.5*cos(b),0];
             A = [zeros(3,2);1,0;0,0;0,1];
         end
         
+        % Generate the trajectory for this joint
         function [q, q_dot, q_ddot] = GenerateTrajectory(q_s, q_s_d, q_s_dd, q_e, q_e_d, q_e_dd, total_time, time_step)       
             t = 0:time_step:total_time;
             [q, q_dot, q_ddot] = Spline.QuinticInterpolation(q_s, q_s_d, q_s_dd, q_e, q_e_d, q_e_dd, t);

@@ -39,17 +39,22 @@ classdef SpatialEulerXYZ < Joint
     end
     
     methods
+        % Constructors
         function j = SpatialEulerXYZ()
             j.translation = TranslationalXYZ;
             j.orientation = SphericalEulerXYZ;
         end
         
+        % Update the joint space
         function update(obj, q, q_dot, q_ddot)
             obj.translation.update(SpatialEulerXYZ.GetTranslationQ(q), SpatialEulerXYZ.GetTranslationQd(q_dot), SpatialEulerXYZ.GetTranslationQd(q_ddot));
             obj.orientation.update(SpatialEulerXYZ.GetOrientationQ(q), SpatialEulerXYZ.GetOrientationQd(q_dot), SpatialEulerXYZ.GetOrientationQd(q_ddot));
             update@Joint(obj, q, q_dot, q_ddot);
         end
         
+        % -------
+        % Getters
+        % -------
         function value = get.x(obj)
             value = obj.translation.x;
         end
@@ -105,24 +110,29 @@ classdef SpatialEulerXYZ < Joint
             q_t_d = q_d(TranslationalXYZ.numDofs+1:SpatialEulerXYZ.numDofs);
         end
         
+        % Get the relative rotation matrix
         function R_pe = RelRotationMatrix(q)
             R_pe = SphericalEulerXYZ.RelRotationMatrix(SpatialEulerXYZ.GetOrientationQ(q));
         end
 
+        % Get the relative translation vector
         function r_rel = RelTranslationVector(q)
             r_rel = TranslationalXYZ.RelTranslationVector(SpatialEulerXYZ.GetTranslationQ(q));
         end
         
+        % Generate the S matrix
         function S = RelVelocityMatrix(q)
             S = [TranslationalXYZ.RelVelocityMatrix(SpatialEulerXYZ.GetTranslationQ(q)) ...
                 SphericalEulerXYZ.RelVelocityMatrix(SpatialEulerXYZ.GetOrientationQ(q))];
         end
         
+        % Generate the S gradient tensor
         function S_grad = RelVelocityMatrixGradient(q)
             S_grad              =   MatrixOperations.Initialise([6,6,6],isa(q, 'sym'));
             S_grad(:,4:6,4:6)   =  SphericalEulerXYZ.RelVelocityMatrixGradient(SpatialEulerXYZ.GetOrientationQ(q));
         end
         
+        % Generate the \dot{S} gradient tensor
         function [S_dot_grad] = RelVelocityMatrixDerivGradient(q,q_dot)
             S_dot_grad              =   MatrixOperations.Initialise([6,6,6],isa(q, 'sym'));
             S_dot_grad(:,4:6,4:6)   =  SphericalEulerXYZ.RelVelocityMatrixDerivGradient(SpatialEulerXYZ.GetOrientationQ(q),SpatialEulerXYZ.GetOrientationQd(q_dot));
@@ -133,17 +143,19 @@ classdef SpatialEulerXYZ < Joint
 %                 SphericalEulerXYZ.RelVelocityMatrixDeriv(SpatialEulerXYZ.GetOrientationQ(q), SpatialEulerXYZ.GetOrientationQd(q_d))];
 %         end
         
+        % The derivative matrix
         function q_deriv = QDeriv(q, q_d)
             q_deriv = [TranslationalXYZ.QDeriv(SpatialEulerXYZ.GetTranslationQ(q), SpatialEulerXYZ.GetTranslationQd(q_d)); ...
                 SphericalEulerXYZ.QDeriv(SpatialEulerXYZ.GetOrientationQ(q), SpatialEulerXYZ.GetOrientationQd(q_d))];
         end
         
-        % TO DO
+        % Generate the N matrix for the joint
         function [N_j,A] = QuadMatrix(~)
             N_j = zeros(SpatialEulerXYZ.numDofs,SpatialEulerXYZ.numDofs^2);
             A = zeros(6,SpatialEulerXYZ.numDofs);
         end
         
+        % Generate the trajectory for this joint
         function [q, q_dot, q_ddot] = GenerateTrajectory(q_s, q_s_d, q_s_dd, q_e, q_e_d, q_e_dd, total_time, time_step)
             [q_trans, q_trans_dot, q_trans_ddot] = TranslationalXYZ.GenerateTrajectory( ...
                 SpatialEulerXYZ.GetTranslationQ(q_s), SpatialEulerXYZ.GetTranslationQ(q_s_d), SpatialEulerXYZ.GetTranslationQ(q_s_dd), ...

@@ -10,13 +10,14 @@ classdef ControllerSimulator < DynamicsSimulator
 
     properties (SetAccess = protected)
         compTime            % computational time for each time step
-        fdSolver
-        controller
-        refTrajectory
-        stateError
+        fdSolver            % The forward dynamics solver
+        controller          % The controller for the system
+        refTrajectory       % The reference trajectory
+        stateError          % The state space error
     end
 
     methods
+        % The control simulator constructor
         function ctrl_sim = ControllerSimulator(model, controller, fd_solver)
             ctrl_sim@DynamicsSimulator(model);
             ctrl_sim.model = model;
@@ -24,6 +25,8 @@ classdef ControllerSimulator < DynamicsSimulator
             ctrl_sim.fdSolver = fd_solver;
         end
 
+        % Implementation of the run function. Converts the dynamics
+        % information into a controller
         function run(obj, ref_trajectory, q0, q0_dot, q0_ddot)
             obj.refTrajectory = ref_trajectory;
             obj.timeVector = obj.refTrajectory.timeVector;

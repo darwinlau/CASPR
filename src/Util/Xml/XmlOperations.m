@@ -28,11 +28,14 @@ classdef XmlOperations
             end
         end
         
+        % Read the xml file and remove the indent nodes.
         function xmlobj = XmlReadRemoveIndents(filename)
             xmlobj = xmlread(filename);
             XmlOperations.RemoveIndentNodes(xmlobj);
         end
         
+        % Reads a string and converts to a vector of 3 elements. This
+        % function will error if the string contains more than 3 terms.
         function r = StringToVector3(string)
             array = regexp(string,' ', 'split');
             assert(length(array) == 3, sprintf('Array string should contain 3 elements: %s', string));
@@ -42,6 +45,7 @@ classdef XmlOperations
             end
         end
         
+        % Converts a string into an N dimensional vector.
         function r = StringToVectorN(string)
             array = regexp(string,' ', 'split');
             r = size(length(array), 1);
@@ -50,6 +54,7 @@ classdef XmlOperations
             end
         end
         
+        % DARWIN is there a reason this function is repeated.
         function r = StringToVector(string)
             array = regexp(string, ' ', 'split');
             r = size(length(array), 1);

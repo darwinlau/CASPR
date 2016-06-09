@@ -18,6 +18,7 @@ classdef ForwardKinematicsSimulator < MotionSimulator
     end
     
     methods
+        % Constructor for the forward kinematics class
         function fk = ForwardKinematicsSimulator(model, fk_solver)
             fk@MotionSimulator(model);
             fk.FKSolver = fk_solver;
