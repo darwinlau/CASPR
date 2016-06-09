@@ -11,9 +11,7 @@ clear; clc; close all;
 model_config = ModelConfig(ModelConfigType.M_SEGESTA);
 
 % The XML objects from the model config are created
-bodies_xmlobj = model_config.getBodiesPropertiesXmlObj();
-cableset_xmlobj = model_config.getCableSetXmlObj(model_config.defaultCableSetId);
+cdpr = model_config.getModel(model_config.defaultCableSetId);
 
-% Load the SystemKinematics object from the XML
-cdpr = SystemModel.LoadXmlObj(bodies_xmlobj, cableset_xmlobj);
+% Plot to see the robot
 MotionSimulator.PlotFrame(cdpr, model_config.displayRange);

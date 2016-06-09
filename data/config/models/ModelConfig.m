@@ -15,17 +15,18 @@ classdef ModelConfig
         trajectoriesFilename        % Filename for the trajectories
         opFilename                  % Filename for the operational space
         
-        bodiesXmlObj                % The DOMNode object for body props
-        cablesXmlObj                % The DOMNode object for cable props
-        trajectoriesXmlObj          % The DOMNode for trajectory props
-        opXmlObj                    % The DOMNode for operational space
-        
+        bodiesModel                 % Stores the SystemModelBodies object for the robot model
         displayRange                % The axis range to display the robot
         defaultCableSetId           % ID for the default cable set to display first
     end
     
     properties (Access = private)
         root_folder                 % The root folder for the CASPR build
+        
+        bodiesXmlObj                % The DOMNode object for body props
+        cablesXmlObj                % The DOMNode object for cable props
+        trajectoriesXmlObj          % The DOMNode for trajectory props
+        opXmlObj                    % The DOMNode for operational space
     end
     
     methods
@@ -118,23 +119,49 @@ classdef ModelConfig
                     error('ModelConfig type is not defined');
             end
                         
+            % Make sure all the filenames that are required exist
             assert(exist(c.bodyPropertiesFilename, 'file') == 2, 'Body properties file does not exist.');
             assert(exist(c.cablesPropertiesFilename, 'file') == 2, 'Cable properties file does not exist.');
             assert(exist(c.trajectoriesFilename, 'file') == 2, 'Trajectories file does not exist.');
-            
+            % Read the XML file to an DOM XML object
             c.bodiesXmlObj =  XmlOperations.XmlReadRemoveIndents(c.bodyPropertiesFilename);
             c.cablesXmlObj =  XmlOperations.XmlReadRemoveIndents(c.cablesPropertiesFilename);
             c.trajectoriesXmlObj =  XmlOperations.XmlReadRemoveIndents(c.trajectoriesFilename);
-            
+            % If the operational space filename is specified then check and load it
             if (~isempty(c.opFilename))
                 assert(exist(c.opFilename, 'file') == 2, 'Operational space properties file does not exist.');
                 XmlOperations.XmlReadRemoveIndents(c.opFilename);
             end
             
+            % Read the model config related properties from the bodies and
+            % cables XML
             c.defaultCableSetId = char(c.cablesXmlObj.getDocumentElement.getAttribute('default_cable_set'));
             c.displayRange = XmlOperations.StringToVector(char(c.bodiesXmlObj.getDocumentElement.getAttribute('display_range')));
+            % Loads the bodiesModel to be used for the trajectory loading
+            bodies_xmlobj = c.getBodiesPropertiesXmlObj();
+            cableset_xmlobj = c.getCableSetXmlObj(c.defaultCableSetId);
+            sysModel = SystemModel.LoadXmlObj(bodies_xmlobj, cableset_xmlobj);
+            c.bodiesModel = sysModel.bodyModel;
+        end
+                
+        function [sysModel] = getModel(obj, cable_set_id, operational_space_id)
+            bodies_xmlobj = obj.getBodiesPropertiesXmlObj();
+            cableset_xmlobj = obj.getCableSetXmlObj(cable_set_id);
+            sysModel = SystemModel.LoadXmlObj(bodies_xmlobj, cableset_xmlobj);
+            
+            if (nargin >= 3 && ~isempty(operational_space_id))
+                op_xmlobj = obj.getOPXmlObj(op_set_id);
+                sysModel.loadOpXmlObj(op_xmlobj);
+            end
         end
         
+        function [traj] = getTrajectory(obj, trajectory_id)
+            traj_xmlobj = obj.getTrajectoryXmlObj(trajectory_id);
+            traj = JointTrajectory.LoadXmlObj(traj_xmlobj, obj.bodiesModel);
+        end
+    end
+    
+    methods (Access = private)
         % Gets the body properties xml object
         function v = getBodiesPropertiesXmlObj(obj)
             v = obj.bodiesXmlObj.getDocumentElement;
@@ -156,23 +183,6 @@ classdef ModelConfig
         function v = getOPXmlObj(obj, id)
             v = obj.opXmlObj.getElementById(id);
             assert(~isempty(v), sprintf('Id ''%s'' does not exist in the operation XML file', id));
-        end
-        
-        function [sysModel, traj] = getModel(obj, cable_set_id, trajectory_id, operational_space_id)
-            bodies_xmlobj = obj.getBodiesPropertiesXmlObj();
-            cableset_xmlobj = obj.getCableSetXmlObj(cable_set_id);
-            sysModel = SystemModel.LoadXmlObj(bodies_xmlobj, cableset_xmlobj);
-            traj = [];
-            
-            if (nargin >= 3 && ~isempty(trajectory_id))
-                traj_xmlobj = obj.getTrajectoryXmlObj(trajectory_id);
-                traj = JointTrajectory.LoadXmlObj(traj_xmlobj, sysModel);
-            end
-            
-            if (nargin >= 4 && ~isempty(operational_space_id))
-                op_xmlobj = obj.getOPXmlObj(op_set_id);
-                sysModel.loadOpXmlObj(op_xmlobj);
-            end
         end
     end
 end

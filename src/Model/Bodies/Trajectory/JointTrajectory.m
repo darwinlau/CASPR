@@ -9,9 +9,9 @@ classdef JointTrajectory < handle
         q           % The joint space coordinate
         q_dot       % The joint space coordinate derivative
         q_ddot      % The joint space coordinate double derivative
-        time_vector % The time vector
-        total_time  % The total time step
-        time_step   % The time step
+        timeVector  % The time vector
+        totalTime   % The total time step
+        timeStep    % The time step
     end
     
     methods
@@ -43,7 +43,7 @@ classdef JointTrajectory < handle
     
     methods (Static)
         % Loads trajectory from XML configuration
-        function trajectory = LoadXmlObj(xmlObj, kin)
+        function trajectory = LoadXmlObj(xmlObj, bodiesObj)
             assert(strcmp(xmlObj.getNodeName, 'trajectory'), 'Element should be <trajectory>');
             total_time = str2double(xmlObj.getElementsByTagName('time_total').item(0).getFirstChild.getData);
             time_step = str2double(xmlObj.getElementsByTagName('time_step').item(0).getFirstChild.getData);
@@ -58,22 +58,22 @@ classdef JointTrajectory < handle
             q_e_dd = XmlOperations.StringToVector(char(endObj.getElementsByTagName('q_ddot').item(0).getFirstChild.getData));
             
             % Error checking on whether the XML file is valid
-            assert(length(q_s) == kin.numDofVars, sprintf('Trajectory config does not contain correct number of DoF vars for q begin, desired : %d, specified : %d', kin.numDofVars, length(q_s)));
-            assert(length(q_s_d) == kin.numDofs, sprintf('Trajectory config does not contain correct number of DoFs for q_dot begin, desired : %d, specified : %d', kin.numDofs, length(q_s_d)));
-            assert(length(q_s_dd) == kin.numDofs, sprintf('Trajectory config does not contain correct number of DoFs for q_ddot begin, desired : %d, specified : %d', kin.numDofs, length(q_s_dd)));
-            assert(length(q_e) == kin.numDofVars, sprintf('Trajectory config does not contain correct number of DoF vars for q end, desired : %d, specified : %d', kin.numDofVars, length(q_e)));
-            assert(length(q_e_d) == kin.numDofs, sprintf('Trajectory config does not contain correct number of DoFs for q_dot end, desired : %d, specified : %d', kin.numDofs, length(q_e_d)));
-            assert(length(q_e_dd) == kin.numDofs, sprintf('Trajectory config does not contain correct number of DoFs for q_ddot end, desired : %d, specified : %d', kin.numDofs, length(q_e_dd)));
+            assert(length(q_s) == bodiesObj.numDofVars, sprintf('Trajectory config does not contain correct number of DoF vars for q begin, desired : %d, specified : %d', bodiesObj.numDofVars, length(q_s)));
+            assert(length(q_s_d) == bodiesObj.numDofs, sprintf('Trajectory config does not contain correct number of DoFs for q_dot begin, desired : %d, specified : %d', bodiesObj.numDofs, length(q_s_d)));
+            assert(length(q_s_dd) == bodiesObj.numDofs, sprintf('Trajectory config does not contain correct number of DoFs for q_ddot begin, desired : %d, specified : %d', bodiesObj.numDofs, length(q_s_dd)));
+            assert(length(q_e) == bodiesObj.numDofVars, sprintf('Trajectory config does not contain correct number of DoF vars for q end, desired : %d, specified : %d', bodiesObj.numDofVars, length(q_e)));
+            assert(length(q_e_d) == bodiesObj.numDofs, sprintf('Trajectory config does not contain correct number of DoFs for q_dot end, desired : %d, specified : %d', bodiesObj.numDofs, length(q_e_d)));
+            assert(length(q_e_dd) == bodiesObj.numDofs, sprintf('Trajectory config does not contain correct number of DoFs for q_ddot end, desired : %d, specified : %d', bodiesObj.numDofs, length(q_e_dd)));
             
-            trajectory = JointTrajectory.GenerateTrajectory(kin, q_s, q_s_d, q_s_dd, q_e, q_e_d, q_e_dd, total_time, time_step);
+            trajectory = JointTrajectory.GenerateTrajectory(bodiesObj, q_s, q_s_d, q_s_dd, q_e, q_e_d, q_e_dd, total_time, time_step);
         end
         
         % Generates trajectory from the starting and ending joint poses for
         % the entire system. Calls the generate trajectory function of each
         % type of joint.
-        function trajectory = GenerateTrajectory(kin, q_s, q_s_d, q_s_dd, q_e, q_e_d, q_e_dd, total_time, time_step)
+        function trajectory = GenerateTrajectory(bodiesObj, q_s, q_s_d, q_s_dd, q_e, q_e_d, q_e_dd, total_time, time_step)
             trajectory = JointTrajectory;
-            n_dof = kin.numDofs;    
+            n_dof = bodiesObj.numDofs;    
             t = 0:time_step:total_time;
             trajectory.timeVector = t;
             trajectory.totalTime = total_time;
@@ -85,11 +85,11 @@ classdef JointTrajectory < handle
             
             index_dof = 1;
             index_var = 1;
-            for k = 1:kin.numLinks
+            for k = 1:bodiesObj.numLinks
                 ind_k_s_dof = index_dof;
-                ind_k_e_dof = index_dof+kin.bodyModel.bodies{k}.joint.numDofs-1;
+                ind_k_e_dof = index_dof+bodiesObj.bodies{k}.joint.numDofs-1;
                 ind_k_s_var = index_var;
-                ind_k_e_var = index_var+kin.bodyModel.bodies{k}.joint.numVars-1;
+                ind_k_e_var = index_var+bodiesObj.bodies{k}.joint.numVars-1;
                 qk_s = q_s(ind_k_s_var:ind_k_e_var);
                 qk_e = q_e(ind_k_s_var:ind_k_e_var);
                 qk_s_d = q_s_d(ind_k_s_dof:ind_k_e_dof);
@@ -97,13 +97,13 @@ classdef JointTrajectory < handle
                 qk_s_dd = q_s_dd(ind_k_s_dof:ind_k_e_dof);
                 qk_e_dd = q_e_dd(ind_k_s_dof:ind_k_e_dof);
                 
-                [qk, qk_dot, qk_ddot] = kin.bodyModel.bodies{k}.joint.GenerateTrajectory(qk_s, qk_s_d, qk_s_dd, qk_e, qk_e_d, qk_e_dd, total_time, time_step);
+                [qk, qk_dot, qk_ddot] = bodiesObj.bodies{k}.joint.GenerateTrajectory(qk_s, qk_s_d, qk_s_dd, qk_e, qk_e_d, qk_e_dd, total_time, time_step);
 
                 q_array(ind_k_s_var:ind_k_e_var, :) = qk;
                 qd_array(ind_k_s_dof:ind_k_e_dof, :) = qk_dot;
                 qdd_array(ind_k_s_dof:ind_k_e_dof, :) = qk_ddot;
-                index_dof = index_dof+kin.bodyModel.bodies{k}.joint.numDofs;
-                index_var = index_var+kin.bodyModel.bodies{k}.joint.numVars;
+                index_dof = index_dof+bodiesObj.bodies{k}.joint.numDofs;
+                index_var = index_var+bodiesObj.bodies{k}.joint.numVars;
             end
             s_q = size(q_array);
             s_q_d = size(qd_array);
