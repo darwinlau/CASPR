@@ -13,6 +13,8 @@ classdef Quaternion
     end
     
     methods
+        % Constructor for a quaternion object where the quaternion is of
+        % the form q = q0 + q1*i + q2*j + q3*k
         function q = Quaternion(q0, q1, q2, q3)
             if nargin > 0
                 q.q0 = q0;
@@ -22,6 +24,7 @@ classdef Quaternion
             end
         end
         
+        % Quaternion inversion. q_inv = q_bar/||q||^2
         function q_inv = inv(q)
             q_inv = Quaternion;
             q_conj = conj(q);
@@ -41,7 +44,7 @@ classdef Quaternion
             % Otherwise this is wrong anyway
         end
         
-        
+        % Multiplication of a quaternion.
         function q = mtimes(qa, qb)
             q = Quaternion;
             if (isnumeric(qa))
@@ -62,18 +65,22 @@ classdef Quaternion
             end
         end
         
+        % Quaternion addition
         function q = plus(qa, qb)
             q = Quaternion(qa.q0+qb.q0, qa.q1+qb.q1, qa.q2+qb.q2, qa.q3+qb.q3);
         end
         
+        % Quaternion subtraction
         function q = minus(qa, qb)
             q = Quaternion(qa.q0-qb.q0, qa.q1-qb.q1, qa.q2-qb.q2, qa.q3-qb.q3);
         end
         
+        % Quaternion norm. This is consistent with a vector norm.
         function n = norm(q)
             n = sqrt(q.q0^2 + q.q1^2 + q.q2^2 + q.q3^2);
         end
         
+        % Quaternion conjugate. q_bar = q0 - q1*i - q2*j - q3*k
         function q_c = conj(q)
             q_c = Quaternion;
             q_c.q0 = q.q0;
@@ -82,6 +89,7 @@ classdef Quaternion
             q_c.q3 = -q.q3;
         end
         
+        % Exponential power for the quaternian
         function q_e = exp(q)
             e_p = exp(q.q0);
             v = [q.q1; q.q2; q.q3];
@@ -98,10 +106,13 @@ classdef Quaternion
             q_e = Quaternion(q_0, q_1, q_2, q_3);
         end
         
+        % Conversion of the quaternion to a vector
         function q_vec = toVector(obj)
             q_vec = [obj.q0; obj.q1; obj.q2; obj.q3];
         end
         
+        % Normalisation of the quaternion. This results in a scaled
+        % quaternion with magnitude 1.
         function q_out = normalise(obj)
             if (abs(obj.q0) == 1)
                 q_out = Quaternion(obj.q0, 0, 0, 0);
@@ -113,6 +124,7 @@ classdef Quaternion
     end
     
     methods (Static)
+        % Convert from rotation matrix to quaternion
         function q_0p = FromRotationMatrix(R_0p)
             q_0p = Quaternion;
             q_0p.q0 = 1/2*sqrt(1 + R_0p(1,1) + R_0p(2,2) + R_0p(3,3));
@@ -121,6 +133,7 @@ classdef Quaternion
             q_0p.q3 = (R_0p(2,1) - R_0p(1,2))/(4*q_0p.q0);
         end
         
+        % Convert from rotation axis angle representation to quaternion
         function q = FromAxisAngle(a)
             q = Quaternion;
             q.q0 = cos(a.th/2);
@@ -129,6 +142,8 @@ classdef Quaternion
             q.q3 = a.kz*sin(a.th/2);
         end
         
+        % Compute the quaternion derivative given axis angle and its
+        % derivative
         function q_d = DerivativeFromAxisAngle(a, a_d)
             q_d = Quaternion;
             q_d.q0 = -a_d.th/2*sin(a.th/2);
@@ -137,6 +152,8 @@ classdef Quaternion
             q_d.q3 = a.kz*a_d.th/2*cos(a.th/2);
         end
         
+        % Compute the quaternion double derivative given axis angle and its
+        % derivatives
         function q_dd = DoubleDerivativeFromAxisAngle(a, a_d, a_dd)
             q_dd = Quaternion;
                 
@@ -157,6 +174,8 @@ classdef Quaternion
                 -2*q_0*q_2+2*q_1*q_3, 2*q_0*q_1+2*q_2*q_3, 1-2*(q_1^2+q_2^2)];
         end
         
+        % Converts quaternion and its derivative to a derivative of a
+        % rotation matrix
         function R_0p_d = ToRotationMatrixDeriv(q, qd)
             q_0 = q.q0;
             q_1 = q.q1;
@@ -171,6 +190,8 @@ classdef Quaternion
                 -2*q0_d*q_2-2*q_0*q2_d+2*q1_d*q_3+2*q_1*q3_d, 2*q0_d*q_1+2*q_0*q1_d+2*q2_d*q_3+2*q_2*q3_d, -4*q1_d*q_1-4*q2_d*q_2];
         end
         
+        % Converts quaternion and its derivatives to a double derivative of a
+        % rotation matrix
         function R_0p_dd = ToRotationMatrixDoubleDeriv(q, qd, qdd)
             q_0 = q.q0;
             q_1 = q.q1;
@@ -189,6 +210,7 @@ classdef Quaternion
                 -2*q0_dd*q_2-4*q0_d*q2_d-2*q_0*q2_dd+2*q1_dd*q_3+4*q1_d*q3_d+2*q_1*q3_dd, 2*q0_dd*q_1+4*q0_d*q1_d+2*q_0*q1_dd+2*q2_dd*q_3+4*q2_d*q3_d+2*q_2*q3_dd, -4*q1_dd*q_1-4*q1_d^2-4*q2_dd*q_2-4*q2_d^2];
         end
         
+        % Interpolation for a quaternion
         function [q, q_d, q_dd] = GenerateInterpolation(q_s, q_e, time)
             % Step 1 Quaternion axis and rotation (possibly to optimise in
             % the future)

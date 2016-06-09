@@ -6,13 +6,15 @@
 classdef WrenchSet < handle
         
     properties (SetAccess = protected)
-        n_faces
-        A
+        n_faces         % The number of faces for the wrench set
+        A               % The polytope is described by A*x <= b
         b
-        v
+        v               % The vertices of the polytope
     end
     
     methods
+        % Build the wrench set given the Jacobian matrix and force
+        % bounds. This version calls qhull
 %         function id = WrenchSet(L,f_u,f_l)
 %             n = size(L,2); m = size(L,1);
 %             q = 2^m;
@@ -55,7 +57,8 @@ classdef WrenchSet < handle
 %             id.b = -T(:,n+1);
 %         end
         
-        % External Call Free Version
+        % Builds the wrench set using the jacobian and force bounds. This
+        % version does not make an external system call.
         function id = WrenchSet(L,f_u,f_l,offset)
             n = size(L,2); m = size(L,1);
             q = 2^m;
@@ -110,6 +113,9 @@ classdef WrenchSet < handle
 %             end
         end
         
+        % Approximate the wrench set with a sphere at position G with
+        % radius s. The radius corresponds to the radius of the capacity
+        % margin
         function w_approx_sphere = sphereApproximationCapacity(obj,G)
             q = obj.n_faces;
             s = zeros(q,1);
@@ -120,6 +126,7 @@ classdef WrenchSet < handle
             w_approx_sphere = WrenchSetSphere(G,s);
         end
         
+        % Determines the largest sphere enclosed within the wrench set.
         function w_approx_sphere = sphereApproximationChebyshev(obj)
             q = obj.n_faces;
             n = size(obj.A,2);
@@ -138,12 +145,15 @@ classdef WrenchSet < handle
             w_approx_sphere = WrenchSetSphere(o(1:2),o(3));
         end
         
+        % Approximate the wrench set with the largest sphere containing the
+        % reference point.
         function w_approx_sphere = sphereApproximationMax(obj,x_ref,buffer)
             options = optimoptions('fmincon','Algorithm','active-set','Display','off');
             [T,r,~] = fmincon(@(x) costMinRad(x,obj.A,obj.b),[0;0],obj.A,obj.b,[],[],[],[],@(x) constraintPointContained(x,obj.A,obj.b,x_ref,buffer),options);
             w_approx_sphere = WrenchSetSphere(T,r);
         end
         
+        % Approximates the wrench set to account for the coriolis.
         function w_approx_sphere = sphereApproximationCoriolis(obj,G,q2)
             % THIS NEEDS TO BE CHANGED LATER
             q = obj.n_faces;

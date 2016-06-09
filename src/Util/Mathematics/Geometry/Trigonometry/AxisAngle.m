@@ -13,6 +13,7 @@ classdef AxisAngle
     end
     
     methods
+        % Construct a new axis angle object
         function a = AxisAngle(th, kx, ky, kz)
             if nargin > 0
                 a.th = th;
@@ -24,6 +25,7 @@ classdef AxisAngle
     end
     
     methods (Static)
+        % Convert a quaternion into the axis angle representation
         function a = FromQuaternion(q)
             a = AxisAngle;
             a.th = 2*acos(q.q0);

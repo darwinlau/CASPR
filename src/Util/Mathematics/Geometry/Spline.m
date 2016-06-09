@@ -9,6 +9,8 @@ classdef Spline
     end
     
     methods (Static)
+        % Construct a qunitic spline interpolation given the boundary
+        % points of the initial and final position, velocity and accelerations. 
         function [x, x_dot, x_ddot] = QuinticInterpolation(x_s, x_s_dot, x_s_ddot, x_e, x_e_dot, x_e_ddot, t)
             t_s = t(1);
             t_e = t(length(t));

@@ -6,14 +6,15 @@
 classdef WrenchSetSphere < handle
         
     properties (SetAccess = protected)
-        r
-        T
+        radius
+        origin
     end
     
     methods
+        % Constructor for a spherical wrench set.
         function id = WrenchSetSphere(T,r)
-            id.T = T;
-            id.r = r;
+            id.origin = T;
+            id.radius = r;
         end
     end
 end

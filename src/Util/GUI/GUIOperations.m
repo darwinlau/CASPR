@@ -14,6 +14,9 @@ classdef GUIOperations
             settings =  XmlOperations.XmlReadRemoveIndents([path_string,str]);
         end
         
+        % Converts and xmlobj into a cell array of strings.  This function
+        % looks through the xml object and returns all strings with the
+        % attribute given by str.
         function str_cell_array = XmlObj2StringCellArray(xmlObj,str)
             if(isempty(str))
                 str_cell_array = cell(1,xmlObj.getLength);
@@ -32,6 +35,7 @@ classdef GUIOperations
             end
         end
             
+        % Create a tab group for the gui
         function CreateTabGroup(handles)
             tabgp = uitabgroup(handles.tab_panel,'Position',[0 0 1 1]);
             % A temporary hack to make the figures plot correctly
@@ -42,6 +46,8 @@ classdef GUIOperations
             setappdata(handles.figure1,'tabgp',tabgp);
         end
         
+        % Generate a new plot for the GUI using the given plotting
+        % function. This new plot will be inserted into a new tab.
         function GUIPlot(plot_type,sim,handles,figure_quantity,tab_toggle)
             plot_function = str2func(plot_type);
             if(tab_toggle)
