@@ -3,10 +3,19 @@
 % Created:      2016
 % Description:
 function initialise_CASPR()
+    % Workout the delimiter symbol for PATH string
+    if ismac || isunix
+        path_delimiter = ':';
+    elseif ispc
+        path_delimiter = ';';
+    else
+        error('Platform not supported');
+    end
+    
     % Remove any path that contains CASPR
     fprintf('Cleaning Libraries\n')
     p = path;
-    p = strsplit(p,':');
+    p = strsplit(p, path_delimiter);
     index = false(size(p));
     for i = 1:length(index)
         if(~isempty(strfind(p{i},'CASPR')))
@@ -22,7 +31,7 @@ function initialise_CASPR()
     fprintf('Adding Libraries\n')
     home_path = cd;
     path_list = genpath(home_path);
-    path_list = strsplit(path_list,':');
+    path_list = strsplit(path_list, path_delimiter);
     for i = 1:length(path_list)
         if(~isempty(strfind(path_list{i},'.git')))
             path_list{i} = '';

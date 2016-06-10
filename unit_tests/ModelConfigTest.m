@@ -15,11 +15,11 @@ classdef ModelConfigTest < matlab.unittest.TestCase
             unique_cell_array = unique(cell_array{1});
             % Two tests are conducted firstly are there any repeated files
             % in the materlist
-            assert(length(cell_array{1}) == length(unique_cell_array),'There are repeated identifiers in the master list')
+            assert(length(cell_array{1}) == length(unique_cell_array),'There are repeated identifiers in the master list');
             % Secondly does each iterm in the list map to an enum.
             for i = 1:length(cell_array{1})
                 % Check if the enum exists
-                eval(['ModelConfigType.',cell_array{1}{i}]);
+                ModelConfigType.(cell_array{1}{i});
             end
         end
         

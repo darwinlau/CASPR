@@ -35,11 +35,12 @@ function setup_CASPR
     fprintf('----------------------------------------------------\n\n')
 
     % Run unit tests to confirm that the models are correctly setup
-    suite = matlab.unittest.TestSuite.fromFile('ModelConfigTest.m');
-    suite.run;
+    %suite = matlab.unittest.TestSuite.fromFile('ModelConfigTest.m');
+    %suite.run;
+    runtests('ModelConfigTest');
     
     fprintf('\n----------------------------------------------------\n')
-    fprintf('Installation Complete\n')
+    fprintf('CASPR Setup Complete. Enjoy!\n')
     fprintf('----------------------------------------------------\n\n')
     
 %     if(~check_unit_tests(home_path))
@@ -50,10 +51,14 @@ end
 
 % Check the dependencies have been correctly setup.
 function OK = check_dependencies()
+    % First check it is a known operating system
+    assert(ismac || isunix || ispc, 'Operating system platform not supported');
+    
     % Code to test the matlab version
     mver = ver('MATLAB');
     fprintf('- Checking MATLAB version... \n\r');
     vv = regexp(mver.Version,'\.','split');
+	fprintf('MATLAB version: %s\n\r',mver.Release);
     if(str2double(vv{1}) < 9)
         if(str2double(vv{2}) < 3)
             fprintf('WARNING: CASPR is designed for MATLAB versions from 2014a onwards. Certain functionality may not work on this version\n\r');
