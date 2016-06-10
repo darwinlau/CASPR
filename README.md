@@ -22,7 +22,9 @@ As the software is run through MATLAB, it is necessary that MATLAB is first inst
 ## Installation: ##
 1. Download the latest version of CASPR from the repository.
   * To allow for updates and to make changes to the repository please do this through the operation
+
     git clone https://github.com/darwinlau/CASPR_private.git
+
 2. Extract the downloaded CASPR folder and place the extracted folder into the directory of your choosing.
 3. Open MATLAB and change the file path to be that of the extracted CASPR root directory.
 4. Run the script setup_CASPR.m. This will test the installation and confirm that CASPR is ready to be run.
@@ -45,6 +47,7 @@ Further information for setting up each of these toolboxes is contained below
 1. Go to the qhull website <http://www.qhull.org/download/> and download the latest version of qhull that is appropriate for your operating system.
 2. Follow the installation instructions provided for your operating system in the file *README.txt*
 3. To allow for CASPR to access the compiled qhull code, move the compiled versionof the code to the subdirectory *dependencies* that is located in your *CASPR* root directory.
+
 ### optitoolbox Installation ###
 1. Go to the optitoolbox website <http://www.i2c2.aut.ac.nz/Wiki/OPTI/index.php/DL/DownloadOPTI> and download the latest version of the toolbox.
 2. Extract the downloaded folder (preferably into the *dependencies* subdirectory).
