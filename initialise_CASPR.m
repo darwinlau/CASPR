@@ -20,15 +20,22 @@ function initialise_CASPR()
     
     % Add the necessaey paths
     fprintf('Adding Libraries\n')
-    path_list = genpath(cd);
+    home_path = cd;
+    path_list = genpath(home_path);
     path_list = strsplit(path_list,':');
     for i = 1:length(path_list)
-        if(~isempty(strfind(path_list{i},'.git'))||~isempty(strfind(path_list{i},'/log/')))
+        if(~isempty(strfind(path_list{i},'.git')))
             path_list{i} = '';
         end
     end
     addpath(path_list{:});
     rehash
     fprintf('Libraries have been set up\n')
+    
+    % Store the home directory
+    if(~exist([home_path,'/logs'],'dir'))
+        mkdir('logs')
+    end
+    save('logs/CASPR_environment.mat','home_path');
 end
 

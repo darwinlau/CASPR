@@ -35,6 +35,13 @@ function setup_CASPR
     fprintf('----------------------------------------------------\n\n')
 
     % Run unit tests to confirm that the models are correctly setup
+    suite = matlab.unittest.TestSuite.fromFile('ModelConfigTest.m');
+    suite.run;
+    
+    fprintf('\n----------------------------------------------------\n')
+    fprintf('Installation Complete\n')
+    fprintf('----------------------------------------------------\n\n')
+    
 %     if(~check_unit_tests(home_path))
 %         return;
 %     end
@@ -56,7 +63,7 @@ function OK = check_dependencies()
     % Optitoolbox
     fprintf('- Checking OptiToolbox...\n\r');
     if(~strcmp(mexext,'mexw32')&&~strcmp(mexext,'mexw64'))
-       fprintf('WARNING: OPTI Toolbox is compiled only for Windows systems. Some functionality will be lost for this version. \n\r');
+       fprintf('[WARNING]: OPTI Toolbox is compiled only for Windows systems. Some functionality will be lost for this version. \n\r');
     else
         % Test opti
         if(strcmp(mexext,'mexw32'))
@@ -68,7 +75,7 @@ function OK = check_dependencies()
         % Test if optitoolbox is in the path
         p = path;
         if(isempty(strfind(p,'OptiToolbox')))
-            fprintf('WARNING: OptiToolbox is not your matlab file path.\n\r');
+            fprintf('[WARNING]: OptiToolbox is not your matlab file path.\n\r');
         else
             opti_Install_Test(1)
         end
@@ -84,7 +91,7 @@ function OK = check_dependencies()
     if(exist(qhull_file,'file'))
         fprintf('qhull is built to specificiations\n\r')
     else
-        fprintf('WARNING:  You do not seem to have qhull installed or it is not in the expected location.\n\r');
+        fprintf('[WARNING]:  You do not seem to have qhull installed or it is not in the expected location.\n\r');
     end
     OK = 1;
 end

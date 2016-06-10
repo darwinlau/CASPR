@@ -45,6 +45,7 @@ classdef ModelConfig
             % Load the contents
             cell_array = textscan(fid,'%s %s %s %s %s %s','delimiter',',');
             i_length = length(cell_array{1});
+            status_flag = 1;
             % Loop through until the right line of the list is found
             for i = 1:i_length
                 if(strcmp(char(cell_array{1}{i}),type_string))
@@ -56,10 +57,11 @@ classdef ModelConfig
                         c.opFilename = [c.root_folder, cdpr_folder,char(cell_array{6}{i})];
                     end
                     fclose(fid);
+                    status_flag = 0;
                     break;
                 end
             end
-            if(i==i_length)
+            if(status_flag)
                 error('ModelConfig type is not defined');
             end
                         
