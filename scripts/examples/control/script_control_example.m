@@ -24,20 +24,14 @@ controller = ComputedTorqueController(modelObj, id_solver, Kp_computedtorque, Kd
 % Setup the inverse dynamics simulator with the SystemKinematicsDynamics
 % object and the inverse dynamics solver
 disp('Start Setup Simulation');
-start_tic = tic;
 fdSolver = ForwardDynamics(FDSolverType.ODE113);
 control_sim = ControllerSimulator(modelObj, controller, fdSolver);
 trajectory_ref = model_config.getTrajectory(trajectory_id);
-time_elapsed = toc(start_tic);
-fprintf('End Setup Simulation : %f seconds\n', time_elapsed);
 
 % Run the solver on the desired trajectory
 disp('Start Running Simulation');
-start_tic = tic;
 error0 = [0.1; -0.1; 0.2; 0; 0; 0];
 control_sim.run(trajectory_ref, trajectory_ref.q{1} + error0, trajectory_ref.q_dot{1}, trajectory_ref.q_ddot{1});
-time_elapsed = toc(start_tic);
-fprintf('End Running Simulation : %f seconds\n', time_elapsed);
 
 control_sim.plotCableForces([],[]);
 control_sim.plotJointSpaceTracking([],[]);

@@ -17,26 +17,17 @@ modelObj = model_config.getModel(cable_set_id);
 
 % Setup the inverse kinematics simulator with the SystemKinematics object
 disp('Start Setup Simulation');
-start_tic = tic;
 sim = InverseKinematicsSimulator(modelObj);
 trajectory = model_config.getTrajectory(trajectory_id);
-time_elapsed = toc(start_tic);
-fprintf('End Setup Simulation : %f seconds\n', time_elapsed);
 
 % Run the kinematics on the desired trajectory
 disp('Start Running Simulation');
-start_tic = tic;
 sim.run(trajectory);
-time_elapsed = toc(start_tic);
-fprintf('End Running Simulation : %f seconds\n', time_elapsed);
 
 % After running the simulator the data can be plotted
 % Refer to the simulator classes to see what can be plotted.
 disp('Start Plotting Simulation');
-start_tic = tic;
-% sim.plotMovie(model_config.displayRange, [fileparts(mfilename('fullpath')), '\CDPR_movie.avi'], 2, 500, 640);
 sim.plotJointSpace([],[]);
 sim.plotCableLengths([],[]);
 sim.plotBodyCOG([],[]);
-time_elapsed = toc(start_tic);
-fprintf('End Plotting Simulation : %f seconds\n', time_elapsed);
+% sim.plotMovie(model_config.displayRange, [fileparts(mfilename('fullpath')), '\CDPR_movie.avi'], 2, 500, 640);

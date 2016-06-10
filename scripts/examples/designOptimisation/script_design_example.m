@@ -30,16 +30,10 @@ MotionSimulator.PlotFrame(modelObj, [-3 3 -3 3 0 5]);
 % Setup the inverse dynamics simulator with the SystemKinematicsDynamics
 % object and the inverse dynamics solver
 disp('Start Setup Simulation');
-start_tic = tic;
 idsim = InverseDynamicsSimulator(modelObj, idsolver);
-time_elapsed = toc(start_tic);
-fprintf('End Setup Simulation : %f seconds\n', time_elapsed);
 
 % Run the solver on the desired trajectory
 disp('Start Running Simulation');
-start_tic = tic;
 idsim.run(trajectory);
-time_elapsed = toc(start_tic);
-fprintf('End Running Simulation : %f seconds\n', time_elapsed);
 idsim.plotCableForces([], []);
 

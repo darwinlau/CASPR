@@ -10,7 +10,7 @@ clear; clc; close all;
 % Set up the type of model:
 model_config = ModelConfig(ModelConfigType.M_SEGESTA);
 
-% The XML objects from the model config are created
+% The SystemModel is created
 cdpr = model_config.getModel(model_config.defaultCableSetId);
 
 % Plot to see the robot
