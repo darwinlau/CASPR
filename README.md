@@ -28,14 +28,14 @@ As the software is run through MATLAB, it is necessary that MATLAB is first inst
 2. Extract the downloaded CASPR folder and place the extracted folder into the directory of your choosing.
 3. Open MATLAB and change the file path to be that of the extracted CASPR root directory.
 4. Run the script setup_CASPR.m. This will test the installation and confirm that CASPR is ready to be run.
-
+**Additional Note:** All subsequent sessions running CASPR should be started by running the initialise_CASPR.m function from the CASPR root directory.
 ## Contributors ##
-As an open source platform CASPR new developments into CASPR are welcome as are feedback/notification of bugs. CASPR is currently maintained by
+As an open source platform new developments into CASPR are welcome as are feedback/notification of bugs. CASPR is currently maintained by
 * Darwin Lau:     <darwinlau@mae.cuhk.edu.hk>
 * Jonathan Eden:  <jpeden@student.unimelb.edu.au>
 
 ## Further Documentation: ##
-Now that you have installed CASPR please look at the *CASPR_101* pdf for further information regarding .
+Now that you have installed CASPR please look at *CASPR_101.pdf*  for further information regarding the operation of CASPR as well as the documentation page **To be inserted**.
 
 ## Dependency Installation ##
 In addition to the core code base, some analysis techniques within CASPR require the use of additional software dependencies. These dependencies include
@@ -50,6 +50,6 @@ Further information for setting up each of these toolboxes is contained below
 
 ### optitoolbox Installation ###
 1. Go to the optitoolbox website <http://www.i2c2.aut.ac.nz/Wiki/OPTI/index.php/DL/DownloadOPTI> and download the latest version of the toolbox.
-2. Extract the downloaded folder (preferably into the *dependencies* subdirectory).
+2. Extract the downloaded folder.
 3. Open MATLAB into the directory of the extracted folder.
-4. Run opti_Install to finalise the installation.
+4. Run opti_Install.m to finalise the installation.

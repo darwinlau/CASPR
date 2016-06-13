@@ -21,6 +21,7 @@ classdef IDSolverOperationalNullSpace < IDSolverBase
         constraints = {}
         options
         f0_previous = []
+        is_OptiToolbox
     end
     methods
         % A constructor for the class.
@@ -31,6 +32,13 @@ classdef IDSolverOperationalNullSpace < IDSolverBase
             id.W0 = W0;
             id.active_set = [];
             id.options = [];
+            % Test if OptiToolbox is installed
+            if(isempty(strfind(path,'OptiToolbox')))
+                warning('OptiToolbox is not installed, switching to MATLAB solver');
+                id.is_OptiToolbox = 0;
+            else
+                id.is_OptiToolbox = 1;
+            end
         end
         
         % The implementation of the resolveFunction
@@ -73,10 +81,24 @@ classdef IDSolverOperationalNullSpace < IDSolverBase
                         obj.options = optimoptions('quadprog', 'Display', 'off', 'MaxIter', 100);
                     end 
                     [f0_soln, id_exit_type] = id_qp_matlab(QP_A, QP_b, A_ineq, b_ineq, [], [], [], [], obj.f0_previous, obj.options);
-               case ID_QP_SolverType.OPTITOOLBOX_IPOPT
-                    [f0_soln, id_exit_type] = id_qp_optitoolbox_ipopt(QP_A, QP_b, A_ineq, b_ineq, [], [], [], [], obj.f0_previous);
+                case ID_QP_SolverType.OPTITOOLBOX_IPOPT
+                    if(obj.is_OptiToolbox)
+                        [f0_soln, id_exit_type] = id_qp_optitoolbox_ipopt(QP_A, QP_b, A_ineq, b_ineq, [], [], [], [], obj.f0_previous);
+                    else
+                        if(isempty(obj.options))
+                            obj.options = optimoptions('quadprog', 'Display', 'off', 'MaxIter', 100);
+                        end
+                        [f0_soln, id_exit_type] = id_qp_matlab(QP_A, QP_b, A_ineq, b_ineq, [], [], [], [], obj.f0_previous, obj.options);
+                    end
                 case ID_QP_SolverType.OPTITOOLBOX_OOQP
-                    [f0_soln, id_exit_type] = id_qp_optitoolbox_ooqp(QP_A, QP_b, A_ineq, b_ineq, [], [], [], [], obj.f0_previous);
+                    if(obj.is_OptiToolbox)
+                        [f0_soln, id_exit_type] = id_qp_optitoolbox_ooqp(QP_A, QP_b, A_ineq, b_ineq, [], [], [], [], obj.f0_previous);
+                    else
+                        if(isempty(obj.options))
+                            obj.options = optimoptions('quadprog', 'Display', 'off', 'MaxIter', 100);
+                        end
+                        [f0_soln, id_exit_type] = id_qp_matlab(QP_A, QP_b, A_ineq, b_ineq, [], [], [], [], obj.f0_previous, obj.options);
+                    end
                 otherwise
                     error('ID_QP_SolverType type is not defined');
             end

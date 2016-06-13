@@ -270,7 +270,7 @@ function save_button_Callback(~, ~, handles) %#ok<DEFNU>
     % handles    structure with handles and user data (see GUIDATA)
     path_string = fileparts(mfilename('fullpath'));
     path_string = path_string(1:strfind(path_string, 'GUI')-2);
-    file_name = [path_string,'\logs\*.mat'];
+    file_name = [path_string,'/logs/*.mat'];
     [file,path] = uiputfile(file_name,'Save file name');
     saveState(handles,[path,file]);
 end
@@ -282,7 +282,7 @@ function load_button_Callback(~, ~, handles) %#ok<DEFNU>
     % handles    structure with handles and user data (see GUIDATA)
     path_string = fileparts(mfilename('fullpath'));
     path_string = path_string(1:strfind(path_string, 'GUI')-2);
-    file_name = [path_string,'\logs\*.mat'];
+    file_name = [path_string,'/logs/*.mat'];
     settings = uigetfile(file_name);
     load(settings)
     mp_text = get(handles.model_text,'String');
@@ -489,7 +489,7 @@ function saveState(handles,file_path)
     else
         path_string                             =   fileparts(mfilename('fullpath'));
         path_string                             =   path_string(1:strfind(path_string, 'GUI')-2);
-        save([path_string,'\logs\workspace_gui_state.mat'],'state')
+        save([path_string,'/logs/workspace_gui_state.mat'],'state')
     end
 end
 
@@ -497,13 +497,15 @@ function loadState(handles)
     % load all of the settings and initialise the values to match
     path_string = fileparts(mfilename('fullpath'));
     path_string = path_string(1:strfind(path_string, 'GUI')-2);
-    file_name = [path_string,'\logs\upcra_gui_state.mat'];
+    file_name = [path_string,'/logs/upcra_gui_state.mat'];
     if(exist(file_name,'file'))
         load(file_name)
         set(handles.model_text,'String',state.model_text);
         set(handles.cable_text,'String',state.cable_text);
+        % This is to ensure that we are starting fresh
+        state.modObj.bodyModel.occupied.reset();
         setappdata(handles.cable_text,'modObj',state.modObj);
-        file_name = [path_string,'\logs\workspace_gui_state.mat'];
+        file_name = [path_string,'/logs/workspace_gui_state.mat'];
         format_q_table(state.modObj.numDofs,handles.qtable)
         if(exist(file_name,'file'))
             load(file_name)

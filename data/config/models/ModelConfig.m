@@ -105,6 +105,20 @@ classdef ModelConfig
             traj_xmlobj = obj.getTrajectoryXmlObj(trajectory_id);
             traj = JointTrajectory.LoadXmlObj(traj_xmlobj, obj.bodiesModel);
         end
+        
+        function cableset_str = getCableSetList(obj)
+            cablesetsObj = obj.cablesXmlObj.getElementsByTagName('cables').item(0).getElementsByTagName('cable_set');
+            cableset_str = cell(1,cablesetsObj.getLength);
+            % Extract the identifies from the cable sets
+            for i =1 :cablesetsObj.getLength
+                cablesetObj = cablesetsObj.item(i-1);
+                cableset_str{i} = char(cablesetObj.getAttribute('id'));
+            end
+        end
+        
+        function trajectories_str = getTrajectoriesList(obj)
+            trajectories_str = GUIOperations.XmlObj2StringCellArray(obj.trajectoriesXmlObj.getElementsByTagName('trajectories').item(0).getElementsByTagName('trajectory'),'id');
+        end
     end
     
     methods (Access = private)

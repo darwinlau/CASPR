@@ -278,25 +278,15 @@ function generate_model_object(handles)
     contents = cellstr(get(handles.model_popup,'String'));
     model_type = contents{get(handles.model_popup,'Value')};
     model_config = ModelConfig(ModelConfigType.(['M_',model_type]));
-    bodies_xmlobj = model_config.getBodiesPropertiesXmlObj();
     contents = cellstr(get(handles.cable_popup,'String'));
     cable_set_id = contents{get(handles.cable_popup,'Value')};
-    cableset_xmlobj = model_config.getCableSetXmlObj(cable_set_id);
-    modObj = SystemModel.LoadXmlObj(bodies_xmlobj, cableset_xmlobj);
+    modObj = model_config.getModel(cable_set_id);
     cla;
-    display_range = bodies_xmlobj.getElementsByTagName('display_range').item(0);
-    if(isempty(display_range))
-        axis_range = [-10,10,-10,10,-10,10];
-        MotionSimulator.PlotFrame(modObj, [-10,10,-10,10,-10,10],handles.figure1);
-    else
-        axis_range = str2num(display_range.getFirstChild.getData); %#ok<ST2NM>
-        MotionSimulator.PlotFrame(modObj, axis_range,handles.figure1);
-%         f = figure;
-%         MotionSimulator.PlotFrame(modObj, axis_range,f);
-    end
+    display_range = model_config.displayRange;
+    MotionSimulator.PlotFrame(modObj, display_range,handles.figure1);
     % Store the dynamics object
     setappdata(handles.cable_popup,'modObj',modObj);
-    setappdata(handles.cable_popup,'axis_range',axis_range);
+    setappdata(handles.cable_popup,'axis_range',display_range);
     set(handles.model_label_text,'String',model_type);
     format_q_table(modObj.numDofs,handles.qtable);
 end
@@ -307,13 +297,14 @@ function cable_popup_update(handles)
     model_type = contents{get(handles.model_popup,'Value')};
     model_config = ModelConfig(ModelConfigType.(['M_',model_type]));
     % Determine the cable sets
-    cablesetsObj = model_config.cablesXmlObj.getElementsByTagName('cables').item(0).getElementsByTagName('cable_set');
-    cableset_str = cell(1,cablesetsObj.getLength);
-    % Extract the identifies from the cable sets
-    for i =1 :cablesetsObj.getLength
-        cablesetObj = cablesetsObj.item(i-1);
-        cableset_str{i} = char(cablesetObj.getAttribute('id'));
-    end
+%     cablesetsObj = model_config.cablesXmlObj.getElementsByTagName('cables').item(0).getElementsByTagName('cable_set');
+%     cableset_str = cell(1,cablesetsObj.getLength);
+%     % Extract the identifies from the cable sets
+%     for i =1 :cablesetsObj.getLength
+%         cablesetObj = cablesetsObj.item(i-1);
+%         cableset_str{i} = char(cablesetObj.getAttribute('id'));
+%     end
+    cableset_str = model_config.getCableSetList();
     set(handles.cable_popup, 'Value', 1);
     set(handles.cable_popup, 'String', cableset_str);
     generate_model_object(handles);
@@ -335,14 +326,14 @@ function saveState(handles)
     if(exist([path_string,'/logs'],'dir')~=7)
         mkdir([path_string,'/logs']);        
     end
-    save([path_string,'\logs\upcra_gui_state.mat'],'state');
+    save([path_string,'/logs/upcra_gui_state.mat'],'state');
 end
 
 function loadState(handles)
     % load all of the settings and initialise the values to match
     path_string = fileparts(mfilename('fullpath'));
     path_string = path_string(1:strfind(path_string, 'GUI')-2);
-    file_name = [path_string,'\logs\upcra_gui_state.mat'];
+    file_name = [path_string,'/logs/upcra_gui_state.mat'];
     if(exist(file_name,'file'))
         load(file_name);
         set(handles.model_popup,'value',state.model_popup_value);

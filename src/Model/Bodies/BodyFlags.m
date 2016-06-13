@@ -20,6 +20,14 @@ classdef BodyFlags < handle
            occupied.hessian         =   false;
            occupied.linearisation   =   false;
         end
+        
+        % Resets the body flags to their default state
+        function reset(obj)
+           obj.dynamics        =   false;
+           obj.op_space        =   false;
+           obj.hessian         =   false;
+           obj.linearisation   =   false;
+        end
     end
     
 end

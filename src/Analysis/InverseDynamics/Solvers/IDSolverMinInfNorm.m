@@ -13,6 +13,7 @@ classdef IDSolverMinInfNorm < IDSolverBase
         objective
         constraints = {}
         options
+        is_OptiToolbox
     end
     methods
         % The constructor for the class.
@@ -21,6 +22,13 @@ classdef IDSolverMinInfNorm < IDSolverBase
             id.objective = objective;
             id.lp_solver_type = lp_solver_type;
             id.options = [];
+            % Test if OptiToolbox is installed
+            if(isempty(strfind(path,'OptiToolbox')))
+                warning('OptiToolbox is not installed, switching to MATLAB solver');
+                id.is_OptiToolbox = 0;
+            else
+                id.is_OptiToolbox = 1;
+            end
         end
         
         % The implementation for the resolveFunction
@@ -64,17 +72,33 @@ classdef IDSolverMinInfNorm < IDSolverBase
                     [temp_cable_forces, id_exit_type] = id_lp_matlab(f, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, f0,obj.options);
                     cable_forces = temp_cable_forces(1:m);
                 case ID_LP_SolverType.OPTITOOLBOX_OOQP
-                    if(isempty(obj.options))
-                        obj.options = optiset('solver', 'OOQP', 'maxiter', 100);
-                    end 
-                    [temp_cable_forces, id_exit_type] = id_lp_opti(f, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, f0,obj.options);
-                    cable_forces = temp_cable_forces(1:m);
-                case ID_LP_SolverType.OPTITOOLBOX_LP_SOLVE
-                    if(isempty(obj.options))
-                        obj.options = optiset('solver', 'LP_SOLVE', 'maxiter', 100,'display','off','warnings','none');
+                    if(obj.is_OptiToolbox)
+                        if(isempty(obj.options))
+                            obj.options = optiset('solver', 'OOQP', 'maxiter', 100);
+                        end 
+                        [temp_cable_forces, id_exit_type] = id_lp_opti(f, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, f0,obj.options);
+                        cable_forces = temp_cable_forces(1:m);
+                    else
+                        if(isempty(obj.options))
+                            obj.options = optimoptions('linprog', 'Display', 'off', 'Algorithm', 'interior-point');
+                        end
+                        [temp_cable_forces, id_exit_type] = id_lp_matlab(f, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, f0,obj.options);
+                        cable_forces = temp_cable_forces(1:m);
                     end
-                    [temp_cable_forces, id_exit_type] = id_lp_opti(f, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, f0,obj.options);
-                    cable_forces = temp_cable_forces(1:m);
+                case ID_LP_SolverType.OPTITOOLBOX_LP_SOLVE
+                    if(obj.is_OptiToolbox)
+                        if(isempty(obj.options))
+                            obj.options = optiset('solver', 'LP_SOLVE', 'maxiter', 100,'display','off','warnings','none');
+                        end
+                        [temp_cable_forces, id_exit_type] = id_lp_opti(f, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, f0,obj.options);
+                        cable_forces = temp_cable_forces(1:m);
+                    else
+                        if(isempty(obj.options))
+                            obj.options = optimoptions('linprog', 'Display', 'off', 'Algorithm', 'interior-point');
+                        end
+                        [temp_cable_forces, id_exit_type] = id_lp_matlab(f, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, f0,obj.options);
+                        cable_forces = temp_cable_forces(1:m);
+                    end
                 otherwise
                     error('ID_LP_SolverType type is not defined');
             end

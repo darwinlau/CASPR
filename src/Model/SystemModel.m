@@ -247,7 +247,6 @@ classdef SystemModel < handle
             value = obj.bodyModel.P.'*(obj.cableModel.V.'*obj.cableModel.forces + obj.bodyModel.M_b*obj.q_ddot + obj.bodyModel.C_b - obj.bodyModel.G_b);
         end
 
-
         function value = get.interactionForceMagnitudes(obj)
             vector = obj.interactionWrench;
             mag = zeros(obj.numLinks,1);

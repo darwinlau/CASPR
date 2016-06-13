@@ -13,6 +13,7 @@ classdef IDSolverQuadProg < IDSolverBase
         objective
         constraints = {}
         options
+        is_OptiToolbox
     end
     methods
         % The contructor for the class.
@@ -22,6 +23,13 @@ classdef IDSolverQuadProg < IDSolverBase
             id.qp_solver_type = qp_solver_type;
             id.active_set = [];
             id.options = [];
+            % Test if OptiToolbox is installed
+            if(isempty(strfind(path,'OptiToolbox')))
+                warning('OptiToolbox is not installed, switching to MATLAB solver');
+                id.is_OptiToolbox = 0;
+            else
+                id.is_OptiToolbox = 1;
+            end
         end
         
         % The implementation of the resolve function.
@@ -60,16 +68,30 @@ classdef IDSolverQuadProg < IDSolverBase
                     [cable_forces, id_exit_type,obj.active_set] = id_qp_matlab_active_set_warm_start(obj.objective.A, obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.active_set,obj.options);
                 % Uses the IPOPT algorithm from OptiToolbox
                 case ID_QP_SolverType.OPTITOOLBOX_IPOPT
-                    if(isempty(obj.options))
-                        obj.options = optiset('solver', 'IPOPT', 'maxiter', 100);
-                    end 
-                    [cable_forces, id_exit_type] = id_qp_opti(obj.objective.A, obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);
+                    if(obj.is_OptiToolbox)
+                        if(isempty(obj.options))
+                            obj.options = optiset('solver', 'IPOPT', 'maxiter', 100);
+                        end 
+                        [cable_forces, id_exit_type] = id_qp_opti(obj.objective.A, obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);
+                    else
+                        if(isempty(obj.options))
+                            obj.options = optimoptions('quadprog', 'Display', 'off', 'MaxIter', 100);
+                        end
+                        [cable_forces, id_exit_type] = id_qp_matlab(obj.objective.A, obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);
+                    end
                 % Uses the OOQP algorithm from the Optitoolbox
                 case ID_QP_SolverType.OPTITOOLBOX_OOQP
-                    if(isempty(obj.options))
-                        obj.options = optiset('solver', 'OOQP', 'maxiter', 100);
-                    end                    
-                    [cable_forces, id_exit_type] = id_qp_opti(obj.objective.A, obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);
+                    if(obj.is_OptiToolbox)
+                        if(isempty(obj.options))
+                            obj.options = optiset('solver', 'OOQP', 'maxiter', 100);
+                        end                    
+                        [cable_forces, id_exit_type] = id_qp_opti(obj.objective.A, obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);
+                    else
+                        if(isempty(obj.options))
+                            obj.options = optimoptions('quadprog', 'Display', 'off', 'MaxIter', 100);
+                        end
+                        [cable_forces, id_exit_type] = id_qp_matlab(obj.objective.A, obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);
+                    end
                 otherwise
                     error('ID_QP_SolverType type is not defined');
             end

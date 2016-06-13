@@ -163,8 +163,8 @@ function trajectory_popup_Update(~, ~, handles)
     model_type = contents{1};
     model_config = ModelConfig(ModelConfigType.(['M_',model_type]));
     setappdata(handles.trajectory_popup,'model_config',model_config);
-    % Determine the cable sets
-    trajectories_str = GUIOperations.XmlObj2StringCellArray(model_config.trajectoriesXmlObj.getElementsByTagName('trajectories').item(0).getElementsByTagName('trajectory'),'id');
+    % Determine the trajectories
+    trajectories_str = model_config.getTrajectoriesList();    
     set(handles.trajectory_popup, 'Value', 1);
     set(handles.trajectory_popup, 'String', trajectories_str);
 end
@@ -521,10 +521,8 @@ function run_button_Callback(~, ~, handles) %#ok<DEFNU>
     contents = cellstr(get(handles.trajectory_popup,'String'));
     trajectory_id = contents{get(handles.trajectory_popup,'Value')};
     model_config = getappdata(handles.trajectory_popup,'model_config');
-    trajectory_xmlobj = model_config.getTrajectoryXmlObj(trajectory_id);
     % Then read the form of dynamics
     modObj = getappdata(handles.cable_text,'modObj');
-    
     % Get the inverse dynamics object
     id_solver = load_idsolver(handles,modObj);
     
@@ -544,7 +542,7 @@ function run_button_Callback(~, ~, handles) %#ok<DEFNU>
     start_tic = tic;
     fdSolver = ForwardDynamics(FDSolverType.ODE113);
     control_sim = ControllerSimulator(modObj, controller,fdSolver);
-    trajectory_ref = JointTrajectory.LoadXmlObj(trajectory_xmlobj, modObj);
+    trajectory_ref = model_config.getTrajectory(trajectory_id);
     time_elapsed = toc(start_tic);
     fprintf('End Setup Simulation : %f seconds\n', time_elapsed);
 
@@ -580,7 +578,7 @@ function save_button_Callback(~, ~, handles) %#ok<DEFNU>
     % handles    structure with handles and user data (see GUIDATA)
     path_string = fileparts(mfilename('fullpath'));
     path_string = path_string(1:strfind(path_string, 'GUI')-2);
-    file_name = [path_string,'\logs\*.mat'];
+    file_name = [path_string,'/logs/*.mat'];
     [file,path] = uiputfile(file_name,'Save file name');
     saveState(handles,[path,file]);
 end
@@ -592,7 +590,7 @@ function load_button_Callback(~, ~, handles) %#ok<DEFNU>
     % handles    structure with handles and user data (see GUIDATA)
     path_string = fileparts(mfilename('fullpath'));
     path_string = path_string(1:strfind(path_string, 'GUI')-2);
-    file_name = [path_string,'\logs\*.mat'];
+    file_name = [path_string,'/logs/*.mat'];
     settings = uigetfile(file_name);
     load(settings);
     mp_text = get(handles.model_text,'String');
@@ -894,15 +892,17 @@ function loadState(handles)
     % load all of the settings and initialise the values to match
     path_string = fileparts(mfilename('fullpath'));
     path_string = path_string(1:strfind(path_string, 'GUI')-2);
-    file_name = [path_string,'\logs\upcra_gui_state.mat'];
+    file_name = [path_string,'/logs/upcra_gui_state.mat'];
     set(handles.status_text,'String','No simulation running');
     if(exist(file_name,'file'))
-        load(file_name)
+        load(file_name);
         set(handles.model_text,'String',state.model_text);
         set(handles.cable_text,'String',state.cable_text);
+        % This is to ensure that we are starting fresh
+        state.modObj.bodyModel.occupied.reset();
         setappdata(handles.cable_text,'modObj',state.modObj);
         trajectory_popup_Update([], [], handles);
-        file_name = [path_string,'\logs\control_gui_state.mat'];
+        file_name = [path_string,'/logs/control_gui_state.mat'];
         if(exist(file_name,'file'))
             load(file_name);
             mp_text = get(handles.model_text,'String');
@@ -962,7 +962,7 @@ function saveState(handles,file_path)
     else
         path_string                             =   fileparts(mfilename('fullpath'));
         path_string                             = path_string(1:strfind(path_string, 'GUI')-2);
-        save([path_string,'\logs\control_gui_state.mat'],'state')
+        save([path_string,'/logs/control_gui_state.mat'],'state')
     end
 end
 
