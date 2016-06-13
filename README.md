@@ -29,12 +29,14 @@ As the software is run through MATLAB, it is necessary that MATLAB is first inst
 3. (Optionally) install the CASPR depedencies. See [Dependency Installation](#dependency_install) for further details
 4. Open MATLAB and change the file path to be that of the extracted CASPR root directory.
 5. Run the script setup_CASPR.m. This will test the installation and confirm that CASPR is ready to be run.
+
 **Additional Note:** All subsequent sessions running CASPR should be started by running the initialise_CASPR.m function from the CASPR root directory.
 
 ## Contributors ##
 As an open source platform new developments into CASPR are welcome as are feedback/notification of bugs. CASPR is currently maintained by
 * Darwin Lau:     <darwinlau@mae.cuhk.edu.hk>
 * Jonathan Eden:  <jpeden@student.unimelb.edu.au>
+
 For notification of issues please use the issues tab within the github page.  For more detailed communication please email Darwin Lau at <darwinlau@mae.cuhk.edu.hk>.
 
 ## Further Documentation: ##
