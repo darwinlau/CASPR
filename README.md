@@ -19,25 +19,28 @@ CASPR has been developed in Windows and ideally should be run on 32-bit and 64-b
 ### MATLAB: ###
 As the software is run through MATLAB, it is necessary that MATLAB is first installed before running CASPR. CASPR has been tested for MATLAB versions 2014a onwards. The core of CASPR will work for older versions, however certain newer functions may need to be replaced with the equivalent depreciated function call.
 
-## Installation: ##
+## Setup: ##
 1. Download the latest version of CASPR from the repository.
   * To allow for updates and to make changes to the repository please do this through the operation
 
     git clone https://github.com/darwinlau/CASPR_private.git
 
 2. Extract the downloaded CASPR folder and place the extracted folder into the directory of your choosing.
-3. Open MATLAB and change the file path to be that of the extracted CASPR root directory.
-4. Run the script setup_CASPR.m. This will test the installation and confirm that CASPR is ready to be run.
+3. (Optionally) install the CASPR depedencies. See [Dependency Installation](#dependency_install) for further details
+4. Open MATLAB and change the file path to be that of the extracted CASPR root directory.
+5. Run the script setup_CASPR.m. This will test the installation and confirm that CASPR is ready to be run.
 **Additional Note:** All subsequent sessions running CASPR should be started by running the initialise_CASPR.m function from the CASPR root directory.
+
 ## Contributors ##
 As an open source platform new developments into CASPR are welcome as are feedback/notification of bugs. CASPR is currently maintained by
 * Darwin Lau:     <darwinlau@mae.cuhk.edu.hk>
 * Jonathan Eden:  <jpeden@student.unimelb.edu.au>
+For notification of issues please use the issues tab within the github page.  For more detailed communication please email Darwin Lau at <darwinlau@mae.cuhk.edu.hk>.
 
 ## Further Documentation: ##
 Now that you have installed CASPR please look at *CASPR_101.pdf*  for further information regarding the operation of CASPR as well as the documentation page **To be inserted**.
 
-## Dependency Installation ##
+## <a name="dependency_install"></a> Dependency Installation ##
 In addition to the core code base, some analysis techniques within CASPR require the use of additional software dependencies. These dependencies include
 * 'qhull' - This is a convex hull library that is used throughout the *Workspace* analysis module.
 * 'optitoolbox' - This is a MATLAB optimisation toolbox. The toolbox is used within the *Inverse Dynamics* and *Design Optimisation* modules.
