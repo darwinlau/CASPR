@@ -1,23 +1,27 @@
-% An approximation of the dexterity measure which applies to 
-% systems subject to unilateral constraints.
+% A measure of the relative tension distribution for the cables which can
+% be used to evaluate the quality of wrench closure at a specific
+% configuration.
 %
 % Please cite the following paper when using this algorithm:
-% R. Kurtz and V. Hayward, "Dexterity measures with unilateral actuation 
-% constraints: the n+ 1 case", Advanced Robotics, vol. 9, no. 5, pp.
-% 561-577, 1994.
+% C.B Pham, S.H Yeo, G. Yang and I. Chen, "Workspace analysis of fully
+% restrained cable-driven manipulators", Robotics and Autonomous Systems, 
+% vol. 57, no. 9, pp. 901-912, 2009.
 %
-% This method has been modified to consider arbitrary cable numbers.
+% This method has been modified to consider singular value
 %
 % Author        : Jonathan EDEN
 % Created       : 2016
-% Description   : 
-classdef UnilateralDexterityMetric < WorkspaceMetric
+% Description   : Implementation of the tension factor metric. This now
+% includes the singular value and considers the effect of removing cables
+classdef TensionFactorModifiedMetric < WorkspaceMetric
     properties (SetAccess = protected, GetAccess = protected)
     end
     
     methods
         % Constructor
-        function m = UnilateralDexterityMetric()
+        function m = TensionFactorModifiedMetric()
+            m.metricMin = 0;
+            m.metricMax = 1;
         end
         
         % Evaluate function implementation
@@ -34,8 +38,8 @@ classdef UnilateralDexterityMetric < WorkspaceMetric
             if((exit_flag == 1) && (rank(L) == dynamics.numDofs))
                 % ADD A LATER FLAG THAT CAN USE WCW IF ALREADY TESTED
                 h = u/norm(u);
-                h_min = min(h);
-                v = sqrt(dynamics.numCables+1)*(1/k)*(h_min/sqrt(h_min^2+1));
+                h_min = min(h); h_max = max(h);
+                v = (1/k)*(h_min/h_max);
                 % Now check if a cable is not necessary (this is only one
                 % cable for now future work will look at combinatorics)
                 for i=1:dynamics.numCables
@@ -47,7 +51,7 @@ classdef UnilateralDexterityMetric < WorkspaceMetric
                     % Test if Jacobian has a positive spanning subspace
                     f       =   ones(dynamics.numCables-1,1);
                     Aeq     =   -L_m';
-                    lb      =   1e-6*ones(dynamics.numCables-1,1);
+                    lb      =   1e-9*ones(dynamics.numCables-1,1);
                     ub      =   Inf*ones(dynamics.numCables-1,1);
                     [u,~,exit_flag] = linprog(f,[],[],Aeq,zeros(dynamics.numDofs,1),lb,ub,[],options);
                     % Test if the Jacobian is full rank
@@ -55,8 +59,8 @@ classdef UnilateralDexterityMetric < WorkspaceMetric
                         h = u/norm(u);
                         Sigma = svd(-L_m');
                         k = max(Sigma)/min(Sigma);
-                        h_min = min(h);
-                        temp_v = sqrt(dynamics.numCables)*(1/k)*(h_min/(sqrt(h_min^2+1)));
+                        h_min = min(h); h_max = max(h);
+                        temp_v = (1/k)*(h_min/h_max);
                         if(temp_v > v)
                             v = temp_v;
                         end

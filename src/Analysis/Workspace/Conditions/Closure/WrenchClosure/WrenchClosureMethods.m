@@ -4,18 +4,10 @@
 % Description    : Enum class for different wrench closure methods
 classdef WrenchClosureMethods
     enumeration 
-        QP
-        TF
-        UD
-        SS
-        CNS
-        CPS
-    end
-    
-    methods (Static)
-        % Lists the workspace methods for the GUI
-        function L = workspace_method_list()
-            L = {'quad_prog','tension_factor','unilateral_dexterity','combinatoric_null_space','combinatoric_positive_span'};
-        end
+        M_QUAD_PROG
+        M_TENSION_FACTOR
+        M_UNILATERAL_DEXTERITY
+        M_COMBINATORIC_NULL_SPACE
+        M_COMBINATORIC_POSITIVE_SPAN
     end
 end

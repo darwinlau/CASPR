@@ -1,9 +1,10 @@
 % An efficient inverse dynamics solver for CDPR systems.
 %
 % Please cite the following paper when using this algorithm:
-% A. Pott and T. Bruckmann and L. Mikelsons "Closed-form force 
-% distribution for parallel wire robots. In Computational kinematics,
-% pp 25-34. Springer, Berlin, 2009.
+% K. M�ller and C. Reichert and T. Bruckmann. 
+% "Analysis of a real-time capable cable force computation method." 
+% In Cable-Driven Parallel Robots, pp. 227-238. Springer International 
+% Publishing, 2015.
 %
 % Author        : Jonathan EDEN
 % Created       : 2016

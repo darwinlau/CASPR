@@ -6,7 +6,7 @@
 % Description    : This class is the class for static workspace evaluation.
 % Different implementations are treated as individual function calls for the
 % evaluate function.
-classdef WorkspaceStatic < WorkspaceConditionBase    
+classdef WorkspaceStatic < WorkspaceCondition
     properties (SetAccess = protected, GetAccess = protected)
         options                         % The options for the wrench closure
     end
@@ -15,39 +15,25 @@ classdef WorkspaceStatic < WorkspaceConditionBase
         % The constructor for this class.
         function w = WorkspaceStatic(method)
             w.options               =   optimset('display','off','Algorithm','interior-point-convex');
-            if(nargin>0)
-                if(strcmp(method,'quad_prog'))
-                    w.method = WorkspaceStaticMethods.QP;
-                elseif(strcmp(method,'capacity_margin'))
-                    w.method = WorkspaceStaticMethods.CMa;
-                elseif(strcmp(method,'capability_measure'))
-                    w.method = WorkspaceStaticMethods.CMe;
-                else
-                    msg = 'Incorrect static workspace method set';
-                    error(msg);
-                end
-            % Translate the method into an enum
+            if(isempty(method))
+                w.method = [];
             else
-                w.method = WorkspaceStaticMethods.QP;
+                w.method = method; 
             end 
         end
         
         % The implementation of the evaluateFunction method
         function inWorkspace = evaluateFunction(obj,dynamics)
-           if(obj.method == WorkspaceStaticMethods.QP)
-               inWorkspace = static_quadprog(dynamics,obj.options);
-           elseif(obj.method == WorkspaceStaticMethods.CMa)
-               inWorkspace = static_capacity_margin(dynamics,obj.options);
-           else
-               inWorkspace = static_capability_measure(dynamics,obj.options);
-           end
-        end
-        
-        % The implementation of the connected method
-        function [isConnected] = connected(obj,workspace,i,j,grid)
-            % This file may need a dynamics object added at a later date
-            tol = 1e-6;
-            isConnected = sum((abs(workspace(:,i) - workspace(:,j)) < grid.delta_q+tol)) + sum((abs(workspace(:,i) - workspace(:,j)-2*pi) < grid.delta_q+tol)) + sum((abs(workspace(:,i) - workspace(:,j)+2*pi) < grid.delta_q+tol)) == grid.n_dimensions;
+            switch(method)
+                case WorkspaceStaticMethods.M_QUAD_PROG
+                    inWorkspace = static_quadprog(dynamics,obj.options);
+                case WorkspaceStaticMethods.M_CAPACITY_MARGIN
+                    inWorkspace = static_capacity_margin(dynamics,obj.options);
+                case WorkspaceStaticMethods.M_SEACM
+                    inWorkspace = static_capability_measure(dynamics,obj.options);
+                otherwise
+                    error('static workspace method is not defined');
+            end
         end
         
         % A function to be used to set options.

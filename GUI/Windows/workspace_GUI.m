@@ -147,9 +147,15 @@ function workspace_generation_popup_Update(hObject,handles)
     settings = getappdata(handles.workspace_condition_popup,'settings');
     workspaceObj = settings.getElementById(workspace_condition_id);
     enum_file = workspaceObj.getElementsByTagName('generation_method_enum').item(0).getFirstChild.getData;
-    workspace_generation_list = eval([char(enum_file),'.workspace_method_list()']);
+    e_list      =   enumeration(char(enum_file));
+    e_n         =   length(e_list);
+    e_list_str  =   cell(1,e_n);
+    for i=1:e_n
+        temp_str = char(e_list(i));
+        e_list_str{i} = temp_str(3:length(temp_str));
+    end
     set(hObject,'Value',1);
-    set(hObject, 'String', workspace_generation_list);
+    set(hObject, 'String', e_list_str);
 end
 
 % --- Executes during object creation, after setting all properties.
@@ -313,29 +319,35 @@ function generate_button_Callback(~, ~, handles) %#ok<DEFNU>
     modObj = getappdata(handles.cable_text,'modObj');
     %% Workspace Setup
     % First the condition
+    % THIS CAN BE NEATENED
     contents = cellstr(get(handles.workspace_condition_popup,'String'));
-    cfh = str2func(contents{get(handles.workspace_condition_popup,'Value')});
+    wc_string = contents{get(handles.workspace_condition_popup,'Value')};
     contents = cellstr(get(handles.workspace_generation_popup,'String'));
-    wcondition  = cfh(contents{get(handles.workspace_generation_popup,'Value')});
+    wcm_string = contents{get(handles.workspace_generation_popup,'Value')};    
+    settings = getappdata(handles.workspace_condition_popup,'settings');
+    workspaceObj = settings.getElementById(wc_string);
+    enum_file = workspaceObj.getElementsByTagName('generation_method_enum').item(0).getFirstChild.getData;
+    wcondition = {WorkspaceCondition.CreateWorkspaceCondition(eval(['WorkspaceConditionType.',wc_string]),eval([char(enum_file),'.M_',wcm_string]),[])};
 %     wcondition  = cfh(contents{get(handles.workspace_generation_popup,'Value')},[-1,1,0,0;0,0,-1,1]);
     % Then the metric
     contents = cellstr(get(handles.workspace_metric_popup,'String'));
     if(strcmp(contents{get(handles.workspace_metric_popup,'Value')},' '))
-        metric = NullMetric();
+        metric = {};
     else
-        mfh = str2func(contents{get(handles.workspace_metric_popup,'Value')});
-        metric = mfh();
+        wmetric = contents{get(handles.workspace_metric_popup,'Value')};
+        metric = {WorkspaceMetric.CreateWorkspaceMetric(eval(['WorkspaceMetricType.',wmetric]),[])};
     end
     %% Now initialise the simulation
     disp('Start Setup Simulation');
     set(handles.status_text,'String','Setting up simulation');
     drawnow;
     start_tic       =   tic;
-    wsim            =   WorkspaceSimulator(modObj,wcondition,metric);
     q_info = get(handles.qtable,'Data');
     uGrid           =   UniformGrid(q_info(:,1),q_info(:,2),q_info(:,3));
     contents = cellstr(get(handles.plot_type_popup,'String'));
     plot_type = contents{get(handles.plot_type_popup,'Value')};
+    opt = WorkspaceSimulatorOptions(true); % I need to add this as an option
+    wsim            =   WorkspaceSimulator(modObj,uGrid,wcondition,metric,opt);
     %% Now set up the grid information
     time_elapsed    =   toc(start_tic);
     fprintf('End Setup Simulation : %f seconds\n', time_elapsed);
@@ -344,7 +356,7 @@ function generate_button_Callback(~, ~, handles) %#ok<DEFNU>
     set(handles.status_text,'String','Simulation running');
     drawnow;
     start_tic       =   tic;
-    wsim.run(uGrid);
+    wsim.run([]); % THIS SHOULD BE MODIFIED TO ALLOW THE WORKSPACE TO BE SUPPLIED
     time_elapsed    =   toc(start_tic);
     fprintf('End Running Simulation : %f seconds\n', time_elapsed);
     
@@ -352,11 +364,7 @@ function generate_button_Callback(~, ~, handles) %#ok<DEFNU>
     set(handles.status_text,'String','Simulation plotting');
     drawnow;
     start_tic = tic;
-    GUIOperations.GUIPlot(plot_type,wsim,handles,str2double(getappdata(handles.plot_type_popup,'num_plots')),get(handles.undock_box,'Value'));
-%     axes(handles.workspace_axes);
-%     cla;
-%     wsim.plotWorkspace();
-    % wsim.plotWorkspaceHigherDimension()
+    % ADD THIS BACK GUIOperations.GUIPlot(plot_type,wsim,handles,str2double(getappdata(handles.plot_type_popup,'num_plots')),get(handles.undock_box,'Value'));
     time_elapsed = toc(start_tic);
     fprintf('End Plotting Simulation : %f seconds\n', time_elapsed);
     set(handles.status_text,'String','No simulation running');

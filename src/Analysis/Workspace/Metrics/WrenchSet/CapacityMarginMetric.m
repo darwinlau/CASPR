@@ -14,7 +14,7 @@
 % Author        : Jonathan EDEN
 % Created       : 2016
 % Description   : Capacity margin metric
-classdef CapacityMarginMetric < WorkspaceMetricBase
+classdef CapacityMarginMetric < WorkspaceMetric
     properties (SetAccess = protected, GetAccess = protected)
         desired_wrench_set
     end
@@ -26,7 +26,7 @@ classdef CapacityMarginMetric < WorkspaceMetricBase
         end
         
         % Evaluate Function implementation
-        function v = evaluateFunction(obj,dynamics,~,~,~)
+        function v = evaluateFunction(obj,dynamics,~)
             L   =   dynamics.L;
             f_u =   dynamics.forcesMax;
             f_l =   dynamics.forcesMin;

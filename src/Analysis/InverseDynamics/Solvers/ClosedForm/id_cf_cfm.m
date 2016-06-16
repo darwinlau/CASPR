@@ -1,8 +1,8 @@
 % An efficient inverse dynamics solver for CDPR systems.
 %
 % Please cite the following paper when using this algorithm:
-% A. Pott and T. Bruckmann and L. Mikelsons "Closed-form force 
-% distribution for parallel wire robots. In Computational kinematics,
+% A. Pott and T. Bruckmann and L. Mikelsons "Closed-form force
+% distribution for parallel wire robots". In Computational kinematics,
 % pp 25-34. Springer, Berlin, 2009.
 %
 % Author        : Jonathan EDEN
@@ -19,4 +19,3 @@ function [ x_opt, exit_type ] = id_cf_cfm(A_eq, b_eq, x_min, x_max)
         exit_type = IDSolverExitType.NO_ERROR;
     end
 end
-

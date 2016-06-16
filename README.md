@@ -1,7 +1,7 @@
 # CASPR #
-The *Cable-robot Analysis and Simulation Platform for Research (CASPR)*  is a MATLAB toolbox that facilitates a range of analysis approaches on arbitrary cable-robot models.
+The *Cable-robot Analysis and Simulation Platform for Research (CASPR)*  is a software platform that is run through MATLAB that facilitates a range of analysis approaches on arbitrary cable-robot models.
 ## Purpose: ##
-The CASPR toolbox represents a unified development platform for the analysis of cable-driven parallel robots.  The current version of the toolbox contains analysis tools for each of the following fields of study:
+The CASPR software platform represents a unified development platform for the analysis of cable-driven parallel robots.  The current version of the platform contains analysis tools for each of the following fields of study:
 *  Dynamics and Control
   * Forward Dynamics
   * Inverse Dynamics
@@ -14,7 +14,7 @@ The CASPR toolbox represents a unified development platform for the analysis of 
 
 ## Environment Requirements: ##
 ### Operating System: ###
-CASPR has been developed in Windows and ideally should be run on 32-bit and 64-bit computers running that operating system. The toolbox has also been tested to work on the Linux Ubuntu distributions from 14.04 onwards, however some of the dependencies cannot be used.
+CASPR has been developed in Windows and ideally should be run on 32-bit and 64-bit computers running that operating system. The platform has also been tested to work on the Linux Ubuntu distributions from 14.04 onwards, however some of the dependencies cannot be used.
 
 ### MATLAB: ###
 As the software is run through MATLAB, it is necessary that MATLAB is first installed before running CASPR. CASPR has been tested for MATLAB versions 2014a onwards. The core of CASPR will work for older versions, however certain newer functions may need to be replaced with the equivalent depreciated function call.
