@@ -24,15 +24,16 @@ classdef (Abstract) WorkspaceMetric < handle
     methods
         % Evalute function returns a quantitative evaluation of a metric
         % given dynamics information
-        function [metric_cell, comp_time] = evaluate(obj,dynamics,options)
-            start_tic = tic;
+        function [metric_type,metric_value, comp_time] = evaluate(obj,dynamics,options)
+            start_tic   =   tic;
+            metric_type =   obj.type;
             f = obj.evaluateFunction(dynamics,options);
             if(f<obj.metricMin)
-                metric_cell = {obj.type,obj.metricMin};
+                metric_value = obj.metricMin;
             elseif(f>obj.metricMax)
-                metric_cell = {obj.type,obj.metricMax};
+                metric_value = obj.metricMax;
             else
-                metric_cell = {obj.type,f};
+                metric_value = f;
             end
             comp_time = toc(start_tic);
         end

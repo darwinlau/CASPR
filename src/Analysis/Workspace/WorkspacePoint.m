@@ -19,28 +19,32 @@ classdef WorkspacePoint < handle
             wp.conditions   = cell(0);
         end
         
-        function addMetric(obj,metric_cell)
+        function addMetric(obj,metric_type,metric_value)
             if(~isempty(obj.metrics))
                 % Test that this is a new metric
-                if(sum(metric_cell{1} == obj.metrics{:,1})==0)    
-                    obj.metrics{size(obj.metrics,1)+1,:} = metric_cell;
+                if(sum(metric_type == obj.metrics(:,1))==0)    
+                    s_l = size(obj.metrics,1)+1;
+                    obj.metrics{s_l,1} = metric_type;
+                    obj.metrics{s_l,2} = metric_value;
                 end
             else
-                obj.metrics{size(obj.metrics,1)+1} = metric_cell;
+                obj.metrics{1,1} = metric_type;
+                obj.metrics{1,2} = metric_value;
             end
         end
         
-        function addCondition(obj,condition_cell)
+        function addCondition(obj,condition_type,condition_value)
             if(~isempty(obj.conditions))
                 % Test that this is a new metric
-                if(sum(condition_cell{1} == obj.conditions{:,1})==0)    
-                    obj.conditions{size(obj.conditions,1)+1,:} = condition_cell;
+                if(sum(condition_type == obj.conditions(:,1))==0)    
+                    s_l = size(obj.conditions,1)+1;
+                    obj.conditions{s_l,1} = condition_type;
+                    obj.conditions{s_l,2} = condition_value;
                 end
             else
-                obj.conditions{size(obj.conditions,1)+1} = condition_cell;
+                obj.conditions{1,1} = condition_type;
+                obj.conditions{1,2} = condition_value;
             end
         end
-    end
-    
+    end    
 end
-

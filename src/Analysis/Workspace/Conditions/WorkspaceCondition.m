@@ -10,7 +10,6 @@
 %   Any new types of metrics need to be added to the WorkspaceConditionType 
 %   enum and also added to the CreateWorkspaceCondition method.
 classdef WorkspaceCondition < handle
-    
     properties 
         method          % Method of implementation (an enum)
         type            % Type of joint from JointType enum
@@ -19,10 +18,10 @@ classdef WorkspaceCondition < handle
     methods
         % The unified implemetnation of evaluate. This evaluates the object
         % dynamics to determine if the workspace condition is satisfied.
-        function [condition_cell, comp_time] = evaluate(obj,dynamics,workspace_point)
-            start_tic = tic;
-            f = obj.evaluateFunction(dynamics, workspace_point);
-            condition_cell = {obj.type,f};
+        function [condition_type, condition_value, comp_time] = evaluate(obj,dynamics,workspace_point)
+            start_tic       = tic;
+            condition_value = obj.evaluateFunction(dynamics, workspace_point);
+            condition_type  = obj.type;
             comp_time = toc(start_tic);
         end
     end
@@ -50,4 +49,3 @@ classdef WorkspaceCondition < handle
         end
     end
 end
-

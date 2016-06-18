@@ -52,15 +52,15 @@ classdef WorkspaceSimulator < Simulator
                 obj.model.update(q, zeros(obj.model.numDofs,1), zeros(obj.model.numDofs,1),zeros(obj.model.numDofs,1));
                 % For each metric compute the value of the point
                 for j = 1:length(obj.metrics)
-                    metric_cell    =   obj.metrics{j}.evaluate(obj.model,[]);
+                    [metric_type,metric_value]          =   obj.metrics{j}.evaluate(obj.model,[]);
                     % MAKE A DECISION REGARDING WHAT TO DO WITH THE METRICS
-                    wp.addMetric(metric_cell);
+                    wp.addMetric(metric_type,metric_value);
                 end
                 % Evaluate each condition
                 for j = 1:length(obj.conditions)
-                    condition_cell    =   obj.conditions{j}.evaluate(obj.model,wp);
-                    if(obj.options.full_storage||(condition_cell{2}==true))
-                        wp.addCondition(condition_cell);
+                    [condition_type,condition_value]    =   obj.conditions{j}.evaluate(obj.model,wp);
+                    if(obj.options.full_storage||(condition_value==true))
+                        wp.addCondition(condition_type,condition_value);
                     end
                 end
                 if(~isempty(wp.metrics)||~isempty(wp.conditions))
@@ -115,14 +115,14 @@ classdef WorkspaceSimulator < Simulator
                     point_list = obj.workspace{i}.conditions;
                 end
                 if(~isempty(point_list))
-                    for j = 1:length(obj.metrics)
-                        type_list(j) = point_list{j}{1};
+                    for j = 1:size(obj.metrics,1)
+                        type_list(j) = point_list{j,1};
                     end
                     val_index = find(type_list==colour_src);
                     if(~isempty(val_index))
                         index_vec = (obj.workspace{i}.pose - obj.grid.q_begin)./obj.grid.delta_q + [1;zeros(obj.grid.n_dimensions-1,1)];
                         index_num = int32(index_vec.'*mapping_vector);
-                        wsim_matrix(index_num) = point_list{val_index}{2};
+                        wsim_matrix(index_num) = point_list{val_index,2};
                     end
                 end
             end
@@ -156,13 +156,16 @@ classdef WorkspaceSimulator < Simulator
     end
     
     methods (Access=private)
-        % Plot the workspace for 2 and 3 dimensional objects
+        % Plot the workspace for condition 2 and 3 dimensional objects
         function plotWorkspaceCondition(obj,w_condition,plot_axis,pose_index)
             assert(~isempty(obj.conditions),'There are no conditions to plot')
             plotting_workspace = obj.workspace;
             for i =1:size(plotting_workspace,1)
                 wp = plotting_workspace{i};
-                if(isempty(wp.conditions)||(sum(w_condition == wp.conditions{:}{1})==0))
+                for j=1:size(wp.conditions,1)
+                    condition_list(j) = wp.conditions{j,1};
+                end
+                if(isempty(wp.conditions)||(sum(w_condition == condition_list)==0))
                     c = [1,1,1];
                 else
                     c = [0,0,0];
@@ -175,7 +178,7 @@ classdef WorkspaceSimulator < Simulator
             end
         end
         
-        % Plot the workspace for 2 and 3 dimensional objects
+        % Plot the workspace metric for 2 and 3 dimensional objects
         function plotWorkspaceMetric(obj,w_metric,plot_axis,pose_index)
             assert(~isempty(obj.metrics),'There are no metrics to plot')
             plotting_workspace = obj.workspace;
@@ -191,12 +194,14 @@ classdef WorkspaceSimulator < Simulator
             c_map = colormap(flipud(gray(floor(scale_factor*mw))));
             for i =1:size(plotting_workspace,1)
                 wp = plotting_workspace{i};
-                wp.metrics{:}{1}
-                if(isempty(wp.metrics)||(sum(w_metric == wp.metrics{:}{1})==0))
+                for j=1:size(wp.metrics,1)
+                    metric_list(j) = wp.metrics{j,1};
+                end
+                if(isempty(wp.metrics)||(sum(w_metric == metric_list)==0))
                     c = [1,1,1];
                 else
                     % Find which metric entry to use
-                    c = c_map(floor(sf*(wp.metrics{wp.metrics{:}{1}==colour_src}{2} - obj.metrics{metric_index}.metricMin)));
+                    c = c_map(floor(scale_factor*(wp.metrics{metric_list==w_metric,2} - obj.metrics{metric_index}.metricMin))+1,:);
                 end
                 if(numel(pose_index)==2)
                     plot(plot_axis,wp.pose(pose_index(1)),wp.pose(pose_index(2)),'Color',c,'Marker','.')

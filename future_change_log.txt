@@ -1,24 +1,4 @@
 Change Log
-    Needed testing
-	Test V
-	Test K
-
-    Needed Changes
-        Remove depreciated workspace classes
-
-        Add linearisation
-            Steps
-                1. Set up B matrix (this is simply [0;-M^-1L^T])
-                2. Set up A matrix
-                    - Compute gradient of M
-                    - Compute gradient of C (this may be a good point to move N matrix into tensor form)
-                    - Compute gradient of G
-                3. Is C necessary?
-
-        Integrate control and MP
-            Add functions such that MP output is suitable control input
-            Fix the MPC with the correct linearisation functions
-
     Time permitting
         Add weighted barycentres to ID
 
@@ -34,4 +14,6 @@ Change Log
 
         Fix how metrics and conditions are handled. Particularly ensure that computation is only
         performed once.
+
+
 
