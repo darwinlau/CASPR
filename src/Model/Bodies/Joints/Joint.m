@@ -13,12 +13,19 @@
 %   Any new types of joints need to be added to the JointType enum and also
 %   added to the CreateJoint method.
 classdef (Abstract) Joint < handle
+    properties
+        tau                 % Actuator effort for joint (if actuated)
+    end
    
     properties (SetAccess = private)
         type                % Type of joint from JointType enum
         q                   % Joint variable q (generalised coordinates)
         q_dot               % Derivative of q
         q_ddot              % Double derivative of q
+        
+        isActuated = 0      % Is this joint actuated, by default not actuated
+        tau_min             % Minimum actuation (if actuated)
+        tau_max             % Maximum actuation (if actuated)
         
         % Dependent but stored values (hence private set)
         R_pe                % The relative rotation
@@ -54,10 +61,8 @@ classdef (Abstract) Joint < handle
             obj.q_ddot = q_ddot;
             obj.R_pe = obj.RelRotationMatrix(q);
             obj.r_rel = obj.RelTranslationVector(q);
-%             obj.S = obj.RelVelocityMatrix(q);
             obj.S_grad  = obj.RelVelocityMatrixGradient(q);
             obj.S_dot_grad = obj.RelVelocityMatrixDerivGradient(q,q_dot);
-%             obj.S_dot = obj.RelVelocityMatrixDeriv(q, q_dot);
         end
         
         % -------
@@ -69,11 +74,17 @@ classdef (Abstract) Joint < handle
         
         function value = get.S_dot(obj)
             % Do we want this here or elsewhere
-            value = TensorOperations.VectorProduct(obj.S_grad,obj.q_dot,3,isa(obj.q,'sym'));
+            value = TensorOperations.VectorProduct(obj.S_grad, obj.q_dot, 3, isa(obj.q,'sym'));
         end
         
         function value = get.S(obj)
             value = obj.RelVelocityMatrix(obj.q);
+        end
+        
+        function set.tau(obj, value)
+            if (obj.isActuated)
+                obj.tau = value;
+            end
         end
 	end
         
@@ -110,12 +121,19 @@ classdef (Abstract) Joint < handle
             end
             j.type = jointType;
             j.update(j.q_default, j.q_dot_default, j.q_ddot_default);
+            j.tau = [];
+            j.tau_min = -Inf*ones(j.numDofs, 1);
+            j.tau_max = Inf*ones(j.numDofs, 1);
         end
         
         % Load new xml objects
         function j = LoadXmlObj(xmlObj)
             jointType = JointType.(char(xmlObj.getAttribute('type')));
             j = Joint.CreateJoint(jointType);
+            if (~isempty(xmlObj.getAttribute('actuated') == '') && strcmp(xmlObj.getAttribute('actuated'), 'true'))
+                j.isActuated = 1;
+                j.tau = zeros(j.numDofs, 1);
+            end
         end
         
         % Perform a simple first order integral

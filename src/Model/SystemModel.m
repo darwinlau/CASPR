@@ -88,6 +88,8 @@ classdef SystemModel < handle
         cableForces                 % cable forces
         forcesMin                   % vector of min forces from cables
         forcesMax                   % vector of max forces from cables
+        
+        jointTau                    % The joint actuator
     end
 
     methods (Static)
@@ -310,5 +312,13 @@ classdef SystemModel < handle
         function value = get.forcesMax(obj)
             value = obj.cableModel.forcesMax; 
         end        
+        
+        function value = get.jointTau(obj)
+            value = obj.bodyModel.tau;
+        end
+        
+        function set.jointTau(obj, value)
+            obj.bodyModel.tau = value;
+        end
     end
 end

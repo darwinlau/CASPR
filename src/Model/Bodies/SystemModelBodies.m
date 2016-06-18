@@ -103,6 +103,8 @@ classdef SystemModelBodies < handle
         q_ub
         % Generalised coordinates time derivative (for special cases q_dot does not equal q_deriv)
         q_deriv
+        numDofsActuated             % Number of actuated DoFs
+        tau                         % The joint actuator
     end
 
     properties
@@ -556,7 +558,7 @@ classdef SystemModelBodies < handle
                 obj.massInertiaMatrix(6*k-5:6*k, 6*k-5:6*k) = [obj.bodies{k}.m*eye(3) zeros(3,3); zeros(3,3) obj.bodies{k}.I_G];
             end
         end
-        
+                
         % Calculate the internal matrices for the quadratic form of the
         % Coriolis/Centrifugal forces.
         function N = calculate_N(obj)
@@ -864,6 +866,35 @@ classdef SystemModelBodies < handle
             end
             G_grad = obj.G_grad;
         end
+        
+        function val = get.numDofsActuated(obj)
+            val = 0;
+            for k = 1:obj.numLinks
+                if (obj.bodies{k}.joint.isActuated)
+                    val = val + obj.bodies{k}.joint.numDofs;
+                end
+            end
+        end
+        
+        function set.tau(obj, value)
+            assert(length(value) == obj.numDofsActuated, 'Cannot set tau since the value does not match the actuated DoFs');
+            count = 0;
+            for k = 1:obj.numLinks
+                if (obj.bodies{k}.joint.isActuated)
+                    obj.bodies{k}.joint.tau = value(count+1:count+obj.bodies{k}.joint.numDofs);
+                    count = count + obj.bodies{k}.joint.numDofs;
+                end
+            end
+        end
+        
+        function val = get.tau(obj)
+            val = [];
+            for k = 1:obj.numLinks
+                if (obj.bodies{k}.joint.isActuated)
+                    val = [val; obj.bodies{k}.joint.tau];
+                end
+            end
+        end
     end
 
     methods (Access = private)
@@ -1014,7 +1045,6 @@ classdef SystemModelBodies < handle
             % Load the body
             assert(strcmp(body_prop_xmlobj.getNodeName, 'links'), 'Root element should be <links>');
 
-%             allLinkItems = body_prop_xmlobj.getChildNodes;
             allLinkItems = body_prop_xmlobj.getElementsByTagName('link_rigid');
 
             num_links = allLinkItems.getLength;
