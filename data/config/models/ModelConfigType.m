@@ -26,5 +26,7 @@ classdef ModelConfigType
         M_2R_PLANAR_XZ
         M_NECK_8S
         M_CAREX
+        % HCDMs
+        M_SPIDERBOT_UR3
     end
 end
