@@ -51,7 +51,7 @@ classdef WrenchClosure < WorkspaceCondition
             for i = 1:length(workspace_point.metrics)
                 % Options are 1 if in workspace, 0 if not in workspace,
                 % -1 if metric doesn't give workspace information.
-                gm = obj.generating_metric(workspace_point.metrics{i}); 
+                gm = obj.generating_metric({workspace_point.metrics{i,:}}); 
                 if(gm==1)
                     inWorkspace = true;
                     return;
@@ -63,6 +63,7 @@ classdef WrenchClosure < WorkspaceCondition
             inWorkspace = wrench_closure_quadprog(dynamics,obj.options);
         end
         
+        % A use the metric for evaluation if it is there
         function val = generating_metric(~,metric)
             switch(metric{1})
                 case {WorkspaceMetricType.TENSION_FACTOR,WorkspaceMetricType.TENSION_FACTOR_MODIFIED,WorkspaceMetricType.UNILATERAL_DEXTERITY}

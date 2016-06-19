@@ -27,7 +27,6 @@ opt = WorkspaceSimulatorOptions(false);
 disp('Start Setup Simulation');
 wsim            =   WorkspaceSimulator(modelObj,uGrid,w_condition,w_metric,opt);
 
-
 % Run the simulation
 disp('Start Running Simulation');
 wsim.run([]);
@@ -35,3 +34,4 @@ wsim.run([]);
 % Plot the simulation
 disp('Start Plotting Simulation');
 wsim.plotWorkspace(WorkspaceConditionType.WRENCH_CLOSURE,[1,2],[]);
+%wsim.plotWorkspace(WorkspaceMetricType.TENSION_FACTOR,[1,2],[]);
