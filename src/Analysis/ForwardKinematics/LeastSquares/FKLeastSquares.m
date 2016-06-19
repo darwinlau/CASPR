@@ -28,7 +28,7 @@ classdef FKLeastSquares < FKAnalysisBase
                 case FK_LS_ApproxOptionType.USE_PREVIOUS_Q
                     q_approx = q_prev;
                 case FK_LS_ApproxOptionType.FIRST_ORDER_INTEGRATE_QDOT
-                    q_approx = obj.model.qIntegrate(q_prev, q_d_prev, delta_t);
+                    q_approx = obj.model.bodyModel.qIntegrate(q_prev, q_d_prev, delta_t);
                 case FK_LS_ApproxOptionType.FIRST_ORDER_INTEGRATE_PSEUDOINV
                     obj.model.update(q_prev, zeros(obj.model.numDofs,1), zeros(obj.model.numDofs,1), zeros(obj.model.numDofs,1));
                     if delta_t ~= 0
