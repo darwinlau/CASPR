@@ -2,6 +2,6 @@ $ git status
 
 # Untracked files:
 logs
-scripts/private/*
+scripts/local/*
 
 /**/*.asv
