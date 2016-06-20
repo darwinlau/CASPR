@@ -13,7 +13,7 @@
 %	(K_cable) and a variable stiffness actuator (K_vs). The stiffness of
 %	the VS actuator is dependent on the cable force, where there is a
 %	linear stiffness-displacement relationship. 
-classdef CableModelVSDFlexureLinear < CableModel        
+classdef CableModelVSDFlexureLinear < CableModelBase      
     properties (SetAccess = private)
         K_cable
         forceDeformationRelationCoeff
@@ -26,11 +26,11 @@ classdef CableModelVSDFlexureLinear < CableModel
         
     methods 
         function ck = CableModelVSDFlexureLinear(name, numLinks)
-            ck@CableModel(name, numLinks);
+            ck@CableModelBase(name, numLinks);
         end
         
         function update(obj, bodyModel)
-            update@CableModel(obj, bodyModel);
+            update@CableModelBase(obj, bodyModel);
         end
         
         function value = get.K(obj)
@@ -39,7 +39,7 @@ classdef CableModelVSDFlexureLinear < CableModel
         
         function value = get.K_vsd(obj)
             % Need to handle the case of no cable force assigned somehow
-            if (obj.force == CableModel.INVALID_FORCE)
+            if (obj.force == CableModelBase.INVALID_FORCE)
             end
             a = obj.forceDeformationRelationCoeff(1);
             b = obj.forceDeformationRelationCoeff(2);

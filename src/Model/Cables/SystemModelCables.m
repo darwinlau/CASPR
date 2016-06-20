@@ -238,7 +238,7 @@ classdef SystemModelCables < handle
         end
         
         function value = get.FORCES_INVALID(obj)
-            value = CableModel.INVALID_FORCE * ones(obj.numCables, 1);
+            value = CableModelBase.INVALID_FORCE * ones(obj.numCables, 1);
         end
     end
     

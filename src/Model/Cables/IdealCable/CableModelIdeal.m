@@ -7,18 +7,18 @@
 %	assumes a straight-line model between attachment points. As such, the
 %	only parameters that govern the kinematics of the ideal cable are the
 %	attachment locations of cables at each link.
-classdef CableModelIdeal < CableModel     
+classdef CableModelIdeal < CableModelBase     
     properties (Dependent)
         K
     end
     
     methods 
         function ck = CableModelIdeal(name, numLinks)
-            ck@CableModel(name, numLinks);
+            ck@CableModelBase(name, numLinks);
         end
         
         function update(obj, bodyModel)
-            update@CableModel(obj, bodyModel);
+            update@CableModelBase(obj, bodyModel);
         end
         
         function value = get.K(~)

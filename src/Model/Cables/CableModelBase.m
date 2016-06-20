@@ -4,7 +4,7 @@
 % robots:
 % D. Lau, D. Oetomo, and S. K. Halgamuge, "Generalized Modeling of
 % Multilink Cable-Driven Manipulators with Arbitrary Routing Using the
-% Cable-Routing Matrix," IEEE Trans. Robot., vol. 29, no. 5, pp. 1102–1113,
+% Cable-Routing Matrix," IEEE Trans. Robot., vol. 29, no. 5, pp. 1102ï¿½1113,
 % Oct. 2013.
 % 
 % Author        : Darwin LAU
@@ -15,14 +15,14 @@
 %       - the ability to add and remove segments
 %       - update the kinematics (i.e. attachment locations) of each segment
 %       - access the CRM term
-classdef (Abstract) CableModel < handle
+classdef (Abstract) CableModelBase < handle
     properties (Constant)
         INVALID_FORCE = -1
     end
     
     properties 
         % Actual cable force, use -1 to represent invalid forces
-        force = CableModel.INVALID_FORCE;
+        force = CableModelBase.INVALID_FORCE;
     end
     
     properties (SetAccess = protected)
@@ -48,7 +48,7 @@ classdef (Abstract) CableModel < handle
     end
         
     methods
-        function ck = CableModel(name, numLinks)
+        function ck = CableModelBase(name, numLinks)
             ck.name = name;
             ck.numLinks = numLinks;
         end

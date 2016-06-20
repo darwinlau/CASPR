@@ -12,7 +12,7 @@
 %	Variable stiffness actuator where the stiffness is a function of the
 %	cable force. The stiffness to displacement, and hence force,
 %	relationships are non-linear for this type of VSD.
-classdef CableModelVSDTorsionSpring < CableModel              
+classdef CableModelVSDTorsionSpring < CableModelBase              
     properties (SetAccess = private)
         K_cable
         numSprings
@@ -27,11 +27,11 @@ classdef CableModelVSDTorsionSpring < CableModel
     
     methods 
         function ck = CableModelVSDTorsionSpring(name, numLinks)
-            ck@CableModel(name, numLinks);
+            ck@CableModelBase(name, numLinks);
         end
         
         function update(obj, bodyModel)
-            update@CableModel(obj, bodyModel);
+            update@CableModelBase(obj, bodyModel);
         end
         
         function value = get.K(obj)
@@ -40,7 +40,7 @@ classdef CableModelVSDTorsionSpring < CableModel
         
         function value = get.K_vsd(obj)
             % Need to handle the case of no cable force assigned somehow
-            if (obj.force == CableModel.INVALID_FORCE)
+            if (obj.force == CableModelBase.INVALID_FORCE)
             end
             C_theta = (obj.force * obj.springLength)/(2 * obj.numSprings * obj.springStiffness);
             theta = (1.571 * C_theta^3 + 1.251 * C_theta^2 + 0.696 * C_theta - 0.0000158)/(C_theta^3 + 1.793 * C_theta^2 + 1.271 * C_theta + 0.695);
