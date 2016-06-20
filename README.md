@@ -1,18 +1,11 @@
 # CASPR #
 The *Cable-robot Analysis and Simulation Platform for Research (CASPR)*  is an open-source software platform developed in MATLAB that facilitates a range of analysis approaches on arbitrary cable-robot models.
 ## Purpose: ##
-CASPR is designed for researchers to perform study on Cable-Driven Parallel Robots (\emph{CDPRs}) with the following benefits:
-* **Comprehensive** range of different types of analyses on cable-driven parallel robots (\emph{CDPRs}): kinematics, dynamics, control, workspace analysis, and design optimisation.
-* **Extensive library** of existing state-of-the-art CDPR models already included, ranging from single link CDPRs to multilink CDPRs to hybrid acutated CDPRs. XML format of the CDPR model means it is easy to add and simulate your own CDPR.
-* **Perform research faster** for both existing and new researchers in CDPRs by removing the need to re-implement other algorithms and re-derive the system model.
-* **Modular software architecture** makes it easy to add, test and compare your own algorithms, implementations, cable models, types of joints and much more.
-* **Easily compare** different algorithms and implementations on the same machine for the same type of analysis and CDPR using the modular architecture and extensive library.
-* **Open-source** for the research community to contribute and share their research with everyone.
+CASPR is designed for researchers to perform study on Cable-Driven Parallel Robots (#CDPRs#). CASPR intends to prevent the "reinvent-the-wheel" problem from inhibiting the research progress and advancement of CDPRs. It looks to do this by providing researchers with
 
-CASPR intends to prevent the ``reinvent-the-wheel" problem from inhibiting the research progress and advancement of CDPRs. It looks to do this by providing researchers with
-1. The ability to use the extensive libraries and models of CASPR for the analysis of cable driven robots.
-2. The ability to easily contribute new analysis techniques and models to CASPR.
-3. The ability to share your research in a convenient and standardised format.
+1. The ability to use the extensive libraries and models of CASPR from the community for your research.
+2. The ability to easily and efficiently add, test and validate your algorithms and models.
+3. The ability to share your research to the community.
 
 The CASPR software platform represents a unified development platform for the analysis of cable-driven parallel robots.  The current version of the platform contains analysis tools for each of the following fields of study:
 *  Dynamics and Control
@@ -33,15 +26,16 @@ CASPR can be operated any version of Windows and Linux that runs MATLAB (refer b
 As the software is run through MATLAB, it is necessary that MATLAB is first installed before running CASPR. CASPR has been tested for MATLAB versions 2013a onwards. The core of CASPR will work for older versions, however certain newer functions may need to be replaced with the equivalent depreciated function call.
 
 ## Setup: ##
-1. Download the latest version of CASPR from the repository.
-  * To allow for updates and to make changes to the repository please do this through the operation
+1. There are two ways to download CASPR to your computer:
 
-    git clone https://github.com/darwinlau/CASPR.git
+  * [READ-ONLY ACCESS] - git clone https://github.com/darwinlau/CASPR.git
+  * [READ-CONTRIBUTE ACCESS] - Fork the CASPR repository onto your github account and then clone the new repository.
+    git clone https://github.com/YOUR_USER_NAME/CASPR.git
+    **Note:** For additional information regarding forking on github please refer to <https://help.github.com/articles/fork-a-repo/>
 
-2. Extract the downloaded CASPR folder and place the extracted folder into the directory of your choosing.
-3. (Optionally) install the CASPR depedencies. See [Dependency Installation](#dependency_install) for further details
-4. Open MATLAB and change the file path to be that of the extracted CASPR root directory.
-5. Run the script setup_CASPR.m. This will test the installation and confirm that CASPR is ready to be run.
+2. (Optionally) install the CASPR depedencies. See [Dependency Installation](#dependency_install) for further details
+3. Open MATLAB and change the file path to be that of the extracted CASPR root directory.
+4. Run the script setup_CASPR.m. This will test the installation and confirm that CASPR is ready to be run.
 
 **Additional Note:** All subsequent sessions running CASPR should be started by running the initialise_CASPR.m function from the CASPR root directory.
 
