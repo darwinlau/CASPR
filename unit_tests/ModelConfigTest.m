@@ -40,7 +40,7 @@ classdef ModelConfigTest < matlab.unittest.TestCase
             [mSet, mNames] = enumeration('JointType');
             for i = 1:length(mSet)
                 disp(['Testing JointType: ', mNames{i}]);
-                j = Joint.CreateJoint(mSet(i));
+                j = JointBase.CreateJoint(mSet(i));
                 testCase.assertNotEmpty(j);
             end
         end

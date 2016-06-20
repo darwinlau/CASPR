@@ -37,7 +37,7 @@ classdef SphericalQuaternion < JointBase
             else
                 q_quat_norm = Quaternion(q(1), q(2), q(3), q(4));
             end
-            update@Joint(obj, q_quat_norm.toVector(), q_dot, q_ddot);
+            update@JointBase(obj, q_quat_norm.toVector(), q_dot, q_ddot);
         end
         
         % -------

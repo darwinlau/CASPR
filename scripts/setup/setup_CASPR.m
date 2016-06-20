@@ -6,9 +6,9 @@
 % Description:
 function setup_CASPR
     clc;
-    home_path = cd;
+    cd('../..'); home_path = cd;
     try
-        cd('../../src/Analysis');
+        cd('src/Analysis');
     catch
         error('Incorrect folder structure or you have not called the function from the setup directory');
     end
@@ -19,15 +19,14 @@ function setup_CASPR
 
     cd(home_path);
     % Check the status of the dependencies
-    if(~check_dependencies())
-        return;
-    end
+    version_flag = check_dependencies();
     
     fprintf('\n----------------------------------------------------\n')
     fprintf('Initialising the Libraries\n')
     fprintf('----------------------------------------------------\n\n')
     
     % Add toolbox path to MATLAB (this is temporary)
+    ls
     initialise_CASPR;
     
     fprintf('\n----------------------------------------------------\n')
@@ -37,7 +36,18 @@ function setup_CASPR
     % Run unit tests to confirm that the models are correctly setup
     %suite = matlab.unittest.TestSuite.fromFile('ModelConfigTest.m');
     %suite.run;
-    runtests('ModelConfigTest');
+    if(version_flag)
+        suite = matlab.unittest.TestSuite.fromFile('ModelConfigTest.m');
+        results = suite.run;
+        if([results.Failed]==true)
+            fprintf('\n----------------------------------------------------\n')
+            fprintf('CASPR Failed to Install. Please view the Unit Test Output\n')
+            fprintf('----------------------------------------------------\n\n')
+            return;
+        end
+    else
+        runtests('ModelConfigTest');
+    end
     
     fprintf('\n----------------------------------------------------\n')
     fprintf('CASPR Setup Complete. Enjoy!\n')
@@ -50,9 +60,10 @@ end
 
 
 % Check the dependencies have been correctly setup.
-function OK = check_dependencies()
+function old_matlab_version = check_dependencies()
     % First check it is a known operating system
     assert(ismac || isunix || ispc, 'Operating system platform not supported');
+    old_matlab_version = 0;
     
     % Code to test the matlab version
     mver = ver('MATLAB');
@@ -61,6 +72,7 @@ function OK = check_dependencies()
 	fprintf('MATLAB version: %s\n\r',mver.Release);
     if(str2double(vv{1}) < 9)
         if(str2double(vv{2}) < 3)
+            old_matlab_version = 1; 
             fprintf('WARNING: CASPR is designed for MATLAB versions from 2014a onwards. Certain functionality may not work on this version\n\r');
         end
     end
@@ -98,5 +110,4 @@ function OK = check_dependencies()
     else
         fprintf('[WARNING]:  You do not seem to have qhull installed or it is not in the expected location.\n\r');
     end
-    OK = 1;
 end
