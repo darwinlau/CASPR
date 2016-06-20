@@ -3,7 +3,7 @@
 % Author        : Darwin LAU
 % Created       : 2012
 % Description   :
-classdef RevoluteY < Joint
+classdef RevoluteY < JointBase
     
     properties (Constant = true)
         numDofs = 1;

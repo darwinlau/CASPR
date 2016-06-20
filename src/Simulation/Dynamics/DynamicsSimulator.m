@@ -43,6 +43,8 @@ classdef DynamicsSimulator < MotionSimulator
                 figure;
                 plot(obj.timeVector, forces(cables_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); 
                 title('Cable forces');                 
+                xlabel('Time (seconds)')
+                ylabel('Force (N)');
             end
             
 %             line_color_order = [1 0 0; 0 1 0; 0 0 1; 0 1 1; 1 0 1; 1 1 0; 0 0 0; 1 165/255 0; 139/255 69/255 19/255];

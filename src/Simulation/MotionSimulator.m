@@ -124,11 +124,15 @@ classdef (Abstract) MotionSimulator < Simulator
                 figure;
                 plot(obj.timeVector, q_array(states_to_plot, :), 'Color', 'k', 'LineWidth', 1.5);
                 title('Joint space variables');
+                xlabel('Time (seconds)');
+                ylabel('Pose');
 
                 % Plots derivative joint space variables q_dot(t)
                 figure;
                 plot(obj.timeVector, q_dot_array(states_to_plot, :), 'Color', 'k', 'LineWidth', 1.5);
                 title('Joint space derivatives');
+                xlabel('Time (seconds)');
+                ylabel('Velocity');
             end
         end
 

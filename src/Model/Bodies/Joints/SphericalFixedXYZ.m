@@ -3,7 +3,7 @@
 % Author        : Darwin LAU
 % Created       : 2012
 % Description   :
-classdef SphericalFixedXYZ < Joint
+classdef SphericalFixedXYZ < JointBase
         
     properties (Constant = true)
         numDofs = 3;

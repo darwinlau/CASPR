@@ -3,7 +3,7 @@
 % Author        : Darwin LAU
 % Created       : 2015
 % Description   :
-classdef SphericalQuaternion < Joint
+classdef SphericalQuaternion < JointBase
     
     properties (Constant = true)
         numDofs = 3;

@@ -3,7 +3,7 @@
 % Author        : Darwin LAU
 % Created       : 2012
 % Description   :
-classdef SphericalEulerXYZ < Joint
+classdef SphericalEulerXYZ < JointBase
         
     properties (Constant = true)
         numDofs = 3;
