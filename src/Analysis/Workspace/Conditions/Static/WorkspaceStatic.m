@@ -6,7 +6,7 @@
 % Description    : This class is the class for static workspace evaluation.
 % Different implementations are treated as individual function calls for the
 % evaluate function.
-classdef WorkspaceStatic < WorkspaceCondition
+classdef WorkspaceStatic < WorkspaceConditionBase
     properties (SetAccess = protected, GetAccess = protected)
         options                         % The options for the wrench closure
     end

@@ -8,9 +8,9 @@ function setup_CASPR
     clc;
     home_path = cd;
     try
-        cd('src/Analysis');
+        cd('../../src/Analysis');
     catch
-        error('Incorrect folder structure or you have not caled the function from the root directory');
+        error('Incorrect folder structure or you have not called the function from the setup directory');
     end
 
     fprintf('\n----------------------------------------------------\n')

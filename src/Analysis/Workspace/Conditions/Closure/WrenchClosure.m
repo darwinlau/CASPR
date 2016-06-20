@@ -4,7 +4,7 @@
 % Author        : Jonathan EDEN
 % Created       : 2015
 % Description    : 
-classdef WrenchClosure < WorkspaceCondition
+classdef WrenchClosure < WorkspaceConditionBase
     properties (SetAccess = protected, GetAccess = protected)
         options                         % The options for the wrench closure
     end

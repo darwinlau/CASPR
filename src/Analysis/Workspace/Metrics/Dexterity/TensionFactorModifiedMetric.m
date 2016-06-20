@@ -13,7 +13,7 @@
 % Created       : 2016
 % Description   : Implementation of the tension factor metric. This now
 % includes the singular value and considers the effect of removing cables
-classdef TensionFactorModifiedMetric < WorkspaceMetric
+classdef TensionFactorModifiedMetric < WorkspaceMetricBase
     properties (SetAccess = protected, GetAccess = protected)
     end
     

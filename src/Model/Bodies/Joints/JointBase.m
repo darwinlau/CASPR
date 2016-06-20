@@ -115,7 +115,7 @@ classdef (Abstract) JointBase < handle
         % Load new xml objects
         function j = LoadXmlObj(xmlObj)
             jointType = JointType.(char(xmlObj.getAttribute('type')));
-            j = Joint.CreateJoint(jointType);
+            j = JointBase.CreateJoint(jointType);
         end
         
         % Perform a simple first order integral
