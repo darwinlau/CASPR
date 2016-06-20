@@ -1,7 +1,7 @@
 # CASPR #
 The *Cable-robot Analysis and Simulation Platform for Research (CASPR)*  is an open-source software platform developed in MATLAB that facilitates a range of analysis approaches on arbitrary cable-robot models.
 ## Purpose: ##
-CASPR is designed for researchers to perform study on Cable-Driven Parallel Robots (#CDPRs#). CASPR intends to prevent the "reinvent-the-wheel" problem from inhibiting the research progress and advancement of CDPRs. It looks to do this by providing researchers with
+CASPR is designed for researchers to perform study on Cable-Driven Parallel Robots (*CDPRs*). CASPR aims to provide researchers with:
 
 1. The ability to use the extensive libraries and models of CASPR from the community for your research.
 2. The ability to easily and efficiently add, test and validate your algorithms and models.
@@ -31,11 +31,12 @@ As the software is run through MATLAB, it is necessary that MATLAB is first inst
   * [READ-ONLY ACCESS] - git clone https://github.com/darwinlau/CASPR.git
   * [READ-CONTRIBUTE ACCESS] - Fork the CASPR repository onto your github account and then clone the new repository.
     git clone https://github.com/YOUR_USER_NAME/CASPR.git
-    **Note:** For additional information regarding forking on github please refer to <https://help.github.com/articles/fork-a-repo/>
+   
+ **Note:** For additional information regarding forking on github please refer to <https://help.github.com/articles/fork-a-repo/>
 
 2. (Optionally) install the CASPR depedencies. See [Dependency Installation](#dependency_install) for further details
 3. Open MATLAB and change the file path to be that of the extracted CASPR root directory.
-4. Run the script setup_CASPR.m. This will test the installation and confirm that CASPR is ready to be run.
+4. Run the script setup_CASPR.m within the *scripts/setup/* folder. This will test the installation and confirm that CASPR is ready to be run.
 
 **Additional Note:** All subsequent sessions running CASPR should be started by running the initialise_CASPR.m function from the CASPR root directory.
 
@@ -47,7 +48,7 @@ As an open source platform new developments into CASPR are welcome as are feedba
 For notification of issues please use the issues tab within the github page <https://github.com/darwinlau/CASPR/issues>.  For more detailed communication please email Darwin Lau at <darwinlau@mae.cuhk.edu.hk>.
 
 ## Further Documentation: ##
-Now that you have installed CASPR please look at *CASPR_101.pdf* (located in the *docs* directory) for further information regarding the operation of CASPR.
+Now that you have installed CASPR, please look at *CASPR_101.pdf* (located in the *docs* directory) for further information regarding the operation of CASPR.
 
 ## <a name="dependency_install"></a> Dependency Installation ##
 In addition to the core code base, some analysis techniques within CASPR require the use of additional software dependencies. These dependencies include
