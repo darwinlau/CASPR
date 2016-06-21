@@ -22,6 +22,8 @@ classdef (Abstract) Joint < handle
         q                   % Joint variable q (generalised coordinates)
         q_dot               % Derivative of q
         q_ddot              % Double derivative of q
+        q_min               % Minimum joint values of q
+        q_max               % Maximum joint values of q
         
         isActuated = 0      % Is this joint actuated, by default not actuated
         tau_min             % Minimum actuation (if actuated)
@@ -49,8 +51,8 @@ classdef (Abstract) Joint < handle
         q_default           % The default q
         q_dot_default       % The default q_dot
         q_ddot_default      % The default q_ddot
-        q_lb                % The lower bound on joints
-        q_ub                % The upper bound on joints
+        q_lb                % The lower bound on joints that are physically meaningful
+        q_ub                % The upper bound on joints that are physically meaningful
     end
     
     methods
@@ -121,6 +123,8 @@ classdef (Abstract) Joint < handle
             end
             j.type = jointType;
             j.update(j.q_default, j.q_dot_default, j.q_ddot_default);
+            j.q_min = j.q_lb;
+            j.q_max = j.q_ub;
             j.tau = [];
             j.tau_min = -Inf*ones(j.numDofs, 1);
             j.tau_max = Inf*ones(j.numDofs, 1);
