@@ -7,7 +7,7 @@
 %	be modelled like a linear spring, either because of its own stretching
 %	or that a spring is put in series in the cable (or both). The main
 %	parameter that needs to be specified is the overall cable stiffness K.
-classdef CableModelLinearSpring < CableModel        
+classdef CableModelLinearSpring < CableModelBase        
     properties (SetAccess = private)
         K_cable
     end
@@ -18,11 +18,11 @@ classdef CableModelLinearSpring < CableModel
     
     methods 
         function ck = CableModelLinearSpring(name, numLinks)
-            ck@CableModel(name, numLinks);
+            ck@CableModelBase(name, numLinks);
         end
         
         function update(obj, bodyModel)
-            update@CableModel(obj, bodyModel);
+            update@CableModelBase(obj, bodyModel);
         end
         
         function value = get.K(obj)

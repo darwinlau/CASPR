@@ -3,7 +3,7 @@
 % Author        : Darwin LAU
 % Created       : 2015
 % Description   :
-classdef SphericalQuaternion < Joint
+classdef SphericalQuaternion < JointBase
     
     properties (Constant = true)
         numDofs = 3;
@@ -37,7 +37,7 @@ classdef SphericalQuaternion < Joint
             else
                 q_quat_norm = Quaternion(q(1), q(2), q(3), q(4));
             end
-            update@Joint(obj, q_quat_norm.toVector(), q_dot, q_ddot);
+            update@JointBase(obj, q_quat_norm.toVector(), q_dot, q_ddot);
         end
         
         % -------

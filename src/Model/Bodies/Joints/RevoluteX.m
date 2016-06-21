@@ -3,7 +3,7 @@
 % Author        : Darwin LAU
 % Created       : 2012
 % Description   :
-classdef RevoluteX < Joint        
+classdef RevoluteX < JointBase        
     properties (Constant = true)
         numDofs = 1;
         numVars = 1;

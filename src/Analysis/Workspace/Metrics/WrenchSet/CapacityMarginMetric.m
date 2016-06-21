@@ -14,7 +14,7 @@
 % Author        : Jonathan EDEN
 % Created       : 2016
 % Description   : Capacity margin metric
-classdef CapacityMarginMetric < WorkspaceMetric
+classdef CapacityMarginMetric < WorkspaceMetricBase
     properties (SetAccess = protected, GetAccess = protected)
         desired_wrench_set
     end

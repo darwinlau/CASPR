@@ -3,7 +3,7 @@
 % Author        : Darwin LAU
 % Created       : 2015
 % Description   :
-classdef PrismaticXY < Joint        
+classdef PrismaticXY < JointBase        
     properties (Constant = true)
         numDofs = 2;
         numVars = 2;

@@ -35,7 +35,7 @@ classdef BodyModelRigid < BodyModel
             
             % <joint_type> tag
             jointXmlObj = xmlobj.getElementsByTagName('joint').item(0);
-            joint = Joint.LoadXmlObj(jointXmlObj);
+            joint = JointBase.LoadXmlObj(jointXmlObj);
                         
             % Generate the rigid body object
             bk = BodyModelRigid(id, name, joint);

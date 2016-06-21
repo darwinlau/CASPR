@@ -9,7 +9,7 @@
 %       - The method to evaluate the metric
 %   Any new types of metrics need to be added to the WorkspaceMetricType 
 %   enum and also added to the CreateWorkspaceMetric method.
-classdef (Abstract) WorkspaceMetric < handle
+classdef (Abstract) WorkspaceMetricBase < handle
     
     properties
         type            % Type of joint from JointType enum
@@ -30,7 +30,7 @@ classdef (Abstract) WorkspaceMetric < handle
             f = obj.evaluateFunction(dynamics,options);
             if(f<obj.metricMin)
                 metric_value = obj.metricMin;
-            elseif(f>obj.metricMax)
+            elseif(f>obj.metricMax)w
                 metric_value = obj.metricMax;
             else
                 metric_value = f;

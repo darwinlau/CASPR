@@ -10,7 +10,7 @@
 % Author        : Jonathan EDEN
 % Created       : 2016
 % Description   : Implementation of the tension factor metric.
-classdef TensionFactorMetric < WorkspaceMetric
+classdef TensionFactorMetric < WorkspaceMetricBase
     properties (SetAccess = protected, GetAccess = protected)
     end
     

@@ -5,7 +5,7 @@
 % Author        : Jonathan EDEN
 % Created       : 2016
 % Description   : 
-classdef ConditionNumberMetric < WorkspaceMetric
+classdef ConditionNumberMetric < WorkspaceMetricBase
     properties (SetAccess = protected, GetAccess = protected)
     end
     

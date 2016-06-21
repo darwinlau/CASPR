@@ -3,7 +3,7 @@
 % Author        : Darwin LAU
 % Created       : 2015
 % Description   :
-classdef TranslationalXYZ < Joint
+classdef TranslationalXYZ < JointBase
         
     properties (Constant = true)
         numDofs = 3;

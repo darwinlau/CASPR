@@ -3,7 +3,7 @@
 % Author        : Darwin LAU
 % Created       : 2015
 % Description   :
-classdef PlanarXY < Joint        
+classdef PlanarXY < JointBase        
     properties (Constant = true)
         numDofs = 3;
         numVars = 3;

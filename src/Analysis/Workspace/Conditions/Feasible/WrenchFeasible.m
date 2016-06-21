@@ -4,7 +4,7 @@
 % Author        : Jonathan EDEN
 % Created       : 2015
 % Description    : Class for evalaution of WFC.
-classdef WrenchFeasible < WorkspaceCondition
+classdef WrenchFeasible < WorkspaceConditionBase
     properties (SetAccess = protected, GetAccess = protected)
         desired_wrench_set
     end

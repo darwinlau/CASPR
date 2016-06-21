@@ -327,7 +327,7 @@ function generate_button_Callback(~, ~, handles) %#ok<DEFNU>
     settings = getappdata(handles.workspace_condition_popup,'settings');
     workspaceObj = settings.getElementById(wc_string);
     enum_file = workspaceObj.getElementsByTagName('generation_method_enum').item(0).getFirstChild.getData;
-    wcondition = {WorkspaceCondition.CreateWorkspaceCondition(eval(['WorkspaceConditionType.',wc_string]),eval([char(enum_file),'.M_',wcm_string]),[])};
+    wcondition = {WorkspaceConditionBase.CreateWorkspaceCondition(eval(['WorkspaceConditionType.',wc_string]),eval([char(enum_file),'.M_',wcm_string]),[])};
 %     wcondition  = cfh(contents{get(handles.workspace_generation_popup,'Value')},[-1,1,0,0;0,0,-1,1]);
     % Then the metric
     contents = cellstr(get(handles.workspace_metric_popup,'String'));
@@ -335,7 +335,7 @@ function generate_button_Callback(~, ~, handles) %#ok<DEFNU>
         metric = {};
     else
         wmetric = contents{get(handles.workspace_metric_popup,'Value')};
-        metric = {WorkspaceMetric.CreateWorkspaceMetric(eval(['WorkspaceMetricType.',wmetric]),[])};
+        metric = {WorkspaceMetricBase.CreateWorkspaceMetric(eval(['WorkspaceMetricType.',wmetric]),[])};
     end
     %% Now initialise the simulation
     disp('Start Setup Simulation');

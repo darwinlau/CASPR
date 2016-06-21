@@ -3,7 +3,7 @@
 % Author        : Darwin LAU
 % Created       : 2015
 % Description   :
-classdef SpatialEulerXYZ < Joint
+classdef SpatialEulerXYZ < JointBase
     properties
         translation
         orientation
@@ -49,7 +49,7 @@ classdef SpatialEulerXYZ < Joint
         function update(obj, q, q_dot, q_ddot)
             obj.translation.update(SpatialEulerXYZ.GetTranslationQ(q), SpatialEulerXYZ.GetTranslationQd(q_dot), SpatialEulerXYZ.GetTranslationQd(q_ddot));
             obj.orientation.update(SpatialEulerXYZ.GetOrientationQ(q), SpatialEulerXYZ.GetOrientationQd(q_dot), SpatialEulerXYZ.GetOrientationQd(q_ddot));
-            update@Joint(obj, q, q_dot, q_ddot);
+            update@JointBase(obj, q, q_dot, q_ddot);
         end
         
         % -------

@@ -9,7 +9,7 @@
 %       - The method to determine if neighbouring points are connected
 %   Any new types of metrics need to be added to the WorkspaceConditionType 
 %   enum and also added to the CreateWorkspaceCondition method.
-classdef WorkspaceCondition < handle
+classdef WorkspaceConditionBase < handle
     properties 
         method          % Method of implementation (an enum)
         type            % Type of joint from JointType enum

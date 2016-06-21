@@ -12,7 +12,7 @@
 %       - The method to generate a trajectory for the joint
 %   Any new types of joints need to be added to the JointType enum and also
 %   added to the CreateJoint method.
-classdef (Abstract) Joint < handle
+classdef (Abstract) JointBase < handle
     properties
         tau                 % Actuator effort for joint (if actuated)
     end
@@ -133,7 +133,7 @@ classdef (Abstract) Joint < handle
         % Load new xml objects
         function j = LoadXmlObj(xmlObj)
             jointType = JointType.(char(xmlObj.getAttribute('type')));
-            j = Joint.CreateJoint(jointType);
+            j = JointBase.CreateJoint(jointType);
             if (~isempty(xmlObj.getAttribute('actuated') == '') && strcmp(xmlObj.getAttribute('actuated'), 'true'))
                 j.isActuated = 1;
                 j.tau = zeros(j.numDofs, 1);

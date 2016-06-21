@@ -3,7 +3,7 @@
 % Author        : Darwin LAU
 % Created       : 2015
 % Description   :
-classdef SpatialQuaternion < Joint
+classdef SpatialQuaternion < JointBase
     properties
         translation
         orientation
@@ -52,7 +52,7 @@ classdef SpatialQuaternion < Joint
         function update(obj, q, q_dot, q_ddot)
             obj.translation.update(SpatialQuaternion.GetTranslationQ(q), SpatialQuaternion.GetTranslationQd(q_dot), SpatialQuaternion.GetTranslationQd(q_ddot));
             obj.orientation.update(SpatialQuaternion.GetOrientationQ(q), SpatialQuaternion.GetOrientationQd(q_dot), SpatialQuaternion.GetOrientationQd(q_ddot));
-            update@Joint(obj, q, q_dot, q_ddot);
+            update@JointBase(obj, q, q_dot, q_ddot);
         end
         
         % -------
