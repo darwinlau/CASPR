@@ -57,7 +57,6 @@ classdef IDSolverClosedForm < IDSolverBase
             
             obj.f_previous = cable_forces;
         end
-    end
-    
+    end    
 end
 
