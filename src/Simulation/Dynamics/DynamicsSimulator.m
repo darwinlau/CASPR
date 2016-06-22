@@ -37,11 +37,20 @@ classdef DynamicsSimulator < MotionSimulator
             
             forces = cell2mat(obj.cableForces);
             
+            valid_forces_ind = find(forces(1,:) ~= CableModelBase.INVALID_FORCE);
+            valid_forces_ind_inv = setdiff(1:length(obj.timeVector), valid_forces_ind);
+            
             if(~isempty(plot_axis))
-                plot(plot_axis,obj.timeVector, forces(cables_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); 
+                hold on;
+                plot(plot_axis,obj.timeVector(valid_forces_ind), forces(cables_to_plot, valid_forces_ind), '.', 'LineWidth', 1.5, 'Color', 'k'); 
+                plot(plot_axis,obj.timeVector(valid_forces_ind_inv), forces(cables_to_plot, valid_forces_ind_inv), '.', 'LineWidth', 1.5, 'Color', 'r'); 
+                hold off;
             else
                 figure;
-                plot(obj.timeVector, forces(cables_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); 
+                hold on;
+                plot(obj.timeVector(valid_forces_ind), forces(cables_to_plot, valid_forces_ind), '.', 'LineWidth', 1.5, 'Color', 'k'); 
+                plot(obj.timeVector(valid_forces_ind_inv), forces(cables_to_plot, valid_forces_ind_inv), '.', 'LineWidth', 1.5, 'Color', 'r'); 
+                hold off;
                 title('Cable forces');                 
                 xlabel('Time (seconds)')
                 ylabel('Force (N)');
