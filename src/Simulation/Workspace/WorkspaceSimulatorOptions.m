@@ -7,12 +7,12 @@
 
 classdef WorkspaceSimulatorOptions
     properties
-        full_storage        % An option to store all grid points.
+        union       % Determines if the workspace should take a union of the conditions or the intersection
     end
     
     methods
-        function opt = WorkspaceSimulatorOptions(full_storage)
-            opt.full_storage = full_storage;
+        function opt = WorkspaceSimulatorOptions(union)
+            opt.union = union;
         end
     end
 end

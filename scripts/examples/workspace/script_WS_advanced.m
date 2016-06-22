@@ -19,7 +19,7 @@ q_step          =   0.1; n_dim           =   2;
 uGrid           =   UniformGrid(0.1*ones(n_dim,1),0.9*ones(n_dim,1),q_step*ones(n_dim,1));
 % Define the workspace condition and metrics
 w_condition  =   {WorkspaceConditionBase.CreateWorkspaceCondition(WorkspaceConditionType.WRENCH_CLOSURE,[],[])};
-w_metric = {WorkspaceMetricBase.CreateWorkspaceMetric(WorkspaceMetricType.TENSION_FACTOR,[])};
+w_metric = {WorkspaceMetricBase.CreateWorkspaceMetric(WorkspaceMetricType.SEACM,[])};
 opt = WorkspaceSimulatorOptions(true);
 
 % Start the simulation
@@ -29,8 +29,11 @@ wsim            =   WorkspaceSimulator(modelObj,uGrid,opt);
 % Run the simulation
 disp('Start Running Simulation');
 wsim.run(w_condition,w_metric);
+wsim.run([],{WorkspaceMetricBase.CreateWorkspaceMetric(WorkspaceMetricType.TENSION_FACTOR,[])});
 
 % Plot the simulation
 disp('Start Plotting Simulation');
 wsim.plotWorkspace2(WorkspaceConditionType.WRENCH_CLOSURE,[1,2],[]);
 wsim.plotWorkspace2(WorkspaceMetricType.TENSION_FACTOR,[1,2],[]);
+wsim.filterWorkspaceMetric(WorkspaceMetricType.SEACM,-100,100);
+wsim.plotWorkspace2(WorkspaceMetricType.SEACM,[1,2],[]);

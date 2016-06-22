@@ -48,7 +48,7 @@ classdef WrenchClosure < WorkspaceConditionBase
         % metric information
         function inWorkspace = metrics_evaluation(obj,dynamics,workspace_point)
             % Check if there is a metric that can already be used.
-            for i = 1:length(workspace_point.metrics)
+            for i = 1:size(workspace_point.metrics,1)
                 % Options are 1 if in workspace, 0 if not in workspace,
                 % -1 if metric doesn't give workspace information.
                 gm = obj.generating_metric({workspace_point.metrics{i,:}}); 
@@ -65,16 +65,20 @@ classdef WrenchClosure < WorkspaceConditionBase
         
         % A use the metric for evaluation if it is there
         function val = generating_metric(~,metric)
-            switch(metric{1})
-                case {WorkspaceMetricType.TENSION_FACTOR,WorkspaceMetricType.TENSION_FACTOR_MODIFIED,WorkspaceMetricType.UNILATERAL_DEXTERITY}
-                    if(metric{2}>0)
-                        val = 1;
-                    else
-                        val = 0;
-                    end
-                otherwise
-                    % The metric cannot be used for the evaluation
-                    val = -1;
+            if(~isempty(metric{1}))
+                switch(metric{1})
+                    case {WorkspaceMetricType.TENSION_FACTOR,WorkspaceMetricType.TENSION_FACTOR_MODIFIED,WorkspaceMetricType.UNILATERAL_DEXTERITY}
+                        if(metric{2}>0)
+                            val = 1;
+                        else
+                            val = 0;
+                        end
+                    otherwise
+                        % The metric cannot be used for the evaluation
+                        val = -1;
+                end
+            else
+                val = -1;
             end
         end        
     end
