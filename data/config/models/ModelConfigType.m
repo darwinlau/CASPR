@@ -5,9 +5,9 @@
 % Description    :
 %    Enumeration for the ModelConfig in order to initialise the appropriate
 %    CDPR for simulations. Users must add the enum for their robots added
-%    to the library. 
+%    to the library.
 classdef ModelConfigType
-    enumeration 
+    enumeration
         % Planar manipulators
         M_2DOF_VSD
         M_KNTU_PLANAR
@@ -15,6 +15,7 @@ classdef ModelConfigType
         % Spatial manipulators
         M_ACROBOT
 		M_COGIRO
+        M_IPANEMA_1
         M_IPANEMA_2
         M_NIST_ROBOCRANE
         M_SEGESTA
