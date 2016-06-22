@@ -19,6 +19,11 @@ function [ x_opt, exit_type] = id_cf_icfm(A_eq, b_eq, x_min, x_max)
     Ap = A_eq'/(A_eq*A_eq');
     N = eye(m) - Ap*A_eq;
     x_temp = x_m + Ap*(b_eq - x_shift);
+    if(isnan(x_temp))
+        x_opt = x_temp;
+        exit_type = IDSolverExitType.INFEASIBLE;
+        return;
+    end
     index = true(m,1); 
     x_fixed = x_m;  
     A_temp = A_eq;
