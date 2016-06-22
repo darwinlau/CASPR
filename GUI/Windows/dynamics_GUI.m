@@ -661,7 +661,12 @@ function delete_figure_tool_ClickedCallback(~, ~, handles) %#ok<DEFNU>
     % handles    structure with handles and user data (see GUIDATA)
     tabgp = getappdata(handles.figure1,'tabgp');
     s_tab = get(tabgp,'SelectedTab');
-    delete(s_tab);
+    try
+        delete(s_tab);
+    catch
+        dfjksh
+    end
+    disp('stuff')
 end
 
 

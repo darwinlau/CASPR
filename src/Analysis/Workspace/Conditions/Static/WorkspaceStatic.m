@@ -23,16 +23,20 @@ classdef WorkspaceStatic < WorkspaceConditionBase
         end
         
         % The implementation of the evaluateFunction method
-        function inWorkspace = evaluateFunction(obj,dynamics)
-            switch(method)
-                case WorkspaceStaticMethods.M_QUAD_PROG
-                    inWorkspace = static_quadprog(dynamics,obj.options);
-                case WorkspaceStaticMethods.M_CAPACITY_MARGIN
-                    inWorkspace = static_capacity_margin(dynamics,obj.options);
-                case WorkspaceStaticMethods.M_SEACM
-                    inWorkspace = static_capability_measure(dynamics,obj.options);
-                otherwise
-                    error('static workspace method is not defined');
+        function inWorkspace = evaluateFunction(obj,dynamics,workspace_point)
+            if(isempty(obj.method))
+                inWorkspace = obj.metrics_evaluation(dynamics,workspace_point);
+            else
+                switch(method)
+                    case WorkspaceStaticMethods.M_QUAD_PROG
+                        inWorkspace = static_quadprog(dynamics,obj.options);
+                    case WorkspaceStaticMethods.M_CAPACITY_MARGIN
+                        inWorkspace = static_capacity_margin(dynamics,obj.options);
+                    case WorkspaceStaticMethods.M_SEACM
+                        inWorkspace = static_capability_measure(dynamics,obj.options);
+                    otherwise
+                        error('static workspace method is not defined');
+                end
             end
         end
         
@@ -40,5 +44,45 @@ classdef WorkspaceStatic < WorkspaceConditionBase
         function setOptions(obj,options)
             obj.options = options;
         end
+    end
+    
+    methods (Access = private)
+        % A method to evaluate the workspace condition using already known
+        % metric information
+        function inWorkspace = metrics_evaluation(obj,dynamics,workspace_point)
+            % Check if there is a metric that can already be used.
+            for i = 1:size(workspace_point.metrics,1)
+                % Options are 1 if in workspace, 0 if not in workspace,
+                % -1 if metric doesn't give workspace information.
+                gm = obj.generating_metric({workspace_point.metrics{i,:}}); 
+                if(gm==1)
+                    inWorkspace = true;
+                    return;
+                elseif(gm==0)
+                    inWorkspace = false;
+                    return;
+                end
+            end
+            inWorkspace = static_quadprog(dynamics,obj.options);
+        end
+        
+        % A use the metric for evaluation if it is there
+        function val = generating_metric(~,metric)
+            if(~isempty(metric{1}))
+                switch(metric{1})
+                    case WorkspaceMetricType.SEACM
+                        if(metric{2}>=0)
+                            val = 1;
+                        else
+                            val = 0;
+                        end
+                    otherwise
+                        % The metric cannot be used for the evaluation
+                        val = -1;
+                end
+            else
+                val = -1;
+            end
+        end        
     end
 end

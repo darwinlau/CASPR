@@ -21,7 +21,7 @@ classdef WrenchFeasible < WorkspaceConditionBase
         end
         
         % Evaluate the wrench closure condition return true if satisfied 
-        function inWorkspace = evaluateFunction(obj,dynamics)
+        function inWorkspace = evaluateFunction(obj,dynamics,~)
             switch(method)
                 case WrenchFeasibleMethods.M_CAPACITY_MARGIN
                     inWorkspace = wrench_feasible_capacity_margin(obj.desired_wrench_set,dynamics);

@@ -347,7 +347,7 @@ function generate_button_Callback(~, ~, handles) %#ok<DEFNU>
     contents = cellstr(get(handles.plot_type_popup,'String'));
     plot_type = contents{get(handles.plot_type_popup,'Value')};
     opt = WorkspaceSimulatorOptions(true); % I need to add this as an option
-    wsim            =   WorkspaceSimulator(modObj,uGrid,wcondition,metric,opt);
+    wsim            =   WorkspaceSimulator(modObj,uGrid,opt);
     %% Now set up the grid information
     time_elapsed    =   toc(start_tic);
     fprintf('End Setup Simulation : %f seconds\n', time_elapsed);
@@ -356,16 +356,17 @@ function generate_button_Callback(~, ~, handles) %#ok<DEFNU>
     set(handles.status_text,'String','Simulation running');
     drawnow;
     start_tic       =   tic;
-    wsim.run([]); % THIS SHOULD BE MODIFIED TO ALLOW THE WORKSPACE TO BE SUPPLIED
+    wsim.run(wcondition,metric); 
     time_elapsed    =   toc(start_tic);
     fprintf('End Running Simulation : %f seconds\n', time_elapsed);
     
     disp('Start Plotting Simulation');
-    set(handles.status_text,'String','Simulation plotting');
-    drawnow;
-    start_tic = tic;
-    % ADD THIS BACK GUIOperations.GUIPlot(plot_type,wsim,handles,str2double(getappdata(handles.plot_type_popup,'num_plots')),get(handles.undock_box,'Value'));
-    time_elapsed = toc(start_tic);
+%     set(handles.status_text,'String','Simulation plotting');
+%     drawnow;
+%     start_tic = tic;
+%     GUIOperations.GUIPlot(plot_type,wsim,handles,str2double(getappdata(handles.plot_type_popup,'num_plots')),get(handles.undock_box,'Value'));
+%     time_elapsed = toc(start_tic);
+    disp('Workspace plotting is not currently supported in the GUI.  Please use the plotting functions for the Simulator Classes')
     fprintf('End Plotting Simulation : %f seconds\n', time_elapsed);
     set(handles.status_text,'String','No simulation running');
     setappdata(handles.figure1,'sim',wsim);
