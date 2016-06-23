@@ -40,17 +40,26 @@ As the software is run through MATLAB, it is necessary that MATLAB is first inst
 
 **Additional Note:** All subsequent sessions running CASPR should be started by running the initialise_CASPR.m function from the CASPR root directory.
 
-## Contributors ##
+## Contributors: ##
 As an open source platform new developments into CASPR are welcome as are feedback/notification of bugs. Contributors for the development of this project include
 * Darwin Lau:     <darwinlau@mae.cuhk.edu.hk>
 * Jonathan Eden:  <jpeden@student.unimelb.edu.au>
 
 For notification of issues please use the issues tab within the github page <https://github.com/darwinlau/CASPR/issues>.  For more detailed communication please email Darwin Lau at <darwinlau@mae.cuhk.edu.hk>.
 
-## Further Documentation: ##
-Now that you have installed CASPR, please look at *CASPR_101.pdf* (located in the *docs* directory) for further information regarding the operation of CASPR.
+## Getting Started: ##
+To start using CASPR, please follow the steps below
 
-## <a name="dependency_install"></a> Dependency Installation ##
+1. Navigate to the CASPR root directory folder.
+2. Run the script initialise_CASPR.m.  This will ensure that your path libraries have been set up and should be run everytime that you use CASPR.
+3. Go into the script folders to look at example or open up the CASPR GUI using the CASPR_GUI command.
+
+For further information regarding the operation of CASPR please refer to *CASPR_101.pdf* (located in the *docs* directory).
+
+## Keeping CASPR Up to Date: ##
+To keep CASPR up to date please periodically execute the command *git pull* from your root directory.
+
+## <a name="dependency_install"></a> Dependency Installation (Optional) ##
 In addition to the core code base, some analysis techniques within CASPR require the use of additional software dependencies. These dependencies include
 * 'qhull' - This is a convex hull library that is used throughout the *Workspace* analysis module.
 * 'optitoolbox' - This is a MATLAB optimisation toolbox. The toolbox is used within the *Inverse Dynamics* and *Design Optimisation* modules.
