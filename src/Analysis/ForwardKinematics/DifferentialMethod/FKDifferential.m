@@ -3,19 +3,18 @@
 %
 % Author        : Darwin LAU
 % Created       : 2015
-% Description    : 
+% Description    :
 classdef FKDifferential < FKAnalysisBase
-    
     properties (Access = private)
     end
-    
+
     methods
         % The constructor for this solver.  This is simply a call of the
         % base constructor.
         function fkd = FKDifferential(model)
             fkd@FKAnalysisBase(model);
         end
-        
+
         % The implementation of the abstract computeFunction methods.
         function [q, q_dot] = computeFunction(obj, length, lengths_prev_2, q_prev, ~, delta_t)
             if delta_t ~= 0
@@ -29,4 +28,3 @@ classdef FKDifferential < FKAnalysisBase
         end
     end
 end
-
