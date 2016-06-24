@@ -31,14 +31,12 @@ As the software is run through MATLAB, it is necessary that MATLAB is first inst
   * [READ-ONLY ACCESS] - git clone https://github.com/darwinlau/CASPR.git
   * [READ-CONTRIBUTE ACCESS] - Fork the CASPR repository onto your github account and then clone the new repository.
     git clone https://github.com/YOUR_USER_NAME/CASPR.git
-   
+
  **Note:** For additional information regarding forking on github please refer to <https://help.github.com/articles/fork-a-repo/>
 
 2. (Optionally) install the CASPR depedencies. See [Dependency Installation](#dependency_install) for further details
 3. Open MATLAB and change the file path to be that of the extracted CASPR root directory.
 4. Run the script setup_CASPR.m within the *scripts/setup/* folder. This will test the installation and confirm that CASPR is ready to be run.
-
-**Additional Note:** All subsequent sessions running CASPR should be started by running the initialise_CASPR.m function from the CASPR root directory.
 
 ## Contributors: ##
 As an open source platform new developments into CASPR are welcome as are feedback/notification of bugs. Contributors for the development of this project include
