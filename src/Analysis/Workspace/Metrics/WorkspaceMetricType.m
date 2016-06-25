@@ -13,6 +13,7 @@ classdef WorkspaceMetricType
         TENSION_FACTOR
         TENSION_FACTOR_MODIFIED
         UNILATERAL_DEXTERITY
+        CONDITION_NUMBER
     end
 end
 

@@ -37,13 +37,7 @@ function varargout = CASPR_GUI(varargin)
     % Last Modified by GUIDE v2.5 26-Feb-2016 17:56:58
 
     % Begin initialization code - DO NOT EDIT
-    path_string = fileparts(mfilename('fullpath'));
-    path_string = path_string(1:strfind(path_string, 'GUI')-2);
-    p = path;
-    if(isempty(strfind(p,[path_string,'\str'])))
-        addpath(genpath(path_string))
-    end
-    
+    warning('off','MATLAB:uitabgroup:OldVersion')
     gui_Singleton = 1;
     gui_State = struct('gui_Name',       mfilename, ...
                        'gui_Singleton',  gui_Singleton, ...

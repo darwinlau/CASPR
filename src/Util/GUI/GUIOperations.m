@@ -39,10 +39,14 @@ classdef GUIOperations
         function CreateTabGroup(handles)
             tabgp = uitabgroup(handles.tab_panel,'Position',[0 0 1 1]);
             % A temporary hack to make the figures plot correctly
-            tab1 = uitab(tabgp);
+            tab1 = uitab(tabgp,'Title','Home Tab');
             ax = axes;
-            set(ax,'Parent',tab1,'OuterPosition',[0,0,1,1])
-            delete(tab1);
+            set(ax,'Parent',tab1,'OuterPosition',[0,0,1,1],'Xtick',[],'Ytick',[]);
+            t1 = text(0.1,0.8,'CASPR GUI Tab','FontSize',25);
+            t2 = text(0.1,0.6,'Please enter your desired settings','FontSize',15);
+            t3 = text(0.1,0.52,'and then press run/generate to','FontSize',15);
+            t4 = text(0.1,0.44,'start the simulation.','FontSize',15);
+%             delete(tab1);
             setappdata(handles.figure1,'tabgp',tabgp);
         end
         

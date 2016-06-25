@@ -13,38 +13,23 @@ classdef WorkspacePoint < handle
     end
     
     methods
-        function wp = WorkspacePoint(pose)
+        % Constructor for the class
+        function wp = WorkspacePoint(pose,n_metrics,n_constraints)
             wp.pose         = pose;
-            wp.metrics      = cell(0);
-            wp.conditions   = cell(0);
+            wp.metrics      = cell(n_metrics,2);
+            wp.conditions   = cell(n_constraints,2);
         end
         
-        function addMetric(obj,metric_type,metric_value)
-            if(~isempty(obj.metrics))
-                % Test that this is a new metric
-                if(sum(metric_type == obj.metrics(:,1))==0)    
-                    s_l = size(obj.metrics,1)+1;
-                    obj.metrics{s_l,1} = metric_type;
-                    obj.metrics{s_l,2} = metric_value;
-                end
-            else
-                obj.metrics{1,1} = metric_type;
-                obj.metrics{1,2} = metric_value;
-            end
+        % A function to add the metric information to the point
+        function addMetric(obj,metric_type,metric_value,index)
+            obj.metrics{index,1} = metric_type;
+            obj.metrics{index,2} = metric_value;
         end
         
-        function addCondition(obj,condition_type,condition_value)
-            if(~isempty(obj.conditions))
-                % Test that this is a new metric
-                if(sum(condition_type == obj.conditions(:,1))==0)    
-                    s_l = size(obj.conditions,1)+1;
-                    obj.conditions{s_l,1} = condition_type;
-                    obj.conditions{s_l,2} = condition_value;
-                end
-            else
-                obj.conditions{1,1} = condition_type;
-                obj.conditions{1,2} = condition_value;
-            end
+        % A function to add a new condition to the point
+        function addCondition(obj,condition_type,index)
+            obj.conditions{index,1} = condition_type;
+            obj.conditions{index,2} = true;
         end
     end    
 end

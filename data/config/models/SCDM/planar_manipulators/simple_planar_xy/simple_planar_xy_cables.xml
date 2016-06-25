@@ -2,7 +2,7 @@
 <!DOCTYPE cables [
   <!ATTLIST cable_set id ID #REQUIRED>
 ]>
-  
+
 <cables default_cable_set="basic">
   <cable_set id="basic">
     <cable_ideal name="cable 1" attachment_reference="com">
@@ -17,7 +17,7 @@
         </attachment>
         <attachment>
           <link>1</link>
-          <location>-0.125 -0.125 0</location>
+          <location>-0.125 0 0</location>
         </attachment>
       </attachments>
     </cable_ideal>
@@ -33,7 +33,7 @@
         </attachment>
         <attachment>
           <link>1</link>
-          <location>0.125 -0.125 0</location>
+          <location>0.125 0 0</location>
         </attachment>
       </attachments>
     </cable_ideal>
@@ -49,7 +49,7 @@
         </attachment>
         <attachment>
           <link>1</link>
-          <location>0.125 0.125 0</location>
+          <location>0.125 0 0</location>
         </attachment>
       </attachments>
     </cable_ideal>
@@ -65,7 +65,7 @@
         </attachment>
         <attachment>
           <link>1</link>
-          <location>-0.125 0.125 0</location>
+          <location>-0.125 0 0</location>
         </attachment>
       </attachments>
     </cable_ideal>

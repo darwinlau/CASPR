@@ -2,7 +2,7 @@
 % Author        : Jonathan EDEN
 % Created       : 2016
 % Description   : Implementation of the SEACM
-classdef SEACM < WorkspaceMetric
+classdef SEACM < WorkspaceMetricBase
     properties (SetAccess = protected, GetAccess = protected)
     end
     

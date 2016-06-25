@@ -5,7 +5,7 @@
 % Description    :
 
 % Load configs
-clc; clear; warning off; close all;
+clc; clear; close all;
 
 % Set up the model 
 model_type = ModelConfigType.M_2DOF_VSD;
@@ -18,20 +18,22 @@ modelObj = model_config.getModel(cable_set_id);
 q_step          =   0.1; n_dim           =   2;
 uGrid           =   UniformGrid(0.1*ones(n_dim,1),0.9*ones(n_dim,1),q_step*ones(n_dim,1));
 % Define the workspace condition and metrics
-% w_condition  =   {WorkspaceCondition.CreateWorkspaceCondition(WorkspaceConditionType.WRENCH_CLOSURE,WrenchClosureMethods.M_COMBINATORIC_NULL_SPACE,[])};
 w_condition  =   {WorkspaceConditionBase.CreateWorkspaceCondition(WorkspaceConditionType.WRENCH_CLOSURE,[],[])};
-w_metric = {WorkspaceMetricBase.CreateWorkspaceMetric(WorkspaceMetricType.SEACM,[]),WorkspaceMetricBase.CreateWorkspaceMetric(WorkspaceMetricType.TENSION_FACTOR,[])};
-opt = WorkspaceSimulatorOptions(false);
+w_metric = {WorkspaceMetricBase.CreateWorkspaceMetric(WorkspaceMetricType.SEACM,[])};
+opt = WorkspaceSimulatorOptions(true);
 
 % Start the simulation
 disp('Start Setup Simulation');
-wsim            =   WorkspaceSimulator(modelObj,uGrid,w_condition,w_metric,opt);
+wsim            =   WorkspaceSimulator(modelObj,uGrid,opt);
 
 % Run the simulation
 disp('Start Running Simulation');
-wsim.run([]);
+wsim.run(w_condition,w_metric);
+wsim.run([],{WorkspaceMetricBase.CreateWorkspaceMetric(WorkspaceMetricType.TENSION_FACTOR,[])});
 
 % Plot the simulation
 disp('Start Plotting Simulation');
-wsim.plotWorkspace(WorkspaceConditionType.WRENCH_CLOSURE,[1,2],[]);
-%wsim.plotWorkspace(WorkspaceMetricType.TENSION_FACTOR,[1,2],[]);
+wsim.plotWorkspace2(WorkspaceConditionType.WRENCH_CLOSURE,[1,2],[]);
+wsim.plotWorkspace2(WorkspaceMetricType.TENSION_FACTOR,[1,2],[]);
+wsim.filterWorkspaceMetric(WorkspaceMetricType.SEACM,-100,100);
+wsim.plotWorkspace2(WorkspaceMetricType.SEACM,[1,2],[]);
