@@ -20,7 +20,7 @@ classdef IDObjectiveInfOptimallySafe < IDObjectiveInfinity
         
         % The objective update implementation
         function updateObjective(obj, dynamics)
-            f_m     =   0.5*(dynamics.cableDynamics.forcesMin + dynamics.cableDynamics.forcesMax);
+            f_m     =   0.5*(dynamics.cableModel.forcesMin + dynamics.cableModel.forcesMax);
             obj.b   =   -diag(obj.weights)*f_m;
         end
         
