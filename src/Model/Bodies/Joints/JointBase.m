@@ -93,6 +93,8 @@ classdef (Abstract) JointBase < handle
                     j = PrismaticXY;
                 case JointType.PLANAR_XY
                     j = PlanarXY;
+                case JointType.PLANAR_YZ
+                    j = PlanarYZ;
                 case JointType.S_EULER_XYZ
                     j = SphericalEulerXYZ;
                 case JointType.S_FIXED_XYZ
