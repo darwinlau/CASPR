@@ -392,6 +392,8 @@ classdef SystemModelCables < handle
                     xml_cables{k} = CableModelIdeal.LoadXmlObj(currentCableItem, bodiesModel);
                 elseif (strcmp(type, 'cable_linear_spring'))
                     xml_cables{k} = CableModelLinearSpring.LoadXmlObj(currentCableItem, bodiesModel);
+                elseif (strcmp(type, 'cable_passive_linear_spring'))
+                    xml_cables{k} = CableModelPassiveLinearSpring.LoadXmlObj(currentCableItem, bodiesModel);
                 elseif (strcmp(type, 'cable_vsd_torsion_spring'))
                     xml_cables{k} = CableModelVSDTorsionSpring.LoadXmlObj(currentCableItem, bodiesModel);
                 elseif (strcmp(type, 'cable_vsd_flexure_linear'))
