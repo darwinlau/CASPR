@@ -1,8 +1,8 @@
 % Base objective function with abstract methods defined
-% 
+%
 % Author        : Darwin LAU
 % Created       : 2016
-% Description	: 
+% Description	:
 %   The general form of the objective function is
 %                       y = f(x),       output y and input x
 %   The objective function has two main functions:
@@ -11,10 +11,6 @@
 %       2) Evaluate the objective by returning the value of f and the
 %       gradient of f
 classdef IDObjective < handle
-    
-    properties
-    end
-    
     methods (Abstract)
         % Update the objective to consider the dynamics.
         updateObjective(obj, dynamics);
@@ -22,6 +18,4 @@ classdef IDObjective < handle
         % its gradient.
         [f, grad_f] = evaluateFunction(obj, x);
     end
-    
 end
-

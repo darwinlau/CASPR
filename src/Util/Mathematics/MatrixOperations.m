@@ -3,32 +3,28 @@
 % Author        : Darwin LAU
 % Created       : 2014
 % Description    :
-classdef MatrixOperations 
-    
-    properties
-    end
-    
+classdef MatrixOperations
     methods (Static)
         % Given the vector [v(1);v(2);v(3)], arrage the vector into a skew
         % symmetric matrix.
         function s = SkewSymmetric(v)
             s = [0 -v(3) v(2); v(3) 0 -v(1); -v(2) v(1) 0];
         end
-        
+
         % Given a set of vectors determine a linearly independent set of
         % the largest possible rank
         function [L,M] = FindLinearlyIndependentSet(A)
             [~,~,E] = qr(A,0); [n,m] = size(A);
             L = A(:,E(1:n));
             M = A(:,E(n+1:m));
-        end    
-        
+        end
+
         % Matrix multiplication operations for computation of the internal
         % quadratic form matrices.
         function C = MatrixProdLeftQuad(A,B)
             ma = size(A,1); na = size(A,2);
             mb = size(B,1); %nb = size(B,2);
-            C = MatrixOperations.Initialise([mb,ma*mb],isa(B,'sym'));            
+            C = MatrixOperations.Initialise([mb,ma*mb],isa(B,'sym'));
             for i=1:ma
                 c = (i-1)*mb+1:(i-1)*mb+mb;
                 for j = 1:na
@@ -37,7 +33,7 @@ classdef MatrixOperations
                 end
             end
         end
-        
+
         % Matrix multiplication operations for computation of the internal
         % quadratic form matrices.
         function C = GenerateMatrixQuadCross(A,B)
@@ -45,7 +41,7 @@ classdef MatrixOperations
             M_A = [zeros(n_q,1),-A(3,:).',A(2,:).',A(3,:).',zeros(n_q,1),-A(1,:).',-A(2,:).',A(1,:).',zeros(n_q,1)];
             C = MatrixOperations.InteriorProdRightQuad(M_A,B);
         end
-        
+
         % Initialise a matrix. This calls zeros for real variables (flag =
         % 0) otherwise it calls the equivalent symbolic function.
         function C = Initialise(s,flag)
@@ -57,7 +53,7 @@ classdef MatrixOperations
             end
         end
     end
-    
+
     methods (Static, Access = private)
         % Matrix multiplication operations for computation of the internal
         % quadratic form matrices.
@@ -78,6 +74,4 @@ classdef MatrixOperations
             end
         end
     end
-    
 end
-

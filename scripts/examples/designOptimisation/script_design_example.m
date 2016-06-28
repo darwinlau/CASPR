@@ -1,3 +1,5 @@
+clc; clear; close all;
+
 model_config = ModelConfig(ModelConfigType.M_IPANEMA_2);
 trajectory_id = 'traj_z_up';
 cable_set_id = 'original';
