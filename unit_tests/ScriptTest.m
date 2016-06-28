@@ -12,7 +12,8 @@ classdef ScriptTest < matlab.unittest.TestCase
             % cellfunc
             
             % First go through the directories to extract each script in the examples folder
-            dir_list = dir('/home/jpeden/Dropbox/CASPR_private/scripts/examples/');
+            folder_location = '../scripts/examples/';
+            dir_list = dir(folder_location);
             % Remove the . and .. options
             s_l = size(dir_list,1);
             script_list = cell(0);
@@ -23,7 +24,7 @@ classdef ScriptTest < matlab.unittest.TestCase
                 while(i <= s_el)
                     if(dir_list(i).isdir)
                         % Add the elements
-                        temp_dir_list = dir(['/home/jpeden/Dropbox/CASPR_private/scripts/examples/',dir_list(i).name]);
+                        temp_dir_list = dir([folder_location,dir_list(i).name]);
                         t_s_l = size(temp_dir_list,1);
                         if(t_s_l > 2)
                             dir_list(s_el+1:s_el+t_s_l-2) = temp_dir_list(3:t_s_l);
