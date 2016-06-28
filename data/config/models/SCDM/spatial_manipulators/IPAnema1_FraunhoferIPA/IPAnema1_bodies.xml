@@ -4,7 +4,7 @@
     <joint type="SPATIAL_EULER_XYZ" />
     <physical>
       <mass>25.0</mass>
-      <com_location>0.0 1.0 0.2</com_location>
+      <com_location>0.0 0.0 0.0</com_location>
       <end_location>0.0 0.0 0.0</end_location>
       <inertia ref="com">
         <Ixx>14.0</Ixx>

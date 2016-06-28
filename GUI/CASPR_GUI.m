@@ -34,7 +34,7 @@ function varargout = CASPR_GUI(varargin)
 
     % Edit the above text to modify the response to help CASPR_GUI
 
-    % Last Modified by GUIDE v2.5 26-Feb-2016 17:56:58
+    % Last Modified by GUIDE v2.5 26-Jun-2016 13:31:26
 
     % Begin initialization code - DO NOT EDIT
     warning('off','MATLAB:uitabgroup:OldVersion')
@@ -101,6 +101,15 @@ function figure1_CloseRequestFcn(hObject, ~, handles) %#ok<DEFNU>
     % Hint: delete(hObject) closes the figure
     saveState(handles);
     delete(hObject);
+end
+
+% --- Executes when figure1 is resized.
+function figure1_ResizeFcn(hObject, eventdata, handles)
+    % hObject    handle to figure1 (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    structure with handles and user data (see GUIDATA)
+%     rect = get(0,'ScreenSize');
+%     set(hObject,'Position',rect);
 end
 
 %--------------------------------------------------------------------------
@@ -290,14 +299,6 @@ function cable_popup_update(handles)
     contents = cellstr(get(handles.model_popup,'String'));
     model_type = contents{get(handles.model_popup,'Value')};
     model_config = ModelConfig(ModelConfigType.(['M_',model_type]));
-    % Determine the cable sets
-%     cablesetsObj = model_config.cablesXmlObj.getElementsByTagName('cables').item(0).getElementsByTagName('cable_set');
-%     cableset_str = cell(1,cablesetsObj.getLength);
-%     % Extract the identifies from the cable sets
-%     for i =1 :cablesetsObj.getLength
-%         cablesetObj = cablesetsObj.item(i-1);
-%         cableset_str{i} = char(cablesetObj.getAttribute('id'));
-%     end
     cableset_str = model_config.getCableSetList();
     set(handles.cable_popup, 'Value', 1);
     set(handles.cable_popup, 'String', cableset_str);

@@ -756,12 +756,12 @@ function objective_table_Update(dimension,hObject)
     set(hObject,'ColumnEditable',true(1,dimension));
     q_position = get(hObject,'Position');
     if(dimension>4)
-        q_position(2) = 0.38;
-        q_position(4) = 0.15;
+        q_position(2) = 0.35;
+        q_position(4) = 0.19;
         set(hObject,'Position',q_position);
     else
-        q_position(2) = 0.38;
-        q_position(4) = 0.106;
+        q_position(2) = 0.35;
+        q_position(4) = 0.15;
         set(hObject,'Position',q_position);
     end
 end
@@ -773,11 +773,11 @@ function constraint_table_Update(dimension,hObject)
     q_position = get(hObject,'Position');
     if(dimension(2)>4)
         q_position(2) = 0.04;
-        q_position(4) = 0.15;
+        q_position(4) = 0.19;
         set(hObject,'Position',q_position);
     else
         q_position(2) = 0.04;
-        q_position(4) = 0.106;
+        q_position(4) = 0.15;
         set(hObject,'Position',q_position);
     end
 end
@@ -788,12 +788,12 @@ function tuning_parameter_table_Update(dimension,hObject)
     set(hObject,'ColumnEditable',true(1,dimension));
     q_position = get(hObject,'Position');
     if(dimension>4)
-        q_position(2) = 0.38;
-        q_position(4) = 0.15;
+        q_position(2) = 0.35;
+        q_position(4) = 0.19;
         set(hObject,'Position',q_position);
     else
-        q_position(2) = 0.38;
-        q_position(4) = 0.106;
+        q_position(2) = 0.35;
+        q_position(4) = 0.15;
         set(hObject,'Position',q_position);
     end
 end
