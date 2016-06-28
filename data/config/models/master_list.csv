@@ -1,6 +1,7 @@
 M_2DOF_VSD,/SCDM/planar_manipulators/2_Dof_VSD/,2_Dof_VSD_bodies.xml,2_Dof_VSD_cables.xml,2_Dof_VSD_trajectories.xml,
 M_KNTU_PLANAR,/SCDM/planar_manipulators/KNTU_planar/,KNTU_planar_xy_bodies.xml,KNTU_planar_xy_cables.xml,KNTU_planar_xy_trajectories.xml,
 M_SIMPLE_PLANAR_XY,/SCDM/planar_manipulators/simple_planar_xy/,simple_planar_xy_bodies.xml,simple_planar_xy_cables.xml,simple_planar_xy_trajectories.xml,
+M_PASSIVE_SPRINGS_PLANAR,/SCDM/planar_manipulators/passive_springs_planar/,passive_springs_planar_bodies.xml,passive_springs_planar_cables.xml,passive_springs_planar_trajectories.xml,
 M_ACROBOT,/SCDM/spatial_manipulators/ACROBOT_IRTJV/,ACROBOT_bodies.xml,ACROBOT_cables.xml,ACROBOT_trajectories.xml,
 M_COGIRO,/SCDM/spatial_manipulators/CoGiRo/,CoGiRo_bodies.xml,CoGiRo_cables.xml,CoGiRo_trajectories.xml,
 M_IPANEMA_1,/SCDM/spatial_manipulators/IPAnema1_FraunhoferIPA/,IPAnema1_bodies.xml,IPAnema1_cables.xml,IPAnema1_trajectories.xml,

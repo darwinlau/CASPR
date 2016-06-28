@@ -12,6 +12,7 @@ classdef ModelConfigType
         M_2DOF_VSD
         M_KNTU_PLANAR
         M_SIMPLE_PLANAR_XY
+        M_PASSIVE_SPRINGS_PLANAR
         % Spatial manipulators
         M_ACROBOT
 		M_COGIRO
