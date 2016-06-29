@@ -35,7 +35,7 @@ classdef WorkspaceStatic < WorkspaceConditionBase
                     case WorkspaceStaticMethods.M_SEACM
                         inWorkspace = static_capability_measure(dynamics,obj.options);
                     otherwise
-                        error('static workspace method is not defined');
+                        CASPR_log.Print('static workspace method is not defined',CASPRLogLevel.ERROR);
                 end
             end
         end

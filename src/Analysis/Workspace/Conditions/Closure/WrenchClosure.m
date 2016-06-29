@@ -37,7 +37,7 @@ classdef WrenchClosure < WorkspaceConditionBase
                 case WrenchClosureMethods.M_COMBINATORIC_POSITIVE_SPAN
                     inWorkspace = wrench_closure_combinatoric_positive_span(dynamics,obj.options);
                 otherwise
-                    error('Wrench closure method is not defined');
+                    CASPR_log.Print('Wrench closure method is not defined',CASPRLogLevel.ERROR);
                 end
             end
         end
