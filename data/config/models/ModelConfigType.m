@@ -20,6 +20,7 @@ classdef ModelConfigType
         M_IPANEMA_2
         M_NIST_ROBOCRANE
         M_SEGESTA
+        M_FAST
         M_SIMPLE_SPATIAL
         % Spherical manipulators
         M_MYOROB_SHOULDER
