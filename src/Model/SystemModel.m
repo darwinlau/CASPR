@@ -52,6 +52,8 @@ classdef SystemModel < handle
         
         % Hessians
         L_grad                  % The gradient of the jacobian L
+        L_grad_active           % active part of the Jacobian matrix gradient
+        L_grad_passive          % active part of the Jacobian matrix gradient
 
         % Generalised coordinates
         q                       % Generalised coordinates state vector
@@ -147,7 +149,7 @@ classdef SystemModel < handle
             A(obj.numDofs+1:2*obj.numDofs,obj.numDofs+1:2*obj.numDofs) = -obj.M\obj.bodyModel.C_grad_qdot;
             
             % The B matrix
-            B = [zeros(obj.numDofs,obj.numCables);-obj.M\obj.L'];
+            B = [zeros(obj.numDofs,obj.numCables);-obj.M\obj.L_active'];
         end
         
         % Load the operational space xml object
@@ -179,11 +181,11 @@ classdef SystemModel < handle
         end
         
         function value = get.numCablesActive(obj)
-            value = obj.cableModel.numCablesActive;
+            value = obj.cableModel.numActiveCables;
         end
         
         function value = get.numCablesPassive(obj)
-            value = obj.cableModel.numCablesPassive;
+            value = obj.cableModel.numPassiveCables;
         end
 
         function value = get.cableLengths(obj)
@@ -235,6 +237,14 @@ classdef SystemModel < handle
             end
             is_symbolic = isa(obj.q,'sym');
             value = TensorOperations.LeftMatrixProduct(obj.cableModel.V,obj.bodyModel.W_grad,is_symbolic) + TensorOperations.RightMatrixProduct(obj.cableModel.V_grad,obj.bodyModel.W,is_symbolic);
+        end
+        
+        function value = get.L_grad_active(obj)
+            value = obj.L_grad(obj.cableModel.activeCableIndices, :, :);
+        end
+        
+        function value = get.L_grad_passive(obj)
+            value = obj.L_grad(obj.cableModel.passiveCableIndices, :, :);
         end
         
         function value = get.K(obj)

@@ -53,6 +53,8 @@ classdef SystemModelCables < handle
         forcesPassive               % Vector of forces for passive cables
         V_active
         V_passive
+        V_grad_active
+        V_grad_passive
         FORCES_ACTIVE_INVALID       % Constant of vector of invalid forces for active cables
     end
 
@@ -291,11 +293,19 @@ classdef SystemModelCables < handle
             value = length(obj.cables);
         end
         
-        function V_grad = get.V_grad(obj)
+        function value = get.V_grad(obj)
             if(isempty(obj.V_grad))
                 obj.update_hessian();
             end
-            V_grad = obj.V_grad;
+            value = obj.V_grad;
+        end
+        
+        function value = get.V_grad_active(obj)
+            value = obj.V_grad(obj.activeCableIndices, :, :);
+        end
+        
+        function value = get.V_grad_passive(obj)
+            value = obj.V_grad(obj.passiveCableIndices, :, :);
         end
         
         function value = get.FORCES_ACTIVE_INVALID(obj)

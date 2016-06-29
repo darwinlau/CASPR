@@ -35,7 +35,6 @@ function setup_CASPR
     % Run unit tests to confirm that the models are correctly setup
     %suite = matlab.unittest.TestSuite.fromFile('ModelConfigTest.m');
     %suite.run;
-    ls
     failed_tests = CASPR_tests('ModelConfigTest');
     if(sum(failed_tests)>0)
         fprintf('\n----------------------------------------------------\n')

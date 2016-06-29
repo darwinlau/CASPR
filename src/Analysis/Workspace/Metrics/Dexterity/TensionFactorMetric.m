@@ -24,8 +24,8 @@ classdef TensionFactorMetric < WorkspaceMetricBase
         % Evaluate function implementation
         function v = evaluateFunction(~,dynamics,options)
             % Determine the Jacobian Matrix
-            L = dynamics.L;
-            [u,~,exit_flag] = linprog(ones(1,dynamics.numCables),[],[],-L',zeros(dynamics.numDofs,1),1e-6*ones(dynamics.numCables,1),1e6*ones(dynamics.numCables,1),[],options);
+            L = dynamics.L_active;
+            [u,~,exit_flag] = linprog(ones(1,dynamics.numCablesActive),[],[],-L',zeros(dynamics.numDofs,1),1e-6*ones(dynamics.numCablesActive,1),1e6*ones(dynamics.numCablesActive,1),[],options);
             if((exit_flag == 1) && (rank(L) == dynamics.numDofs))
                 h = u/norm(u);
                 h_min = min(h); h_max = max(h);

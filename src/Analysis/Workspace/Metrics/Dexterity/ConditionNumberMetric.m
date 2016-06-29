@@ -17,7 +17,7 @@ classdef ConditionNumberMetric < WorkspaceMetricBase
         % Evaluate function implementation
         function v = evaluateFunction(~,dynamics,~)
             % Determine the Jacobian Matrix
-            L = dynamics.L;
+            L = dynamics.L_active;
             % Compute singular values of jacobian matrix
             Sigma = svd(-L');
             % Compute the condition number

@@ -11,7 +11,7 @@
 % Description   : 
 function inWorkspace = wrench_closure_combinatoric_null_space(dynamics,~)
     % Determine necessary variables for test
-    A       =   -dynamics.L'; % Cable Jacobian
+    A       =   -dynamics.L_active'; % Cable Jacobian
     [n,m] = size(A); % Size variables
     %% Evaluate Matrix Rank
     if(rank(A)==n)
