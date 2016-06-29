@@ -44,7 +44,7 @@ classdef ControllerSimulator < DynamicsSimulator
             obj.trajectory.q_ddot{1} = q0_ddot;
             
             for t = 1:length(obj.timeVector)
-                fprintf('Time : %f\n', obj.timeVector(t));
+                CASPR_log.Print(sprintf('Time : %f\n', obj.timeVector(t)),CASPRLogLevel.INFO);
                 obj.cableForces{t} = obj.controller.executeFunction(obj.trajectory.q{t},  obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t}, ref_trajectory.q{t}, ref_trajectory.q_dot{t}, ref_trajectory.q_ddot{t});
                 obj.stateError{t} = ref_trajectory.q{t} - obj.trajectory.q{t};
                 if t < length(obj.timeVector)
@@ -61,7 +61,7 @@ classdef ControllerSimulator < DynamicsSimulator
         
         % Plots both the reference and computed trajectory.
         function plotJointSpaceTracking(obj, states_to_plot, plot_axis)
-            assert(~isempty(obj.trajectory), 'Cannot plot since trajectory is empty');
+            CASPR_log.Assert(~isempty(obj.trajectory), 'Cannot plot since trajectory is empty');
 
             n_dof = obj.model.numDofs;
 

@@ -38,14 +38,11 @@ classdef (Abstract) MotionSimulator < Simulator
         % frames will be computed to confirm to the total time of the
         % video.
         function plotMovie(obj, plot_axis, filename, time, width, height)
-            assert(~isempty(obj.trajectory), 'Cannot plot since trajectory is empty');
-
+            CASPR_log.Assert(~isempty(obj.trajectory), 'Cannot plot since trajectory is empty');
             fps = 30;
-
             writerObj = VideoWriter(filename);
             %writerObj.Quality = 100;
             writerObj.open();
-
             plot_handle = figure('Position', [10, 10, width, height]);
             for i = 1:round(fps*time)
                 t = round(length(obj.timeVector)/round(fps*time)*i);
@@ -68,15 +65,13 @@ classdef (Abstract) MotionSimulator < Simulator
         % of numbers) to plot (it is possible to default to plot all cables
         % if the array is []).
         function plotCableLengths(obj, cables_to_plot, plot_axis)
-            assert(~isempty(obj.cableLengths), 'Cannot plot since lengths vector is empty');
-            assert(~isempty(obj.cableLengthsDot), 'Cannot plot since lengths_dot vector is empty');
-
+            CASPR_log.Assert(~isempty(obj.cableLengths), 'Cannot plot since lengths vector is empty');
+            CASPR_log.Assert(~isempty(obj.cableLengthsDot), 'Cannot plot since lengths_dot vector is empty');
             if isempty(cables_to_plot)
                 cables_to_plot = 1:obj.model.numCables;
             end
             length_array = cell2mat(obj.cableLengths);
             length_dot_array = cell2mat(obj.cableLengthsDot);
-    
             if(~isempty(plot_axis))
                 plot(plot_axis(1),obj.timeVector, length_array(cables_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); 
                 plot(plot_axis(2),obj.timeVector, length_dot_array(cables_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); 
@@ -106,14 +101,11 @@ classdef (Abstract) MotionSimulator < Simulator
         % of numbers) to plot (it is possible to default to plot all states
         % if the array is []).
         function plotJointSpace(obj, states_to_plot, plot_axis)
-            assert(~isempty(obj.trajectory), 'Cannot plot since trajectory is empty');
-
+            CASPR_log.Assert(~isempty(obj.trajectory), 'Cannot plot since trajectory is empty');
             n_dof = obj.model.numDofs;
-
             if isempty(states_to_plot)
                 states_to_plot = 1:n_dof;
             end
-
             q_array = cell2mat(obj.trajectory.q);
             q_dot_array = cell2mat(obj.trajectory.q_dot);
             if(~isempty(plot_axis))
@@ -141,14 +133,12 @@ classdef (Abstract) MotionSimulator < Simulator
         % of numbers) to plot (it is possible to default to plot all bodies
         % if the array is []).
         function plotBodyCOG(obj, bodies_to_plot, plot_axis)
-            assert(~isempty(obj.trajectory), 'Cannot plot since trajectory is empty');
-
+            CASPR_log.Assert(~isempty(obj.trajectory), 'Cannot plot since trajectory is empty');
             % Plots absolute position, velocity and acceleration of COG
             % with respect to {0}
             if isempty(bodies_to_plot)
                 bodies_to_plot = 1:obj.model.numLinks;
             end
-
             pos0 = zeros(3*length(bodies_to_plot), length(obj.timeVector));
             pos0_dot = zeros(3*length(bodies_to_plot), length(obj.timeVector));
             pos0_ddot = zeros(3*length(bodies_to_plot), length(obj.timeVector));
@@ -160,7 +150,6 @@ classdef (Abstract) MotionSimulator < Simulator
                     pos0_ddot(3*ki-2:3*ki, t) = obj.model.bodyModel.bodies{bodies_to_plot(ki)}.R_0k*obj.model.bodyModel.bodies{bodies_to_plot(ki)}.a_OG;
                 end
             end
-            
             if(~isempty(plot_axis))
                 plot(plot_axis(1),obj.timeVector, pos0, 'LineWidth', 1.5, 'Color', 'k'); 
                 plot(plot_axis(2),obj.timeVector, pos0_dot, 'LineWidth', 1.5, 'Color', 'k'); 
@@ -178,8 +167,6 @@ classdef (Abstract) MotionSimulator < Simulator
                 plot(obj.timeVector, pos0_ddot, 'Color', 'k', 'LineWidth', 1.5);
                 title('Acceleration of CoG');
             end
-            
-
             % ONLY USED IN DEBUGGING START
             % Numerical derivative must be performed in frame {0}
 %             pos0_dot_num = zeros(size(pos0));
@@ -202,14 +189,12 @@ classdef (Abstract) MotionSimulator < Simulator
         % of numbers) to plot (it is possible to default to plot all bodies
         % if the array is []).
         function plotAngularAcceleration(obj, bodies_to_plot, plot_axis)
-            assert(~isempty(obj.trajectory), 'Cannot plot since trajectory is empty');
-
+            CASPR_log.Assert(~isempty(obj.trajectory), 'Cannot plot since trajectory is empty');
             % Plots absolute position, velocity and acceleration of COG
             % with respect to {0}
             if isempty(bodies_to_plot)
                 bodies_to_plot = 1:obj.model.numLinks;
             end
-
             ang0 = zeros(3*length(bodies_to_plot), length(obj.timeVector));
             ang0_dot = zeros(3*length(bodies_to_plot), length(obj.timeVector));
             for t = 1:length(obj.timeVector)
@@ -219,7 +204,6 @@ classdef (Abstract) MotionSimulator < Simulator
                     ang0_dot(3*ki-2:3*ki, t) = obj.model.bodyModel.bodies{bodies_to_plot(ki)}.R_0k*obj.model.bodyModel.bodies{bodies_to_plot(ki)}.w_dot;
                 end
             end
-
             if(~isempty(plot_axis))
                 plot(plot_axis(1),obj.timeVector, ang0, 'LineWidth', 1.5, 'Color', 'k'); 
                 plot(plot_axis(2),obj.timeVector, ang0_dot, 'LineWidth', 1.5, 'Color', 'k'); 
@@ -232,7 +216,6 @@ classdef (Abstract) MotionSimulator < Simulator
                 plot(obj.timeVector, ang0_dot, 'Color', 'k', 'LineWidth', 1.5);
                 title('Angular acceleration of rigid bodies');
             end
-
             % ONLY USED IN DEBUGGING START
 %             % Numerical derivative must be performed in frame {0}
 %             ang0_dot_num = zeros(size(ang0));

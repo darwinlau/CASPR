@@ -40,7 +40,7 @@ classdef ForwardDynamicsSimulator < DynamicsSimulator
             obj.trajectory.q_ddot{1} = q0_ddot;
             
             for t = 2:length(obj.timeVector)
-                fprintf('Simulation time : %f\n', obj.timeVector(t));
+                CASPR_log.Print(sprintf('Simulation time : %f\n', obj.timeVector(t)),CASPRLogLevel.INFO);
                 [obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t}, obj.model] = obj.fdSolver.compute(obj.model.q, obj.model.q_dot, cable_forces{t-1}, zeros(obj.model.numDofs,1), obj.timeVector(t)-obj.timeVector(t-1), obj.model);
                 obj.interactionWrench{t} = obj.model.interactionWrench;
                 obj.cableLengths{t} = obj.model.cableLengths;

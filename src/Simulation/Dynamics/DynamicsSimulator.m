@@ -29,7 +29,7 @@ classdef DynamicsSimulator < MotionSimulator
         % of numbers) to plot (it is possible to default to plot all cables
         % if the array is []).
         function plotCableForces(obj, cables_to_plot, plot_axis)
-            assert(~isempty(obj.cableForces), 'Cannot plot since cableForces is empty');
+            CASPR_log.Assert(~isempty(obj.cableForces), 'Cannot plot since cableForces is empty');
             
             if isempty(cables_to_plot)
                 cables_to_plot = 1:obj.model.numCables;
@@ -68,7 +68,7 @@ classdef DynamicsSimulator < MotionSimulator
         % of numbers) to plot (it is possible to default to plot all links
         % if the array is []).
         function plotInteractionForceMagnitudes(obj, links_to_plot, plot_axis)
-            assert(~isempty(obj.interactionWrench), 'Cannot plot since interactionWrench is empty');
+            CASPR_log.Assert(~isempty(obj.interactionWrench), 'Cannot plot since interactionWrench is empty');
             
             if isempty(links_to_plot)
                 links_to_plot = 1:obj.model.numLinks;
@@ -107,7 +107,7 @@ classdef DynamicsSimulator < MotionSimulator
         % axis only. Can refer to IDConstraintInteractionForceAngleCone 
         % to incorporate the F_centre parameter.
         function plotInteractionForceAngles(obj, links_to_plot)
-            assert(~isempty(obj.interactionWrench), 'Cannot plot since interactionWrench is empty');
+            CASPR_log.Assert(~isempty(obj.interactionWrench), 'Cannot plot since interactionWrench is empty');
             
             if nargin == 1 || isempty(links_to_plot)
                 links_to_plot = 1:obj.model.numLinks;
@@ -136,7 +136,7 @@ classdef DynamicsSimulator < MotionSimulator
         % of numbers) to plot (it is possible to default to plot all links
         % if the array is []).
         function plotInteractionMomentMagnitudes(obj, links_to_plot)
-            assert(~isempty(obj.interactionWrench), 'Cannot plot since interactionWrench is empty');
+            CASPR_log.Assert(~isempty(obj.interactionWrench), 'Cannot plot since interactionWrench is empty');
             
             if nargin == 1 || isempty(links_to_plot)
                 links_to_plot = 1:obj.model.numLinks;
@@ -164,7 +164,7 @@ classdef DynamicsSimulator < MotionSimulator
         % of numbers) to plot (it is possible to default to plot all links
         % if the array is []).
         function plotInteractionForceZ(obj, links_to_plot)
-            assert(~isempty(obj.interactionWrench), 'Cannot plot since interactionWrench is empty');
+            CASPR_log.Assert(~isempty(obj.interactionWrench), 'Cannot plot since interactionWrench is empty');
             
             if nargin == 1 || isempty(links_to_plot)
                 links_to_plot = 1:obj.model.numLinks;
