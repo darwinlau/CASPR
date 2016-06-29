@@ -4,7 +4,7 @@
 ]>
 
 <trajectories>
-  <trajectory id="x_simple">
+  <trajectory id="y_simple">
     <time_total>1</time_total>
     <time_step>0.01</time_step>
     <begin>
