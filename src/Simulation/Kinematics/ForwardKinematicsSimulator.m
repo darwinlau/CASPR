@@ -47,20 +47,18 @@ classdef ForwardKinematicsSimulator < MotionSimulator
             q_prev = q0_approx;
             q_d_prev = q0_prev_approx;
             lengths_prev = lengths{1};
-            lengths_prev_2 = lengths{1};
             
             time_prev = 0;
             
             for t = 1:length(obj.trajectory.timeVector)
                 fprintf('Time : %f\n', obj.trajectory.timeVector(t));
-                [q, q_dot] = obj.FKSolver.compute(lengths{t}, lengths_prev_2, q_prev, q_d_prev, obj.trajectory.timeVector(t) - time_prev);
+                [q, q_dot] = obj.FKSolver.compute(lengths{t}, lengths_prev, q_prev, q_d_prev, obj.trajectory.timeVector(t) - time_prev);
                 obj.trajectory.q{t} = q;
                 obj.trajectory.q_dot{t} = q_dot;
                 
                 q_prev = q;
                 q_d_prev = q_dot;
                 time_prev =  obj.trajectory.timeVector(t);
-                lengths_prev_2 = lengths_prev;
                 lengths_prev = lengths{t};
                 obj.lengthError{t} = obj.FKSolver.ComputeLengthErrorVector(q, lengths{t}, obj.model);
                 obj.lengthErrorNorm(t) = norm(obj.lengthError{t});

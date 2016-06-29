@@ -22,7 +22,7 @@ classdef FKLeastSquares < FKAnalysisBase
         end
         
         % The implementatin of the abstract compute function.
-        function [q, q_dot] = computeFunction(obj, len, len_prev_2, q_prev, q_d_prev, delta_t)
+        function [q, q_dot] = computeFunction(obj, len, len_prev, q_prev, q_d_prev, delta_t)
             % Step 1: Compute the approximation of q for the optimiser
             switch obj.approxMethod
                 case FK_LS_ApproxOptionType.USE_PREVIOUS_Q
@@ -32,7 +32,7 @@ classdef FKLeastSquares < FKAnalysisBase
                 case FK_LS_ApproxOptionType.FIRST_ORDER_INTEGRATE_PSEUDOINV
                     obj.model.update(q_prev, zeros(obj.model.numDofs,1), zeros(obj.model.numDofs,1), zeros(obj.model.numDofs,1));
                     if delta_t ~= 0
-                        q_approx = obj.model.bodyModel.qIntegrate(q_prev, pinv(obj.model.L) * (len - len_prev_2)/(2*delta_t), delta_t);
+                        q_approx = obj.model.bodyModel.qIntegrate(q_prev, pinv(obj.model.L) * (len - len_prev)/delta_t, delta_t);
                     else
                         q_approx = obj.model.bodyModel.qIntegrate(q_prev, zeros(obj.model.numDofs,1), 0);
                     end
@@ -68,7 +68,7 @@ classdef FKLeastSquares < FKAnalysisBase
                 case FK_LS_QdotOptionType.PSEUDO_INV
                     if delta_t ~= 0
                         obj.model.update(q, zeros(size(q)), zeros(size(q)), zeros(size(q)));
-                        q_dot = pinv(obj.model.L) * (len - len_prev_2)/(2*delta_t);
+                        q_dot = pinv(obj.model.L) * (len - len_prev)/delta_t;
                     else
                         q_dot = zeros(obj.model.numDofs,1);
                     end

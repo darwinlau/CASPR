@@ -27,9 +27,9 @@ classdef FKAnalysisBase < handle
         
         % Computes the joint position information given the cable
         % information.
-        function [q, q_dot, comp_time] = compute(obj, len, len_prev_2, q_prev, q_d_prev, delta_t)
+        function [q, q_dot, comp_time] = compute(obj, len, len_prev, q_prev, q_d_prev, delta_t)
             start_tic = tic;
-            [q, q_dot] = obj.computeFunction(len, len_prev_2, q_prev, q_d_prev, delta_t);
+            [q, q_dot] = obj.computeFunction(len, len_prev, q_prev, q_d_prev, delta_t);
             comp_time = toc(start_tic);
         end
     end
