@@ -12,6 +12,7 @@
 classdef ForwardKinematicsSimulator < MotionSimulator
     
     properties (SetAccess = protected) 
+        compTime            % computational time for each time step
         lengthError         % Cell array of the length error vector
         lengthErrorNorm     % Array of the error norm for the trajectory
         FKSolver            % The FK solver object (inherits from FKAnalysisBase)
@@ -26,10 +27,16 @@ classdef ForwardKinematicsSimulator < MotionSimulator
         
         % The run function performs the FK at each point in time using the
         % trajectory of cable lengths
-        function run(obj, lengths, lengths_dot, time_vector, q0_approx, q0_prev_approx)
+        function run(obj, lengths, lengths_dot, time_vector, q0_approx, q0_prev_approx, cable_indices)
+            if (nargin <= 6 || isempty(cable_indices))
+                cable_indices = 1:obj.model.numCables;
+            end
+                
+            
             obj.timeVector = time_vector;
             obj.cableLengths = lengths;
             obj.cableLengthsDot = lengths_dot;
+            obj.compTime = zeros(length(obj.timeVector), 1);
             
             % Setting up
             obj.trajectory = JointTrajectory;
@@ -37,7 +44,7 @@ classdef ForwardKinematicsSimulator < MotionSimulator
             obj.trajectory.q = cell(1, length(obj.timeVector));
             obj.trajectory.q_dot = cell(1, length(obj.timeVector));
             obj.lengthError = cell(1, length(obj.timeVector));
-            obj.lengthError(:) = {zeros(size(q0_approx))};
+            obj.lengthError(:) = {zeros(size(lengths{1}))};
             obj.lengthErrorNorm = zeros(length(obj.timeVector), 1);
             % Does not compute q_ddot (set it to be empty)
             obj.trajectory.q_ddot = cell(1, length(obj.timeVector));
@@ -47,22 +54,19 @@ classdef ForwardKinematicsSimulator < MotionSimulator
             q_prev = q0_approx;
             q_d_prev = q0_prev_approx;
             lengths_prev = lengths{1};
-            lengths_prev_2 = lengths{1};
             
             time_prev = 0;
             
             for t = 1:length(obj.trajectory.timeVector)
-                CASPR_log(sprintf('Time : %f\n', obj.trajectory.timeVector(t)),CASPRLogLevel.INFO);
-                [q, q_dot] = obj.FKSolver.compute(lengths{t}, lengths_prev_2, q_prev, q_d_prev, obj.trajectory.timeVector(t) - time_prev);
+                CASPR_log.Print(sprintf('Time : %f\n', obj.trajectory.timeVector(t)),CASPRLogLevel.INFO);
+                [q, q_dot, obj.compTime(t)] = obj.FKSolver.compute(lengths{t}, lengths_prev, cable_indices, q_prev, q_d_prev, obj.trajectory.timeVector(t) - time_prev);
                 obj.trajectory.q{t} = q;
-                obj.trajectory.q_dot{t} = q_dot;
-                
+                obj.trajectory.q_dot{t} = q_dot;                
                 q_prev = q;
                 q_d_prev = q_dot;
                 time_prev =  obj.trajectory.timeVector(t);
-                lengths_prev_2 = lengths_prev;
                 lengths_prev = lengths{t};
-                obj.lengthError{t} = obj.FKSolver.ComputeLengthErrorVector(q, lengths{t}, obj.model);
+                obj.lengthError{t} = obj.FKSolver.ComputeLengthErrorVector(q, lengths{t}, obj.model, cable_indices);
                 obj.lengthErrorNorm(t) = norm(obj.lengthError{t});
             end
         end
@@ -70,10 +74,10 @@ classdef ForwardKinematicsSimulator < MotionSimulator
         % Plots the error for each cable length by comparing the reference
         % length with the length as a result of the solution generalised
         % coordinates.
-        function plotCableLengthError(obj,~,plot_axis)
+        function plotCableLengthError(obj, ~, plot_axis)
             lengthError_array = cell2mat(obj.lengthError);
             if(~isempty(plot_axis))
-                plot(plot_axis,obj.timeVector, lengthError_array, 'Color', 'k', 'LineWidth', 1.5);
+                plot(plot_axis, obj.timeVector, lengthError_array, 'Color', 'k', 'LineWidth', 1.5);
             else
                 figure;
                 plot(obj.timeVector, lengthError_array, 'Color', 'k', 'LineWidth', 1.5);

@@ -181,11 +181,11 @@ classdef SystemModel < handle
         end
         
         function value = get.numCablesActive(obj)
-            value = obj.cableModel.numActiveCables;
+            value = obj.cableModel.numCablesActive;
         end
         
         function value = get.numCablesPassive(obj)
-            value = obj.cableModel.numPassiveCables;
+            value = obj.cableModel.numCablesPassive;
         end
 
         function value = get.cableLengths(obj)
@@ -307,7 +307,7 @@ classdef SystemModel < handle
 %         end
 
         function value = get.q_ddot_dynamics(obj)
-            obj.bodyModel.q_ddot = obj.M\(-obj.L.'*obj.cableModel.forces - obj.C - obj.G - obj.W_e);
+            obj.bodyModel.q_ddot = obj.M\(-obj.L.'*obj.cableForces - obj.C - obj.G - obj.W_e);
             value = obj.q_ddot;
         end
 

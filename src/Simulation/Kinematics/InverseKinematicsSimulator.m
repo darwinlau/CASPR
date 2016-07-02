@@ -15,9 +15,12 @@ classdef InverseKinematicsSimulator < MotionSimulator
         end
         
         % Implementation of the run function.
-        function run(obj, trajectory)
-            obj.trajectory = trajectory;
+        function run(obj, trajectory, cable_indices)
+            if (nargin <= 2 || isempty(cable_indices))
+                cable_indices = 1:obj.model.numCables;
+            end
             
+            obj.trajectory = trajectory;            
             obj.timeVector = obj.trajectory.timeVector;
             
             % Runs the simulation over the specified trajectory
@@ -27,8 +30,8 @@ classdef InverseKinematicsSimulator < MotionSimulator
             for t = 1:length(obj.trajectory.timeVector)
                 CASPR_log.Print(sprintf('Time : %f\n', obj.trajectory.timeVector(t)),CASPRLogLevel.INFO);
                 obj.model.update(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t},zeros(size(obj.trajectory.q_dot{t})));
-                obj.cableLengths{t} = obj.model.cableLengths;
-                obj.cableLengthsDot{t} = obj.model.cableLengthsDot;
+                obj.cableLengths{t} = obj.model.cableLengths(cable_indices);
+                obj.cableLengthsDot{t} = obj.model.cableLengthsDot(cable_indices);
             end
         end
     end

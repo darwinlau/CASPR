@@ -21,11 +21,12 @@ classdef IDSolverOperationalNullSpace < IDSolverBase
         constraints = {}
         options
         f0_previous = []
+        indicesActive_previous = []
         is_OptiToolbox
     end
     methods
         % A constructor for the class.
-        function id = IDSolverOperationalNullSpace(model,objective, qp_solver_type, W0)
+        function id = IDSolverOperationalNullSpace(model, objective, qp_solver_type, W0)
             id@IDSolverBase(model);
             id.objective = objective;
             id.qp_solver_type = qp_solver_type;
@@ -44,26 +45,28 @@ classdef IDSolverOperationalNullSpace < IDSolverBase
         % The implementation of the resolveFunction
         function [cable_forces,Q_opt, id_exit_type] = resolveFunction(obj, dynamics)            
             % Form the linear EoM constraint
-            % M\ddot{q} + C + G + F_{ext} = -J^T f (constraint)
+            % M\ddot{q} + C + G + w_{ext} = -L_active^T f_active - L_passive^T f_passive (constraint)
             [A_eom, b_eom] = IDSolverBase.GetEoMConstraints(dynamics);  
             % Form the lower and upper bound force constraints
-            fmin = dynamics.forcesMin;
-            fmax = dynamics.forcesMax;
+            fmin = dynamics.cableForcesActiveMin;
+            fmax = dynamics.cableForcesActiveMax;
             
             % Get objective function
             obj.objective.updateObjective(dynamics);
             if (~isempty(obj.f_previous))
+                % TODO: Bug here, need to handle the case of changing
+                % active cable forces (and hence f_previous)
                 [~, grad_f] = obj.objective.evaluateFunction(obj.f_previous);
             else
-                grad_f = zeros(dynamics.numCables,1);
+                grad_f = zeros(dynamics.numCablesActive, 1);
             end
             
-            f0_nom = - obj.W0 * grad_f;
+            f0_nom = - obj.W0(dynamics.cableModel.cableIndicesActive, dynamics.cableModel.cableIndicesActive) * grad_f;
             A_pinv = A_eom'/(A_eom * A_eom');
-            A_null = eye(dynamics.numCables) - A_pinv * A_eom;
+            A_null = eye(dynamics.numCablesActive) - A_pinv * A_eom;
             f_task = A_pinv * b_eom;
             
-            QP_A = 2 * eye(dynamics.numCables);
+            QP_A = 2 * eye(dynamics.numCablesActive);
             QP_b = -2 * f0_nom;
                     
             A_ineq = [-A_null; A_null];
@@ -104,7 +107,7 @@ classdef IDSolverOperationalNullSpace < IDSolverBase
             end
             
             if (id_exit_type ~= IDSolverExitType.NO_ERROR)
-                cable_forces = dynamics.cableModel.FORCES_INVALID;
+                cable_forces = dynamics.cableModel.FORCES_ACTIVE_INVALID;
                 Q_opt = inf;
             else
                 cable_forces = f_task + A_null * f0_soln;

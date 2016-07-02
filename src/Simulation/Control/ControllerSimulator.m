@@ -45,10 +45,10 @@ classdef ControllerSimulator < DynamicsSimulator
             
             for t = 1:length(obj.timeVector)
                 CASPR_log.Print(sprintf('Time : %f\n', obj.timeVector(t)),CASPRLogLevel.INFO);
-                obj.cableForces{t} = obj.controller.executeFunction(obj.trajectory.q{t},  obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t}, ref_trajectory.q{t}, ref_trajectory.q_dot{t}, ref_trajectory.q_ddot{t});
+                [obj.cableForcesActive{t}, obj.cableIndicesActive{t}, obj.cableForces{t}] = obj.controller.execute(obj.trajectory.q{t},  obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t}, ref_trajectory.q{t}, ref_trajectory.q_dot{t}, ref_trajectory.q_ddot{t}, obj.timeVector(t));
                 obj.stateError{t} = ref_trajectory.q{t} - obj.trajectory.q{t};
                 if t < length(obj.timeVector)
-                    [obj.trajectory.q{t+1}, obj.trajectory.q_dot{t+1}, obj.trajectory.q_ddot{t+1}, obj.model] = obj.fdSolver.compute(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.cableForces{t}, zeros(obj.model.numDofs,1), obj.timeVector(t+1)-obj.timeVector(t), obj.model);
+                    [obj.trajectory.q{t+1}, obj.trajectory.q_dot{t+1}, obj.trajectory.q_ddot{t+1}, obj.model] = obj.fdSolver.compute(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.cableForcesActive{t}, obj.cableIndicesActive{t}, zeros(obj.model.numDofs,1), obj.timeVector(t+1)-obj.timeVector(t), obj.model);
                 end
             end
         end

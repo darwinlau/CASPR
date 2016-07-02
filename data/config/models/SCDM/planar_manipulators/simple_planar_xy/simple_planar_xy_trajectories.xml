@@ -20,7 +20,7 @@
   </trajectory>
   <trajectory id="general_1">
     <time_total>1</time_total>
-    <time_step>0.001</time_step>
+    <time_step>0.01</time_step>
     <begin>
       <q>0.3 0.6 0.1</q>
       <q_dot>0.0 0.0 0.0</q_dot>

@@ -17,24 +17,30 @@ classdef IDObjectiveMinInteractions < IDObjectiveQuadratic
     methods
         % The constructor function for minimising the interactions
         function o = IDObjectiveMinInteractions(weights)
-            o.weights = weights;
+            o.updateWeights(weights);
         end
         
         % The objective update implementation
         function updateObjective(obj, dynamics)
-            obj.A = zeros(dynamics.numCables, dynamics.numCables);
-            obj.b = zeros(dynamics.numCables,1);
+            obj.A = zeros(dynamics.numCablesActive, dynamics.numCablesActive);
+            obj.b = zeros(dynamics.numCablesActive,1);
             obj.c = 0;
             
             a = dynamics.bodyModel.P'*(dynamics.bodyModel.M_b*dynamics.q_ddot + dynamics.bodyModel.C_b - dynamics.bodyModel.G_b);
             w_T = dynamics.bodyModel.P'*dynamics.cableModel.V';
             
+            % Only consider the active cables
+            active_indices = dynamics.cableModel.cableIndicesActive;
+            passive_indices = dynamics.cableModel.cableIndicesPassive;
+            
             for k = 1:dynamics.numLinks
                 for dof = 1:6
-                    a_x = a(6*(k-1)+dof);
                     H_vector = w_T(6*(k-1)+dof, :).';
-                    obj.A = obj.A + obj.weights(6*(k-1)+dof)*(H_vector*H_vector.');
-                    obj.b = obj.b + obj.weights(6*(k-1)+dof)*2*a_x*H_vector;
+                    H_vector_active = H_vector(active_indices);
+                    H_vector_passive = H_vector(passive_indices);
+                    a_x = a(6*(k-1)+dof) + H_vector_passive.' * dynamics.cableForcesPassive;
+                    obj.A = obj.A + obj.weights(6*(k-1)+dof)*(H_vector_active*H_vector_active.');
+                    obj.b = obj.b + obj.weights(6*(k-1)+dof)*2*a_x*H_vector_active;
                     obj.c = obj.c + obj.weights(6*(k-1)+dof)*a_x^2;
                 end
             end

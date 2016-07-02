@@ -31,11 +31,11 @@ classdef SystemModelCables < handle
         cables = {};                % Cell array of CableKinematics object
         % These vectors contain the indices of each active or passive cable
         % corresponding to their index within the cables vector
-        activeCableIndices = [];    % Index of active cables in cables vector
-        passiveCableIndices = [];   % Index of passive cables in cables vector
+        cableIndicesActive = [];    % Index of active cables in cables vector
+        cableIndicesPassive = [];   % Index of passive cables in cables vector
         numCables = 0;              % The number of cables
-        numPassiveCables = 0;       % Number of passive cables
-        numActiveCables = 0;        % Number of active cables
+        numCablesPassive = 0;       % Number of passive cables
+        numCablesActive = 0;        % Number of active cables
         numLinks = 0;               % The number of links
         K                           % The matix of cable stiffnesses
         is_symbolic                 % A flag to indicate the need for symbolic computations
@@ -77,8 +77,8 @@ classdef SystemModelCables < handle
             obj.V = MatrixOperations.Initialise([obj.numCables,6*obj.numLinks],obj.is_symbolic);
             obj.K = MatrixOperations.Initialise([obj.numCables,obj.numCables],obj.is_symbolic);
             
-            obj.numActiveCables = 0;
-            obj.numPassiveCables = 0;
+            obj.numCablesActive = 0;
+            obj.numCablesPassive = 0;
             for i = 1:obj.numCables
                 obj.cables{i}.update(bodyModel);
                 cable = obj.cables{i};
@@ -99,24 +99,24 @@ classdef SystemModelCables < handle
                 obj.K(i,i) = obj.cables{i}.K;
                 
                 if (cable.isActive)
-                    obj.numActiveCables = obj.numActiveCables + 1;
+                    obj.numCablesActive = obj.numCablesActive + 1;
                 else
-                    obj.numPassiveCables = obj.numPassiveCables + 1;
+                    obj.numCablesPassive = obj.numCablesPassive + 1;
                 end
             end
             
             ind_active = 1;
             ind_passive = 1;
-            obj.activeCableIndices = zeros(obj.numActiveCables, 1);
-            obj.passiveCableIndices = zeros(obj.numPassiveCables, 1);
+            obj.cableIndicesActive = zeros(obj.numCablesActive, 1);
+            obj.cableIndicesPassive = zeros(obj.numCablesPassive, 1);
             for i = 1:obj.numCables
                 % Active cable
                 if (obj.cables{i}.isActive)
-                    obj.activeCableIndices(ind_active) = i;
+                    obj.cableIndicesActive(ind_active) = i;
                     ind_active = ind_active + 1;
                 % Passive cable
                 else
-                    obj.passiveCableIndices(ind_passive) = i;
+                    obj.cableIndicesPassive(ind_passive) = i;
                     ind_passive = ind_passive + 1;
                 end
             end
@@ -237,11 +237,11 @@ classdef SystemModelCables < handle
         end
         
         function value = get.lengthsActive(obj)
-            value = obj.lengths(obj.activeCableIndices);
+            value = obj.lengths(obj.cableIndicesActive);
         end
         
         function value = get.lengthsPassive(obj)
-            value = obj.lengths(obj.passiveCableIndices);
+            value = obj.lengths(obj.cableIndicesPassive);
         end
         
         function value = get.forces(obj)
@@ -252,41 +252,41 @@ classdef SystemModelCables < handle
         end
         
         function set.forces(obj, f)
-            assert(length(f) == obj.numActiveCables, 'Forces dimension inconsistent with the number of active cables');
+            assert(length(f) == obj.numCablesActive, 'Forces dimension inconsistent with the number of active cables');
             
-            for i = 1:obj.numActiveCables
-                obj.cables{obj.activeCableIndices(i)}.force = f(i);
+            for i = 1:obj.numCablesActive
+                obj.cables{obj.cableIndicesActive(i)}.force = f(i);
             end
         end
         
         function value = get.forcesActive(obj)
-            value = obj.forces(obj.activeCableIndices);
+            value = obj.forces(obj.cableIndicesActive);
         end
         
         function value = get.forcesActiveMin(obj)
-            value = zeros(obj.numActiveCables, 1);
-            for i = 1:obj.numActiveCables
-                value(i) = obj.cables{obj.activeCableIndices(i)}.forceMin;
+            value = zeros(obj.numCablesActive, 1);
+            for i = 1:obj.numCablesActive
+                value(i) = obj.cables{obj.cableIndicesActive(i)}.forceMin;
             end
         end
         
         function value = get.forcesActiveMax(obj)
-            value = zeros(obj.numActiveCables, 1);
-            for i = 1:obj.numActiveCables
-                value(i) = obj.cables{obj.activeCableIndices(i)}.forceMax;
+            value = zeros(obj.numCablesActive, 1);
+            for i = 1:obj.numCablesActive
+                value(i) = obj.cables{obj.cableIndicesActive(i)}.forceMax;
             end
         end
                 
         function value = get.forcesPassive(obj)
-            value = obj.forces(obj.passiveCableIndices);
+            value = obj.forces(obj.cableIndicesPassive);
         end
         
         function value = get.V_active(obj)
-            value = obj.V(obj.activeCableIndices, :);
+            value = obj.V(obj.cableIndicesActive, :);
         end
         
         function value = get.V_passive(obj)
-            value = obj.V(obj.passiveCableIndices, :);
+            value = obj.V(obj.cableIndicesPassive, :);
         end
         
         function value = get.numCables(obj)
@@ -309,7 +309,7 @@ classdef SystemModelCables < handle
         end
         
         function value = get.FORCES_ACTIVE_INVALID(obj)
-            value = CableModelBase.INVALID_FORCE * ones(obj.numActiveCables, 1);
+            value = CableModelBase.INVALID_FORCE * ones(obj.numCablesActive, 1);
         end
     end
     

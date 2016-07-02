@@ -45,12 +45,13 @@ classdef IDConstraintInteractionForceAngleCone < IDConstraintLinear
         % Updates the constraints to match the dynamics.
         function updateConstraint(obj, dynamics)
             % F = a + R' * f
-            a = dynamics.P'*(dynamics.bodyDynamics.M_b*dynamics.q_ddot + dynamics.bodyDynamics.C_b - dynamics.bodyDynamics.G_b);
-            R_T = dynamics.P'*dynamics.V';
+            a = dynamics.bodyModel.P'*(dynamics.bodyModel.M_b*dynamics.q_ddot + dynamics.bodyModel.C_b - dynamics.bodyModel.G_b);
+            R_T = dynamics.bodyModel.P'*dynamics.cableModel.V';
             % A_F * F <= 0
             % A_F ( a + R' * f ) <= 0
-            obj.A = obj.A_F * R_T(6*obj.jointNum-5:6*obj.jointNum-3, :);
-            obj.b = -obj.A_F * a(6*obj.jointNum-5:6*obj.jointNum-3);
+            % A_F ( a + R_passive' * f_passive + R_active' * f_active ) <= 0
+            obj.A = obj.A_F * R_T(6*obj.jointNum-5:6*obj.jointNum-3, dynamics.cableModel.cableIndicesActive);
+            obj.b = -obj.A_F * (a(6*obj.jointNum-5:6*obj.jointNum-3) + R_T(6*obj.jointNum-5:6*obj.jointNum-3, dynamics.cableModel.cableIndicesPassive) * dynamics.cableForcesPassive);
         end
         
         % Compute the constaint points.

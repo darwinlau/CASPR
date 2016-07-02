@@ -28,11 +28,11 @@ classdef IDSolverOptimallySafe < IDSolverBase
         % The implementation of the abstract resolveFunction
         function [cable_forces,Q_opt, id_exit_type] = resolveFunction(obj, dynamics)            
             % Form the linear EoM constraint
-            % M\ddot{q} + C + G + F_{ext} = -J^T f (constraint)
+            % M\ddot{q} + C + G + w_{ext} = -L_active^T f_active - L_passive^T f_passive (constraint)
             [A_eq, b_eq] = IDSolverBase.GetEoMConstraints(dynamics);  
             % Form the lower and upper bound force constraints
-            fmin = dynamics.forcesMin;
-            fmax = dynamics.forcesMax;
+            fmin = dynamics.cableForcesActiveMin;
+            fmax = dynamics.cableForcesActiveMax;
 
             % Ensure that the resolve function should be applied for this
             % class of problem
@@ -41,17 +41,17 @@ classdef IDSolverOptimallySafe < IDSolverBase
             
             switch (obj.os_solver_type)
                 case ID_OS_SolverType.LP
-                    [cable_forces, id_exit_type] = id_os_matlab(A_eq, b_eq, fmin, fmax,obj.alpha);
+                    [cable_forces, id_exit_type] = id_os_matlab(A_eq, b_eq, fmin, fmax, obj.alpha);
                     Q_opt = norm(cable_forces,1);
                 case ID_OS_SolverType.EFFICIENT_LP
-                    [cable_forces, id_exit_type,obj.x_prev,obj.active_set] = id_os_efficient(A_eq, b_eq, fmin, fmax,obj.alpha,obj.x_prev,obj.active_set);
+                    [cable_forces, id_exit_type,obj.x_prev,obj.active_set] = id_os_efficient(A_eq, b_eq, fmin, fmax, obj.alpha, obj.x_prev, obj.active_set);
                     Q_opt = norm(cable_forces);
                 otherwise
                     error('ID_OS_SolverType type is not defined');
             end
             
             if (id_exit_type ~= IDSolverExitType.NO_ERROR)
-                cable_forces = dynamics.cableModel.FORCES_INVALID;
+                cable_forces = dynamics.cableModel.FORCES_ACTIVE_INVALID;
                 Q_opt = inf;
             end            
             

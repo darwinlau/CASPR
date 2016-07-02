@@ -21,7 +21,7 @@ classdef IDSolverClosedForm < IDSolverBase
     end
     methods
         % The constructor for this class
-        function id = IDSolverClosedForm(model,cf_solver_type)
+        function id = IDSolverClosedForm(model, cf_solver_type)
             id@IDSolverBase(model);
             id.cf_solver_type = cf_solver_type;
         end
@@ -29,11 +29,11 @@ classdef IDSolverClosedForm < IDSolverBase
         % The implementation of the resolveFunction.
         function [cable_forces,Q_opt, id_exit_type] = resolveFunction(obj, dynamics)            
             % Form the linear EoM constraint
-            % M\ddot{q} + C + G + F_{ext} = -J^T f (constraint)
+            % M\ddot{q} + C + G + w_{ext} = -L_active^T f_active - L_passive^T f_passive (constraint)
             [A_eq, b_eq] = IDSolverBase.GetEoMConstraints(dynamics);  
             % Form the lower and upper bound force constraints
-            fmin = dynamics.forcesMin;
-            fmax = dynamics.forcesMax;
+            fmin = dynamics.cableForcesActiveMin;
+            fmax = dynamics.cableForcesActiveMax;
 
             switch (obj.cf_solver_type)
                 case ID_CF_SolverType.CLOSED_FORM
@@ -49,7 +49,7 @@ classdef IDSolverClosedForm < IDSolverBase
             end
             
             if (id_exit_type ~= IDSolverExitType.NO_ERROR)
-                cable_forces = dynamics.cableModel.FORCES_INVALID;
+                cable_forces = dynamics.cableModel.FORCES_ACTIVE_INVALID;
                 Q_opt = Inf;
             else
                 Q_opt = norm(cable_forces);

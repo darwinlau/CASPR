@@ -20,9 +20,9 @@ classdef ForwardDynamicsSimulator < DynamicsSimulator
         end
         
         % Implementation of the run function
-        function run(obj, cable_forces, time_vector, q0, q0_dot)
+        function run(obj, cable_forces_active, cable_indices_active, time_vector, q0, q0_dot)
             obj.timeVector = time_vector;
-            obj.cableForces = cable_forces;
+            obj.cableForces = cable_forces_active;
             
             obj.trajectory = JointTrajectory;
             obj.trajectory.timeVector = obj.timeVector;
@@ -41,7 +41,7 @@ classdef ForwardDynamicsSimulator < DynamicsSimulator
             
             for t = 2:length(obj.timeVector)
                 CASPR_log.Print(sprintf('Simulation time : %f\n', obj.timeVector(t)),CASPRLogLevel.INFO);
-                [obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t}, obj.model] = obj.fdSolver.compute(obj.model.q, obj.model.q_dot, cable_forces{t-1}, zeros(obj.model.numDofs,1), obj.timeVector(t)-obj.timeVector(t-1), obj.model);
+                [obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t}, obj.model] = obj.fdSolver.compute(obj.model.q, obj.model.q_dot, cable_forces_active{t-1}, cable_indices_active{t-1}, zeros(obj.model.numDofs,1), obj.timeVector(t)-obj.timeVector(t-1), obj.model);
                 obj.interactionWrench{t} = obj.model.interactionWrench;
                 obj.cableLengths{t} = obj.model.cableLengths;
                 obj.cableLengthsDot{t} = obj.model.cableLengthsDot;

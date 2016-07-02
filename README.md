@@ -65,8 +65,8 @@ In addition to the core code base, some analysis techniques within CASPR require
 Further information for setting up each of these toolboxes is contained below
 ### qhull Installation ###
 1. Go to the qhull website <http://www.qhull.org/download/> and download the latest version of qhull that is appropriate for your operating system.
-2. Follow the installation instructions provided for your operating system in the file *README.txt*
-3. To allow for CASPR to access the compiled qhull code, move the compiled versionof the code to the subdirectory *dependencies* that is located in your *CASPR* root directory.
+2. Follow the installation instructions provided for your operating system in the file *README.txt* which will be in the downloaded qhull folder.
+3. To allow for CASPR to access the compiled qhull code, move the compiled version of the code to the subdirectory *dependencies* that is located in your *CASPR* root directory.
 
 ### optitoolbox Installation ###
 1. Go to the optitoolbox website <http://www.i2c2.aut.ac.nz/Wiki/OPTI/index.php/DL/DownloadOPTI> and download the latest version of the toolbox.
