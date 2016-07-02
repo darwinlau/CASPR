@@ -68,6 +68,7 @@ classdef SystemModelBodies < handle
         numDofVars
         numOPDofs
         numLinks
+        numDofsActuated             % Number of actuated DoFs
 
         % Mass matrix
         massInertiaMatrix = [];       % Mass-inertia 6p x 6p matrix
@@ -103,7 +104,6 @@ classdef SystemModelBodies < handle
         q_ub
         % Generalised coordinates time derivative (for special cases q_dot does not equal q_deriv)
         q_deriv
-        numDofsActuated             % Number of actuated DoFs
         tau                         % The joint actuator
     end
 
@@ -120,11 +120,15 @@ classdef SystemModelBodies < handle
             num_dofs = 0;
             num_dof_vars = 0;
             num_op_dofs = 0;
+            num_dof_actuated = 0;
             b.index_k = MatrixOperations.Initialise([1,b.numLinks],0);
             for k = 1:length(bodies)
                 b.index_k(k) = num_dofs + 1;
                 num_dofs = num_dofs + bodies{k}.numDofs;
                 num_dof_vars = num_dof_vars + bodies{k}.numDofVars;
+                if (bodies{k}.joint.isActuated)
+                    num_dof_actuated = num_dof_actuated + bodies{k}.joint.numDofs;
+                end
             end
             b.bodies = bodies;
             b.numDofs = num_dofs;
@@ -866,16 +870,7 @@ classdef SystemModelBodies < handle
             end
             G_grad = obj.G_grad;
         end
-        
-        function val = get.numDofsActuated(obj)
-            val = 0;
-            for k = 1:obj.numLinks
-                if (obj.bodies{k}.joint.isActuated)
-                    val = val + obj.bodies{k}.joint.numDofs;
-                end
-            end
-        end
-        
+                
         function set.tau(obj, value)
             assert(length(value) == obj.numDofsActuated, 'Cannot set tau since the value does not match the actuated DoFs');
             count = 0;
