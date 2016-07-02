@@ -134,6 +134,7 @@ classdef SystemModelBodies < handle
             b.numDofs = num_dofs;
             b.numDofVars = num_dof_vars;
             b.numOPDofs = num_op_dofs;
+            b.numDofsActuated = num_dof_actuated;
             b.numLinks = length(b.bodies);
 
             b.connectivityGraph = MatrixOperations.Initialise([b.numLinks, b.numLinks],0);
