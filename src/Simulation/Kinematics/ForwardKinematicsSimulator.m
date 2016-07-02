@@ -58,8 +58,7 @@ classdef ForwardKinematicsSimulator < MotionSimulator
             time_prev = 0;
             
             for t = 1:length(obj.trajectory.timeVector)
-                fprintf('Time : %f\n', obj.trajectory.timeVector(t));
-                
+                CASPR_log.Print(sprintf('Time : %f\n', obj.trajectory.timeVector(t)),CASPRLogLevel.INFO);
                 [q, q_dot, obj.compTime(t)] = obj.FKSolver.compute(lengths{t}, lengths_prev, cable_indices, q_prev, q_d_prev, obj.trajectory.timeVector(t) - time_prev);
                 obj.trajectory.q{t} = q;
                 obj.trajectory.q_dot{t} = q_dot;                

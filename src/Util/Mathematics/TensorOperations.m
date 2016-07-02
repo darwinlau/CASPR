@@ -4,19 +4,19 @@
 % Author        : Jonathan EDEN
 % Created       : 2016
 % Description    :
-classdef TensorOperations 
+classdef TensorOperations
     methods (Static)
         % Right multiplication of a tensor of order 3 with a vector to produce a matrix.
         % Three different operations are possible dependent upon which
         % index is given. These operations are consistent with the 1 mode,
         % 2 mode and 3 mode tensor products defined in the literature.
         function C = VectorProduct(A_ten,b,index,flag)
-            assert((index>=1)&&(index<=3),'index input must be between 1 and 3');
+            CASPR_log.Assert((index>=1)&&(index<=3),'index input must be between 1 and 3');
             s = size(A_ten);
             if(length(s) == 2)
                 s(3) = 1;
             end
-            assert(s(index) == length(b),'Invalid multiplication b must be the same length as s(index)');
+            CASPR_log.Assert(s(index) == length(b),'Invalid multiplication b must be the same length as s(index)');
             switch index
                 case 1
                     C = MatrixOperations.Initialise(s(2:3),flag);
@@ -48,10 +48,10 @@ classdef TensorOperations
                         C = C + A_ten(:,:,l)*b(l);
                     end
                 otherwise
-                    disp('This case should not be possible');
+                    CASPR_log.Print('Index must be 1, 2 or 3.',CASPRLogLevel.ERROR);
             end
         end
-        
+
         % Right multiplication of a tensor of order 3 with a matrix to
         % produce another tensor.
         function C = RightMatrixProduct(A_ten,B,flag)
@@ -63,7 +63,7 @@ classdef TensorOperations
                 end
             end
         end
-        
+
         % Left multiplication of a tensor of order 3 with a matrix to
         % produce another tensor.
         function C = LeftMatrixProduct(A,B_ten,flag)
@@ -79,19 +79,19 @@ classdef TensorOperations
                 end
             end
         end
-        
+
         % Left and right multiplication of a tensor by the same matrix.
         function C = LeftRightMatrixProduct(A,B_ten,flag)
             % I think it should be transpose
             C_temp  =   TensorOperations.RightMatrixProduct(B_ten,A,flag);
             C       =   TensorOperations.LeftMatrixProduct(A,C_temp,flag);
         end
-        
+
         % Transpose operation for tensors. The indices given by index are
         % switched in an analogous fashion to tensor math.
         function C = Transpose(A,index,flag)
-            assert(length(index)==2,'Two indices must be given for the transpose');
-            assert(sum(index>3)+sum(index<0)==0,'Transpose only supported for Tensors of order 3');
+            CASPR_log.Assert(length(index)==2,'Two indices must be given for the transpose');
+            CASPR_log.Assert(sum(index>3)+sum(index<0)==0,'Transpose only supported for Tensors of order 3');
             % Acts like a transpose operation for a 3 dimensional array.
             % The indices to switch are assumed to be given.
             s = size(A);
@@ -123,4 +123,3 @@ classdef TensorOperations
         end
     end
 end
-

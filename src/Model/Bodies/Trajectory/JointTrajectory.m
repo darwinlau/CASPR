@@ -44,7 +44,7 @@ classdef JointTrajectory < handle
     methods (Static)
         % Loads trajectory from XML configuration
         function trajectory = LoadXmlObj(xmlObj, bodiesObj)
-            assert(strcmp(xmlObj.getNodeName, 'trajectory'), 'Element should be <trajectory>');
+            CASPR_log.Assert(strcmp(xmlObj.getNodeName, 'trajectory'), 'Element should be <trajectory>');
             total_time = str2double(xmlObj.getElementsByTagName('time_total').item(0).getFirstChild.getData);
             time_step = str2double(xmlObj.getElementsByTagName('time_step').item(0).getFirstChild.getData);
             beginObj = xmlObj.getElementsByTagName('begin').item(0);
@@ -58,12 +58,12 @@ classdef JointTrajectory < handle
             q_e_dd = XmlOperations.StringToVector(char(endObj.getElementsByTagName('q_ddot').item(0).getFirstChild.getData));
             
             % Error checking on whether the XML file is valid
-            assert(length(q_s) == bodiesObj.numDofVars, sprintf('Trajectory config does not contain correct number of DoF vars for q begin, desired : %d, specified : %d', bodiesObj.numDofVars, length(q_s)));
-            assert(length(q_s_d) == bodiesObj.numDofs, sprintf('Trajectory config does not contain correct number of DoFs for q_dot begin, desired : %d, specified : %d', bodiesObj.numDofs, length(q_s_d)));
-            assert(length(q_s_dd) == bodiesObj.numDofs, sprintf('Trajectory config does not contain correct number of DoFs for q_ddot begin, desired : %d, specified : %d', bodiesObj.numDofs, length(q_s_dd)));
-            assert(length(q_e) == bodiesObj.numDofVars, sprintf('Trajectory config does not contain correct number of DoF vars for q end, desired : %d, specified : %d', bodiesObj.numDofVars, length(q_e)));
-            assert(length(q_e_d) == bodiesObj.numDofs, sprintf('Trajectory config does not contain correct number of DoFs for q_dot end, desired : %d, specified : %d', bodiesObj.numDofs, length(q_e_d)));
-            assert(length(q_e_dd) == bodiesObj.numDofs, sprintf('Trajectory config does not contain correct number of DoFs for q_ddot end, desired : %d, specified : %d', bodiesObj.numDofs, length(q_e_dd)));
+            CASPR_log.Assert(length(q_s) == bodiesObj.numDofVars, sprintf('Trajectory config does not contain correct number of DoF vars for q begin, desired : %d, specified : %d', bodiesObj.numDofVars, length(q_s)));
+            CASPR_log.Assert(length(q_s_d) == bodiesObj.numDofs, sprintf('Trajectory config does not contain correct number of DoFs for q_dot begin, desired : %d, specified : %d', bodiesObj.numDofs, length(q_s_d)));
+            CASPR_log.Assert(length(q_s_dd) == bodiesObj.numDofs, sprintf('Trajectory config does not contain correct number of DoFs for q_ddot begin, desired : %d, specified : %d', bodiesObj.numDofs, length(q_s_dd)));
+            CASPR_log.Assert(length(q_e) == bodiesObj.numDofVars, sprintf('Trajectory config does not contain correct number of DoF vars for q end, desired : %d, specified : %d', bodiesObj.numDofVars, length(q_e)));
+            CASPR_log.Assert(length(q_e_d) == bodiesObj.numDofs, sprintf('Trajectory config does not contain correct number of DoFs for q_dot end, desired : %d, specified : %d', bodiesObj.numDofs, length(q_e_d)));
+            CASPR_log.Assert(length(q_e_dd) == bodiesObj.numDofs, sprintf('Trajectory config does not contain correct number of DoFs for q_ddot end, desired : %d, specified : %d', bodiesObj.numDofs, length(q_e_dd)));
             
             trajectory = JointTrajectory.GenerateTrajectory(bodiesObj, q_s, q_s_d, q_s_dd, q_e, q_e_d, q_e_dd, total_time, time_step);
         end

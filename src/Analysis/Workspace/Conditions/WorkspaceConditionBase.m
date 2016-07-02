@@ -43,7 +43,7 @@ classdef WorkspaceConditionBase < handle
                 case WorkspaceConditionType.STATIC
                     wc = WorkspaceStatic(method);
                 otherwise
-                    error('Workspace metric type is not defined');
+                    CASPR_log.Print('Workspace metric type is not defined',CASPRLogLevel.ERROR);
             end
             wc.type = conditionType;
         end

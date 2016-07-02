@@ -7,7 +7,6 @@
 %   track a reference trajectory in joint space. The controller algorithm
 %   (ControllerBase object) is specified for the simulator. 
 classdef ControllerSimulator < DynamicsSimulator
-
     properties (SetAccess = protected)
         compTime            % computational time for each time step
         fdSolver            % The forward dynamics solver
@@ -44,7 +43,7 @@ classdef ControllerSimulator < DynamicsSimulator
             obj.trajectory.q_ddot{1} = q0_ddot;
             
             for t = 1:length(obj.timeVector)
-                fprintf('Time : %f\n', obj.timeVector(t));
+                CASPR_log.Print(sprintf('Time : %f\n', obj.timeVector(t)),CASPRLogLevel.INFO);
                 [obj.cableForcesActive{t}, obj.cableIndicesActive{t}, obj.cableForces{t}] = obj.controller.execute(obj.trajectory.q{t},  obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t}, ref_trajectory.q{t}, ref_trajectory.q_dot{t}, ref_trajectory.q_ddot{t}, obj.timeVector(t));
                 obj.stateError{t} = ref_trajectory.q{t} - obj.trajectory.q{t};
                 if t < length(obj.timeVector)
@@ -61,7 +60,7 @@ classdef ControllerSimulator < DynamicsSimulator
         
         % Plots both the reference and computed trajectory.
         function plotJointSpaceTracking(obj, states_to_plot, plot_axis)
-            assert(~isempty(obj.trajectory), 'Cannot plot since trajectory is empty');
+            CASPR_log.Assert(~isempty(obj.trajectory), 'Cannot plot since trajectory is empty');
 
             n_dof = obj.model.numDofs;
 

@@ -40,7 +40,7 @@ classdef InverseDynamicsSimulator < DynamicsSimulator
 %            obj.compIterations = zeros(length(obj.timeVector), 1);
 
             for t = 1:length(obj.timeVector)
-                fprintf('Time : %f\n', obj.timeVector(t));
+                CASPR_log.Print(sprintf('Time : %f\n', obj.timeVector(t)),CASPRLogLevel.INFO);
                 % The model is already updated within the resolve function
                 [forces_active, obj.model, obj.IDFunctionCost(t), obj.IDExitType{t}, obj.compTime(t)] = obj.IDSolver.resolve(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t}, zeros(obj.model.numDofs,1));
                 
@@ -52,13 +52,13 @@ classdef InverseDynamicsSimulator < DynamicsSimulator
                 obj.cableLengthsDot{t} = obj.model.cableLengthsDot;
                 
                 if (obj.IDExitType{t} ~= IDSolverExitType.NO_ERROR)
-                    warning('No feasible solution for the ID');
+                    CASPR_log.Print('No feasible solution for the ID',CASPRLogLevel.WARNING);
                     errorFlag = 1;
                 end
             end
             
             if (errorFlag == 1)
-                warning('At least one point on the trajectory resulted in no feasible solution for the ID');
+                CASPR_log.Print('At least one point on the trajectory resulted in no feasible solution for the ID',CASPRLogLevel.WARNING);
             end
         end
 
@@ -73,8 +73,8 @@ classdef InverseDynamicsSimulator < DynamicsSimulator
         % Plots the left and right sides of the EoM to show whether the
         % solution matches the desired EoM.
         function verifyEoMConstraint(obj)
-            assert(~isempty(obj.trajectory), 'Cannot verify the EoM since trajectory is empty');
-            assert(~isempty(obj.cableForces), 'Cannot verify the EoM since trajectory is empty');
+            CASPR_log.Assert(~isempty(obj.trajectory), 'Cannot verify the EoM since trajectory is empty');
+            CASPR_log.Assert(~isempty(obj.cableForces), 'Cannot verify the EoM since trajectory is empty');
 
             w_left = zeros(obj.model.numDofs, length(obj.timeVector));
             w_right = zeros(obj.model.numDofs, length(obj.timeVector));

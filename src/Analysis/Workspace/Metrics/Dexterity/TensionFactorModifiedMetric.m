@@ -27,14 +27,14 @@ classdef TensionFactorModifiedMetric < WorkspaceMetricBase
         % Evaluate function implementation
         function v = evaluateFunction(~,dynamics,options)
             % Determine the Jacobian Matrix
-            L = dynamics.L;
+            L = dynamics.L_active;
             % Compute singular values of jacobian matrix
             Sigma = svd(-L');
             % Compute the condition number
             k = max(Sigma)/min(Sigma);
             % For the moment calculate the UD assuming that all cables are
             % used
-            [u,~,exit_flag] = linprog(ones(1,dynamics.numCables),[],[],-L',zeros(dynamics.numDofs,1),1e-6*ones(dynamics.numCables,1),1e6*ones(dynamics.numCables,1),[],options);
+            [u,~,exit_flag] = linprog(ones(1,dynamics.numCablesActive),[],[],-L',zeros(dynamics.numDofs,1),1e-6*ones(dynamics.numCablesActive,1),1e6*ones(dynamics.numCablesActive,1),[],options);
             if((exit_flag == 1) && (rank(L) == dynamics.numDofs))
                 % ADD A LATER FLAG THAT CAN USE WCW IF ALREADY TESTED
                 h = u/norm(u);
@@ -42,17 +42,17 @@ classdef TensionFactorModifiedMetric < WorkspaceMetricBase
                 v = (1/k)*(h_min/h_max);
                 % Now check if a cable is not necessary (this is only one
                 % cable for now future work will look at combinatorics)
-                for i=1:dynamics.numCables
-                    W = eye(dynamics.numCables);
+                for i=1:dynamics.numCablesActive
+                    W = eye(dynamics.numCablesActive);
                     W(i,:) = [];
                     % Determine necessary variables for test
                     L_m       =   W*L; % Cable Jacobian
                     L_rank  =   rank(L');   % Cable Jacobian Rank
                     % Test if Jacobian has a positive spanning subspace
-                    f       =   ones(dynamics.numCables-1,1);
+                    f       =   ones(dynamics.numCablesActive-1,1);
                     Aeq     =   -L_m';
-                    lb      =   1e-9*ones(dynamics.numCables-1,1);
-                    ub      =   Inf*ones(dynamics.numCables-1,1);
+                    lb      =   1e-9*ones(dynamics.numCablesActive-1,1);
+                    ub      =   Inf*ones(dynamics.numCablesActive-1,1);
                     [u,~,exit_flag] = linprog(f,[],[],Aeq,zeros(dynamics.numDofs,1),lb,ub,[],options);
                     % Test if the Jacobian is full rank
                     if((exit_flag==1) && (L_rank == dynamics.numDofs))

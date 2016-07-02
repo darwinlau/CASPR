@@ -56,7 +56,7 @@ classdef PSOOptimiser < BBOptimiserBase
                         Q_opt = Q_particles_opt(p);
                     end
                 end
-                fprintf('Initialisation stage. Particle: %d, Q: %.4f, Q_opt: %.4f, gBest particle %d\n', p, Q, Q_opt, gBestId);
+                CASPR_log.Print(sprintf('Initialisation stage. Particle: %d, Q: %.4f, Q_opt: %.4f, gBest particle %d\n', p, Q, Q_opt, gBestId),CASPRLogLevel.INFO);
             end
             
             % Run for the iterations
@@ -80,8 +80,7 @@ classdef PSOOptimiser < BBOptimiserBase
                             Q_opt = Q_particles_opt(p);
                         end
                     end
-                    
-                    fprintf('Iteration: %d, particle: %d, Q: %.4f, Q_opt: %.4f, gBest particle %d\n', it, p, Q, Q_opt, gBestId);
+                    CASPR_log.Print(sprintf('Iteration: %d, particle: %d, Q: %.4f, Q_opt: %.4f, gBest particle %d\n', it, p, Q, Q_opt, gBestId),CASPRLogLevel.INFO);
                 end
             end
             x_opt = gBest;
@@ -107,7 +106,6 @@ classdef PSOOptimiser < BBOptimiserBase
                 end
             end
         end
-    end
-    
+    end    
 end
 

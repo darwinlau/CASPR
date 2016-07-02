@@ -179,7 +179,7 @@ classdef SystemModelBodies < handle
             % Set bodies kinematics (rotation matrices)
             for k = 1:obj.numLinks
                 parent_link_num = obj.bodies{k}.parentLinkId;
-                assert(parent_link_num < k, 'Problem with numbering of links with parent and child');
+                CASPR_log.Assert(parent_link_num < k, 'Problem with numbering of links with parent and child');
 
                 % Determine rotation matrix
                 % Determine joint location
@@ -523,10 +523,10 @@ classdef SystemModelBodies < handle
 
         % Supporting function to connect a particular child to a parent
         function connectBodies(obj, parent_link_num, child_link_num, r_parent_loc)
-            assert(parent_link_num < child_link_num, 'Parent link number must be smaller than child');
-            assert(~isempty(obj.bodies{child_link_num}), 'Child link does not exist');
+            CASPR_log.Assert(parent_link_num < child_link_num, 'Parent link number must be smaller than child');
+            CASPR_log.Assert(~isempty(obj.bodies{child_link_num}), 'Child link does not exist');
             if parent_link_num > 0
-                assert(~isempty(obj.bodies{parent_link_num}), 'Parent link does not exist');
+                CASPR_log.Assert(~isempty(obj.bodies{parent_link_num}), 'Parent link does not exist');
             end
 
             obj.bodiesPathGraph(child_link_num, child_link_num) = 1;
@@ -653,7 +653,7 @@ classdef SystemModelBodies < handle
         function loadOpXmlObj(obj,op_space_xmlobj)
             obj.occupied.op_space = true;
             % Load the op space
-            assert(strcmp(op_space_xmlobj.getNodeName, 'op_set'), 'Root element should be <op_set>');
+            CASPR_log.Assert(strcmp(op_space_xmlobj.getNodeName, 'op_set'), 'Root element should be <op_set>');
             % Go into the cable set
             allOPItems = op_space_xmlobj.getChildNodes;
 
@@ -671,7 +671,7 @@ classdef SystemModelBodies < handle
                 elseif(strcmp(type, 'pose_euler_xyz'))
                     op_space = OpPoseEulerXYZ.LoadXmlObj(currentOPItem);
                 else
-                    error('Unknown link type: %s', type);
+                    CASPR_log.Printf(sprintf('Unknown link type: %s', type),CASPRLogLevel.ERROR);
                 end
                 parent_link = op_space.link;
                 obj.bodies{parent_link}.attachOPSpace(op_space);
@@ -754,7 +754,7 @@ classdef SystemModelBodies < handle
 
         function M_y = get.M_y(obj)
             if(~obj.occupied.dynamics)
-                assert(obj.occupied.op_space, 'Operational space coordinates has not been attached');
+                CASPR_log.Assert(obj.occupied.op_space, 'Operational space coordinates has not been attached');
                 obj.createMassInertiaMatrix();
                 obj.occupied.dynamics = true;
                 obj.update_dynamics();
@@ -764,7 +764,7 @@ classdef SystemModelBodies < handle
 
         function C_y = get.C_y(obj)
             if(~obj.occupied.dynamics)
-                assert(obj.occupied.op_space, 'Operational space coordinates has not been attached');
+                CASPR_log.Assert(obj.occupied.op_space, 'Operational space coordinates has not been attached');
                 obj.createMassInertiaMatrix();
                 obj.occupied.dynamics = true;
                 obj.update_dynamics();
@@ -774,7 +774,7 @@ classdef SystemModelBodies < handle
 
         function G_y = get.G_y(obj)
             if(~obj.occupied.dynamics)
-                assert(obj.occupied.op_space, 'Operational space coordinates has not been attached');
+                CASPR_log.Assert(obj.occupied.op_space, 'Operational space coordinates has not been attached');
                 obj.createMassInertiaMatrix();
                 obj.occupied.dynamics = true;
                 obj.update_dynamics();
@@ -934,7 +934,7 @@ classdef SystemModelBodies < handle
         % Generate the internal SKATrans matrix for hessian and linearisation
         % computation.
         function S_KA = generateSKATrans(obj,k,a)
-            assert(k>=a,'Invalid input to generateSKATrans')
+            CASPR_log.Assert(k>=a,'Invalid input to generateSKATrans')
             R_a0 = obj.bodies{a}.R_0k.';
             S_KA = MatrixOperations.Initialise([3,obj.index_k(k)+obj.bodies{k}.numDofs-1],obj.is_symbolic);
             for i =a+1:k
@@ -1039,7 +1039,7 @@ classdef SystemModelBodies < handle
         % Load the bodies xml object.
         function b = LoadXmlObj(body_prop_xmlobj)
             % Load the body
-            assert(strcmp(body_prop_xmlobj.getNodeName, 'links'), 'Root element should be <links>');
+            CASPR_log.Assert(strcmp(body_prop_xmlobj.getNodeName, 'links'), 'Root element should be <links>');
 
             allLinkItems = body_prop_xmlobj.getElementsByTagName('link_rigid');
 
@@ -1052,13 +1052,13 @@ classdef SystemModelBodies < handle
                 currentLinkItem = allLinkItems.item(k-1);
 
                 num_k = str2double(currentLinkItem.getAttribute('num'));
-                assert(num_k == k, sprintf('Link number does not correspond to its order, order: %d, specified num: %d ', k, num_k));
+                CASPR_log.Assert(num_k == k, sprintf('Link number does not correspond to its order, order: %d, specified num: %d ', k, num_k));
 
                 type = char(currentLinkItem.getNodeName);
                 if (strcmp(type, 'link_rigid'))
                     links{k} = BodyModelRigid.LoadXmlObj(currentLinkItem);
                 else
-                    error('Unknown link type: %s', type);
+                    CASPRLogLevel.Print(sprintf('Unknown link type: %s', type),CASPRLogLevel.ERROR);
                 end
             end
 

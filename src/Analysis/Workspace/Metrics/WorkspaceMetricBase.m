@@ -39,7 +39,7 @@ classdef (Abstract) WorkspaceMetricBase < handle
         
         % Overrides the metricMin and MetricMax values
         function setMetricLimits(obj,metric_min,metric_max)
-            assert(metric_max >= metric_min,'Maximum must be greater than minimum');
+            CASPR_log.Assert(metric_max >= metric_min,'Maximum must be greater than minimum');
             obj.metricMin = metric_min;
             obj.metricMax = metric_max;
         end
@@ -68,7 +68,7 @@ classdef (Abstract) WorkspaceMetricBase < handle
                 case WorkspaceMetricType.UNILATERAL_DEXTERITY
                     wm = UnilateralDexterityMetric;
                 otherwise
-                    error('Workspace metric type is not defined');
+                    CASPR_log.Print('Workspace metric type is not defined',CASPRLogLevel.ERROR);
             end
             wm.type = metricType;
         end

@@ -68,5 +68,4 @@ classdef BodyModelRigid < BodyModel
             bk.r_Parent = XmlOperations.StringToVector3(char(parentObj.getElementsByTagName('location').item(0).getFirstChild.getData));
         end
     end
-
 end

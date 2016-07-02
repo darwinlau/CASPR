@@ -105,7 +105,7 @@ classdef (Abstract) CableModelBase < handle
         end
         
         function c_jk = getCRMTerm(obj, j, k)
-            assert(j <= obj.numSegments, 'Invalid segment number.');
+            CASPR_log.Assert(j <= obj.numSegments, 'Invalid segment number.');
             % This is checked in segments.getCRMTerm
             %assert(k <= obj.numLinks+1, 'Invalid link number');
             c_jk = obj.segments{j}.getCRMTerm(k);

@@ -25,19 +25,19 @@ classdef CASPR_log
             switch(log_level)
                 case CASPRLogLevel.DEBUG
                     if(set_log_level == CASPRLogLevel.DEBUG)
-                        fprintf(fid,['DEBUG: ',str,carrage_return]);
+                        fprintf(fid,['DEBUG:\t',str,carrage_return]);
                     end
                 case CASPRLogLevel.INFO
                     if((set_log_level == CASPRLogLevel.DEBUG)||(set_log_level == CASPRLogLevel.INFO))
-                        fprintf(fid,['INFO: ',str,carrage_return]);
+                        fprintf(fid,['INFO:\t',str,carrage_return]);
                     end
                 case CASPRLogLevel.WARNING
                     if(set_log_level ~= CASPRLogLevel.ERROR)
-                        fprintf(fid,['WARNING: ',str,carrage_return]);
+                        fprintf(fid,['WARNING:\t',str,carrage_return]);
                         warning(str)
                     end
                 case CASPRLogLevel.ERROR
-                    fprintf(fid,['ERROR: ',str,carrage_return]);
+                    fprintf(fid,['ERROR:\t',str,carrage_return]);
                     error(str)
                 otherwise
                     error('The specified log level is not valid');

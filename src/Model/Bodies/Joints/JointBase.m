@@ -121,7 +121,7 @@ classdef (Abstract) JointBase < handle
                 case JointType.SPATIAL_EULER_XYZ
                     j = SpatialEulerXYZ;
                 otherwise
-                    error('Joint type is not defined');
+                    CASPR_log.Print('Joint type is not defined',CASPRLogLevel.ERROR);
             end
             j.type = jointType;
             j.update(j.q_default, j.q_dot_default, j.q_ddot_default);

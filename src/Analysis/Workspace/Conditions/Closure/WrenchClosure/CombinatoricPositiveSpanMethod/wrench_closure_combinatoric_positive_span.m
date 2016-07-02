@@ -12,7 +12,7 @@
 % Description   : 
 function inWorkspace = wrench_closure_combinatoric_positive_span(dynamics,options)
     % Determine necessary variables for test
-    A       =   -dynamics.L'; % Cable Jacobian
+    A       =   -dynamics.L_active'; % Cable Jacobian
     n = size(A,1); m = size(A,2); % Size variables
     %% Evaluate Matrix Rank
     if(rank(A)==n)

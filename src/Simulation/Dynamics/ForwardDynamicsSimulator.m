@@ -6,8 +6,7 @@
 %   The forward dynamics simulator solves for the generalised coordinates
 %   for a given cable-force trajectory. The FD solver that should be used
 %   to resolve and integrate the EoM is specified to the simulator.
-classdef ForwardDynamicsSimulator < DynamicsSimulator
-    
+classdef ForwardDynamicsSimulator < DynamicsSimulator    
     properties        
         fdSolver
     end
@@ -40,7 +39,7 @@ classdef ForwardDynamicsSimulator < DynamicsSimulator
             obj.trajectory.q_ddot{1} = q0_ddot;
             
             for t = 2:length(obj.timeVector)
-                fprintf('Simulation time : %f\n', obj.timeVector(t));
+                CASPR_log.Print(sprintf('Simulation time : %f\n', obj.timeVector(t)),CASPRLogLevel.INFO);
                 [obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t}, obj.model] = obj.fdSolver.compute(obj.model.q, obj.model.q_dot, cable_forces_active{t-1}, cable_indices_active{t-1}, zeros(obj.model.numDofs,1), obj.timeVector(t)-obj.timeVector(t-1), obj.model);
                 obj.interactionWrench{t} = obj.model.interactionWrench;
                 obj.cableLengths{t} = obj.model.cableLengths;

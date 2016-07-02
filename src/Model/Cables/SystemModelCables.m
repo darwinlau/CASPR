@@ -53,6 +53,8 @@ classdef SystemModelCables < handle
         forcesPassive               % Vector of forces for passive cables
         V_active
         V_passive
+        V_grad_active
+        V_grad_passive
         FORCES_ACTIVE_INVALID       % Constant of vector of invalid forces for active cables
     end
 
@@ -68,7 +70,7 @@ classdef SystemModelCables < handle
         % to update the entire system, rather than calling the update
         % function for each cable directly.
         function update(obj, bodyModel)
-            assert(bodyModel.numLinks == obj.numLinks, 'Number of links between the cable and body kinematics must be consistent');
+            CASPR_log.Assert(bodyModel.numLinks == obj.numLinks, 'Number of links between the cable and body kinematics must be consistent');
             obj.is_symbolic = isa(bodyModel.q,'sym');
             % Set each cable's kinematics (absolute attachment locations
             % and segment vectors) and Determine V
@@ -196,7 +198,7 @@ classdef SystemModelCables < handle
         % Returns the c_{ijk} element of the CRM
         % CRM is m x s x (p+1) matrix representing the cable-routing
         function c_ijk = getCRMTerm(obj, i, j, k)
-            assert(i <= obj.numCables, 'Invalid cable number.');
+            CASPR_log.Assert(i <= obj.numCables, 'Invalid cable number.');
             c_ijk = obj.cables{i}.getCRMTerm(j, k);
         end
         
@@ -250,8 +252,7 @@ classdef SystemModelCables < handle
         end
         
         function set.forces(obj, f)
-            assert(length(f) == obj.numCablesActive, 'Forces dimension inconsistent with the number of active cables');
-            
+            CASPR_log.Assert(length(f) == obj.numCablesActive, 'Forces dimension inconsistent with the number of active cables');
             for i = 1:obj.numCablesActive
                 obj.cables{obj.cableIndicesActive(i)}.force = f(i);
             end
@@ -291,11 +292,19 @@ classdef SystemModelCables < handle
             value = length(obj.cables);
         end
         
-        function V_grad = get.V_grad(obj)
+        function value = get.V_grad(obj)
             if(isempty(obj.V_grad))
                 obj.update_hessian();
             end
-            V_grad = obj.V_grad;
+            value = obj.V_grad;
+        end
+        
+        function value = get.V_grad_active(obj)
+            value = obj.V_grad(obj.cableIndicesActive, :, :);
+        end
+        
+        function value = get.V_grad_passive(obj)
+            value = obj.V_grad(obj.cableIndicesPassive, :, :);
         end
         
         function value = get.FORCES_ACTIVE_INVALID(obj)
@@ -361,7 +370,7 @@ classdef SystemModelCables < handle
         end
         
         function [k_A,k_B] = determineAnchorLinks(obj,i,j,k,c_ijk)
-            assert(abs(c_ijk)==1,'Anchor links can only be determined when c_ijk is unitary');
+            CASPR_log.Assert(abs(c_ijk)==1,'Anchor links can only be determined when c_ijk is unitary');
             if(c_ijk == 1)
                 k_B = k;
                 k_A = find(obj.getCRMTerm(i,j,1:obj.numLinks+1)==-1);
@@ -377,7 +386,7 @@ classdef SystemModelCables < handle
 
     methods (Static)
         function c = LoadXmlObj(cable_prop_xmlobj, bodiesModel)
-            assert(strcmp(cable_prop_xmlobj.getNodeName, 'cable_set'), 'Root element should be <cable_set>');
+            CASPR_log.Assert(strcmp(cable_prop_xmlobj.getNodeName, 'cable_set'), 'Root element should be <cable_set>');
             allCableItems = cable_prop_xmlobj.getChildNodes;
             num_cables = allCableItems.getLength;
             xml_cables = cell(1,num_cables);
@@ -399,11 +408,11 @@ classdef SystemModelCables < handle
                 elseif (strcmp(type, 'cable_vsd_flexure_linear'))
                     xml_cables{k} = CableModelVSDFlexureLinear.LoadXmlObj(currentCableItem, bodiesModel);
                 elseif (strcmp(type, 'muscle_hill_type'))
-                    error('Not implemented yet, please try again later.');
+                    CASPR_log.Print('muscle_hill_type not implemented yet, please try again later.',CASPRLogLevel.ERROR);
                 elseif (strcmp(type, 'pneumatic_artificial_muscle'))
-                    error('Not implemented yet, please try again later.');
+                    CASPR_log.Print('pneumatic_artificial_muscle not implemented yet, please try again later.',CASPRLogLevel.ERROR);
                 else
-                    error('Unknown cables type: %s', type);
+                    CASPR_log.Print(sprintf('Unknown cables type: %s', type),CASPRLogLevel.ERROR);
                 end
             end
 
