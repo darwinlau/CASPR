@@ -14,7 +14,9 @@
 classdef DynamicsSimulator < MotionSimulator
     
     properties
-        cableForces         % cell array of cable force vector
+        cableForcesActive   % cell array of cable force vector (active)
+        cableIndicesActive  % cell array of cable indices for active cables
+        cableForces         % cell array of cable force vector (all)
         interactionWrench   % cell array of the interaction wrench vector
     end
     

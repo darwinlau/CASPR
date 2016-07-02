@@ -22,27 +22,27 @@ classdef IDSolverBase < handle
         end
         
         % Resolves the system kinematics into the next set of cable forces.
-        function [cable_forces, Q_opt, id_exit_type, comp_time, model] = resolve(obj, q, q_d, q_dd, w_ext)
+        function [forces_active, model, Q_opt, id_exit_type, comp_time] = resolve(obj, q, q_d, q_dd, w_ext)
             obj.model.update(q, q_d, q_dd, w_ext);
             start_tic = tic;
-            [obj.model.cableForces, Q_opt, id_exit_type] = obj.resolveFunction(obj.model);
+            [forces_active, Q_opt, id_exit_type] = obj.resolveFunction(obj.model);
             comp_time = toc(start_tic);
+            obj.model.cableForces = forces_active;
             model = obj.model;
-            cable_forces = obj.model.cableForces;
         end
     end
     
     methods (Abstract)
         % The abstract resolution function to be implemented by concrete
         % implementations of this base class.
-        [cable_forces,Q_opt, id_exit_type] = resolveFunction(obj, dynamics);
+        [cable_forces, mode, Q_opt, id_exit_type] = resolveFunction(obj, dynamics);
     end
     
     methods (Static)
         % The equation of motion constraints in linear terms.
         function [A, b] = GetEoMConstraints(dynamics)
-            A = -dynamics.L';
-            b = dynamics.M*dynamics.q_ddot + dynamics.C + dynamics.G + dynamics.W_e; 
+            A = -dynamics.L_active';
+            b = dynamics.M*dynamics.q_ddot + dynamics.C + dynamics.G + dynamics.W_e + dynamics.L_passive' * dynamics.cableForcesPassive; 
         end
     end
 end

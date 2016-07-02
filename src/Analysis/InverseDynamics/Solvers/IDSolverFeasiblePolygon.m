@@ -18,7 +18,7 @@ classdef IDSolverFeasiblePolygon < IDSolverBase
     end
     methods
         % The constructor for the class
-        function id = IDSolverFeasiblePolygon(model,fp_solver_type)
+        function id = IDSolverFeasiblePolygon(model, fp_solver_type)
             id@IDSolverBase(model);
             id.fp_solver_type = fp_solver_type;
         end
@@ -27,14 +27,14 @@ classdef IDSolverFeasiblePolygon < IDSolverBase
         function [cable_forces,Q_opt, id_exit_type] = resolveFunction(obj, dynamics)            
             % Ensure that the resolve function should be applied for this
             % class of problem
-            assert(dynamics.numCables == dynamics.numDofs + 2,'Number of cables must be equal the number of degrees of freedom plus 2');
+            assert(dynamics.numCablesActive == dynamics.numDofs + 2,'Number of cables must be equal the number of degrees of freedom plus 2');
             
             % Form the linear EoM constraint
-            % M\ddot{q} + C + G + F_{ext} = -J^T f (constraint)
+            % M\ddot{q} + C + G + w_{ext} = -L_active^T f_active - L_passive^T f_passive (constraint)
             [A_eq, b_eq] = IDSolverBase.GetEoMConstraints(dynamics);  
             % Form the lower and upper bound force constraints
-            fmin = dynamics.forcesMin;
-            fmax = dynamics.forcesMax;
+            fmin = dynamics.cableForcesActiveMin;
+            fmax = dynamics.cableForcesActiveMax;
 
             switch (obj.fp_solver_type)
                 case ID_FP_SolverType.NORM_1
@@ -51,7 +51,7 @@ classdef IDSolverFeasiblePolygon < IDSolverBase
             end
             
             if (id_exit_type ~= IDSolverExitType.NO_ERROR)
-                cable_forces = dynamics.cableModel.FORCES_INVALID;
+                cable_forces = dynamics.cableModel.FORCES_ACTIVE_INVALID;
                 Q_opt = Inf;
             end            
             

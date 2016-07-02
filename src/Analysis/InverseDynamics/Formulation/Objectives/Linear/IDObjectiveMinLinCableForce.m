@@ -6,19 +6,21 @@
 classdef IDObjectiveMinLinCableForce < IDObjectiveLinear
     properties (SetAccess = protected)
         weights
+        A_full
+        b_full
     end
 
     methods
         % The constructor function for minimising the 1 cable force
         % norms.
         function o = IDObjectiveMinLinCableForce(weights)
-            o.weights = weights;
+            o.updateWeights(weights);
+            o.c = 0;
         end
 
         % The objective update implementation
-        function updateObjective(obj, ~)
-            obj.b = obj.weights;
-            obj.c = 0;
+        function updateObjective(obj, dynamics)
+            obj.b = obj.weights(dynamics.cableModel.cableIndicesActive);
         end
 
         % An update of the weights
