@@ -25,8 +25,8 @@ classdef CableSegmentModel < handle
         
     methods
         function ck = CableSegmentModel(numLinks, sLink, sLoc, eLink, eLoc, bodiesModel, attachmentRefType)
-            assert(sLink <= numLinks, '"sLink" exceeds total number of links');
-            assert(eLink <= numLinks, '"eLink" exceeds total number of links');
+            CASPR_log.Assert(sLink <= numLinks, '"sLink" exceeds total number of links');
+            CASPR_log.Assert(eLink <= numLinks, '"eLink" exceeds total number of links');
             
             ck.numLinks = numLinks;
             ck.segmentVector = [0;0;0];
@@ -69,12 +69,12 @@ classdef CableSegmentModel < handle
                         ck.r_GA{eLink+1} = -bodiesModel.bodies{eLink}.r_G + ck.r_PA{eLink+1};
                     end
                 otherwise
-                    error('CableAttachmentReferenceType type is not defined');
+                    CASPR_log.Print('CableAttachmentReferenceType type is not defined',CASPRLogLevel.ERROR);
             end
         end
         
         function c_k = getCRMTerm(obj, k)
-            assert(k(length(k)) <= obj.numLinks+1, 'Invalid link number.');
+            CASPR_log.Assert(k(length(k)) <= obj.numLinks+1, 'Invalid link number.');
             c_k = obj.CRM(k);
         end
         

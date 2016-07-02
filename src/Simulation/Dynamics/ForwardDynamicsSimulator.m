@@ -6,8 +6,7 @@
 %   The forward dynamics simulator solves for the generalised coordinates
 %   for a given cable-force trajectory. The FD solver that should be used
 %   to resolve and integrate the EoM is specified to the simulator.
-classdef ForwardDynamicsSimulator < DynamicsSimulator
-    
+classdef ForwardDynamicsSimulator < DynamicsSimulator    
     properties        
         fdSolver
     end

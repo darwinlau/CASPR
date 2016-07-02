@@ -7,7 +7,6 @@
 %   track a reference trajectory in joint space. The controller algorithm
 %   (ControllerBase object) is specified for the simulator. 
 classdef ControllerSimulator < DynamicsSimulator
-
     properties (SetAccess = protected)
         compTime            % computational time for each time step
         fdSolver            % The forward dynamics solver

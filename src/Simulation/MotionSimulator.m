@@ -55,7 +55,6 @@ classdef (Abstract) MotionSimulator < Simulator
                 writerObj.writeVideo(frame);
                 clf(plot_handle);
             end
-
             writerObj.close();
             close(plot_handle);
         end

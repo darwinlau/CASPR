@@ -240,11 +240,11 @@ classdef SystemModel < handle
         end
         
         function value = get.L_grad_active(obj)
-            value = obj.L_grad(obj.cableModel.activeCableIndices, :, :);
+            value = obj.L_grad(obj.cableModel.cableIndicesActive, :, :);
         end
         
         function value = get.L_grad_passive(obj)
-            value = obj.L_grad(obj.cableModel.passiveCableIndices, :, :);
+            value = obj.L_grad(obj.cableModel.cableIndicesPassive, :, :);
         end
         
         function value = get.K(obj)

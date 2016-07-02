@@ -36,13 +36,13 @@ classdef CableModelPassiveLinearSpring < CableModelBase
             % <cable_passive_linear_spring> tag
             name = char(xmlobj.getAttribute('name'));
             attachRefString = char(xmlobj.getAttribute('attachment_reference'));
-            assert(~isempty(attachRefString), 'Invalid <cable_passive_linear_spring> XML format: attachment_reference field empty');
+            CASPR_log.Assert(~isempty(attachRefString), 'Invalid <cable_passive_linear_spring> XML format: attachment_reference field empty');
             if (strcmp(attachRefString, 'joint'))
                 attachmentRef = CableAttachmentReferenceType.JOINT;
             elseif (strcmp(attachRefString, 'com'))
                 attachmentRef = CableAttachmentReferenceType.COM;
             else
-                error('Unknown cableAttachmentReference type: %s', attachRefString);
+                CASPR_log.Print(sprintf('Unknown cableAttachmentReference type: %s', attachRefString),CASPRLogLevel.ERROR);
             end
             
             % Generate an object
@@ -57,8 +57,8 @@ classdef CableModelPassiveLinearSpring < CableModelBase
             
             % <attachments> tag
             attachmentObjs = xmlobj.getElementsByTagName('attachments').item(0).getElementsByTagName('attachment');
-            assert(~isempty(name), 'No name specified for this cable');
-            assert(attachmentObjs.getLength >= 2, sprintf('Not enough attachments for cable ''%s'': %d attachment(s) specified', name, attachmentObjs.getLength));
+            CASPR_log.Assert(~isempty(name), 'No name specified for this cable');
+            CASPR_log.Assert(attachmentObjs.getLength >= 2, sprintf('Not enough attachments for cable ''%s'': %d attachment(s) specified', name, attachmentObjs.getLength));
             % Beginning attachment of segment 1
             attachmentObj = attachmentObjs.item(0);
             sLink = str2double(attachmentObj.getElementsByTagName('link').item(0).getFirstChild.getData);

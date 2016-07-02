@@ -36,4 +36,3 @@ classdef InverseKinematicsSimulator < MotionSimulator
         end
     end
 end
-
