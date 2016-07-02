@@ -30,6 +30,7 @@ classdef InverseDynamicsSimulator < DynamicsSimulator
             obj.timeVector = obj.trajectory.timeVector;
             % Runs the simulation over the specified trajectory
             obj.cableForces = cell(1, length(obj.trajectory.timeVector));
+            obj.cableIndicesActive = cell(1, length(obj.trajectory.timeVector));
 
             obj.IDFunctionCost = zeros(length(obj.timeVector), 1);
             obj.IDExitType = cell(length(obj.timeVector), 1);
@@ -41,7 +42,11 @@ classdef InverseDynamicsSimulator < DynamicsSimulator
             for t = 1:length(obj.timeVector)
                 fprintf('Time : %f\n', obj.timeVector(t));
                 % The model is already updated within the resolve function
-                [obj.cableForces{t}, obj.IDFunctionCost(t), obj.IDExitType{t}, obj.compTime(t), obj.model] = obj.IDSolver.resolve(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t}, zeros(obj.model.numDofs,1));
+                [forces_active, obj.model, obj.IDFunctionCost(t), obj.IDExitType{t}, obj.compTime(t)] = obj.IDSolver.resolve(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t}, zeros(obj.model.numDofs,1));
+                
+                obj.cableForcesActive{t} = forces_active;
+                obj.cableForces{t} = obj.model.cableForces;
+                obj.cableIndicesActive{t} = obj.model.cableModel.cableIndicesActive;
                 obj.interactionWrench{t} = obj.model.interactionWrench;
                 obj.cableLengths{t} = obj.model.cableLengths;
                 obj.cableLengthsDot{t} = obj.model.cableLengthsDot;

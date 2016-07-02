@@ -4,7 +4,6 @@
 % Created       : 2016
 % Description   :
 classdef GUIOperations
-    
     methods (Static)
         % childNodes is a java type and hence is a handle class (no need to
         % return the childNodes again)
@@ -13,7 +12,7 @@ classdef GUIOperations
             path_string = path_string(1:strfind(path_string, 'src')-2);
             settings =  XmlOperations.XmlReadRemoveIndents([path_string,str]);
         end
-        
+
         % Converts and xmlobj into a cell array of strings.  This function
         % looks through the xml object and returns all strings with the
         % attribute given by str.
@@ -34,7 +33,7 @@ classdef GUIOperations
                 end
             end
         end
-            
+
         % Create a tab group for the gui
         function CreateTabGroup(handles)
             tabgp = uitabgroup(handles.tab_panel,'Position',[0 0 1 1]);
@@ -42,14 +41,14 @@ classdef GUIOperations
             tab1 = uitab(tabgp,'Title','Home Tab');
             ax = axes;
             set(ax,'Parent',tab1,'OuterPosition',[0,0,1,1],'Xtick',[],'Ytick',[]);
-            t1 = text(0.1,0.8,'CASPR GUI Tab','FontSize',25);
-            t2 = text(0.1,0.6,'Please enter your desired settings','FontSize',15);
-            t3 = text(0.1,0.52,'and then press run/generate to','FontSize',15);
-            t4 = text(0.1,0.44,'start the simulation.','FontSize',15);
+            t1 = text(0.1,0.8,'CASPR GUI Tab','FontSize',25,'FontUnits','normalized');
+            t2 = text(0.1,0.6,'Please enter your desired settings','FontSize',12,'FontUnits','normalized');
+            t3 = text(0.1,0.52,'and then press run/generate to','FontSize',12,'FontUnits','normalized');
+            t4 = text(0.1,0.44,'start the simulation.','FontSize',12,'FontUnits','normalized');
 %             delete(tab1);
             setappdata(handles.figure1,'tabgp',tabgp);
         end
-        
+
         % Generate a new plot for the GUI using the given plotting
         % function. This new plot will be inserted into a new tab.
         function GUIPlot(plot_type,sim,handles,figure_quantity,tab_toggle)

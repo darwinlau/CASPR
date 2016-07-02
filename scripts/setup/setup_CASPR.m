@@ -26,7 +26,6 @@ function setup_CASPR
     fprintf('----------------------------------------------------\n\n')
     
     % Add toolbox path to MATLAB (this is temporary)
-    ls
     initialise_CASPR;
     
     fprintf('\n----------------------------------------------------\n')
@@ -36,7 +35,8 @@ function setup_CASPR
     % Run unit tests to confirm that the models are correctly setup
     %suite = matlab.unittest.TestSuite.fromFile('ModelConfigTest.m');
     %suite.run;
-    failed_tests = CASPR_tests('ModelConfigTest.m');
+    ls
+    failed_tests = CASPR_tests('ModelConfigTest');
     if(sum(failed_tests)>0)
         fprintf('\n----------------------------------------------------\n')
         fprintf('CASPR Failed to Install. Please view the Unit Test Output\n')
@@ -92,9 +92,9 @@ function old_matlab_version = check_dependencies()
     % Test for qhull
     fprintf('- Checking OptiToolbox...\n\r');
     if(isunix)
-        qhull_file = '/dependencies/qhull-2012.1/bin/qconvex.exe';
-    else
         qhull_file = '/dependencies/qhull-2012.1/bin/qconvex';
+    else
+        qhull_file = '/dependencies/qhull-2012.1/bin/qconvex.exe';
     end
     if(exist(qhull_file,'file'))
         fprintf('qhull is built to specificiations\n\r')

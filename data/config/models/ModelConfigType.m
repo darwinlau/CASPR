@@ -12,6 +12,7 @@ classdef ModelConfigType
         M_2DOF_VSD
         M_KNTU_PLANAR
         M_SIMPLE_PLANAR_XY
+        M_PASSIVE_SPRINGS_PLANAR
         % Spatial manipulators
         M_ACROBOT
 		M_COGIRO
@@ -19,6 +20,7 @@ classdef ModelConfigType
         M_IPANEMA_2
         M_NIST_ROBOCRANE
         M_SEGESTA
+        M_FAST
         M_SIMPLE_SPATIAL
         % Spherical manipulators
         M_MYOROB_SHOULDER

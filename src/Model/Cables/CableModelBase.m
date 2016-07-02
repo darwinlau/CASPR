@@ -27,6 +27,7 @@ classdef (Abstract) CableModelBase < handle
     
     properties (SetAccess = protected)
         segments = {}               % Cell array of CableSegmentKinematics
+        isActive = true             % Whether the cable is in passive state
         % Minimum and maximum allowable cable force
         forceMin
         forceMax

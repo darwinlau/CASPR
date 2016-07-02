@@ -17,7 +17,7 @@ classdef IDSolverLinProg < IDSolverBase
     end
     methods
         % The constructor for this class
-        function id = IDSolverLinProg(model,objective, lp_solver_type)
+        function id = IDSolverLinProg(model, objective, lp_solver_type)
             id@IDSolverBase(model);
             id.objective = objective;
             id.lp_solver_type = lp_solver_type;
@@ -34,11 +34,11 @@ classdef IDSolverLinProg < IDSolverBase
         % The implementation of the resolveFunction
         function [cable_forces,Q_opt, id_exit_type] = resolveFunction(obj, dynamics)            
             % Form the linear EoM constraint
-            % M\ddot{q} + C + G + F_{ext} = -J^T f (constraint)
+            % M\ddot{q} + C + G + w_{ext} = -L_active^T f_active - L_passive^T f_passive (constraint)
             [A_eq, b_eq] = IDSolverBase.GetEoMConstraints(dynamics);  
             % Form the lower and upper bound force constraints
-            fmin = dynamics.forcesMin;
-            fmax = dynamics.forcesMax;
+            fmin = dynamics.cableForcesActiveMin;
+            fmax = dynamics.cableForcesActiveMax;
             % Get objective function
             obj.objective.updateObjective(dynamics);
                         
@@ -85,7 +85,7 @@ classdef IDSolverLinProg < IDSolverBase
             end
             
             if (id_exit_type ~= IDSolverExitType.NO_ERROR)
-                cable_forces = dynamics.cableModel.FORCES_INVALID;
+                cable_forces = dynamics.cableModel.FORCES_ACTIVE_INVALID;
                 Q_opt = inf;
             else
                 Q_opt = obj.objective.evaluateFunction(cable_forces);

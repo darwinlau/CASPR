@@ -40,7 +40,7 @@ fprintf('End Running Inverse Dynamics Simulation : %f seconds\n', time_elapsed);
 % Then run the forward dynamics
 disp('Start Running Forward Dynamics Simulation');
 start_tic = tic;
-fdsim.run(idsim.cableForces, trajectory.timeVector, trajectory.q{1}, trajectory.q_dot{1});
+fdsim.run(idsim.cableForcesActive, idsim.cableIndicesActive, trajectory.timeVector, trajectory.q{1}, trajectory.q_dot{1});
 time_elapsed = toc(start_tic);
 fprintf('End Running Forward Dynamics Simulation : %f seconds\n', time_elapsed);
 

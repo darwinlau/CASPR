@@ -1,12 +1,9 @@
 % Base constraint with abstract methods defined
-% 
+%
 % Author        : Darwin LAU
 % Created       : 2016
-% Description	: 
-classdef IDConstraint < handle    
-    properties
-    end
-    
+% Description	:
+classdef IDConstraint < handle
     methods (Abstract)
         % Update the system constraints given the dynamics
         updateConstraint(obj, dynamics);
@@ -14,6 +11,4 @@ classdef IDConstraint < handle
         % candidate.
         satisfied = verifyConstraint(obj, x);
     end
-    
 end
-

@@ -36,6 +36,8 @@ classdef SystemModel < handle
         numOPDofs               % Number of operational space degrees of freedom
         numCables               % Number of cables
         numActuators            % Number of actuators for the entire system (both cables and joint DoFs)
+        numCablesActive         % Number of active cables
+        numCablesPassive        % Number of active cables
         
         % Cable Lengths
         cableLengths            % Vector of cable lengths
@@ -43,6 +45,8 @@ classdef SystemModel < handle
 
         % Jacobians
         L                       % cable to joint Jacobian matrix L = VW
+        L_active                % active part of the Jacobian matrix
+        L_passive               % passive part of the Jacobian matrix
         J                       % joint to operational space Jacobian matrix
         J_dot                   % derivative of J
         K                       % The stiffness matrix
@@ -87,9 +91,10 @@ classdef SystemModel < handle
         
         % The cable force information
         cableForces                 % cable forces
-        forcesMin                   % vector of min forces from cables
-        forcesMax                   % vector of max forces from cables
-        
+        cableForcesActive           % cable forces
+        cableForcesPassive          % cable forces
+        cableForcesActiveMin        % vector of min forces from cables
+        cableForcesActiveMax        % vector of max forces from cables
         jointTau                    % The joint actuator
     end
 
@@ -178,6 +183,14 @@ classdef SystemModel < handle
         function value = get.numActuators(obj)
             value = obj.numCables + obj.bodyModel.numDofsActuated;
         end
+            
+        function value = get.numCablesActive(obj)
+            value = obj.cableModel.numCablesActive;
+        end
+        
+        function value = get.numCablesPassive(obj)
+            value = obj.cableModel.numCablesPassive;
+        end
 
         function value = get.cableLengths(obj)
             value = zeros(obj.numCables,1);
@@ -208,6 +221,14 @@ classdef SystemModel < handle
 
         function value = get.L(obj)
             value = obj.cableModel.V*obj.bodyModel.W;
+        end
+        
+        function value = get.L_active(obj)
+            value = obj.cableModel.V_active*obj.bodyModel.W;
+        end
+        
+        function value = get.L_passive(obj)
+            value = obj.cableModel.V_passive*obj.bodyModel.W;
         end
         
         function value = get.L_grad(obj)
@@ -282,7 +303,7 @@ classdef SystemModel < handle
 %         end
 
         function value = get.q_ddot_dynamics(obj)
-            obj.bodyModel.q_ddot = obj.M\(-obj.L.'*obj.cableModel.forces - obj.C - obj.G - obj.W_e);
+            obj.bodyModel.q_ddot = obj.M\(-obj.L.'*obj.cableForces - obj.C - obj.G - obj.W_e);
             value = obj.q_ddot;
         end
 
@@ -310,12 +331,20 @@ classdef SystemModel < handle
             value = obj.cableModel.forces;
         end
         
-        function value = get.forcesMin(obj)
-           value = obj.cableModel.forcesMin; 
+        function value = get.cableForcesActive(obj)
+            value = obj.cableModel.forcesActive;
         end
         
-        function value = get.forcesMax(obj)
-            value = obj.cableModel.forcesMax; 
+        function value = get.cableForcesPassive(obj)
+            value = obj.cableModel.forcesPassive;
+        end
+        
+        function value = get.cableForcesActiveMin(obj)
+           value = obj.cableModel.forcesActiveMin; 
+        end
+        
+        function value = get.cableForcesActiveMax(obj)
+            value = obj.cableModel.forcesActiveMax; 
         end        
         
         function value = get.jointTau(obj)

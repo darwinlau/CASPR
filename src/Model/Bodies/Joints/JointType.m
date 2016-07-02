@@ -11,6 +11,7 @@ classdef JointType
         U_XY                    % Universal with xy-euler
         P_XY                    % Translational joint in XY plane
         PLANAR_XY               % Planar in XY plane
+        PLANAR_YZ               % Planar in YZ plane
         S_EULER_XYZ             % Spherical xyz-euler
         S_FIXED_XYZ             % Spherical xyz-fixed
         S_QUATERNION            % Spherical joint using quaternion

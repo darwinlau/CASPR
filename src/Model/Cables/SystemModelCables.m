@@ -29,7 +29,13 @@ classdef SystemModelCables < handle
         V                           % Cable Jacobian l_dot = V x_dot
         V_grad = [];                % Derivative of V with respect to q
         cables = {};                % Cell array of CableKinematics object
+        % These vectors contain the indices of each active or passive cable
+        % corresponding to their index within the cables vector
+        cableIndicesActive = [];    % Index of active cables in cables vector
+        cableIndicesPassive = [];   % Index of passive cables in cables vector
         numCables = 0;              % The number of cables
+        numCablesPassive = 0;       % Number of passive cables
+        numCablesActive = 0;        % Number of active cables
         numLinks = 0;               % The number of links
         K                           % The matix of cable stiffnesses
         is_symbolic                 % A flag to indicate the need for symbolic computations
@@ -37,11 +43,17 @@ classdef SystemModelCables < handle
 
     properties (Dependent)
         numSegmentsMax              % Maximum number of segments out of all of the cables
-        lengths                     % vector of lengths for all of the cables
-        forces                      % vector of forces from cables
-        forcesMin                   % vector of min forces from cables
-        forcesMax                   % vector of max forces from cables
-        FORCES_INVALID
+        lengths                     % Vector of lengths for all of the cables
+        lengthsActive               % Vector of lengths for active cables
+        lengthsPassive              % Vector of lengths for passive cables
+        forces                      % Vector of forces for all of the cables
+        forcesActive                % Vector of forces for active cables
+        forcesActiveMin             % Vector of min forces for active cables
+        forcesActiveMax             % Vector of max forces for passive cables
+        forcesPassive               % Vector of forces for passive cables
+        V_active
+        V_passive
+        FORCES_ACTIVE_INVALID       % Constant of vector of invalid forces for active cables
     end
 
     methods
@@ -62,6 +74,9 @@ classdef SystemModelCables < handle
             % and segment vectors) and Determine V
             obj.V = MatrixOperations.Initialise([obj.numCables,6*obj.numLinks],obj.is_symbolic);
             obj.K = MatrixOperations.Initialise([obj.numCables,obj.numCables],obj.is_symbolic);
+            
+            obj.numCablesActive = 0;
+            obj.numCablesPassive = 0;
             for i = 1:obj.numCables
                 obj.cables{i}.update(bodyModel);
                 cable = obj.cables{i};
@@ -80,6 +95,28 @@ classdef SystemModelCables < handle
                     obj.V(i, 6*k-5:6*k) = [V_ixk_T.' V_itk_T.'];
                 end
                 obj.K(i,i) = obj.cables{i}.K;
+                
+                if (cable.isActive)
+                    obj.numCablesActive = obj.numCablesActive + 1;
+                else
+                    obj.numCablesPassive = obj.numCablesPassive + 1;
+                end
+            end
+            
+            ind_active = 1;
+            ind_passive = 1;
+            obj.cableIndicesActive = zeros(obj.numCablesActive, 1);
+            obj.cableIndicesPassive = zeros(obj.numCablesPassive, 1);
+            for i = 1:obj.numCables
+                % Active cable
+                if (obj.cables{i}.isActive)
+                    obj.cableIndicesActive(ind_active) = i;
+                    ind_active = ind_active + 1;
+                % Passive cable
+                else
+                    obj.cableIndicesPassive(ind_passive) = i;
+                    ind_passive = ind_passive + 1;
+                end
             end
             
             if(bodyModel.occupied.hessian)
@@ -197,6 +234,14 @@ classdef SystemModelCables < handle
             end
         end
         
+        function value = get.lengthsActive(obj)
+            value = obj.lengths(obj.cableIndicesActive);
+        end
+        
+        function value = get.lengthsPassive(obj)
+            value = obj.lengths(obj.cableIndicesPassive);
+        end
+        
         function value = get.forces(obj)
             value = zeros(obj.numCables, 1);
             for i = 1:obj.numCables
@@ -205,25 +250,41 @@ classdef SystemModelCables < handle
         end
         
         function set.forces(obj, f)
-            assert(length(f) == obj.numCables, 'Forces dimension inconsistent with the number of cables');
+            assert(length(f) == obj.numCablesActive, 'Forces dimension inconsistent with the number of active cables');
             
-            for i = 1:obj.numCables
-                obj.cables{i}.force = f(i);
+            for i = 1:obj.numCablesActive
+                obj.cables{obj.cableIndicesActive(i)}.force = f(i);
             end
         end
         
-        function value = get.forcesMin(obj)
-            value = zeros(obj.numCables, 1);
-            for i = 1:obj.numCables
-                value(i) = obj.cables{i}.forceMin;
+        function value = get.forcesActive(obj)
+            value = obj.forces(obj.cableIndicesActive);
+        end
+        
+        function value = get.forcesActiveMin(obj)
+            value = zeros(obj.numCablesActive, 1);
+            for i = 1:obj.numCablesActive
+                value(i) = obj.cables{obj.cableIndicesActive(i)}.forceMin;
             end
         end
         
-        function value = get.forcesMax(obj)
-            value = zeros(obj.numCables, 1);
-            for i = 1:obj.numCables
-                value(i) = obj.cables{i}.forceMax;
+        function value = get.forcesActiveMax(obj)
+            value = zeros(obj.numCablesActive, 1);
+            for i = 1:obj.numCablesActive
+                value(i) = obj.cables{obj.cableIndicesActive(i)}.forceMax;
             end
+        end
+                
+        function value = get.forcesPassive(obj)
+            value = obj.forces(obj.cableIndicesPassive);
+        end
+        
+        function value = get.V_active(obj)
+            value = obj.V(obj.cableIndicesActive, :);
+        end
+        
+        function value = get.V_passive(obj)
+            value = obj.V(obj.cableIndicesPassive, :);
         end
         
         function value = get.numCables(obj)
@@ -237,8 +298,8 @@ classdef SystemModelCables < handle
             V_grad = obj.V_grad;
         end
         
-        function value = get.FORCES_INVALID(obj)
-            value = CableModelBase.INVALID_FORCE * ones(obj.numCables, 1);
+        function value = get.FORCES_ACTIVE_INVALID(obj)
+            value = CableModelBase.INVALID_FORCE * ones(obj.numCablesActive, 1);
         end
     end
     
@@ -331,6 +392,8 @@ classdef SystemModelCables < handle
                     xml_cables{k} = CableModelIdeal.LoadXmlObj(currentCableItem, bodiesModel);
                 elseif (strcmp(type, 'cable_linear_spring'))
                     xml_cables{k} = CableModelLinearSpring.LoadXmlObj(currentCableItem, bodiesModel);
+                elseif (strcmp(type, 'cable_passive_linear_spring'))
+                    xml_cables{k} = CableModelPassiveLinearSpring.LoadXmlObj(currentCableItem, bodiesModel);
                 elseif (strcmp(type, 'cable_vsd_torsion_spring'))
                     xml_cables{k} = CableModelVSDTorsionSpring.LoadXmlObj(currentCableItem, bodiesModel);
                 elseif (strcmp(type, 'cable_vsd_flexure_linear'))
