@@ -37,5 +37,5 @@ idsim = InverseDynamicsSimulator(modelObj, idsolver);
 % Run the solver on the desired trajectory
 disp('Start Running Simulation');
 idsim.run(trajectory);
-idsim.plotCableForces([], []);
+idsim.plotCableForces();
 

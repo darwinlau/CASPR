@@ -53,18 +53,23 @@ classdef ControllerSimulator < DynamicsSimulator
         end
         
         % Plots the tracking error in generalised coordinates
-        function plotTrackingError(obj)
+        function plotTrackingError(obj, plot_axis)
             trackingError_array = cell2mat(obj.stateError);
-            plot(obj.timeVector, trackingError_array, 'Color', 'k', 'LineWidth', 1.5);
+            if(nargin == 1 || isempty(plot_axis)) 
+                figure;
+                plot(obj.timeVector, trackingError_array, 'Color', 'k', 'LineWidth', 1.5);
+            else
+                plot(plot_axis, obj.timeVector, trackingError_array, 'Color', 'k', 'LineWidth', 1.5);
+            end
         end
         
         % Plots both the reference and computed trajectory.
-        function plotJointSpaceTracking(obj, states_to_plot, plot_axis)
+        function plotJointSpaceTracking(obj, plot_axis, states_to_plot)
             CASPR_log.Assert(~isempty(obj.trajectory), 'Cannot plot since trajectory is empty');
 
             n_dof = obj.model.numDofs;
 
-            if isempty(states_to_plot)
+            if nargin <= 2 || isempty(states_to_plot)
                 states_to_plot = 1:n_dof;
             end
 
@@ -73,16 +78,7 @@ classdef ControllerSimulator < DynamicsSimulator
             q_ref_array = cell2mat(obj.refTrajectory.q);
             q_ref_dot_array = cell2mat(obj.refTrajectory.q_dot);
 
-            if(~isempty(plot_axis))
-                plot(plot_axis(1),obj.timeVector, q_ref_array(states_to_plot, :), 'LineWidth', 1.5, 'LineStyle', '--', 'Color', 'r'); 
-                hold on;
-                plot(plot_axis(1),obj.timeVector, q_array(states_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); 
-                hold off;
-                plot(plot_axis(2),obj.timeVector, q_ref_dot_array(states_to_plot, :), 'LineWidth', 'LineStyle', '--', 1.5, 'Color', 'r'); 
-                hold on;
-                plot(plot_axis(2),obj.timeVector, q_dot_array(states_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); 
-                hold off;
-            else
+            if nargin <= 1 || isempty(plot_axis)
                 % Plots joint space variables q(t)
                 figure;
                 hold on;
@@ -98,6 +94,15 @@ classdef ControllerSimulator < DynamicsSimulator
                 plot(obj.timeVector, q_dot_array(states_to_plot, :), 'Color', 'k', 'LineWidth', 1.5);
                 hold off;
                 title('Joint space derivatives');
+            else
+                plot(plot_axis(1),obj.timeVector, q_ref_array(states_to_plot, :), 'LineWidth', 1.5, 'LineStyle', '--', 'Color', 'r'); 
+                hold on;
+                plot(plot_axis(1),obj.timeVector, q_array(states_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); 
+                hold off;
+                plot(plot_axis(2),obj.timeVector, q_ref_dot_array(states_to_plot, :), 'LineWidth', 'LineStyle', '--', 1.5, 'Color', 'r'); 
+                hold on;
+                plot(plot_axis(2),obj.timeVector, q_dot_array(states_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); 
+                hold off;                
             end
         end
     end

@@ -33,6 +33,6 @@ disp('Start Running Simulation');
 error0 = [0.1; -0.1; 0.2; 0; 0; 0];
 control_sim.run(trajectory_ref, trajectory_ref.q{1} + error0, trajectory_ref.q_dot{1}, trajectory_ref.q_ddot{1});
 
-control_sim.plotCableForces([],[]);
-control_sim.plotJointSpaceTracking([],[]);
+control_sim.plotCableForces();
+control_sim.plotJointSpaceTracking();
 control_sim.plotTrackingError();

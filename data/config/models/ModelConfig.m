@@ -38,12 +38,19 @@ classdef ModelConfig
             c.opFilename = '';
             c.opXmlObj = [];
             
+            % Check the type of enum and open the master list
+            if (isa(type, 'ModelConfigType'))
+                fid = fopen([c.root_folder,'/model_master_list.csv']);
+            elseif (isa(type, 'TestModelConfigType'))
+                fid = fopen([c.root_folder,'/model_test_list.csv']);
+            else
+                error('Unknown type of model type');
+            end            
+            
             % Determine the Filenames
-            type_string = char(type);
-            % Open the master_list file
-            fid = fopen([c.root_folder,'/master_list.csv']);
             % Load the contents
-            cell_array = textscan(fid,'%s %s %s %s %s %s','delimiter',',');
+            cell_array = textscan(fid,'%s %s %s %s %s %s','delimiter',',');            
+            type_string = char(type);
             i_length = length(cell_array{1});
             status_flag = 1;
             % Loop through until the right line of the list is found

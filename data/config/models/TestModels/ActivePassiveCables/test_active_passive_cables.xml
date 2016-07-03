@@ -1,0 +1,219 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE cables [
+  <!ATTLIST cable_set id ID #REQUIRED>
+]>
+
+<cables default_cable_set="four_springs">
+  <cable_set id="one_spring">
+    <cable_ideal name="cable 1" attachment_reference="com">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>60</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 -2.0 2.0</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0 -0.3 -0.05</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 2" attachment_reference="com">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>60</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 -1.5 -2.0</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0 -0.3 -0.05</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 3" attachment_reference="com">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>60</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 1.5 -2.0</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0 0.3 0.05</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 4" attachment_reference="com">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>60</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 2.0 2.0</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0 0.3 0.05</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_passive_linear_spring name="spring 0" attachment_reference="com">
+      <properties>
+        <K>5</K>
+        <l0>1.0</l0>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 0 4.0</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0 0 0.1</location>
+        </attachment>
+      </attachments>
+    </cable_passive_linear_spring>
+  </cable_set>
+  <cable_set id="four_springs">
+    <cable_ideal name="cable 1" attachment_reference="com">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>60</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 -2.0 2.0</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0 -0.3 -0.05</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 2" attachment_reference="com">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>60</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 -1.5 -2.0</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0 -0.3 -0.05</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 3" attachment_reference="com">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>60</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 1.5 -2.0</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0 0.3 0.05</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 4" attachment_reference="com">
+      <properties>
+        <force_min>0.001</force_min>
+        <force_max>60</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 2.0 2.0</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0 0.3 0.05</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_passive_linear_spring name="spring 1" attachment_reference="com">
+      <properties>
+        <K>5</K>
+        <l0>1.0</l0>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 4.0 2.0</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0 0.15 0.1</location>
+        </attachment>
+      </attachments>
+    </cable_passive_linear_spring>
+    <cable_passive_linear_spring name="spring 2" attachment_reference="com">
+      <properties>
+        <K>5</K>
+        <l0>1.0</l0>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 -4.0 2.0</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0 -0.15 0.1</location>
+        </attachment>
+      </attachments>
+    </cable_passive_linear_spring>
+    <cable_passive_linear_spring name="spring 3" attachment_reference="com">
+      <properties>
+        <K>5</K>
+        <l0>1.0</l0>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 1.0 4.0</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0 0.15 -0.1</location>
+        </attachment>
+      </attachments>
+    </cable_passive_linear_spring>
+    <cable_passive_linear_spring name="spring 4" attachment_reference="com">
+      <properties>
+        <K>5</K>
+        <l0>1.0</l0>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 -1.0 4.0</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0 -0.15 -0.1</location>
+        </attachment>
+      </attachments>
+    </cable_passive_linear_spring>
+  </cable_set>
+</cables>

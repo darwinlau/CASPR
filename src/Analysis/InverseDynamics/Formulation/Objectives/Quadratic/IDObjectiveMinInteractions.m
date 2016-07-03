@@ -22,6 +22,8 @@ classdef IDObjectiveMinInteractions < IDObjectiveQuadratic
         
         % The objective update implementation
         function updateObjective(obj, dynamics)
+            CASPR_log.Assert(length(obj.weights) == 6 * dynamics.numLinks, 'Dimensions of weight is not correct, it should be a vector of length 6*numLinks');
+            
             obj.A = zeros(dynamics.numCablesActive, dynamics.numCablesActive);
             obj.b = zeros(dynamics.numCablesActive,1);
             obj.c = 0;

@@ -35,6 +35,6 @@ fksim.run(iksim.cableLengths, iksim.cableLengthsDot, iksim.timeVector, iksim.tra
 
 % It is expected that iksim and fksim should have the same joint space (the
 % result of fksim)
-iksim.plotJointSpace([], []);
-fksim.plotJointSpace([] , []);
-fksim.plotCableLengthError([],[]);
+iksim.plotJointSpace();
+fksim.plotJointSpace();
+fksim.plotCableLengthError();

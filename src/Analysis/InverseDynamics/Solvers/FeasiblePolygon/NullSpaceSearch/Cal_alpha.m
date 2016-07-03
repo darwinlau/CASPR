@@ -23,7 +23,7 @@ for ind = 1:length(index_new),
             bk = -1;
         elseif  t_min(k) - t_sol(k) <= n_k * v_ij && n_k * v_ij < t_max(k) - t_sol(k)
             temp = (t_max(k) - t_sol(k) - n_k * v_ij)/(n_k * ni_prepend);
-            bk = 1;            
+            bk = 1;
         else
             continue
         end
@@ -46,9 +46,7 @@ for ind = 1:length(index_new),
         bl = bk;
     end
     if(alpha<1e-4)
-        sfgdlkj
+        CASPR_log.Print('Next intersection is a parallel line',CASPRLogLevel.ERROR);
     end
 end
-
 end
-

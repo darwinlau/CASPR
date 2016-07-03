@@ -45,5 +45,5 @@ time_elapsed = toc(start_tic);
 fprintf('End Running Forward Dynamics Simulation : %f seconds\n', time_elapsed);
 
 % Finally compare the results
-idsim.plotJointSpace([], []);
-fdsim.plotJointSpace([], []);
+idsim.plotJointSpace();
+fdsim.plotJointSpace();
