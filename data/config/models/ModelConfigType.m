@@ -29,10 +29,5 @@ classdef ModelConfigType
         M_2R_PLANAR_XZ
         M_NECK_8S
         M_CAREX
-        
-        % Testing models
-        T_SCDM
-        T_MCDM
-        T_PASSIVE
     end
 end
