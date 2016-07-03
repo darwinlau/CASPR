@@ -30,10 +30,10 @@ classdef DynamicsSimulator < MotionSimulator
         % need to specify the plot axis and also which cables (as an array
         % of numbers) to plot (it is possible to default to plot all cables
         % if the array is []).
-        function plotCableForces(obj, cables_to_plot, plot_axis)
+        function plotCableForces(obj, plot_axis, cables_to_plot)
             CASPR_log.Assert(~isempty(obj.cableForces), 'Cannot plot since cableForces is empty');
             
-            if isempty(cables_to_plot)
+            if nargin <= 2 || isempty(links_to_plot)
                 cables_to_plot = 1:obj.model.numCables;
             end
             
@@ -42,12 +42,7 @@ classdef DynamicsSimulator < MotionSimulator
             valid_forces_ind = find(forces(1,:) ~= CableModelBase.INVALID_FORCE);
             valid_forces_ind_inv = setdiff(1:length(obj.timeVector), valid_forces_ind);
             
-            if(~isempty(plot_axis))
-                hold on;
-                plot(plot_axis,obj.timeVector(valid_forces_ind), forces(cables_to_plot, valid_forces_ind), '.', 'LineWidth', 1.5, 'Color', 'k'); 
-                plot(plot_axis,obj.timeVector(valid_forces_ind_inv), forces(cables_to_plot, valid_forces_ind_inv), '.', 'LineWidth', 1.5, 'Color', 'r'); 
-                hold off;
-            else
+            if nargin <= 1 || isempty(plot_axis)
                 figure;
                 hold on;
                 plot(obj.timeVector(valid_forces_ind), forces(cables_to_plot, valid_forces_ind), '.', 'LineWidth', 1.5, 'Color', 'k'); 
@@ -56,23 +51,22 @@ classdef DynamicsSimulator < MotionSimulator
                 title('Cable forces');                 
                 xlabel('Time (seconds)')
                 ylabel('Force (N)');
+            else
+                hold on;
+                plot(plot_axis,obj.timeVector(valid_forces_ind), forces(cables_to_plot, valid_forces_ind), '.', 'LineWidth', 1.5, 'Color', 'k'); 
+                plot(plot_axis,obj.timeVector(valid_forces_ind_inv), forces(cables_to_plot, valid_forces_ind_inv), '.', 'LineWidth', 1.5, 'Color', 'r'); 
+                hold off;                
             end
-            
-%             line_color_order = [1 0 0; 0 1 0; 0 0 1; 0 1 1; 1 0 1; 1 1 0; 0 0 0; 1 165/255 0; 139/255 69/255 19/255];
-%             line_style_order = '-|--|:|-.';
-%             gcf = figure;
-%             set(gcf, 'DefaultAxesColorOrder', line_color_order, 'DefaultAxesLineStyleOrder', line_style_order);
-%             plot(obj.timeVector, forces(cables_to_plot, :), 'LineWidth', 1.5); title('Cable forces');
         end
         
         % Plots the magnitude of interaction forces trajectory. Users
         % need to specify the plot axis and also which links (as an array
         % of numbers) to plot (it is possible to default to plot all links
         % if the array is []).
-        function plotInteractionForceMagnitudes(obj, links_to_plot, plot_axis)
+        function plotInteractionForceMagnitudes(obj, plot_axis, links_to_plot)
             CASPR_log.Assert(~isempty(obj.interactionWrench), 'Cannot plot since interactionWrench is empty');
             
-            if isempty(links_to_plot)
+            if nargin <= 2 || isempty(links_to_plot)
                 links_to_plot = 1:obj.model.numLinks;
             end
             
@@ -88,19 +82,13 @@ classdef DynamicsSimulator < MotionSimulator
                 end
             end
             
-            if(~isempty(plot_axis))
-                plot(plot_axis,obj.timeVector, forcesMag, 'LineWidth', 1.5, 'Color', 'k');
-            else
+            if nargin <= 1 || isempty(plot_axis)
                 figure;
                 plot(obj.timeVector, forcesMag, 'LineWidth', 1.5, 'Color', 'k');
                 title('Magnitude of interaction forces');
+            else
+                plot(plot_axis,obj.timeVector, forcesMag, 'LineWidth', 1.5, 'Color', 'k');
             end
-            
-%             line_color_order = [1 0 0; 0 1 0; 0 0 1; 0 1 1; 1 0 1; 1 1 0; 0 0 0; 1 165/255 0; 139/255 69/255 19/255];
-%             line_style_order = '-|--|:|-.';
-%             gcf = figure;
-%             set(gcf, 'DefaultAxesColorOrder', line_color_order, 'DefaultAxesLineStyleOrder', line_style_order);
-%             plot(obj.timeVector, forces(links_to_plot, :), 'LineWidth', 1.5); title('Cable forces');
         end        
         
         % Plots the interaction angle into the Z axis.
@@ -108,10 +96,10 @@ classdef DynamicsSimulator < MotionSimulator
         % interaction angles want to be measured with reference to the Z 
         % axis only. Can refer to IDConstraintInteractionForceAngleCone 
         % to incorporate the F_centre parameter.
-        function plotInteractionForceAngles(obj, links_to_plot)
+        function plotInteractionForceAngles(obj, plot_axis, links_to_plot)
             CASPR_log.Assert(~isempty(obj.interactionWrench), 'Cannot plot since interactionWrench is empty');
             
-            if nargin == 1 || isempty(links_to_plot)
+            if nargin <= 2 || isempty(links_to_plot)
                 links_to_plot = 1:obj.model.numLinks;
             end
             
@@ -128,19 +116,23 @@ classdef DynamicsSimulator < MotionSimulator
                 end
             end
             
-            figure;
-            plot(obj.timeVector, angles, 'LineWidth', 1.5, 'Color', 'k');
-            title('Interaction angles');           
+            if nargin <= 1 || isempty(plot_axis)
+                figure;
+                plot(obj.timeVector, angles, 'LineWidth', 1.5, 'Color', 'k');
+                title('Interaction angles');
+            else
+                plot(plot_axis,obj.timeVector, angles, 'LineWidth', 1.5, 'Color', 'k');
+            end
         end
         
         % Plots the magnitude of interaction moments trajectory. Users
         % need to specify the plot axis and also which links (as an array
         % of numbers) to plot (it is possible to default to plot all links
         % if the array is []).
-        function plotInteractionMomentMagnitudes(obj, links_to_plot)
+        function plotInteractionMomentMagnitudes(obj, plot_axis, links_to_plot)
             CASPR_log.Assert(~isempty(obj.interactionWrench), 'Cannot plot since interactionWrench is empty');
             
-            if nargin == 1 || isempty(links_to_plot)
+            if nargin <= 2 || isempty(links_to_plot)
                 links_to_plot = 1:obj.model.numLinks;
             end
             
@@ -156,16 +148,20 @@ classdef DynamicsSimulator < MotionSimulator
                 end
             end
             
-            figure;
-            plot(obj.timeVector, momentsMag, 'LineWidth', 1.5, 'Color', 'k');
-            title('Magnitude of interaction moments'); 
+            if nargin <= 1 || isempty(plot_axis)
+                figure;
+                plot(obj.timeVector, momentsMag, 'LineWidth', 1.5, 'Color', 'k');
+                title('Magnitude of interaction moments'); 
+            else
+                plot(plot_axis, obj.timeVector, momentsMag, 'LineWidth', 1.5, 'Color', 'k');
+            end
         end
         
         % Plots the magnitude of Z dir interaction force trajectory. Users
         % need to specify the plot axis and also which links (as an array
         % of numbers) to plot (it is possible to default to plot all links
         % if the array is []).
-        function plotInteractionForceZ(obj, links_to_plot)
+        function plotInteractionForceZ(obj, plot_axis, links_to_plot)
             CASPR_log.Assert(~isempty(obj.interactionWrench), 'Cannot plot since interactionWrench is empty');
             
             if nargin == 1 || isempty(links_to_plot)
@@ -184,11 +180,14 @@ classdef DynamicsSimulator < MotionSimulator
                 end
             end
             
-            figure;
-            plot(obj.timeVector, forcesZ, 'LineWidth', 1.5, 'Color', 'k');
-            title('Interaction forces (Z component)'); 
+            if nargin <= 1 || isempty(plot_axis)
+                figure;
+                plot(obj.timeVector, forcesZ, 'LineWidth', 1.5, 'Color', 'k');
+                title('Interaction forces (Z component)'); 
+            else
+                plot(plot_axis, obj.timeVector, forcesZ, 'LineWidth', 1.5, 'Color', 'k');
+            end
         end
     end
-    
 end
 

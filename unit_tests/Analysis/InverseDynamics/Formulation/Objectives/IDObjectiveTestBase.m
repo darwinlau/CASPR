@@ -5,9 +5,9 @@
 % Description    :
 classdef IDObjectiveTestBase < matlab.unittest.TestCase
     properties (MethodSetupParameter)
-        model_config_type = struct('IPAnema', ModelConfigType.M_IPANEMA_2, ...
-            'Neck_8S', ModelConfigType.M_NECK_8S, ...
-            'Active_passive_cables', ModelConfigType.M_PASSIVE_SPRINGS_PLANAR);
+        model_config_type = struct('SCDM', ModelConfigType.T_SCDM, ...
+            'MCDM', ModelConfigType.T_MCDM, ...
+            'Active_passive_cables', ModelConfigType.T_PASSIVE);
     end
     
     properties
@@ -23,4 +23,3 @@ classdef IDObjectiveTestBase < matlab.unittest.TestCase
     end
     
 end
-

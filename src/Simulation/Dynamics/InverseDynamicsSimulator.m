@@ -64,15 +64,19 @@ classdef InverseDynamicsSimulator < DynamicsSimulator
 
         % Plots the cost associated with the ID solver (for solvers that
         % aim to minimise some objective cost).
-        function plotIDCost(obj)
-            figure;
-            plot(obj.timeVector, obj.IDFunctionCost, 'LineWidth', 1.5, 'Color', 'k');
-            title('ID function cost');
+        function plotIDCost(obj,plot_axis)
+            if(nargin == 1 || isempty(plot_axis))
+                figure;
+                plot(obj.timeVector, obj.IDFunctionCost, 'LineWidth', 1.5, 'Color', 'k');
+                title('ID function cost');
+            else
+                plot(plot_axis,obj.timeVector, obj.IDFunctionCost, 'LineWidth', 1.5, 'Color', 'k');
+            end
         end
 
         % Plots the left and right sides of the EoM to show whether the
         % solution matches the desired EoM.
-        function verifyEoMConstraint(obj)
+        function verifyEoMConstraint(obj, plot_axis)
             CASPR_log.Assert(~isempty(obj.trajectory), 'Cannot verify the EoM since trajectory is empty');
             CASPR_log.Assert(~isempty(obj.cableForces), 'Cannot verify the EoM since trajectory is empty');
 
@@ -85,8 +89,13 @@ classdef InverseDynamicsSimulator < DynamicsSimulator
                 w_right(:,t) = -obj.model.L'*obj.cableForces{t};
             end
 
-            figure; plot(obj.timeVector, w_left, 'LineWidth', 1.5, 'Color', 'k'); title('ID verify w left hand side');
-            figure; plot(obj.timeVector, w_right, 'LineWidth', 1.5, 'Color', 'k'); title('ID verify w right hand side');
+            if nargin <= 1 || isempty(plot_axis)
+                figure; plot(obj.timeVector, w_left, 'LineWidth', 1.5, 'Color', 'k'); title('ID verify w left hand side');
+                figure; plot(obj.timeVector, w_right, 'LineWidth', 1.5, 'Color', 'k'); title('ID verify w right hand side');
+            else
+                plot(plot_axis(1), obj.timeVector, w_left, 'LineWidth', 1.5, 'Color', 'k'); 
+                plot(plot_axis(2), obj.timeVector, w_right, 'LineWidth', 1.5, 'Color', 'k');
+            end
         end
     end
 end

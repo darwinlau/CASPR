@@ -27,7 +27,7 @@ sim.run(trajectory);
 % After running the simulator the data can be plotted
 % Refer to the simulator classes to see what can be plotted.
 disp('Start Plotting Simulation');
-sim.plotJointSpace([],[]);
-sim.plotCableLengths([],[]);
-sim.plotBodyCOG([],[]);
+sim.plotJointSpace();
+sim.plotCableLengths();
+sim.plotBodyCOG();
 % sim.plotMovie(model_config.displayRange, [fileparts(mfilename('fullpath')), '\CDPR_movie.avi'], 2, 500, 640);
