@@ -19,11 +19,7 @@ classdef IDObjectiveQuadraticTest < IDObjectiveTestBase
             end
         end
     end
-    
-    properties
-        idObj
-    end
-        
+            
     methods (Test)
         function updateObjectiveTest(testCase)
             testCase.idObj.updateObjective(testCase.modelObj);

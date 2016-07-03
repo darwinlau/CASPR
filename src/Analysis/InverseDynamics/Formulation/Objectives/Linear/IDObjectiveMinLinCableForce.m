@@ -6,8 +6,6 @@
 classdef IDObjectiveMinLinCableForce < IDObjectiveLinear
     properties (SetAccess = protected)
         weights
-        A_full
-        b_full
     end
 
     methods
@@ -20,6 +18,7 @@ classdef IDObjectiveMinLinCableForce < IDObjectiveLinear
 
         % The objective update implementation
         function updateObjective(obj, dynamics)
+            CASPR_log.Assert(length(obj.weights) == dynamics.numCables, 'Dimensions of weight is not correct, it should be a vector of length numCables');
             obj.b = obj.weights(dynamics.cableModel.cableIndicesActive);
         end
 
