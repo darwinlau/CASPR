@@ -2,23 +2,22 @@
 %
 % Author        : Darwin LAU
 % Created       : 2016
-% Description    : 
+% Description    :
 %   The foward dynamics is performed using a simple scheme of
 %   double-integration of the joint acceleration obtained from the
 %   equations of motion. The solver type of the FD can be specified.
 %   Currently, the solver types are limited to the MATLAB ODE solvers.
 classdef ForwardDynamics < handle
-    
     properties
         solverType          % The type of forward dynamics solver
     end
-    
+
     methods
         % A constructor for forward dynamics objects
         function fd = ForwardDynamics(solver_type)
             fd.solverType = solver_type;
         end
-        
+
         % Compute the forward dynamics given a set of desired joint space
         % positions and cable forces.
         function [q, q_dot, q_ddot, dynamics] = compute(obj, qp, qp_d, cable_forces_active, cable_indices_active, w_ext, dt, model)
@@ -45,7 +44,7 @@ classdef ForwardDynamics < handle
                     solverFn = @(f,t,y0) ode23tb(f,t,y0);
             end
             [~, y_out] = solverFn(@(~,y) ForwardDynamics.eom(0, y, model, cable_forces_active, cable_indices_active, w_ext), [0 dt], y0);
-            
+
             %[~, y_out] = ode113(@(~,y) ForwardDynamics.eom(0, y, model, cable_forces, w_ext), [0 dt], y0);
             % The output of the ODE is the solution and y0 for the next iteration
             s_end = size(y_out,1);
@@ -59,9 +58,9 @@ classdef ForwardDynamics < handle
             % cable forces
             q_ddot = model.q_ddot_dynamics;
             dynamics = model;
-        end        
+        end
     end
-    
+
     methods (Static, Access = private)
         % The equation of motion for integration purposes.
         function y_dot = eom(~, y, model, f_active, f_indices_active, w_ext)

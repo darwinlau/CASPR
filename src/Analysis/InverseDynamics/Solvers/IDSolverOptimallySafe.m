@@ -9,8 +9,8 @@
 %
 % Author        : Jonathan EDEN
 % Created       : 2016
-% Description   : 
-classdef IDSolverOptimallySafe < IDSolverBase    
+% Description   :
+classdef IDSolverOptimallySafe < IDSolverBase
     properties (SetAccess = private)
         os_solver_type
         x_prev
@@ -24,21 +24,21 @@ classdef IDSolverOptimallySafe < IDSolverBase
             id.x_prev = [];
             id.alpha = alpha;
         end
-        
+
         % The implementation of the abstract resolveFunction
-        function [cable_forces,Q_opt, id_exit_type] = resolveFunction(obj, dynamics)            
+        function [cable_forces,Q_opt, id_exit_type] = resolveFunction(obj, dynamics)
             % Form the linear EoM constraint
             % M\ddot{q} + C + G + w_{ext} = -L_active^T f_active - L_passive^T f_passive (constraint)
-            [A_eq, b_eq] = IDSolverBase.GetEoMConstraints(dynamics);  
+            [A_eq, b_eq] = IDSolverBase.GetEoMConstraints(dynamics);
             % Form the lower and upper bound force constraints
             fmin = dynamics.cableForcesActiveMin;
             fmax = dynamics.cableForcesActiveMax;
 
             % Ensure that the resolve function should be applied for this
             % class of problem
-            assert(sum(fmin-fmin(1)*ones(size(fmin))) + sum(fmax-fmax(1)*ones(size(fmax))) == 0,'Minimum and maximum cable forces should be the same for all cables.');
-            assert((obj.alpha >= 0) && ~isinf(obj.alpha),'alpha must be non-negative and finite.');
-            
+            CASPR_log.Assert(sum(fmin-fmin(1)*ones(size(fmin))) + sum(fmax-fmax(1)*ones(size(fmax))) == 0,'Minimum and maximum cable forces should be the same for all cables.');
+            CASPR_log.Assert((obj.alpha >= 0) && ~isinf(obj.alpha),'alpha must be non-negative and finite.');
+
             switch (obj.os_solver_type)
                 case ID_OS_SolverType.LP
                     [cable_forces, id_exit_type] = id_os_matlab(A_eq, b_eq, fmin, fmax, obj.alpha);
@@ -47,22 +47,21 @@ classdef IDSolverOptimallySafe < IDSolverBase
                     [cable_forces, id_exit_type,obj.x_prev,obj.active_set] = id_os_efficient(A_eq, b_eq, fmin, fmax, obj.alpha, obj.x_prev, obj.active_set);
                     Q_opt = norm(cable_forces);
                 otherwise
-                    error('ID_OS_SolverType type is not defined');
+                    CASPR_log.Print('ID_OS_SolverType type is not defined',CASPRLogLevel.ERROR);
             end
-            
+
             if (id_exit_type ~= IDSolverExitType.NO_ERROR)
                 cable_forces = dynamics.cableModel.FORCES_ACTIVE_INVALID;
                 Q_opt = inf;
-            end            
-            
+            end
+
             obj.f_previous = cable_forces;
         end
-        
+
         % A function to add constraints.
         function addConstraint(obj, linConstraint)
             obj.constraints{length(obj.constraints)+1} = linConstraint;
         end
     end
-    
-end
 
+end

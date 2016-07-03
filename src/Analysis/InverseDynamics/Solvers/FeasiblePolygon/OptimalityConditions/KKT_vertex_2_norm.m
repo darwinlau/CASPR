@@ -19,9 +19,7 @@ Aij = [ai,aj];
 mu = Aij\v_ij;
 if mu(1)>=0 && mu(2)>=0
     Cond = 1;
-else 
+else
     Cond = 0;
 end
-
 end
-

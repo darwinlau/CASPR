@@ -4,8 +4,8 @@
 % Created       : 2016
 % Description   : MATLAB implementation of QP solvers with warm starting.
 function [ x_opt, exit_type,active_set_new] = id_qp_matlab_active_set_warm_start(A, b, A_ineq, b_ineq, A_eq, b_eq, xmin, xmax, x0,active_set,options)
-    assert(det(A)>=1e-6,'Efficient Method does not work for singular A');
-    assert(isempty(A_ineq)&&isempty(b_ineq),'Efficient method cannot handle inequality constraints');
+    CASPR_log.Assert(det(A)>=1e-6,'Efficient Method does not work for singular A');
+    CASPR_log.Assert(isempty(A_ineq)&&isempty(b_ineq),'Efficient method cannot handle inequality constraints');
 %     [n,m] = size(A_eq);
 %     C = [eye(m);-eye(m)]; d = [xmin;-xmax];
 %     [x_opt,exitflag,active_set_new] = mpcqpsolver(A,b,C,d,A_eq,b_eq,active_set,options);
@@ -39,7 +39,7 @@ function [ x_opt, exit_type,active_set_new] = id_qp_matlab_active_set_warm_start
             else
                 % The issue is with optimality
                 joint_saturated = (~diag(W)).*(-mu.*(q_n==xmin) + mu.*(q_n==xmax)>-1e-6);
-                q_n = joint_saturated.*q_n; 
+                q_n = joint_saturated.*q_n;
                 W       =   diag(~joint_saturated);
                 AW = A_eq*W;
                 AWinv = Ainv*(AW)'/(AW*Ainv*AW');
@@ -59,7 +59,7 @@ function [ x_opt, exit_type,active_set_new] = id_qp_matlab_active_set_warm_start
         % Solve for lambda and x
         % THIS COMPONENT NEEDS TO BE BETTER TESTED WHEN A WIDER RANGE OF
         % OBJECTIVES HAVE BEEN ADDED
-        [n,m] = size(A_eq); 
+        [n,m] = size(A_eq);
         joint_saturated =   active_set(1:m) |  active_set(m+1:2*m);
         q_n             =   active_set(1:m).*xmin + active_set(m+1:2*m).*xmax;
         W = ~joint_saturated;
@@ -70,7 +70,7 @@ function [ x_opt, exit_type,active_set_new] = id_qp_matlab_active_set_warm_start
         x_sub = -(HWinv - HWinv*AW'*AWHWAWinv*AW*HWinv)*(b(W) + A(W,~W)*q_n(~W)) + HWinv*AW'*AWHWAWinv*(b_eq - A_eq(:,~W)*q_n(~W));
         lambda = -AWHWAWinv*AW*HWinv*(b(W) + A(W,~W)*q_n(~W)) - AWHWAWinv*(b_eq - A_eq(:,~W)*q_n(~W));
         x0 = q_n; x0(W) = x_sub;
-        mu = -A*x0 - A_eq'*lambda;  
+        mu = -A*x0 - A_eq'*lambda;
         if(sum(x0-xmin<-1e-6)||sum(xmax-x0<-1e-6)||sum(-mu.*(q_n==xmin) + mu.*(q_n==xmax)<-1e-6))
             if(sum(x0-xmin<-1e-6)||sum(xmax - x0<-1e-6))
                 % For the moment call qp
@@ -98,15 +98,14 @@ function [ x_opt, exit_type,active_set_new] = id_qp_matlab_active_set_warm_start
         case 1
             exit_type = IDSolverExitType.NO_ERROR;
         case 0
-            fprintf('Max iteration limit reached\n');
+            CASPR_log.Print('Max iteration limit reached\n',CASPRLogLevel.INFO);
             exit_type = IDSolverExitType.ITERATION_LIMIT_REACHED;
         case -2
-            fprintf('Problem infeasible\n');
+            CASPR_log.Print('Problem infeasible\n',CASPRLogLevel.INFO);
             exit_type = IDSolverExitType.INFEASIBLE;
             x_opt = xmin;
         otherwise
-            fprintf('Other error : Code %d\n', exit_flag);
+            CASPR_log.Print(sprintf('Other error : Code %d\n', exit_flag),CASPRLogLevel.INFO);
             exit_type = IDSolverExitType.SOLVER_SPECIFIC_ERROR;
     end
 end
-

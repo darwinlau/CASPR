@@ -1,5 +1,5 @@
 % An efficient inverse dynamics solver for CDPR systems with n+2 cables
-% (where n is the number of DOFs). 
+% (where n is the number of DOFs).
 %
 % Please cite the following paper when using this algorithm:
 % M. Gouttefarde, J. Lamaury, C. Reichert and T. Bruckmann, "A Versatile
@@ -9,10 +9,10 @@
 % Author        : Jonathan EDEN and Jihong ZHU
 % Created       : 2016
 % Description   : This approach allows for three types of objective
-% functions to be considered, to minimise the 1-norm of cable forces, to 
-% minimise the 2-norm of cable forces, and to produce a wrench closest to 
+% functions to be considered, to minimise the 1-norm of cable forces, to
+% minimise the 2-norm of cable forces, and to produce a wrench closest to
 % centroid of the wrench polytope.
-classdef IDSolverFeasiblePolygon < IDSolverBase    
+classdef IDSolverFeasiblePolygon < IDSolverBase
     properties (SetAccess = private)
         fp_solver_type      % The type of feasibility polygon sovler
     end
@@ -22,16 +22,16 @@ classdef IDSolverFeasiblePolygon < IDSolverBase
             id@IDSolverBase(model);
             id.fp_solver_type = fp_solver_type;
         end
-        
+
         % The implementation of the abstract resolveFunction
-        function [cable_forces,Q_opt, id_exit_type] = resolveFunction(obj, dynamics)            
+        function [cable_forces,Q_opt, id_exit_type] = resolveFunction(obj, dynamics)
             % Ensure that the resolve function should be applied for this
             % class of problem
-            assert(dynamics.numCablesActive == dynamics.numDofs + 2,'Number of cables must be equal the number of degrees of freedom plus 2');
-            
+            CASPR_log.Assert(dynamics.numCablesActive == dynamics.numDofs + 2,'Number of cables must be equal the number of degrees of freedom plus 2');
+
             % Form the linear EoM constraint
             % M\ddot{q} + C + G + w_{ext} = -L_active^T f_active - L_passive^T f_passive (constraint)
-            [A_eq, b_eq] = IDSolverBase.GetEoMConstraints(dynamics);  
+            [A_eq, b_eq] = IDSolverBase.GetEoMConstraints(dynamics);
             % Form the lower and upper bound force constraints
             fmin = dynamics.cableForcesActiveMin;
             fmax = dynamics.cableForcesActiveMax;
@@ -47,16 +47,15 @@ classdef IDSolverFeasiblePolygon < IDSolverBase
                     [cable_forces, id_exit_type] = id_fp_centroid(A_eq, b_eq, fmin, fmax);
                     Q_opt = 0;
                 otherwise
-                    error('ID_FP_SolverType type is not defined');
+                    CASPR_log.Print('ID_FP_SolverType type is not defined',CASPRLogLevel.ERROR);
             end
-            
+
             if (id_exit_type ~= IDSolverExitType.NO_ERROR)
                 cable_forces = dynamics.cableModel.FORCES_ACTIVE_INVALID;
                 Q_opt = Inf;
-            end            
-            
+            end
+
             obj.f_previous = cable_forces;
         end
     end
 end
-
