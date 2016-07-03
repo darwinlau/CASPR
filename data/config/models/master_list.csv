@@ -15,3 +15,6 @@ M_SIMPLE_SPHERICAL,/SCDM/spherical_manipulators/simple_spherical/,simple_spheric
 M_2R_PLANAR_XZ,/MCDM/2R_planar_xz/,2R_planar_xz_bodies.xml,2R_planar_xz_cables.xml,2R_planar_xz_trajectories.xml,2R_planar_xz_op.xml
 M_NECK_8S,/MCDM/8S_neck/,8S_neck_bodies.xml,8S_neck_cables.xml,8S_neck_trajectories_eulerXYZ.xml,
 M_CAREX,/MCDM/CAREX/,CAREX_bodies.xml,CAREX_cables.xml,CAREX_trajectories.xml,
+T_SCDM,/.testModels/SCDM/test_spatial/,test_spatial_bodies.xml,test_spatial_cables.xml,test_spatial_trajectories.xml,
+T_MCDM,/.testModels/MCDM/3S/,3S_bodies.xml,3S_cables.xml,3S_trajectories_eulerXYZ.xml,
+T_PASSIVE,/.testModels/passiveCable/passive_springs_planar/,passive_springs_planar_bodies.xml,passive_springs_planar_cables.xml,passive_springs_planar_trajectories.xml,
