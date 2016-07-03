@@ -19,7 +19,7 @@ classdef IDObjectiveLinearTest < IDObjectiveTestBase
     methods (Test)
         function updateObjectiveTest(testCase)
             testCase.idObj.updateObjective(testCase.modelObj);
-            testCase.assertTrue(length(testCase.idObj.b) == testCase.modelObj.numCablesActive, '''b'' vector is of wrong dimension');
+            testCase.assertLength(testCase.idObj.b, testCase.modelObj.numCablesActive, '''b'' vector is of wrong dimension');
         end
     end
     

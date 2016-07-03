@@ -23,8 +23,8 @@ classdef IDObjectiveQuadraticTest < IDObjectiveTestBase
     methods (Test)
         function updateObjectiveTest(testCase)
             testCase.idObj.updateObjective(testCase.modelObj);
-            testCase.assertTrue(isequal(size(testCase.idObj.A), [testCase.modelObj.numCablesActive testCase.modelObj.numCablesActive]), '''A'' matrix is of wrong dimension');
-            testCase.assertTrue(length(testCase.idObj.b) == testCase.modelObj.numCablesActive, '''b'' vector is of wrong dimension');
+            testCase.assertSize(testCase.idObj.A, [testCase.modelObj.numCablesActive testCase.modelObj.numCablesActive], '''A'' matrix is of wrong dimension');
+            testCase.assertLength(testCase.idObj.b, testCase.modelObj.numCablesActive, '''b'' vector is of wrong dimension');
         end
     end
     
