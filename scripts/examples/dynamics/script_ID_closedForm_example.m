@@ -26,5 +26,5 @@ trajectory = model_config.getTrajectory('x_simple');
 idsim.run(trajectory);
 
 % Plotting simulation graphs
-idsim.plotJointSpace([],[]);
-idsim.plotCableForces([],[]);
+idsim.plotJointSpace();
+idsim.plotCableForces();

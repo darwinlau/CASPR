@@ -43,6 +43,6 @@ fprintf('Optimisation computational time, mean : %f seconds, std dev : %f second
 
 % Plotting simulation graphs
 disp('Start Plotting Simulation');
-idsim.plotJointSpace([],[]);
-idsim.plotCableForces([],[]);
+idsim.plotJointSpace();
+idsim.plotCableForces();
 % idsim.plotMovie(model_config.displayAxis, [fileparts(mfilename('fullpath')), '\CDPR_movie.avi'], 2, 500, 640);

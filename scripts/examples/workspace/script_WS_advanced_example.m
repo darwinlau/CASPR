@@ -33,7 +33,7 @@ wsim.run([],{WorkspaceMetricBase.CreateWorkspaceMetric(WorkspaceMetricType.TENSI
 
 % Plot the simulation
 disp('Start Plotting Simulation');
-wsim.plotWorkspace2(WorkspaceConditionType.WRENCH_CLOSURE,[1,2],[]);
-wsim.plotWorkspace2(WorkspaceMetricType.TENSION_FACTOR,[1,2],[]);
+wsim.plotWorkspace2([],WorkspaceConditionType.WRENCH_CLOSURE,[1,2]);
+wsim.plotWorkspace2([],WorkspaceMetricType.TENSION_FACTOR,[1,2]);
 wsim.filterWorkspaceMetric(WorkspaceMetricType.SEACM,-100,100);
-wsim.plotWorkspace2(WorkspaceMetricType.SEACM,[1,2],[]);
+wsim.plotWorkspace2([],WorkspaceMetricType.SEACM,[1,2]);
