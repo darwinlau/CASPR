@@ -4,7 +4,6 @@
 % Created       : 2012
 % Description   :
 classdef SphericalEulerXYZ < JointBase
-        
     properties (Constant = true)
         numDofs = 3;
         numVars = 3;
@@ -93,16 +92,6 @@ classdef SphericalEulerXYZ < JointBase
             S_dot_grad(:,:,3)   =   [zeros(3,3);b_d*sin(b)*sin(g) - g_d*cos(b)*cos(g),-g_d*sin(g),0;...
                                     b_d*sin(b)*cos(g) + g_d*cos(b)*sin(g),-g_d*cos(g),0;0,0,0];
         end
-        
-%         function S_dot = RelVelocityMatrixDeriv(q, q_dot)
-%             b = SphericalEulerXYZ.GetBeta(q);
-%             g = SphericalEulerXYZ.GetGamma(q);
-%             b_d = SphericalEulerXYZ.GetBeta(q_dot);
-%             g_d = SphericalEulerXYZ.GetGamma(q_dot);
-%             S_dot = [zeros(3,3); -b_d*sin(b)*cos(g)-g_d*cos(b)*sin(g) g_d*cos(g) 0; ...
-%                 b_d*sin(b)*sin(g)-g_d*cos(b)*cos(g) -g_d*sin(g) 0; ...
-%                 b_d*cos(b) 0 0];
-%         end
         
         % Generate the N matrix for the joint
         function [N_j,A] = QuadMatrix(q)

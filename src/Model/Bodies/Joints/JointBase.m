@@ -13,7 +13,6 @@
 %   Any new types of joints need to be added to the JointType enum and also
 %   added to the CreateJoint method.
 classdef (Abstract) JointBase < handle
-   
     properties (SetAccess = private)
         type                % Type of joint from JointType enum
         q                   % Joint variable q (generalised coordinates)

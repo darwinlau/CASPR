@@ -76,10 +76,6 @@ classdef PlanarYZ < JointBase
             S_dot_grad = zeros(6,3,3);
         end
         
-%         function S_dot = RelVelocityMatrixDeriv(~, ~)
-%             S_dot = zeros(6, 3);
-%         end
-        
         % Generate the N matrix for the joint
         function [N_j,A] = QuadMatrix(~)
             N_j = zeros(PlanarYZ.numDofs,PlanarYZ.numDofs^2);

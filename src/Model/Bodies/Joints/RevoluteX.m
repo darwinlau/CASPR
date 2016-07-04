@@ -58,11 +58,7 @@ classdef RevoluteX < JointBase
         function [S_dot_grad] = RelVelocityMatrixDerivGradient(~,~)
             S_dot_grad = zeros(6,1,1);
         end
-        
-%         function [S_dot] = RelVelocityMatrixDeriv(~, ~)
-%             S_dot = zeros(6,1);
-%         end
-        
+                
         % Generate the N matrix for the joint
         function [N_j,A] = QuadMatrix(~)
             N_j = 0;

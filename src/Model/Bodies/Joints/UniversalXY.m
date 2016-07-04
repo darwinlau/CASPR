@@ -3,8 +3,7 @@
 % Author        : Darwin LAU
 % Created       : 2016
 % Description   :
-classdef UniversalXY < JointBase
-        
+classdef UniversalXY < JointBase      
     properties (Constant = true)
         numDofs = 2;
         numVars = 2;

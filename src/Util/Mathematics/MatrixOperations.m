@@ -39,7 +39,7 @@ classdef MatrixOperations
         function C = GenerateMatrixQuadCross(A,B)
             n_q = size(A,2);
             M_A = [zeros(n_q,1),-A(3,:).',A(2,:).',A(3,:).',zeros(n_q,1),-A(1,:).',-A(2,:).',A(1,:).',zeros(n_q,1)];
-            C = MatrixOperations.InteriorProdRightQuad(M_A,B);
+            C = MatrixOperations.interior_product_right_quad(M_A,B);
         end
 
         % Initialise a matrix. This calls zeros for real variables (flag =
@@ -57,7 +57,7 @@ classdef MatrixOperations
     methods (Static, Access = private)
         % Matrix multiplication operations for computation of the internal
         % quadratic form matrices.
-        function C = InteriorProdRightQuad(A,B)
+        function C = interior_product_right_quad(A,B)
             ma = size(A,1); na = size(A,2);
             mb = size(B,1); %nb = size(B,2);
             C = MatrixOperations.Initialise([ma,(na*(ma/mb))],isa(A,'sym'));

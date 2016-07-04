@@ -10,8 +10,8 @@
 % Description   : This is an implementation of the minimisation of the 2 
 % norm solution.
 % Required function:
-% Cal_ni: calculate the prependicular vector
-% Cal_alpha: calculate alpha
+% cal_ni: calculate the prependicular vector
+% cal_alpha: calculate alpha
 function [ x_opt, exit_type, comp_time ] = id_fp_1_norm(A_eq, b_eq, xmin, xmax)
     delta = 1e-8;   % Use of delta to aviod numerical error
     m = size(A_eq,1);
@@ -45,8 +45,8 @@ function [ x_opt, exit_type, comp_time ] = id_fp_1_norm(A_eq, b_eq, xmin, xmax)
     
     v_f = v_ij;
     while 1
-        ni_prepend = Cal_ni(N,i,j,bj);
-        [alpha,l,bl] = Cal_alpha(N,ni_prepend,i,v_ij,xmin,xmax,x_p);
+        ni_prepend = cal_ni(N,i,j,bj);
+        [alpha,l,bl] = cal_alpha(N,ni_prepend,i,v_ij,xmin,xmax,x_p);
         v_li = v_ij + alpha * ni_prepend;        % The next point
         if(Indexset(l)==0)
             %                 NotIndexset = complete_index(~ismember(complete_index,Indexset));

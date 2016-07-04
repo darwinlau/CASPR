@@ -19,6 +19,7 @@ classdef IDSolverClosedForm < IDSolverBase
         cf_solver_type
         options
     end
+    
     methods
         % The constructor for this class
         function id = IDSolverClosedForm(model, cf_solver_type)

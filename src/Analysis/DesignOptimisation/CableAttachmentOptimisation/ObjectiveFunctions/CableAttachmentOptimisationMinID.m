@@ -41,7 +41,6 @@ classdef CableAttachmentOptimisationMinID < CableAttachmentOptimisationFnBase
                 else
                     Q = Q + obj.errorCost;
                 end
-
             end
         end
     end

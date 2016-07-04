@@ -124,9 +124,9 @@ classdef WorkspaceSimulator < Simulator
             end
             hold(plot_axis,'on');
             if(isa(capability_measure,'WorkspaceMetricType'))
-                plotWorkspaceMetric2(obj,plot_axis,capability_measure,slices);
+                plot_workspace_metric_2(obj,plot_axis,capability_measure,slices);
             elseif(isa(capability_measure,'WorkspaceConditionType'))
-                plotWorkspaceCondition2(obj,plot_axis,capability_measure,slices);
+                plot_workspace_condition_2(obj,plot_axis,capability_measure,slices);
             else
                 CASPR_log.Print('The capability measure must either be a workspace metric or a workspace condition',CASPRLogLevel.ERROR);
             end
@@ -142,9 +142,9 @@ classdef WorkspaceSimulator < Simulator
             end
             hold(plot_axis,'on');
             if(isa(capability_measure,'WorkspaceMetricType'))
-                plotWorkspaceMetric3(obj,plot_axis,capability_measure,slices);
+                plot_workspace_metric_3(obj,plot_axis,capability_measure,slices);
             elseif(isa(capability_measure,'WorkspaceConditionType'))
-                plotWorkspaceCondition3(obj,plot_axis,capability_measure,slices);
+                plot_workspace_condition_3(obj,plot_axis,capability_measure,slices);
             else
                 CASPR_log.Print('The capability measure must either be a workspace metric or a workspace condition',CASPRLogLevel.ERROR);
             end
@@ -250,7 +250,7 @@ classdef WorkspaceSimulator < Simulator
         end
         
         % Plot the workspace for condition 2 objects
-        function plotWorkspaceCondition2(obj,plot_axis,w_condition,pose_index)
+        function plot_workspace_condition_2(obj,plot_axis,w_condition,pose_index)
             CASPR_log.Assert(~isempty(obj.conditions),'There are no conditions to plot');
             % Find the position of the condition in the workspace list
             c_i = obj.find_capability_index(w_condition);            
@@ -276,7 +276,7 @@ classdef WorkspaceSimulator < Simulator
         end
         
         % Plot the workspace for condition 2 objects
-        function plotWorkspaceCondition3(obj,plot_axis,w_condition,pose_index)
+        function plot_workspace_condition_3(obj,plot_axis,w_condition,pose_index)
             CASPR_log.Assert(~isempty(obj.conditions),'There are no conditions to plot')
             % Find the position of the condition in the workspace list
             c_i = obj.find_capability_index(w_condition);            
@@ -304,7 +304,7 @@ classdef WorkspaceSimulator < Simulator
         end
         
         % Plot the workspace metric for 2 and 3 dimensional objects
-        function plotWorkspaceMetric2(obj,plot_axis,w_metric,pose_index)
+        function plot_workspace_metric_2(obj,plot_axis,w_metric,pose_index)
             CASPR_log.Assert(~isempty(obj.metrics),'There are no metrics to plot');
             plotting_workspace = obj.workspace;
             % First determine the metric entry
@@ -328,7 +328,7 @@ classdef WorkspaceSimulator < Simulator
         end
         
         % Plot the workspace metric for 2 and 3 dimensional objects
-        function plotWorkspaceMetric3(obj,plot_axis,w_metric,pose_index)
+        function plot_workspace_metric_3(obj,plot_axis,w_metric,pose_index)
             CASPR_log.Assert(~isempty(obj.metrics),'There are no metrics to plot')
             plotting_workspace = obj.workspace;
             % First determine the metric entry

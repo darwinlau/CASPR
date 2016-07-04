@@ -133,7 +133,7 @@ classdef SystemModel < handle
             % Had the linearisation been computed previously
             if(isempty(obj.bodyModel.Minv_grad))
                 obj.bodyModel.occupied.linearisation = true;
-                obj.bodyModel.update_linearisation();
+                obj.bodyModel.updateLinearisation();
             end
             
             % Determine the A matrix using gradient matrices
@@ -231,8 +231,8 @@ classdef SystemModel < handle
             if(isempty(obj.bodyModel.W_grad))
                 if(~obj.bodyModel.occupied.hessian)
                     obj.bodyModel.occupied.hessian = true;
-                    obj.bodyModel.update_hessian();
-                    obj.cableModel.update_hessian(obj.bodyModel);
+                    obj.bodyModel.updateHessian();
+                    obj.cableModel.updateHessian(obj.bodyModel);
                 end
             end
             is_symbolic = isa(obj.q,'sym');

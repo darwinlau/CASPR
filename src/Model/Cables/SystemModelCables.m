@@ -122,19 +122,19 @@ classdef SystemModelCables < handle
             end
             
             if(bodyModel.occupied.hessian)
-                obj.update_hessian(bodyModel);
+                obj.updateHessian(bodyModel);
             end
         end
         
         % This function updates V_grad
-        function update_hessian(obj,bodyModel)
+        function updateHessian(obj,bodyModel)
             obj.V_grad = MatrixOperations.Initialise([obj.numCables,6*obj.numLinks,bodyModel.numDofs],obj.is_symbolic);
             for i = 1:obj.numCables
                 % Cables are already up to date
                 cable = obj.cables{i};
                 num_cable_segments = cable.numSegments;
                 for k = 1:obj.numLinks
-                    body = bodyModel.bodies{k};
+                    body_k = bodyModel.bodies{k};
                     V_ik_t_grad = MatrixOperations.Initialise([1,3,bodyModel.numDofs],obj.is_symbolic);
                     V_ik_r_grad = MatrixOperations.Initialise([1,3,bodyModel.numDofs],obj.is_symbolic);
                     for j = 1:num_cable_segments
@@ -145,7 +145,7 @@ classdef SystemModelCables < handle
                             l_ij_grad = MatrixOperations.Initialise([3,bodyModel.numDofs],obj.is_symbolic); %#ok<NASGU>
                             l_hat_ij_grad = MatrixOperations.Initialise([1,3,bodyModel.numDofs],obj.is_symbolic);
                             rot_l_hat_ij_grad = MatrixOperations.Initialise([1,3,bodyModel.numDofs],obj.is_symbolic);
-                            [k_A,k_B] = obj.determineAnchorLinks(i,j,k,c_ijk);
+                            [k_A,k_B] = obj.determine_anchor_links(i,j,k,c_ijk);
                             % Translational term is the same
                             % THIS CODE SHOULD BE MADE MORE CONSISTENT A
                             % LOT OF THIS SECTION IS UNNEEDED.
@@ -153,10 +153,10 @@ classdef SystemModelCables < handle
                                 % This means that link k is the link of B_ij
                                 % Compute the Translational term
                                 % First deal with the translation derivative component
-                                l_ij_grad = obj.generateSKATrans(min([k_A,k_B]),max([k_A,k_B]),k,bodyModel);
+                                l_ij_grad = obj.generate_SKA_trans(min([k_A,k_B]),max([k_A,k_B]),k,bodyModel);
                                 % Compute cross product term
-                                l_ij_grad = l_ij_grad + obj.generateSKACrossRot(min([k_A,k_B]),max([k_A,k_B]),k,bodyModel,cable.segments{j}.r_OA{k_A+1});
-                                l_ij = body.R_0k.'*segment.segmentVector;
+                                l_ij_grad = l_ij_grad + obj.generate_SKA_cross_rot(min([k_A,k_B]),max([k_A,k_B]),k,bodyModel,cable.segments{j}.r_OA{k_A+1});
+                                l_ij = body_k.R_0k.'*segment.segmentVector;
                                 l_hat_ij_grad(1,:,:) = ((1/segment.length)*eye(3) - (1/segment.length^3)*(l_ij*l_ij.'))*l_ij_grad;
                                 rot_l_hat_ij_grad(1,:,:) = MatrixOperations.SkewSymmetric(segment.r_GA{k+1})*((1/segment.length)*eye(3) - (1/segment.length^3)*(l_ij*l_ij.'))*l_ij_grad;
                                 V_ik_t_grad(1,:,:) = V_ik_t_grad(1,:,:) + l_hat_ij_grad;
@@ -165,9 +165,9 @@ classdef SystemModelCables < handle
                                 % This means that link k is the link of A_ij
                                 % Compute the Translational term
                                 % First deal with the translation derivative component
-                                l_ij_grad = obj.generateSKATrans(min([k_A,k_B]),max([k_A,k_B]),k,bodyModel);
+                                l_ij_grad = obj.generate_SKA_trans(min([k_A,k_B]),max([k_A,k_B]),k,bodyModel);
                                 % Compute cross product term
-                                l_ij_grad = l_ij_grad + obj.generateSKACrossRot(min([k_A,k_B]),max([k_A,k_B]),k,bodyModel,cable.segments{j}.r_OA{k_B+1});
+                                l_ij_grad = l_ij_grad + obj.generate_SKA_cross_rot(min([k_A,k_B]),max([k_A,k_B]),k,bodyModel,cable.segments{j}.r_OA{k_B+1});
                                 l_hat_ij_grad(1,:,:) = ((1/segment.length)*eye(3) - (1/segment.length^3)*(segment.segmentVector*segment.segmentVector.'))*l_ij_grad;
                                 rot_l_hat_ij_grad(1,:,:) = MatrixOperations.SkewSymmetric(segment.r_GA{k+1})*((1/segment.length)*eye(3) - (1/segment.length^3)*(segment.segmentVector*segment.segmentVector.'))*l_ij_grad;
                                 V_ik_t_grad = V_ik_t_grad - l_hat_ij_grad; % Subtraction accounts for the c_ijk multiplication
@@ -181,17 +181,6 @@ classdef SystemModelCables < handle
                     obj.V_grad(i, 6*k-2:6*k,:) = V_ik_r_grad;
                 end
             end
-%             disp('1')
-%             V_g = diff(obj.V,bodyModel.q(1));
-%             V_g(1,1)
-%             obj.V_grad(1,1,1)
-%             sgdkjh
-%             simplify(diff(obj.V,bodyModel.q(1))-obj.V_grad(:,:,1))
-%             disp('2')
-%             simplify(diff(obj.V,bodyModel.q(2))-obj.V_grad(:,:,2))
-%             disp('3')
-%             simplify(diff(obj.V,bodyModel.q(3))-obj.V_grad(:,:,3))
-%             kfgjh
         end
         
 
@@ -294,7 +283,7 @@ classdef SystemModelCables < handle
         
         function value = get.V_grad(obj)
             if(isempty(obj.V_grad))
-                obj.update_hessian();
+                obj.updateHessian();
             end
             value = obj.V_grad;
         end
@@ -313,7 +302,7 @@ classdef SystemModelCables < handle
     end
     
     methods (Access = private)
-        function S_K = generateSKACrossRot(obj,k_a,k_b,k,bodyModel,r_OA)
+        function S_KA = generate_SKA_cross_rot(obj,k_a,k_b,k,bodyModel,r_OA)
             % Determine which is the smaller term
             if(k_a < k_b)
                 sign_factor = 1;
@@ -325,23 +314,29 @@ classdef SystemModelCables < handle
                 k_max = k_b;
             end
             R_k0 = bodyModel.bodies{k}.R_0k.';
-            S_K = MatrixOperations.Initialise([3,bodyModel.numDofs],obj.is_symbolic);
-            if(k==k_min)
-                for i = k_min+1:k_max
-                    body_i = bodyModel.bodies{i};
-                    R_0i = body_i.R_0k;
-                    S_K(:,bodyModel.index_k(i):bodyModel.index_k(i)+body_i.numDofs-1) = -sign_factor*R_k0*R_0i*MatrixOperations.SkewSymmetric(-body_i.r_OP + R_0i.'*r_OA)*bodyModel.S(6*i-2:6*i,bodyModel.index_k(i):bodyModel.index_k(i)+body_i.numDofs-1);
-                end
-            elseif(k == k_max)
-                for i = k_min+1:k_max
-                    body_i = bodyModel.bodies{i};
-                    R_0i = body_i.R_0k;
-                    S_K(:,bodyModel.index_k(i):bodyModel.index_k(i)+body_i.numDofs-1) = sign_factor*R_k0*R_0i*MatrixOperations.SkewSymmetric(body_i.r_OP - R_0i.'*r_OA)*bodyModel.S(6*i-2:6*i,bodyModel.index_k(i):bodyModel.index_k(i)+body_i.numDofs-1);
+            S_KA = MatrixOperations.Initialise([3,bodyModel.numDofs],obj.is_symbolic);
+            if(bodyModel.bodiesPathGraph(k_min,k_max))
+                if(k==k_min)
+                    for i = k_min+1:k_max
+                        if(bodyModel.bodiesPathGraph(i,k_max))
+                            body_i = bodyModel.bodies{i};
+                            R_0i = body_i.R_0k;
+                            S_KA(:,bodyModel.index_k(i):bodyModel.index_k(i)+body_i.numDofs-1) = -sign_factor*R_k0*R_0i*MatrixOperations.SkewSymmetric(-body_i.r_OP + R_0i.'*r_OA)*bodyModel.S(6*i-2:6*i,bodyModel.index_k(i):bodyModel.index_k(i)+body_i.numDofs-1);
+                        end
+                    end
+                elseif(k == k_max)
+                    for i = k_min+1:k_max
+                        if(bodyModel.bodiesPathGraph(i,k_max))
+                            body_i = bodyModel.bodies{i};
+                            R_0i = body_i.R_0k;
+                            S_KA(:,bodyModel.index_k(i):bodyModel.index_k(i)+body_i.numDofs-1) = sign_factor*R_k0*R_0i*MatrixOperations.SkewSymmetric(body_i.r_OP - R_0i.'*r_OA)*bodyModel.S(6*i-2:6*i,bodyModel.index_k(i):bodyModel.index_k(i)+body_i.numDofs-1);
+                        end
+                    end
                 end
             end
         end
         
-        function S_KA = generateSKATrans(obj,k_a,k_b,k,bodyModel)   
+        function S_KA = generate_SKA_trans(obj,k_a,k_b,k,bodyModel)   
             if(k_a < k_b)
                 % THIS NEEDS TO BE INVESTIGATED TIME PENDING
                 sign_factor = 1;
@@ -355,21 +350,24 @@ classdef SystemModelCables < handle
             end
             R_k0 = bodyModel.bodies{k}.R_0k.';
             S_KA = MatrixOperations.Initialise([3,bodyModel.numDofs],obj.is_symbolic);
-            for i =k_min+1:k_max
-                % At the moment this is assuming a serial mechanism
-                ip = bodyModel.bodies{i}.parentLinkId;
-                if(ip == 0)
-                    R_0ip = eye(3);
-                else
-                    body_ip = bodyModel.bodies{bodyModel.bodies{i}.parentLinkId};
-                    R_0ip = body_ip.R_0k;
+            if(bodyModel.bodiesPathGraph(k_min,k_max))
+                for i =k_min+1:k_max
+                    if(bodyModel.bodiesPathGraph(i,k_max))
+                        ip = bodyModel.bodies{i}.parentLinkId;
+                        if(ip == 0)
+                            R_0ip = eye(3);
+                        else
+                            body_ip = bodyModel.bodies{bodyModel.bodies{i}.parentLinkId};
+                            R_0ip = body_ip.R_0k;
+                        end
+                        body_i = bodyModel.bodies{i};
+                        S_KA(:,bodyModel.index_k(i):bodyModel.index_k(i)+body_i.numDofs-1) = sign_factor*R_k0*R_0ip*bodyModel.S(6*i-5:6*i-3,bodyModel.index_k(i):bodyModel.index_k(i)+body_i.numDofs-1);
+                    end
                 end
-                body_i = bodyModel.bodies{i};
-                S_KA(:,bodyModel.index_k(i):bodyModel.index_k(i)+body_i.numDofs-1) = sign_factor*R_k0*R_0ip*bodyModel.S(6*i-5:6*i-3,bodyModel.index_k(i):bodyModel.index_k(i)+body_i.numDofs-1);
             end
         end
         
-        function [k_A,k_B] = determineAnchorLinks(obj,i,j,k,c_ijk)
+        function [k_A,k_B] = determine_anchor_links(obj,i,j,k,c_ijk)
             CASPR_log.Assert(abs(c_ijk)==1,'Anchor links can only be determined when c_ijk is unitary');
             if(c_ijk == 1)
                 k_B = k;
