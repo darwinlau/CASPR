@@ -4,7 +4,7 @@
 % Created       : 2016
 % Description    :
 classdef IDObjectiveTestBase < matlab.unittest.TestCase
-    properties (MethodSetupParameter)
+    properties (ClassSetupParameter)
         model_config_type = struct('SCDM', TestModelConfigType.T_SCDM, ...
             'MCDM', TestModelConfigType.T_MCDM, ...
             'Active_passive_cables', TestModelConfigType.T_ACTIVE_PASSIVE_CABLES);
@@ -15,7 +15,7 @@ classdef IDObjectiveTestBase < matlab.unittest.TestCase
         idObj;
     end
             
-    methods (TestMethodSetup)
+    methods (TestClassSetup)
         function setupModelObj(testCase, model_config_type)
             model_config = ModelConfig(model_config_type);
             testCase.modelObj = model_config.getModel(model_config.defaultCableSetId);
