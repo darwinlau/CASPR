@@ -33,7 +33,7 @@ function setup_CASPR
     fprintf('----------------------------------------------------\n\n')
 
     % Set the logging level
-    CASPR_log.SetLoggingDetails(CASPRLogLevel.INFO,[]);
+    CASPR_log.SetLoggingDetails(CASPRLogLevel.INFO);
     
     % Run unit tests to confirm that the models are correctly setup
     %suite = matlab.unittest.TestSuite.fromFile('ModelConfigTest.m');

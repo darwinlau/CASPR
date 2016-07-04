@@ -11,12 +11,14 @@ classdef CASPR_log
         function SetLoggingDetails(log_level,log_path)
             % Test that log level is valid
             assert(isa(log_level,'CASPRLogLevel'),'log_level must be an enum from CASPRLogLevel');
-            save('logs/log_level.mat','log_level','log_path');
             % Open the log file fresh
-            if(~isempty(log_path))
+            if(nargin == 2 && ~isempty(log_path))
                 % Reset the log file to be empty
                 fid = fopen(log_path,'w'); fclose(fid);
+            else
+                log_path = [];
             end
+            save('logs/log_level.mat','log_level','log_path');
         end
         
         % Logging print

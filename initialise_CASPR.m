@@ -47,4 +47,3 @@ function initialise_CASPR()
     end
     save('logs/CASPR_environment.mat','home_path');
 end
-
