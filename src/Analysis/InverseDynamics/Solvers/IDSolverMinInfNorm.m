@@ -50,7 +50,7 @@ classdef IDSolverMinInfNorm < IDSolverBase
                 b_ineq = [b_ineq; obj.constraints{i}.b];
             end
 
-            % Modify the info norm
+            % Modify the inf norm
             [n,m] = size(A_eq);
             f = [zeros(m,1);1];
             A_ineq = [A_ineq,zeros(size(A_ineq,1),1);obj.objective.A,-ones(m,1);-obj.objective.A,-ones(m,1)];
