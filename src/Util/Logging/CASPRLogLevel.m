@@ -3,11 +3,11 @@
 % Author        : Jonathan EDEN
 % Created       : 2016
 % Description   :
-classdef CASPRLogLevel
+classdef CASPRLogLevel < uint32
     enumeration 
-        DEBUG       % Display all information
-        INFO        % Display computational information in addition to warnings and errors
-        WARNING     % Display any warnings and errors
-        ERROR       % Only display fatal warnings.
+        DEBUG       (1) % Display all information
+        INFO        (2) % Display computational information in addition to warnings and errors
+        WARNING     (3) % Display any warnings and errors
+        ERROR       (4) % Only display fatal warnings.
     end
 end

@@ -54,7 +54,7 @@ classdef GUIOperations
         function GUIPlot(plot_type,sim,handles,figure_quantity,tab_toggle)
             plot_function = str2func(plot_type);
             if(tab_toggle)
-                plot_function(sim,[],[]);
+                plot_function(sim);
             else
                 tabgp = getappdata(handles.figure1,'tabgp');
                 for i = 1:figure_quantity
@@ -62,7 +62,7 @@ classdef GUIOperations
                     ax(i) = axes; %#ok<AGROW>
                     set(ax(i),'Parent',tab(i),'OuterPosition',[0,0,1,1])
                 end
-                plot_function(sim,[],ax);
+                plot_function(sim,ax);
             end
         end
     end

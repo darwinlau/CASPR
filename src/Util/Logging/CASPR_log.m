@@ -8,50 +8,65 @@
 classdef CASPR_log
     methods (Static)
         % Set logging level
-        function SetLoggingDetails(log_level,log_path)
+        function SetLoggingDetails(log_level, log_path)
             % Test that log level is valid
-            assert(isa(log_level,'CASPRLogLevel'),'log_level must be an enum from CASPRLogLevel');
-            save('logs/log_level.mat','log_level','log_path');
+            assert(isa(log_level,'CASPRLogLevel'), 'log_level must be an enum from CASPRLogLevel');
             % Open the log file fresh
-            if(~isempty(log_path))
+            if(nargin == 2 && ~isempty(log_path))
                 % Reset the log file to be empty
                 fid = fopen(log_path,'w'); fclose(fid);
+            else
+                log_path = [];
+            end
+            save('logs/log_level.mat', 'log_level', 'log_path');
+        end
+        
+        % Prints debug statement
+        function Debug(str)
+            CASPR_log.Print(str, CASPRLogLevel.DEBUG);
+        end
+                
+        % Prints 
+        function Info(str)
+            CASPR_log.Print(str, CASPRLogLevel.INFO);
+        end
+        
+        function Warn(str)
+            CASPR_log.Print(str, CASPRLogLevel.WARNING);
+        end
+        
+        function Error(str)
+            CASPR_log.Print(str, CASPRLogLevel.ERROR);
+        end
+        
+        function Assert(condition, str)
+            if(~condition)
+                CASPR_log.Error(str);
             end
         end
         
         % Logging print
-        function Print(str,log_level)
-            [set_log_level,fid,carrage_return] = CASPR_log.Extract();            
-            switch(log_level)
-                case CASPRLogLevel.DEBUG
-                    if(set_log_level == CASPRLogLevel.DEBUG)
-                        fprintf(fid,['DEBUG:\t',str,carrage_return]);
-                    end
-                case CASPRLogLevel.INFO
-                    if((set_log_level == CASPRLogLevel.DEBUG)||(set_log_level == CASPRLogLevel.INFO))
-                        fprintf(fid,['INFO:\t',str,carrage_return]);
-                    end
-                case CASPRLogLevel.WARNING
-                    if(set_log_level ~= CASPRLogLevel.ERROR)
-                        fprintf(fid,['WARNING:\t',str,carrage_return]);
-                        warning(str)
-                    end
-                case CASPRLogLevel.ERROR
-                    fprintf(fid,['ERROR:\t',str,carrage_return]);
-                    error(str)
-                otherwise
-                    error('The specified log level is not valid');
+        function Print(str, log_level)
+            [set_log_level, fid, carrage_return] = CASPR_log.Extract();   
+            if (log_level >= set_log_level)
+                switch (log_level)
+                    case CASPRLogLevel.DEBUG
+                        fprintf(fid,['[DEBUG] ', str, carrage_return]);
+                    case CASPRLogLevel.INFO
+                        fprintf(fid,['[INFO] ', str, carrage_return]);
+                    case CASPRLogLevel.WARNING
+                        fprintf(fid,['[WARNING] ', str, carrage_return]);
+                        warning(str);
+                    case CASPRLogLevel.ERROR
+                        fprintf(fid,['[ERROR] ', str, carrage_return]);
+                        error(str);
+                    otherwise
+                        error('The specified log level is not valid');
+                end
             end
-            if(fid~=1)
+            
+            if(fid ~= 1)
                 fclose(fid);
-            end
-        end
-        
-        function Assert(condition,str)
-            [~,fid,carrage_return] = CASPR_log.Extract();
-            if(~condition)
-                fprintf(fid,['ERROR: ',str,carrage_return]);
-                error(str)
             end
         end
     end

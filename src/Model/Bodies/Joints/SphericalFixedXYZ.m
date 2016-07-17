@@ -4,7 +4,6 @@
 % Created       : 2012
 % Description   :
 classdef SphericalFixedXYZ < JointBase
-        
     properties (Constant = true)
         numDofs = 3;
         numVars = 3;
@@ -91,16 +90,6 @@ classdef SphericalFixedXYZ < JointBase
             S_dot_grad(:,:,1)   =   [zeros(4,3);0,-a_d*cos(a),-a_d*sin(a)*cos(b) - b_d*cos(a)*sin(b);0,a_d*sin(a),-a_d*cos(a)*cos(b) + b_d*sin(a)*sin(b)];
             S_dot_grad(:,:,2)   =   [zeros(3,3);0,0,b_d*sin(b);0,0,-a_d*sin(a)*cos(b) - b_d*sin(a)*cos(b);0,0,a_d*sin(a)*sin(b) - b_d*cos(a)*cos(b)];
         end
-        
-        
-        
-%         function S = RelVelocityMatrixDeriv(q, q_dot)
-%             a = SphericalFixedXYZ.GetAlpha(q);
-%             b = SphericalFixedXYZ.GetBeta(q);
-%             a_d = SphericalFixedXYZ.GetAlpha(q_dot);
-%             b_d = SphericalFixedXYZ.GetBeta(q_dot);
-%             S = [zeros(3,3); 0, 0, -b_d*cos(b); 0, -a_d*sin(a), a_d*cos(a)*cos(b)-b_d*sin(a)*sin(b); 0, -a_d*cos(a), -a_d*sin(a)*cos(b)-b_d*cos(a)*sin(b)];
-%         end
         
         % Generate the N matrix for the joint
         function [N_j,A] = QuadMatrix(q)

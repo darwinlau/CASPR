@@ -138,11 +138,6 @@ classdef SpatialEulerXYZ < JointBase
             S_dot_grad(:,4:6,4:6)   =  SphericalEulerXYZ.RelVelocityMatrixDerivGradient(SpatialEulerXYZ.GetOrientationQ(q),SpatialEulerXYZ.GetOrientationQd(q_dot));
         end
         
-%         function S_dot = RelVelocityMatrixDeriv(q, q_d)
-%             S_dot = [TranslationalXYZ.RelVelocityMatrixDeriv(SpatialEulerXYZ.GetTranslationQ(q), SpatialEulerXYZ.GetTranslationQd(q_d)) ...
-%                 SphericalEulerXYZ.RelVelocityMatrixDeriv(SpatialEulerXYZ.GetOrientationQ(q), SpatialEulerXYZ.GetOrientationQd(q_d))];
-%         end
-        
         % The derivative matrix
         function q_deriv = QDeriv(q, q_d)
             q_deriv = [TranslationalXYZ.QDeriv(SpatialEulerXYZ.GetTranslationQ(q), SpatialEulerXYZ.GetTranslationQd(q_d)); ...
