@@ -22,6 +22,9 @@ classdef IDSolverTest < matlab.unittest.TestCase
         lp_solver_type = struct('MATLAB', ID_LP_SolverType.MATLAB, ...
             'OptiToolbox_OOQP', ID_LP_SolverType.OPTITOOLBOX_OOQP, ...
             'OptiToolbox_LP', ID_LP_SolverType.OPTITOOLBOX_LP_SOLVE);
+        infp_solver_type = struct('MATLAB', ID_LP_SolverType.MATLAB, ...
+            'OptiToolbox_OOQP', ID_LP_SolverType.OPTITOOLBOX_OOQP, ...
+            'OptiToolbox_LP', ID_LP_SolverType.OPTITOOLBOX_LP_SOLVE);
     end
             
     methods (TestClassSetup)
@@ -42,6 +45,13 @@ classdef IDSolverTest < matlab.unittest.TestCase
         function testLPSolver(testCase, lp_solver_type)
             id_objective = IDObjectiveMinLinCableForce(ones(testCase.modelObj.numCables, 1));
             id_solver = IDSolverLinProg(testCase.modelObj, id_objective, lp_solver_type);
+            [cable_f, Q_opt, id_exit_type] = id_solver.resolveFunction(testCase.modelObj);
+            testCase.assertIDSolverOutput(cable_f, Q_opt, id_exit_type);
+        end
+        
+        function testInfPSolver(testCase, infp_solver_type)
+            id_objective = IDObjectiveMinInfCableForce(ones(testCase.modelObj.numCables, 1));
+            id_solver = IDSolverMinInfNorm(testCase.modelObj, id_objective, infp_solver_type);
             [cable_f, Q_opt, id_exit_type] = id_solver.resolveFunction(testCase.modelObj);
             testCase.assertIDSolverOutput(cable_f, Q_opt, id_exit_type);
         end
