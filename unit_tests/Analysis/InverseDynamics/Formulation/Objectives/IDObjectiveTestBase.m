@@ -7,7 +7,8 @@ classdef IDObjectiveTestBase < matlab.unittest.TestCase
     properties (ClassSetupParameter)
         model_config_type = struct('SCDM', TestModelConfigType.T_SCDM, ...
             'MCDM', TestModelConfigType.T_MCDM, ...
-            'Active_passive_cables', TestModelConfigType.T_ACTIVE_PASSIVE_CABLES);
+            'Active_passive_cables', TestModelConfigType.T_ACTIVE_PASSIVE_CABLES, ...
+            'HCDM', TestModelConfigType.T_HCDM);
     end
     
     properties

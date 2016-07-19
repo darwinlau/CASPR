@@ -12,5 +12,6 @@ classdef TestModelConfigType
         T_SCDM
         T_MCDM
         T_ACTIVE_PASSIVE_CABLES
+        T_HCDM
     end
 end
