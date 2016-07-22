@@ -19,8 +19,12 @@ classdef IDObjectiveMinInfCableForce < IDObjectiveInfinity
 
         % The objective update implementation
         function updateObjective(obj, dynamics)
-            obj.A = obj.A_full(dynamics.cableModel.cableIndicesActive, dynamics.cableModel.cableIndicesActive);
-            obj.b = obj.b_full(dynamics.cableModel.cableIndicesActive);
+            CASPR_log.Assert(length(obj.weights) == dynamics.numActuators, 'Dimensions of weight is not correct, it should be a vector of length numActuators');
+            
+            indices_all = 1:dynamics.numActuators;
+            indices_active = indices_all(setdiff(1:length(indices_all), dynamics.cableModel.cableIndicesPassive));
+            obj.A = obj.A_full(indices_active, indices_active);
+            obj.b = obj.b_full(indices_active);
         end
 
         % An update of the weights

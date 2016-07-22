@@ -11,7 +11,7 @@ classdef IDObjectiveLinearTest < IDObjectiveTestBase
     methods (TestMethodSetup)
         function setupIDObj(testCase, lin_objective_test)
             if (isequal(lin_objective_test, 'MinLinCableForce'))
-                testCase.idObj = IDObjectiveMinLinCableForce(ones(1, testCase.modelObj.numCables));
+                testCase.idObj = IDObjectiveMinLinCableForce(ones(1, testCase.modelObj.numActuators));
             end
         end
     end
@@ -19,7 +19,7 @@ classdef IDObjectiveLinearTest < IDObjectiveTestBase
     methods (Test)
         function updateObjectiveTest(testCase)
             testCase.idObj.updateObjective(testCase.modelObj);
-            testCase.assertLength(testCase.idObj.b, testCase.modelObj.numCablesActive, '''b'' vector is of wrong dimension');
+            testCase.assertLength(testCase.idObj.b, testCase.modelObj.numActuatorsActive, '''b'' vector is of wrong dimension');
         end
     end
     
