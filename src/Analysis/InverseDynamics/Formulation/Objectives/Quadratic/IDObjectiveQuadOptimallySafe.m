@@ -21,11 +21,14 @@ classdef IDObjectiveQuadOptimallySafe < IDObjectiveQuadratic
 
         % The objective update implementation
         function updateObjective(obj, dynamics)
-            CASPR_log.Assert(length(obj.weights) == dynamics.numCables, 'Dimensions of weight is not correct, it should be a vector of length numCables');
+            CASPR_log.Assert(length(obj.weights) == dynamics.numActuators, 'Dimensions of weight is not correct, it should be a vector of length numCables');
             
-            f_m     =   0.5*(dynamics.cableForcesActiveMin + dynamics.cableForcesActiveMax);
-            obj.A   =   obj.A_full(dynamics.cableModel.cableIndicesActive, dynamics.cableModel.cableIndicesActive);
-            obj.b   =   -2*diag(obj.weights(dynamics.cableModel.cableIndicesActive))*f_m;
+            indices_all = 1:dynamics.numActuators;
+            indices_active = indices_all(setdiff(1:length(indices_all), dynamics.cableModel.cableIndicesPassive));
+            
+            f_m     =   0.5*(dynamics.actuationForcesMin + dynamics.actuationForcesMax);
+            obj.A   =   obj.A_full(indices_active, indices_active);
+            obj.b   =   -2*diag(obj.weights(indices_active))*f_m;
         end
 
         % An update of the weights

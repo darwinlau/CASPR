@@ -41,9 +41,8 @@ classdef IDSolverBase < handle
     methods (Static)
         % The equation of motion constraints in linear terms.
         function [A, b] = GetEoMConstraints(dynamics)
-            A = -dynamics.L_active';
+            A = [-dynamics.L_active' dynamics.A];
             b = dynamics.M*dynamics.q_ddot + dynamics.C + dynamics.G + dynamics.W_e + dynamics.L_passive' * dynamics.cableForcesPassive; 
         end
     end
 end
-

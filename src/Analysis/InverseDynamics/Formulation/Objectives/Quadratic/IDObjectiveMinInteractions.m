@@ -24,8 +24,10 @@ classdef IDObjectiveMinInteractions < IDObjectiveQuadratic
         function updateObjective(obj, dynamics)
             CASPR_log.Assert(length(obj.weights) == 6 * dynamics.numLinks, 'Dimensions of weight is not correct, it should be a vector of length 6*numLinks');
             
-            obj.A = zeros(dynamics.numCablesActive, dynamics.numCablesActive);
-            obj.b = zeros(dynamics.numCablesActive,1);
+            num_actuators = dynamics.numActuatorsActive;
+            num_active_cables = dynamics.numCablesActive;
+            obj.A = zeros(num_actuators, num_actuators);
+            obj.b = zeros(num_actuators,1);
             obj.c = 0;
             
             a = dynamics.bodyModel.P'*(dynamics.bodyModel.M_b*dynamics.q_ddot + dynamics.bodyModel.C_b - dynamics.bodyModel.G_b);
@@ -41,8 +43,10 @@ classdef IDObjectiveMinInteractions < IDObjectiveQuadratic
                     H_vector_active = H_vector(active_indices);
                     H_vector_passive = H_vector(passive_indices);
                     a_x = a(6*(k-1)+dof) + H_vector_passive.' * dynamics.cableForcesPassive;
-                    obj.A = obj.A + obj.weights(6*(k-1)+dof)*(H_vector_active*H_vector_active.');
-                    obj.b = obj.b + obj.weights(6*(k-1)+dof)*2*a_x*H_vector_active;
+                    % Only cables affect the joint interaction forces and
+                    % moments
+                    obj.A(1:num_active_cables,1:num_active_cables) = obj.A(1:num_active_cables,1:num_active_cables) + obj.weights(6*(k-1)+dof)*(H_vector_active*H_vector_active.');
+                    obj.b(1:num_active_cables) = obj.b(1:num_active_cables) + obj.weights(6*(k-1)+dof)*2*a_x*H_vector_active;
                     obj.c = obj.c + obj.weights(6*(k-1)+dof)*a_x^2;
                 end
             end

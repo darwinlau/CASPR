@@ -18,12 +18,14 @@ classdef IDObjectiveMinQuadCableForce < IDObjectiveQuadratic
         end
 
         % The objective update implementation
-        function updateObjective(obj, dynamics)
-            CASPR_log.Assert(length(obj.weights) == dynamics.numCables, 'Dimensions of weight is not correct, it should be a vector of length numCables');
+        function updateObjective(obj, dynamics)            
+            CASPR_log.Assert(length(obj.weights) == dynamics.numCables + dynamics.numDofsJointActuated, 'Dimensions of weight is not correct, it should be a vector of length numCables + numDofsJointActuated (for HCDMs)');
             
+            indices_all = 1:dynamics.numActuators;
+            indices_active = indices_all(setdiff(1:length(indices_all), dynamics.cableModel.cableIndicesPassive));
             % Only select the active cable elements to consider
-            obj.A = obj.A_full(dynamics.cableModel.cableIndicesActive, dynamics.cableModel.cableIndicesActive);
-            obj.b = obj.b_full(dynamics.cableModel.cableIndicesActive);
+            obj.A = obj.A_full(indices_active, indices_active);
+            obj.b = obj.b_full(indices_active);
         end
 
         % An update of the weights

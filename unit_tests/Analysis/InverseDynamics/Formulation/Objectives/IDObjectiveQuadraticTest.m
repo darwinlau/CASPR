@@ -11,11 +11,11 @@ classdef IDObjectiveQuadraticTest < IDObjectiveTestBase
     methods (TestMethodSetup)
         function setupIDObj(testCase, quad_objective_test)
             if (isequal(quad_objective_test, 'MinQuadCableForce'))
-                testCase.idObj = IDObjectiveMinQuadCableForce(ones(1, testCase.modelObj.numCables));
+                testCase.idObj = IDObjectiveMinQuadCableForce(ones(1, testCase.modelObj.numActuators));
             elseif (isequal(quad_objective_test, 'MinInteractions'))
                 testCase.idObj = IDObjectiveMinInteractions(ones(1, 6*testCase.modelObj.numLinks));
             elseif (isequal(quad_objective_test, 'QuadOptimallySafe'))
-                testCase.idObj = IDObjectiveQuadOptimallySafe(ones(1, testCase.modelObj.numCables));
+                testCase.idObj = IDObjectiveQuadOptimallySafe(ones(1, testCase.modelObj.numActuators));
             end
         end
     end
@@ -23,8 +23,8 @@ classdef IDObjectiveQuadraticTest < IDObjectiveTestBase
     methods (Test)
         function updateObjectiveTest(testCase)
             testCase.idObj.updateObjective(testCase.modelObj);
-            testCase.assertSize(testCase.idObj.A, [testCase.modelObj.numCablesActive testCase.modelObj.numCablesActive], '''A'' matrix is of wrong dimension');
-            testCase.assertLength(testCase.idObj.b, testCase.modelObj.numCablesActive, '''b'' vector is of wrong dimension');
+            testCase.assertSize(testCase.idObj.A, [testCase.modelObj.numActuatorsActive testCase.modelObj.numActuatorsActive], '''A'' matrix is of wrong dimension');
+            testCase.assertLength(testCase.idObj.b, testCase.modelObj.numActuatorsActive, '''b'' vector is of wrong dimension');
         end
     end
     
