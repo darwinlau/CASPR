@@ -4,9 +4,6 @@
 % Created       : 2011
 % Description    :
 classdef (Abstract) BodyModel < handle
-    %BODYKINEMATICS Summary of this class goes here
-    %   Detailed explanation goes here
-
     properties
         % Absolute reference positions
         R_0k = eye(3);          % Rotation matrix ^0_kR where k is current link
@@ -54,6 +51,7 @@ classdef (Abstract) BodyModel < handle
         numDofs         % The number of degrees of freedom
         numDofVars      % The number of degrees of freedom variables
         numOPDofs       % The number of operational space degrees of freedom
+        isJointActuated % Whether the body is joint actuated
     end
 
     methods
@@ -104,6 +102,10 @@ classdef (Abstract) BodyModel < handle
             else
                 dofs = 0;
             end
+        end
+        
+        function val = get.isJointActuated(obj)
+            val = obj.joint.isActuated;
         end
     end
 end

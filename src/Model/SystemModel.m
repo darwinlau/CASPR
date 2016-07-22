@@ -39,6 +39,7 @@ classdef SystemModel < handle
         numCablesActive         % Number of active cables
         numCablesPassive        % Number of active cables
         numActuators            % Number of actuators for the entire system (both cables and joint DoFs)
+        numActuatorsActive      % Number of actuators for the entire system that are active
         
         % Cable Lengths
         cableLengths            % Vector of cable lengths
@@ -81,24 +82,28 @@ classdef SystemModel < handle
         % Since S^T w_p = 0 and S^T P^T = W^T
         % W^T ( M_b * q_ddot + C_b ) = W^T ( G_b - V^T f )
         % The equations of motion can then be expressed in the form
-        % M * q_ddot + C + G + W_e = - L^T f
+        % M * q_ddot + C + G + W_e = - L^T f + A tau
         M
         C
         G
         W_e
+        A
 
         % Instead of q_ddot being passed as input to the system, it could
         % also be determined from:
         % M * q_ddot + C + G + W_e = - L^T f
         q_ddot_dynamics
         
-        % The cable force information
+        % The actuation information
         cableForces                 % cable forces
         cableForcesActive           % cable forces
         cableForcesPassive          % cable forces
-        cableForcesActiveMin        % vector of min forces from cables
-        cableForcesActiveMax        % vector of max forces from cables
-        jointTau                    % The joint actuator
+        
+        jointTau                    % The joint actuator forces
+        
+        actuationForces             % vector of actuation forces including both cable forces and actuator forces
+        actuationForcesMin          % vector of min active actuation forces
+        actuationForcesMax          % vector of max active actuation forces
     end
 
     methods (Static)
@@ -188,6 +193,10 @@ classdef SystemModel < handle
         end
         
         function value = get.numActuators(obj)
+            value = obj.numCables + obj.numDofsJointActuated;
+        end
+        
+        function value = get.numActuatorsActive(obj)
             value = obj.numCablesActive + obj.numDofsJointActuated;
         end
             
@@ -337,11 +346,22 @@ classdef SystemModel < handle
         function value = get.W_e(obj)
             value = obj.bodyModel.W_e;
         end
-
-        function set.cableForces(obj, f)
-            obj.cableModel.forces = f;
+        
+        function value = get.A(obj)
+            value = obj.bodyModel.A;
         end
-
+        
+        function set.actuationForces(obj, f)
+            obj.cableModel.forces = f(1:obj.numCablesActive);
+            if (obj.numDofsJointActuated > 0)
+                obj.bodyModel.tau = f(obj.numCablesActive+1:length(f));
+            end
+        end
+        
+        function value = get.actuationForces(obj)
+            value = [obj.cableForcesActive; obj.jointTau];
+        end
+                
         function value = get.cableForces(obj)
             value = obj.cableModel.forces;
         end
@@ -353,21 +373,17 @@ classdef SystemModel < handle
         function value = get.cableForcesPassive(obj)
             value = obj.cableModel.forcesPassive;
         end
-        
-        function value = get.cableForcesActiveMin(obj)
-           value = obj.cableModel.forcesActiveMin; 
-        end
-        
-        function value = get.cableForcesActiveMax(obj)
-            value = obj.cableModel.forcesActiveMax; 
-        end        
-        
+                
         function value = get.jointTau(obj)
             value = obj.bodyModel.tau;
         end
         
-        function set.jointTau(obj, value)
-            obj.bodyModel.tau = value;
+        function value = get.actuationForcesMin(obj)
+            value = [obj.cableModel.forcesActiveMin; obj.bodyModel.tauMin];
+        end
+        
+        function value = get.actuationForcesMax(obj)
+            value = [obj.cableModel.forcesActiveMax; obj.bodyModel.tauMax];
         end
     end
 end

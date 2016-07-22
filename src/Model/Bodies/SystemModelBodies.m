@@ -21,6 +21,13 @@ classdef SystemModelBodies < handle
     properties (SetAccess = private)
         % Objects
         bodies                  % Cell array of BodyModel objects
+        
+        % Degrees of freedom
+        numDofs
+        numDofVars
+        numOPDofs
+        numLinks
+        numDofsActuated             % Number of actuated DoFs
 
         % Generalised coordinates of the system
         q                       % Joint space coordinates
@@ -63,13 +70,6 @@ classdef SystemModelBodies < handle
         x_ddot                  % Absolute accelerations (x_ddot = W(q)*q_ddot + C_a(q,q_dot))
         C_a                     % Relationship between body and joint accelerations \ddot{\mathbf{x}} = W \ddot{\mathbf{q}} + C_a
 
-        % Degrees of freedom
-        numDofs
-        numDofVars
-        numOPDofs
-        numLinks
-        numDofsActuated             % Number of actuated DoFs
-
         % Mass matrix
         massInertiaMatrix = [];       % Mass-inertia 6p x 6p matrix
 
@@ -88,6 +88,7 @@ classdef SystemModelBodies < handle
         C = [];
         G = [];
         W_e = [];
+        A = [];
 
         % Index for ease of computation
         index_k                      % A vector consisting of the first index to each joint
@@ -105,6 +106,8 @@ classdef SystemModelBodies < handle
         % Generalised coordinates time derivative (for special cases q_dot does not equal q_deriv)
         q_deriv
         tau                         % The joint actuator
+        tauMin                      % The joint actuator minimum value
+        tauMax                      % The joint actuator maximum value
     end
 
     properties
@@ -143,6 +146,18 @@ classdef SystemModelBodies < handle
             b.W = MatrixOperations.Initialise([6*b.numLinks, b.numDofs],0);
             b.T = MatrixOperations.Initialise([0,6*b.numLinks],0);
 
+            % Construct joint actuation selection matrix
+            b.A = zeros(b.numDofs, b.numDofsActuated);
+            dof_ind = 0;
+            dof_tau = 0;
+            for k = 1:b.numLinks
+                if (b.bodies{k}.isJointActuated)
+                    b.A(dof_ind+1:dof_ind+b.bodies{k}.numDofs, dof_tau+1:dof_tau+b.bodies{k}.numDofs) = eye(b.bodies{k}.numDofs, b.bodies{k}.numDofs);
+                    dof_tau = dof_tau + b.bodies{k}.numDofs;
+                end
+                dof_ind = dof_ind + b.bodies{k}.numDofs;
+            end
+            
             % Connects the objects of the system and create the
             % connectivity and body path graphs
             b.formConnectiveMap();
@@ -344,7 +359,7 @@ classdef SystemModelBodies < handle
             obj.M =   obj.W.' * obj.M_b;
             obj.C =   obj.W.' * obj.C_b;
             obj.G = - obj.W.' * obj.G_b;
-
+            
             % Operational space equation of motion terms
             if(obj.occupied.op_space)
                 obj.M_y = inv(obj.J*inv(obj.M)*obj.J'); %#ok<MINV>
@@ -876,17 +891,45 @@ classdef SystemModelBodies < handle
             count = 0;
             for k = 1:obj.numLinks
                 if (obj.bodies{k}.joint.isActuated)
-                    obj.bodies{k}.joint.tau = value(count+1:count+obj.bodies{k}.joint.numDofs);
-                    count = count + obj.bodies{k}.joint.numDofs;
+                    num_dofs = obj.bodies{k}.joint.numDofs;
+                    obj.bodies{k}.joint.tau = value(count+1:count+num_dofs);
+                    count = count + num_dofs;
                 end
             end
         end
         
         function val = get.tau(obj)
-            val = [];
+            val = zeros(obj.numDofsActuated, 1);
+            count = 0;
             for k = 1:obj.numLinks
                 if (obj.bodies{k}.joint.isActuated)
-                    val = [val; obj.bodies{k}.joint.tau];
+                    num_dofs = obj.bodies{k}.joint.numDofs;
+                    val(count+1:count+num_dofs) = obj.bodies{k}.joint.tau;
+                    count = count + num_dofs;
+                end
+            end
+        end
+        
+        function val = get.tauMin(obj)
+            val = zeros(obj.numDofsActuated, 1);
+            count = 0;
+            for k = 1:obj.numLinks
+                if (obj.bodies{k}.joint.isActuated)
+                    num_dofs = obj.bodies{k}.joint.numDofs;
+                    val(count+1:count+num_dofs) = obj.bodies{k}.joint.tau_min;
+                    count = count + num_dofs;
+                end
+            end
+        end
+        
+        function val = get.tauMax(obj)
+            val = zeros(obj.numDofsActuated, 1);
+            count = 0;
+            for k = 1:obj.numLinks
+                if (obj.bodies{k}.joint.isActuated)
+                    num_dofs = obj.bodies{k}.joint.numDofs;
+                    val(count+1:count+num_dofs) = obj.bodies{k}.joint.tau_max;
+                    count = count + num_dofs;
                 end
             end
         end
