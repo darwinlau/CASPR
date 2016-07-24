@@ -33,7 +33,7 @@ classdef IDSolverQuadProg < IDSolverBase
         end
 
         % The implementation of the resolve function.
-        function [cable_forces, Q_opt, id_exit_type] = resolveFunction(obj, dynamics)
+        function [actuation_forces, Q_opt, id_exit_type] = resolveFunction(obj, dynamics)
             % Form the linear EoM constraint
             % M\ddot{q} + C + G + w_{ext} = -L_active^T f_active - L_passive^T f_passive (constraint)
             [A_eq, b_eq] = IDSolverBase.GetEoMConstraints(dynamics);
@@ -58,26 +58,26 @@ classdef IDSolverQuadProg < IDSolverBase
                     if(isempty(obj.options))
                         obj.options = optimoptions('quadprog', 'Display', 'off', 'MaxIter', 100);
                     end
-                    [cable_forces, id_exit_type] = id_qp_matlab(obj.objective.A, obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);
+                    [actuation_forces, id_exit_type] = id_qp_matlab(obj.objective.A, obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);                    
                 % Uses MATLAB solver with a warm start strategy on the
                 % active set
                 case ID_QP_SolverType.MATLAB_ACTIVE_SET_WARM_START
                     if(isempty(obj.options))
                         obj.options = optimoptions('quadprog', 'Display', 'off', 'MaxIter', 100);
                     end
-                    [cable_forces, id_exit_type,obj.active_set] = id_qp_matlab_active_set_warm_start(obj.objective.A, obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.active_set,obj.options);
+                    [actuation_forces, id_exit_type,obj.active_set] = id_qp_matlab_active_set_warm_start(obj.objective.A, obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.active_set,obj.options);
                 % Uses the IPOPT algorithm from OptiToolbox
                 case ID_QP_SolverType.OPTITOOLBOX_IPOPT
                     if(obj.is_OptiToolbox)
                         if(isempty(obj.options))
                             obj.options = optiset('solver', 'IPOPT', 'maxiter', 100);
                         end
-                        [cable_forces, id_exit_type] = id_qp_opti(obj.objective.A, obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);
+                        [actuation_forces, id_exit_type] = id_qp_opti(obj.objective.A, obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);
                     else
                         if(isempty(obj.options))
                             obj.options = optimoptions('quadprog', 'Display', 'off', 'MaxIter', 100);
                         end
-                        [cable_forces, id_exit_type] = id_qp_matlab(obj.objective.A, obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);
+                        [actuation_forces, id_exit_type] = id_qp_matlab(obj.objective.A, obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);
                     end
                 % Uses the OOQP algorithm from the Optitoolbox
                 case ID_QP_SolverType.OPTITOOLBOX_OOQP
@@ -85,12 +85,12 @@ classdef IDSolverQuadProg < IDSolverBase
                         if(isempty(obj.options))
                             obj.options = optiset('solver', 'OOQP', 'maxiter', 100);
                         end
-                        [cable_forces, id_exit_type] = id_qp_opti(obj.objective.A, obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);
+                        [actuation_forces, id_exit_type] = id_qp_opti(obj.objective.A, obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);
                     else
                         if(isempty(obj.options))
                             obj.options = optimoptions('quadprog', 'Display', 'off', 'MaxIter', 100);
                         end
-                        [cable_forces, id_exit_type] = id_qp_matlab(obj.objective.A, obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);
+                        [actuation_forces, id_exit_type] = id_qp_matlab(obj.objective.A, obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);
                     end
                 otherwise
                     CASPR_log.Print('ID_QP_SolverType type is not defined',CASPRLogLevel.ERROR);
@@ -99,14 +99,14 @@ classdef IDSolverQuadProg < IDSolverBase
             % If there is an error, cable forces will take on the invalid
             % value and Q_opt is infinity
             if (id_exit_type ~= IDSolverExitType.NO_ERROR)
-                cable_forces = dynamics.cableModel.FORCES_ACTIVE_INVALID;
+                actuation_forces = dynamics.ACTUATION_ACTIVE_INVALID;
                 Q_opt = inf;
             % Otherwise valid exit, compute Q_opt using the objective
             else
-                Q_opt = obj.objective.evaluateFunction(cable_forces);
+                Q_opt = obj.objective.evaluateFunction(actuation_forces);
             end
             % Set f_previous, may be useful for some algorithms
-            obj.f_previous = cable_forces;
+            obj.f_previous = actuation_forces;
         end
 
         % Helps to add an additional constraint to the QP problem

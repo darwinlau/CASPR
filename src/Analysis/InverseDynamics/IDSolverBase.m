@@ -27,7 +27,7 @@ classdef IDSolverBase < handle
             start_tic = tic;
             [forces_active, Q_opt, id_exit_type] = obj.resolveFunction(obj.model);
             comp_time = toc(start_tic);
-            obj.model.cableForces = forces_active;
+            obj.model.actuationForces = forces_active;
             model = obj.model;
         end
     end

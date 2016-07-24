@@ -32,13 +32,13 @@ classdef IDSolverLinProg < IDSolverBase
         end
 
         % The implementation of the resolveFunction
-        function [cable_forces,Q_opt, id_exit_type] = resolveFunction(obj, dynamics)
+        function [actuation_forces, Q_opt, id_exit_type] = resolveFunction(obj, dynamics)
             % Form the linear EoM constraint
             % M\ddot{q} + C + G + w_{ext} = -L_active^T f_active - L_passive^T f_passive (constraint)
             [A_eq, b_eq] = IDSolverBase.GetEoMConstraints(dynamics);
             % Form the lower and upper bound force constraints
-            fmin = dynamics.cableForcesActiveMin;
-            fmax = dynamics.cableForcesActiveMax;
+            fmin = dynamics.actuationForcesMin;
+            fmax = dynamics.actuationForcesMax;
             % Get objective function
             obj.objective.updateObjective(dynamics);
 
@@ -55,43 +55,43 @@ classdef IDSolverLinProg < IDSolverBase
                     if(isempty(obj.options))
                         obj.options = optimoptions('linprog', 'Display', 'off', 'Algorithm', 'interior-point');
                     end
-                    [cable_forces, id_exit_type] = id_lp_matlab(obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);
+                    [actuation_forces, id_exit_type] = id_lp_matlab(obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);
                 case ID_LP_SolverType.OPTITOOLBOX_OOQP
                     if(obj.is_OptiToolbox)
                         if(isempty(obj.options))
                             obj.options = optiset('solver', 'OOQP', 'maxiter', 100);
                         end
-                        [cable_forces, id_exit_type] = id_lp_opti(obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);
+                        [actuation_forces, id_exit_type] = id_lp_opti(obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);
                     else
                         if(isempty(obj.options))
                             obj.options = optimoptions('linprog', 'Display', 'off', 'Algorithm', 'interior-point');
                         end
-                        [cable_forces, id_exit_type] = id_lp_matlab(obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);
+                        [actuation_forces, id_exit_type] = id_lp_matlab(obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);
                     end
                 case ID_LP_SolverType.OPTITOOLBOX_LP_SOLVE
                     if(obj.is_OptiToolbox)
                         if(isempty(obj.options))
                             obj.options = optiset('solver', 'LP_SOLVE', 'maxiter', 100,'display','off','warnings','none');
                         end
-                        [cable_forces, id_exit_type] = id_lp_opti(obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);
+                        [actuation_forces, id_exit_type] = id_lp_opti(obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);
                     else
                         if(isempty(obj.options))
                             obj.options = optimoptions('linprog', 'Display', 'off', 'Algorithm', 'interior-point');
                         end
-                        [cable_forces, id_exit_type] = id_lp_matlab(obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);
+                        [actuation_forces, id_exit_type] = id_lp_matlab(obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);
                     end
                 otherwise
-                    CASPR_log.Print('ID_LP_SolverType type is not defined',CASPRLogLevel.ERROR);
+                    CASPR_log.Print('ID_LP_SolverType type is not defined', CASPRLogLevel.ERROR);
             end
 
             if (id_exit_type ~= IDSolverExitType.NO_ERROR)
-                cable_forces = dynamics.cableModel.FORCES_ACTIVE_INVALID;
+                actuation_forces = dynamics.ACTUATION_ACTIVE_INVALID;
                 Q_opt = inf;
             else
-                Q_opt = obj.objective.evaluateFunction(cable_forces);
+                Q_opt = obj.objective.evaluateFunction(actuation_forces);
             end
 
-            obj.f_previous = cable_forces;
+            obj.f_previous = actuation_forces;
         end
 
         % A function with which to add new constraints.

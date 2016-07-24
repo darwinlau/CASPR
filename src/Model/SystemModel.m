@@ -91,7 +91,7 @@ classdef SystemModel < handle
 
         % Instead of q_ddot being passed as input to the system, it could
         % also be determined from:
-        % M * q_ddot + C + G + W_e = - L^T f
+        % M * q_ddot + C + G + W_e = - L^T f + tau
         q_ddot_dynamics
         
         % The actuation information
@@ -104,6 +104,7 @@ classdef SystemModel < handle
         actuationForces             % vector of actuation forces including both cable forces and actuator forces
         actuationForcesMin          % vector of min active actuation forces
         actuationForcesMax          % vector of max active actuation forces
+        ACTUATION_ACTIVE_INVALID    
     end
 
     methods (Static)
@@ -327,7 +328,7 @@ classdef SystemModel < handle
 %         end
 
         function value = get.q_ddot_dynamics(obj)
-            obj.bodyModel.q_ddot = obj.M\(-obj.L.'*obj.cableForces - obj.C - obj.G - obj.W_e);
+            obj.bodyModel.q_ddot = obj.M\(-obj.L.'*obj.cableForces + obj.jointTau - obj.C - obj.G - obj.W_e);
             value = obj.q_ddot;
         end
 
@@ -384,6 +385,10 @@ classdef SystemModel < handle
         
         function value = get.actuationForcesMax(obj)
             value = [obj.cableModel.forcesActiveMax; obj.bodyModel.tauMax];
+        end
+        
+        function value = get.ACTUATION_ACTIVE_INVALID(obj)
+            value = [obj.cableModel.FORCES_ACTIVE_INVALID; obj.bodyModel.TAU_INVALID];
         end
     end
 end

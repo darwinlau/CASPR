@@ -13,6 +13,10 @@
 %   Any new types of joints need to be added to the JointType enum and also
 %   added to the CreateJoint method.
 classdef (Abstract) JointBase < handle
+    properties (Constant)
+        INVALID_TAU = -Inf
+    end
+    
     properties
         tau                 % Actuator effort for joint (if actuated)
     end

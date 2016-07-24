@@ -108,6 +108,7 @@ classdef SystemModelBodies < handle
         tau                         % The joint actuator
         tauMin                      % The joint actuator minimum value
         tauMax                      % The joint actuator maximum value
+        TAU_INVALID
     end
 
     properties
@@ -932,6 +933,10 @@ classdef SystemModelBodies < handle
                     count = count + num_dofs;
                 end
             end
+        end
+        
+        function value = get.TAU_INVALID(obj)
+            value = JointBase.INVALID_TAU * ones(obj.numDofsActuated, 1);
         end
     end
 

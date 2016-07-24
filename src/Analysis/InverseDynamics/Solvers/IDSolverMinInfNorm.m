@@ -32,13 +32,13 @@ classdef IDSolverMinInfNorm < IDSolverBase
         end
 
         % The implementation for the resolveFunction
-        function [cable_forces,Q_opt, id_exit_type] = resolveFunction(obj, dynamics)
+        function [actuation_forces, Q_opt, id_exit_type] = resolveFunction(obj, dynamics)
             % Form the linear EoM constraint
             % M\ddot{q} + C + G + w_{ext} = -L_active^T f_active - L_passive^T f_passive (constraint)
             [A_eq, b_eq] = IDSolverBase.GetEoMConstraints(dynamics);
             % Form the lower and upper bound force constraints
-            fmin = dynamics.cableForcesActiveMin;
-            fmax = dynamics.cableForcesActiveMax;
+            fmin = dynamics.actuationForcesMin;
+            fmax = dynamics.actuationForcesMax;
             % Get objective function
             obj.objective.updateObjective(dynamics);
 
@@ -59,7 +59,7 @@ classdef IDSolverMinInfNorm < IDSolverBase
             fmin = [fmin;-Inf];
             fmax = [fmax;Inf];
             if(~isempty(obj.f_previous))
-                f0 = [obj.f_previous;0];
+                f0 = [obj.f_previous; 0];
             else
                 f0 = zeros(m+1,1);
             end
@@ -70,20 +70,20 @@ classdef IDSolverMinInfNorm < IDSolverBase
                         obj.options = optimoptions('linprog', 'Display', 'off', 'Algorithm', 'interior-point');
                     end
                     [temp_cable_forces, id_exit_type] = id_lp_matlab(f, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, f0,obj.options);
-                    cable_forces = temp_cable_forces(1:m);
+                    actuation_forces = temp_cable_forces(1:m);
                 case ID_LP_SolverType.OPTITOOLBOX_OOQP
                     if(obj.is_OptiToolbox)
                         if(isempty(obj.options))
                             obj.options = optiset('solver', 'OOQP', 'maxiter', 100);
                         end
                         [temp_cable_forces, id_exit_type] = id_lp_opti(f, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, f0,obj.options);
-                        cable_forces = temp_cable_forces(1:m);
+                        actuation_forces = temp_cable_forces(1:m);
                     else
                         if(isempty(obj.options))
                             obj.options = optimoptions('linprog', 'Display', 'off', 'Algorithm', 'interior-point');
                         end
                         [temp_cable_forces, id_exit_type] = id_lp_matlab(f, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, f0,obj.options);
-                        cable_forces = temp_cable_forces(1:m);
+                        actuation_forces = temp_cable_forces(1:m);
                     end
                 case ID_LP_SolverType.OPTITOOLBOX_LP_SOLVE
                     if(obj.is_OptiToolbox)
@@ -91,26 +91,26 @@ classdef IDSolverMinInfNorm < IDSolverBase
                             obj.options = optiset('solver', 'LP_SOLVE', 'maxiter', 100,'display','off','warnings','none');
                         end
                         [temp_cable_forces, id_exit_type] = id_lp_opti(f, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, f0,obj.options);
-                        cable_forces = temp_cable_forces(1:m);
+                        actuation_forces = temp_cable_forces(1:m);
                     else
                         if(isempty(obj.options))
                             obj.options = optimoptions('linprog', 'Display', 'off', 'Algorithm', 'interior-point');
                         end
                         [temp_cable_forces, id_exit_type] = id_lp_matlab(f, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, f0,obj.options);
-                        cable_forces = temp_cable_forces(1:m);
+                        actuation_forces = temp_cable_forces(1:m);
                     end
                 otherwise
                     CASPR_log.Print('ID_LP_SolverType type is not defined',CASPRLogLevel.ERROR);
             end
 
             if (id_exit_type ~= IDSolverExitType.NO_ERROR)
-                cable_forces = dynamics.cableModel.FORCES_ACTIVE_INVALID;
+                actuation_forces = dynamics.ACTUATION_ACTIVE_INVALID;
                 Q_opt = Inf;
             else
-                Q_opt = max(cable_forces);
+                Q_opt = max(actuation_forces);
             end
 
-            obj.f_previous = cable_forces;
+            obj.f_previous = actuation_forces;
         end
 
         % A function with which to add additional constraaints
