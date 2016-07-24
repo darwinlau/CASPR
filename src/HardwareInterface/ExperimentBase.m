@@ -16,21 +16,20 @@ classdef ExperimentBase < handle
         
         function run(obj)
             obj.createCloseFigureHandle();
-            obj.hardwareInterface.feedbackOnSend();
+            obj.hardwareInterface.systemOnSend();
+            %obj.hardwareInterface.lengthInitialSend([1.0; 1.0; 1.0; 1.0; 1.0; 1.0; 1.0; 1.0]);
             
             while(obj.isRunning)
                 % The code will wait on the serial comm to read until it
                 % receives something meaningful from the Arduino
                 obj.hardwareInterface.feedbackRead();
-                %cmd_str = fscanf(obj.serial_port, '%s\n');
-                %disp(cmd_str);
                 
                 % After a meaningful command the experiment should process
                 % it
                 drawnow;
             end
             
-            obj.hardwareInterface.feedbackOffSend();
+            obj.hardwareInterface.systemOffSend();
         end
         
         function createCloseFigureHandle(obj)
