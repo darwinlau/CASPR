@@ -25,6 +25,15 @@ classdef IDSolverTest < matlab.unittest.TestCase
         infp_solver_type = struct('MATLAB', ID_LP_SolverType.MATLAB, ...
             'OptiToolbox_OOQP', ID_LP_SolverType.OPTITOOLBOX_OOQP, ...
             'OptiToolbox_LP', ID_LP_SolverType.OPTITOOLBOX_LP_SOLVE);
+        os_solver_type = struct('LP', ID_OS_SolverType.LP, ...
+            'Efficient_LP', ID_OS_SolverType.EFFICIENT_LP);
+       fp_solver_type = struct('NORM_1', ID_FP_SolverType.NORM_1, ...
+            'NORM_2', ID_FP_SolverType.NORM_2, ...
+            'CENTROID', ID_FP_SolverType.CENTROID);
+        cf_solver_type = struct('CLOSED_FORM', ID_CF_SolverType.CLOSED_FORM, ...
+            'IMPROVED_CLOSED_FORM', ID_CF_SolverType.IMPROVED_CLOSED_FORM, ...
+            'PUNCTURE_METHOD', ID_CF_SolverType.PUNCTURE_METHOD, ...
+            'IMPROVED_PUNCTURE_METHOD',ID_CF_SolverType.IMPROVED_PUNCTURE_METHOD);
     end
             
     methods (TestClassSetup)
@@ -55,6 +64,25 @@ classdef IDSolverTest < matlab.unittest.TestCase
             [cable_f, Q_opt, id_exit_type] = id_solver.resolveFunction(testCase.modelObj);
             testCase.assertIDSolverOutput(cable_f, Q_opt, id_exit_type);
         end
+        
+%         function testOptimallySafeSolver(testCase, os_solver_type)
+%             id_solver = IDSolverOptimallySafe(testCase.modelObj, 1, os_solver_type);
+%             [cable_f, Q_opt, id_exit_type] = id_solver.resolveFunction(testCase.modelObj);
+%             testCase.assertIDSolverOutput(cable_f, Q_opt, id_exit_type);
+%         end
+        
+%        function testFeasiblePolygon(testCase, fp_solver_type)
+%            id_solver = IDSolverFeasiblePolygon(testCase.modelObj, fp_solver_type);
+%            [cable_f, Q_opt, id_exit_type] = id_solver.resolveFunction(testCase.modelObj);
+%            testCase.assertIDSolverOutput(cable_f, Q_opt, id_exit_type);
+%        end
+         
+         function testClosedForm(testCase, cf_solver_type)
+             id_solver = IDSolverClosedForm(testCase.modelObj, cf_solver_type);
+             [cable_f, Q_opt, id_exit_type] = id_solver.resolveFunction(testCase.modelObj);
+             testCase.assertIDSolverOutput(cable_f, Q_opt, id_exit_type);
+         end
+        
     end
     
     methods
