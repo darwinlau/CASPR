@@ -41,33 +41,52 @@ classdef SystemModel < handle
         numActuators            % Number of actuators for the entire system (both cables and joint DoFs)
         numActuatorsActive      % Number of actuators for the entire system that are active
         
-        % Cable Lengths
+        % Generalised coordinates
+        q                       % Generalised coordinates state vector
+        q_deriv                 % Generalised coordinates time derivative (for special cases q_dot does not equal q_deriv)
+        q_dot                   % Generalised coordinates derivative
+        q_ddot                  % Generalised coordinates double derivative
+        jointTau                % The joint actuator forces for active joints
+        
+        % Actuator forces
+        actuationForces             % vector of actuation forces including both cable forces and actuator forces
+        actuationForcesMin          % vector of min active actuation forces
+        actuationForcesMax          % vector of max active actuation forces
+        ACTUATION_ACTIVE_INVALID    % vector of invalid actuator commands (from both cables and joint actuators)
+        
+        % Cable lengths and forces
         cableLengths            % Vector of cable lengths
         cableLengthsDot         % Vector of cable length derivatives
-
-        % Jacobians
+        cableForces             % Vector of all cable forces (active and passive)
+        cableForcesActive       % Vector of cable forces for active cables
+        cableForcesPassive      % Vector of cable forces for passive cables
+        
+        % Jacobian matrices
         L                       % cable to joint Jacobian matrix L = VW
         L_active                % active part of the Jacobian matrix
         L_passive               % passive part of the Jacobian matrix
         J                       % joint to operational space Jacobian matrix
         J_dot                   % derivative of J
         K                       % The stiffness matrix
+                
+        % Since S^T w_p = 0 and S^T P^T = W^T
+        % W^T ( M_b * q_ddot + C_b ) = W^T ( G_b - V^T f )
+        % The equations of motion can then be expressed in the form
+        % M * q_ddot + C + G + W_e = - L^T f + A tau
+        M
+        C
+        G
+        W_e
+        A
+        % Instead of q_ddot being passed as input to the system, it could
+        % also be determined from:
+        % M * q_ddot + C + G + W_e = - L^T f + tau
+        q_ddot_dynamics
         
         % Hessians
         L_grad                  % The gradient of the jacobian L
         L_grad_active           % active part of the Jacobian matrix gradient
         L_grad_passive          % active part of the Jacobian matrix gradient
-
-        % Generalised coordinates
-        q                       % Generalised coordinates state vector
-        q_deriv                 % Generalised coordinates time derivative (for special cases q_dot does not equal q_deriv)
-        q_dot                   % Generalised coordinates derivative
-        q_ddot                  % Generalised coordinates double derivative
-        
-        % Operational space coordinates
-        y                       % Operational space coordinate vector
-        y_dot                   % Operational space coordinate derivative
-        y_ddot                  % Operational space coordinate double derivative
         
         % Linearisation Matrices
         A_lin                   % The state matrix for the system linearisation
@@ -78,33 +97,11 @@ classdef SystemModel < handle
         interactionWrench               % Joint interaction wrenches (w_p)
         interactionForceMagnitudes      % Magnitudes of the interaction force at each joint
         interactionMomentMagnitudes     % Magnitudes of the interaction moments at each joint
-
-        % Since S^T w_p = 0 and S^T P^T = W^T
-        % W^T ( M_b * q_ddot + C_b ) = W^T ( G_b - V^T f )
-        % The equations of motion can then be expressed in the form
-        % M * q_ddot + C + G + W_e = - L^T f + A tau
-        M
-        C
-        G
-        W_e
-        A
-
-        % Instead of q_ddot being passed as input to the system, it could
-        % also be determined from:
-        % M * q_ddot + C + G + W_e = - L^T f + tau
-        q_ddot_dynamics
-        
-        % The actuation information
-        cableForces                 % cable forces
-        cableForcesActive           % cable forces
-        cableForcesPassive          % cable forces
-        
-        jointTau                    % The joint actuator forces
-        
-        actuationForces             % vector of actuation forces including both cable forces and actuator forces
-        actuationForcesMin          % vector of min active actuation forces
-        actuationForcesMax          % vector of max active actuation forces
-        ACTUATION_ACTIVE_INVALID    
+                
+        % Operational space coordinates
+        y                       % Operational space coordinate vector
+        y_dot                   % Operational space coordinate derivative
+        y_ddot                  % Operational space coordinate double derivative
     end
 
     methods (Static)
