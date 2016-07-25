@@ -15,8 +15,8 @@
 %	linear stiffness-displacement relationship. 
 classdef CableModelVSDFlexureLinear < CableModelBase      
     properties (SetAccess = private)
-        K_cable
-        forceDeformationRelationCoeff
+        K_cable = 1;
+        forceDeformationRelationCoeff = [4,1,2]; % default values
     end
     
     properties (Dependent)

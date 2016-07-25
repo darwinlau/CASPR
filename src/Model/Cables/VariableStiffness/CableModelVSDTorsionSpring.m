@@ -14,10 +14,10 @@
 %	relationships are non-linear for this type of VSD.
 classdef CableModelVSDTorsionSpring < CableModelBase              
     properties (SetAccess = private)
-        K_cable
-        numSprings
-        springStiffness             % Variable 'K_theta' in the paper
-        springLength                % Variable 'd' in the paper
+        K_cable = 1; % 1 is set as a default value
+        numSprings = 1; % (default value set)
+        springStiffness = 1;             % Variable 'K_theta' in the paper (default value set)
+        springLength = 1;               % Variable 'd' in the paper (default value set)
     end
     
     properties (Dependent)
