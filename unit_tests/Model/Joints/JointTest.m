@@ -18,14 +18,11 @@ classdef JointTest < matlab.unittest.TestCase
             'S_QUATERNION', JointType.S_QUATERNION, ...
             'T_XYZ', JointType.T_XYZ, ...
             'SPATIAL_QUATERNION', JointType.SPATIAL_QUATERNION, ...
-            'SPATIAL_EULER_XYZ', JointType.SPATIAL_EULER_XYZ);
-        
-        
-        
+            'SPATIAL_EULER_XYZ', JointType.SPATIAL_EULER_XYZ);        
     end
     
     properties         
-    jointObj;
+        jointObj;
     end
     
     
@@ -37,7 +34,14 @@ classdef JointTest < matlab.unittest.TestCase
     
     methods (Test)
         function testUpdate(testCase)
-            testCase.jointObj.update(1, 0, 0);
+            switch(testCase.jointObj.type)
+                case JointType.S_QUATERNION
+                    testCase.jointObj.update([1;0;0;0], zeros(testCase.jointObj.numDofs,1), zeros(testCase.jointObj.numDofs,1));
+                case JointType.SPATIAL_QUATERNION
+                    testCase.jointObj.update([0;0;0;1;0;0;0], zeros(testCase.jointObj.numDofs,1), zeros(testCase.jointObj.numDofs,1));
+                otherwise
+                    testCase.jointObj.update(zeros(testCase.jointObj.numVars,1), zeros(testCase.jointObj.numDofs,1), zeros(testCase.jointObj.numDofs,1));
+            end
         end
         
         function testDependentVariables(testCase)
