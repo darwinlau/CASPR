@@ -5,11 +5,13 @@
 % Description    :
 classdef CableModelPassiveLinearSpringTest < CableModelTestBase
     methods (Test) 
+        % Test the constructor
         function testCableModelPassiveLinearSpring(testCase)
             c = CableModelPassiveLinearSpring('1',1);
             testCase.assertNotEmpty(c);
         end
         
+        % Test the update function
         function testUpdate(testCase)
             c = CableModelPassiveLinearSpring('1',1);
             % Create the body model
@@ -18,6 +20,7 @@ classdef CableModelPassiveLinearSpringTest < CableModelTestBase
             c.update(modelObj.bodyModel)
         end
         
+        % Test that the cable length 
         function testLength(testCase)
             c = CableModelPassiveLinearSpring('1',1);
             c.force = 0;
@@ -25,6 +28,7 @@ classdef CableModelPassiveLinearSpringTest < CableModelTestBase
             testCase.assertPositiveCableLengths(l);
         end
         
+        % Test that the spring stiffness K
         function testK(testCase)
             c = CableModelPassiveLinearSpring('1',1);
             c.force = 0;

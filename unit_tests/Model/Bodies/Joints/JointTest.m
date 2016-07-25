@@ -3,11 +3,11 @@
 % Author        : Felix YUE
 % Created       : 2016
 % Description   :
-
 classdef JointTest < matlab.unittest.TestCase
     % Compile a test structure corresponding of all joint types.
     properties (ClassSetupParameter)
-        joint_type = TestingOperations.createTestClassSetupParameter('JointType');
+        joint_type = UnitTestOperations.createTestClassSetupParameter('JointType');
+        % unit test operations
     end
 
     % Test case properties
@@ -25,14 +25,7 @@ classdef JointTest < matlab.unittest.TestCase
     methods (Test)
         % Test that the joint can be updated
         function testUpdate(testCase)
-            switch(testCase.jointObj.type)
-                case JointType.S_QUATERNION
-                    testCase.jointObj.update([1;0;0;0], zeros(testCase.jointObj.numDofs,1), zeros(testCase.jointObj.numDofs,1));
-                case JointType.SPATIAL_QUATERNION
-                    testCase.jointObj.update([0;0;0;1;0;0;0], zeros(testCase.jointObj.numDofs,1), zeros(testCase.jointObj.numDofs,1));
-                otherwise
-                    testCase.jointObj.update(zeros(testCase.jointObj.numVars,1), zeros(testCase.jointObj.numDofs,1), zeros(testCase.jointObj.numDofs,1));
-            end
+            testCase.jointObj.update(testCase.jointObj.q_default, zeros(testCase.jointObj.numDofs,1), zeros(testCase.jointObj.numDofs,1));
             testCase.assertJointPropertySize()
         end
 

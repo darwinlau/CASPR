@@ -14,10 +14,10 @@
 %	relationships are non-linear for this type of VSD.
 classdef CableModelVSDTorsionSpring < CableModelBase              
     properties (SetAccess = private)
-        K_cable = 1; % 1 is set as a default value
-        numSprings = 1; % (default value set)
-        springStiffness = 1;             % Variable 'K_theta' in the paper (default value set)
-        springLength = 1;               % Variable 'd' in the paper (default value set)
+        K_cable
+        numSprings
+        springStiffness              % Variable 'K_theta' in the paper
+        springLength                 % Variable 'd' in the paper
     end
     
     properties (Dependent)
@@ -26,8 +26,12 @@ classdef CableModelVSDTorsionSpring < CableModelBase
     end
     
     methods 
-        function ck = CableModelVSDTorsionSpring(name, numLinks)
+        function ck = CableModelVSDTorsionSpring(name, numLinks, K_cable, numSprings, springStiffness, springLength)
             ck@CableModelBase(name, numLinks);
+            ck.K_cable = K_cable;
+            ck.numSprings = numSprings;
+            ck.springStiffness = springStiffness;
+            ck.springLength = springLength;
         end
         
         function update(obj, bodyModel)
@@ -63,19 +67,20 @@ classdef CableModelVSDTorsionSpring < CableModelBase
                 CASPR_log.Print(sprintf('Unknown cableAttachmentReference type: %s', attachRefString),CASPRLogLevel.ERROR);
             end
             
-            % Generate an ideal cable object
-            c = CableModelVSDTorsionSpring(name, bodiesModel.numLinks);
-            
             % <properties> tag
             propertiesObj = xmlobj.getElementsByTagName('properties').item(0);
             % <K>
-            c.K_cable = str2double(propertiesObj.getElementsByTagName('K_cable').item(0).getFirstChild.getData);
+            K_cable = str2double(propertiesObj.getElementsByTagName('K_cable').item(0).getFirstChild.getData);
             % <num_torsion_springs>
-            c.numSprings = str2double(propertiesObj.getElementsByTagName('num_torsion_springs').item(0).getFirstChild.getData);
+            numSprings = str2double(propertiesObj.getElementsByTagName('num_torsion_springs').item(0).getFirstChild.getData);
             % <torsion_spring_stiffness>
-            c.springStiffness = str2double(propertiesObj.getElementsByTagName('torsion_spring_stiffness').item(0).getFirstChild.getData);
+            springStiffness = str2double(propertiesObj.getElementsByTagName('torsion_spring_stiffness').item(0).getFirstChild.getData);
             % <torsion_spring_length>
-            c.springLength = str2double(propertiesObj.getElementsByTagName('torsion_spring_length').item(0).getFirstChild.getData);
+            springLength = str2double(propertiesObj.getElementsByTagName('torsion_spring_length').item(0).getFirstChild.getData);
+            
+            % Generate an ideal cable object
+            c = CableModelVSDTorsionSpring(name, bodiesModel.numLinks, K_cable, numSprings, springStiffness, springLength);
+            
             % <force_min>
             c.forceMin = str2double(propertiesObj.getElementsByTagName('force_min').item(0).getFirstChild.getData);
             % <force_max>

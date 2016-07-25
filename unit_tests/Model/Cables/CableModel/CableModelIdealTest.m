@@ -5,11 +5,13 @@
 % Description    :
 classdef CableModelIdealTest < CableModelTestBase
     methods (Test) 
+        % Test the constructor
         function testCableModelIdeal(testCase)
             c = CableModelIdeal('1',1);
             testCase.assertNotEmpty(c)
         end
         
+        % Test the update function
         function testUpdate(testCase)
             c = CableModelIdeal('1',1);
             % Create the body model
@@ -18,6 +20,7 @@ classdef CableModelIdealTest < CableModelTestBase
             c.update(modelObj.bodyModel)
         end
         
+        % Test the length of the springs
         function testLength(testCase)
             c = CableModelIdeal('1',1);
             c.force = 0;
@@ -25,6 +28,7 @@ classdef CableModelIdealTest < CableModelTestBase
             testCase.assertPositiveCableLengths(l);
         end
         
+        % Test the spring stiffness K
         function testK(testCase)
             c = CableModelIdeal('1',1);
             c.force = 0;

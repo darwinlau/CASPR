@@ -23,6 +23,7 @@ classdef IDSolverOptimallySafe < IDSolverBase
             id.os_solver_type = os_solver_type;
             id.x_prev = [];
             id.alpha = alpha;
+            CASPR_log.Assert((length(alpha) == 1) && (alpha >= 0),'alpha must be positive ');
         end
 
         % The implementation of the abstract resolveFunction

@@ -5,11 +5,13 @@
 % Description    :
 classdef CableModelLinearSpringTest < CableModelTestBase
     methods (Test) 
+        % Test the constructor 
         function testCableModelLinearSpring(testCase)
             c = CableModelLinearSpring('1',1);
             testCase.assertNotEmpty(c);
         end
         
+        % Test the update function
         function testUpdate(testCase)
             c = CableModelLinearSpring('1',1);
             % Create the body model
@@ -18,6 +20,7 @@ classdef CableModelLinearSpringTest < CableModelTestBase
             c.update(modelObj.bodyModel)
         end
         
+        % Test the cable length function
         function testLength(testCase)
             c = CableModelLinearSpring('1',1);
             c.force = 0;
@@ -25,6 +28,7 @@ classdef CableModelLinearSpringTest < CableModelTestBase
             testCase.assertPositiveCableLengths(l);
         end
         
+        % Test the spring stiffness K
         function testK(testCase)
             c = CableModelLinearSpring('1',1);
             c.force = 0;

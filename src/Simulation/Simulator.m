@@ -15,6 +15,7 @@ classdef (Abstract) Simulator < handle
     methods 
         % Constructor
         function s = Simulator(model)
+            CASPR_log.Assert(isa(model,'SystemModel'));
             s.model = model;
         end
     end

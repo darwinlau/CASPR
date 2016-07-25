@@ -3,7 +3,7 @@
 % Author        : Jonathan EDEN
 % Created       : 2016
 % Description    :
-classdef TestingOperations
+classdef UnitTestOperations
     methods (Static)
         % This function is used to create structures for class setup
         % parameters. It can use a given enumeration class and provides the
