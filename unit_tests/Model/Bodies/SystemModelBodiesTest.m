@@ -26,6 +26,7 @@ classdef SystemModelBodiesTest < matlab.unittest.TestCase
     methods (Test)
         % Test that the update function works
         function testUpdate(testCase)
+            disp('Testing system body update function')
             testCase.modelObj.bodyModel.update(zeros(testCase.modelObj.bodyModel.numDofVars,1),zeros(testCase.modelObj.bodyModel.numDofs,1),zeros(testCase.modelObj.bodyModel.numDofs,1),zeros(testCase.modelObj.bodyModel.numDofs,1));
             testCase.assertSystemModelBodiesPropertySize();
         end
@@ -33,38 +34,29 @@ classdef SystemModelBodiesTest < matlab.unittest.TestCase
         % -----------------------------------
         % Test the dependent variables
         % -----------------------------------
-        % q_default
-        function testQDefault(testCase)
+        % default values
+        function testDefault(testCase)
+            disp('Testing default values')
             testCase.modelObj.bodyModel.q_default;
             testCase.assertLength(testCase.modelObj.bodyModel.q_default,testCase.modelObj.bodyModel.numDofVars,'q_default of wrong dimension');
-        end
-        
-        % q_dot_default
-        function testQDotDefault(testCase)
             testCase.modelObj.bodyModel.q_dot_default;
             testCase.assertLength(testCase.modelObj.bodyModel.q_dot_default,testCase.modelObj.bodyModel.numDofs,'q_dot_default of wrong dimension');
-        end
-
-        % q_ddot_default
-        function testQDDotDefault(testCase)
             testCase.modelObj.bodyModel.q_ddot_default;
             testCase.assertLength(testCase.modelObj.bodyModel.q_ddot_default,testCase.modelObj.bodyModel.numDofs,'q_ddot_default of wrong dimension');
         end
         
-        % q_lb
-        function testQLb(testCase)
+        % bounds
+        function testQBounds(testCase)
+            disp('Testing bound values')
             testCase.modelObj.bodyModel.q_lb;
             testCase.assertLength(testCase.modelObj.bodyModel.q_lb,testCase.modelObj.bodyModel.numDofVars,'q_lb of wrong dimension');
-        end
-        
-        % q_ub
-        function testQUb(testCase)
             testCase.modelObj.bodyModel.q_ub;
             testCase.assertLength(testCase.modelObj.bodyModel.q_ub,testCase.modelObj.bodyModel.numDofVars,'q_ub of wrong dimension');
         end
         
         % q_deriv
         function testQDeriv(testCase)
+            disp('Testing q_deriv')
             testCase.modelObj.bodyModel.q_deriv;
             testCase.assertLength(testCase.modelObj.bodyModel.q_deriv,testCase.modelObj.bodyModel.numDofVars,'q_deriv of wrong dimension');
         end

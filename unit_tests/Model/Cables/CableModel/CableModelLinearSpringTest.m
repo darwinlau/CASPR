@@ -7,12 +7,14 @@ classdef CableModelLinearSpringTest < CableModelTestBase
     methods (Test) 
         % Test the constructor 
         function testCableModelLinearSpring(testCase)
+            disp('Testing CableModelLinearSpring Constructor')
             c = CableModelLinearSpring('1',1);
             testCase.assertNotEmpty(c);
         end
         
         % Test the update function
         function testUpdate(testCase)
+            disp('Testing CableModelLinearSpring update')
             c = CableModelLinearSpring('1',1);
             % Create the body model
             model_config = ModelConfig(TestModelConfigType.T_SCDM);
@@ -22,6 +24,7 @@ classdef CableModelLinearSpringTest < CableModelTestBase
         
         % Test the cable length function
         function testLength(testCase)
+            disp('Testing CableModelLinearSpring length')
             c = CableModelLinearSpring('1',1);
             c.force = 0;
             l = c.length;
@@ -30,6 +33,7 @@ classdef CableModelLinearSpringTest < CableModelTestBase
         
         % Test the spring stiffness K
         function testK(testCase)
+            disp('Testing CableModelLinearSpring stiffness')
             c = CableModelLinearSpring('1',1);
             c.force = 0;
             K = c.K;

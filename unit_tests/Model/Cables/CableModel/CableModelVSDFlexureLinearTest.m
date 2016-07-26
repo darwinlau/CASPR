@@ -7,12 +7,14 @@ classdef CableModelVSDFlexureLinearTest < CableModelTestBase
     methods (Test) 
         % Test the constructor
         function testCableModelVSDFlexureLinear(testCase)
+            disp('Testing CableModelVSDFlexureLinear Constructor')
             c = CableModelVSDFlexureLinear('1',1,1,[4,1,2]);
             testCase.assertNotEmpty(c);
         end
         
         % Test the update function
         function testUpdate(testCase)
+            disp('Testing CableModelVSDFlexureLinear update')
             c = CableModelVSDFlexureLinear('1',1,1,[4,1,2]);
             % Create the body model
             model_config = ModelConfig(TestModelConfigType.T_SCDM);
@@ -22,6 +24,7 @@ classdef CableModelVSDFlexureLinearTest < CableModelTestBase
         
         % Test the length
         function testLength(testCase)
+            disp('Testing CableModelVSDFlexureLinear length')
             c = CableModelVSDFlexureLinear('1',1,1,[4,1,2]);
             c.force = 0;
             l = c.length;
@@ -30,6 +33,7 @@ classdef CableModelVSDFlexureLinearTest < CableModelTestBase
         
         % Test the stiffness
         function testK(testCase)
+            disp('Testing CableModelVSDFlexureLinear stiffness')
             c = CableModelVSDFlexureLinear('1',1,1,[4,1,2]);
             c.force = 0;
             K = c.K;

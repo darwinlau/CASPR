@@ -26,6 +26,7 @@ classdef SystemModelCablesTest < matlab.unittest.TestCase
     methods (Test)        
         % Confirm that the update function works
         function testUpdate(testCase)
+            disp('Testing the system Cables update function')
             testCase.modelObj.cableModel.update(testCase.modelObj.bodyModel);
             testCase.assertSystemModelCablePropertySize();
         end
@@ -35,11 +36,13 @@ classdef SystemModelCablesTest < matlab.unittest.TestCase
         % ----------------------------------------
         % Test the number of maximum segments
         function testNumSegmentsMax(testCase)
+            disp('Testing the number of segments')
             testCase.modelObj.cableModel.numSegmentsMax;              % Maximum number of segments out of all of the cables
         end
         
         % Test the length related variables
         function testLengths(testCase)
+            disp('Testing the length variables')
             testCase.modelObj.cableModel.lengths;                     % Vector of lengths for all of the cables
             testCase.modelObj.cableModel.lengthsActive;               % Vector of lengths for active cables 
             testCase.modelObj.cableModel.lengthsPassive;              % Vector of lengths for passive cables
@@ -47,6 +50,7 @@ classdef SystemModelCablesTest < matlab.unittest.TestCase
         
         % Test the forces
         function testForces(testCase)
+            disp('Testing the force variables')
             testCase.modelObj.cableModel.forces;                      % Vector of forces for all of the cables
             testCase.modelObj.cableModel.forcesActive;                % Vector of forces for active cables
             testCase.modelObj.cableModel.forcesActiveMin;             % Vector of min forces for active cables
@@ -56,6 +60,7 @@ classdef SystemModelCablesTest < matlab.unittest.TestCase
         
         % Test the V matrix
         function testVMatrices(testCase)
+            disp('Testing the V matrix')
             testCase.modelObj.cableModel.V_active;
             testCase.modelObj.cableModel.V_passive;
         end

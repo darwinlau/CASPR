@@ -45,6 +45,7 @@ classdef IDSolverTest < matlab.unittest.TestCase
     
     methods (Test)
         function testQPSolver(testCase, qp_solver_type)
+            disp('Testing QP solver')
             id_objective = IDObjectiveMinQuadCableForce(ones(1, testCase.modelObj.numCables));
             id_solver = IDSolverQuadProg(testCase.modelObj, id_objective, qp_solver_type);
             [cable_f, Q_opt, id_exit_type] = id_solver.resolveFunction(testCase.modelObj);
@@ -52,6 +53,7 @@ classdef IDSolverTest < matlab.unittest.TestCase
         end
         
         function testLPSolver(testCase, lp_solver_type)
+            disp('Testing LP solver')
             id_objective = IDObjectiveMinLinCableForce(ones(testCase.modelObj.numCables, 1));
             id_solver = IDSolverLinProg(testCase.modelObj, id_objective, lp_solver_type);
             [cable_f, Q_opt, id_exit_type] = id_solver.resolveFunction(testCase.modelObj);
@@ -59,6 +61,7 @@ classdef IDSolverTest < matlab.unittest.TestCase
         end
         
         function testInfPSolver(testCase, infp_solver_type)
+            disp('Testing Inf norm solver')
             id_objective = IDObjectiveMinInfCableForce(ones(testCase.modelObj.numCables, 1));
             id_solver = IDSolverMinInfNorm(testCase.modelObj, id_objective, infp_solver_type);
             [cable_f, Q_opt, id_exit_type] = id_solver.resolveFunction(testCase.modelObj);
@@ -78,6 +81,7 @@ classdef IDSolverTest < matlab.unittest.TestCase
 %        end
          
          function testClosedForm(testCase, cf_solver_type)
+             disp('Testing closed form solver')
              id_solver = IDSolverClosedForm(testCase.modelObj, cf_solver_type);
              [cable_f, Q_opt, id_exit_type] = id_solver.resolveFunction(testCase.modelObj);
              testCase.assertIDSolverOutput(cable_f, Q_opt, id_exit_type);

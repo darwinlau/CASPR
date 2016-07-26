@@ -25,6 +25,7 @@ classdef JointTest < matlab.unittest.TestCase
     methods (Test)
         % Test that the joint can be updated
         function testUpdate(testCase)
+            disp('Testing Joint Update')
             testCase.jointObj.update(testCase.jointObj.q_default, zeros(testCase.jointObj.numDofs,1), zeros(testCase.jointObj.numDofs,1));
             testCase.assertJointPropertySize()
         end
@@ -33,19 +34,22 @@ classdef JointTest < matlab.unittest.TestCase
         % Tests for the dependent variables
         % ---------------------------------
         % First q_deriv
-        function testQDerive(testCase)
+        function testQDeriv(testCase)
+            disp('Testing q_deriv')
             testCase.jointObj.q_deriv;
             testCase.assertLength(testCase.jointObj.q_deriv,testCase.jointObj.numVars,'q_deriv of wrong dimension');
         end
         
         % First S_dot
         function testSDot(testCase)
+            disp('Testing S_dot')
             testCase.jointObj.S_dot;
             testCase.assertSize(testCase.jointObj.S_dot,[6,testCase.jointObj.numDofs],'S_dot of wrong dimension');
         end
         
         % First S
         function testS(testCase)
+            disp('Testing S')
             testCase.jointObj.S;
             testCase.assertSize(testCase.jointObj.S,[6,testCase.jointObj.numDofs],'S of wrong dimension');
         end
