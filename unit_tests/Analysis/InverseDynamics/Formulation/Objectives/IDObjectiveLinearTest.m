@@ -18,6 +18,7 @@ classdef IDObjectiveLinearTest < IDObjectiveTestBase
         
     methods (Test)
         function updateObjectiveTest(testCase)
+            disp('Testing linear objective update')
             testCase.idObj.updateObjective(testCase.modelObj);
             testCase.assertLength(testCase.idObj.b, testCase.modelObj.numActuatorsActive, '''b'' vector is of wrong dimension');
         end

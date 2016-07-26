@@ -12,7 +12,8 @@ classdef ScriptTest < matlab.unittest.TestCase
             % cellfunc
             
             % First go through the directories to extract each script in the examples folder
-            folder_location = '../scripts/examples/';
+            home_path = cd;
+            folder_location = [home_path,'/scripts/examples/'];
             dir_list = dir(folder_location);
             % Remove the . and .. options
             s_l = size(dir_list,1);

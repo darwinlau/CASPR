@@ -769,30 +769,42 @@ classdef SystemModelBodies < handle
 
         function M_y = get.M_y(obj)
             if(~obj.occupied.dynamics)
-                CASPR_log.Assert(obj.occupied.op_space, 'Operational space coordinates has not been attached');
-                obj.createMassInertiaMatrix();
-                obj.occupied.dynamics = true;
-                obj.updateDynamics();
+                if(~obj.occupied.op_space)
+                    M_y = [];
+                    return;
+                else
+                    obj.createMassInertiaMatrix();
+                    obj.occupied.dynamics = true;
+                    obj.updateDynamics();
+                end
             end
             M_y = obj.M_y;
         end
 
         function C_y = get.C_y(obj)
             if(~obj.occupied.dynamics)
-                CASPR_log.Assert(obj.occupied.op_space, 'Operational space coordinates has not been attached');
-                obj.createMassInertiaMatrix();
-                obj.occupied.dynamics = true;
-                obj.updateDynamics();
+                if(~obj.occupied.op_space)
+                    C_y = [];
+                    return;
+                else
+                    obj.createMassInertiaMatrix();
+                    obj.occupied.dynamics = true;
+                    obj.updateDynamics();
+                end
             end
             C_y = obj.C_y;
         end
 
         function G_y = get.G_y(obj)
             if(~obj.occupied.dynamics)
-                CASPR_log.Assert(obj.occupied.op_space, 'Operational space coordinates has not been attached');
-                obj.createMassInertiaMatrix();
-                obj.occupied.dynamics = true;
-                obj.updateDynamics();
+                if(~obj.occupied.op_space)
+                    G_y = [];
+                    return;
+                else
+                    obj.createMassInertiaMatrix();
+                    obj.occupied.dynamics = true;
+                    obj.updateDynamics();
+                end                
             end
             G_y = obj.G_y;
         end

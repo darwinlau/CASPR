@@ -284,6 +284,7 @@ function generate_model_object(handles)
     contents = cellstr(get(handles.cable_popup,'String'));
     cable_set_id = contents{get(handles.cable_popup,'Value')};
     modObj = model_config.getModel(cable_set_id);
+    modObj.bodyModel.occupied.reset();
     cla;
     display_range = model_config.displayRange;
     MotionSimulator.PlotFrame(modObj, display_range,handles.figure1);

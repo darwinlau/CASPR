@@ -26,6 +26,15 @@ classdef IDSolverTest < matlab.unittest.TestCase
         infp_solver_type = struct('MATLAB', ID_LP_SolverType.MATLAB, ...
             'OptiToolbox_OOQP', ID_LP_SolverType.OPTITOOLBOX_OOQP, ...
             'OptiToolbox_LP', ID_LP_SolverType.OPTITOOLBOX_LP_SOLVE);
+        os_solver_type = struct('LP', ID_OS_SolverType.LP, ...
+            'Efficient_LP', ID_OS_SolverType.EFFICIENT_LP);
+       fp_solver_type = struct('NORM_1', ID_FP_SolverType.NORM_1, ...
+            'NORM_2', ID_FP_SolverType.NORM_2, ...
+            'CENTROID', ID_FP_SolverType.CENTROID);
+        cf_solver_type = struct('CLOSED_FORM', ID_CF_SolverType.CLOSED_FORM, ...
+            'IMPROVED_CLOSED_FORM', ID_CF_SolverType.IMPROVED_CLOSED_FORM, ...
+            'PUNCTURE_METHOD', ID_CF_SolverType.PUNCTURE_METHOD, ...
+            'IMPROVED_PUNCTURE_METHOD',ID_CF_SolverType.IMPROVED_PUNCTURE_METHOD);
     end
             
     methods (TestClassSetup)
@@ -37,6 +46,7 @@ classdef IDSolverTest < matlab.unittest.TestCase
     
     methods (Test)
         function testQPSolver(testCase, qp_solver_type)
+            disp('Testing QP solver')
             id_objective = IDObjectiveMinQuadCableForce(ones(1, testCase.modelObj.numActuators));
             id_solver = IDSolverQuadProg(testCase.modelObj, id_objective, qp_solver_type);
             [actuation_soln, Q_opt, id_exit_type] = id_solver.resolveFunction(testCase.modelObj);
@@ -44,6 +54,7 @@ classdef IDSolverTest < matlab.unittest.TestCase
         end
         
         function testLPSolver(testCase, lp_solver_type)
+            disp('Testing LP solver')
             id_objective = IDObjectiveMinLinCableForce(ones(testCase.modelObj.numActuators, 1));
             id_solver = IDSolverLinProg(testCase.modelObj, id_objective, lp_solver_type);
             [actuation_soln, Q_opt, id_exit_type] = id_solver.resolveFunction(testCase.modelObj);
@@ -51,11 +62,32 @@ classdef IDSolverTest < matlab.unittest.TestCase
         end
         
         function testInfPSolver(testCase, infp_solver_type)
+            disp('Testing Inf norm solver')
             id_objective = IDObjectiveMinInfCableForce(ones(testCase.modelObj.numActuators, 1));
             id_solver = IDSolverMinInfNorm(testCase.modelObj, id_objective, infp_solver_type);
             [actuation_soln, Q_opt, id_exit_type] = id_solver.resolveFunction(testCase.modelObj);
             testCase.assertIDSolverOutput(actuation_soln, Q_opt, id_exit_type);
         end
+        
+%         function testOptimallySafeSolver(testCase, os_solver_type)
+%             id_solver = IDSolverOptimallySafe(testCase.modelObj, 1, os_solver_type);
+%             [cable_f, Q_opt, id_exit_type] = id_solver.resolveFunction(testCase.modelObj);
+%             testCase.assertIDSolverOutput(cable_f, Q_opt, id_exit_type);
+%         end
+        
+%        function testFeasiblePolygon(testCase, fp_solver_type)
+%            id_solver = IDSolverFeasiblePolygon(testCase.modelObj, fp_solver_type);
+%            [cable_f, Q_opt, id_exit_type] = id_solver.resolveFunction(testCase.modelObj);
+%            testCase.assertIDSolverOutput(cable_f, Q_opt, id_exit_type);
+%        end
+         
+         function testClosedForm(testCase, cf_solver_type)
+             disp('Testing closed form solver')
+             id_solver = IDSolverClosedForm(testCase.modelObj, cf_solver_type);
+             [cable_f, Q_opt, id_exit_type] = id_solver.resolveFunction(testCase.modelObj);
+             testCase.assertIDSolverOutput(cable_f, Q_opt, id_exit_type);
+         end
+        
     end
     
     methods

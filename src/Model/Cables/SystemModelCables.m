@@ -16,7 +16,6 @@
 %   When the kinematics are updated, the V matrix (l_dot = V x_dot) also
 %   gets updated and stored.
 classdef SystemModelCables < handle
-
     properties (SetAccess = private)
         % This matrix should probably be computed as needed (dependent
         % variable), but if it is a commonly used matrix (i.e. accessed

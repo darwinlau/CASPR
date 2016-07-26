@@ -16,7 +16,7 @@
 classdef CableModelVSDFlexureLinear < CableModelBase      
     properties (SetAccess = private)
         K_cable
-        forceDeformationRelationCoeff
+        forceDeformationRelationCoeff 
     end
     
     properties (Dependent)
@@ -25,8 +25,11 @@ classdef CableModelVSDFlexureLinear < CableModelBase
     end
         
     methods 
-        function ck = CableModelVSDFlexureLinear(name, numLinks)
+        function ck = CableModelVSDFlexureLinear(name, numLinks, K_cable, forceDeformationRelationCoeff)
+            % Constructor
             ck@CableModelBase(name, numLinks);
+            ck.K_cable = K_cable;
+            ck.forceDeformationRelationCoeff = forceDeformationRelationCoeff;
         end
         
         function update(obj, bodyModel)
@@ -62,16 +65,17 @@ classdef CableModelVSDFlexureLinear < CableModelBase
                 CASPR_log.Print(sprintf('Unknown cableAttachmentReference type: %s', attachRefString),CASPRLogLevel.ERROR);
             end
             
-            % Generate an ideal cable object
-            c = CableModelVSDFlexureLinear(name, bodiesModel.numLinks);
-            
             % <properties> tag
             propertiesObj = xmlobj.getElementsByTagName('properties').item(0);
             % <K_cable>
-            c.K_cable = str2double(propertiesObj.getElementsByTagName('K_cable').item(0).getFirstChild.getData);
+            K_cable = str2double(propertiesObj.getElementsByTagName('K_cable').item(0).getFirstChild.getData);
             % <vsd_force_deformation_relation>: quadratic relationship
             % between force and deformation [a b c]
-            c.forceDeformationRelationCoeff = XmlOperations.StringToVector3(char(propertiesObj.getElementsByTagName('vsd_force_deformation_relation').item(0).getFirstChild.getData));
+            forceDeformationRelationCoeff = XmlOperations.StringToVector3(char(propertiesObj.getElementsByTagName('vsd_force_deformation_relation').item(0).getFirstChild.getData));
+            
+            % Generate an ideal cable object
+            c = CableModelVSDFlexureLinear(name, bodiesModel.numLinks, K_cable, forceDeformationRelationCoeff);
+            
             % <force_min>
             c.forceMin = str2double(propertiesObj.getElementsByTagName('force_min').item(0).getFirstChild.getData);
             % <force_max>

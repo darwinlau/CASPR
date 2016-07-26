@@ -6,20 +6,9 @@
 %    Unit tests to confirm that the model configuration is correct. 
 classdef ModelConfigTest < matlab.unittest.TestCase
     methods (Test)
-        % Test that all defined joints can be instantiated.
-        function modelJointCreationTest(testCase)
-            disp('modelJointCreation test');
-            [mSet, mNames] = enumeration('JointType');
-            for i = 1:length(mSet)
-                disp(['Testing JointType: ', mNames{i}]);
-                j = JointBase.CreateJoint(mSet(i));
-                testCase.assertNotEmpty(j);
-            end
-        end
-        
         % Test that the master_list is correctly setup
         function masterModelListValidTest(testCase)
-            disp('masterListValid test');
+            disp('Testing masterListValid');
             load('CASPR_environment.mat', 'home_path');
             % Open up and scan through the master list
             fid = fopen([home_path,'/data/config/models/model_master_list.csv']);
@@ -37,7 +26,7 @@ classdef ModelConfigTest < matlab.unittest.TestCase
         
         % Test that the model configuration files exist.
         function modelConfigFilesExistTest(testCase)
-            disp('modelConfigFilesExist test');
+            disp('Testing that model config files exist');
             [mSet, mNames] = enumeration('ModelConfigType');
             for i = 1:length(mSet)
                 disp(['Testing ModelConfigType: ', mNames{i}]);
@@ -48,7 +37,7 @@ classdef ModelConfigTest < matlab.unittest.TestCase
         
         % Test that all models can be constructed as bodies.
         function modelCreation(testCase)
-            disp('modelBodyCreation test');
+            disp('Testing model creation');
             [mSet, mNames] = enumeration('ModelConfigType');
             for i = 1:length(mSet)
                 disp(['Testing ModelConfigType: ', mNames{i}]);
@@ -58,7 +47,7 @@ classdef ModelConfigTest < matlab.unittest.TestCase
             end
         end
         
-        % Test that the master_list is correctly setup
+        % Test that the test master_list is correctly setup
         function testModelListValidTest(testCase)
             disp('masterListValid test');
             load('CASPR_environment.mat', 'home_path');
@@ -76,29 +65,27 @@ classdef ModelConfigTest < matlab.unittest.TestCase
             end
         end
         
-        % Test that the model configuration files exist.
+        % Test that the test model configuration files exist.
         function testModelConfigFilesExistTest(testCase)
             disp('modelConfigFilesExist test');
             [mSet, mNames] = enumeration('TestModelConfigType');
             for i = 1:length(mSet)
-                disp(['Testing ModelConfigType: ', mNames{i}]);
+                % disp(['Testing ModelConfigType: ', mNames{i}]);
                 m = ModelConfig(mSet(i));
                 testCase.assertNotEmpty(m);
             end
         end
         
-        % Test that all models can be constructed as bodies.
+        % Test that all test models can be constructed as bodies.
         function testModelCreationTest(testCase)
             disp('modelBodyCreation test');
             [mSet, mNames] = enumeration('TestModelConfigType');
             for i = 1:length(mSet)
-                disp(['Testing ModelConfigType: ', mNames{i}]);
+                % disp(['Testing ModelConfigType: ', mNames{i}]);
                 m = ModelConfig(mSet(i));
                 model = m.getModel(m.defaultCableSetId);
                 testCase.assertNotEmpty(model);
             end
         end
     end
-    
 end
-
