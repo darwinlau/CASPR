@@ -1,0 +1,1 @@
+runtests({'CableModelIdealTest','CableModelLinearSpringTest','CableModelPassiveLinearSpringTest','CableModelVSDFlexureLinearTest','CableModelVSDTorsionSpringTest'})

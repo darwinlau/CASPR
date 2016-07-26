@@ -116,6 +116,9 @@ classdef SystemModel < handle
         % Function updates the kinematics and dynamics of the bodies and
         % cables of the system with the joint state (q, q_dot and q_ddot)
         function update(obj, q, q_dot, q_ddot, w_ext)
+            % Assert that the body model uses the correct 
+            CASPR_log.Assert(length(q) == obj.bodyModel.numDofVars && length(q_dot) == obj.bodyModel.numDofs ...
+                && length(q_ddot) == obj.bodyModel.numDofs && length(w_ext) == obj.bodyModel.numDofs,'Incorrect input to update function');
             obj.bodyModel.update(q, q_dot, q_ddot, w_ext);
             obj.cableModel.update(obj.bodyModel);
         end

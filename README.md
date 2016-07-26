@@ -23,7 +23,7 @@ The CASPR software platform represents a unified development platform for the an
 CASPR can be operated any version of Windows and Linux that runs MATLAB (refer below). It should be noted that some optional features cannot be used when run on Linux.
 
 ### MATLAB: ###
-As the software is run through MATLAB, it is necessary that MATLAB is first installed before running CASPR. CASPR has been tested for MATLAB versions 2013a onwards. The core of CASPR will work for older versions, however certain newer functions may need to be replaced with the equivalent depreciated function call.
+As the software is run through MATLAB, it is necessary that MATLAB is first installed before running CASPR. CASPR has been tested for MATLAB versions 2013a onwards. The core of CASPR will work for older versions, however certain newer functions may need to be replaced with the equivalent depreciated function call. **Note**: Unit testing requires MATLAB 2014a or later. 
 
 ## Setup: ##
 1. There are two ways to download CASPR to your computer:
@@ -50,7 +50,7 @@ To start using CASPR, please follow the steps below
 
 1. Navigate to the CASPR root directory folder.
 2. Run the script initialise_CASPR.m.  This will ensure that your path libraries have been set up and should be run everytime that you use CASPR.
-3. Go into the script folders to look at example or open up the CASPR GUI using the CASPR_GUI command.
+3. Go into the script folders to look at examples or open up the CASPR GUI using the CASPR_GUI command.
 
 For further information regarding the operation of CASPR please refer to *CASPR_101.pdf* (located in the *docs* directory).
 

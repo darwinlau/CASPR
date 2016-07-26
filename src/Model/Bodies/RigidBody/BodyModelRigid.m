@@ -10,8 +10,8 @@ classdef BodyModelRigid < BodyModel
 
     methods
         % The constructor
-        function bk = BodyModelRigid(id, name, jointType)
-            bk@BodyModel(id, name, jointType);
+        function bk = BodyModelRigid(id, name, joint)
+            bk@BodyModel(id, name, joint);
         end
 
         % Updates the joint space

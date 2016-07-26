@@ -8,6 +8,6 @@ classdef CASPRLogLevel < uint32
         DEBUG       (1) % Display all information
         INFO        (2) % Display computational information in addition to warnings and errors
         WARNING     (3) % Display any warnings and errors
-        ERROR       (4) % Only display fatal warnings.
+        ERROR       (4) % Only display errors (this checks all assertions).
     end
 end
