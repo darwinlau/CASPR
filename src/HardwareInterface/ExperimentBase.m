@@ -2,6 +2,7 @@
 classdef ExperimentBase < handle
     properties (SetAccess = private)
         hardwareInterface;
+        model
         closeFigureHandle;
     end
     
@@ -10,11 +11,31 @@ classdef ExperimentBase < handle
     end
     
     methods
-        function eb = ExperimentBase(hw_interface)
+        function eb = ExperimentBase(hw_interface, model)
             eb.hardwareInterface = hw_interface;
+            eb.model = model;
         end
         
-        function run(obj)
+        function runDataCollectionHundredSamples(obj)
+            obj.hardwareInterface.systemOnSend();
+            for i = 1:100
+                i
+                obj.hardwareInterface.cmdRead();
+            end
+            obj.hardwareInterface.systemOffSend();
+        end
+        
+        function runKinematicTrajectory(obj, trajectory)
+            obj.hardwareInterface.systemOnSend();
+            for t = 1:length(trajectory.timeVector)
+                obj.hardwareInterface.cmdRead();
+                obj.model.update(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t},zeros(size(obj.trajectory.q_dot{t})));
+                obj.hardwareInterface.lengthCommandSend(obj.model.cableLengths);
+            end
+            obj.hardwareInterface.systemOffSend();
+        end
+        
+        function runWhileCode(obj)
             obj.createCloseFigureHandle();
             obj.hardwareInterface.systemOnSend();
             %obj.hardwareInterface.lengthInitialSend([1.0; 1.0; 1.0; 1.0; 1.0; 1.0; 1.0; 1.0]);
@@ -22,7 +43,7 @@ classdef ExperimentBase < handle
             while(obj.isRunning)
                 % The code will wait on the serial comm to read until it
                 % receives something meaningful from the Arduino
-                obj.hardwareInterface.feedbackRead();
+                obj.hardwareInterface.cmdRead();
                 
                 % After a meaningful command the experiment should process
                 % it

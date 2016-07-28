@@ -3,6 +3,15 @@ classdef ArduinoCASPRInterface < handle
         M_TO_MM = 1000;
         MM_TO_M = 0.001;
         LENGTH_HEX_NUM_DIGITS = 4;
+        RECEIVE_PREFIX_FEEDBACK = 'f';
+        RECEIVE_PREFIX_ERROR = 'e';
+        SEND_PREFIX_START = 's';
+        SEND_PREFIX_END = 'e';
+        SEND_PREFIX_INITIAL = 'i';
+        SEND_PREFIX_LENGTH_CMD = 'l';
+        COMM_PREFIX_ACKNOWLEDGE = 'a';
+        
+        BAUD_RATE = 115200;     % Bits per second
     end
     
     properties (SetAccess = private)
@@ -13,19 +22,14 @@ classdef ArduinoCASPRInterface < handle
         % sent to the hardware, and the vice versa, 48 received refers to
         % 4.8 mm to increase the resolution of the data
         lengthMult = 10;
+        
+        feedback
     end
     
     properties (Access = private)
         serial_port
     end
-    
-    properties (Dependent)
-    end
-    
-    properties (Constant)
-        BAUD_RATE = 115200;     % Bits per second
-    end
-    
+        
     methods
         function interface = ArduinoCASPRInterface(comPort, numCmd)
             interface.comPort = comPort;
@@ -44,13 +48,12 @@ classdef ArduinoCASPRInterface < handle
             disp('Serial Port Closed');
         end
         
-        % Sends character 'a' to the device and waits for same character to
+        % Sends character to the device and waits for same character to
         % come back
         function [success] = dectectDevice(obj)
-            fprintf(obj.serial_port, 'a\n');
-            %set(obj.serial_port, 'Timeout', 5.0);
+            fprintf(obj.serial_port, [obj.COMM_PREFIX_ACKNOWLEDGE '\n']);
             cmd_str = fscanf(obj.serial_port, '%s\n');
-            if (isequal(cmd_str, 'a'))
+            if (isequal(cmd_str, obj.COMM_PREFIX_ACKNOWLEDGE))
                 success = true;
             else
                 success = false;
@@ -61,10 +64,9 @@ classdef ArduinoCASPRInterface < handle
         % Note: l_cmd from CASPR will be in the units [m]
         function lengthCommandSend(obj, l_cmd)
             CASPR_log.Assert(length(l_cmd) == obj.numCmd, sprintf('Number of command values must be equal to %d', obj.numCmd));
-            l_cmd_units = obj.M_TO_MM * obj.lengthMult * l_cmd;
-            str_cmd = 'L';
+            str_cmd = obj.SEND_PREFIX_LENGTH_CMD;
             for i = 1:obj.numCmd
-                str_cmd = [str_cmd, dec2hex(round(l_cmd_units(i)), obj.LENGTH_HEX_NUM_DIGITS)];
+                str_cmd = [str_cmd, obj.casprLengthToHW(l_cmd(i))];
             end
             fprintf(obj.serial_port, '%s\n', str_cmd);
         end
@@ -73,40 +75,45 @@ classdef ArduinoCASPRInterface < handle
         % Note: l_cmd from CASPR will be in the units [m]
         function lengthInitialSend(obj, l0)
             CASPR_log.Assert(length(l0) == obj.numCmd, sprintf('Number of command values must be equal to %d', obj.numCmd));
-            l0_units = obj.M_TO_MM * obj.lengthMult*l0;
-            str_cmd = 'I';
+            str_cmd = obj.SEND_PREFIX_INITIAL;
             for i = 1:obj.numCmd
-                str_cmd = [str_cmd, dec2hex(l0_units(i), obj.LENGTH_HEX_NUM_DIGITS)];
+                str_cmd = [str_cmd, obj.casprLengthToHW(l0(i))];
             end
             fprintf(obj.serial_port, '%s\n', str_cmd);
         end
         
+        function cmdRead(obj)
+            cmd_str = fscanf(obj.serial_port, '%s\n');
+            if (cmd_str(1) == obj.RECEIVE_PREFIX_FEEDBACK)
+                obj.feedbackRead(cmd_str);
+            elseif (cmd_str(1) == obj.RECEIVE_PREFIX_ERROR && length(cmd_str) == 1)
+                CASPR_log.Error('Error received from Arduino hardware interface');
+            end
+        end
+        
         % All length commands are to sent from hardware in terms of [mm]
         % Note: l_feedback from CASPR will be in the units [m]
-        function [l_feedback] = feedbackRead(obj)
-            cmd_str = fscanf(obj.serial_port, '%s\n');
+        function feedbackRead(obj, cmd_str)
             CASPR_log.Assert(length(cmd_str) == obj.LENGTH_HEX_NUM_DIGITS * obj.numCmd + 1, sprintf('Number of feedback values must be equal to %d', obj.numCmd));
-            CASPR_log.Assert(cmd_str(1) == 'F', 'First character of feedback should be ''F''');
-            l_feedback = zeros(obj.numCmd, 1);
+            CASPR_log.Assert(cmd_str(1) == obj.RECEIVE_PREFIX_FEEDBACK, 'First character of feedback should be ''F''');
+            obj.feedback = zeros(obj.numCmd, 1);
             % Start at character 2 since 1st character should be 'F'
             cmd_str_ind = 2;
             for i = 1:obj.numCmd
-                l_feedback(i) = hex2dec(cmd_str(cmd_str_ind:cmd_str_ind+obj.LENGTH_HEX_NUM_DIGITS-1));
+                obj.feedback(i) = obj.hardwareLengthToCASPR(cmd_str(cmd_str_ind:cmd_str_ind+obj.LENGTH_HEX_NUM_DIGITS-1));
                 cmd_str_ind = cmd_str_ind + obj.LENGTH_HEX_NUM_DIGITS;                
             end
-            l_feedback = l_feedback * obj.MM_TO_M / obj.lengthMult;
-            l_feedback
+            obj.feedback
         end
         
         function systemOnSend(obj)
-            fprintf(obj.serial_port, 's\n');
+            fprintf(obj.serial_port, [obj.SEND_PREFIX_START '\n']);
         end
         
         function systemOffSend(obj)
-            fprintf(obj.serial_port, 'e\n');
+            fprintf(obj.serial_port, [obj.SEND_PREFIX_END '\n']);
         end
     end
-    
     
     methods (Access = private)
         function setupSerial(obj, comPort)
@@ -128,6 +135,16 @@ classdef ArduinoCASPRInterface < handle
             end
         end
         
+        % Unit on hardware [mm] * lengthMult (to increase resolution) sent to CASPR in hex format
+        function caspr_length = hardwareLengthToCASPR(obj, hardware_length_str)
+            caspr_length = hex2dec(hardware_length_str) * obj.MM_TO_M / obj.lengthMult;
+        end
+        
+        % Unit on CASPR [m], convert to [mm] with multiplier and in HEX to
+        % a particular number of digits
+        function hw_length_str = casprLengthToHW(obj, length)
+            hw_length_str = dec2hex(length * obj.M_TO_MM * obj.lengthMult, obj.LENGTH_HEX_NUM_DIGITS);
+        end
     end
     
     methods (Static)

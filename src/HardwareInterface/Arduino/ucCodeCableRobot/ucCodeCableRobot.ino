@@ -24,21 +24,30 @@
 #define TIME_STEP 1.0/FEEDBACK_FREQUENCY
 #define NUM_MOTORS 8
 #define LENGTH_HEX_NUM_DIGITS 4
+#define LENGTH_SEND_MAX 65536
 #define LENGTH_MULT 10
+
+#define SEND_PREFIX_FEEDBACK 'f'
+#define SEND_PREFIX_ERROR 'a'
+#define RECEIVE_PREFIX_START 's'
+#define RECEIVE_PREFIX_END 'e'
+#define RECEIVE_PREFIX_INITIAL 'i'
+#define RECEIVE_PREFIX_LENGTH_CMD 'l'
+#define COMM_PREFIX_ACKNOWLEDGE 'a'
 
 double timeVal = 0.0;
 int timeCounter = 0;
 int systemOn = 0;
 double initLengths[NUM_MOTORS] = {0,0,0,0,0,0,0,0};
 double relLengths[NUM_MOTORS] = {100,200,300,400,500,600,700,800};
-double cndLengths[NUM_MOTORS] = {0,0,0,0,0,0,0,0};
+double cableLengths[NUM_MOTORS] = {0,0,0,0,0,0,0,0};
+double cmdLengths[NUM_MOTORS] = {0,0,0,0,0,0,0,0};
 
 void sendFeedback();
 void setInitialLengths(String str);
 void setCmdLengths(String str);
 void readSerial();
 
-String str = "";
 
 void setup() {
   Serial.begin(115200);
@@ -61,6 +70,10 @@ SIGNAL(TIMER0_COMPA_vect)
     timeCounter = 0;
     if (systemOn)
     {
+      for (int i = 0; i < NUM_MOTORS; i++)
+      {
+        cableLengths[i] = initLengths[i] + relLengths[i];
+      }
       sendFeedback();
     }
     timeVal += TIME_STEP;
@@ -74,11 +87,14 @@ void loop()
 
 void sendFeedback()
 {
-  Serial.print("F");
+  // Send the first character of F to indicate feedback
+  Serial.print(SEND_PREFIX_FEEDBACK);
   for (int i = 0; i < NUM_MOTORS; i++)
   {
-    double l = (initLengths[i] + relLengths[i])*LENGTH_MULT;
-    int l_rounded = l + 0.5;
+    // Convert length from mm to mm * LENGTH_MULT to send
+    double l_to_send = cableLengths[i] * LENGTH_MULT;
+    // Round to nearest integer value
+    int l_rounded = l_to_send + 0.5;
     char format[4];
     char s[LENGTH_HEX_NUM_DIGITS]; 
     sprintf(format, "%%.%dX", LENGTH_HEX_NUM_DIGITS);
@@ -92,25 +108,28 @@ void readSerial()
 {
   if (Serial.available() > 0)
   {
-    str = Serial.readStringUntil('\n');
-
-    if (str == "a")
+    String str = Serial.readStringUntil('\n');
+    if (str[0] == COMM_PREFIX_ACKNOWLEDGE && str.length() == 1)
     {
       systemOn = 0;
-      Serial.println("a");
+      Serial.println(COMM_PREFIX_ACKNOWLEDGE);
     }
-    else if (str[0] == 'I')
+    else if (str[0] == RECEIVE_PREFIX_START && str.length() == 1)
+    {
+      systemOn = 1;
+    }
+    else if (str[0] == RECEIVE_PREFIX_END && str.length() == 1)
+    {
+      systemOn = 0;
+    }
+    else if (str[0] == RECEIVE_PREFIX_INITIAL)
     {
       setInitialLengths(str);
     }
-    else if (str[0] == 'L')
+    else if (str[0] == RECEIVE_PREFIX_LENGTH_CMD)
     {
       setCmdLengths(str);
     }
-    else if (str == "s")
-      systemOn = 1;
-    else if (str == "e")
-      systemOn = 0;
   }
 }
 
