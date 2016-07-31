@@ -16,7 +16,7 @@ function [ x_opt, exit_type ] = id_qp_matlab(A, b, A_ineq, b_ineq, A_eq, b_eq, x
             exit_type = IDSolverExitType.INFEASIBLE;
             x_opt = xmin;
         otherwise
-            CASPR_log.Info(sprintf('Other error : Code %d', exit_flag));
+            CASPR_log.Info(sprintf('Other error : Code %d', exitflag));
             exit_type = IDSolverExitType.SOLVER_SPECIFIC_ERROR;
     end
 end
