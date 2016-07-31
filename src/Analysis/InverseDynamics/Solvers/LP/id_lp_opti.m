@@ -18,7 +18,7 @@ function [ x_opt, exit_type ] = id_lp_opti(b, A_ineq, b_ineq, A_eq, b_eq, xmin, 
             CASPR_log.Info('Solver specific error');
             exit_type = IDSolverExitType.SOLVER_SPECIFIC_ERROR;
         otherwise
-            CASPR_log.Info(sprintf('Other error : Code %d', exit_flag));
+            CASPR_log.Info(sprintf('Other error : Code %d', exitflag));
             exit_type = IDSolverExitType.SOLVER_SPECIFIC_ERROR;
     end
 end
