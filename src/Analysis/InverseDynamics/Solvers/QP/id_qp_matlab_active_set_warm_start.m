@@ -105,7 +105,7 @@ function [ x_opt, exit_type,active_set_new] = id_qp_matlab_active_set_warm_start
             exit_type = IDSolverExitType.INFEASIBLE;
             x_opt = xmin;
         otherwise
-            CASPR_log.Info(sprintf('Other error : Code %d', exit_flag));
+            CASPR_log.Info(sprintf('Other error : Code %d', exitflag));
             exit_type = IDSolverExitType.SOLVER_SPECIFIC_ERROR;
     end
 end
