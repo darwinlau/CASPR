@@ -9,14 +9,14 @@ function [ x_opt, exit_type ] = id_qp_matlab(A, b, A_ineq, b_ineq, A_eq, b_eq, x
         case 1
             exit_type = IDSolverExitType.NO_ERROR;
         case 0
-            CASPR_log.Print('Max iteration limit reached\n',CASPRLogLevel.INFO);
+            CASPR_log.Info('Max iteration limit reached');
             exit_type = IDSolverExitType.ITERATION_LIMIT_REACHED;
         case -2
-            CASPR_log.Print('Problem infeasible\n',CASPRLogLevel.INFO);
+            CASPR_log.Info('Problem infeasible');
             exit_type = IDSolverExitType.INFEASIBLE;
             x_opt = xmin;
         otherwise
-            CASPR_log.Print(sprintf('Other error : Code %d\n', exit_flag),CASPRLogLevel.INFO);
+            CASPR_log.Info(sprintf('Other error : Code %d', exit_flag));
             exit_type = IDSolverExitType.SOLVER_SPECIFIC_ERROR;
     end
 end

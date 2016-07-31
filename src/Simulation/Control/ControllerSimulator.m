@@ -43,7 +43,7 @@ classdef ControllerSimulator < DynamicsSimulator
             obj.trajectory.q_ddot{1} = q0_ddot;
             
             for t = 1:length(obj.timeVector)
-                CASPR_log.Print(sprintf('Time : %f\n', obj.timeVector(t)),CASPRLogLevel.INFO);
+                CASPR_log.Print(sprintf('Time : %f', obj.timeVector(t)),CASPRLogLevel.INFO);
                 [obj.cableForcesActive{t}, obj.cableIndicesActive{t}, obj.cableForces{t}] = obj.controller.execute(obj.trajectory.q{t},  obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t}, ref_trajectory.q{t}, ref_trajectory.q_dot{t}, ref_trajectory.q_ddot{t}, obj.timeVector(t));
                 obj.stateError{t} = ref_trajectory.q{t} - obj.trajectory.q{t};
                 if t < length(obj.timeVector)

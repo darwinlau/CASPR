@@ -34,7 +34,7 @@ classdef CableAttachmentOptimisationMinID < CableAttachmentOptimisationFnBase
 
             for t = 1:length(trajectory.timeVector)
                 % The model is already updated within the resolve function
-                [~, Q_t, idExit] = idsolver.resolve(trajectory.q{t}, trajectory.q_dot{t}, trajectory.q_ddot{t}, zeros(obj.model.numDofs,1));
+                [~, ~, Q_t, idExit] = idsolver.resolve(trajectory.q{t}, trajectory.q_dot{t}, trajectory.q_ddot{t}, zeros(obj.model.numDofs,1));
 
                 if idExit == IDSolverExitType.NO_ERROR
                     Q = Q + Q_t;

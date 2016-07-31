@@ -4,9 +4,6 @@
 % Created       : 2011
 % Description    :
 classdef (Abstract) BodyModel < handle
-    %BODYKINEMATICS Summary of this class goes here
-    %   Detailed explanation goes here
-
     properties
         % Absolute reference positions
         R_0k = eye(3);          % Rotation matrix ^0_kR where k is current link
