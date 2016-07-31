@@ -81,18 +81,18 @@ function old_matlab_version = check_dependencies()
         else
             fprintf('MATLAB %s 64bit (Windows x64) detected\n\r',mver.Release);
         end
-        
         % Test if optitoolbox is in the path
         p = path;
         if(isempty(strfind(p,'OptiToolbox')))
             fprintf('[WARNING]: OptiToolbox is not your matlab file path.\n\r');
         else
-            opti_Install_Test(1)
+            fprintf('OptiToolbox found on the path.\n\r');
+            %opti_Install_Test(1);
         end
     end
     
     % Test for qhull
-    fprintf('- Checking OptiToolbox...\n\r');
+    fprintf('- Checking qhull...\n\r');
     if(isunix)
         qhull_file = '/dependencies/qhull-2012.1/bin/qconvex';
     else
