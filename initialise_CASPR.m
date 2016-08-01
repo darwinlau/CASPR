@@ -3,6 +3,7 @@
 % Created:      2016
 % Description:
 function initialise_CASPR()
+    clc;
     % Workout the delimiter symbol for PATH string
     if ismac || isunix
         path_delimiter = ':';
@@ -12,8 +13,11 @@ function initialise_CASPR()
         error('Platform not supported');
     end
     
+    fprintf('---------------------------------------------\n')
+    fprintf('Initialising CASPR environment\n')
+    fprintf('---------------------------------------------\n')
     % Remove any path that contains CASPR
-    fprintf('Cleaning Libraries\n')
+    fprintf('Cleaning CASPR from library path\n')
     p = path;
     p = strsplit(p, path_delimiter);
     index = false(size(p));
@@ -28,7 +32,7 @@ function initialise_CASPR()
     end
     
     % Add the necessaey paths
-    fprintf('Adding Libraries\n')
+    fprintf('Adding CASPR to library path\n')
     home_path = cd;
     path_list = genpath(home_path);
     path_list = strsplit(path_list, path_delimiter);
@@ -39,7 +43,7 @@ function initialise_CASPR()
     end
     addpath(path_list{:});
     rehash
-    fprintf('Libraries have been set up\n')
+    fprintf('CASPR paths have been successfully set up. Enjoy!\n')
     
     % Store the home directory
     if(~exist([home_path,'/logs'],'dir'))
