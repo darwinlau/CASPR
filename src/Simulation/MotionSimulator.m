@@ -83,7 +83,8 @@ classdef (Abstract) MotionSimulator < Simulator
                 plot(plot_axis(1),obj.timeVector, length_array(cables_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); 
                 plot(plot_axis(2),obj.timeVector, length_dot_array(cables_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); 
             end
-
+            assignin('base','lengths',length_array);
+        
             % ONLY USED IN DEBUGGING START
 %             lengths_dot_num = zeros(obj.model.numCables, length(obj.timeVector));
 %             for t = 2:length(obj.timeVector)

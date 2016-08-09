@@ -25,7 +25,30 @@ classdef ExperimentBase < handle
             obj.hardwareInterface.systemOffSend();
         end
         
+        function runOneLocation(obj)
+            obj.hardwareInterface.systemOnSend();
+            X = [0.04;0.04;0.02;0.02;0.02;0.02;0.02;0.02];
+            obj.hardwareInterface.lengthCommandSend(X);
+            obj.hardwareInterface.cmdRead();
+            obj.hardwareInterface.systemOffSend();
+        end
+        function runTrajectory(obj)
+            clc;
+            obj.hardwareInterface.systemOnSend();
+            load('C:\Users\AdminDing\Desktop\CASPR_private\ref information\cablelength traj1.mat','lengths');
+            %lengths
+            for i=1:size(lengths,2)
+                X = lengths(:,i);
+                i
+                X = round(X, 3)
+            obj.hardwareInterface.lengthCommandSend(X);
+                        pause(0.1);
+            end
+            obj.hardwareInterface.systemOffSend();
+        end
+        
         function runKinematicTrajectory(obj, trajectory)
+
             obj.hardwareInterface.systemOnSend();
             for t = 1:length(trajectory.timeVector)
                 obj.hardwareInterface.cmdRead();

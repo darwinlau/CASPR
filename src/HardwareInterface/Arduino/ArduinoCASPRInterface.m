@@ -97,7 +97,7 @@ classdef ArduinoCASPRInterface < handle
             CASPR_log.Assert(length(cmd_str) == obj.LENGTH_HEX_NUM_DIGITS * obj.numCmd + 1, sprintf('Number of feedback values must be equal to %d', obj.numCmd));
             CASPR_log.Assert(cmd_str(1) == obj.RECEIVE_PREFIX_FEEDBACK, 'First character of feedback should be ''F''');
             obj.feedback = zeros(obj.numCmd, 1);
-            % Start at character 2 since 1st character should be 'F'
+            % Start at character 2 since 1st character should be 'f'
             cmd_str_ind = 2;
             for i = 1:obj.numCmd
                 obj.feedback(i) = obj.hardwareLengthToCASPR(cmd_str(cmd_str_ind:cmd_str_ind+obj.LENGTH_HEX_NUM_DIGITS-1));
