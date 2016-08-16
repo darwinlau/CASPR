@@ -38,6 +38,18 @@ As the software is run through MATLAB, it is necessary that MATLAB is first inst
 3. Open MATLAB and change the file path to be that of the extracted CASPR root directory.
 4. Run the script setup_CASPR.m within the *scripts/setup/* folder. This will test the installation and confirm that CASPR is ready to be run.
 
+## Citation: ##
+If you use CASPR in your research please cite the 2016 IROS paper:
+
+    @inproceedings{lau2016CASPR,
+     title={{CASPR}: A Comprehensive Cable-Robot Analysis and Simulation Platform for the Research of Cable-Driven Parallel Robots},
+     author={Lau, Darwin and Eden, Jonathan and Tan, Ying and Oetomo, Denny},
+     booktitle={IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)},
+     year={2016},
+     organization={IEEE}
+    }
+
+
 ## Contributors: ##
 As an open source platform new developments into CASPR are welcome as are feedback/notification of bugs. Contributors for the development of this project include
 * Darwin Lau:     <darwinlau@mae.cuhk.edu.hk>
@@ -52,7 +64,7 @@ To start using CASPR, please follow the steps below
 2. Run the script initialise_CASPR.m.  This will ensure that your path libraries have been set up and should be run everytime that you use CASPR.
 3. Go into the script folders to look at examples or open up the CASPR GUI using the CASPR_GUI command.
 
-For further information regarding the operation of CASPR please refer to *CASPR_101.pdf* (located in the *docs* directory).
+For further information regarding the operation of CASPR please refer to *CASPR_101.pdf* (located in the *docs* directory). Aditional documentation including the 2016 IROS paper can also be found within this directory.
 
 ## Keeping CASPR Up to Date: ##
 To keep CASPR up to date please periodically execute the command *git pull* from your root directory.
