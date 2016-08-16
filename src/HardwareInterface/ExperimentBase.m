@@ -27,7 +27,7 @@ classdef ExperimentBase < handle
         
         function runOneLocation(obj)
             obj.hardwareInterface.systemOnSend();
-            X = [0.04;0.04;0.02;0.02;0.02;0.02;0.02;0.02];
+            X = [0.23;0.23;0.23;0.23;0.23;0.23;0.23;0.23];
             obj.hardwareInterface.lengthCommandSend(X);
             obj.hardwareInterface.cmdRead();
             obj.hardwareInterface.systemOffSend();
@@ -50,10 +50,15 @@ classdef ExperimentBase < handle
         function runKinematicTrajectory(obj, trajectory)
 
             obj.hardwareInterface.systemOnSend();
+            X = 200*ones(8,1);
             for t = 1:length(trajectory.timeVector)
+                tout = tic;
                 obj.hardwareInterface.cmdRead();
-                obj.model.update(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t},zeros(size(obj.trajectory.q_dot{t})));
-                obj.hardwareInterface.lengthCommandSend(obj.model.cableLengths);
+                obj.model.update(trajectory.q{t}, trajectory.q_dot{t}, trajectory.q_ddot{t},zeros(size(trajectory.q_dot{t})));
+                X = round(obj.model.cableLengths, 3);
+                obj.hardwareInterface.lengthCommandSend(X);
+                elapsed_time = toc(tout);
+                elapsed_time
             end
             obj.hardwareInterface.systemOffSend();
         end

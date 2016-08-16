@@ -4,32 +4,31 @@
 ]>
 
 <trajectories>
-  <trajectory id="traj_1">
-    <time_total>1</time_total>
-    <time_step>0.01</time_step>
-    <begin>
-      <q>-1 -0.5 1.5 0.2 -0.4 0.1</q>
-      <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
-      <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
-    </begin>
-    <end>
-      <q>1 0.5 0.5 0.3 0.0 -0.2</q>
-      <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
-      <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
-    </end>
-  </trajectory>
-  <trajectory id="traj_z_up">
-    <time_total>1</time_total>
-    <time_step>0.01</time_step>
-    <begin>
-      <q>0.0 0.0 0.0 0.0 0.0 0.0</q>
-      <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
-      <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
-    </begin>
-    <end>
-      <q>0.0 0.0 0.5 0.0 0.0 0.0</q>
-      <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
-      <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
-    </end>
+  <trajectory id="traj_1" time_step="0.01">
+    <points>
+      <point>
+        <q>-1 -0.5 1.5 0.2 -0.4 0.1</q>
+        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+      </point>
+      <point time="1.0">
+        <q>1 0.5 0.5 0.3 0.0 -0.2</q>
+        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+      </point>
+    </points>
+  <trajectory id="traj_z_up" time_step="0.01">
+    <points>
+      <point>
+        <q>0.0 0.0 0.0 0.0 0.0 0.0</q>
+        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+      </point>
+      <point>
+        <q>0.0 0.0 0.5 0.0 0.0 0.0</q>
+        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+      </point>
+    </points>
   </trajectory>
 </trajectories>

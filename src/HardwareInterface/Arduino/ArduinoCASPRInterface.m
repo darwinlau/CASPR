@@ -63,6 +63,7 @@ classdef ArduinoCASPRInterface < handle
         % All length commands are to be sent to hardware in terms of [mm]
         % Note: l_cmd from CASPR will be in the units [m]
         function lengthCommandSend(obj, l_cmd)
+            l_cmd = l_cmd(1:8);
             CASPR_log.Assert(length(l_cmd) == obj.numCmd, sprintf('Number of command values must be equal to %d', obj.numCmd));
             str_cmd = obj.SEND_PREFIX_LENGTH_CMD;
             for i = 1:obj.numCmd
@@ -84,6 +85,7 @@ classdef ArduinoCASPRInterface < handle
         
         function cmdRead(obj)
             cmd_str = fscanf(obj.serial_port, '%s\n');
+            length(cmd_str);
             if (cmd_str(1) == obj.RECEIVE_PREFIX_FEEDBACK)
                 obj.feedbackRead(cmd_str);
             elseif (cmd_str(1) == obj.RECEIVE_PREFIX_ERROR && length(cmd_str) == 1)
