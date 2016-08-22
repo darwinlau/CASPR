@@ -17,6 +17,7 @@
         <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
       </point>
     </points>
+  </trajectory>
   <trajectory id="traj_z_up" time_step="0.01">
     <points>
       <point>

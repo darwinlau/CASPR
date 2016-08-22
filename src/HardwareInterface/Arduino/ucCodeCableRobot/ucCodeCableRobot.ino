@@ -22,7 +22,7 @@
 #define FEEDBACK_FREQUENCY 10// In Hz
 #define FEEDBACK_FREQUENCY_COUNT 1000/FEEDBACK_FREQUENCY
 #define TIME_STEP 1.0/FEEDBACK_FREQUENCY
-#define NUM_MOTORS 8
+#define NUM_MOTORS 2
 #define LENGTH_HEX_NUM_DIGITS 4
 #define LENGTH_SEND_MAX 65536
 #define LENGTH_MULT 10
@@ -38,11 +38,10 @@
 double timeVal = 0.0;
 int timeCounter = 0;
 int systemOn = 0;
-double initLengths[NUM_MOTORS] = {0,0,0,0,0,0,0,0};
-double relLengths[NUM_MOTORS] = {100,200,300,400,500,600,700,800};
-double cableLengths[NUM_MOTORS] = {0,0,0,0,0,0,0,0};
-double cmdLengths[NUM_MOTORS] = {0,0,0,0,0,0,0,0};
-
+double initLengths[NUM_MOTORS];
+double relLengths[NUM_MOTORS];
+double cableLengths[NUM_MOTORS];
+double cmdLengths[NUM_MOTORS];
 void sendFeedback();
 void setInitialLengths(String str);
 void setCmdLengths(String str);
@@ -51,6 +50,14 @@ void readSerial();
 
 void setup() {
   Serial.begin(115200);
+
+  // Initialise the matricies
+  for(int i=0;i<NUM_MOTORS;i++){
+    initLengths[i] = 100;
+    relLengths[i] = 0;
+    cableLengths[i] = 0;
+    cmdLengths[i] = 0;
+  }
 
   // Setup timer0
   // Timer0 is already used for millis() - we'll just interrupt somewhere
@@ -76,6 +83,7 @@ SIGNAL(TIMER0_COMPA_vect)
       }
       sendFeedback();
     }
+    //Serial.println("la");
     timeVal += TIME_STEP;
   }
 }
@@ -95,10 +103,21 @@ void sendFeedback()
     double l_to_send = cableLengths[i] * LENGTH_MULT;
     // Round to nearest integer value
     int l_rounded = l_to_send + 0.5;
-    char format[4];
-    char s[LENGTH_HEX_NUM_DIGITS]; 
-    sprintf(format, "%%.%dX", LENGTH_HEX_NUM_DIGITS);
-    sprintf(s, format, l_rounded);
+    char t[LENGTH_HEX_NUM_DIGITS];
+    char s[LENGTH_HEX_NUM_DIGITS+1];
+    // Pad the 0s
+    itoa(l_rounded,t,16);
+    // Find the first 0 value
+    int j = strlen(t);
+    // Now rearrange by shifting the values across
+    for(int k = 0; k < LENGTH_HEX_NUM_DIGITS; k++){
+      if(k < j){
+        s[LENGTH_HEX_NUM_DIGITS - (j-k)] = t[k];
+      } else {
+        s[k-j] = '0';
+      }      
+    }
+    s[LENGTH_HEX_NUM_DIGITS] = '\0';
     Serial.print(s);
   }
   Serial.print("\n");
