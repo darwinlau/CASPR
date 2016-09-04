@@ -43,31 +43,72 @@ classdef JointTrajectory < handle
     
     methods (Static)
         % Loads trajectory from XML configuration
-        function trajectory = LoadXmlObj(xmlObj, bodiesObj)
+        function [trajectory_all] = LoadXmlObj(xmlObj, bodiesObj)
             CASPR_log.Assert(strcmp(xmlObj.getNodeName, 'trajectory'), 'Element should be <trajectory>');
-            total_time = str2double(xmlObj.getElementsByTagName('time_total').item(0).getFirstChild.getData);
-            time_step = str2double(xmlObj.getElementsByTagName('time_step').item(0).getFirstChild.getData);
-            beginObj = xmlObj.getElementsByTagName('begin').item(0);
-            endObj = xmlObj.getElementsByTagName('end').item(0);
+            points_node = xmlObj.getElementsByTagName('points').item(0);
+            point_nodes = points_node.getChildNodes;
+            num_points = point_nodes.getLength;
+            time_step = str2double(xmlObj.getAttribute('time_step'));
             
-            q_s = XmlOperations.StringToVector(char(beginObj.getElementsByTagName('q').item(0).getFirstChild.getData));
-            q_s_d = XmlOperations.StringToVector(char(beginObj.getElementsByTagName('q_dot').item(0).getFirstChild.getData));
-            q_s_dd = XmlOperations.StringToVector(char(beginObj.getElementsByTagName('q_ddot').item(0).getFirstChild.getData));
-            q_e = XmlOperations.StringToVector(char(endObj.getElementsByTagName('q').item(0).getFirstChild.getData));
-            q_e_d = XmlOperations.StringToVector(char(endObj.getElementsByTagName('q_dot').item(0).getFirstChild.getData));
-            q_e_dd = XmlOperations.StringToVector(char(endObj.getElementsByTagName('q_ddot').item(0).getFirstChild.getData));
+            q_points = cell(num_points,1);
+            q_points_d = cell(num_points,1);
+            q_points_dd = cell(num_points,1);
+            time_points = zeros(1, num_points);
             
-            % Error checking on whether the XML file is valid
-            CASPR_log.Assert(length(q_s) == bodiesObj.numDofVars, sprintf('Trajectory config does not contain correct number of DoF vars for q begin, desired : %d, specified : %d', bodiesObj.numDofVars, length(q_s)));
-            CASPR_log.Assert(length(q_s_d) == bodiesObj.numDofs, sprintf('Trajectory config does not contain correct number of DoFs for q_dot begin, desired : %d, specified : %d', bodiesObj.numDofs, length(q_s_d)));
-            CASPR_log.Assert(length(q_s_dd) == bodiesObj.numDofs, sprintf('Trajectory config does not contain correct number of DoFs for q_ddot begin, desired : %d, specified : %d', bodiesObj.numDofs, length(q_s_dd)));
-            CASPR_log.Assert(length(q_e) == bodiesObj.numDofVars, sprintf('Trajectory config does not contain correct number of DoF vars for q end, desired : %d, specified : %d', bodiesObj.numDofVars, length(q_e)));
-            CASPR_log.Assert(length(q_e_d) == bodiesObj.numDofs, sprintf('Trajectory config does not contain correct number of DoFs for q_dot end, desired : %d, specified : %d', bodiesObj.numDofs, length(q_e_d)));
-            CASPR_log.Assert(length(q_e_dd) == bodiesObj.numDofs, sprintf('Trajectory config does not contain correct number of DoFs for q_ddot end, desired : %d, specified : %d', bodiesObj.numDofs, length(q_e_dd)));
+            for k = 1:num_points
+                point_node = point_nodes.item(k-1);
+                q_points{k} = XmlOperations.StringToVector(char(point_node.getElementsByTagName('q').item(0).getFirstChild.getData));
+                q_points_d{k} = XmlOperations.StringToVector(char(point_node.getElementsByTagName('q_dot').item(0).getFirstChild.getData));
+                q_points_dd{k} = XmlOperations.StringToVector(char(point_node.getElementsByTagName('q_ddot').item(0).getFirstChild.getData));
+                if (k > 1)
+                    time_points(k) = str2double(point_node.getAttribute('time'));
+                end
+    %             % Error checking on whether the XML file is valid
+    %             CASPR_log.Assert(length(q_s) == bodiesObj.numDofVars, sprintf('Trajectory config does not contain correct number of DoF vars for q begin, desired : %d, specified : %d', bodiesObj.numDofVars, length(q_s)));
+    %             CASPR_log.Assert(length(q_s_d) == bodiesObj.numDofs, sprintf('Trajectory config does not contain correct number of DoFs for q_dot begin, desired : %d, specified : %d', bodiesObj.numDofs, length(q_s_d)));
+    %             CASPR_log.Assert(length(q_s_dd) == bodiesObj.numDofs, sprintf('Trajectory config does not contain correct number of DoFs for q_ddot begin, desired : %d, specified : %d', bodiesObj.numDofs, length(q_s_dd)));
+    %             CASPR_log.Assert(length(q_e) == bodiesObj.numDofVars, sprintf('Trajectory config does not contain correct number of DoF vars for q end, desired : %d, specified : %d', bodiesObj.numDofVars, length(q_e)));
+    %             CASPR_log.Assert(length(q_e_d) == bodiesObj.numDofs, sprintf('Trajectory config does not contain correct number of DoFs for q_dot end, desired : %d, specified : %d', bodiesObj.numDofs, length(q_e_d)));
+    %             CASPR_log.Assert(length(q_e_dd) == bodiesObj.numDofs, sprintf('Trajectory config does not contain correct number of DoFs for q_ddot end, desired : %d, specified : %d', bodiesObj.numDofs, length(q_e_dd)));
+    %             
+            end
             
-            trajectory = JointTrajectory.GenerateTrajectory(bodiesObj, q_s, q_s_d, q_s_dd, q_e, q_e_d, q_e_dd, total_time, time_step);
+            for k = 1:num_points-1
+                trajectory = JointTrajectory.GenerateTrajectory(bodiesObj, q_points{k}, q_points_d{k}, q_points_dd{k}, q_points{k+1}, q_points_d{k+1}, q_points_dd{k+1}, time_points(k+1)-time_points(k), time_step);
+                a = trajectory.q(1:length(trajectory.q));
+                b = trajectory.q_dot(1:length(trajectory.q_dot));
+                c = trajectory.q_ddot(1:length(trajectory.q_ddot));
+                t = trajectory.timeVector(1:length(trajectory.timeVector));
+                
+                if (k < 2)
+                new_q = a;
+                new_q_dot = b;
+                new_q_ddot = c;
+                new_timeVector = t;
+               
+                end
+                if(k > 1)
+                a(1) = [];
+                b(1) = [];
+                c(1) = [];
+                t(1) = [];
+                t = t + new_timeVector(end);
+                new_q = horzcat(new_q, a);
+                new_q_dot = horzcat(new_q_dot, b);
+                new_q_ddot = horzcat(new_q_ddot, c);
+                new_timeVector = horzcat(new_timeVector, t);
+                end
+            end
+            trajectory_all = JointTrajectory();
+            trajectory_all.q = new_q;
+            trajectory_all.q_dot = new_q_dot;
+            trajectory_all.q_ddot = new_q_ddot;
+            trajectory_all.timeVector = new_timeVector;
+            trajectory_all.totalTime = trajectory_all.timeVector(end);
+            trajectory_all.timeStep = time_step;
         end
         
+    
         % Generates trajectory from the starting and ending joint poses for
         % the entire system. Calls the generate trajectory function of each
         % type of joint.
@@ -112,5 +153,5 @@ classdef JointTrajectory < handle
             trajectory.q_dot = mat2cell(qd_array, s_q_d(1), ones(1, s_q_d(2)));
             trajectory.q_ddot = mat2cell(qdd_array, s_q_d(1), ones(1, s_q_d(2)));
         end
-    end    
+    end
 end
