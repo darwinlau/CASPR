@@ -9,7 +9,7 @@
 #include <string.h>#include <Wire.h>
 #include <math.h>
 
-#define NANO_ID 4
+#define NANO_ID 5
 
 #define FEEDBACK_FREQUENCY 40// In Hz
 #define SAMPLETIME (5000.0/FEEDBACK_FREQUENCY)
@@ -28,7 +28,7 @@
 #define ASCII_DIFFERENCE 32
 #define BAUD_RATE 74880
 
-#define MOTOR_PIN 6
+#define MOTOR_PIN 2
 /////////////////////////// DEBUGGING AND TIMING VARIABLES //////////////
 
 unsigned long int t_ref;
@@ -138,6 +138,8 @@ void loop() {
       currentDeg = servoDeg;
 
       if (newCommand) {
+        updateDestinationDeg();
+        limitDegree(); //keeps the destinationDegree within 0 - 360 degree
         /*Serial.println();
           Serial.print("ServoPWM ");
           Serial.print(servoPWM);
@@ -147,9 +149,6 @@ void loop() {
           Serial.print(" angularChange ");
           Serial.print(angularChangeReceived);
         */
-
-        updateDestinationDeg();
-        limitDegree(); //keeps the destinationDegree within 0 - 360 degree
         if (cross == true)
         {
           crossing(); //
@@ -157,10 +156,10 @@ void loop() {
         }
         newCommand = 0; //IMPORTANT - COMMENT BACK IN
         /*Serial.print(" destinationDeg ");
-        Serial.print(destinationDeg);
-        Serial.print(" ");
-        Serial.print(" destinationPWM ");
-        Serial.print(destinationPWM);
+          Serial.print(destinationDeg);
+          Serial.print(" ");
+          Serial.print(" destinationPWM ");
+          Serial.print(destinationPWM);
         */
       }
       ctrl_motor(); //transmits the output signal towards the motor
@@ -168,7 +167,7 @@ void loop() {
         Serial.print(" ");
         Serial.print(destinationPWM);
         newCommand = 0;
-      }
+        }
       */
     }
   }
@@ -282,10 +281,11 @@ int readPositionFeedback()
 void updateDestinationDeg() { //updates the destination degree from the serial monitor (if no input, no change)
   if (initialDeg < 0) { //first time this method is entered
     initialDeg = servoDeg;
+    destinationDeg = servoDeg;
   }
   if (angularChangeReceived != 0)
   {
-    destinationDeg = servoDeg + angularChangeReceived; // update the destination degree by using current position plus requested angular change
+    destinationDeg += angularChangeReceived; // update the destination degree by using current position plus requested angular change
     angularChangeReceived = 0;
   }
 }
