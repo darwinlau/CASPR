@@ -16,7 +16,7 @@
 // Defining constants
 #define FEEDBACK_FREQUENCY 20// In Hz
 #define TIME_STEP 1.0/FEEDBACK_FREQUENCY
-#define NUMBER_CONNECTED_NANOS 2
+#define NUMBER_CONNECTED_NANOS 8
 #define BAUD_RATE 74880
 
 #define HEX_DIGITS_ANGLE 2
@@ -50,6 +50,7 @@ String receivedFeedback;
 char sendFeedback[NUMBER_CONNECTED_NANOS * HEX_DIGITS_LENGTH + 1];
 unsigned int lastLengthCommand[NUMBER_CONNECTED_NANOS]; //unsigned int has 2 bytes, range 0 - 65535
 unsigned int lastLengthFeedback[NUMBER_CONNECTED_NANOS]; //with .1 mm precision, this equals ~6.5m
+unsigned int initLength[NUMBER_CONNECTED_NANOS];
 char feedbackNano[HEX_DIGITS_ANGLE]; // Array to store the nano feedback
 boolean positive = 1; // flag to indicate positive angle change
 int angularChangeReceived; // change in angular value that was recieved
@@ -90,7 +91,8 @@ void setup() {
   Serial1.begin(BAUD_RATE); //broadcast
   for (int i = 0; i < NUMBER_CONNECTED_NANOS; i++) { //all the softwareSerials for arduino nano
     serialNano[i].begin(BAUD_RATE);
-    lastLengthFeedback[i] = 32768; //middle
+    initLength[i] = 32768; //middle
+    lastLengthFeedback[i] = 32768; 
     lastLengthCommand[i] = 32768;
     //serialNano[i].setTimeout(10);
   }
@@ -149,18 +151,24 @@ void readSerialUSB() {
     }
     else if (receivedCommand[0] == RECEIVE_PREFIX_LENGTH_CMD) //l
     {
-      setCmdLengths();
       enableMotors = 1;
     }
   }
 }
 
 void setInitialLengths() {
+  char tmp[4];
+  unsigned long int newInitLength;
+  for (int j = 0; j < NUMBER_CONNECTED_NANOS; j++) {
+    for (int k = 0; k < HEX_DIGITS_LENGTH; k++) {
+      tmp[k] = receivedCommand[j*HEX_DIGITS_LENGTH + k +1];
+    }
+    newInitLength = strtol(tmp, 0, 16);
+    lastLengthFeedback[j]+= (newInitLength - initLength[j]);
+    lastLengthCommand[j] += (newInitLength - initLength[j]);
+    initLength[j] = newInitLength;
+  }
 }
-
-void setCmdLengths() {
-}
-
 
 void requestNanoFeedback() {
   for (int i = 0; i < NUMBER_CONNECTED_NANOS; i++) {
