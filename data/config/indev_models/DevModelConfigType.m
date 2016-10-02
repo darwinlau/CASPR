@@ -5,5 +5,7 @@
 % Description    :
 classdef DevModelConfigType
     enumeration
+        D_CUHK_DINGBOT
+        D_CUHK_WALLBOT
     end
 end
