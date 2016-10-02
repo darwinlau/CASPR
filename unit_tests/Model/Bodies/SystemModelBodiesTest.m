@@ -18,7 +18,7 @@ classdef SystemModelBodiesTest < matlab.unittest.TestCase
     % Set up the test case with the model objects
     methods (TestClassSetup)
         function setupModelObj(testCase, model_config_type)
-            model_config = ModelConfig(model_config_type);
+            model_config = TestModelConfig(model_config_type);
             testCase.modelObj = model_config.getModel(model_config.defaultCableSetId);
         end
     end
