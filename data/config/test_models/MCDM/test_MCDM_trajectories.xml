@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE trajectories [
+  <!ATTLIST trajectory id ID #REQUIRED>
+]>
+
+<trajectories>
+  <trajectory id="roll" time_step="0.01">
+    <points>
+      <point>
+        <q>-0.06981317 0 0 -0.06981317 0 0 -0.06981317 0 0</q>
+        <q_dot>0 0 0 0 0 0 0 0 0</q_dot>
+        <q_ddot>0 0 0 0 0 0 0 0 0</q_ddot>
+      </point>
+      <point>
+        <q>0.06981317 0 0 0.06981317 0 0 0.06981317 0 0</q>
+        <q_dot>0 0 0 0 0 0 0 0 0</q_dot>
+        <q_ddot>0 0 0 0 0 0 0 0 0</q_ddot>
+      </point>
+    </points>  
+  </trajectory>
+</trajectories>
