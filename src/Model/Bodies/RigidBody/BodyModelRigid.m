@@ -50,16 +50,33 @@ classdef BodyModelRigid < BodyModel
             bk.r_Pe = XmlOperations.StringToVector3(char(physicalObj.getElementsByTagName('end_location').item(0).getFirstChild.getData));
             % <inertia>
             inertiaObj = physicalObj.getElementsByTagName('inertia').item(0);
-            I_Gxx = str2double(inertiaObj.getElementsByTagName('Ixx').item(0).getFirstChild.getData);
-            I_Gyy = str2double(inertiaObj.getElementsByTagName('Iyy').item(0).getFirstChild.getData);
-            I_Gzz = str2double(inertiaObj.getElementsByTagName('Izz').item(0).getFirstChild.getData);
-            I_Gxy = str2double(inertiaObj.getElementsByTagName('Ixy').item(0).getFirstChild.getData);
-            I_Gxz = str2double(inertiaObj.getElementsByTagName('Ixz').item(0).getFirstChild.getData);
-            I_Gyz = str2double(inertiaObj.getElementsByTagName('Iyz').item(0).getFirstChild.getData);
-            bk.I_G = [I_Gxx I_Gxy I_Gxz; ...
-                I_Gxy I_Gyy I_Gyz; ...
-                I_Gxz I_Gyz I_Gzz];
+            RefString = char(inertiaObj.getAttribute('ref'));
+            assert(~isempty(RefString), 'Invalid <inertia> XML format: ref field empty');
+            if (strcmp(RefString, 'joint'))
+                I_Oxx = str2double(inertiaObj.getElementsByTagName('Ixx').item(0).getFirstChild.getData);
+                I_Oyy = str2double(inertiaObj.getElementsByTagName('Iyy').item(0).getFirstChild.getData);
+                I_Ozz = str2double(inertiaObj.getElementsByTagName('Izz').item(0).getFirstChild.getData);
+                I_Oxy = str2double(inertiaObj.getElementsByTagName('Ixy').item(0).getFirstChild.getData);
+                I_Oxz = str2double(inertiaObj.getElementsByTagName('Ixz').item(0).getFirstChild.getData);
+                I_Oyz = str2double(inertiaObj.getElementsByTagName('Iyz').item(0).getFirstChild.getData);
+                bk.I_G = [I_Oxx I_Oxy I_Oxz; ...
+                    I_Oxy I_Oyy I_Oyz; ...
+                    I_Oxz I_Oyz I_Ozz] - bk.m*(bk.r_G.'*bk.r_G*eye(3) - bk.r_G*bk.r_G.');
+            elseif (strcmp(RefString, 'com'))
+                I_Gxx = str2double(inertiaObj.getElementsByTagName('Ixx').item(0).getFirstChild.getData);
+                I_Gyy = str2double(inertiaObj.getElementsByTagName('Iyy').item(0).getFirstChild.getData);
+                I_Gzz = str2double(inertiaObj.getElementsByTagName('Izz').item(0).getFirstChild.getData);
+                I_Gxy = str2double(inertiaObj.getElementsByTagName('Ixy').item(0).getFirstChild.getData);
+                I_Gxz = str2double(inertiaObj.getElementsByTagName('Ixz').item(0).getFirstChild.getData);
+                I_Gyz = str2double(inertiaObj.getElementsByTagName('Iyz').item(0).getFirstChild.getData);
+                bk.I_G = [I_Gxx I_Gxy I_Gxz; ...
+                    I_Gxy I_Gyy I_Gyz; ...
+                    I_Gxz I_Gyz I_Gzz];
+            else
+                error('Unknown Reference type: %s', RefString);
+            end
             
+            % INERTIA REF IS MISSING
             % <parent> tag
             parentObj = xmlobj.getElementsByTagName('parent').item(0);
             % <num>

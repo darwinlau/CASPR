@@ -10,7 +10,6 @@ M_NIST_ROBOCRANE,/SCDM/spatial_manipulators/NIST_ROBOCRANE/,NIST_bodies.xml,NIST
 M_SEGESTA,/SCDM/spatial_manipulators/SEGESTA/,SEGESTA_bodies.xml,SEGESTA_cables.xml,SEGESTA_trajectories.xml,
 M_SIMPLE_SPATIAL,/SCDM/spatial_manipulators/simple_spatial/,simple_spatial_bodies.xml,simple_spatial_cables.xml,simple_spatial_trajectories.xml,
 M_FAST,/SCDM/spatial_manipulators/FAST/,FAST_bodies.xml,FAST_cables.xml,FAST_trajectories.xml,
-M_CUHK_SPATIAL_SMALL,/SCDM/spatial_manipulators/CUHK_spatial_small/,CUHK_spatial_small_bodies.xml,CUHK_spatial_small_cables.xml,CUHK_spatial_small_trajectories.xml,
 M_MYOROB_SHOULDER,/SCDM/spherical_manipulators/myorob_shoulder_TUM/,myorob_shoulder_bodies.xml,myorob_shoulder_cables.xml,myorob_shoulder_trajectories.xml,
 M_SIMPLE_SPHERICAL,/SCDM/spherical_manipulators/simple_spherical/,simple_spherical_bodies.xml,simple_spherical_cables.xml,simple_spherical_trajectories.xml,
 M_2R_PLANAR_XZ,/MCDM/2R_planar_xz/,2R_planar_xz_bodies.xml,2R_planar_xz_cables.xml,2R_planar_xz_trajectories.xml,2R_planar_xz_op.xml

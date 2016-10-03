@@ -17,7 +17,7 @@ classdef CableModelIdealTest < CableModelTestBase
             disp('Testing CableModelIdeal update')
             c = CableModelIdeal('1',1);
             % Create the body model
-            model_config = ModelConfig(TestModelConfigType.T_SCDM);
+            model_config = TestModelConfig(TestModelConfigType.T_SCDM);
             modelObj = model_config.getModel(model_config.defaultCableSetId);
             c.update(modelObj.bodyModel)
         end

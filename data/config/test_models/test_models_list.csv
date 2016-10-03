@@ -1,0 +1,3 @@
+T_SCDM,/SCDM/,test_SCDM_bodies.xml,test_SCDM_cables.xml,test_SCDM_trajectories.xml
+T_MCDM,/MCDM/,test_MCDM_bodies.xml,test_MCDM_cables.xml,test_MCDM_trajectories.xml
+T_ACTIVE_PASSIVE_CABLES,/ActivePassiveCables/,test_active_passive_bodies.xml,test_active_passive_cables.xml,test_active_passive_trajectories.xml
