@@ -11,6 +11,10 @@
    A12 (66), A13 (67), A14 (68), A15 (69).
 */
 
+
+  //ORIGINAL
+
+
 #include <SoftwareSerial.h>
 
 // Defining constants
@@ -112,17 +116,11 @@ void loop() {
   if (systemOn) {
     if ((millis() - t_ref) > TIME_STEP * 1000) { // Operate at roughly 20Hz time
       t_ref = millis(); // Reset the time (AT A LATER DATE PROTECTION MAY BE NEEDED FOR OVERFLOW
-      Serial.print(t_ref);
-      Serial.print(" ");
       requestNanoFeedback(); // Request Feedback from the nanos
       for (int j = 0; j < (HEX_DIGITS_LENGTH * NUMBER_CONNECTED_NANOS) + 1; j++) { //send received Feedback back to mega
-        Serial.print(sendFeedback[j]);
-        Serial.print(" ");
-        Serial.print(t_ref);
-        Serial.print(" ");
-      }
-      Serial.print(" ");
-      Serial.println(t_ref);
+        Serial.print('f');
+        }
+      Serial.println();
       Serial.flush();
       if (enableMotors) {
         sendNanoCommand(); // Set up to send command for the nano
@@ -263,11 +261,17 @@ void sendNanoCommand() {
     receivedCommand[0] = '\0';
 
     sendCommand[0] = 'a';
+    for(int k = 0; k < 16; k++){
+      Serial.print('f');
+    }
     for (int j = 0; j < (HEX_DIGITS_ANGLE * NUMBER_CONNECTED_NANOS + 1); j++) {
       Serial1.print(sendCommand[j]);
+      Serial.print(sendCommand[j]);
     }
     Serial1.println();
     Serial1.flush();
+    Serial.println();
+    Serial.flush();
   }
 }
 
