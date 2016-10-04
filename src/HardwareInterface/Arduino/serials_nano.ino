@@ -9,14 +9,13 @@
 #include <string.h>#include <Wire.h>
 #include <math.h>
 
-#define NANO_ID 5
+#define NANO_ID 7
 
 #define FEEDBACK_FREQUENCY 40// In Hz
 #define SAMPLETIME (5000.0/FEEDBACK_FREQUENCY)
 #define TIME_STEP 1.0/FEEDBACK_FREQUENCY
 #define LENGTH_HEX_NUM_DIGITS 2
-#define Kp 1.0 // Gain for proportional controller
-#define Ki 0.5 // Gain for integrator
+#define Kp 1.0 // Gain for proportional controller#define Ki 0.5 // Gain for integrator
 #define DELTA 10 // The quarter degree as freezing regions at crossing area
 
 #define RECEIVE_ANGLE_CMD 'a'
@@ -37,7 +36,7 @@ unsigned long int t_ref;
 int maximumPWMFeedback[8] = {1501, 1494, 1501, 1493, 1501, 1499, 1501, 1520};
 int minimumPWMFeedback[8] = {484, 483, 484, 482, 484, 484, 484, 491};
 int maximumPWMOutput[8] = {1488, 1485, 1489, 1481, 1488, 1490, 1490, 1509};
-int minimumPWMOutput[8] = {469, 469, 471, 468, 469, 471, 469, 476};
+int minimumPWMOutput[8] = {469, 469, 471, 473, 469, 471, 474, 481}; //3, 6, 7 increased by 5
 int clockwise_max[8] = {2194, 2175, 2185, 2175, 2189, 2188, 2188, 2215};
 int clockwise_min[8] = {2094, 2082, 2090, 2079, 2089, 2088, 2088, 2117};
 int clockwise_max_speed[8] = {283, 278, 272, 269, 272, 281, 278, 278};
@@ -79,18 +78,14 @@ boolean firstTimeRead = 1;
 boolean firstTimeCommand = 1;
 boolean enableServo = 0;
 boolean stillmode = 0;
-boolean positive = 0;
+boolean positiveCommand = 0;
+boolean positiveFeedback = 0;
 
 boolean cw = 1;
 int pwmTestrun = 700;
 
 boolean newCommand = 0;
-
-int numReadings = 4;
-int feedback[4];
-int feedbackCounter;
-unsigned long int feedbackTotal;
-
+int sendCommandCounter = 0;
 
 int servoDeg;
 
@@ -125,7 +120,8 @@ String strReceived;
 
 void setup() {
   Serial.begin(BAUD_RATE);
-
+  servoDeg = readPositionFeedback();
+  currentDeg = servoDeg;
 }
 
 void loop() {
@@ -138,37 +134,20 @@ void loop() {
       currentDeg = servoDeg;
 
       if (newCommand) {
+        sendCommandCounter = 5;
+        Serial.println(" new Command ");
         updateDestinationDeg();
         limitDegree(); //keeps the destinationDegree within 0 - 360 degree
-        /*Serial.println();
-          Serial.print("ServoPWM ");
-          Serial.print(servoPWM);
-          Serial.print(" ");
-          Serial.print(servoDeg);
-          Serial.print(" servoDeg ");
-          Serial.print(" angularChange ");
-          Serial.print(angularChangeReceived);
-        */
         if (cross == true)
         {
           crossing(); //
-          quitCrossing();
         }
         newCommand = 0; //IMPORTANT - COMMENT BACK IN
-        /*Serial.print(" destinationDeg ");
-          Serial.print(destinationDeg);
-          Serial.print(" ");
-          Serial.print(" destinationPWM ");
-          Serial.print(destinationPWM);
-        */
       }
-      ctrl_motor(); //transmits the output signal towards the motor
-      /*if (newCommand) {
-        Serial.print(" ");
-        Serial.print(destinationPWM);
-        newCommand = 0;
-        }
-      */
+      if (sendCommandCounter > 0) {
+        ctrl_motor(); //transmits the output signal towards the motor
+        sendCommandCounter--;
+      }
     }
   }
 }
@@ -235,11 +214,11 @@ void readAngularChange() {
   tmp[2] = '\0';
   if (tmp[0] > ASCII_MIDDLE_POINT) {
     tmp[0] -= ASCII_DIFFERENCE;
-    positive = 0;
+    positiveCommand = 0;
   }
-  else positive = 1;
+  else positiveCommand = 1;
 
-  if (positive) {
+  if (positiveCommand) {
     angularChangeReceived = strtol(tmp, 0, 16);
   }
   else angularChangeReceived = -strtol(tmp, 0, 16);
@@ -264,24 +243,12 @@ int readPositionFeedback()
   else if (servoPWM > maximumPWMFeedback[NANO_ID]) {
     servoPWM = maximumPWMFeedback[NANO_ID];
   }
-  /*
-    feedbackTotal -= feedback[feedbackCounter];
-    feedback[feedbackCounter] = inverseMapping(servoPWM); //converts the pwm value to an angle
-    feedbackTotal += feedback[feedbackCounter];
-    feedbackCounter++;
-
-    if (feedbackCounter >= numReadings) {
-    feedbackCounter = 0;
-    }
-    return (feedbackTotal / numReadings);
-  */
   return inverseMapping(servoPWM); //converts the pwm value to an angle and returns it
 }
 
 void updateDestinationDeg() { //updates the destination degree from the serial monitor (if no input, no change)
   if (initialDeg < 0) { //first time this method is entered
     initialDeg = servoDeg;
-    destinationDeg = servoDeg;
   }
   if (angularChangeReceived != 0)
   {
@@ -307,13 +274,15 @@ void limitDegree() { //keeps the destinationDegree within 0 - 360 degree, e.g. -
 void crossing() {
   int Currentpos = servoDeg;
   if (check != 1) {
-    if (positive == 0) // From right
+    if (positiveCommand == 0) // From right
     {
       crossPulse = anticlockwise_max[NANO_ID];
+      check = 1;
     }
-    else if (positive == 1) // From left
+    else if (positiveCommand == 1) // From left
     {
       crossPulse = clockwise_max[NANO_ID];
+      check = 1;
     }
   }
 }
@@ -322,14 +291,14 @@ void quitCrossing() {
   int Currentpos = servoDeg;
   //Serial.print("currentpos ");
   //Serial.println(Currentpos);
-  if (positive == 0) // From right
+  if (positiveCommand == 0) // From right
   {
     if ((Currentpos < (1440 - DELTA)) && (Currentpos > 720 )) {
       cross = false;
       check = 0;
     }
   }
-  else if (positive == 1) // From left
+  else if (positiveCommand == 1) // From left
   {
     if ((Currentpos > DELTA) && (Currentpos < 720 )) {
       cross = false;
@@ -341,9 +310,8 @@ void quitCrossing() {
 void ctrl_motor() { //transmits the output signal towards the motor
   if (cross == true)//ding
   {
+    sendCommandCounter = 5;
     servoPulse(MOTOR_PIN, crossPulse);
-    //Serial.print(" crosspulse ");
-    //Serial.println(crossPulse);
     quitCrossing();
   }
   else
@@ -358,6 +326,9 @@ void servoPulse(int servoPin, int pulseWidth) {
   delayMicroseconds(pulseWidth);
   digitalWrite(servoPin, LOW);
   delayMicroseconds(3000 - pulseWidth);
+  Serial.print(pulseWidth);
+  Serial.print(" ");
+  Serial.flush();
 }
 
 void mapping() { // maps the calculated destinationDeg onto the pwm_output scale
@@ -404,10 +375,10 @@ void sendFeedback() {
   }
   lastDeg = currentDeg;
   if (angularChangeFeedback < 0) {
-    positive = 0;
+    positiveFeedback = 0;
     angularChangeFeedback = abs(angularChangeFeedback);
   } else {
-    positive = 1;
+    positiveFeedback = 1;
   }
 
   char sendingFeedback[LENGTH_HEX_NUM_DIGITS + 1];
@@ -418,7 +389,7 @@ void sendFeedback() {
     sendingFeedback[0] = '0';
     sendingFeedback[2] = '\0';
   }
-  if (positive) {
+  if (positiveFeedback) {
     /* out of 4 cases, only two have to be handled here, the others are:
         positive and standard conversion letters 0-9 -> not to be changed
         negative and standard conversion letters a-f -> not to be changed
