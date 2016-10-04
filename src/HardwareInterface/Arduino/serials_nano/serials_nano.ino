@@ -9,13 +9,14 @@
 #include <string.h>#include <Wire.h>
 #include <math.h>
 
-#define NANO_ID 7
+#define NANO_ID 0
 
 #define FEEDBACK_FREQUENCY 40// In Hz
 #define SAMPLETIME (5000.0/FEEDBACK_FREQUENCY)
 #define TIME_STEP 1.0/FEEDBACK_FREQUENCY
 #define LENGTH_HEX_NUM_DIGITS 2
-#define Kp 1.0 // Gain for proportional controller#define Ki 0.5 // Gain for integrator
+#define Kp 1.0 // Gain for proportional controller
+#define Ki 0.5 // Gain for integrator
 #define DELTA 10 // The quarter degree as freezing regions at crossing area
 
 #define RECEIVE_ANGLE_CMD 'a'
@@ -128,14 +129,11 @@ void loop() {
   readSerial();
   if ((millis() - t_ref) > TIME_STEP * 1000) {
     t_ref = millis();
-    if (enableServo) //if input has been received, transmission to servo is enabled
-    {
+    //if (enableServo){ //if input has been received, transmission to servo is enabled
       servoDeg = readPositionFeedback();
       currentDeg = servoDeg;
-
       if (newCommand) {
         sendCommandCounter = 5;
-        Serial.println(" new Command ");
         updateDestinationDeg();
         limitDegree(); //keeps the destinationDegree within 0 - 360 degree
         if (cross == true)
@@ -148,7 +146,7 @@ void loop() {
         ctrl_motor(); //transmits the output signal towards the motor
         sendCommandCounter--;
       }
-    }
+    //}
   }
 }
 
@@ -158,7 +156,6 @@ void readSerial() //receive characterizing prefix (+ length in 2 digit Hex, with
     strReceived = Serial.readStringUntil('\n');
     char command = strReceived[0];
     if (command == RECEIVE_ANGLE_CMD) {
-      newCommand = 1;
       if (firstTimeCommand) {
         enableServo = 1;
         firstTimeCommand = 0;
@@ -222,7 +219,9 @@ void readAngularChange() {
     angularChangeReceived = strtol(tmp, 0, 16);
   }
   else angularChangeReceived = -strtol(tmp, 0, 16);
-
+  if(angularChangeReceived != 0){
+    newCommand = 1;
+    }
 }
 
 int readPositionFeedback()
@@ -326,9 +325,6 @@ void servoPulse(int servoPin, int pulseWidth) {
   delayMicroseconds(pulseWidth);
   digitalWrite(servoPin, LOW);
   delayMicroseconds(3000 - pulseWidth);
-  Serial.print(pulseWidth);
-  Serial.print(" ");
-  Serial.flush();
 }
 
 void mapping() { // maps the calculated destinationDeg onto the pwm_output scale
