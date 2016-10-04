@@ -92,7 +92,7 @@ void setup() {
   for (int i = 0; i < NUMBER_CONNECTED_NANOS; i++) { //all the softwareSerials for arduino nano
     serialNano[i].begin(BAUD_RATE);
     initLength[i] = 32768; //middle
-    lastLengthFeedback[i] = 32768; 
+    lastLengthFeedback[i] = 32768;
     lastLengthCommand[i] = 32768;
     //serialNano[i].setTimeout(10);
   }
@@ -112,13 +112,18 @@ void loop() {
   if (systemOn) {
     if ((millis() - t_ref) > TIME_STEP * 1000) { // Operate at roughly 20Hz time
       t_ref = millis(); // Reset the time (AT A LATER DATE PROTECTION MAY BE NEEDED FOR OVERFLOW
+      Serial.print(t_ref);
+      Serial.print(" ");
       requestNanoFeedback(); // Request Feedback from the nanos
-      for (int j = 0; j < (HEX_DIGITS_LENGTH * NUMBER_CONNECTED_NANOS + 1); j++) { //send received Feedback back to mega
+      for (int j = 0; j < (HEX_DIGITS_LENGTH * NUMBER_CONNECTED_NANOS) + 1; j++) { //send received Feedback back to mega
         Serial.print(sendFeedback[j]);
+        Serial.print(" ");
+        Serial.print(t_ref);
+        Serial.print(" ");
       }
-      Serial.println();
+      Serial.print(" ");
+      Serial.println(t_ref);
       Serial.flush();
-
       if (enableMotors) {
         sendNanoCommand(); // Set up to send command for the nano
       }
@@ -161,10 +166,10 @@ void setInitialLengths() {
   unsigned long int newInitLength;
   for (int j = 0; j < NUMBER_CONNECTED_NANOS; j++) {
     for (int k = 0; k < HEX_DIGITS_LENGTH; k++) {
-      tmp[k] = receivedCommand[j*HEX_DIGITS_LENGTH + k +1];
+      tmp[k] = receivedCommand[j * HEX_DIGITS_LENGTH + k + 1];
     }
     newInitLength = strtol(tmp, 0, 16);
-    lastLengthFeedback[j]+= (newInitLength - initLength[j]);
+    lastLengthFeedback[j] += (newInitLength - initLength[j]);
     lastLengthCommand[j] += (newInitLength - initLength[j]);
     initLength[j] = newInitLength;
   }
