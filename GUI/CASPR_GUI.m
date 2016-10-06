@@ -34,7 +34,7 @@ function varargout = CASPR_GUI(varargin)
 
     % Edit the above text to modify the response to help CASPR_GUI
 
-    % Last Modified by GUIDE v2.5 26-Jun-2016 13:31:26
+    % Last Modified by GUIDE v2.5 06-Oct-2016 14:39:27
 
     % Begin initialization code - DO NOT EDIT
     warning('off','MATLAB:uitabgroup:OldVersion')
@@ -179,16 +179,9 @@ function model_popup_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
     % Hint: popupmenu controls usually have a white background on Windows.
     %       See ISPC and COMPUTER.
     if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-         set(hObject,'BackgroundColor','white');
+        set(hObject,'BackgroundColor','white');
     end
-    e_list      =   enumeration('ModelConfigType');
-    e_n         =   length(e_list);
-    e_list_str  =   cell(1,e_n);
-    for i=1:e_n
-        temp_str = char(e_list(i));
-        e_list_str{i} = temp_str(3:length(temp_str));
-    end
-    set(hObject, 'String', e_list_str);
+    set(hObject, 'String', {' '});
 end
 
 % Cable Popup
@@ -256,8 +249,11 @@ function update_button_Callback(~, ~, handles) %#ok<DEFNU>
 % hObject    handle to update_button (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-    modObj = getappdata(handles.cable_popup,'modObj');
+    % modObj = getappdata(handles.cable_popup,'modObj');
+    %generate_model_object(handles);
     q_data = get(handles.qtable,'Data');
+    modObj = getappdata(handles.cable_popup,'modObj');
+    set(handles.qtable,'Data',q_data);
     modObj.update(q_data',zeros(modObj.numDofVars,1),zeros(modObj.numDofVars,1),zeros(modObj.numDofVars,1));
     cla;
     axis_range = getappdata(handles.cable_popup,'axis_range');
@@ -280,7 +276,11 @@ function generate_model_object(handles)
     % Generate the dynamics object
     contents = cellstr(get(handles.model_popup,'String'));
     model_type = contents{get(handles.model_popup,'Value')};
-    model_config = ModelConfig(ModelConfigType.(['M_',model_type]));
+    if(get(handles.checkbox,'value'))
+        model_config = DevModelConfig(DevModelConfigType.(['D_',model_type]));
+    else
+    	model_config = ModelConfig(ModelConfigType.(['M_',model_type]));
+    end
     contents = cellstr(get(handles.cable_popup,'String'));
     cable_set_id = contents{get(handles.cable_popup,'Value')};
     modObj = model_config.getModel(cable_set_id);
@@ -295,11 +295,33 @@ function generate_model_object(handles)
     format_q_table(modObj.numDofs,handles.qtable);
 end
 
+function model_popup_update(handles)
+    % Determine the state of the toggle
+    toggle_state = get(handles.checkbox,'Value');
+    if(toggle_state)
+        e_list      =   enumeration('DevModelConfigType');
+    else
+    	e_list      =   enumeration('ModelConfigType');
+    end
+    e_n         =   length(e_list);
+    e_list_str  =   cell(1,e_n);
+    for i=1:e_n
+        temp_str = char(e_list(i));
+        e_list_str{i} = temp_str(3:length(temp_str));
+    end
+    set(handles.model_popup, 'Value', 1);
+    set(handles.model_popup, 'String', e_list_str);
+end
+
 function cable_popup_update(handles)
     % Generate the model_config object
     contents = cellstr(get(handles.model_popup,'String'));
     model_type = contents{get(handles.model_popup,'Value')};
-    model_config = ModelConfig(ModelConfigType.(['M_',model_type]));
+    if(get(handles.checkbox,'value'))
+        model_config = DevModelConfig(DevModelConfigType.(['D_',model_type]));
+    else
+    	model_config = ModelConfig(ModelConfigType.(['M_',model_type]));
+    end
     cableset_str = model_config.getCableSetList();
     set(handles.cable_popup, 'Value', 1);
     set(handles.cable_popup, 'String', cableset_str);
@@ -310,6 +332,7 @@ function saveState(handles)
     % Save all of the settings
     state.model_popup_value     =   get(handles.model_popup,'value');
     state.cable_popup_value     =   get(handles.cable_popup,'value');
+    state.checkbox_value        =   get(handles.checkbox,'value');
     contents                    =   get(handles.model_popup,'String');
     state.model_text            =   contents{state.model_popup_value};
     contents                    =   get(handles.cable_popup,'String');
@@ -322,21 +345,24 @@ function saveState(handles)
     if(exist([path_string,'/logs'],'dir')~=7)
         mkdir([path_string,'/logs']);        
     end
-    save([path_string,'/logs/upcra_gui_state.mat'],'state');
+    save([path_string,'/logs/caspr_gui_state.mat'],'state');
 end
 
 function loadState(handles)
     % load all of the settings and initialise the values to match
     path_string = fileparts(mfilename('fullpath'));
     path_string = path_string(1:strfind(path_string, 'GUI')-2);
-    file_name = [path_string,'/logs/upcra_gui_state.mat'];
+    file_name = [path_string,'/logs/caspr_gui_state.mat'];
     if(exist(file_name,'file'))
         load(file_name);
+        set(handles.checkbox,'value',state.checkbox_value);
+        model_popup_update(handles);
         set(handles.model_popup,'value',state.model_popup_value);
         cable_popup_update(handles);
         set(handles.cable_popup,'value',state.cable_popup_value);
         generate_model_object(handles);
     else
+        model_popup_update(handles);
         set(handles.model_popup,'value',1);
         cable_popup_update(handles);
     end
@@ -351,4 +377,16 @@ function format_q_table(numDofs,qtable)
         column_name{i} = ['q',num2str(i)];
     end
     set(qtable,'ColumnName',column_name);
+end
+
+
+% --- Executes on button press in checkbox.
+function checkbox_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox
+    model_popup_update(handles);
+    cable_popup_update(handles);
 end
