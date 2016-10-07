@@ -5,6 +5,7 @@
 
 #define LENGTH_HEX_ANGLE 2
 #define LENGTH_PWM_COMMAND 4
+#define DIGITS_PWM_FEEDBACK 3
 #define Kp 1.0 // Gain for proportional controller
 #define Ki 0.5 // Gain for integrator
 #define DELTA 7 // freezing regions at crossing area
@@ -51,6 +52,8 @@ int angularChangeFeedback;
 
 int lastDeg;
 int currentDeg = minimumPWMFeedback[NANO_ID];
+
+char pwmFeedback[DIGITS_PWM_FEEDBACK];
 
 /////////////////////////// FEEDBACK VARIABLES ///////////////////////////
 
@@ -121,7 +124,7 @@ void readSerial() //receive characterizing prefix (+ length in 2 digit Hex, with
         quitCrossing();
       } else delay(5);
       readPWMCommand();
-      detectCrossing();
+      //detectCrossing(); //crossing determined by mega now, sends boolean for crossing
       ctrl_motor(pwmCommand);
     }
     else if (command == RECEIVE_FEEDBACK_REQUEST) { //f
@@ -167,11 +170,22 @@ void readSerial() //receive characterizing prefix (+ length in 2 digit Hex, with
 
 void readPWMCommand() {
   char pwmReceived[LENGTH_PWM_COMMAND];
-  for (int i = 0; i < LENGTH_PWM_COMMAND; i++) {
-    pwmReceived[i] = strReceived[1 + i + (LENGTH_PWM_COMMAND * NANO_ID)];
+  cross = strReceived[1 + (LENGTH_PWM_COMMAND * NANO_ID)];
+  for (int i = 0; i < LENGTH_PWM_COMMAND - 1; i++) {
+    pwmReceived[i] = strReceived[1 + i + 1 + (LENGTH_PWM_COMMAND * NANO_ID)]; //+1 for prefix, another +1 to omit the crossing boolean
   }
-  pwmCommand = strtol(pwmReceived, 0, 10);
+  pwmCommand = strtol(pwmReceived, 0, 16);
+  if (cross = true) {
+    if (pwmCommand > lastPWM) { //->CCW crossing
+      crossCW = false;
+    } else {
+      crossCW = true;
+    }
+  }
+  lastPWM = pwmCommand;
 }
+
+
 
 int readPositionFeedback()
 { //reads position feedback and stores it in servoPWM
@@ -234,12 +248,12 @@ void ctrl_motor(int pwmMotor) { //transmits the output signal towards the motor
     }
     servoPulse(crossPulse);
     servoPulse(crossPulse);
-    Serial.println(crossPulse);  
+    Serial.println(crossPulse);
   }
   else {
     servoPulse(pwmMotor);
     servoPulse(pwmMotor);
-    Serial.println(pwmMotor);  
+    Serial.println(pwmMotor);
   }
 }
 
@@ -252,7 +266,12 @@ void servoPulse(int pulseWidth) {
 
 
 void sendFeedback() {
-  Serial.println(String(servoPWM));
+  itoa(servoPWM, pwmFeedback, 16);
+  for(int i = 0; i < DIGTS_PWM_FEEDBACK; i++){
+  Serial.print(pwmFeedback[i]);
+  Serial.print();
+  Serial.flush();
+  }
 }
 
 
