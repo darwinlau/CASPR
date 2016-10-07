@@ -21,7 +21,7 @@
 
 #define HEX_DIGITS_LENGTH 4
 #define DIGITS_PWM_COMMAND 4
-#define DIGITS_PWM_FEEDBACK 4
+#define DIGITS_PWM_FEEDBACK 3
 
 #define ASCII_MIDDLE_POINT 75 //breakpoint between cw(0-9, A-F) and ccw (P-Y, a-f)
 #define ASCII_DIFFERENCE 32 //difference for conversion between cw and ccw
@@ -247,7 +247,7 @@ void requestNanoFeedback() {
       while (serialNano[i].available() > 0) {
         serialNano[i].read(); //clears the buffer of any other bytes
       }
-      pwmFeedback[i] = strtol(feedbackNano, 0, 10);
+      pwmFeedback[i] = strtol(feedbackNano, 0, 16);
       if (pwmFeedback[i] > pwmLastFeedback[i]) { //possible crossing CCW (right -> left)
         if ((-rangePWMOutput[i] - pwmLastFeedback[i] + pwmFeedback[i]) > (pwmLastFeedback[i] - pwmFeedback[i])) {
           pwmFeedbackDiff = pwmFeedback[i] - rangePWMOutput[i] - pwmLastFeedback[i];
