@@ -31,9 +31,15 @@ function initialise_CASPR()
         rmpath(temp_p{ : });
     end
     
-    % Add the necessaey paths
-    fprintf('Adding CASPR to library path\n')
+    % Store the home directory
     home_path = cd;
+    if(~exist([home_path,'/logs'],'dir'))
+        mkdir('logs')
+    end
+    save('logs/CASPR_environment.mat','home_path');
+    
+    % Add the necessary paths
+    fprintf('Adding CASPR to library path\n')
     path_list = genpath(home_path);
     path_list = strsplit(path_list, path_delimiter);
     for i = 1:length(path_list)
@@ -44,10 +50,4 @@ function initialise_CASPR()
     addpath(path_list{:});
     rehash
     fprintf('CASPR paths have been successfully set up. Enjoy!\n')
-    
-    % Store the home directory
-    if(~exist([home_path,'/logs'],'dir'))
-        mkdir('logs')
-    end
-    save('logs/CASPR_environment.mat','home_path');
 end

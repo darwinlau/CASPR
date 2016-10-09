@@ -5,8 +5,8 @@
 % Description    :
 classdef TestModelConfig < ModelConfigBase    
     properties (Constant)
-        MODEL_FOLDER_PATH = '\test_models';
-        LIST_FILENAME = '\test_models_list.csv';
+        MODEL_FOLDER_PATH = '/test_models';
+        LIST_FILENAME = '/test_models_list.csv';
     end
     
     methods
