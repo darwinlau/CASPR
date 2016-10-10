@@ -228,7 +228,6 @@ classdef (Abstract) MotionSimulator < Simulator
 %             title('Aangular acceleration of rigid bodies (numerical)');
             % ONLY USED IN DEBUGGING START
         end
-
     end
     methods (Static)
         % Plots a single image of the CDPR at the specified kinematics.
@@ -243,7 +242,7 @@ classdef (Abstract) MotionSimulator < Simulator
             end
             
             axis(plot_axis);
-            view(-37,32); what do we want to do with this
+            view(-37,32); 
             hold on;
             grid on;
             xlabel('x');
