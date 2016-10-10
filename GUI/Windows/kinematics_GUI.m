@@ -31,7 +31,7 @@ function varargout = kinematics_GUI(varargin)
 
     % Edit the above text to modify the response to help kinematics_GUI
 
-    % Last Modified by GUIDE v2.5 21-Feb-2016 12:02:04
+    % Last Modified by GUIDE v2.5 06-Oct-2016 16:19:17
 
     % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
@@ -192,7 +192,11 @@ end
 function trajectory_popup_Update(~, handles)
     contents = cellstr(get(handles.model_text,'String'));
     model_type = contents{1};
-    model_config = ModelConfig(ModelConfigType.(['M_',model_type]));
+    if(getappdata(handles.figure1,'toggle'))
+        model_config = DevModelConfig(DevModelConfigType.(['D_',model_type]));
+    else
+        model_config = ModelConfig(ModelConfigType.(['M_',model_type]));
+    end
     setappdata(handles.trajectory_popup,'model_config',model_config);
     % Determine the trajectories
     trajectories_str = model_config.getTrajectoriesList();    
@@ -643,12 +647,13 @@ function loadState(handles)
     path_string = path_string(1:strfind(path_string, 'GUI')-2);
     settingsXMLObj =  XmlOperations.XmlReadRemoveIndents([path_string,'/GUI/XML/kinematicsXML.xml']);
     setappdata(handles.figure1,'settings',settingsXMLObj);
-    file_name = [path_string,'/logs/upcra_gui_state.mat'];
+    file_name = [path_string,'/logs/caspr_gui_state.mat'];
     set(handles.status_text,'String','No simulation running');
     if(exist(file_name,'file'))
         load(file_name);
         set(handles.model_text,'String',state.model_text);
         set(handles.cable_text,'String',state.cable_text);
+        setappdata(handles.figure1,'toggle',state.checkbox_value);
         state.modObj.bodyModel.occupied.reset();
         setappdata(handles.cable_text,'modObj',state.modObj);
         trajectory_popup_Update([], handles);
@@ -731,4 +736,31 @@ function initialise_popups(handles)
     q_dot_popup_Update(handles.q_dot_popup,handles);
     % Needed callbacks
     plot_type_popup_Callback(handles.plot_type_popup,[],handles);
+end
+
+
+% --- Executes on button press in plot_movie_button.
+function plot_movie_button_Callback(hObject, eventdata, handles)
+% hObject    handle to plot_movie_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    % Things that this should do
+    sim = getappdata(handles.figure1,'sim');
+    if(isempty(sim))
+        warning('No simulator has been generated. Please press run first'); %#ok<WNTAG>
+    else
+        % h = axes();
+        plot3(0,0,0);
+        h = gca;
+        path_string = fileparts(mfilename('fullpath'));
+        path_string = path_string(1:strfind(path_string, 'GUI')-2);
+        % Check if the log folder exists
+        if((exist([path_string,'/data'],'dir')~=7)||(exist([path_string,'/data/videos'],'dir')~=7))
+            if((exist([path_string,'/data'],'dir')~=7))
+                mkdir([path_string,'/data']);
+            end
+            mkdir([path_string,'/data/videos']);
+        end      
+        sim.plotMovie(h, 'data/videos/kinematics_gui_output.avi', sim.timeVector(length(sim.timeVector)), 700, 700)
+    end
 end

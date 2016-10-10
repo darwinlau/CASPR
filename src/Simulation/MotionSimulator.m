@@ -243,6 +243,7 @@ classdef (Abstract) MotionSimulator < Simulator
             end
             
             axis(plot_axis);
+            view(-37,32); what do we want to do with this
             hold on;
             grid on;
             xlabel('x');

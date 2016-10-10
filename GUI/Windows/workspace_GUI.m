@@ -510,7 +510,7 @@ function loadState(handles)
     % load all of the settings and initialise the values to match
     path_string = fileparts(mfilename('fullpath'));
     path_string = path_string(1:strfind(path_string, 'GUI')-2);
-    file_name = [path_string,'/logs/upcra_gui_state.mat'];
+    file_name = [path_string,'/logs/caspr_gui_state.mat'];
     if(exist(file_name,'file'))
         load(file_name)
         set(handles.model_text,'String',state.model_text);
