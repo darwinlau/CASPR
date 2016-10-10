@@ -250,8 +250,9 @@ function update_button_Callback(~, ~, handles) %#ok<DEFNU>
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
     % modObj = getappdata(handles.cable_popup,'modObj');
-    %generate_model_object(handles);
+    %
     q_data = get(handles.qtable,'Data');
+    generate_model_object(handles);
     modObj = getappdata(handles.cable_popup,'modObj');
     set(handles.qtable,'Data',q_data);
     modObj.update(q_data',zeros(modObj.numDofVars,1),zeros(modObj.numDofVars,1),zeros(modObj.numDofVars,1));
@@ -267,6 +268,20 @@ function control_button_Callback(~, ~, handles) %#ok<DEFNU>
     % handles    structure with handles and user data (see GUIDATA)
     saveState(handles);
     control_GUI;
+end
+
+%--------------------------------------------------------------------------
+%% Checkboxes
+%--------------------------------------------------------------------------
+% --- Executes on button press in checkbox.
+function checkbox_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox
+    model_popup_update(handles);
+    cable_popup_update(handles);
 end
 
 %--------------------------------------------------------------------------
@@ -377,16 +392,4 @@ function format_q_table(numDofs,qtable)
         column_name{i} = ['q',num2str(i)];
     end
     set(qtable,'ColumnName',column_name);
-end
-
-
-% --- Executes on button press in checkbox.
-function checkbox_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of checkbox
-    model_popup_update(handles);
-    cable_popup_update(handles);
 end
