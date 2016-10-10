@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <links display_range="-5 5 -4 4 -0.5 6">
-  <link_rigid num="1" name="IPAnema 2 (Fraunhofer IPA)">
+  <link_rigid num="1" name="IPAnema 1 (Fraunhofer IPA)">
     <joint type="SPATIAL_EULER_XYZ" />
     <physical>
       <mass>25.0</mass>
