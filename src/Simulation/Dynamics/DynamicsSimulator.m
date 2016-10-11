@@ -33,7 +33,7 @@ classdef DynamicsSimulator < MotionSimulator
         function plotCableForces(obj, plot_axis, cables_to_plot)
             CASPR_log.Assert(~isempty(obj.cableForces), 'Cannot plot since cableForces is empty');
             
-            if nargin <= 2 || isempty(links_to_plot)
+            if nargin <= 2 || isempty(cables_to_plot)
                 cables_to_plot = 1:obj.model.numCables;
             end
             
