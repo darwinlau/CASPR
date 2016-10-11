@@ -761,6 +761,7 @@ function plot_movie_button_Callback(hObject, eventdata, handles)
             end
             mkdir([path_string,'/data/videos']);
         end      
-        sim.plotMovie(h, 'data/videos/kinematics_gui_output.avi', sim.timeVector(length(sim.timeVector)), 700, 700)
+        model_config = getappdata(handles.trajectory_popup,'model_config');
+        sim.plotMovie(model_config.displayRange, 'data/videos/kinematics_gui_output.avi', sim.timeVector(length(sim.timeVector)), 700, 700);
     end
 end
