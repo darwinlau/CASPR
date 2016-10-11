@@ -11,7 +11,7 @@ classdef ArduinoCASPRInterface < handle
         SEND_PREFIX_LENGTH_CMD = 'l';
         COMM_PREFIX_ACKNOWLEDGE = 'a';
         
-        BAUD_RATE = 115200;     % Bits per second
+        BAUD_RATE = 74880;     % Bits per second
     end
     
     properties (SetAccess = private)
@@ -34,7 +34,27 @@ classdef ArduinoCASPRInterface < handle
         function interface = ArduinoCASPRInterface(comPort, numCmd)
             interface.comPort = comPort;
             interface.numCmd = numCmd;
-            interface.setupSerial(interface.comPort);
+        end
+        
+        function open(obj)
+            % Initialize the serialpush port communication between Arduino and MATLAB
+            % The input value is the COMPORT should be changed as per requirement
+            % We ensure that the arduino is also communicatiing with MATLAB at this
+            % time. A predefined code on the arduino acknowledges this. 
+
+            obj.serial_port = serial(obj.comPort);
+            set(obj.serial_port, 'DataBits', 8);
+            set(obj.serial_port, 'StopBits', 1);
+            set(obj.serial_port, 'BaudRate', obj.BAUD_RATE);
+            set(obj.serial_port, 'Parity', 'none'); 
+            
+            try
+                fopen(obj.serial_port);
+            catch error
+                CASPR_log.Error(error.message);
+            end
+            
+            pause(1.0);
         end
                 
         function close(obj)
@@ -50,7 +70,7 @@ classdef ArduinoCASPRInterface < handle
         
         % Sends character to the device and waits for same character to
         % come back
-        function [success] = dectectDevice(obj)
+        function [success] = detectDevice(obj)
             fprintf(obj.serial_port, [obj.COMM_PREFIX_ACKNOWLEDGE '\n']);
             cmd_str = fscanf(obj.serial_port, '%s\n');
             if (isequal(cmd_str, obj.COMM_PREFIX_ACKNOWLEDGE))
@@ -85,7 +105,6 @@ classdef ArduinoCASPRInterface < handle
         
         function cmdRead(obj)
             cmd_str = fscanf(obj.serial_port, '%s\n');
-            length(cmd_str);
             if (cmd_str(1) == obj.RECEIVE_PREFIX_FEEDBACK)
                 obj.feedbackRead(cmd_str);
             elseif (cmd_str(1) == obj.RECEIVE_PREFIX_ERROR && length(cmd_str) == 1)
@@ -105,7 +124,6 @@ classdef ArduinoCASPRInterface < handle
                 obj.feedback(i) = obj.hardwareLengthToCASPR(cmd_str(cmd_str_ind:cmd_str_ind+obj.LENGTH_HEX_NUM_DIGITS-1));
                 cmd_str_ind = cmd_str_ind + obj.LENGTH_HEX_NUM_DIGITS;                
             end
-            obj.feedback
         end
         
         function systemOnSend(obj)
@@ -117,26 +135,7 @@ classdef ArduinoCASPRInterface < handle
         end
     end
     
-    methods (Access = private)
-        function setupSerial(obj, comPort)
-            % Initialize the serialpush port communication between Arduino and MATLAB
-            % The input value is the COMPORT should be changed as per requirement
-            % We ensure that the arduino is also communicatiing with MATLAB at this
-            % time. A predefined code on the arduino acknowledges this. 
-
-            obj.serial_port = serial(comPort);
-            set(obj.serial_port, 'DataBits', 8);
-            set(obj.serial_port, 'StopBits', 1);
-            set(obj.serial_port, 'BaudRate', obj.BAUD_RATE);
-            set(obj.serial_port, 'Parity', 'none'); 
-            
-            try
-                fopen(obj.serial_port);
-            catch error
-                CASPR_log.Error(error.message);
-            end
-        end
-        
+    methods (Access = private)        
         % Unit on hardware [mm] * lengthMult (to increase resolution) sent to CASPR in hex format
         function caspr_length = hardwareLengthToCASPR(obj, hardware_length_str)
             caspr_length = hex2dec(hardware_length_str) * obj.MM_TO_M / obj.lengthMult;
@@ -145,7 +144,7 @@ classdef ArduinoCASPRInterface < handle
         % Unit on CASPR [m], convert to [mm] with multiplier and in HEX to
         % a particular number of digits
         function hw_length_str = casprLengthToHW(obj, length)
-            hw_length_str = dec2hex(length * obj.M_TO_MM * obj.lengthMult, obj.LENGTH_HEX_NUM_DIGITS);
+            hw_length_str = dec2hex(round(length * obj.M_TO_MM * obj.lengthMult), obj.LENGTH_HEX_NUM_DIGITS);
         end
     end
     
