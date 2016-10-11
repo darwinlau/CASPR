@@ -5,8 +5,8 @@
 % Description    :
 classdef DevModelConfig < ModelConfigBase    
     properties (Constant)
-        MODEL_FOLDER_PATH = '\indev_models';
-        LIST_FILENAME = '\indev_models_list.csv';
+        MODEL_FOLDER_PATH = '/indev_models';
+        LIST_FILENAME = '/indev_models_list.csv';
     end
     
     methods
