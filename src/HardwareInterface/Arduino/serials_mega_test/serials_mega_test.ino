@@ -16,7 +16,7 @@
 // Defining constants
 #define FEEDBACK_FREQUENCY 20// In Hz
 #define TIME_STEP 1.0/FEEDBACK_FREQUENCY
-#define NUMBER_CONNECTED_NANOS 8
+#define NUMBER_CONNECTED_NANOS 1
 #define BAUD_RATE 74880
 
 #define HEX_DIGITS_LENGTH 4
@@ -71,7 +71,8 @@ unsigned int initLength[NUMBER_CONNECTED_NANOS];
 double stepPWMFeedback[NUMBER_CONNECTED_NANOS];
 double stepPWMOutput[NUMBER_CONNECTED_NANOS];
 
-boolean crossing[NUMBER_CONNECTED_NANOS];
+boolean crossingFeedback[NUMBER_CONNECTED_NANOS];
+int crossingCommand[NUMBER_CONNECTED_NANOS];
 
 char feedbackNano[DIGITS_PWM_FEEDBACK]; // Array to store the nano feedback
 boolean positive = 1; // flag to indicate positive angle change
@@ -124,6 +125,7 @@ SoftwareSerial serialNano[8] = {
    Serial1. for transmission to Nano devices
    SoftwareSerial for receiving from individual Nanos
 */
+
 void setup() {
   Serial.begin(BAUD_RATE);  //USB
   Serial1.begin(BAUD_RATE); //broadcast
@@ -150,35 +152,27 @@ void setup() {
 void loop() {
   readSerialUSB();
   if ((millis() - t_ref) > TIME_STEP * 1000) { // Operate at roughly 20Hz time
-    Serial.print(millis() - t_ref);
-    Serial.print(" total  nanoFB: ");
     t_ref = millis(); // Reset the time (AT A LATER DATE PROTECTION MAY BE NEEDED FOR OVERFLOW
     if (systemOn) {
-      requestNanoFeedback();
-      sendNanoFeedback();
+        requestNanoFeedback();
+        sendNanoFeedback();
+      /*
+        radCounter++;
+        rad = radCounter * 0.075;
+        sinDeg = sin(rad) * 720;
+        sinDeg += 720;
+        angularChangeCommand = sinDeg - lastSinDeg;
+        lastSinDeg = sinDeg;
 
-      Serial.print(" ");
-      Serial.print(millis() - t_ref);
-      Serial.print(" ");
-
-      radCounter++;
-      rad = radCounter * 0.1;
-      tmpSendLength = sin(rad) * 1500;
-      tmpSendLength += 32768;
-
+        tmpSendLength = sin(rad) * 1500;
+        tmpSendLength += 32768;
+      */
       readNanoCommand();
-
-      Serial.print(" after read: ");
-      Serial.print(millis() - t_ref);
-      Serial.print(" nanoCommand: ");
-
       if (enableMotors) {
         sendNanoCommand(); // Set up to send command for the nano
       }
     }
-    Serial.print(" ");
-    Serial.println(millis() - t_ref);
-    Serial.flush();
+
   }
 }
 
@@ -199,7 +193,7 @@ void readSerialUSB() {
     {
       systemOn = 0;
       enableMotors = 1;
-      Serial1.println(" p10001000100010001000100010001000");
+      Serial1.println(" p03d103d103d103d103d103d103d103d1");
     }
     else if (receivedCommand[0] == RECEIVE_PREFIX_INITIAL) //i
     {
@@ -234,7 +228,7 @@ void requestNanoFeedback() {
     Serial1.flush(); //waits for the sending of Serial to be complete before moving on
 
     counter = 0;
-    while ((serialNano[i].available() == 0) && counter < 500) {
+    while ((serialNano[i].available() == 0) && counter < 200) {
       counter++;
     }
     if (serialNano[i].available() > 0) {
@@ -251,24 +245,20 @@ void requestNanoFeedback() {
       if (pwmFeedback[i] > pwmLastFeedback[i]) { //possible crossing CCW (right -> left)
         if ((-rangePWMOutput[i] - pwmLastFeedback[i] + pwmFeedback[i]) > (pwmLastFeedback[i] - pwmFeedback[i])) {
           pwmFeedbackDiff = pwmFeedback[i] - rangePWMOutput[i] - pwmLastFeedback[i];
-          crossing[i] = true;
+          crossingFeedback[i] = true;
         }
       }
       else if ((rangePWMOutput[i] - pwmLastFeedback[i] + pwmFeedback[i]) < (pwmLastFeedback[i] - pwmFeedback[i])) { //crossing CW (left -> right)
         pwmFeedbackDiff = rangePWMOutput[i] - pwmLastFeedback[i] + pwmFeedback[i];
-        crossing[i] = true;
+        crossingFeedback[i] = true;
       } else {
         pwmFeedbackDiff = pwmFeedback[i] - pwmLastFeedback[i];
-        crossing[i] = false;
+        crossingFeedback[i] = false;
       }
       pwmLastFeedback[i] = pwmFeedback[i];
 
       lastLengthFeedback[i] += (int)(((pwmFeedbackDiff * stepPWMFeedback[i]) * angleToLength) + 0.5); //conversion of pwmDiff to angleChange to lengthChange
     }
-  
-  Serial.print(" ");
-  Serial.print(millis() - t_ref);
-  Serial.print(" ");
   }
 }
 
@@ -288,47 +278,45 @@ void sendNanoFeedback() {
 
 
 void readNanoCommand() {
-  //if (receivedCommand[0] == COMMAND_LENGTH) {
-  for (int i = 0; i < NUMBER_CONNECTED_NANOS; i++) {
-    /*for (int j = 0; j < HEX_DIGITS_LENGTH; j++) {
+  if (receivedCommand[0] == COMMAND_LENGTH) {
+    for (int i = 0; i < NUMBER_CONNECTED_NANOS; i++) {
+      for (int j = 0; j < HEX_DIGITS_LENGTH; j++) {
         tmpRead[j] = receivedCommand[HEX_DIGITS_LENGTH * i + j + 1]; //HEX_DIGITS_LENGTH*i gives position in array for respective ID, +1 omits command prefix
       }
       tmpRead[HEX_DIGITS_LENGTH] = '\0';
       tmpSendLength = strtol(tmpRead, 0, 16);
-    */
-    lengthChangeCommand = tmpSendLength - lastLengthCommand[i]; //strtol returns long int, lastLengthCommand is unsigned int (4byte - 2byte), changes will not be >int_max
-    lastLengthCommand[i] += lengthChangeCommand; //update lastLengthCommand for next command
-    angularChangeCommand = (lengthChangeCommand * lengthToAngle) + 0.5;
-    pwmCommand[i] += (int)((angularChangeCommand * stepPWMOutput[i] ) + 0.5);
+      lengthChangeCommand = tmpSendLength - lastLengthCommand[i]; //strtol returns long int, lastLengthCommand is unsigned int (4byte - 2byte), changes will not be >int_max
+      lastLengthCommand[i] += lengthChangeCommand; //update lastLengthCommand for next command
+      angularChangeCommand = (lengthChangeCommand * lengthToAngle) + 0.5;
 
-    // keeping pwmCommand in boundaries, enabling crossing
-    if (pwmCommand[i] < minimumPWMOutput[i]) {
-      pwmCommand[i] = maximumPWMOutput[i] - fabs(fmod(pwmCommand[i], maximumPWMOutput[i]));
-    }
-    else if (pwmCommand[i] > maximumPWMOutput[i]) {
-      pwmCommand[i] = fmod(pwmCommand[i], maximumPWMOutput[i]);
+      pwmCommand[i] += (int)((angularChangeCommand * stepPWMOutput[i] ) + 0.5);
+
+      // keeping pwmCommand in boundaries, enabling crossing
+      if (pwmCommand[i] < minimumPWMOutput[i]) { //CROSSING RIGHT -> LEFT
+        pwmCommand[i] = maximumPWMOutput[i] - fabs(fmod(minimumPWMOutput[i], pwmCommand[i]));
+        crossingCommand[i] = 2;
+      } else if (pwmCommand[i] > maximumPWMOutput[i]) { //CROSSING LEFT -> RIGHT
+        pwmCommand[i] = minimumPWMOutput[i] + fmod(pwmCommand[i], maximumPWMOutput[i]);
+        crossingCommand[i] = 1;
+      }
     }
   }
-  //}
   receivedCommand[0] = '\0'; //resets array, so it is not read twice
+  enableMotors = 1;
 }
 
 void sendNanoCommand() {
   Serial1.print(SEND_PWM_COMMAND);
-  Serial.print(SEND_PWM_COMMAND);
   for (int i = 0; i < NUMBER_CONNECTED_NANOS; i++) {
-    itoa(pwmCommand[i], commandNano, 16); 
-    //strLength = strlen(commandNano); //not necessary, 2 digit hex is 255 max -> smaller than minimumPWM
-    Serial1.print(crossing[i]);
-    Serial.print(crossing[i]);
+    Serial1.print(crossingCommand[i]);
+    itoa(pwmCommand[i], commandNano, 16);
     for (int j = 0; j < (DIGITS_PWM_COMMAND - 1); j++) {
       Serial1.print(commandNano[j]);
-      Serial.print(commandNano[j]);
     }
   }
   Serial1.println();
+  //Serial1.println();
   Serial1.flush();
-  Serial.flush();
 }
 
 
