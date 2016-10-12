@@ -154,8 +154,8 @@ void loop() {
   if ((millis() - t_ref) > TIME_STEP * 1000) { // Operate at roughly 20Hz time
     t_ref = millis(); // Reset the time (AT A LATER DATE PROTECTION MAY BE NEEDED FOR OVERFLOW
     if (systemOn) {
-        requestNanoFeedback();
-        sendNanoFeedback();
+      requestNanoFeedback();
+      sendNanoFeedback();
       /*
         radCounter++;
         rad = radCounter * 0.075;
@@ -222,9 +222,10 @@ void setInitialLengths() {
 }
 
 void requestNanoFeedback() {
+
   for (int i = 0; i < NUMBER_CONNECTED_NANOS; i++) {
     serialNano[i].listen();
-    Serial1.println('f'); //requests feedback from nano
+    Serial1.println('f' + String(i)); //requests feedback from nano
     Serial1.flush(); //waits for the sending of Serial to be complete before moving on
 
     counter = 0;
@@ -235,6 +236,7 @@ void requestNanoFeedback() {
       //receivedFeedback = Serial.readStringUntil('\n');
       for (int j = 0; j < DIGITS_PWM_FEEDBACK; j++) {
         feedbackNano[j] = serialNano[i].read();
+        Serial.print(feedbackNano[j]);
       }
       feedbackNano[DIGITS_PWM_FEEDBACK] = '\0';
 
@@ -242,6 +244,8 @@ void requestNanoFeedback() {
         serialNano[i].read(); //clears the buffer of any other bytes
       }
       pwmFeedback[i] = strtol(feedbackNano, 0, 16);
+      Serial.print("  ");
+      Serial.print(pwmFeedback[i]);
       if (pwmFeedback[i] > pwmLastFeedback[i]) { //possible crossing CCW (right -> left)
         if ((-rangePWMOutput[i] - pwmLastFeedback[i] + pwmFeedback[i]) > (pwmLastFeedback[i] - pwmFeedback[i])) {
           pwmFeedbackDiff = pwmFeedback[i] - rangePWMOutput[i] - pwmLastFeedback[i];
@@ -255,9 +259,16 @@ void requestNanoFeedback() {
         pwmFeedbackDiff = pwmFeedback[i] - pwmLastFeedback[i];
         crossingFeedback[i] = false;
       }
+      Serial.print("  ");
+      Serial.print(pwmFeedback[i]);
+      Serial.print(" ");
+      Serial.print(crossingFeedback[i]);
       pwmLastFeedback[i] = pwmFeedback[i];
 
       lastLengthFeedback[i] += (int)(((pwmFeedbackDiff * stepPWMFeedback[i]) * angleToLength) + 0.5); //conversion of pwmDiff to angleChange to lengthChange
+      Serial.print(" length ");
+      Serial.print(lastLengthFeedback[i]);
+      Serial.print(" ");
     }
   }
 }
@@ -274,6 +285,7 @@ void sendNanoFeedback() {
       Serial.print(feedbackMega[j]);
     }
   }
+  Serial.println();
 }
 
 
@@ -307,11 +319,14 @@ void readNanoCommand() {
 
 void sendNanoCommand() {
   Serial1.print(SEND_PWM_COMMAND);
+  Serial.print(SEND_PWM_COMMAND);
   for (int i = 0; i < NUMBER_CONNECTED_NANOS; i++) {
     Serial1.print(crossingCommand[i]);
+    Serial.print(crossingCommand[i]);
     itoa(pwmCommand[i], commandNano, 16);
     for (int j = 0; j < (DIGITS_PWM_COMMAND - 1); j++) {
       Serial1.print(commandNano[j]);
+      Serial.print(commandNano[j]);
     }
   }
   Serial1.println();
