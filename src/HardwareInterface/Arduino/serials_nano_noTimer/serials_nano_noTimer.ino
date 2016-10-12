@@ -1,4 +1,5 @@
-#include <string.h>#include <Wire.h>
+#include <string.h>
+#include <Wire.h>
 #include <math.h>
 
 #define NANO_ID 0
@@ -30,12 +31,12 @@ int maximumPWMOutput[8] = {1488, 1485, 1489, 1481, 1488, 1490, 1490, 1509};
 int minimumPWMOutput[8] = {469, 469, 471, 473, 469, 471, 474, 481}; //3, 6, 7 increased by 5
 int clockwise_max[8] = {2194, 2175, 2185, 2175, 2189, 2188, 2188, 2215};
 int clockwise_min[8] = {2094, 2082, 2090, 2079, 2089, 2088, 2088, 2117};
-int clockwise_max_speed[8] = {283, 278, 272, 269, 272, 281, 278, 278};
-int clockwise_min_speed[8] = {130, 131, 127, 127, 127, 128, 133, 130};
-int anticlockwise_max[8] = {1800, 1780, 1785, 1780, 1785, 1786, 1788, 1811};
+int clockwise_max_speed[8] = {791, 777, 764, 756, 752, 780, 770, 796};
+int clockwise_min_speed[8] = {374, 364, 370, 363, 345, 360, 370, 373};
+int anticlockwise_max[8] = {1791, 1780, 1785, 1780, 1785, 1786, 1788, 1811};
 int anticlockwise_min[8] = {1891, 1880, 1887, 1876, 1885, 1886, 1888, 1910};
-int anticlockwise_max_speed[8] = { -281, -278, -273, -269, -270, -279, -273, -279};
-int anticlockwise_min_speed[8] = { -133, -130, -132, -129, -124, -129, -128, -131};
+int anticlockwise_max_speed[8] = { 281, 278, 273, 269, 270, 279, 273, 279}; //All are negative values
+int anticlockwise_min_speed[8] = { 365, 366, 356, 335, 352, 358, 365, 372}; //All are negative values
 
 /////////////////////////// SERVO PARAMETERS ///////////////////////// //
 
@@ -52,6 +53,7 @@ int angularChangeFeedback;
 
 int lastDeg;
 int currentDeg = minimumPWMFeedback[NANO_ID];
+double delayTime;
 
 char pwmFeedback[DIGITS_PWM_FEEDBACK];
 
@@ -87,13 +89,13 @@ void sendFeedback();
 void readSerial();
 int readPositionFeedback();
 void quitCrossing();
-void ctrl_motor();
+void ctrl_motor(int pwmMotor);
 void servoPulse(int pulseWidth);
 
 /////////////////////////// CONTROL VARIABLES ///////////////////////////
 
 /// controlling of the method crossing() ///
-boolean cross = 0;
+int cross = 0;
 int crossPulse = 0;
 boolean crossCW;
 
@@ -120,11 +122,10 @@ void readSerial() //receive characterizing prefix (+ length in 2 digit Hex, with
     char command = strReceived[0];
     if (command == RECEIVE_PWM_CMD) { //p
       readPositionFeedback();
-      if (cross) {
+      if ((cross > 0) && (cross < 3)) {
         quitCrossing();
-      } else delay(5);
+      }
       readPWMCommand();
-      //detectCrossing(); //crossing determined by mega now, sends boolean for crossing
       ctrl_motor(pwmCommand);
     }
     else if (command == RECEIVE_FEEDBACK_REQUEST) { //f
@@ -170,22 +171,21 @@ void readSerial() //receive characterizing prefix (+ length in 2 digit Hex, with
 
 void readPWMCommand() {
   char pwmReceived[LENGTH_PWM_COMMAND];
-  cross = strReceived[1 + (LENGTH_PWM_COMMAND * NANO_ID)];
+  cross = strReceived[1 + (LENGTH_PWM_COMMAND * NANO_ID)] - '0';
+  //Serial.print("cross ");
+  //Serial.println(cross);
   for (int i = 0; i < LENGTH_PWM_COMMAND - 1; i++) {
     pwmReceived[i] = strReceived[1 + i + 1 + (LENGTH_PWM_COMMAND * NANO_ID)]; //+1 for prefix, another +1 to omit the crossing boolean
   }
   pwmCommand = strtol(pwmReceived, 0, 16);
-  if (cross = true) {
-    if (pwmCommand > lastPWM) { //->CCW crossing
-      crossCW = false;
-    } else {
+  if ((cross > 0) && (cross < 3)) {
+    if (cross == 1) { //->CW crossing
       crossCW = true;
+    } else if (cross == 2) {
+      crossCW = false;
     }
   }
-  lastPWM = pwmCommand;
 }
-
-
 
 int readPositionFeedback()
 { //reads position feedback and stores it in servoPWM
@@ -208,52 +208,67 @@ int readPositionFeedback()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void detectCrossing() {
-  if (pwmCommand > lastPWM) { //->CCW crossing
-    if (abs((minimumPWMOutput[NANO_ID] - lastPWM) + (pwmCommand - maximumPWMOutput[NANO_ID])) < (pwmCommand - lastPWM)) {
-      cross = true;
-      crossCW = false;
-      Serial.print(" CCW ");
-    }
-  } else if ((maximumPWMOutput[NANO_ID] - lastPWM) + (pwmCommand - minimumPWMOutput[NANO_ID]) < (lastPWM - pwmCommand)) {
-    cross = true;
-    crossCW = true;
-    Serial.print(" CW ");
-  } else cross = false;
+void crossing() {
+  if (crossCW) { //->CW crossing
+    int PWMdifference = pwmCommand - lastPWM;
+    //delayTime = (double)(PWMdifference * 1000 / anticlockwise_max_speed[NANO_ID]);
+    delayTime = 150;
+    // Serial.print(" CW ");
+    //Serial.println(PWMdifference);
+  } else if (!crossCW)
+  { //->CCW crossing
+    int PWMdifference = lastPWM - pwmCommand;
+    //delayTime = (double)(PWMdifference * 1000 / clockwise_max_speed[NANO_ID]);
+    delayTime = 150;
+    //Serial.print(" CCW ");
+    //Serial.println(PWMdifference);
+  } else
+  {
+    cross = false;
+  }
   lastPWM = pwmCommand;
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void quitCrossing() {
+  //Serial.print("servoPWM");
+    //Serial.println(servoPWM);
   if (!crossCW) // From right
-  {
+  {     
     if ((servoPWM < (maximumPWMFeedback[NANO_ID] - DELTA)) && (servoPWM > middlePWMFeedback[NANO_ID] )) {
-      cross = false;
+      cross = 0;
     }
   }
   else if (crossCW) // From left
   {
     if ((servoPWM > DELTA) && (servoPWM <= 720 )) { //smaller/equal because middlePWMFEedback is rounded down
-      cross = false;
+      cross = 0;
     }
   }
 }
 
 void ctrl_motor(int pwmMotor) { //transmits the output signal towards the motor
-  if (cross)
+  if ((cross > 0) && (cross < 3))
   {
     if (crossCW) {
       crossPulse = clockwise_max[NANO_ID];
-    } else {
+    } else if (!crossCW) {
       crossPulse = anticlockwise_max[NANO_ID];
     }
+    //Serial.print("crossPulse");
+    //Serial.println(crossPulse);
     servoPulse(crossPulse);
     servoPulse(crossPulse);
-    Serial.println(crossPulse);
+    //delay(500);
+    //cross = 0;
+    //servoPulse(pwmMotor);
+    //servoPulse(pwmMotor);
+    //Serial.print("pwmMotor");
+    //Serial.println(pwmMotor);
   }
   else {
     servoPulse(pwmMotor);
     servoPulse(pwmMotor);
-    Serial.println(pwmMotor);
+    //Serial.println(pwmMotor);
   }
 }
 
@@ -267,11 +282,8 @@ void servoPulse(int pulseWidth) {
 
 void sendFeedback() {
   itoa(servoPWM, pwmFeedback, 16);
-  for(int i = 0; i < DIGTS_PWM_FEEDBACK; i++){
-  Serial.print(pwmFeedback[i]);
-  Serial.print();
-  Serial.flush();
+  for (int i = 0; i < DIGITS_PWM_FEEDBACK; i++) {
+    Serial.print(pwmFeedback[i]);
+    Serial.flush();
   }
 }
-
-
