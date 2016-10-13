@@ -65,26 +65,39 @@ classdef (Abstract) MotionSimulator < Simulator
         % if the array is []).
         function plotCableLengths(obj, plot_axis, cables_to_plot)
             CASPR_log.Assert(~isempty(obj.cableLengths), 'Cannot plot since lengths vector is empty');
-            CASPR_log.Assert(~isempty(obj.cableLengthsDot), 'Cannot plot since lengths_dot vector is empty');
             if nargin <= 2 || isempty(cables_to_plot)
                 cables_to_plot = 1:obj.model.numCables;
             end
             length_array = cell2mat(obj.cableLengths);
-            length_dot_array = cell2mat(obj.cableLengthsDot);
             if(nargin <= 1||isempty(plot_axis))
                 figure;
                 plot(obj.timeVector, length_array(cables_to_plot, :), 'LineWidth', 1.5, 'Color', 'k');
                 title('Cable Lengths');
-
+            else
+                plot(plot_axis(1),obj.timeVector, length_array(cables_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); 
+            end
+        end
+        
+        % Plots the cable lengths derivative of the CDPR over the trajectory. Users
+        % need to specify the plot axis and also which cables (as an array
+        % of numbers) to plot (it is possible to default to plot all cables
+        % if the array is []).
+        function plotCableLengthsDot(obj, plot_axis, cables_to_plot)
+            CASPR_log.Assert(~isempty(obj.cableLengthsDot), 'Cannot plot since lengths_dot vector is empty');
+            if nargin <= 2 || isempty(cables_to_plot)
+                cables_to_plot = 1:obj.model.numCables;
+            end
+            length_dot_array = cell2mat(obj.cableLengthsDot);
+            if(nargin <= 1||isempty(plot_axis))
                 figure;
                 plot(obj.timeVector, length_dot_array(cables_to_plot, :), 'LineWidth', 1.5, 'Color', 'k');
                 title('Cable Lengths Derivative');
             else
-                plot(plot_axis(1),obj.timeVector, length_array(cables_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); 
                 plot(plot_axis(2),obj.timeVector, length_dot_array(cables_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); 
             end
 
             % ONLY USED IN DEBUGGING START
+%             length_array = cell2mat(obj.cableLengths);
 %             lengths_dot_num = zeros(obj.model.numCables, length(obj.timeVector));
 %             for t = 2:length(obj.timeVector)
 %                 lengths_dot_num(:, t) = (length_array(:, t) - length_array(:, t-1))/(obj.timeVector(t) - obj.timeVector(t-1));
@@ -106,7 +119,6 @@ classdef (Abstract) MotionSimulator < Simulator
                 states_to_plot = 1:n_dof;
             end
             q_array = cell2mat(obj.trajectory.q);
-            q_dot_array = cell2mat(obj.trajectory.q_dot);
             if(nargin <= 1||isempty(plot_axis))
                 % Plots joint space variables q(t)
                 figure;
@@ -114,7 +126,23 @@ classdef (Abstract) MotionSimulator < Simulator
                 title('Joint space variables');
                 xlabel('Time (seconds)');
                 ylabel('Pose');
-
+            else
+                plot(plot_axis(1),obj.timeVector, q_array(states_to_plot, :), 'LineWidth', 1.5, 'Color', 'k');
+            end
+        end
+        
+        % Plots the joint space vars of the CDPR over the trajectory. Users
+        % need to specify the plot axis and also which states (as an array
+        % of numbers) to plot (it is possible to default to plot all states
+        % if the array is []).
+        function plotJointSpaceDot(obj, plot_axis, states_to_plot)
+            CASPR_log.Assert(~isempty(obj.trajectory), 'Cannot plot since trajectory is empty');
+            n_dof = obj.model.numDofs;
+            if nargin <= 2 || isempty(cables_to_plot)
+                states_to_plot = 1:n_dof;
+            end
+            q_dot_array = cell2mat(obj.trajectory.q_dot);
+            if(nargin <= 1||isempty(plot_axis))
                 % Plots derivative joint space variables q_dot(t)
                 figure;
                 plot(obj.timeVector, q_dot_array(states_to_plot, :), 'Color', 'k', 'LineWidth', 1.5);
@@ -122,7 +150,6 @@ classdef (Abstract) MotionSimulator < Simulator
                 xlabel('Time (seconds)');
                 ylabel('Velocity');
             else
-                plot(plot_axis(1),obj.timeVector, q_array(states_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); 
                 plot(plot_axis(2),obj.timeVector, q_dot_array(states_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); 
             end
         end
@@ -139,50 +166,95 @@ classdef (Abstract) MotionSimulator < Simulator
                 bodies_to_plot = 1:obj.model.numLinks;
             end
             pos0 = zeros(3*length(bodies_to_plot), length(obj.timeVector));
-            pos0_dot = zeros(3*length(bodies_to_plot), length(obj.timeVector));
-            pos0_ddot = zeros(3*length(bodies_to_plot), length(obj.timeVector));
             for t = 1:length(obj.timeVector)
                 obj.model.bodyModel.update(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t},zeros(size(obj.trajectory.q_dot{t})));
                 for ki = 1:length(bodies_to_plot)
                     pos0(3*ki-2:3*ki, t) = obj.model.bodyModel.bodies{bodies_to_plot(ki)}.R_0k*obj.model.bodyModel.bodies{bodies_to_plot(ki)}.r_OG;
-                    pos0_dot(3*ki-2:3*ki, t) = obj.model.bodyModel.bodies{bodies_to_plot(ki)}.R_0k*obj.model.bodyModel.bodies{bodies_to_plot(ki)}.v_OG;
-                    pos0_ddot(3*ki-2:3*ki, t) = obj.model.bodyModel.bodies{bodies_to_plot(ki)}.R_0k*obj.model.bodyModel.bodies{bodies_to_plot(ki)}.a_OG;
                 end
             end
             if(nargin <= 1 ||isempty(plot_axis))
                 figure;
                 plot(obj.timeVector, pos0, 'Color', 'k', 'LineWidth', 1.5);
                 title('Position of CoG');
-                
+            else
+                plot(plot_axis(1),obj.timeVector, pos0, 'LineWidth', 1.5, 'Color', 'k'); 
+            end
+        end       
+        
+        % Plots the CoG of the links of the CDPR over the trajectory. Users
+        % need to specify the plot axis and also which bodies (as an array
+        % of numbers) to plot (it is possible to default to plot all bodies
+        % if the array is []).
+        function plotBodyCOGDot(obj, plot_axis, bodies_to_plot)
+            CASPR_log.Assert(~isempty(obj.trajectory), 'Cannot plot since trajectory is empty');
+            % Plots absolute position, velocity and acceleration of COG
+            % with respect to {0}
+            if nargin <= 2 || isempty(bodies_to_plot)
+                bodies_to_plot = 1:obj.model.numLinks;
+            end
+            pos0_dot = zeros(3*length(bodies_to_plot), length(obj.timeVector));
+            for t = 1:length(obj.timeVector)
+                obj.model.bodyModel.update(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t},zeros(size(obj.trajectory.q_dot{t})));
+                for ki = 1:length(bodies_to_plot)
+                    pos0_dot(3*ki-2:3*ki, t) = obj.model.bodyModel.bodies{bodies_to_plot(ki)}.R_0k*obj.model.bodyModel.bodies{bodies_to_plot(ki)}.v_OG;
+                end
+            end
+            if(nargin <= 1 ||isempty(plot_axis))
                 figure;
                 plot(obj.timeVector, pos0_dot, 'Color', 'k', 'LineWidth', 1.5);
                 title('Velocity of CoG');
-                
-                figure;
-                plot(obj.timeVector, pos0_ddot, 'Color', 'k', 'LineWidth', 1.5);
-                title('Acceleration of CoG');
-            else
-                plot(plot_axis(1),obj.timeVector, pos0, 'LineWidth', 1.5, 'Color', 'k'); 
+            else 
                 plot(plot_axis(2),obj.timeVector, pos0_dot, 'LineWidth', 1.5, 'Color', 'k'); 
-                plot(plot_axis(3),obj.timeVector, pos0_ddot, 'LineWidth', 1.5, 'Color', 'k'); 
             end
             % ONLY USED IN DEBUGGING START
             % Numerical derivative must be performed in frame {0}
 %             pos0_dot_num = zeros(size(pos0));
-%             pos0_ddot_num = zeros(size(pos0));
 %             for t = 2:length(obj.timeVector)
 %                 pos0_dot_num(:, t) = (pos0(:, t) - pos0(:, t-1))/(obj.timeVector(t)-obj.timeVector(t-1));
-%                 pos0_ddot_num(:, t) = (pos0_dot_num(:, t) - pos0_dot_num(:, t-1))/(obj.timeVector(t)-obj.timeVector(t-1));
 %             end
 %             figure;
 %             plot(obj.timeVector, pos0_dot_num, 'Color', 'k', 'LineWidth', 1.5);
 %             title('Velocity of CoG (numerical)');
+            % ONLY USED IN DEBUGGING END
+        end
+                
+        % Plots the CoG of the links of the CDPR over the trajectory. Users
+        % need to specify the plot axis and also which bodies (as an array
+        % of numbers) to plot (it is possible to default to plot all bodies
+        % if the array is []).
+        function plotBodyCOGDdot(obj, plot_axis, bodies_to_plot)
+            CASPR_log.Assert(~isempty(obj.trajectory), 'Cannot plot since trajectory is empty');
+            % Plots absolute position, velocity and acceleration of COG
+            % with respect to {0}
+            if nargin <= 2 || isempty(bodies_to_plot)
+                bodies_to_plot = 1:obj.model.numLinks;
+            end
+            pos0_ddot = zeros(3*length(bodies_to_plot), length(obj.timeVector));
+            for t = 1:length(obj.timeVector)
+                obj.model.bodyModel.update(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t},zeros(size(obj.trajectory.q_dot{t})));
+                for ki = 1:length(bodies_to_plot)
+                    pos0_ddot(3*ki-2:3*ki, t) = obj.model.bodyModel.bodies{bodies_to_plot(ki)}.R_0k*obj.model.bodyModel.bodies{bodies_to_plot(ki)}.a_OG;
+                end
+            end
+            if(nargin <= 1 ||isempty(plot_axis))
+                figure;
+                plot(obj.timeVector, pos0_ddot, 'Color', 'k', 'LineWidth', 1.5);
+                title('Acceleration of CoG');
+            else
+                plot(plot_axis(3),obj.timeVector, pos0_ddot, 'LineWidth', 1.5, 'Color', 'k'); 
+            end
+            % ONLY USED IN DEBUGGING START
+            % Numerical derivative must be performed in frame {0}
+%             pos0_ddot_num = zeros(size(pos0));
+%             for t = 2:length(obj.timeVector)
+%                 pos0_ddot_num(:, t) = (pos0_dot_num(:, t) - pos0_dot_num(:, t-1))/(obj.timeVector(t)-obj.timeVector(t-1));
+%             end
 %             figure;
 %             plot(obj.timeVector, pos0_ddot_num, 'Color', 'k', 'LineWidth', 1.5);
 %             title('Acceleration of CoG (numerical)');
             % ONLY USED IN DEBUGGING END
         end
-
+                
         % Plots the angular acceleration of the links of the CDPR. Users
         % need to specify the plot axis and also which bodies (as an array
         % of numbers) to plot (it is possible to default to plot all bodies
@@ -195,25 +267,44 @@ classdef (Abstract) MotionSimulator < Simulator
                 bodies_to_plot = 1:obj.model.numLinks;
             end
             ang0 = zeros(3*length(bodies_to_plot), length(obj.timeVector));
-            ang0_dot = zeros(3*length(bodies_to_plot), length(obj.timeVector));
             for t = 1:length(obj.timeVector)
                 obj.model.bodyModel.update(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t},zeros(size(obj.trajectory.q_ddot{t})));
                 for ki = 1:length(bodies_to_plot)
                     ang0(3*ki-2:3*ki, t) = obj.model.bodyModel.bodies{bodies_to_plot(ki)}.R_0k*obj.model.bodyModel.bodies{bodies_to_plot(ki)}.w;
-                    ang0_dot(3*ki-2:3*ki, t) = obj.model.bodyModel.bodies{bodies_to_plot(ki)}.R_0k*obj.model.bodyModel.bodies{bodies_to_plot(ki)}.w_dot;
                 end
             end
             if(nargin <= 1 || isempty(plot_axis))
                 figure;
                 plot(obj.timeVector, ang0, 'Color', 'k', 'LineWidth', 1.5);
-                title('Angular velocity of rigid bodies');
-
+                title('Angular velocity of rigid bodies');          
+            else
+                plot(plot_axis(1),obj.timeVector, ang0, 'LineWidth', 1.5, 'Color', 'k'); 
+            end
+        end
+        
+        % Plots the angular acceleration of the links of the CDPR. Users
+        % need to specify the plot axis and also which bodies (as an array
+        % of numbers) to plot (it is possible to default to plot all bodies
+        % if the array is []).
+        function plotAngularAccelerationDot(obj, plot_axis, bodies_to_plot)
+            CASPR_log.Assert(~isempty(obj.trajectory), 'Cannot plot since trajectory is empty');
+            % Plots absolute position, velocity and acceleration of COG
+            % with respect to {0}
+            if nargin <= 2 || isempty(bodies_to_plot)
+                bodies_to_plot = 1:obj.model.numLinks;
+            end
+            ang0_dot = zeros(3*length(bodies_to_plot), length(obj.timeVector));
+            for t = 1:length(obj.timeVector)
+                obj.model.bodyModel.update(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t},zeros(size(obj.trajectory.q_ddot{t})));
+                for ki = 1:length(bodies_to_plot)
+                    ang0_dot(3*ki-2:3*ki, t) = obj.model.bodyModel.bodies{bodies_to_plot(ki)}.R_0k*obj.model.bodyModel.bodies{bodies_to_plot(ki)}.w_dot;
+                end
+            end
+            if(nargin <= 1 || isempty(plot_axis))
                 figure;
                 plot(obj.timeVector, ang0_dot, 'Color', 'k', 'LineWidth', 1.5);
-                title('Angular acceleration of rigid bodies');                
+                title('Angular acceleration dot of rigid bodies');                
             else
-
-                plot(plot_axis(1),obj.timeVector, ang0, 'LineWidth', 1.5, 'Color', 'k'); 
                 plot(plot_axis(2),obj.timeVector, ang0_dot, 'LineWidth', 1.5, 'Color', 'k'); 
             end
             % ONLY USED IN DEBUGGING START
@@ -228,6 +319,7 @@ classdef (Abstract) MotionSimulator < Simulator
             % ONLY USED IN DEBUGGING START
         end
     end
+    
     methods (Static)
         % Plots a single image of the CDPR at the specified kinematics.
         % Users can specify the plotting axis and also which figure handle
