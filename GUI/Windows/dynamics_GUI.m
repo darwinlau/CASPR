@@ -1026,7 +1026,9 @@ function run_forward_dynamics(handles,modObj,trajectory_id)
     set(handles.status_text,'String','Running forward dynamics');
     drawnow;
     start_tic = tic;
-    fdsim.run(idsim.cableForces, trajectory.timeVector, trajectory.q{1}, trajectory.q_dot{1});
+    trajectory.q{1}
+    trajectory.q_dot{1}
+    fdsim.run(idsim.cableForcesActive, idsim.cableIndicesActive, trajectory.timeVector, trajectory.q{1}, trajectory.q_dot{1});
     time_elapsed = toc(start_tic);
     fprintf('End Running Forward Dynamics Simulation : %f seconds\n', time_elapsed);
     
