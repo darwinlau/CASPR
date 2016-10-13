@@ -21,6 +21,7 @@ classdef ModelConfigType
         M_NIST_ROBOCRANE
         M_SEGESTA
         M_FAST
+        M_CABLE_ROBOT_SIMULATOR
         M_SIMPLE_SPATIAL
         % Spherical manipulators
         M_MYOROB_SHOULDER
