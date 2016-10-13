@@ -1,4 +1,4 @@
-classdef ArduinoCASPRInterface < handle
+classdef ArduinoCASPRInterface < HardwareInterfaceBase
     properties (Constant)
         M_TO_MM = 1000;
         MM_TO_M = 0.001;
@@ -32,6 +32,7 @@ classdef ArduinoCASPRInterface < handle
         
     methods
         function interface = ArduinoCASPRInterface(comPort, numCmd)
+            interface@HardwareInterfaceBase();
             interface.comPort = comPort;
             interface.numCmd = numCmd;
         end
