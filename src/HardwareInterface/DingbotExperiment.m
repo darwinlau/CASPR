@@ -64,7 +64,7 @@ classdef DingbotExperiment < ExperimentBase
             trajectory_id = 'traj_1';
             
             exp = DingbotExperiment();
-            trajectory = model_config.getTrajectory(trajectory_id);
+            trajectory = exp.modelConfig.getTrajectory(trajectory_id);
             exp.runTrajectory(trajectory);
             figure; 
             plot(trajectory.timeVector, exp.l_cmd_traj);
