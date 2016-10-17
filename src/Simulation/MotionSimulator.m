@@ -74,8 +74,10 @@ classdef (Abstract) MotionSimulator < Simulator
                 plot(obj.timeVector, length_array(cables_to_plot, :), 'LineWidth', 1.5, 'Color', 'k');
                 title('Cable Lengths');
             else
-                plot(plot_axis(1),obj.timeVector, length_array(cables_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); 
+                plot(plot_axis,obj.timeVector, length_array(cables_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); 
             end
+            xlabel('Time (s)');
+            ylabel('Lengths (m)');
         end
         
         % Plots the cable lengths derivative of the CDPR over the trajectory. Users
@@ -93,9 +95,10 @@ classdef (Abstract) MotionSimulator < Simulator
                 plot(obj.timeVector, length_dot_array(cables_to_plot, :), 'LineWidth', 1.5, 'Color', 'k');
                 title('Cable Lengths Derivative');
             else
-                plot(plot_axis(2),obj.timeVector, length_dot_array(cables_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); 
+                plot(plot_axis,obj.timeVector, length_dot_array(cables_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); 
             end
-
+            xlabel('Time (s)');
+            ylabel('Velocity (m/s)');
             % ONLY USED IN DEBUGGING START
 %             length_array = cell2mat(obj.cableLengths);
 %             lengths_dot_num = zeros(obj.model.numCables, length(obj.timeVector));
@@ -124,11 +127,11 @@ classdef (Abstract) MotionSimulator < Simulator
                 figure;
                 plot(obj.timeVector, q_array(states_to_plot, :), 'Color', 'k', 'LineWidth', 1.5);
                 title('Joint space variables');
-                xlabel('Time (seconds)');
-                ylabel('Pose');
             else
-                plot(plot_axis(1),obj.timeVector, q_array(states_to_plot, :), 'LineWidth', 1.5, 'Color', 'k');
+                plot(plot_axis,obj.timeVector, q_array(states_to_plot, :), 'LineWidth', 1.5, 'Color', 'k');
             end
+            xlabel('Time (seconds)');
+            ylabel('Pose');
         end
         
         % Plots the joint space vars of the CDPR over the trajectory. Users
@@ -147,11 +150,11 @@ classdef (Abstract) MotionSimulator < Simulator
                 figure;
                 plot(obj.timeVector, q_dot_array(states_to_plot, :), 'Color', 'k', 'LineWidth', 1.5);
                 title('Joint space derivatives');
-                xlabel('Time (seconds)');
-                ylabel('Velocity');
             else
-                plot(plot_axis(2),obj.timeVector, q_dot_array(states_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); 
+                plot(plot_axis,obj.timeVector, q_dot_array(states_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); 
             end
+            xlabel('Time (seconds)');
+            ylabel('Velocity');            
         end
 
         % Plots the CoG of the links of the CDPR over the trajectory. Users
@@ -177,8 +180,10 @@ classdef (Abstract) MotionSimulator < Simulator
                 plot(obj.timeVector, pos0, 'Color', 'k', 'LineWidth', 1.5);
                 title('Position of CoG');
             else
-                plot(plot_axis(1),obj.timeVector, pos0, 'LineWidth', 1.5, 'Color', 'k'); 
+                plot(plot_axis,obj.timeVector, pos0, 'LineWidth', 1.5, 'Color', 'k'); 
             end
+            xlabel('Time (seconds)');
+            ylabel('Position (m)');            
         end       
         
         % Plots the CoG of the links of the CDPR over the trajectory. Users
@@ -204,8 +209,10 @@ classdef (Abstract) MotionSimulator < Simulator
                 plot(obj.timeVector, pos0_dot, 'Color', 'k', 'LineWidth', 1.5);
                 title('Velocity of CoG');
             else 
-                plot(plot_axis(2),obj.timeVector, pos0_dot, 'LineWidth', 1.5, 'Color', 'k'); 
+                plot(plot_axis,obj.timeVector, pos0_dot, 'LineWidth', 1.5, 'Color', 'k'); 
             end
+            xlabel('Time (seconds)');
+            ylabel('Velocity (m/s)');
             % ONLY USED IN DEBUGGING START
             % Numerical derivative must be performed in frame {0}
 %             pos0_dot_num = zeros(size(pos0));
@@ -241,8 +248,10 @@ classdef (Abstract) MotionSimulator < Simulator
                 plot(obj.timeVector, pos0_ddot, 'Color', 'k', 'LineWidth', 1.5);
                 title('Acceleration of CoG');
             else
-                plot(plot_axis(3),obj.timeVector, pos0_ddot, 'LineWidth', 1.5, 'Color', 'k'); 
+                plot(plot_axis,obj.timeVector, pos0_ddot, 'LineWidth', 1.5, 'Color', 'k'); 
             end
+            xlabel('Time (seconds)');
+            ylabel('Acceleration (m/s^2)');            
             % ONLY USED IN DEBUGGING START
             % Numerical derivative must be performed in frame {0}
 %             pos0_ddot_num = zeros(size(pos0));
@@ -259,7 +268,7 @@ classdef (Abstract) MotionSimulator < Simulator
         % need to specify the plot axis and also which bodies (as an array
         % of numbers) to plot (it is possible to default to plot all bodies
         % if the array is []).
-        function plotAngularAcceleration(obj, plot_axis, bodies_to_plot)
+        function plotAngularVelocity(obj, plot_axis, bodies_to_plot)
             CASPR_log.Assert(~isempty(obj.trajectory), 'Cannot plot since trajectory is empty');
             % Plots absolute position, velocity and acceleration of COG
             % with respect to {0}
@@ -278,15 +287,17 @@ classdef (Abstract) MotionSimulator < Simulator
                 plot(obj.timeVector, ang0, 'Color', 'k', 'LineWidth', 1.5);
                 title('Angular velocity of rigid bodies');          
             else
-                plot(plot_axis(1),obj.timeVector, ang0, 'LineWidth', 1.5, 'Color', 'k'); 
+                plot(plot_axis,obj.timeVector, ang0, 'LineWidth', 1.5, 'Color', 'k'); 
             end
+            xlabel('Time (seconds)');
+            ylabel('Angular Velocity (rad/s)');            
         end
         
         % Plots the angular acceleration of the links of the CDPR. Users
         % need to specify the plot axis and also which bodies (as an array
         % of numbers) to plot (it is possible to default to plot all bodies
         % if the array is []).
-        function plotAngularAccelerationDot(obj, plot_axis, bodies_to_plot)
+        function plotAngularAcceleration(obj, plot_axis, bodies_to_plot)
             CASPR_log.Assert(~isempty(obj.trajectory), 'Cannot plot since trajectory is empty');
             % Plots absolute position, velocity and acceleration of COG
             % with respect to {0}
@@ -305,8 +316,10 @@ classdef (Abstract) MotionSimulator < Simulator
                 plot(obj.timeVector, ang0_dot, 'Color', 'k', 'LineWidth', 1.5);
                 title('Angular acceleration dot of rigid bodies');                
             else
-                plot(plot_axis(2),obj.timeVector, ang0_dot, 'LineWidth', 1.5, 'Color', 'k'); 
+                plot(plot_axis,obj.timeVector, ang0_dot, 'LineWidth', 1.5, 'Color', 'k'); 
             end
+            xlabel('Time (seconds)');
+            ylabel('Angular Acceleration (rad/s^3)');            
             % ONLY USED IN DEBUGGING START
 %             % Numerical derivative must be performed in frame {0}
 %             ang0_dot_num = zeros(size(ang0));

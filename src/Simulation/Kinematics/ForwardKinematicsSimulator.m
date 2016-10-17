@@ -84,6 +84,8 @@ classdef ForwardKinematicsSimulator < MotionSimulator
             else
                 plot(plot_axis, obj.timeVector, lengthError_array, 'Color', 'k', 'LineWidth', 1.5);
             end
+            xlabel('Time (seconds)')
+            ylabel('Error (m)');
         end
     end
 end

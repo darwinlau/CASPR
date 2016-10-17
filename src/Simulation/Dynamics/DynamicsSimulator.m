@@ -49,14 +49,14 @@ classdef DynamicsSimulator < MotionSimulator
                 plot(obj.timeVector(valid_forces_ind_inv), forces(cables_to_plot, valid_forces_ind_inv), '.', 'LineWidth', 1.5, 'Color', 'r'); 
                 hold off;
                 title('Cable forces');                 
-                xlabel('Time (seconds)')
-                ylabel('Force (N)');
             else
                 hold on;
                 plot(plot_axis,obj.timeVector(valid_forces_ind), forces(cables_to_plot, valid_forces_ind), '.', 'LineWidth', 1.5, 'Color', 'k'); 
                 plot(plot_axis,obj.timeVector(valid_forces_ind_inv), forces(cables_to_plot, valid_forces_ind_inv), '.', 'LineWidth', 1.5, 'Color', 'r'); 
                 hold off;                
             end
+            xlabel('Time (seconds)')
+            ylabel('Force (N)');
         end
         
         % Plots the magnitude of interaction forces trajectory. Users
@@ -89,6 +89,8 @@ classdef DynamicsSimulator < MotionSimulator
             else
                 plot(plot_axis,obj.timeVector, forcesMag, 'LineWidth', 1.5, 'Color', 'k');
             end
+            xlabel('Time (seconds)')
+            ylabel('Force (N)');
         end        
         
         % Plots the interaction angle into the Z axis.
