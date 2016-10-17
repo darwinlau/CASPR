@@ -77,9 +77,7 @@ classdef CASPR_log
     
     methods(Access = private, Static)
         function [log_level,fid,carrage_return] = Extract()
-            % Load the logging information and the fprintf location
-            home_path = cd;
-            log_struct = load([home_path,'/data/config/log_level.mat']);
+            log_struct = load('data/config/log_level.mat');
             % Determine the what to print to
             if(isempty(log_struct.log_path))
                 fid = 1;

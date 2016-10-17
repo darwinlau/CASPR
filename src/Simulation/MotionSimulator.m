@@ -346,7 +346,7 @@ classdef (Abstract) MotionSimulator < Simulator
             end
             
             axis(plot_axis);
-            view(view_angle'); 
+            view(view_angle); 
             hold on;
             grid on;
             xlabel('x');

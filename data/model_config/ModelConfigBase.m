@@ -86,7 +86,7 @@ classdef (Abstract) ModelConfigBase < handle
             % cables XML
             c.defaultCableSetId = char(c.cablesXmlObj.getDocumentElement.getAttribute('default_cable_set'));
             c.displayRange = XmlOperations.StringToVector(char(c.bodiesXmlObj.getDocumentElement.getAttribute('display_range')));
-            c.viewAngle = XmlOperations.StringToVector(char(c.bodiesXmlObj.getDocumentElement.getAttribute('view_angle')));
+            c.viewAngle = XmlOperations.StringToVector(char(c.bodiesXmlObj.getDocumentElement.getAttribute('view_angle')))';
             % Loads the bodiesModel to be used for the trajectory loading
             bodies_xmlobj = c.getBodiesPropertiesXmlObj();
             cableset_xmlobj = c.getCableSetXmlObj(c.defaultCableSetId);
