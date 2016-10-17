@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<links display_range="-1.0 1.0 -1.0 1.0 -1.0 1.0" view_angle="-37 32">
+  <link_rigid num="1" name="Upper Arm">
+    <joint type="S_EULER_XYZ" q_initial="0 0 0"/>
+    <physical>
+      <mass>3.0</mass>
+      <com_location>0.0 0.0 -0.13</com_location>
+      <end_location>0.0 0.0 -0.3</end_location>
+      <inertia ref="com">
+        <Ixx>0.0225</Ixx>
+        <Iyy>0.0225</Iyy>
+        <Izz>0.0</Izz>
+        <Ixy>0.0</Ixy>
+        <Ixz>0.0</Ixz>
+        <Iyz>0.0</Iyz>
+      </inertia>
+    </physical>
+    <parent>
+      <num>0</num>
+      <location>0.0 0.0 0.0</location>
+    </parent>
+  </link_rigid>
+  <link_rigid num="2" name="Forearm">
+    <joint type="R_Y" q_initial="0"/>
+    <physical>
+      <mass>2.0</mass>
+      <com_location>0.0 0.0 -0.12</com_location>
+      <end_location>0.0 0.0 -0.28</end_location>
+      <inertia ref="com">
+        <Ixx>0.0131</Ixx>
+        <Iyy>0.0131</Iyy>
+        <Izz>0.0</Izz>
+        <Ixy>0.0</Ixy>
+        <Ixz>0.0</Ixz>
+        <Iyz>0.0</Iyz>
+      </inertia>
+    </physical>
+    <parent>
+      <num>1</num>
+      <location>0.0 0.0 -0.3</location>
+    </parent>
+  </link_rigid>
+</links>

@@ -18,6 +18,7 @@ classdef (Abstract) JointBase < handle
         q                   % Joint variable q (generalised coordinates)
         q_dot               % Derivative of q
         q_ddot              % Double derivative of q
+        q_initial           % The initial value of q for plotting
         
         % Dependent but stored values (hence private set)
         R_pe                % The relative rotation
@@ -78,7 +79,7 @@ classdef (Abstract) JointBase < handle
         
     methods (Static)
         % Create a new joint
-        function j = CreateJoint(jointType)
+        function j = CreateJoint(jointType,q_initial)
             switch jointType
                 case JointType.R_X
                     j = RevoluteX;
@@ -110,13 +111,20 @@ classdef (Abstract) JointBase < handle
                     CASPR_log.Print('Joint type is not defined',CASPRLogLevel.ERROR);
             end
             j.type = jointType;
-            j.update(j.q_default, j.q_dot_default, j.q_ddot_default);
+            if(nargin == 2)
+                j.q_initial = q_initial;
+                j.update(j.q_initial, j.q_dot_default, j.q_ddot_default);
+            else
+                j.q_initial = j.q_default;
+                j.update(j.q_default, j.q_dot_default, j.q_ddot_default);
+            end
         end
         
         % Load new xml objects
         function j = LoadXmlObj(xmlObj)
             jointType = JointType.(char(xmlObj.getAttribute('type')));
-            j = JointBase.CreateJoint(jointType);
+            q_initial = XmlOperations.StringToVector(char(xmlObj.getAttribute('q_initial')));
+            j = JointBase.CreateJoint(jointType, q_initial);
         end
         
         % Perform a simple first order integral

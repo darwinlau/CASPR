@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<links display_range="-0.25 1.25 -0.25 1.25 -0.25 1.25" view_angle="-37 32">
+  <link_rigid num="1" name="Spatial Manipulator">
+    <joint type="SPATIAL_EULER_XYZ" q_initial="0.5 0.5 0.5 0 0 0"/>
+    <physical>
+      <mass>1</mass>
+      <com_location>0.0 0.0 0.0</com_location>
+      <end_location>0.0 0.0 0.15</end_location>
+      <inertia ref="com">
+        <Ixx>0.0042</Ixx>
+        <Iyy>0.0083</Iyy>
+        <Izz>0.0108</Izz>
+        <Ixy>0.0</Ixy>
+        <Ixz>0.0</Ixz>
+        <Iyz>0.0</Iyz>
+      </inertia>
+    </physical>
+    <parent>
+      <num>0</num>
+      <location>0.0 0.0 0.0</location>
+    </parent>
+  </link_rigid>
+</links>

@@ -17,7 +17,7 @@ modelObj = model_config.getModel(cable_set_id);
 
 id_objective = IDObjectiveMinQuadCableForce(ones(modelObj.numCables,1));
 id_solver = IDSolverQuadProg(modelObj, id_objective, ID_QP_SolverType.MATLAB);
-Kp_computedtorque = 100*eye(modelObj.numDofs);
+Kp_computedtorque = 50*eye(modelObj.numDofs);
 Kd_computedtorque = 15*eye(modelObj.numDofs);
 controller = ComputedTorqueController(modelObj, id_solver, Kp_computedtorque, Kd_computedtorque);
 

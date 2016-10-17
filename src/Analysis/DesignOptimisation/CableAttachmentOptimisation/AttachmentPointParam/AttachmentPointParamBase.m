@@ -18,7 +18,7 @@ classdef (Abstract) AttachmentPointParamBase < handle
     end
 
     properties (SetAccess = private)
-        attachmentRefType
+        attachmentRefType % What is this typically
     end
 
     properties (Abstract, Dependent)

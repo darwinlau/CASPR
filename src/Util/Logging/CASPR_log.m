@@ -18,7 +18,11 @@ classdef CASPR_log
             else
                 log_path = [];
             end
-            save('logs/log_level.mat', 'log_level', 'log_path');
+            home_path = cd;
+            if(~exist([home_path,'/data/config'],'dir'))
+                mkdir([home_path,'/data/config'])
+            end
+            save([home_path,'/data/config/log_level.mat'], 'log_level', 'log_path');
         end
         
         % Prints debug statement
@@ -74,7 +78,8 @@ classdef CASPR_log
     methods(Access = private, Static)
         function [log_level,fid,carrage_return] = Extract()
             % Load the logging information and the fprintf location
-            log_struct = load('logs/log_level.mat');
+            home_path = cd;
+            log_struct = load([home_path,'/data/config/log_level.mat']);
             % Determine the what to print to
             if(isempty(log_struct.log_path))
                 fid = 1;

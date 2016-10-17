@@ -19,7 +19,6 @@ classdef Spline
                 0 0 2 6*t_e 12*t_e^2 20*t_e^3];
             b = [x_s; x_s_dot; x_s_ddot; x_e; x_e_dot; x_e_ddot];
             a = T\b;
-
             x = a(1) + a(2)*t + a(3)*t.^2 + a(4)*t.^3 + a(5)*t.^4 + a(6)*t.^5;
             x_dot = a(2) + 2*a(3)*t + 3*a(4)*t.^2 + 4*a(5)*t.^3 + 5*a(6)*t.^4;
             x_ddot = 2*a(3) + 6*a(4)*t + 12*a(5)*t.^2 + 20*a(6)*t.^3;

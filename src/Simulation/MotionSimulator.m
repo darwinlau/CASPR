@@ -37,7 +37,7 @@ classdef (Abstract) MotionSimulator < Simulator
         % video. The video will be recorded at 30 fps so the number of
         % frames will be computed to confirm to the total time of the
         % video.
-        function plotMovie(obj, plot_axis, filename, time, width, height)
+        function plotMovie(obj, plot_axis, view_angle, filename, time, width, height)
             CASPR_log.Assert(~isempty(obj.trajectory), 'Cannot plot since trajectory is empty');
             fps = 30;
             writerObj = VideoWriter(filename);
@@ -50,7 +50,7 @@ classdef (Abstract) MotionSimulator < Simulator
                     t = 1;
                 end
                 obj.model.update(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t}, zeros(size(obj.trajectory.q_dot{t})));
-                MotionSimulator.PlotFrame(obj.model, plot_axis, plot_handle)
+                MotionSimulator.PlotFrame(obj.model, plot_axis, view_angle, plot_handle)
                 frame = getframe(plot_handle);
                 writerObj.writeVideo(frame);
                 clf(plot_handle);
@@ -325,15 +325,15 @@ classdef (Abstract) MotionSimulator < Simulator
         % Users can specify the plotting axis and also which figure handle
         % to plot too. If no or empty figure handle is specified then a new
         % figure plot will be created.
-        function PlotFrame(kinematics, plot_axis, fig_handle)
-            if nargin < 3 || isempty(fig_handle)
+        function PlotFrame(kinematics, plot_axis, view_angle, fig_handle)
+            if nargin < 4 || isempty(fig_handle)
                 figure;
             else
                 figure(fig_handle);
             end
             
             axis(plot_axis);
-            view(-37,32); 
+            view(view_angle'); 
             hold on;
             grid on;
             xlabel('x');

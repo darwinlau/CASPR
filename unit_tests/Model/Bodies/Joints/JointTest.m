@@ -26,7 +26,7 @@ classdef JointTest < matlab.unittest.TestCase
         % Test that the joint can be updated
         function testUpdate(testCase)
             disp('Testing Joint Update')
-            testCase.jointObj.update(testCase.jointObj.q_default, zeros(testCase.jointObj.numDofs,1), zeros(testCase.jointObj.numDofs,1));
+            testCase.jointObj.update(testCase.jointObj.q_initial, zeros(testCase.jointObj.numDofs,1), zeros(testCase.jointObj.numDofs,1));
             testCase.assertJointPropertySize()
         end
 
@@ -63,6 +63,7 @@ classdef JointTest < matlab.unittest.TestCase
             testCase.assertLength(testCase.jointObj.q,testCase.jointObj.numVars,'q of wrong dimension');
             testCase.assertLength(testCase.jointObj.q_dot,testCase.jointObj.numDofs,'q_dot of wrong dimension');
             testCase.assertLength(testCase.jointObj.q_ddot,testCase.jointObj.numDofs,'q_ddot of wrong dimension');
+            testCase.assertLength(testCase.jointObj.q_initial,testCase.jointObj.numVars,'q_initial of wrong dimension');
             testCase.assertLength(testCase.jointObj.q_default,testCase.jointObj.numVars,'q_default of wrong dimension');
             testCase.assertLength(testCase.jointObj.q_dot_default,testCase.jointObj.numDofs,'q_dot_default of wrong dimension');
             testCase.assertLength(testCase.jointObj.q_ddot_default,testCase.jointObj.numDofs,'q_ddot_default of wrong dimension');

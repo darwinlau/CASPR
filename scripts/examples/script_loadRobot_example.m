@@ -14,4 +14,4 @@ model_config = ModelConfig(ModelConfigType.M_SEGESTA);
 cdpr = model_config.getModel(model_config.defaultCableSetId);
 
 % Plot to see the robot
-MotionSimulator.PlotFrame(cdpr, model_config.displayRange);
+MotionSimulator.PlotFrame(cdpr, model_config.displayRange, model_config.viewAngle);

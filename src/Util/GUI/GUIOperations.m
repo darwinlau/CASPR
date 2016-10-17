@@ -38,7 +38,7 @@ classdef GUIOperations
         function CreateTabGroup(handles)
             tabgp = uitabgroup(handles.tab_panel,'Position',[0 0 1 1]);
             % A temporary hack to make the figures plot correctly
-            tab1 = uitab(tabgp,'Title','Home Tab');
+            tab1 = uitab(tabgp,'Title','0');
             ax = axes;
             set(ax,'Parent',tab1,'OuterPosition',[0,0,1,1],'Xtick',[],'Ytick',[]);
             t1 = text(0.1,0.8,'CASPR GUI Tab','FontSize',25,'FontUnits','normalized');
