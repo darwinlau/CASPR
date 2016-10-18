@@ -14,7 +14,7 @@ classdef DingbotExperiment < ExperimentBase
             % Load the SystemKinematics object from the XML
             modelObj = model_config.getModel(cable_set_id);
             % Create the hardware interface
-            hw_interface = ArduinoCASPRInterface('COM4', 8);            
+            hw_interface = ArduinoCASPRInterface('COM3', 1);            
             eb@ExperimentBase(hw_interface, modelObj);
             eb.modelConfig = model_config;
         end
@@ -86,27 +86,29 @@ classdef DingbotExperiment < ExperimentBase
             exp.hardwareInterface.detectDevice()
             
             % Set the initial lengths all to be 0.5m
-            l0 = [0.5; 0.5; 0.5; 0.5; 0.5; 0.5; 0.5; 0.5];
-            exp.hardwareInterface.lengthInitialSend(l0);
+            %l0 = [0.5];
+            %l0 = [0.5; 0.5; 0.5; 0.5; 0.5; 0.5; 0.5; 0.5];
+            %exp.hardwareInterface.lengthInitialSend(l0);
             
             % Start the system to get feedback
             exp.hardwareInterface.systemOnSend();
             % Should drive the system for 3 seconds (60 * 0.05s)
-            for t=1:60
-                % Wait for feedback to start the 50ms loop
+            for t=1:6000
+            % Wait for feedback to start the 50ms loop
                 exp.hardwareInterface.cmdRead();
                 % Send the 1cm movement down
-                exp.hardwareInterface.lengthCommandSend(l0 + [0.010; 0.010; 0.010; 0.010; 0.010; 0.010; 0.010; 0.010]);
+                % exp.hardwareInterface.lengthCommandSend(l0 + [0.010; 0.010; 0.010; 0.010; 0.010; 0.010; 0.010; 0.010]);
                 % Store the feedback received
                 exp.l_feedback_traj(:, t) = exp.hardwareInterface.feedback;
+                exp.l_feedback_traj(:, t)
             end
             
             % Stop the feedback
             exp.hardwareInterface.systemOffSend();
             % Close the hardware interface
             exp.closeHardwareInterface();
-            
             plot(0.05:0.05:3, exp.l_feedback_traj);
+
         end
     end
 end

@@ -84,7 +84,7 @@ classdef ArduinoCASPRInterface < HardwareInterfaceBase
         % All length commands are to be sent to hardware in terms of [mm]
         % Note: l_cmd from CASPR will be in the units [m]
         function lengthCommandSend(obj, l_cmd)
-            l_cmd = l_cmd(1:8);
+            l_cmd = l_cmd(1:1);
             CASPR_log.Assert(length(l_cmd) == obj.numCmd, sprintf('Number of command values must be equal to %d', obj.numCmd));
             str_cmd = obj.SEND_PREFIX_LENGTH_CMD;
             for i = 1:obj.numCmd
@@ -140,6 +140,7 @@ classdef ArduinoCASPRInterface < HardwareInterfaceBase
         % Unit on hardware [mm] * lengthMult (to increase resolution) sent to CASPR in hex format
         function caspr_length = hardwareLengthToCASPR(obj, hardware_length_str)
             caspr_length = hex2dec(hardware_length_str) * obj.MM_TO_M / obj.lengthMult;
+            caspr_length
         end
         
         % Unit on CASPR [m], convert to [mm] with multiplier and in HEX to
