@@ -16,12 +16,13 @@
 // Defining constants
 #define FEEDBACK_FREQUENCY 20// In Hz
 #define TIME_STEP 1.0/FEEDBACK_FREQUENCY
-#define NUMBER_CONNECTED_NANOS 8
+#define NUMBER_CONNECTED_NANOS 1
 #define BAUD_RATE 74880
 
 #define HEX_DIGITS_LENGTH 4
 #define DIGITS_PWM_COMMAND 4
 #define DIGITS_PWM_FEEDBACK 3
+#define CROSSING_ID 1
 
 #define REQUEST_FEEDBACK 'f'
 #define REQUEST_TEST 't'
@@ -82,7 +83,8 @@ char tmpRead[HEX_DIGITS_LENGTH];
 char commandNano[DIGITS_PWM_COMMAND - 1];
 
 float lengthToAngle = 720.0 / (M_PI * RADIUS); //1.14591562747955322265625
-float angleToLength = (M_PI * RADIUS) / 45.0; // 13.9626340866088867
+float angleToLength = (M_PI * RADIUS) / 720.0; // 0.8726646259971650
+
 
 
 unsigned int tmpSendLength;
@@ -137,8 +139,30 @@ void setup() {
 
     /////// TEMPORARY - REVISE LATER AFTER CALIBRATION //////////
     pwmCommand[i] = middlePWMFeedback[i] - 13;
+  }
+  ///// READ INITIAL FEEDBACK FROM EACH NANO /////
+  for (int i = 0; i < NUMBER_CONNECTED_NANOS; i++) {
+    serialNano[i].listen();
+    Serial1.println('f' + String(i)); //requests feedback from nano
+    Serial1.flush(); //waits for the sending of Serial to be complete before moving on
 
+    counter = 0;
+    while ((serialNano[i].available() == 0) && counter < 200) {
+      counter++;
+    }
+    if (serialNano[i].available() > 0) {
+      //receivedFeedback = Serial.readStringUntil('\n');
+      for (int j = 0; j < DIGITS_PWM_FEEDBACK; j++) {
+        feedbackNano[j] = serialNano[i].read();
+      }
+      feedbackNano[DIGITS_PWM_FEEDBACK] = '\0';
 
+      while (serialNano[i].available() > 0) {
+        serialNano[i].read(); //clears the buffer of any other bytes
+      }
+      pwmFeedback[i] = strtol(feedbackNano, 0, 16);
+
+    }
   }
   t_ref = millis();
   //receivedCommand = INITIAL_LENGTH_COMMAND;
@@ -255,7 +279,7 @@ void sendNanoFeedback() {
     itoa(lastLengthFeedback[i], feedbackMega, 16);
     strLength = strlen(feedbackMega);
 
-    for (int j = 0; j < (4 - strLength); j++) {
+    for (int j = 0; j < (DIGITS_PWM_FEEDBACK + CROSSING_ID - strLength); j++) {
       Serial.print('0');
       Serial.flush();
     }
@@ -267,7 +291,7 @@ void sendNanoFeedback() {
   Serial.println();
   Serial.flush();
 
-  
+
 }
 
 
