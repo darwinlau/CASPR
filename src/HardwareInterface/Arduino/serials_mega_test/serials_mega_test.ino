@@ -16,7 +16,7 @@
 // Defining constants
 #define FEEDBACK_FREQUENCY 20// In Hz
 #define TIME_STEP 1.0/FEEDBACK_FREQUENCY
-#define NUMBER_CONNECTED_NANOS 1
+#define NUMBER_CONNECTED_NANOS 8
 #define BAUD_RATE 74880
 
 #define HEX_DIGITS_LENGTH 4
@@ -151,24 +151,12 @@ void loop() {
     t_ref = millis(); // Reset the time (AT A LATER DATE PROTECTION MAY BE NEEDED FOR OVERFLOW
     if (systemOn) {
       requestNanoFeedback();
-      sendNanoFeedback();
-      /*
-        radCounter++;
-        rad = radCounter * 0.075;
-        sinDeg = sin(rad) * 720;
-        sinDeg += 720;
-        angularChangeCommand = sinDeg - lastSinDeg;
-        lastSinDeg = sinDeg;
-
-        tmpSendLength = sin(rad) * 1500;
-        tmpSendLength += 32768;
-      */
-      readNanoCommand();
       if (enableMotors) {
+        readNanoCommand();
         sendNanoCommand(); // Set up to send command for the nano
       }
+      sendNanoFeedback();
     }
-
   }
 }
 
@@ -257,7 +245,7 @@ void requestNanoFeedback() {
       pwmLastFeedback[i] = pwmFeedback[i];
 
       lastLengthFeedback[i] += (int)(((pwmFeedbackDiff * stepPWMFeedback[i]) * angleToLength)); //conversion of pwmDiff to angleChange to lengthChange
-     }
+    }
   }
 }
 
@@ -266,14 +254,20 @@ void sendNanoFeedback() {
   for (int i = 0; i < NUMBER_CONNECTED_NANOS; i++) {
     itoa(lastLengthFeedback[i], feedbackMega, 16);
     strLength = strlen(feedbackMega);
-    for (int j = 0; j < (DIGITS_PWM_FEEDBACK - strLength); j++) {
+
+    for (int j = 0; j < (4 - strLength); j++) {
       Serial.print('0');
+      Serial.flush();
     }
     for (int j = 0; j < strLength; j++) { //fills sendFeedback array at right position, no conversion necessary
       Serial.print(feedbackMega[j]);
+      Serial.flush();
     }
   }
   Serial.println();
+  Serial.flush();
+
+  
 }
 
 
