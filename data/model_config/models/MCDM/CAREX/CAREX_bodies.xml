@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<links display_range="-1.0 1.0 -1.0 1.0 -1.0 1.0" view_angle="-37 32">
+<links display_range="-0.5 0.5 -0.2 0.2 -0.75 0.25" view_angle="-37 32">
   <link_rigid num="1" name="Upper Arm">
     <joint type="S_EULER_XYZ" q_initial="0 0 0"/>
     <physical>
