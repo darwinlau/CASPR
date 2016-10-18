@@ -92,17 +92,32 @@
         <plot_function type="plotInteractionForceMagnitudes">
             <figure_quantity>1</figure_quantity>
         </plot_function>
+        <plot_function type="plotAngularVelocity">
+            <figure_quantity>1</figure_quantity>
+        </plot_function>
         <plot_function type="plotAngularAcceleration">
-            <figure_quantity>2</figure_quantity>
+            <figure_quantity>1</figure_quantity>
         </plot_function>
         <plot_function type="plotBodyCOG">
-            <figure_quantity>3</figure_quantity>
+            <figure_quantity>1</figure_quantity>
+        </plot_function>
+        <plot_function type="plotBodyCOGDot">
+            <figure_quantity>1</figure_quantity>
+        </plot_function>
+        <plot_function type="plotBodyCOGDdot">
+            <figure_quantity>1</figure_quantity>
         </plot_function>
         <plot_function type="plotJointSpace">
-            <figure_quantity>2</figure_quantity>
+            <figure_quantity>1</figure_quantity>
+        </plot_function>
+        <plot_function type="plotJointSpaceDot">
+            <figure_quantity>1</figure_quantity>
         </plot_function>
         <plot_function type="plotCableLengths">
-            <figure_quantity>2</figure_quantity>
+            <figure_quantity>1</figure_quantity>
+        </plot_function>
+        <plot_function type="plotCableLengthsDot">
+            <figure_quantity>1</figure_quantity>
         </plot_function>
 	</plot_functions>
 </simulator>

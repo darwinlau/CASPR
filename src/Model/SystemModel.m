@@ -104,7 +104,7 @@ classdef SystemModel < handle
             b               =   SystemModel();
             b.bodyModel     =   SystemModelBodies.LoadXmlObj(body_xmlobj);
             b.cableModel    =   SystemModelCables.LoadXmlObj(cable_xmlobj, b.bodyModel);
-            b.update(b.bodyModel.q_default, b.bodyModel.q_dot_default, b.bodyModel.q_ddot_default, zeros(b.numDofs,1));
+            b.update(b.bodyModel.q_initial, b.bodyModel.q_dot_default, b.bodyModel.q_ddot_default, zeros(b.numDofs,1));
         end
     end
 

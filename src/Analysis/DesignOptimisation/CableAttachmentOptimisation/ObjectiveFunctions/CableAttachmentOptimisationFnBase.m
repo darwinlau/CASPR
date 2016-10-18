@@ -8,7 +8,8 @@ classdef (Abstract) CableAttachmentOptimisationFnBase < handle
     end
 
     methods (Abstract)
-        % The "evaluate" function
+        % The "evaluate" function. A new optimisation function needs to
+        % only define a method of evaluation
         Q = evaluate(obj);
     end
 end

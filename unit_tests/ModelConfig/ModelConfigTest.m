@@ -3,7 +3,7 @@
 % Author        : Darwin LAU
 % Created       : 2016
 % Description    :
-%    Unit tests to confirm that the model configuration is correct. 
+%    Unit tests to confirm that the model configuration is correct.
 classdef ModelConfigTest < matlab.unittest.TestCase
     methods (Test)
         % Test that the master_list is correctly setup
@@ -11,7 +11,7 @@ classdef ModelConfigTest < matlab.unittest.TestCase
             disp('Testing masterListValid');
             load('CASPR_environment.mat', 'home_path');
             % Open up and scan through the master list
-            fid = fopen([home_path,'/data/config/models/models_list.csv']);
+            fid = fopen([home_path,'/data/model_config/models/models_list.csv']);
             cell_array = textscan(fid,'%s %s %s %s %s %s','delimiter',',');
             unique_cell_array = unique(cell_array{1});
             % Two tests are conducted firstly are there any repeated files
@@ -23,7 +23,7 @@ classdef ModelConfigTest < matlab.unittest.TestCase
                 ModelConfigType.(cell_array{1}{i});
             end
         end
-        
+
         % Test that the model configuration files exist.
         function modelConfigFilesExistTest(testCase)
             disp('Testing that model config files exist');
@@ -34,7 +34,7 @@ classdef ModelConfigTest < matlab.unittest.TestCase
                 testCase.assertNotEmpty(m);
             end
         end
-        
+
         % Test that all models can be constructed as bodies.
         function modelCreation(testCase)
             disp('Testing model creation');
@@ -46,13 +46,13 @@ classdef ModelConfigTest < matlab.unittest.TestCase
                 testCase.assertNotEmpty(model);
             end
         end
-        
+
         % Test that the test master_list is correctly setup
         function testModelListValidTest(testCase)
             disp('testModelListValid test');
             load('CASPR_environment.mat', 'home_path');
             % Open up and scan through the master list
-            fid = fopen([home_path,'/data/config/test_models/test_models_list.csv']);
+            fid = fopen([home_path,'/data/model_config/test_models/test_models_list.csv']);
             cell_array = textscan(fid,'%s %s %s %s %s %s','delimiter',',');
             unique_cell_array = unique(cell_array{1});
             % Two tests are conducted firstly are there any repeated files
@@ -64,7 +64,7 @@ classdef ModelConfigTest < matlab.unittest.TestCase
                 TestModelConfigType.(cell_array{1}{i});
             end
         end
-        
+
         % Test that the test model configuration files exist.
         function testModelConfigFilesExistTest(testCase)
             disp('testModelConfigFilesExist test');
@@ -75,7 +75,7 @@ classdef ModelConfigTest < matlab.unittest.TestCase
                 testCase.assertNotEmpty(m);
             end
         end
-        
+
         % Test that all test models can be constructed as bodies.
         function testModelCreationTest(testCase)
             disp('testModelBodyCreation test');
@@ -87,13 +87,13 @@ classdef ModelConfigTest < matlab.unittest.TestCase
                 testCase.assertNotEmpty(model);
             end
         end
-        
-        
+
+
         function devModelListValidTest(testCase)
             disp('devModelListValid test');
             load('CASPR_environment.mat', 'home_path');
             % Open up and scan through the master list
-            fid = fopen([home_path,'/data/config/indev_models/indev_models_list.csv']);
+            fid = fopen([home_path,'/data/model_config/indev_models/indev_models_list.csv']);
             cell_array = textscan(fid,'%s %s %s %s %s %s','delimiter',',');
             unique_cell_array = unique(cell_array{1});
             % Two tests are conducted firstly are there any repeated files
@@ -105,7 +105,7 @@ classdef ModelConfigTest < matlab.unittest.TestCase
                 DevModelConfigType.(cell_array{1}{i});
             end
         end
-        
+
         % Test that the test model configuration files exist.
         function devModelConfigFilesExistTest(testCase)
             disp('devModelConfigFilesExist test');
@@ -116,7 +116,7 @@ classdef ModelConfigTest < matlab.unittest.TestCase
                 testCase.assertNotEmpty(m);
             end
         end
-        
+
         % Test that all test models can be constructed as bodies.
         function devModelCreationTest(testCase)
             disp('devModelBodyCreation test');

@@ -33,10 +33,10 @@ function initialise_CASPR()
     
     % Store the home directory
     home_path = cd;
-    if(~exist([home_path,'/logs'],'dir'))
-        mkdir('logs')
+    if(~exist([home_path,'/data/config'],'dir'))
+        mkdir([home_path,'/data/config'])
     end
-    save('logs/CASPR_environment.mat','home_path');
+    save([home_path,'/data/config/CASPR_environment.mat'],'home_path');
     
     % Add the necessary paths
     fprintf('Adding CASPR to library path\n')

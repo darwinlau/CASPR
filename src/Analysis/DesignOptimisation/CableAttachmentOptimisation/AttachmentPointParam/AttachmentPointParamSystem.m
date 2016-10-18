@@ -25,7 +25,7 @@ classdef AttachmentPointParamSystem < handle
             ap.cables = cables;
         end
         
-        % Upddates the state for each cable
+        % Updates the state for each cable
         function updateCableAttachments(obj, x, cablesKin, bodiesKin)
             counter = 0;
             for i = 1:obj.numCables

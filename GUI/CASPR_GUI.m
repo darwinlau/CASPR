@@ -258,7 +258,8 @@ function update_button_Callback(~, ~, handles) %#ok<DEFNU>
     modObj.update(q_data',zeros(modObj.numDofVars,1),zeros(modObj.numDofVars,1),zeros(modObj.numDofVars,1));
     cla;
     axis_range = getappdata(handles.cable_popup,'axis_range');
-    MotionSimulator.PlotFrame(modObj, axis_range,handles.figure1);
+    view_angle = getappdata(handles.cable_popup,'view_angle');
+    MotionSimulator.PlotFrame(modObj, axis_range, view_angle, handles.figure1);
 end
 
 % --- Executes on button press in control_button.
@@ -302,10 +303,12 @@ function generate_model_object(handles)
     modObj.bodyModel.occupied.reset();
     cla;
     display_range = model_config.displayRange;
-    MotionSimulator.PlotFrame(modObj, display_range,handles.figure1);
+    view_angle = model_config.viewAngle;
+    MotionSimulator.PlotFrame(modObj, display_range, view_angle, handles.figure1);
     % Store the dynamics object
     setappdata(handles.cable_popup,'modObj',modObj);
     setappdata(handles.cable_popup,'axis_range',display_range);
+    setappdata(handles.cable_popup,'view_angle',view_angle);
     set(handles.model_label_text,'String',model_type);
     format_q_table(modObj.numDofs,handles.qtable);
 end
@@ -357,17 +360,17 @@ function saveState(handles)
     path_string = fileparts(mfilename('fullpath'));
     path_string = path_string(1:strfind(path_string, 'GUI')-2);
     % Check if the log folder exists
-    if(exist([path_string,'/logs'],'dir')~=7)
-        mkdir([path_string,'/logs']);        
+    if(exist([path_string,'/GUI/config'],'dir')~=7)
+        mkdir([path_string,'/GUI/config']);        
     end
-    save([path_string,'/logs/caspr_gui_state.mat'],'state');
+    save([path_string,'/GUI/config/caspr_gui_state.mat'],'state');
 end
 
 function loadState(handles)
     % load all of the settings and initialise the values to match
     path_string = fileparts(mfilename('fullpath'));
     path_string = path_string(1:strfind(path_string, 'GUI')-2);
-    file_name = [path_string,'/logs/caspr_gui_state.mat'];
+    file_name = [path_string,'/GUI/config/caspr_gui_state.mat'];
     if(exist(file_name,'file'))
         load(file_name);
         set(handles.checkbox,'value',state.checkbox_value);

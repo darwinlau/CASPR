@@ -6,12 +6,12 @@
 %   This class inherits from BodyModel and assumes that the body is a rigid
 %   body. Currently this is the only implementation of the BodyModel as no
 %   elastic/deformable bodies are considered.
-classdef BodyModelRigid < BodyModel
+classdef BodyModelRigid < BodyModelBase
 
     methods
         % The constructor
         function bk = BodyModelRigid(id, name, joint)
-            bk@BodyModel(id, name, joint);
+            bk@BodyModelBase(id, name, joint);
         end
 
         % Updates the joint space
@@ -20,7 +20,7 @@ classdef BodyModelRigid < BodyModel
             % Since bodies and attachment locations do not change, no need to update anything here
 
             % Update standard things from kinematics
-            update@BodyModel(obj, q, q_dot, q_ddot);
+            update@BodyModelBase(obj, q, q_dot, q_ddot);
 
             % Post updates if necessary
         end
@@ -32,14 +32,14 @@ classdef BodyModelRigid < BodyModel
             % <link_rigid> tag
             id = str2double(char(xmlobj.getAttribute('num')));
             name = char(xmlobj.getAttribute('name'));
-            
+
             % <joint_type> tag
             jointXmlObj = xmlobj.getElementsByTagName('joint').item(0);
             joint = JointBase.LoadXmlObj(jointXmlObj);
-                        
+
             % Generate the rigid body object
             bk = BodyModelRigid(id, name, joint);
-            
+
             % <physical> tag
             physicalObj = xmlobj.getElementsByTagName('physical').item(0);
             % <mass>
@@ -75,7 +75,7 @@ classdef BodyModelRigid < BodyModel
             else
                 error('Unknown Reference type: %s', RefString);
             end
-            
+
             % INERTIA REF IS MISSING
             % <parent> tag
             parentObj = xmlobj.getElementsByTagName('parent').item(0);
