@@ -12,7 +12,7 @@ function initialise_CASPR()
     try
         cd('src/Analysis');
     catch
-        error('Incorrect folder structure or you have not called the function from the setup directory');
+        error('Incorrect folder structure or you have not called the function from the CASPR root directory');
     end
     cd(home_path);
     % Set the current version
