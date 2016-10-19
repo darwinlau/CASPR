@@ -98,6 +98,7 @@ classdef SystemModelBodies < handle
     end
 
     properties (Dependent)
+        q_initial
         q_default
         q_dot_default
         q_ddot_default
@@ -713,6 +714,15 @@ classdef SystemModelBodies < handle
         % -------
         % Getters
         % -------        
+        function q = get.q_initial(obj)
+            q = zeros(obj.numDofVars, 1);
+            index_vars = 1;
+            for k = 1:obj.numLinks
+                q(index_vars:index_vars+obj.bodies{k}.joint.numVars-1) = obj.bodies{k}.joint.q_initial;
+                index_vars = index_vars + obj.bodies{k}.joint.numVars;
+            end
+        end
+        
         function q = get.q_default(obj)
             q = zeros(obj.numDofVars, 1);
             index_vars = 1;

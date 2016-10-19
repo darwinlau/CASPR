@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<links display_range="0 12 0 15 0 10" view_angle="-37 32">
+  <link_rigid num="1" name="Award winning cable robot">
+    <joint type="SPATIAL_EULER_XYZ" q_initial="5.9 7.5 4.3 0 0 0"/>
+    <physical>
+      <mass>100</mass>
+      <com_location>0.0 0.0 0.0</com_location>
+      <end_location>0.0 0.0 0.0</end_location>
+      <inertia ref="com">
+        <Ixx>10.0</Ixx>
+        <Iyy>10.0</Iyy>
+        <Izz>10.0</Izz>
+        <Ixy>0.0</Ixy>
+        <Ixz>0.0</Ixz>
+        <Iyz>0.0</Iyz>
+      </inertia>
+    </physical>
+    <parent>
+      <num>0</num>
+      <location>0.0 0.0 0.0</location>
+    </parent>
+  </link_rigid>
+</links>

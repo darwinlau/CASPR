@@ -26,8 +26,10 @@ classdef (Abstract) JointBase < handle
         q                   % Joint variable q (generalised coordinates)
         q_dot               % Derivative of q
         q_ddot              % Double derivative of q
+        
         q_min               % Minimum joint values of q
         q_max               % Maximum joint values of q
+        q_initial           % The initial value of q for plotting
         
         isActuated = 0      % Is this joint actuated, by default not actuated
         tau_min             % Minimum actuation (if actuated)
@@ -96,7 +98,7 @@ classdef (Abstract) JointBase < handle
         
     methods (Static)
         % Create a new joint
-        function j = CreateJoint(jointType)
+        function j = CreateJoint(jointType, q_initial)
             switch jointType
                 case JointType.R_X
                     j = RevoluteX;
@@ -128,7 +130,15 @@ classdef (Abstract) JointBase < handle
                     CASPR_log.Print('Joint type is not defined',CASPRLogLevel.ERROR);
             end
             j.type = jointType;
-            j.update(j.q_default, j.q_dot_default, j.q_ddot_default);
+            
+            
+            if (nargin == 2)
+                j.q_initial = q_initial;
+            else
+                j.q_initial = j.q_default;
+            end
+            j.update(j.q_initial, j.q_dot_default, j.q_ddot_default);
+            
             j.q_min = j.q_lb;
             j.q_max = j.q_ub;
             j.tau = [];
@@ -139,7 +149,8 @@ classdef (Abstract) JointBase < handle
         % Load new xml objects
         function j = LoadXmlObj(xmlObj)
             jointType = JointType.(char(xmlObj.getAttribute('type')));
-            j = JointBase.CreateJoint(jointType);
+            q_initial = XmlOperations.StringToVector(char(xmlObj.getAttribute('q_initial')));
+            j = JointBase.CreateJoint(jointType, q_initial);
             if (~isempty(xmlObj.getAttribute('actuated') == '') && strcmp(xmlObj.getAttribute('actuated'), 'true'))
                 j.isActuated = 1;
                 j.tau = zeros(j.numDofs, 1);

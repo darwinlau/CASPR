@@ -26,7 +26,7 @@ optimiser = PSOOptimiser(ap_system.x_min, ap_system.x_max, @(x) cableAttachmentO
 
 ap_system.updateCableAttachments(x_opt, modelObj.cableModel, modelObj.bodyModel);
 modelObj.update(zeros(modelObj.numDofs,1), zeros(modelObj.numDofs,1), zeros(modelObj.numDofs,1), zeros(modelObj.numDofs,1));
-MotionSimulator.PlotFrame(modelObj, [-3 3 -3 3 0 5]);
+MotionSimulator.PlotFrame(modelObj, [-3 3 -3 3 0 5], [-37, 32]);
 
 
 % Setup the inverse dynamics simulator with the SystemKinematicsDynamics

@@ -31,7 +31,7 @@ function varargout = dynamics_GUI(varargin)
 
     % Edit the above text to modify the response to help dynamics_GUI
 
-    % Last Modified by GUIDE v2.5 22-Feb-2016 15:21:32
+    % Last Modified by GUIDE v2.5 09-Oct-2016 22:19:06
 
     % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
@@ -161,7 +161,12 @@ end
 function trajectory_popup_Update(~, ~, handles)
     contents = cellstr(get(handles.model_text,'String'));
     model_type = contents{1};
-    model_config = ModelConfig(ModelConfigType.(['M_',model_type]));
+    if(getappdata(handles.figure1,'toggle'))
+        model_config = DevModelConfig(DevModelConfigType.(['D_',model_type]));
+    else
+        model_config = ModelConfig(ModelConfigType.(['M_',model_type]));
+    end
+    disp('al')
     setappdata(handles.trajectory_popup,'model_config',model_config);
     % Determine the cable sets
     trajectories_str = model_config.getTrajectoriesList();    
@@ -552,7 +557,7 @@ function save_button_Callback(~, ~, handles) %#ok<DEFNU>
     % handles    structure with handles and user data (see GUIDATA)
     path_string = fileparts(mfilename('fullpath'));
     path_string = path_string(1:strfind(path_string, 'GUI')-2);
-    file_name = [path_string,'/logs/*.mat'];
+    file_name = [path_string,'/GUI/config/*.mat'];
     [file,path] = uiputfile(file_name,'Save file name');
     saveState(handles,[path,file]);
 end
@@ -564,7 +569,7 @@ function load_button_Callback(~, ~, handles) %#ok<DEFNU>
     % handles    structure with handles and user data (see GUIDATA)
     path_string = fileparts(mfilename('fullpath'));
     path_string = path_string(1:strfind(path_string, 'GUI')-2);
-    file_name = [path_string,'/logs/*.mat'];
+    file_name = [path_string,'/GUI/config/*.mat'];
     settings = uigetfile(file_name);
     load(settings);
     mp_text = get(handles.model_text,'String');
@@ -661,7 +666,7 @@ function delete_figure_tool_ClickedCallback(~, ~, handles) %#ok<DEFNU>
     % handles    structure with handles and user data (see GUIDATA)
     tabgp = getappdata(handles.figure1,'tabgp');
     s_tab = get(tabgp,'SelectedTab');
-    if(strcmp('Home Tab',get(s_tab,'Title')))
+    if(strcmp('0',get(s_tab,'Title')))
         % Do nothing
     else
         delete(s_tab);
@@ -914,17 +919,18 @@ function loadState(handles)
     % load all of the settings and initialise the values to match
     path_string = fileparts(mfilename('fullpath'));
     path_string = path_string(1:strfind(path_string, 'GUI')-2);
-    file_name = [path_string,'/logs/upcra_gui_state.mat'];
+    file_name = [path_string,'/GUI/config/caspr_gui_state.mat'];
     set(handles.status_text,'String','No simulation running');
     if(exist(file_name,'file'))
-        load(file_name)
+        load(file_name);
         set(handles.model_text,'String',state.model_text);
         set(handles.cable_text,'String',state.cable_text);
+        setappdata(handles.figure1,'toggle',state.checkbox_value);
         % This is to ensure that we are starting fresh
         state.modObj.bodyModel.occupied.reset();
         setappdata(handles.cable_text,'modObj',state.modObj);
         trajectory_popup_Update([], [], handles);
-        file_name = [path_string,'/logs/dynamics_gui_state.mat'];
+        file_name = [path_string,'/GUI/config/dynamics_gui_state.mat'];
         if(exist(file_name,'file'))
             load(file_name);
             mp_text = get(handles.model_text,'String');
@@ -981,7 +987,7 @@ function saveState(handles,file_path)
     else
         path_string                             =   fileparts(mfilename('fullpath'));
         path_string                             = path_string(1:strfind(path_string, 'GUI')-2);
-        save([path_string,'/logs/dynamics_gui_state.mat'],'state')
+        save([path_string,'/GUI/config/dynamics_gui_state.mat'],'state')
     end
 end
 
@@ -1020,7 +1026,9 @@ function run_forward_dynamics(handles,modObj,trajectory_id)
     set(handles.status_text,'String','Running forward dynamics');
     drawnow;
     start_tic = tic;
-    fdsim.run(idsim.cableForces, trajectory.timeVector, trajectory.q{1}, trajectory.q_dot{1});
+    trajectory.q{1}
+    trajectory.q_dot{1}
+    fdsim.run(idsim.cableForcesActive, idsim.cableIndicesActive, trajectory.timeVector, trajectory.q{1}, trajectory.q_dot{1});
     time_elapsed = toc(start_tic);
     fprintf('End Running Forward Dynamics Simulation : %f seconds\n', time_elapsed);
     
@@ -1090,4 +1098,31 @@ function weight_number = get_weight_number(xmlObj,modObj)
     weight_cables = str2double(xmlObj.getElementsByTagName('weight_cables_multiplier').item(0).getFirstChild.getData);
     weight_constants = str2num(xmlObj.getElementsByTagName('weight_constants').item(0).getFirstChild.getData); %#ok<ST2NM>
     weight_number = weight_links*modObj.numLinks + weight_cables*modObj.numCables + sum(weight_constants);
+end
+
+% --- Executes on button press in plot_movie_button.
+function plot_movie_button_Callback(hObject, eventdata, handles)
+% hObject    handle to plot_movie_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    % Things that this should do
+    sim = getappdata(handles.figure1,'sim');
+    if(isempty(sim))
+        warning('No simulator has been generated. Please press run first'); %#ok<WNTAG>
+    else
+        % h = axes();
+        plot3(0,0,0);
+        h = gca;
+        path_string = fileparts(mfilename('fullpath'));
+        path_string = path_string(1:strfind(path_string, 'GUI')-2);
+        % Check if the log folder exists
+        if((exist([path_string,'/data'],'dir')~=7)||(exist([path_string,'/data/videos'],'dir')~=7))
+            if((exist([path_string,'/data'],'dir')~=7))
+                mkdir([path_string,'/data']);
+            end
+            mkdir([path_string,'/data/videos']);
+        end      
+        model_config = getappdata(handles.trajectory_popup,'model_config');
+        sim.plotMovie(model_config.displayRange, model_config.viewAngle, 'data/videos/dynamics_gui_output.avi', sim.timeVector(length(sim.timeVector)), 700, 700);
+    end
 end
