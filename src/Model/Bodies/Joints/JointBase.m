@@ -116,7 +116,7 @@ classdef (Abstract) JointBase < handle
                 j.update(j.q_initial, j.q_dot_default, j.q_ddot_default);
             else
                 j.q_initial = j.q_default;
-                j.update(j.q_default, j.q_dot_default, j.q_ddot_default);
+                j.update(j.q_initial, j.q_dot_default, j.q_ddot_default);
             end
         end
         
