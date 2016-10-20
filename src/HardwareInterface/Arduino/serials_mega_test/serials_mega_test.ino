@@ -39,7 +39,7 @@
 #define RECEIVE_RESET_CMD 'r'
 
 
-#define RADIUS 210 //spool, 20mm in 0.1mm precision
+#define RADIUS 210 //spool, in average radius in 0.1mm precision  actual radius is 20mm
 
 int maximumPWMFeedback[8] = {1501, 1494, 1501, 1493, 1501, 1499, 1501, 1520};
 int minimumPWMFeedback[8] = {484, 483, 484, 482, 484, 484, 484, 491};
@@ -131,7 +131,7 @@ SoftwareSerial serialNano[8] = {
 void setup() {
   Serial.begin(BAUD_RATE);  //USB
   Serial1.begin(BAUD_RATE); //broadcast
-  Serial.print("feedback: ");
+  //Serial.print("feedback: ");
   for (int i = 0; i < NUMBER_CONNECTED_NANOS; i++) { //all the softwareSerials for arduino nano
     serialNano[i].begin(BAUD_RATE);
     initLength[i] = 32768; //middle
@@ -166,12 +166,12 @@ void setup() {
       }
       pwmFeedback[i] = strtol(feedbackNano, 0, 16);
       pwmCommand[i] = pwmFeedback[i] * pwmMapping[i];
-      Serial.print(pwmFeedback[i]);
-      Serial.print(" step " + String(i));
-      Serial.println(stepPWMFeedback[i]);
+    //  Serial.print(pwmFeedback[i]);
+    //  Serial.print(" step " + String(i));
+   //   Serial.println(stepPWMFeedback[i]);
     }
   }
-  Serial.println();
+ // Serial.println();
   t_ref = millis();
   //receivedCommand = INITIAL_LENGTH_COMMAND;
 }
@@ -300,23 +300,14 @@ void requestNanoFeedback() {
         pwmFeedbackDiff = pwmFeedback[i] - pwmLastFeedback[i];
         crossingFeedback[i] = false;
       }
-      if (crossingFeedback[i]) {
-        Serial.println();
-        Serial.println(" crossing ");
-      }
       pwmLastFeedback[i] = pwmFeedback[i];
-      Serial.print(" - pwmFeedback ");
-      Serial.print(pwmFeedback[i]);
-
+    
       int test = (int)(((pwmFeedbackDiff * stepPWMFeedback[i]) * angleToLength));
  //     Serial.print(" test ");
    //   Serial.print(test);
 
       lastLengthFeedback[i] += test; //conversion of pwmDiff to angleChange to lengthChange
 
-      Serial.print(" lastLength: ");
-      Serial.print(lastLengthFeedback[i]);
-      Serial.print(" ");
     }
   }
 }
