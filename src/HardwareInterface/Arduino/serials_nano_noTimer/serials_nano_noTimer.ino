@@ -119,7 +119,10 @@ int pwmDifference = 0;
 
 void setup() {
   Serial.begin(BAUD_RATE);
-  readPositionFeedback();
+  while (servoPWM == 0) {
+    readPositionFeedback();
+  }
+  resetAverageArray();
   lastPWMServo = servoPWM - 13;
   Serial.println(lastPWMServo);
 }
@@ -220,14 +223,13 @@ int readPositionFeedback() { //reads position feedback and stores it in servoPWM
   else if (servoPWM > maximumPWMFeedback[NANO_ID]) {
     servoPWM = maximumPWMFeedback[NANO_ID];
   }
-  
+  readIndexPWM++;
   if (readIndexPWM >= numReadings) {
     readIndexPWM = 0;
   }
   totalPWM -= readings[readIndexPWM];
   readings[readIndexPWM] = servoPWM;
   totalPWM += readings[readIndexPWM];
-  readIndexPWM++;
   averagePWM = totalPWM / numReadings;
 }
 
