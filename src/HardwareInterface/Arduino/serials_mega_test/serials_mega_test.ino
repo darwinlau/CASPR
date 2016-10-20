@@ -141,7 +141,7 @@ void setup() {
     stepPWMFeedback[i] = 1440.0 / (double)(rangePWMFeedback[i]);
     rangePWMOutput[i] = maximumPWMOutput[i] - minimumPWMOutput[i];
     stepPWMOutput[i] = (double)rangePWMOutput[i] / 1440.0; //360 degree in quarter degree precision -> 1440 steps
-    pwmMapping[i] = (double)rangePWMOutput[i] / (double)rangePWMFeedback[i];
+    pwmMapping[i] = (double)rangePWMOutput[i] / (double)rangePWMFeedback[i]; //factor for mapping PWMFeedback onto PWMOutput
 
 
     /////// TEMPORARY - REVISE LATER AFTER CALIBRATION //////////
@@ -165,7 +165,7 @@ void setup() {
         serialNano[i].read(); //clears the buffer of any other bytes
       }
       pwmFeedback[i] = strtol(feedbackNano, 0, 16);
-      pwmCommand[i] = pwmFeedback[i] * pwmMapping[i];
+      pwmCommand[i] = (pwmFeedback[i]-minimumPWMFeedback[i]) * pwmMapping[i] + minimumPWMOutput[i];
     //  Serial.print(pwmFeedback[i]);
     //  Serial.print(" step " + String(i));
    //   Serial.println(stepPWMFeedback[i]);
