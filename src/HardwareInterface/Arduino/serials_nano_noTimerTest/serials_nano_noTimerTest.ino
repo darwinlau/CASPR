@@ -2,7 +2,7 @@
 #include <Wire.h>
 #include <math.h>
 
-#define NANO_ID 0
+#define NANO_ID 6
 
 #define LENGTH_HEX_ANGLE 2
 #define LENGTH_PWM_COMMAND 4
@@ -151,7 +151,6 @@ void readSerial() { //receive characterizing prefix (+ length in 2 digit Hex, wi
     else if (command == RECEIVE_FEEDBACK_REQUEST) { //f
       char id = strReceived[1];
       if (id == NANO_ID + '0') {
-        readPositionFeedback();
         sendFeedback();
       }
     }
