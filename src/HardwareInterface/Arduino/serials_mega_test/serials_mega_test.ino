@@ -20,13 +20,14 @@
 #define BAUD_RATE 74880
 
 #define HEX_DIGITS_LENGTH 4
-#define DIGITS_PWM_COMMAND 4
+#define DIGITS_PWM_COMMAND 3
 #define DIGITS_PWM_FEEDBACK 3
 #define CROSSING_ID 1
 
 #define REQUEST_FEEDBACK 'f'
 #define REQUEST_TEST 't'
 #define COMMAND_LENGTH 'l'
+#define RECEIVE_BLOCK_CMD 'b'
 
 #define SEND_PREFIX_FEEDBACK 'f'
 #define SEND_PWM_COMMAND 'p'
@@ -35,6 +36,8 @@
 #define RECEIVE_PREFIX_INITIAL 'i'
 #define RECEIVE_PREFIX_LENGTH_CMD 'l'
 #define COMM_PREFIX_ACKNOWLEDGE 'a'
+#define RECEIVE_RESET_CMD 'r'
+
 
 #define RADIUS 200 //spool, 20mm in 0.1mm precision
 
@@ -67,6 +70,7 @@ unsigned int lastLengthFeedback[NUMBER_CONNECTED_NANOS]; //with .1 mm precision,
 unsigned int initLength[NUMBER_CONNECTED_NANOS];
 double stepPWMFeedback[NUMBER_CONNECTED_NANOS];
 double stepPWMOutput[NUMBER_CONNECTED_NANOS];
+double pwmMapping[NUMBER_CONNECTED_NANOS];
 
 boolean crossingFeedback[NUMBER_CONNECTED_NANOS];
 int crossingCommand[NUMBER_CONNECTED_NANOS];
@@ -80,7 +84,7 @@ int lengthChangeCommand;
 int angleChange;
 char tmpRead[HEX_DIGITS_LENGTH];
 
-char commandNano[DIGITS_PWM_COMMAND - 1];
+char commandNano[DIGITS_PWM_COMMAND];
 
 float lengthToAngle = 720.0 / (M_PI * RADIUS); //1.14591562747955322265625
 float angleToLength = (M_PI * RADIUS) / 720.0; // 0.8726646259971650
@@ -127,21 +131,21 @@ SoftwareSerial serialNano[8] = {
 void setup() {
   Serial.begin(BAUD_RATE);  //USB
   Serial1.begin(BAUD_RATE); //broadcast
+  Serial.print("feedback: ");
   for (int i = 0; i < NUMBER_CONNECTED_NANOS; i++) { //all the softwareSerials for arduino nano
     serialNano[i].begin(BAUD_RATE);
     initLength[i] = 32768; //middle
     lastLengthFeedback[i] = 32768;
     lastLengthCommand[i] = 32768;
-    stepPWMFeedback[i] = 1440.0 / (double)(maximumPWMFeedback[i] - minimumPWMFeedback[i]); //INVERTED FOR SPECIFIC USE IN THIS CODE
-    rangePWMOutput[i] = maximumPWMFeedback[i] - minimumPWMFeedback[i];
-    stepPWMOutput[i] = (double)(maximumPWMOutput[i] - minimumPWMOutput[i]) / 1440.0; //360 degree in quarter degree precision -> 1440 steps
+    rangePWMFeedback[i] = maximumPWMFeedback[i] - minimumPWMFeedback[i];
+    stepPWMFeedback[i] = 1440.0 / (double)(rangePWMFeedback[i]);
     rangePWMOutput[i] = maximumPWMOutput[i] - minimumPWMOutput[i];
+    stepPWMOutput[i] = (double)rangePWMOutput[i] / 1440.0; //360 degree in quarter degree precision -> 1440 steps
+    pwmMapping[i] = (double)rangePWMOutput[i] / (double)rangePWMFeedback[i];
+
 
     /////// TEMPORARY - REVISE LATER AFTER CALIBRATION //////////
-    pwmCommand[i] = middlePWMFeedback[i] - 13;
-  }
-  ///// READ INITIAL FEEDBACK FROM EACH NANO /////
-  for (int i = 0; i < NUMBER_CONNECTED_NANOS; i++) {
+
     serialNano[i].listen();
     Serial1.println('f' + String(i)); //requests feedback from nano
     Serial1.flush(); //waits for the sending of Serial to be complete before moving on
@@ -161,9 +165,13 @@ void setup() {
         serialNano[i].read(); //clears the buffer of any other bytes
       }
       pwmFeedback[i] = strtol(feedbackNano, 0, 16);
-
+      pwmCommand[i] = pwmFeedback[i] * pwmMapping[i];
+      Serial.print(pwmFeedback[i]);
+      Serial.print(" step ");
+      Serial.print(stepPWMFeedback[i]);
     }
   }
+  Serial.println();
   t_ref = millis();
   //receivedCommand = INITIAL_LENGTH_COMMAND;
 }
@@ -212,6 +220,16 @@ void readSerialUSB() {
     {
       enableMotors = 1;
     }
+    else if (receivedCommand[0] == RECEIVE_RESET_CMD) //r
+    {
+      resetLengths();
+      enableMotors = 1;
+    }
+    else if (receivedCommand[0] == RECEIVE_BLOCK_CMD) //b
+    {
+      enableMotors = 1;
+      sendNanoCommand(); //this sends the detected position from the nano, mapped to the PWMOutput range - no movement, only locking of motors
+    }
   }
 }
 
@@ -226,6 +244,19 @@ void setInitialLengths() {
     lastLengthFeedback[j] += (newInitLength - initLength[j]);
     lastLengthCommand[j] += (newInitLength - initLength[j]);
     initLength[j] = newInitLength;
+  }
+}
+
+void resetLengths() {
+  char tmp[4];
+  unsigned long int resetLength;
+  for (int j = 0; j < NUMBER_CONNECTED_NANOS; j++) {
+    for (int k = 0; k < HEX_DIGITS_LENGTH; k++) {
+      tmp[k] = receivedCommand[j * HEX_DIGITS_LENGTH + k + 1];
+    }
+    resetLength = strtol(tmp, 0, 16);
+    lastLengthFeedback[j] = resetLength;
+    lastLengthCommand[j] += resetLength;
   }
 }
 
@@ -267,8 +298,22 @@ void requestNanoFeedback() {
         crossingFeedback[i] = false;
       }
       pwmLastFeedback[i] = pwmFeedback[i];
+      Serial.print(" - pwmFeedback ");
+      Serial.print(pwmFeedback[i]);
+      Serial.print(" diff ");
+      Serial.print(pwmFeedbackDiff);
+      Serial.print(" angle ");
+      Serial.print(pwmFeedbackDiff * stepPWMFeedback[i]);
 
-      lastLengthFeedback[i] += (int)(((pwmFeedbackDiff * stepPWMFeedback[i]) * angleToLength)); //conversion of pwmDiff to angleChange to lengthChange
+      int test = (int)(((pwmFeedbackDiff * stepPWMFeedback[i]) * angleToLength));
+      Serial.print(" test ");
+      Serial.print(test);
+
+      lastLengthFeedback[i] += test; //conversion of pwmDiff to angleChange to lengthChange
+
+      Serial.print(" lastLength: ");
+      Serial.print(lastLengthFeedback[i]);
+      Serial.print(" ");
     }
   }
 }
@@ -328,7 +373,7 @@ void sendNanoCommand() {
   for (int i = 0; i < NUMBER_CONNECTED_NANOS; i++) {
     Serial1.print(crossingCommand[i]);
     itoa(pwmCommand[i], commandNano, 16);
-    for (int j = 0; j < (DIGITS_PWM_COMMAND - 1); j++) {
+    for (int j = 0; j < DIGITS_PWM_COMMAND; j++) {
       Serial1.print(commandNano[j]);
     }
   }
