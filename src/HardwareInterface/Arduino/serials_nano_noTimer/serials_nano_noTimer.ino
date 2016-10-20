@@ -220,14 +220,14 @@ int readPositionFeedback() { //reads position feedback and stores it in servoPWM
   else if (servoPWM > maximumPWMFeedback[NANO_ID]) {
     servoPWM = maximumPWMFeedback[NANO_ID];
   }
-  readIndexPWM++;
-  if(readIndexPWM >= numReadings){
+  
+  if (readIndexPWM >= numReadings) {
     readIndexPWM = 0;
   }
   totalPWM -= readings[readIndexPWM];
   readings[readIndexPWM] = servoPWM;
   totalPWM += readings[readIndexPWM];
-
+  readIndexPWM++;
   averagePWM = totalPWM / numReadings;
 }
 
@@ -247,12 +247,14 @@ void quitCrossing() {
   if (cross == 1) { // From left
     if ((servoPWM > DELTA) && (servoPWM <= middlePWMFeedback[NANO_ID])) { //smaller/equal because middlePWMFEedback is rounded down
       cross = 0;
+      resetAverageArray();
     } else lastCross = cross;
   }
   else if (cross == 2) // From right
   {
     if ((servoPWM < (maximumPWMFeedback[NANO_ID] - DELTA)) && (servoPWM > middlePWMFeedback[NANO_ID] )) {
       cross = 0;
+      resetAverageArray();
     } else lastCross = cross;
   }
 }
@@ -288,4 +290,14 @@ void sendFeedback() {
   }
   Serial.println();
   Serial.flush();
+}
+
+
+
+void resetAverageArray() {
+  totalPWM = numReadings * servoPWM;
+  averagePWM = servoPWM;
+  for (int i = 0; i < numReadings; i++) {
+    readings[i] = servoPWM;
+  }
 }
