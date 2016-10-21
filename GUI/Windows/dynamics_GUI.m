@@ -31,7 +31,7 @@ function varargout = dynamics_GUI(varargin)
 
     % Edit the above text to modify the response to help dynamics_GUI
 
-    % Last Modified by GUIDE v2.5 09-Oct-2016 22:19:06
+    % Last Modified by GUIDE v2.5 21-Oct-2016 09:49:15
 
     % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
@@ -166,7 +166,6 @@ function trajectory_popup_Update(~, ~, handles)
     else
         model_config = ModelConfig(ModelConfigType.(['M_',model_type]));
     end
-    disp('al')
     setappdata(handles.trajectory_popup,'model_config',model_config);
     % Determine the cable sets
     trajectories_str = model_config.getTrajectoriesList();    
@@ -618,6 +617,38 @@ function plot_button_Callback(~, ~, handles) %#ok<DEFNU>
     end
 end
 
+% --- Executes on button press in update_button.
+function update_button_Callback(hObject, eventdata, handles) %#ok<DEFNU>
+% hObject    handle to update_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    trajectory_popup_Update(hObject, eventdata, handles);
+end
+
+% --- Executes on button press in plot_movie_button.
+function plot_movie_button_Callback(~, ~, handles) %#ok<DEFNU>
+% hObject    handle to plot_movie_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    % Things that this should do
+    sim = getappdata(handles.figure1,'sim');
+    if(isempty(sim))
+        warning('No simulator has been generated. Please press run first'); %#ok<WNTAG>
+    else
+        path_string = fileparts(mfilename('fullpath'));
+        path_string = path_string(1:strfind(path_string, 'GUI')-2);
+        % Check if the log folder exists
+        if((exist([path_string,'/data'],'dir')~=7)||(exist([path_string,'/data/videos'],'dir')~=7))
+            if((exist([path_string,'/data'],'dir')~=7))
+                mkdir([path_string,'/data']);
+            end
+            mkdir([path_string,'/data/videos']);
+        end      
+        model_config = getappdata(handles.trajectory_popup,'model_config');
+        sim.plotMovie(model_config.displayRange, model_config.viewAngle, 'data/videos/dynamics_gui_output.avi', sim.timeVector(length(sim.timeVector)), 700, 700);
+    end
+end
+
 %--------------------------------------------------------------------------
 %% Toolbar buttons
 %--------------------------------------------------------------------------
@@ -1026,8 +1057,6 @@ function run_forward_dynamics(handles,modObj,trajectory_id)
     set(handles.status_text,'String','Running forward dynamics');
     drawnow;
     start_tic = tic;
-    trajectory.q{1}
-    trajectory.q_dot{1}
     fdsim.run(idsim.cableForcesActive, idsim.cableIndicesActive, trajectory.timeVector, trajectory.q{1}, trajectory.q_dot{1});
     time_elapsed = toc(start_tic);
     fprintf('End Running Forward Dynamics Simulation : %f seconds\n', time_elapsed);
@@ -1098,31 +1127,4 @@ function weight_number = get_weight_number(xmlObj,modObj)
     weight_cables = str2double(xmlObj.getElementsByTagName('weight_cables_multiplier').item(0).getFirstChild.getData);
     weight_constants = str2num(xmlObj.getElementsByTagName('weight_constants').item(0).getFirstChild.getData); %#ok<ST2NM>
     weight_number = weight_links*modObj.numLinks + weight_cables*modObj.numCables + sum(weight_constants);
-end
-
-% --- Executes on button press in plot_movie_button.
-function plot_movie_button_Callback(hObject, eventdata, handles)
-% hObject    handle to plot_movie_button (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-    % Things that this should do
-    sim = getappdata(handles.figure1,'sim');
-    if(isempty(sim))
-        warning('No simulator has been generated. Please press run first'); %#ok<WNTAG>
-    else
-        % h = axes();
-        plot3(0,0,0);
-        h = gca;
-        path_string = fileparts(mfilename('fullpath'));
-        path_string = path_string(1:strfind(path_string, 'GUI')-2);
-        % Check if the log folder exists
-        if((exist([path_string,'/data'],'dir')~=7)||(exist([path_string,'/data/videos'],'dir')~=7))
-            if((exist([path_string,'/data'],'dir')~=7))
-                mkdir([path_string,'/data']);
-            end
-            mkdir([path_string,'/data/videos']);
-        end      
-        model_config = getappdata(handles.trajectory_popup,'model_config');
-        sim.plotMovie(model_config.displayRange, model_config.viewAngle, 'data/videos/dynamics_gui_output.avi', sim.timeVector(length(sim.timeVector)), 700, 700);
-    end
 end
