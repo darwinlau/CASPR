@@ -645,7 +645,9 @@ function plot_movie_button_Callback(~, ~, handles) %#ok<DEFNU>
             mkdir([path_string,'/data/videos']);
         end      
         model_config = getappdata(handles.trajectory_popup,'model_config');
-        sim.plotMovie(model_config.displayRange, model_config.viewAngle, 'data/videos/dynamics_gui_output.avi', sim.timeVector(length(sim.timeVector)), 700, 700);
+        file_name = [path_string,'/data/videos/dynamics_gui_output.avi'];
+        [file,path] = uiputfile(file_name,'Save file name');
+        sim.plotMovie(model_config.displayRange, model_config.viewAngle, [path,file], sim.timeVector(length(sim.timeVector)), 700, 700);
     end
 end
 
