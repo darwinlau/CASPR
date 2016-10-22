@@ -2,9 +2,9 @@
 % from the library.
 %
 % Please cite the following paper when using this algorithm:
-% A. B. Alp and S. K. Agrawal, "Cable suspended robots: design, planning
-% and control," in Robotics and Automation, 2002. Proceedings. ICRA' 02.
-% IEEE International Conference on, vol. 4. IEEE, 2002, pp. 4275¨C4280.
+% A. B. Alp, and S. K. Agrawal, "Cable Suspended Robots: Design, Planning
+% and Control", in Proc. IEEE Int. Conf. Robot. Autom., pp. 4275-4280,
+% 2002.
 % 
 % Author        : Chen SONG
 % Created       : 2016
