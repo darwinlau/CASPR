@@ -169,8 +169,11 @@ function trajectory_popup_Update(~, ~, handles)
     setappdata(handles.trajectory_popup,'model_config',model_config);
     % Determine the cable sets
     trajectories_str = model_config.getTrajectoriesList();    
-    set(handles.trajectory_popup, 'Value', 1);
-    set(handles.trajectory_popup, 'String', trajectories_str);
+    if(~isempty(trajectories_str))
+        set(handles.trajectory_popup, 'Value', 1);   set(handles.trajectory_popup, 'String', trajectories_str);
+    else
+        set(handles.trajectory_popup, 'Value', 1);   set(handles.trajectory_popup, 'String', 'No trajectories are defined for this robot');
+    end
 end
 
 % --- Executes during object creation, after setting all properties.
