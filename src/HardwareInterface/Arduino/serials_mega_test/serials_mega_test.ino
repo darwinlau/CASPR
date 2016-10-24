@@ -13,10 +13,11 @@
 
 #include <SoftwareSerial.h>
 
-// Defining constants
+#define NUMBER_CONNECTED_NANOS 8
+#define RADIUS 210 //spool, in average radius in 0.1mm precision  actual radius is 20mm
+
 #define FEEDBACK_FREQUENCY 20// In Hz
 #define TIME_STEP 1.0/FEEDBACK_FREQUENCY
-#define NUMBER_CONNECTED_NANOS 8
 #define BAUD_RATE 74880
 
 #define HEX_DIGITS_LENGTH 4
@@ -24,22 +25,21 @@
 #define DIGITS_PWM_FEEDBACK 3
 #define CROSSING_ID 1
 
-#define REQUEST_FEEDBACK 'f'
-#define REQUEST_TEST 't'
-#define COMMAND_LENGTH 'l'
-#define RECEIVE_BLOCK_CMD 'b'
+#define CASPR_FEEDBACK 'f'
+#define CASPR_LENGTH_CMD 'l'
+#define CASPR_ACKNOWLEDGE 'a'
+#define CASPR_START 's'
+#define CASPR_END 'e'
+#define CASPR_INITIAL 'i'
+#define CASPR_RESET 'r'
+#define CASPR_HOLD 'h'
 
-#define SEND_PREFIX_FEEDBACK 'f'
-#define SEND_PWM_COMMAND 'p'
-#define RECEIVE_PREFIX_START 's'
-#define RECEIVE_PREFIX_END 'e'
-#define RECEIVE_PREFIX_INITIAL 'i'
-#define RECEIVE_PREFIX_LENGTH_CMD 'l'
-#define COMM_PREFIX_ACKNOWLEDGE 'a'
-#define RECEIVE_RESET_CMD 'r'
+#define NANO_PWM_COMMAND 'p'
+#define NANO_FEEDBACK 'f'
+#define NANO_TEST 't'
+#define NANO_TESTDRIVE 'z'
 
-
-#define RADIUS 210 //spool, in average radius in 0.1mm precision  actual radius is 20mm
+/////////////////////////// SERVO PARAMETERS //////////////
 
 int maximumPWMFeedback[8] = {1501, 1494, 1501, 1493, 1501, 1499, 1501, 1520};
 int minimumPWMFeedback[8] = {484, 483, 484, 482, 484, 484, 484, 491};
@@ -56,45 +56,49 @@ int anticlockwise_max_speed[8] = { -281, -278, -273, -269, -270, -279, -273, -27
 int anticlockwise_min_speed[8] = { -133, -130, -132, -129, -124, -129, -128, -131};
 
 
-unsigned long int t_ref;
-String receivedCommand;
-String receivedFeedback;
-int pwmCommand[NUMBER_CONNECTED_NANOS];
-int pwmFeedback[NUMBER_CONNECTED_NANOS];
-int pwmLastFeedback[NUMBER_CONNECTED_NANOS];
-int pwmFeedbackDiff = 0;
 int rangePWMOutput[NUMBER_CONNECTED_NANOS];
 int rangePWMFeedback[NUMBER_CONNECTED_NANOS];
-unsigned int lengthCommand[NUMBER_CONNECTED_NANOS]; //unsigned int has 2 bytes, range 0 - 65535
-unsigned int lengthFeedback[NUMBER_CONNECTED_NANOS]; //with .1 mm precision, this equals ~6.5m
 unsigned int initLength[NUMBER_CONNECTED_NANOS];
 double stepPWMFeedback[NUMBER_CONNECTED_NANOS];
 double stepPWMOutput[NUMBER_CONNECTED_NANOS];
 double pwmMapping[NUMBER_CONNECTED_NANOS];
 
+/////////////////////////// OPERATION ARRAYS //////////////
+
+int pwmFeedback[NUMBER_CONNECTED_NANOS];
+int pwmLastFeedback[NUMBER_CONNECTED_NANOS];
+
 boolean crossingFeedback[NUMBER_CONNECTED_NANOS];
 int crossingCommand[NUMBER_CONNECTED_NANOS];
+unsigned int lengthCommand[NUMBER_CONNECTED_NANOS]; //unsigned int has 2 bytes, range 0 - 65535
+unsigned int lengthFeedback[NUMBER_CONNECTED_NANOS]; //with .1 mm precision, this equals ~6.5m
 
+/////////////////////////// TEMPORARY VARIABLES //////////////
+
+int pwmFeedbackDiff = 0;
 char feedbackNano[DIGITS_PWM_FEEDBACK]; // Array to store the nano feedback
-boolean positive = 1; // flag to indicate positive angle change
-int angularChangeReceived; // change in angular value that was recieved
+char commandNano[DIGITS_PWM_COMMAND];
 char feedbackMega[HEX_DIGITS_LENGTH]; //4 digit hex length from a nano, sent to mega
 int lengthChangeCommand;
-int angleChange;
 char tmpRead[HEX_DIGITS_LENGTH];
+unsigned int tmpSendLength;
+int angularChangeCommand;
+int strLength = 0;
+int readCounter = 0;
 
-char commandNano[DIGITS_PWM_COMMAND];
+/////////////////////////// MISC //////////////
+
+String receivedCommand;
 
 float lengthToAngle = 720.0 / (M_PI * RADIUS); //1.091348181201570 with Radius 210
 float angleToLength = (M_PI * RADIUS) / 720.0; // 0.9162978572970230 with Radius 210
 
-
-unsigned int tmpSendLength;
-int angularChangeCommand;
+unsigned long int t_ref;
 
 boolean systemOn, enableMotors;
 
-int counter = 0;
+
+/////////////////////////// SIN WAVE TESTING //////////////
 
 int radCounter = 0;
 float rad = 0;
@@ -106,7 +110,7 @@ char sinAngleCmd[2];
 boolean sinPositive = 0;
 int sendPWM = 0;
 
-int strLength = 0;
+
 
 
 SoftwareSerial serialNano[8] = {
@@ -148,12 +152,11 @@ void setup() {
     Serial1.println('f' + String(i)); //requests feedback from nano
     Serial1.flush(); //waits for the sending of Serial to be complete before moving on
 
-    counter = 0;
-    while ((serialNano[i].available() == 0) && counter < 200) {
-      counter++;
+    readCounter = 0;
+    while ((serialNano[i].available() == 0) && readCounter < 200) {
+      readCounter++;
     }
     if (serialNano[i].available() > 0) {
-      //receivedFeedback = Serial.readStringUntil('\n');
       for (int j = 0; j < DIGITS_PWM_FEEDBACK; j++) {
         feedbackNano[j] = serialNano[i].read();
       }
@@ -171,14 +174,13 @@ void setup() {
   }
   // Serial.println();
   t_ref = millis();
-  //receivedCommand = INITIAL_LENGTH_COMMAND;
 }
 
 /* Main loop acts to interface with MATLAB (asynchronously) and nano at 20Hz */
 void loop() {
   readSerialUSB();
   if ((millis() - t_ref) > TIME_STEP * 1000) { // Operate at roughly 20Hz time
-    t_ref = millis(); // Reset the time (AT A LATER DATE PROTECTION MAY BE NEEDED FOR OVERFLOW
+    t_ref = millis(); // Reset the time
     if (systemOn) {
       requestNanoFeedback();
       if (enableMotors) {
@@ -193,37 +195,36 @@ void loop() {
 void readSerialUSB() {
   if (Serial.available() > 0) {  //MATLAB via USB
     receivedCommand = Serial.readStringUntil('\n');
-    if (receivedCommand[0] == COMM_PREFIX_ACKNOWLEDGE && receivedCommand.length() == 1) //a
+    if (receivedCommand[0] == CASPR_ACKNOWLEDGE && receivedCommand.length() == 1) //a
     {
       systemOn = 0;
-      Serial.println(COMM_PREFIX_ACKNOWLEDGE);
+      Serial.println(CASPR_ACKNOWLEDGE);
     }
 
-    else if (receivedCommand[0] == RECEIVE_PREFIX_START && receivedCommand.length() == 1) //s
+    else if (receivedCommand[0] == CASPR_START && receivedCommand.length() == 1) //s
     {
       systemOn = 1;
     }
-    else if (receivedCommand[0] == RECEIVE_PREFIX_END && receivedCommand.length() == 1) //e
+    else if (receivedCommand[0] == CASPR_END && receivedCommand.length() == 1) //e
     {
       systemOn = 0;
       enableMotors = 1;
-      //Serial1.println("p03d103d103d103d103d103d103d103d1");
     }
-    else if (receivedCommand[0] == RECEIVE_PREFIX_INITIAL) //i
+    else if (receivedCommand[0] == CASPR_INITIAL) //i
     {
       setInitialLengths();
       enableMotors = 1;
     }
-    else if (receivedCommand[0] == RECEIVE_PREFIX_LENGTH_CMD) //l
+    else if (receivedCommand[0] == CASPR_LENGTH_CMD) //l
     {
       enableMotors = 1;
     }
-    else if (receivedCommand[0] == RECEIVE_RESET_CMD) //r
+    else if (receivedCommand[0] == CASPR_RESET) //r
     {
       resetLengths();
       enableMotors = 1;
     }
-    else if (receivedCommand[0] == RECEIVE_BLOCK_CMD) //b
+    else if (receivedCommand[0] == CASPR_HOLD) //b
     {
       enableMotors = 1;
       for (int i = 0; i < NUMBER_CONNECTED_NANOS; i++) {
@@ -264,15 +265,14 @@ void resetLengths() {
 void requestNanoFeedback() {
   for (int i = 0; i < NUMBER_CONNECTED_NANOS; i++) {
     serialNano[i].listen();
-    Serial1.println('f' + String(i)); //requests feedback from nano
+    Serial1.println(NANO_FEEDBACK + String(i)); //requests feedback from nano
     Serial1.flush(); //waits for the sending of Serial to be complete before moving on
 
-    counter = 0;
-    while ((serialNano[i].available() == 0) && counter < 200) {
-      counter++;
+    readCounter = 0;
+    while ((serialNano[i].available() == 0) && readCounter < 200) {
+      readCounter++;
     }
     if (serialNano[i].available() > 0) {
-      //receivedFeedback = Serial.readStringUntil('\n');
       for (int j = 0; j < DIGITS_PWM_FEEDBACK; j++) {
         feedbackNano[j] = serialNano[i].read();
       }
@@ -310,7 +310,7 @@ void requestNanoFeedback() {
 }
 
 void sendNanoFeedback() {
-  Serial.print(SEND_PREFIX_FEEDBACK);
+  Serial.print(CASPR_FEEDBACK);
   for (int i = 0; i < NUMBER_CONNECTED_NANOS; i++) {
     itoa(lengthFeedback[i], feedbackMega, 16);
     strLength = strlen(feedbackMega);
@@ -330,7 +330,7 @@ void sendNanoFeedback() {
 
 
 void readNanoCommand() {
-  if (receivedCommand[0] == COMMAND_LENGTH) {
+  if (receivedCommand[0] == CASPR_LENGTH_CMD) {
     for (int i = 0; i < NUMBER_CONNECTED_NANOS; i++) {
       for (int j = 0; j < HEX_DIGITS_LENGTH; j++) {
         tmpRead[j] = receivedCommand[HEX_DIGITS_LENGTH * i + j + 1]; //HEX_DIGITS_LENGTH*i gives position in array for respective ID, +1 omits command prefix
@@ -358,9 +358,9 @@ void readNanoCommand() {
 }
 
 void sendNanoCommand() {
-  Serial1.print(SEND_PWM_COMMAND);
+  Serial1.print(NANO_PWM_COMMAND);
   //Serial.print("  command ");
-  //Serial.print(SEND_PWM_COMMAND);
+  //Serial.print(NANO_SEND_PWM_COMMAND);
   for (int i = 0; i < NUMBER_CONNECTED_NANOS; i++) {
     Serial1.print(crossingCommand[i]);
     //Serial.print(crossingCommand[i]);
