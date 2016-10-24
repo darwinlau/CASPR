@@ -3,27 +3,20 @@
 #include <math.h>
 
 #define NANO_ID 1
+#define MOTOR_PIN 2
+#define BAUD_RATE 74880
+#define DELTA 7 // freezing regions at crossing area
 
-#define LENGTH_HEX_ANGLE 2
 #define LENGTH_PWM_COMMAND 4
 #define DIGITS_PWM_FEEDBACK 3
-#define Kp 1.0 // Gain for proportional controller
-#define Ki 0.5 // Gain for integrator
-#define DELTA 7 // freezing regions at crossing area
 
 #define RECEIVE_PWM_CMD 'p'
 #define RECEIVE_FEEDBACK_REQUEST 'f'
 #define RECEIVE_TEST_REQUEST 't'
 #define RECEIVE_TESTDRIVE_REQUEST 'z'
 
-#define BAUD_RATE 74880
-
-#define MOTOR_PIN 2
-/////////////////////////// DEBUGGING AND TIMING VARIABLES //////////////
-
-unsigned long int t_ref;
-
 /////////////////////////// MOTORS DATA BANK //////////////
+
 int maximumPWMFeedback[8] = {1501, 1494, 1501, 1493, 1501, 1499, 1501, 1520};
 int minimumPWMFeedback[8] = {484, 483, 484, 482, 484, 484, 484, 491};
 int middlePWMFeedback[8] = {992, 988, 992, 987, 992, 991, 992, 1005}; // all numbers rounded down
@@ -39,82 +32,58 @@ int anticlockwise_min[8] = {1891, 1880, 1887, 1876, 1885, 1886, 1888, 1910};
 int anticlockwise_max_speed[8] = { 281, 278, 273, 269, 270, 279, 273, 279}; //All are negative values
 int anticlockwise_min_speed[8] = { 365, 366, 356, 335, 352, 358, 365, 372}; //All are negative values
 
-/////////////////////////// SERVO PARAMETERS ///////////////////////// //
 
-/// PWM scale for position feedback from servo ///
-double stepPWMFeedback = (double)(maximumPWMFeedback[NANO_ID] - minimumPWMFeedback[NANO_ID]) / 1440.0; //360 degree in quarter degree precision -> 1440 steps
+/////////////////////////// COMMUNICATION ///////////////////////// //
 
-/// PWM scale for position output to servo ///
-double stepPWMOutput = (double)(maximumPWMOutput[NANO_ID] - minimumPWMOutput[NANO_ID]) / 1440.0; //360 degree in quarter degree precision -> 1440 steps
-
-double initialDeg = -1;
-
-int angularChangeReceived;
-int angularChangeFeedback;
-
-int lastDeg;
-int currentDeg = minimumPWMFeedback[NANO_ID];
-double delayTime;
+String strReceived;
+char commandReceived;
 
 char pwmFeedback[DIGITS_PWM_FEEDBACK];
 
+
 /////////////////////////// FEEDBACK VARIABLES ///////////////////////////
 
-/// servo position as 'pwm' value (see _feedback for scale above) ///
-int servoPWM;
+int servoPWM; // servo position as 'pwm' value (see _feedback for scale above)
+int lastPWMServo = 0;
 
-///////SMOOTHING FEEDBACK
-
+/// SMOOTHING FEEDBACK ///
 int numReadings = 8;
-int readings[8] = {0, 0, 0, 0, 8, 8, 8, 8};
+int readings[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 int readIndexPWM = 0;
 int totalPWM = 0;
 int averagePWM = 0;
 
-/////////////////////////// OUTPUT VARIABLES ///////////////////////////
 
-/// derived aim of angle ///
-int destinationDeg = 0;
-int destinationPWM;
+/////////////////////////// COMMAND AND MOTOR CONTROL ///////////////////////////
 
-/// control communication with serial and servo ///
-boolean firstTimeRead = 1;
-boolean enableServo = 0;
-boolean stillmode = 0;
-boolean positiveCommand = 0;
-boolean positiveFeedback = 0;
-
-boolean cw = 1;
-int pwmTestrun = 700;
-
-int lastPWMServo = 0;
-int lastPWMCommand = 0;
 int pwmCommand = 0;
+int lastPWMCommand = 0;
 
-int sendCounter = 0;
-
-/////////////////////////// FUNCTION PRECALLING ///////////////////////////
-
-//void setup_timer1();
-void sendFeedback();
-void readSerial();
-int readPositionFeedback();
-void quitCrossing();
-void ctrl_motor(int pwmMotor);
-void servoPulse(int pulseWidth);
-
-/////////////////////////// CONTROL VARIABLES ///////////////////////////
-
-/// controlling of the method crossing() ///
 int cross = 0;
 int lastCross = 0;
 int crossPulse = 0;
-
-/// control for errors ///
-double ref, ITerm, lastErr, dInput;
-unsigned long lastTime;
-String strReceived;
 int pwmDifference = 0;
+
+int sendCounter = 0;
+
+/////////////////////////// DEBUGGING AND TIMING VARIABLES //////////////
+
+unsigned long int t_ref;
+double delayTime;
+boolean cw = 1;
+int pwmTestrun = 700;
+
+
+/////////////////////////// FUNCTION PRECALLING ///////////////////////////
+
+int readPositionFeedback();
+void crossing();
+void quitCrossing();
+void ctrl_motor(int pwmMotor);
+void servOPulse(int pulseWidth);
+void sendFeedback();
+void resetAverageArray();
+
 
 
 void setup() {
@@ -123,9 +92,8 @@ void setup() {
     readPositionFeedback();
   }
   resetAverageArray();
-  lastPWMServo = servoPWM - 13;
-  Serial.println(lastPWMServo);
-}
+  lastPWMServo = servoPWM;
+  }
 
 void loop() {
   readSerial();
@@ -134,8 +102,8 @@ void loop() {
 void readSerial() { //receive characterizing prefix (+ length in 2 digit Hex, with manipulation of first bit for sign)
   if (Serial.available() > 0) {
     strReceived = Serial.readStringUntil('\n');
-    char command = strReceived[0];
-    if (command == RECEIVE_PWM_CMD) { //p
+    commandReceived = strReceived[0];
+    if (commandReceived == RECEIVE_PWM_CMD) { //p
       lastCross = 0;
       readPositionFeedback();
       if (cross > 0) {
@@ -150,19 +118,19 @@ void readSerial() { //receive characterizing prefix (+ length in 2 digit Hex, wi
       ctrl_motor(pwmCommand);
     }
 
-    else if (command == RECEIVE_FEEDBACK_REQUEST) { //f
+    else if (commandReceived == RECEIVE_FEEDBACK_REQUEST) { //f
       char id = strReceived[1];
       if (id == NANO_ID + '0') {
         sendFeedback();
       }
     }
-    else if (command == RECEIVE_TEST_REQUEST) { //t
+    else if (commandReceived == RECEIVE_TEST_REQUEST) { //t
       Serial.print('c');
       Serial.println('c');
       Serial.flush();
       delayMicroseconds(10);
     }
-    else if (command == RECEIVE_TESTDRIVE_REQUEST) { //z
+    else if (commandReceived == RECEIVE_TESTDRIVE_REQUEST) { //z
       if (cw) {
         if (pwmTestrun < (maximumPWMOutput[NANO_ID] + 20)) {
           pwmTestrun += 20;
@@ -234,12 +202,12 @@ int readPositionFeedback() { //reads position feedback and stores it in servoPWM
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void crossing() {
+void crossing() { //for later optimization (exit crossing autonomously after delay, calculation based on pwmDifference)
   if (cross == 1) { //->CW crossing
-    pwmDifference = rangePWMOutput[NANO_ID] + pwmCommand - lastPWMCommand;
+    //pwmDifference = rangePWMOutput[NANO_ID] + pwmCommand - lastPWMCommand;
     //delayTime = (double)(pwmDifference * 1000 / anticlockwise_max_speed[NANO_ID]);
   } else if (cross == 2) { //->CCW crossing
-    pwmDifference = pwmCommand - rangePWMOutput[NANO_ID] - lastPWMCommand;
+    //pwmDifference = pwmCommand - rangePWMOutput[NANO_ID] - lastPWMCommand;
     //delayTime = (double)(pwmDifference * 1000 / clockwise_max_speed[NANO_ID]);
   }
   lastPWMCommand = pwmCommand;
