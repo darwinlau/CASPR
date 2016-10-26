@@ -5,7 +5,7 @@
 #define NANO_ID 0
 #define MOTOR_PIN 2
 #define BAUD_RATE 74880
-#define DELTA 4 // freezing regions at crossing area
+#define DELTA 7 // freezing regions at crossing area
 
 #define LENGTH_PWM_COMMAND 4
 #define DIGITS_PWM_FEEDBACK 3
@@ -74,6 +74,7 @@ int pwmTestrun = 700;
 /////////////////////////// FUNCTION PRECALLING ///////////////////////////
 
 int readPositionFeedback();
+void loopAverage();
 void crossing();
 void quitCrossing();
 void ctrl_motor(int pwmMotor);
@@ -86,18 +87,7 @@ void testdrive();
 void setup() {
   Serial.begin(BAUD_RATE);
   while (servoPWM == 0) {
-    readPositionFeedback();
-    loopAveragePWM = servoPWM;
-    delay(3);
-    readPositionFeedback();
-    loopAveragePWM += servoPWM;
-    delay(3);
-    readPositionFeedback();
-    loopAveragePWM += servoPWM;
-    delay(3);
-    readPositionFeedback();
-    loopAveragePWM += servoPWM;
-    loopAveragePWM = (int)(loopAveragePWM / 4.0);
+    loopAverage();
   }
   lastPWMServo = servoPWM;
 }
@@ -112,21 +102,10 @@ void readSerial() { //receive characterizing prefix (+ length in 2 digit Hex, wi
     commandReceived = strReceived[0];
     if (commandReceived == RECEIVE_PWM_CMD) { //p
       lastCross = 0;
-      readPositionFeedback();
-      loopAveragePWM = servoPWM;
-      delay(3);
-      readPositionFeedback();
-      loopAveragePWM += servoPWM;
-      delay(3);
-      readPositionFeedback();
-      loopAveragePWM += servoPWM;
-      delay(3);
-      readPositionFeedback();
-      loopAveragePWM += servoPWM;
-      loopAveragePWM = (int)(loopAveragePWM / 4.0);
+      loopAverage();
       Serial.print(" avg: ");
-      Serial.print(loopAveragePWM);
-      Serial.print(" ");
+      Serial.println(loopAveragePWM);
+
       if (cross > 0) {
         if (crossingCounter > 0) {
           quitCrossing();
@@ -134,6 +113,7 @@ void readSerial() { //receive characterizing prefix (+ length in 2 digit Hex, wi
         else {
           cross = 0;
           lastCross = 0;
+          crossingCounter = 0;
         }
       }
       delay(5);
@@ -163,6 +143,17 @@ void readSerial() { //receive characterizing prefix (+ length in 2 digit Hex, wi
     }
   }
   // ADD CALIBRATION LATER
+}
+
+void loopAverage() {
+  readPositionFeedback();
+  loopAveragePWM = servoPWM;
+  for (int i = 0; i < 3; i++) {
+    delay(3);
+    readPositionFeedback();
+    loopAveragePWM += servoPWM;
+  }
+  loopAveragePWM = (int)(loopAveragePWM / 4.0);
 }
 
 
@@ -199,6 +190,7 @@ int readPositionFeedback() { //reads position feedback and stores it in servoPWM
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void crossing() { //for later optimization (exit crossing autonomously after delay, calculation based on pwmDifference)
+  pwmDifference = 0;
   if (cross == 1) { //->CW crossing
     pwmDifference = rangePWMOutput[NANO_ID] + pwmCommand - lastPWMCommand;
     crossingCounter = 2 + (pwmDifference / 40);
@@ -208,6 +200,12 @@ void crossing() { //for later optimization (exit crossing autonomously after del
     crossingCounter = 2 + (pwmDifference / 40);
     //delayTime = (double)(pwmDifference * 1000 / clockwise_max_speed[NANO_ID]);
   }
+  /*
+     Serial.print(" diff: ");
+    Serial.print(pwmDifference);
+    Serial.print(" ");
+    Serial.println(crossingCounter);
+  */
   lastPWMCommand = pwmCommand;
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
