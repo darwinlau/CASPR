@@ -10,6 +10,7 @@ classdef ArduinoCASPRInterface < HardwareInterfaceBase
         SEND_PREFIX_INITIAL = 'i';
         SEND_PREFIX_LENGTH_CMD = 'l';
         COMM_PREFIX_ACKNOWLEDGE = 'a';
+        COMM_PREFIX_SETUP = 'k';
         
         BAUD_RATE = 74880;     % Bits per second
     end
@@ -29,7 +30,7 @@ classdef ArduinoCASPRInterface < HardwareInterfaceBase
     properties (Access = private)
         serial_port
     end
-        
+    
     methods
         function interface = ArduinoCASPRInterface(comPort, numCmd)
             interface@HardwareInterfaceBase();
@@ -41,13 +42,13 @@ classdef ArduinoCASPRInterface < HardwareInterfaceBase
             % Initialize the serialpush port communication between Arduino and MATLAB
             % The input value is the COMPORT should be changed as per requirement
             % We ensure that the arduino is also communicatiing with MATLAB at this
-            % time. A predefined code on the arduino acknowledges this. 
-
+            % time. A predefined code on the arduino acknowledges this.
+            
             obj.serial_port = serial(obj.comPort);
             set(obj.serial_port, 'DataBits', 8);
             set(obj.serial_port, 'StopBits', 1);
             set(obj.serial_port, 'BaudRate', obj.BAUD_RATE);
-            set(obj.serial_port, 'Parity', 'none'); 
+            set(obj.serial_port, 'Parity', 'none');
             
             try
                 fopen(obj.serial_port);
@@ -56,8 +57,9 @@ classdef ArduinoCASPRInterface < HardwareInterfaceBase
             end
             
             pause(1.0);
+            fprintf(obj.serial_port, [obj.COMM_PREFIX_SETUP '\n']);
         end
-                
+        
         function close(obj)
             %clear all;
             if ~isempty(obj.serial_port)
@@ -84,7 +86,7 @@ classdef ArduinoCASPRInterface < HardwareInterfaceBase
         % All length commands are to be sent to hardware in terms of [mm]
         % Note: l_cmd from CASPR will be in the units [m]
         function lengthCommandSend(obj, l_cmd)
-            l_cmd = l_cmd(1:1);
+            %l_cmd = l_cmd(1:1);
             CASPR_log.Assert(length(l_cmd) == obj.numCmd, sprintf('Number of command values must be equal to %d', obj.numCmd));
             str_cmd = obj.SEND_PREFIX_LENGTH_CMD;
             for i = 1:obj.numCmd
@@ -106,11 +108,13 @@ classdef ArduinoCASPRInterface < HardwareInterfaceBase
         
         function cmdRead(obj)
             cmd_str = fscanf(obj.serial_port, '%s\n');
-            if (cmd_str(1) == obj.RECEIVE_PREFIX_FEEDBACK)
-                obj.feedbackRead(cmd_str);
-            elseif (cmd_str(1) == obj.RECEIVE_PREFIX_ERROR && length(cmd_str) == 1)
-                CASPR_log.Error('Error received from Arduino hardware interface');
-            end
+            %            if (cmd_str(1) == obj.RECEIVE_PREFIX_FEEDBACK)
+            %obj.feedbackRead(cmd_str);
+            %            elseif (cmd_str(1) == obj.RECEIVE_PREFIX_ERROR && length(cmd_str) == 1)
+            %               CASPR_log.Error('Error received from Arduino hardware interface');
+            %  else
+            cmd_str
+            %            end
         end
         
         % All length commands are to sent from hardware in terms of [mm]
@@ -123,7 +127,7 @@ classdef ArduinoCASPRInterface < HardwareInterfaceBase
             cmd_str_ind = 2;
             for i = 1:obj.numCmd
                 obj.feedback(i) = obj.hardwareLengthToCASPR(cmd_str(cmd_str_ind:cmd_str_ind+obj.LENGTH_HEX_NUM_DIGITS-1));
-                cmd_str_ind = cmd_str_ind + obj.LENGTH_HEX_NUM_DIGITS;                
+                cmd_str_ind = cmd_str_ind + obj.LENGTH_HEX_NUM_DIGITS;
             end
         end
         
@@ -136,11 +140,10 @@ classdef ArduinoCASPRInterface < HardwareInterfaceBase
         end
     end
     
-    methods (Access = private)        
+    methods (Access = private)
         % Unit on hardware [mm] * lengthMult (to increase resolution) sent to CASPR in hex format
         function caspr_length = hardwareLengthToCASPR(obj, hardware_length_str)
             caspr_length = hex2dec(hardware_length_str) * obj.MM_TO_M / obj.lengthMult;
-            caspr_length
         end
         
         % Unit on CASPR [m], convert to [mm] with multiplier and in HEX to
