@@ -267,7 +267,7 @@ void resetLengths() {
     }
     resetLength = strtol(tmp, 0, 16);
     lengthFeedback[j] = resetLength;
-    lengthCommand[j] += resetLength;
+    lengthCommand[j] = resetLength;
   }
 }
 

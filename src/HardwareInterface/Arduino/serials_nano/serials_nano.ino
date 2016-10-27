@@ -109,8 +109,7 @@ void readSerial() { //receive characterizing prefix (+ length in 2 digit Hex, wi
       if (cross > 0) {
         if (crossingCounter > 0) {
           quitCrossing();
-        }
-        else {
+        } else {
           cross = 0;
           lastCross = 0;
           crossingCounter = 0;
