@@ -1,0 +1,52 @@
+collected feedback on mega very shaky - possible fixes:
+	if mega sends new length command, only receive feedback a limited number of times
+	and stop listening after movement should be finished
+	check if it turned into the right direction on mega
+
+------------------------
+mega:
+conversiong pwm feedback to feedback length
+	does it make sense, to switch crossingFeedback to int as well?
+
+
+still shaky feedback on Mega, always decreasing and shaky
+stop sending pulse on nano, if pulse already been sent
+
+error / warning sequence 
+
+mega crossing detection feedback
+
+
+mega:
+feedback jumps only when lengthCommand comes in
+ - pwmFeedback 1018 diff 0 angle 0.00 test 0 lastLength: 4539 f11bb
+ - pwmFeedback 1019 diff 1 angle 1.42 test 1 lastLength: 4353 f1101
+ - pwmFeedback 1028 diff 9 angle 12.74 test 11 lastLength: 4364 f110c
+ - pwmFeedback 1170 diff 0 angle 0.00 test 0 lastLength: 4544 f11c0
+
+crossing detection on mega -> keep track of # of revolution
+	use array of circumference to change radius
+
+does nano exit crossing?
+	exit crossing after x amount of loops in velocity mode
+
+
+
+
+testing:
+
+feedback
+	nano
+	mega
+
+
+----------------------
+NANO CROSSING
+pwmDifference / 40 for determining how many loops max -> improve later by calculating
+value instead of 4 from max speed and also direction
+
+
+crossing on nano
+	pwm difference correct?
+	counter correct?
+
