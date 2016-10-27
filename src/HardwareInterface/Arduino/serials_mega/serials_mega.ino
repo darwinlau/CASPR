@@ -138,7 +138,7 @@ void setup() {
     serialNano[i].begin(BAUD_RATE_NANO);
     initLength[i] = 32768; //middle
     lengthFeedback[i] = 32768;
-    lengthCommand[i] = 32768;
+    lengthCommand[i] = 32768 + 25;
     rangePWMFeedback[i] = maximumPWMFeedback[i] - minimumPWMFeedback[i];
     stepPWMFeedback[i] = 1440.0 / (double)(rangePWMFeedback[i]);
     rangePWMOutput[i] = maximumPWMOutput[i] - minimumPWMOutput[i];
@@ -348,7 +348,6 @@ void readNanoCommand() {
         tmpSendLength = strtol(tmpRead, 0, 16);
         lengthChangeCommand = tmpSendLength - lengthCommand[i]; //strtol returns long int, lengthCommand is unsigned int (4byte - 2byte), changes will not be >int_max
         lengthCommand[i] += lengthChangeCommand; //update lengthCommand for next command
-
         angularChangeCommand = (lengthChangeCommand * lengthToAngle);
         if (angularChangeCommand > 0) {
           pwmCommand[i] += (int)((angularChangeCommand * stepPWMOutput[i] ) + 0.5);
@@ -366,6 +365,7 @@ void readNanoCommand() {
       }
       // keeping pwmCommand in boundaries, enabling crossing
       crossingCommand[i] = 0;
+      //pwmCommand[i] -= 5;
       if (pwmCommand[i] < minimumPWMOutput[i]) { //CROSSING RIGHT -> LEFT
         pwmCommand[i] = maximumPWMOutput[i] - fabs(fmod(minimumPWMOutput[i], pwmCommand[i]));
         crossingCommand[i] = 2;
