@@ -65,7 +65,7 @@ classdef DingbotExperiment < ExperimentBase
             clc;
             clear;
             close all;
-            trajectory_id = 'traj_1';
+            trajectory_id = 'traj_2';
             
             exp = DingbotExperiment();
             trajectory = exp.modelConfig.getTrajectory(trajectory_id);
