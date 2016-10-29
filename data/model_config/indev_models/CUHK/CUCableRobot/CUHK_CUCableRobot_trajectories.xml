@@ -4,7 +4,7 @@
 ]>
 
 <trajectories>
-  <trajectory id="traj_1" time_step="0.05">
+  <trajectory id="O00001" time_step="0.05">
     <points>
       <point>
         <q>0.5 0.1 0.7 0.0 0.23 0.43</q>
@@ -28,7 +28,7 @@
       </point>  
     </points>
   </trajectory>
-  <trajectory id="traj_2" time_step="0.04">
+  <trajectory id="O00002" time_step="0.04">
     <points>
       <point>
         <q>0.5 0.1 0.7 0.0 0.23 0.43</q>
@@ -52,7 +52,7 @@
       </point>  
     </points>
   </trajectory>
-  <trajectory id="traj_3" time_step="0.03">
+  <trajectory id="O00003" time_step="0.03">
     <points>
       <point>
         <q>0.5 0.1 0.7 0.0 0.23 0.43</q>
@@ -76,7 +76,7 @@
       </point>  
     </points>
   </trajectory>
-  <trajectory id="traj_4" time_step="0.02">
+  <trajectory id="O00004" time_step="0.02">
     <points>
       <point>
         <q>0.5 0.1 0.7 0.0 0.23 0.43</q>
@@ -100,7 +100,7 @@
       </point>  
     </points>
   </trajectory>
-  <trajectory id="traj_5" time_step="0.01">
+  <trajectory id="O00005" time_step="0.01">
     <points>
       <point>
         <q>0.5 0.1 0.7 0.0 0.23 0.43</q>
@@ -124,7 +124,7 @@
       </point>  
     </points>
   </trajectory>
-  <trajectory id="traj_6" time_step="0.05">
+  <trajectory id="O00006" time_step="0.05">
     <points>
       <point>
         <q>0.5 0.1 0.7 0.0 0.23 0.43</q>
@@ -148,7 +148,7 @@
       </point>  
     </points>
   </trajectory>
-  <trajectory id="traj_7" time_step="0.04">
+  <trajectory id="O00007" time_step="0.04">
     <points>
       <point>
         <q>0.5 0.1 0.7 0.0 0.23 0.43</q>
@@ -172,7 +172,7 @@
       </point>  
     </points>
   </trajectory>
-  <trajectory id="traj_8" time_step="0.03">
+  <trajectory id="O00008" time_step="0.03">
     <points>
       <point>
         <q>0.5 0.1 0.7 0.0 0.23 0.43</q>
@@ -196,7 +196,7 @@
       </point>  
     </points>
   </trajectory>
-  <trajectory id="traj_9" time_step="0.02">
+  <trajectory id="O00009" time_step="0.02">
     <points>
       <point>
         <q>0.5 0.1 0.7 0.0 0.23 0.43</q>
@@ -220,7 +220,7 @@
       </point>  
     </points>
   </trajectory>
-  <trajectory id="traj_10" time_step="0.01">
+  <trajectory id="O00010" time_step="0.01">
     <points>
       <point>
         <q>0.5 0.1 0.7 0.0 0.23 0.43</q>
@@ -244,7 +244,7 @@
       </point>  
     </points>
   </trajectory>
-  <trajectory id="traj_11" time_step="0.05">
+  <trajectory id="O00011" time_step="0.05">
     <points>
       <point>
         <q>0.5 0.1 0.7 0.0 0.23 0.43</q>
@@ -268,7 +268,7 @@
       </point>  
     </points>
   </trajectory>
-  <trajectory id="traj_12" time_step="0.04">
+  <trajectory id="O00012" time_step="0.04">
     <points>
       <point>
         <q>0.5 0.1 0.7 0.0 0.23 0.43</q>
@@ -292,7 +292,7 @@
       </point>  
     </points>
   </trajectory>
-  <trajectory id="traj_13" time_step="0.03">
+  <trajectory id="O00013" time_step="0.03">
     <points>
       <point>
         <q>0.5 0.1 0.7 0.0 0.23 0.43</q>
@@ -316,7 +316,7 @@
       </point>  
     </points>
   </trajectory>
-  <trajectory id="traj_14" time_step="0.02">
+  <trajectory id="O00014" time_step="0.02">
     <points>
       <point>
         <q>0.5 0.1 0.7 0.0 0.23 0.43</q>
@@ -340,7 +340,7 @@
       </point>  
     </points>
   </trajectory>
-  <trajectory id="traj_15" time_step="0.01">
+  <trajectory id="O00015" time_step="0.01">
     <points>
       <point>
         <q>0.5 0.1 0.7 0.0 0.23 0.43</q>
