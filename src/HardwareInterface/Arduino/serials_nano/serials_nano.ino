@@ -10,6 +10,8 @@
 #define LENGTH_PWM_COMMAND 4
 #define DIGITS_PWM_FEEDBACK 3
 
+#define SPEEDAVG 3
+
 #define RECEIVE_PWM_CMD 'p'
 #define RECEIVE_FEEDBACK_REQUEST 'f'
 #define RECEIVE_TEST_REQUEST 't'
@@ -40,7 +42,6 @@ int anticlockwise_min_speed[8] = { -133, -130, -132, -129, -124, -129, -128, -13
 
 String strReceived;
 char commandReceived;
-
 char pwmFeedback[DIGITS_PWM_FEEDBACK];
 
 
@@ -48,7 +49,9 @@ char pwmFeedback[DIGITS_PWM_FEEDBACK];
 
 int servoPWM; // servo position as 'pwm' value (see _feedback for scale above)
 int lastPWMServo = 0;
+int lastloopAveragePWM = 0;
 int loopAveragePWM = 0;
+int averageSpeed = 0;
 
 /////////////////////////// COMMAND AND MOTOR CONTROL ///////////////////////////
 
@@ -70,6 +73,8 @@ double delayTime;
 boolean cw = 1;
 int pwmTestrun = 700;
 
+int speedCounter = 0;
+int speedStore[SPEEDAVG];
 
 /////////////////////////// FUNCTION PRECALLING ///////////////////////////
 
@@ -94,6 +99,14 @@ void setup() {
 
 void loop() {
   readSerial();
+  //if (loopAverage > 0)
+  // {
+  delay(50);
+  loopAverage();
+  calSpeed();
+  speedCounter++;
+
+  //  }
 }
 
 void readSerial() { //receive characterizing prefix (+ length in 2 digit Hex, with manipulation of first bit for sign)
@@ -142,6 +155,26 @@ void readSerial() { //receive characterizing prefix (+ length in 2 digit Hex, wi
     }
   }
   // ADD CALIBRATION LATER
+}
+void calSpeed() {
+
+  int totalSpeed = 0;
+  int differencePWM = loopAveragePWM - lastloopAveragePWM;
+  if (abs(differencePWM) > 200)
+  {
+    differencePWM = 0;
+  }
+  speedStore[speedCounter] = differencePWM;
+  lastloopAveragePWM = loopAveragePWM;
+  if (speedCounter == SPEEDAVG) // SPEEDAVG = 5
+  {
+    for (int i = 0; i < SPEEDAVG; i++) {
+      totalSpeed += speedStore[i];
+    }
+    averageSpeed = (double)(totalSpeed / (SPEEDAVG - 1));
+    Serial.println(averageSpeed);
+    speedCounter = 0;
+  }
 }
 
 void loopAverage() {
@@ -207,6 +240,45 @@ void crossing() { //for later optimization (exit crossing autonomously after del
   */
   lastPWMCommand = pwmCommand;
 }
+
+int crossPWM() {
+  int pulse; //PWM for cross
+  if (cross == 1)
+  {
+    if ( averageSpeed < clockwise_min_speed[NANO_ID])
+    {
+      pulse = clockwise_min_speed[NANO_ID];
+    }
+    else if (( averageSpeed > clockwise_min_speed[NANO_ID]) && ( averageSpeed < clockwise_max_speed[NANO_ID]))
+    { 
+      int speedRange = clockwise_max_speed[NANO_ID] - clockwise_min_speed[NANO_ID];
+      int PWMRange = clockwise_max[NANO_ID] - clockwise_min[NANO_ID];
+      pulse = (int)((averageSpeed - clockwise_min_speed[NANO_ID]) / speedRange * PWMRange + clockwise_min[NANO_ID]);
+    }
+    else
+    {
+      pulse = clockwise_min_speed[NANO_ID];
+    }
+  }
+  else if (cross == 2)
+  {
+    if ( averageSpeed < anticlockwise_min_speed[NANO_ID])
+    {
+      pulse = anticlockwise_min_speed[NANO_ID];
+    }
+    else if (( averageSpeed > anticlockwise_min_speed[NANO_ID]) && ( averageSpeed < anticlockwise_max_speed[NANO_ID]))
+    { 
+      int speedRange = anticlockwise_max_speed[NANO_ID] - anticlockwise_min_speed[NANO_ID];
+      int PWMRange = anticlockwise_max[NANO_ID] - anticlockwise_min[NANO_ID];
+      pulse = (int)((averageSpeed - anticlockwise_min_speed[NANO_ID]) / speedRange * PWMRange + anticlockwise_min[NANO_ID]);
+    }
+    else
+    {
+      pulse = anticlockwise_min_speed[NANO_ID];
+    }
+  }
+  return pulse;
+}
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void quitCrossing() {
   if (cross == 1) { // From left
@@ -227,12 +299,14 @@ void quitCrossing() {
 void ctrl_motor(int pwmMotor) { //transmits the output signal towards the motor
   if (cross == 1) {
     crossingCounter--;
-    crossPulse = clockwise_max[NANO_ID];
+    //crossPulse = clockwise_max[NANO_ID];
+    crossPulse = crossPWM();
     servoPulse(crossPulse);
     servoPulse(crossPulse);
   } else if (cross == 2) {
     crossingCounter--;
-    crossPulse = anticlockwise_max[NANO_ID];
+    //crossPulse = anticlockwise_max[NANO_ID];
+    crossPulse = crossPWM();
     servoPulse(crossPulse);
     servoPulse(crossPulse);
   } else if (sendCounter > 0) {

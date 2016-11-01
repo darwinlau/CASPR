@@ -14,7 +14,7 @@
 #include <SoftwareSerial.h>
 
 #define NUMBER_CONNECTED_NANOS 8
-#define RADIUS 210 //spool, in average radius in 0.1mm precision  actual radius is 20mm
+#define RADIUS 210 //spool, in average radius in 0.1mm precision  actual radius is 20mm **Improve in future
 
 #define FEEDBACK_FREQUENCY 20// In Hz
 #define TIME_STEP 0.07
@@ -51,16 +51,15 @@ int middlePWMFeedback[8] = {992, 988, 992, 987, 992, 991, 992, 1005}; // all num
 int maximumPWMOutput[8] = {1488, 1485, 1489, 1481, 1488, 1490, 1490, 1509};
 int minimumPWMOutput[8] = {469, 469, 471, 473, 469, 471, 474, 481}; //3, 6, 7 increased by 5
 int clockwise_max[8] = {2194, 2175, 2185, 2175, 2189, 2188, 2188, 2215};
-int clockwise_min[8] = {2094, 2082, 2090, 2079, 2089, 2088, 2088, 2117};
-int clockwise_max_speed[8] = {283, 278, 272, 269, 272, 281, 278, 278};
-int clockwise_min_speed[8] = {130, 131, 127, 127, 127, 128, 133, 130};
+int clockwise_min[8] = {2098, 2082, 2090, 2079, 2089, 2088, 2088, 2117};
+int clockwise_max_speed[8] = {55, 278, 272, 269, 272, 281, 278, 278};
+int clockwise_min_speed[8] = {25, 131, 127, 127, 127, 128, 133, 130};
 int anticlockwise_max[8] = {1800, 1780, 1785, 1780, 1785, 1786, 1788, 1811};
 int anticlockwise_min[8] = {1891, 1880, 1887, 1876, 1885, 1886, 1888, 1910};
-int anticlockwise_max_speed[8] = { -281, -278, -273, -269, -270, -279, -273, -279};
-int anticlockwise_min_speed[8] = { -133, -130, -132, -129, -124, -129, -128, -131};
+int anticlockwise_max_speed[8] = { -55, -278, -273, -269, -270, -279, -273, -279};
+int anticlockwise_min_speed[8] = { -26, -130, -132, -129, -124, -129, -128, -131};
 
-// speed: (deltaPWM / pwmRange) * (360 / 0.01) - time steps 10ms
-// roughly 8pwm / 10ms on clockwise max
+// speed: deltaPWM per 50ms// roughly 8pwm / 10ms on clockwise max
 
 int rangePWMOutput[NUMBER_CONNECTED_NANOS];
 int rangePWMFeedback[NUMBER_CONNECTED_NANOS];
