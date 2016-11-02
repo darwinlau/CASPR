@@ -99,14 +99,6 @@ void setup() {
 
 void loop() {
   readSerial();
-  //if (loopAverage > 0)
-  // {
-  delay(50);
-  loopAverage();
-  calSpeed();
-  speedCounter++;
-
-  //  }
 }
 
 void readSerial() { //receive characterizing prefix (+ length in 2 digit Hex, with manipulation of first bit for sign)
@@ -116,6 +108,8 @@ void readSerial() { //receive characterizing prefix (+ length in 2 digit Hex, wi
     if (commandReceived == RECEIVE_PWM_CMD) { //p
       lastCross = 0;
       loopAverage();
+      calSpeed();
+      speedCounter++;
       Serial.print(" avg: ");
       Serial.println(loopAveragePWM);
 
@@ -245,36 +239,36 @@ int crossPWM() {
   int pulse; //PWM for cross
   if (cross == 1)
   {
-    if ( averageSpeed < clockwise_min_speed[NANO_ID])
+    if (( averageSpeed < clockwise_min_speed[NANO_ID]) && (averageSpeed > 0))
     {
       pulse = clockwise_min_speed[NANO_ID];
     }
     else if (( averageSpeed > clockwise_min_speed[NANO_ID]) && ( averageSpeed < clockwise_max_speed[NANO_ID]))
-    { 
+    {
       int speedRange = clockwise_max_speed[NANO_ID] - clockwise_min_speed[NANO_ID];
       int PWMRange = clockwise_max[NANO_ID] - clockwise_min[NANO_ID];
       pulse = (int)((averageSpeed - clockwise_min_speed[NANO_ID]) / speedRange * PWMRange + clockwise_min[NANO_ID]);
     }
     else
     {
-      pulse = clockwise_min_speed[NANO_ID];
+      pulse = clockwise_max_speed[NANO_ID];
     }
   }
   else if (cross == 2)
   {
-    if ( averageSpeed < anticlockwise_min_speed[NANO_ID])
+    if (( averageSpeed < anticlockwise_min_speed[NANO_ID]) && (averageSpeed < 0))
     {
       pulse = anticlockwise_min_speed[NANO_ID];
     }
     else if (( averageSpeed > anticlockwise_min_speed[NANO_ID]) && ( averageSpeed < anticlockwise_max_speed[NANO_ID]))
-    { 
+    {
       int speedRange = anticlockwise_max_speed[NANO_ID] - anticlockwise_min_speed[NANO_ID];
       int PWMRange = anticlockwise_max[NANO_ID] - anticlockwise_min[NANO_ID];
       pulse = (int)((averageSpeed - anticlockwise_min_speed[NANO_ID]) / speedRange * PWMRange + anticlockwise_min[NANO_ID]);
     }
     else
     {
-      pulse = anticlockwise_min_speed[NANO_ID];
+      pulse = anticlockwise_max_speed[NANO_ID];
     }
   }
   return pulse;
