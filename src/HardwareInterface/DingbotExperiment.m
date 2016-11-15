@@ -14,7 +14,7 @@ classdef DingbotExperiment < ExperimentBase
             % Load the SystemKinematics object from the XML
             modelObj = model_config.getModel(cable_set_id);
             % Create the hardware interface
-            hw_interface = ArduinoCASPRInterface('COM5', 8);
+            hw_interface = ArduinoCASPRInterface('COM3', 8);
             eb@ExperimentBase(hw_interface, modelObj);
             eb.modelConfig = model_config;
         end
@@ -43,7 +43,9 @@ classdef DingbotExperiment < ExperimentBase
                 %update cable lengths for next command from trajectory
                 obj.model.update(trajectory.q{t}, trajectory.q_dot{t}, trajectory.q_ddot{t},zeros(size(trajectory.q_dot{t})));
                 obj.l_cmd_traj(:, t) = obj.model.cableLengths;
-                %obj.l_feedback_traj(:, t) = obj.hardwareInterface.feedback;
+                obj.hardwareInterface.feedback
+                obj.l_feedback_traj(:, t) = obj.hardwareInterface.feedback; 
+                
                 elapsed = toc * 1000;
                 if(elapsed < 50)
                     java.lang.Thread.sleep(50 - elapsed);
@@ -65,16 +67,17 @@ classdef DingbotExperiment < ExperimentBase
             clc;
             clear;
             close all;
-            trajectory_id = 'traj_2';
+            trajectory_id = 'traj_1';
             
             exp = DingbotExperiment();
             trajectory = exp.modelConfig.getTrajectory(trajectory_id);
-            exp.runTrajectory(trajectory);
+            exp.runTrajectory(trajectory); 
             figure;
             plot(trajectory.timeVector, exp.l_cmd_traj);
             exp.l_cmd_traj(:,1)
-            %figure;
-            %plot(trajectory.timeVector, exp.l_feedback_traj);
+            figure;
+            plot(trajectory.timeVector, exp.l_feedback_traj);
+            
         end
         
         

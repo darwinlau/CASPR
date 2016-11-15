@@ -110,8 +110,8 @@ void readSerial() { //receive characterizing prefix (+ length in 2 digit Hex, wi
       loopAverage();
       calSpeed();
       speedCounter++;
-      Serial.print(" avg: ");
-      Serial.println(loopAveragePWM);
+      //Serial.print(" avg: ");
+      //Serial.println(loopAveragePWM);
 
       if (cross > 0) {
         if (crossingCounter > 0) {
