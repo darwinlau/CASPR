@@ -13,7 +13,7 @@
 
 #include <SoftwareSerial.h>
 
-#define NUMBER_CONNECTED_NANOS 8
+#define NUMBER_CONNECTED_NANOS 1
 #define RADIUS 210 //spool, in average radius in 0.1mm precision  actual radius is 20mm **Improve in future
 
 #define FEEDBACK_FREQUENCY 20// In Hz
@@ -187,6 +187,8 @@ void readSerialUSB() {
     else if (receivedCommand[0] == CASPR_INITIAL) //i
     {
       setInitialLengths();
+      requestNanoFeedback();
+      sendNanoFeedback();
       enableMotors = 1;
       wave = 0;
     }
@@ -198,14 +200,14 @@ void readSerialUSB() {
         requestNanoFeedback();
         sendNanoFeedback();
         //Serial.print('x');
-       // for (int i = 0; i < 4; i++) {
+        // for (int i = 0; i < 4; i++) {
         //  Serial.print(receivedCommand[i + 1]);
-      //   }
+        //   }
 
         if (enableMotors) {
           readNanoCommand();
-      //    Serial1.print(NANO_PWM_COMMAND);
-           sendNanoCommand(); // Set up to send command for the nano
+         //     Serial1.print(NANO_PWM_COMMAND); // testing (feedback)
+          sendNanoCommand(); // Set up to send command for the nano
         }
       }
     }
@@ -266,10 +268,16 @@ void setInitialLengths() {
     for (int k = 0; k < HEX_DIGITS_LENGTH; k++) {
       tmp[k] = receivedCommand[j * HEX_DIGITS_LENGTH + k + 1];
     }
-    newInitLength = strtol(tmp, 0, 16);
+    newInitLength = strtol(tmp, 0, 16); //32768
+ //   Serial.println(newInitLength);
     lengthFeedback[j] += (newInitLength - initLength[j]);
     lengthCommand[j] += (newInitLength - initLength[j]);
     initLength[j] = newInitLength;
+//    Serial.println("lengthfb");
+ //   Serial.print(lengthFeedback[j]);
+ //   Serial.println("lengthcmd");
+ //   Serial.print(lengthCommand[j]);
+
   }
 }
 
@@ -305,8 +313,10 @@ void requestNanoFeedback() {
       crossingFeedback[i] = false;
     }
     pwmLastFeedback[i] = pwmFeedback[i];
-    lengthFeedback[i] += (int)(((pwmFeedbackDiff * stepPWMFeedback[i]) * angleToLength)); //conversion of pwmDiff to angleChange to lengthChange
+  //  lengthFeedback[i] += (int)(((pwmFeedbackDiff * stepPWMFeedback[i]) * angleToLength)); //conversion of pwmDiff to angleChange to lengthChange // some problem on this line which affect the initial length 
+    Serial.println(pwmFeedbackDiff);
   }
+ 
 }
 
 void readNanoFeedback(int i) {
@@ -328,7 +338,7 @@ void readNanoFeedback(int i) {
       serialNano[i].read(); //clears the buffer of any other bytes
     }
     pwmFeedback[i] = strtol(feedbackNano, 0, 16);
-   // Serial.print(pwmFeedback[i]);
+   // Serial.println(pwmFeedback[i]);
   }
 }
 
@@ -338,6 +348,7 @@ void sendNanoFeedback() {
   for (int i = 0; i < NUMBER_CONNECTED_NANOS; i++) {
 
     itoa(lengthFeedback[i], feedbackMega, 16);
+  //  Serial.println(lengthFeedback[i]); //not 32768 lol
     strLength = strlen(feedbackMega);
 
     for (int j = 0; j < (DIGITS_PWM_FEEDBACK + CROSSING_ID - strLength); j++) {
@@ -391,8 +402,8 @@ void readNanoCommand() {
         crossingCommand[i] = 1;
       }
     }
-  //  Serial.print(crossingCommand[0]);
-  //  Serial.println(pwmCommand[0]);
+    //  Serial.print(crossingCommand[0]);
+    //  Serial.println(pwmCommand[0]);
   }
   receivedCommand[0] = '\0'; //resets array, so it is not read twice
   enableMotors = 1;

@@ -3,7 +3,10 @@ classdef DingbotExperiment < ExperimentBase
     properties (SetAccess = private)
         l_feedback_traj    % Temporary variable to store things for now
         l_cmd_traj         % Temporary variable to store things for now
+        q_feedback         % Temporary variable to store things for now
+        q_d_feedback       % Temporary variable to store things for now
         modelConfig
+        forwardKin
     end
     
     methods
@@ -14,9 +17,10 @@ classdef DingbotExperiment < ExperimentBase
             % Load the SystemKinematics object from the XML
             modelObj = model_config.getModel(cable_set_id);
             % Create the hardware interface
-            hw_interface = ArduinoCASPRInterface('COM3', 8);
+            hw_interface = ArduinoCASPRInterface('COM9', 8);
             eb@ExperimentBase(hw_interface, modelObj);
             eb.modelConfig = model_config;
+            eb.forwardKin = FKLeastSquares(modelObj, FK_LS_ApproxOptionType.FIRST_ORDER_INTEGRATE_QDOT, FK_LS_QdotOptionType.FIRST_ORDER_DERIV);
         end
         
         function runTrajectory(obj, trajectory)
@@ -45,6 +49,15 @@ classdef DingbotExperiment < ExperimentBase
                 obj.l_cmd_traj(:, t) = obj.model.cableLengths;
                 obj.hardwareInterface.feedback
                 obj.l_feedback_traj(:, t) = obj.hardwareInterface.feedback; 
+                
+                
+                % Need to change 17th Nov, Peter
+                % update end-effector postition and rotation
+               obj.forwardKin.compute(obj.hardwareInterface.feedback, obj.l_feedback_traj(:, t-1), 1:8,  obj.q_feedback(:,t-1), obj.q_d_feedback(:,t-1), 0.05)
+               obj.q_feedback(:,t) =  obj.forwardKin.compute(:,1);
+               obj.q_d_feedback(:,t) =  obj.forwardKin.compute(:,2);
+               
+               
                 
                 elapsed = toc * 1000;
                 if(elapsed < 50)
@@ -77,6 +90,11 @@ classdef DingbotExperiment < ExperimentBase
             exp.l_cmd_traj(:,1)
             figure;
             plot(trajectory.timeVector, exp.l_feedback_traj);
+            %New function, need testing
+            figure;
+            plot(trajectory.timeVector, exp.q_feedback);
+            figure;
+            plot(trajectory.timeVector,exp.q_d_feedback);
             
         end
         

@@ -106,9 +106,10 @@ classdef ArduinoCASPRInterface < HardwareInterfaceBase
             fprintf(obj.serial_port, '%s\n', str_cmd);
         end
         
-        function testingfeedback(obj)
+        function testingfeedback(obj) % only for testing, will delect later
             
-            fprintf(obj.serial_port, '%s\n','l');
+            fprintf(obj.serial_port, '%s\n','i82078000800080008000800080008000');
+           % fprintf(obj.serial_port, '%s\n','l');
             tfb = fscanf(obj.serial_port, '%s\n');
             tfb
         end
