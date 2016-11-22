@@ -53,6 +53,9 @@ classdef DingbotExperiment < ExperimentBase
                 
                 % Need to change 17th Nov, Peter
                 % update end-effector postition and rotation
+                obj.l_feedback_traj(:, t-1)
+                obj.q_feedback(:,t-1)
+                 obj.q_d_feedback(:,t-1)
                obj.forwardKin.compute(obj.hardwareInterface.feedback, obj.l_feedback_traj(:, t-1), 1:8,  obj.q_feedback(:,t-1), obj.q_d_feedback(:,t-1), 0.05)
                obj.q_feedback(:,t) =  obj.forwardKin.compute(:,1);
                obj.q_d_feedback(:,t) =  obj.forwardKin.compute(:,2);

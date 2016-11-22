@@ -137,7 +137,7 @@ void setup() {
     serialNano[i].begin(BAUD_RATE_NANO);
     initLength[i] = 32768; //middle
     lengthFeedback[i] = 32768;
-    lengthCommand[i] = 32768;// + 15;
+    lengthCommand[i] = 32768 + 16;
     rangePWMFeedback[i] = maximumPWMFeedback[i] - minimumPWMFeedback[i];
     stepPWMFeedback[i] = 1440.0 / (double)(rangePWMFeedback[i]);
     rangePWMOutput[i] = maximumPWMOutput[i] - minimumPWMOutput[i];
@@ -206,7 +206,11 @@ void readSerialUSB() {
 
         if (enableMotors) {
           readNanoCommand();
+<<<<<<< HEAD
          //     Serial1.print(NANO_PWM_COMMAND); // testing (feedback)
+=======
+          //    Serial1.print(NANO_PWM_COMMAND);
+>>>>>>> origin/ArduinoHardwareInterface
           sendNanoCommand(); // Set up to send command for the nano
         }
       }
@@ -338,7 +342,11 @@ void readNanoFeedback(int i) {
       serialNano[i].read(); //clears the buffer of any other bytes
     }
     pwmFeedback[i] = strtol(feedbackNano, 0, 16);
+<<<<<<< HEAD
    // Serial.println(pwmFeedback[i]);
+=======
+    // Serial.print(pwmFeedback[i]);
+>>>>>>> origin/ArduinoHardwareInterface
   }
 }
 
