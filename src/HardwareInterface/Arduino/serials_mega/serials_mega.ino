@@ -137,7 +137,7 @@ void setup() {
     serialNano[i].begin(BAUD_RATE_NANO);
     initLength[i] = 32768; //middle
     lengthFeedback[i] = 32768;
-    lengthCommand[i] = 32768;// + 15;
+    lengthCommand[i] = 32768 + 16;
     rangePWMFeedback[i] = maximumPWMFeedback[i] - minimumPWMFeedback[i];
     stepPWMFeedback[i] = 1440.0 / (double)(rangePWMFeedback[i]);
     rangePWMOutput[i] = maximumPWMOutput[i] - minimumPWMOutput[i];
@@ -198,14 +198,14 @@ void readSerialUSB() {
         requestNanoFeedback();
         sendNanoFeedback();
         //Serial.print('x');
-       // for (int i = 0; i < 4; i++) {
+        // for (int i = 0; i < 4; i++) {
         //  Serial.print(receivedCommand[i + 1]);
-      //   }
+        //   }
 
         if (enableMotors) {
           readNanoCommand();
-      //    Serial1.print(NANO_PWM_COMMAND);
-           sendNanoCommand(); // Set up to send command for the nano
+          //    Serial1.print(NANO_PWM_COMMAND);
+          sendNanoCommand(); // Set up to send command for the nano
         }
       }
     }
@@ -328,7 +328,7 @@ void readNanoFeedback(int i) {
       serialNano[i].read(); //clears the buffer of any other bytes
     }
     pwmFeedback[i] = strtol(feedbackNano, 0, 16);
-   // Serial.print(pwmFeedback[i]);
+    // Serial.print(pwmFeedback[i]);
   }
 }
 
@@ -391,8 +391,8 @@ void readNanoCommand() {
         crossingCommand[i] = 1;
       }
     }
-  //  Serial.print(crossingCommand[0]);
-  //  Serial.println(pwmCommand[0]);
+    //  Serial.print(crossingCommand[0]);
+    //  Serial.println(pwmCommand[0]);
   }
   receivedCommand[0] = '\0'; //resets array, so it is not read twice
   enableMotors = 1;
