@@ -92,6 +92,7 @@ classdef ArduinoCASPRInterface < HardwareInterfaceBase
             for i = 1:obj.numCmd
                 str_cmd = [str_cmd, obj.casprLengthToHW(l_cmd(i))];
             end
+        %    str_cmd
             fprintf(obj.serial_port, '%s\n', str_cmd);
         end
         
@@ -116,13 +117,13 @@ classdef ArduinoCASPRInterface < HardwareInterfaceBase
         
         function cmdRead(obj)
             cmd_str = fscanf(obj.serial_port, '%s\n');
-                       if (cmd_str(1) == obj.RECEIVE_PREFIX_FEEDBACK)
-           obj.feedbackRead(cmd_str);
-                       elseif (cmd_str(1) == obj.RECEIVE_PREFIX_ERROR && length(cmd_str) == 1)
-                          CASPR_log.Error('Error received from Arduino hardware interface');
-             else
-            cmd_str
-                       end
+            if (cmd_str(1) == obj.RECEIVE_PREFIX_FEEDBACK)
+                obj.feedbackRead(cmd_str);
+            elseif (cmd_str(1) == obj.RECEIVE_PREFIX_ERROR && length(cmd_str) == 1)
+                CASPR_log.Error('Error received from Arduino hardware interface');
+            else
+                cmd_str
+            end
         end
         
         % All length commands are to sent from hardware in terms of [mm]
@@ -136,7 +137,6 @@ classdef ArduinoCASPRInterface < HardwareInterfaceBase
             for i = 1:obj.numCmd
                 obj.feedback(i) = obj.hardwareLengthToCASPR(cmd_str(cmd_str_ind:cmd_str_ind+obj.LENGTH_HEX_NUM_DIGITS-1));
                 cmd_str_ind = cmd_str_ind + obj.LENGTH_HEX_NUM_DIGITS;
-                
             end 
         end
         

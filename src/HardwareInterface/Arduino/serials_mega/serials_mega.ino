@@ -13,7 +13,7 @@
 
 #include <SoftwareSerial.h>
 
-#define NUMBER_CONNECTED_NANOS 1
+#define NUMBER_CONNECTED_NANOS 8
 #define RADIUS 210 //spool, in average radius in 0.1mm precision  actual radius is 20mm **Improve in future
 
 #define FEEDBACK_FREQUENCY 20// In Hz
@@ -206,11 +206,11 @@ void readSerialUSB() {
 
         if (enableMotors) {
           readNanoCommand();
-<<<<<<< HEAD
+//<<<<<<< HEAD
          //     Serial1.print(NANO_PWM_COMMAND); // testing (feedback)
-=======
+//=======
           //    Serial1.print(NANO_PWM_COMMAND);
->>>>>>> origin/ArduinoHardwareInterface
+//>>>>>>> origin/ArduinoHardwareInterface
           sendNanoCommand(); // Set up to send command for the nano
         }
       }
@@ -272,6 +272,7 @@ void setInitialLengths() {
     for (int k = 0; k < HEX_DIGITS_LENGTH; k++) {
       tmp[k] = receivedCommand[j * HEX_DIGITS_LENGTH + k + 1];
     }
+     pwmLastFeedback[j] = pwmFeedback[j];
     newInitLength = strtol(tmp, 0, 16); //32768
  //   Serial.println(newInitLength);
     lengthFeedback[j] += (newInitLength - initLength[j]);
@@ -317,8 +318,8 @@ void requestNanoFeedback() {
       crossingFeedback[i] = false;
     }
     pwmLastFeedback[i] = pwmFeedback[i];
-  //  lengthFeedback[i] += (int)(((pwmFeedbackDiff * stepPWMFeedback[i]) * angleToLength)); //conversion of pwmDiff to angleChange to lengthChange // some problem on this line which affect the initial length 
-    Serial.println(pwmFeedbackDiff);
+    lengthFeedback[i] += (int)(((pwmFeedbackDiff * stepPWMFeedback[i]) * angleToLength)); //conversion of pwmDiff to angleChange to lengthChange // some problem on this line which affect the initial length 
+   // Serial.println(pwmFeedbackDiff);
   }
  
 }
@@ -342,11 +343,11 @@ void readNanoFeedback(int i) {
       serialNano[i].read(); //clears the buffer of any other bytes
     }
     pwmFeedback[i] = strtol(feedbackNano, 0, 16);
-<<<<<<< HEAD
+//<<<<<<< HEAD
    // Serial.println(pwmFeedback[i]);
-=======
+//=======
     // Serial.print(pwmFeedback[i]);
->>>>>>> origin/ArduinoHardwareInterface
+//>>>>>>> origin/ArduinoHardwareInterface
   }
 }
 
