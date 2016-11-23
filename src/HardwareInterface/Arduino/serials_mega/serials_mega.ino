@@ -13,7 +13,7 @@
 
 #include <SoftwareSerial.h>
 
-#define NUMBER_CONNECTED_NANOS 8
+#define NUMBER_CONNECTED_NANOS 1
 #define RADIUS 210 //spool, in average radius in 0.1mm precision  actual radius is 20mm **Improve in future
 
 #define FEEDBACK_FREQUENCY 20// In Hz
@@ -187,10 +187,10 @@ void readSerialUSB() {
     else if (receivedCommand[0] == CASPR_INITIAL) //i
     {
       setInitialLengths();
+      requestNanoFeedback();
+      sendNanoFeedback();
       enableMotors = 1;
       wave = 0;
-  //    requestNanoFeedback();
- //       sendNanoFeedback();
     }
     else if (receivedCommand[0] == CASPR_LENGTH_CMD) //l
     {
@@ -206,7 +206,11 @@ void readSerialUSB() {
 
         if (enableMotors) {
           readNanoCommand();
+<<<<<<< HEAD
+         //     Serial1.print(NANO_PWM_COMMAND); // testing (feedback)
+=======
           //    Serial1.print(NANO_PWM_COMMAND);
+>>>>>>> origin/ArduinoHardwareInterface
           sendNanoCommand(); // Set up to send command for the nano
         }
       }
@@ -265,31 +269,29 @@ void setInitialLengths() {
   char tmp[4];
   unsigned long int newInitLength;
   for (int j = 0; j < NUMBER_CONNECTED_NANOS; j++) {
- 
     for (int k = 0; k < HEX_DIGITS_LENGTH; k++) {
       tmp[k] = receivedCommand[j * HEX_DIGITS_LENGTH + k + 1];
     }
-    pwmLastFeedback[j] = pwmFeedback[j]; //feedback initrialisation
-
-    newInitLength = strtol(tmp, 0, 16);
+    newInitLength = strtol(tmp, 0, 16); //32768
+ //   Serial.println(newInitLength);
     lengthFeedback[j] += (newInitLength - initLength[j]);
     lengthCommand[j] += (newInitLength - initLength[j]);
     initLength[j] = newInitLength;
+//    Serial.println("lengthfb");
+ //   Serial.print(lengthFeedback[j]);
+ //   Serial.println("lengthcmd");
+ //   Serial.print(lengthCommand[j]);
 
- 
   }
-  
 }
 
 void resetLengths() {
   char tmp[4];
   unsigned long int resetLength;
   for (int j = 0; j < NUMBER_CONNECTED_NANOS; j++) {
-    
     for (int k = 0; k < HEX_DIGITS_LENGTH; k++) {
       tmp[k] = receivedCommand[j * HEX_DIGITS_LENGTH + k + 1];
     }
-   
     resetLength = strtol(tmp, 0, 16);
     lengthFeedback[j] = resetLength;
     lengthCommand[j] = resetLength;
@@ -314,10 +316,11 @@ void requestNanoFeedback() {
       pwmFeedbackDiff = pwmFeedback[i] - pwmLastFeedback[i];
       crossingFeedback[i] = false;
     }
-
     pwmLastFeedback[i] = pwmFeedback[i];
-    lengthFeedback[i] += (int)(((pwmFeedbackDiff * stepPWMFeedback[i]) * angleToLength)); //conversion of pwmDiff to angleChange to lengthChange
+  //  lengthFeedback[i] += (int)(((pwmFeedbackDiff * stepPWMFeedback[i]) * angleToLength)); //conversion of pwmDiff to angleChange to lengthChange // some problem on this line which affect the initial length 
+    Serial.println(pwmFeedbackDiff);
   }
+ 
 }
 
 void readNanoFeedback(int i) {
@@ -339,7 +342,11 @@ void readNanoFeedback(int i) {
       serialNano[i].read(); //clears the buffer of any other bytes
     }
     pwmFeedback[i] = strtol(feedbackNano, 0, 16);
+<<<<<<< HEAD
+   // Serial.println(pwmFeedback[i]);
+=======
     // Serial.print(pwmFeedback[i]);
+>>>>>>> origin/ArduinoHardwareInterface
   }
 }
 
@@ -349,6 +356,7 @@ void sendNanoFeedback() {
   for (int i = 0; i < NUMBER_CONNECTED_NANOS; i++) {
 
     itoa(lengthFeedback[i], feedbackMega, 16);
+  //  Serial.println(lengthFeedback[i]); //not 32768 lol
     strLength = strlen(feedbackMega);
 
     for (int j = 0; j < (DIGITS_PWM_FEEDBACK + CROSSING_ID - strLength); j++) {
