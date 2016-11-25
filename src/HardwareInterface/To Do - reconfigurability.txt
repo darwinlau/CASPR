@@ -1,0 +1,6 @@
+Reconfigurability Goals for the new DingBot
+1. works with any number of servos, no need to edit matlab and mega code. (e.g. the trajectory is for 8 servos. We plug in 4. All 4 work They move according to the trajectory and give proper feedback.)
+2. works with any servo module, no need to flash nano ID. (e.g. I plug a servo into slot0. It works as servo0. I replace it with another servo. The new servo works as servo0.)
+3. lets DIN slot determine servo ID, no need to flash nano ID. (e.g. I unplug the servo from slot0 and plug it into slot1. It now works as servo1)
+
+Ding and Peter are working on #3?
