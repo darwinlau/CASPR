@@ -9,23 +9,27 @@
    10, 11, 12, 13, 14, 15, 50, 51, 52, 53,
    A8 (62), A9 (63), A10 (64), A11 (65),
    A12 (66), A13 (67), A14 (68), A15 (69).
+  (18 pins in total.)
 */
 
 #include <SoftwareSerial.h>
 
-#define NUMBER_CONNECTED_NANOS 8
+// TODO: This should be sent by MATLAB in the future
+#define NUMBER_CONNECTED_NANOS 1
+// TODO: Peter will update this to be dynamic
 #define RADIUS 210 //spool, in average radius in 0.1mm precision  actual radius is 20mm **Improve in future
 
-#define FEEDBACK_FREQUENCY 20// In Hz
-#define TIME_STEP 0.07
+// These two are useless now because MATLAB is in control of time
+//#define FEEDBACK_FREQUENCY 20// In Hz
+//#define TIME_STEP 0.07
+
 #define BAUD_RATE_NANO 74880
 #define BAUD_RATE_CASPR 74880
-#define LED 13
 
 #define HEX_DIGITS_LENGTH 4
 #define DIGITS_PWM_COMMAND 3
 #define DIGITS_PWM_FEEDBACK 3
-#define CROSSING_ID 1
+#define DIGITS_CROSSING_COMMAND 1
 
 #define CASPR_FEEDBACK 'f'
 #define CASPR_LENGTH_CMD 'l'
@@ -44,7 +48,7 @@
 #define NANO_TESTDRIVE 'z'
 
 /////////////////////////// SERVO PARAMETERS //////////////
-
+// TODO: move to each nano
 int maximumPWMFeedback[8] = {1501, 1494, 1501, 1493, 1501, 1499, 1501, 1520};
 int minimumPWMFeedback[8] = {484, 483, 484, 482, 484, 484, 484, 491};
 int middlePWMFeedback[8] = {992, 988, 992, 987, 992, 991, 992, 1005}; // all numbers rounded down
@@ -82,11 +86,11 @@ unsigned int lengthFeedback[NUMBER_CONNECTED_NANOS]; //with .1 mm precision, thi
 /////////////////////////// TEMPORARY VARIABLES //////////////
 
 int pwmFeedbackDiff = 0;
-char feedbackNano[DIGITS_PWM_FEEDBACK]; // Array to store the nano feedback
+char feedbackNano[DIGITS_PWM_FEEDBACK + 1]; // Array to store the nano feedback, +1 to store the '\0' NUL terminator
 char commandNano[DIGITS_PWM_COMMAND];
 char feedbackMega[HEX_DIGITS_LENGTH]; //4 digit hex length from a nano, sent to mega
 int lengthChangeCommand;
-char tmpRead[HEX_DIGITS_LENGTH];
+char tmpRead[HEX_DIGITS_LENGTH + 1]; //+1 to store the '\0' NUL terminator
 unsigned int tmpSendLength;
 int angularChangeCommand;
 int strLength = 0;
@@ -111,7 +115,7 @@ float rad = 0;
 int sinPWM = 0;
 double waveFactor = 0.025;
 
-
+// TODO: Decide on the maximum number of Nanos we would ever connect
 SoftwareSerial serialNano[8] = {
   SoftwareSerial (62, 19), // RX, TX - 0
   SoftwareSerial (63, 23), //1 THERE IS AN ISSUE WITH THIS PIN
@@ -132,7 +136,7 @@ SoftwareSerial serialNano[8] = {
 void setup() {
   Serial.begin(BAUD_RATE_CASPR);  //USB
   Serial1.begin(BAUD_RATE_NANO); //broadcast
-  pinMode(LED, OUTPUT);
+  pinMode(LED_BUILTIN, OUTPUT);
   for (int i = 0; i < NUMBER_CONNECTED_NANOS; i++) { //all the softwareSerials for arduino nano
     serialNano[i].begin(BAUD_RATE_NANO);
     initLength[i] = 32768; //middle
@@ -149,7 +153,6 @@ void setup() {
     readNanoFeedback(i);
     pwmCommand[i] = (pwmFeedback[i] - minimumPWMFeedback[i]) * pwmMapping[i] + minimumPWMOutput[i];
   }
-  digitalWrite(LED, HIGH);
   t_ref = millis();
 }
 
@@ -175,14 +178,12 @@ void readSerialUSB() {
     {
       systemOn = 1;
       wave = 0;
-      digitalWrite(LED, LOW);
     }
     else if (receivedCommand[0] == CASPR_END && receivedCommand.length() == 1) //e
     {
       systemOn = 0;
       enableMotors = 1;
       wave = 0;
-      digitalWrite(LED, HIGH);
     }
     else if (receivedCommand[0] == CASPR_INITIAL) //i
     {
@@ -272,17 +273,11 @@ void setInitialLengths() {
     for (int k = 0; k < HEX_DIGITS_LENGTH; k++) {
       tmp[k] = receivedCommand[j * HEX_DIGITS_LENGTH + k + 1];
     }
-     pwmLastFeedback[j] = pwmFeedback[j];
+    pwmLastFeedback[j] = pwmFeedback[j];
     newInitLength = strtol(tmp, 0, 16); //32768
- //   Serial.println(newInitLength);
     lengthFeedback[j] += (newInitLength - initLength[j]);
     lengthCommand[j] += (newInitLength - initLength[j]);
     initLength[j] = newInitLength;
-//    Serial.println("lengthfb");
- //   Serial.print(lengthFeedback[j]);
- //   Serial.println("lengthcmd");
- //   Serial.print(lengthCommand[j]);
-
   }
 }
 
@@ -324,25 +319,47 @@ void requestNanoFeedback() {
  
 }
 
+/* Request and read feedback from nano. Convert feedback from HEX to DEC, and store in pwmFeedback. */
 void readNanoFeedback(int i) {
   serialNano[i].listen();
   Serial1.println(NANO_FEEDBACK + String(i)); //requests feedback from nano
   Serial1.flush(); //waits for the sending of Serial to be complete before moving on
 
+  
   readCounter = 0;
-  while ((serialNano[i].available() == 0) && readCounter < 200) {
+  while ((serialNano[i].available() == 0) && readCounter < 200) { //wait for the feedback from nano
     readCounter++;
   }
   if (serialNano[i].available() > 0) {
-    for (int j = 0; j < DIGITS_PWM_FEEDBACK; j++) {
+    for (int j = 0; j < DIGITS_PWM_FEEDBACK; j++) { //read feedback
       feedbackNano[j] = serialNano[i].read();
     }
-    feedbackNano[DIGITS_PWM_FEEDBACK] = '\0';
-
+    feedbackNano[DIGITS_PWM_FEEDBACK] = '\0';  //THE LED FLASHES! feedbackNano is erroneous!
+    
     while (serialNano[i].available() > 0) {
       serialNano[i].read(); //clears the buffer of any other bytes
     }
-    pwmFeedback[i] = strtol(feedbackNano, 0, 16);
+    //check that feedbackNano is a correct value (e.g. 3a2\0), not a noise (e.g. 1)
+    //TODO: remove the follwing after debugging
+    if (feedbackNano[0] != '3' && feedbackNano[0] != '4' && feedbackNano[0] != '5'){
+      digitalWrite(LED_BUILTIN, HIGH);
+    } else {
+      digitalWrite(LED_BUILTIN, LOW);
+    }
+    //THE LED FLASHES! feedbackNano is erroneous!
+
+
+    pwmFeedback[i] = strtol(feedbackNano, 0, 16);  //THE LED FLASHES! pwmFeedback is erroneous!
+
+    //check if pwmFeedback[i] from nano contain erroneous values
+    //TODO: remove the follwing after debugging
+//    if (pwmFeedback[i] < 20){
+//      digitalWrite(LED_BUILTIN, HIGH);
+//    } else {
+//      digitalWrite(LED_BUILTIN, LOW);
+//    }
+    //THE LED FLASHES! pwmFeedback is erroneous!
+    
 //<<<<<<< HEAD
    // Serial.println(pwmFeedback[i]);
 //=======
@@ -360,7 +377,7 @@ void sendNanoFeedback() {
   //  Serial.println(lengthFeedback[i]); //not 32768 lol
     strLength = strlen(feedbackMega);
 
-    for (int j = 0; j < (DIGITS_PWM_FEEDBACK + CROSSING_ID - strLength); j++) {
+    for (int j = 0; j < (DIGITS_PWM_FEEDBACK + DIGITS_CROSSING_COMMAND - strLength); j++) {
       Serial.print('0');
       Serial.flush();
     }

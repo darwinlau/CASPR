@@ -17,6 +17,7 @@
 #define RECEIVE_TEST_REQUEST 't'
 #define RECEIVE_TESTDRIVE_REQUEST 'z'
 
+
 /////////////////////////// MOTORS DATA BANK //////////////
 
 int maximumPWMFeedback[8] = {1501, 1494, 1501, 1493, 1501, 1499, 1501, 1520};
@@ -319,7 +320,7 @@ void servoPulse(int pulseWidth) {
 
 
 void sendFeedback() {
-  itoa(loopAveragePWM, pwmFeedback, 16);
+  itoa(loopAveragePWM, pwmFeedback, 16); 
   for (int i = 0; i < DIGITS_PWM_FEEDBACK; i++) {
     Serial.print(pwmFeedback[i]);
   }
