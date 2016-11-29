@@ -207,11 +207,6 @@ void readSerialUSB() {
 
         if (enableMotors) {
           readNanoCommand();
-//<<<<<<< HEAD
-         //     Serial1.print(NANO_PWM_COMMAND); // testing (feedback)
-//=======
-          //    Serial1.print(NANO_PWM_COMMAND);
-//>>>>>>> origin/ArduinoHardwareInterface
           sendNanoCommand(); // Set up to send command for the nano
         }
       }
@@ -324,7 +319,6 @@ void readNanoFeedback(int i) {
   serialNano[i].listen();
   Serial1.println(NANO_FEEDBACK + String(i)); //requests feedback from nano
   Serial1.flush(); //waits for the sending of Serial to be complete before moving on
-
   
   readCounter = 0;
   while ((serialNano[i].available() == 0) && readCounter < 200) { //wait for the feedback from nano
@@ -334,37 +328,13 @@ void readNanoFeedback(int i) {
     for (int j = 0; j < DIGITS_PWM_FEEDBACK; j++) { //read feedback
       feedbackNano[j] = serialNano[i].read();
     }
-    feedbackNano[DIGITS_PWM_FEEDBACK] = '\0';  //THE LED FLASHES! feedbackNano is erroneous!
-    
+    feedbackNano[DIGITS_PWM_FEEDBACK] = '\0';  
+
     while (serialNano[i].available() > 0) {
       serialNano[i].read(); //clears the buffer of any other bytes
     }
-    //check that feedbackNano is a correct value (e.g. 3a2\0), not a noise (e.g. 1)
-    //TODO: remove the follwing after debugging
-    if (feedbackNano[0] != '3' && feedbackNano[0] != '4' && feedbackNano[0] != '5'){
-      digitalWrite(LED_BUILTIN, HIGH);
-    } else {
-      digitalWrite(LED_BUILTIN, LOW);
-    }
-    //THE LED FLASHES! feedbackNano is erroneous!
 
-
-    pwmFeedback[i] = strtol(feedbackNano, 0, 16);  //THE LED FLASHES! pwmFeedback is erroneous!
-
-    //check if pwmFeedback[i] from nano contain erroneous values
-    //TODO: remove the follwing after debugging
-//    if (pwmFeedback[i] < 20){
-//      digitalWrite(LED_BUILTIN, HIGH);
-//    } else {
-//      digitalWrite(LED_BUILTIN, LOW);
-//    }
-    //THE LED FLASHES! pwmFeedback is erroneous!
-    
-//<<<<<<< HEAD
-   // Serial.println(pwmFeedback[i]);
-//=======
-    // Serial.print(pwmFeedback[i]);
-//>>>>>>> origin/ArduinoHardwareInterface
+    pwmFeedback[i] = strtol(feedbackNano, 0, 16); 
   }
 }
 
@@ -375,7 +345,7 @@ void sendNanoFeedback() {
 
     itoa(lengthFeedback[i], feedbackMega, 16);
   //  Serial.println(lengthFeedback[i]); //not 32768 lol
-    strLength = strlen(feedbackMega);
+    strLength = strlen(feedbackMega);  //will strLength work when feedbackMega has 4 digit instead of 3, and no room for \0?
 
     for (int j = 0; j < (DIGITS_PWM_FEEDBACK + DIGITS_CROSSING_COMMAND - strLength); j++) {
       Serial.print('0');

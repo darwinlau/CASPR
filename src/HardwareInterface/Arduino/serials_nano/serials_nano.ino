@@ -2,7 +2,7 @@
 #include <Wire.h>
 #include <math.h>
 
-#define NANO_ID 0
+#define NANO_ID 7
 #define MOTOR_PIN 2
 #define BAUD_RATE 74880
 #define DELTA 7 // freezing regions at crossing area
@@ -88,8 +88,6 @@ void servOPulse(int pulseWidth);
 void sendFeedback();
 void testdrive();
 
-
-
 void setup() {
   Serial.begin(BAUD_RATE);
   while (servoPWM == 0) {
@@ -109,7 +107,6 @@ void readSerial() { //receive characterizing prefix (+ length in 2 digit Hex, wi
     if (commandReceived == RECEIVE_PWM_CMD) { //p
       lastCross = 0;
       loopAverage();
-      calSpeed();
       speedCounter++;
       //Serial.print(" avg: ");
       //Serial.println(loopAveragePWM);
@@ -150,26 +147,6 @@ void readSerial() { //receive characterizing prefix (+ length in 2 digit Hex, wi
     }
   }
   // ADD CALIBRATION LATER
-}
-void calSpeed() {
-
-  int totalSpeed = 0;
-  int differencePWM = loopAveragePWM - lastloopAveragePWM;
-  if (abs(differencePWM) > 200)
-  {
-    differencePWM = 0;
-  }
-  speedStore[speedCounter] = differencePWM;
-  lastloopAveragePWM = loopAveragePWM;
-  if (speedCounter == SPEEDAVG) // SPEEDAVG = 5
-  {
-    for (int i = 0; i < SPEEDAVG; i++) {
-      totalSpeed += speedStore[i];
-    }
-    averageSpeed = (double)(totalSpeed / (SPEEDAVG - 1));
-    Serial.println(averageSpeed);
-    speedCounter = 0;
-  }
 }
 
 void loopAverage() {
@@ -326,6 +303,8 @@ void sendFeedback() {
   }
   Serial.println();
   Serial.flush();
+
+
 }
 
 void testdrive() {

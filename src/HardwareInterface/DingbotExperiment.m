@@ -18,7 +18,7 @@ classdef DingbotExperiment < ExperimentBase
             % Load the SystemKinematics object from the XML
             modelObj = model_config.getModel(cable_set_id);
             % Create the hardware interface
-            hw_interface = ArduinoCASPRInterface('COM5', 1);
+            hw_interface = ArduinoCASPRInterface('COM3', 1);
             eb@ExperimentBase(hw_interface, modelObj);
             eb.modelConfig = model_config;
             eb.forwardKin = FKLeastSquares(modelObj, FK_LS_ApproxOptionType.FIRST_ORDER_INTEGRATE_QDOT, FK_LS_QdotOptionType.FIRST_ORDER_DERIV);
