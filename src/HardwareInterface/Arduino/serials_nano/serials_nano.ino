@@ -2,7 +2,7 @@
 #include <Wire.h>
 #include <math.h>
 
-#define NANO_ID 7
+#define NANO_ID 0
 #define MOTOR_PIN 2
 #define BAUD_RATE 74880
 #define DELTA 7 // freezing regions at crossing area
@@ -19,8 +19,8 @@
 
 
 /////////////////////////// MOTORS DATA BANK //////////////
-
-int maximumPWMFeedback[8] = {1501, 1494, 1501, 1493, 1501, 1499, 1501, 1520};
+int maximumPWMFeedback[8] = {1495, 1494, 1501, 1493, 1501, 1499, 1501, 1520}; //(DEBUGGGGG ONLYYYY)
+//int maximumPWMFeedback[8] = {1501, 1494, 1501, 1493, 1501, 1499, 1501, 1520};
 int minimumPWMFeedback[8] = {484, 483, 484, 482, 484, 484, 484, 491};
 int middlePWMFeedback[8] = {992, 988, 992, 987, 992, 991, 992, 1005}; // all numbers rounded down
 int maximumPWMOutput[8] = {1488, 1485, 1489, 1481, 1488, 1490, 1490, 1509};

@@ -141,7 +141,7 @@ void setup() {
     serialNano[i].begin(BAUD_RATE_NANO);
     initLength[i] = 32768; //middle
     lengthFeedback[i] = 32768;
-    lengthCommand[i] = 32768 + 16;
+    lengthCommand[i] = 32768;//+ 16;
     rangePWMFeedback[i] = maximumPWMFeedback[i] - minimumPWMFeedback[i];
     stepPWMFeedback[i] = 1440.0 / (double)(rangePWMFeedback[i]);
     rangePWMOutput[i] = maximumPWMOutput[i] - minimumPWMOutput[i];
@@ -369,10 +369,11 @@ void readNanoCommand() {
           tmpRead[j] = receivedCommand[HEX_DIGITS_LENGTH * i + j + 1]; //HEX_DIGITS_LENGTH*i gives position in array for respective ID, +1 omits command prefix
         }
         tmpRead[HEX_DIGITS_LENGTH] = '\0';
-        tmpSendLength = strtol(tmpRead, 0, 16);
+        tmpSendLength = strtol(tmpRead, 0, 16);  //HEX string -> long -> unsigned int tmpSendLength??????????????????????????????????????????
         lengthChangeCommand = tmpSendLength - lengthCommand[i]; //strtol returns long int, lengthCommand is unsigned int (4byte - 2byte), changes will not be >int_max
-        lengthCommand[i] += lengthChangeCommand; //update lengthCommand for next command
-        angularChangeCommand = (lengthChangeCommand * lengthToAngle);
+        lengthCommand[i] += lengthChangeCommand; //update lengthCommand for next command  
+        //^the line above is the same as lengthCommand[i] = lengthCommand[i] + (tmpSendLength - lengthCommand[i]) = tmpSendLength????????????
+        angularChangeCommand = (lengthChangeCommand * lengthToAngle); //(int) = (int) * (float)
         if (angularChangeCommand > 0) {
           pwmCommand[i] += (int)((angularChangeCommand * stepPWMOutput[i] ) + 0.5);
         } else pwmCommand[i] += (int)((angularChangeCommand * stepPWMOutput[i] ) - 0.5);
