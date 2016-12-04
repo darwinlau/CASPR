@@ -3,7 +3,11 @@ classdef DingbotExperiment < ExperimentBase
     properties (SetAccess = private)
         l_feedback_traj    % Temporary variable to store things for now
         l_cmd_traj         % Temporary variable to store things for now
+        
+        q_feedback         % Temporary variable to store things for now
+        q_d_feedback       % Temporary variable to store things for now
         modelConfig
+        forwardKin
     end
     
     methods
@@ -14,9 +18,11 @@ classdef DingbotExperiment < ExperimentBase
             % Load the SystemKinematics object from the XML
             modelObj = model_config.getModel(cable_set_id);
             % Create the hardware interface
-            hw_interface = ArduinoCASPRInterface('COM5', 8);
+            hw_interface = ArduinoCASPRInterface('COM9', 8);
             eb@ExperimentBase(hw_interface, modelObj);
             eb.modelConfig = model_config;
+            eb.forwardKin = FKDifferential(modelObj);
+            %eb.forwardKin = FKLeastSquares(modelObj, FK_LS_ApproxOptionType.FIRST_ORDER_INTEGRATE_QDOT, FK_LS_QdotOptionType.FIRST_ORDER_DERIV);
         end
         
         function runTrajectory(obj, trajectory)
@@ -33,21 +39,43 @@ classdef DingbotExperiment < ExperimentBase
             obj.hardwareInterface.lengthInitialSend(obj.model.cableLengths);
             % Start the system to get feedback
             obj.hardwareInterface.systemOnSend();
+            
+            l_prev = obj.model.cableLengths;
+            q_prev = trajectory.q{1};
+            q_d_prev = trajectory.q_dot{1};
+            
             for t = 1:length(trajectory.timeVector)
+                trajectory.timeVector(t)
                 % Print time for debugging
                 tic;
                 %send command length to Arduino Mega
                 obj.hardwareInterface.lengthCommandSend(obj.model.cableLengths);
                 %read incoming feedback from Arduino Mega
                 obj.hardwareInterface.cmdRead();
-                %update cable lengths for next command from trajectory
+                % update cable lengths for next command from trajectory
                 obj.model.update(trajectory.q{t}, trajectory.q_dot{t}, trajectory.q_ddot{t},zeros(size(trajectory.q_dot{t})));
                 obj.l_cmd_traj(:, t) = obj.model.cableLengths;
-                %obj.l_feedback_traj(:, t) = obj.hardwareInterface.feedback;
+                obj.l_feedback_traj(:, t) = obj.hardwareInterface.feedback; 
+                
+                obj.hardwareInterface.feedback
+              
+                               % testing 17th Nov, Peter
+                % update end-effector postition and rotation
+                %[q, q_dot] = obj.forwardKin.compute(obj.hardwareInterface.feedback, l_prev, 1:8,  q_prev, q_d_prev, 0.05);
+                %obj.q_feedback(:,t) = q;
+                %obj.q_d_feedback(:,t) = q_dot;
+                %l_prev = obj.model.cableLengths;
+                %q_prev = q;
+                %q_d_prev = q_dot;
+                
+                                % testing17th Nov, Peter
+         
+                
                 elapsed = toc * 1000;
                 if(elapsed < 50)
                     java.lang.Thread.sleep(50 - elapsed);
-                else elapsed = toc * 1000
+                else
+                    elapsed = toc * 1000
                 end
 
             end
@@ -65,16 +93,22 @@ classdef DingbotExperiment < ExperimentBase
             clc;
             clear;
             close all;
-            trajectory_id = 'traj_2';
+            trajectory_id = 'traj_1';
             
             exp = DingbotExperiment();
             trajectory = exp.modelConfig.getTrajectory(trajectory_id);
-            exp.runTrajectory(trajectory);
+            exp.runTrajectory(trajectory); 
             figure;
             plot(trajectory.timeVector, exp.l_cmd_traj);
             exp.l_cmd_traj(:,1)
-            %figure;
-            %plot(trajectory.timeVector, exp.l_feedback_traj);
+            figure;
+            plot(trajectory.timeVector, exp.l_feedback_traj);
+              %testing, Peter
+     %       figure;
+     %       plot(trajectory.timeVector, exp.q_feedback);
+     %       figure;
+     %       plot(trajectory.timeVector,exp.q_d_feedback);
+            %testing,Peter
         end
         
         

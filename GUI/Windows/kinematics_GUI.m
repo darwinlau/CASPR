@@ -31,7 +31,7 @@ function varargout = kinematics_GUI(varargin)
 
     % Edit the above text to modify the response to help kinematics_GUI
 
-    % Last Modified by GUIDE v2.5 06-Oct-2016 16:19:17
+    % Last Modified by GUIDE v2.5 21-Oct-2016 09:29:15
 
     % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
@@ -200,7 +200,11 @@ function trajectory_popup_Update(~, handles)
     setappdata(handles.trajectory_popup,'model_config',model_config);
     % Determine the trajectories
     trajectories_str = model_config.getTrajectoriesList();    
-    set(handles.trajectory_popup, 'Value', 1);   set(handles.trajectory_popup, 'String', trajectories_str);
+    if(~isempty(trajectories_str))
+        set(handles.trajectory_popup, 'Value', 1);   set(handles.trajectory_popup, 'String', trajectories_str);
+    else
+        set(handles.trajectory_popup, 'Value', 1);   set(handles.trajectory_popup, 'String', 'No trajectories are defined for this robot');
+    end
 end
 
 % --- Executes during object creation, after setting all properties.
@@ -471,6 +475,43 @@ function run_button_Callback(~, ~, handles) %#ok<DEFNU>
     end
 end
 
+% --- Executes on button press in plot_movie_button.
+function plot_movie_button_Callback(hObject, eventdata, handles)
+% hObject    handle to plot_movie_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    % Things that this should do
+    sim = getappdata(handles.figure1,'sim');
+    if(isempty(sim))
+        warning('No simulator has been generated. Please press run first'); %#ok<WNTAG>
+    else
+        % h = axes();
+        plot3(0,0,0);
+        h = gca;
+        path_string = fileparts(mfilename('fullpath'));
+        path_string = path_string(1:strfind(path_string, 'GUI')-2);
+        % Check if the log folder exists
+        if((exist([path_string,'/data'],'dir')~=7)||(exist([path_string,'/data/videos'],'dir')~=7))
+            if((exist([path_string,'/data'],'dir')~=7))
+                mkdir([path_string,'/data']);
+            end
+            mkdir([path_string,'/data/videos']);
+        end      
+        model_config = getappdata(handles.trajectory_popup,'model_config');
+        file_name = [path_string,'/data/videos/kinematics_gui_output.avi'];
+        [file,path] = uiputfile(file_name,'Save file name');
+        sim.plotMovie(model_config.displayRange, model_config.viewAngle, [path,file], sim.timeVector(length(sim.timeVector)), 700, 700);
+    end
+end
+
+% --- Executes on button press in update_button.
+function update_button_Callback(hObject, eventdata, handles)
+% hObject    handle to update_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    trajectory_popup_Update(hObject, handles);
+end
+
 %--------------------------------------------------------------------------
 % Checkboxes
 %--------------------------------------------------------------------------
@@ -736,32 +777,4 @@ function initialise_popups(handles)
     q_dot_popup_Update(handles.q_dot_popup,handles);
     % Needed callbacks
     plot_type_popup_Callback(handles.plot_type_popup,[],handles);
-end
-
-
-% --- Executes on button press in plot_movie_button.
-function plot_movie_button_Callback(hObject, eventdata, handles)
-% hObject    handle to plot_movie_button (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-    % Things that this should do
-    sim = getappdata(handles.figure1,'sim');
-    if(isempty(sim))
-        warning('No simulator has been generated. Please press run first'); %#ok<WNTAG>
-    else
-        % h = axes();
-        plot3(0,0,0);
-        h = gca;
-        path_string = fileparts(mfilename('fullpath'));
-        path_string = path_string(1:strfind(path_string, 'GUI')-2);
-        % Check if the log folder exists
-        if((exist([path_string,'/data'],'dir')~=7)||(exist([path_string,'/data/videos'],'dir')~=7))
-            if((exist([path_string,'/data'],'dir')~=7))
-                mkdir([path_string,'/data']);
-            end
-            mkdir([path_string,'/data/videos']);
-        end      
-        model_config = getappdata(handles.trajectory_popup,'model_config');
-        sim.plotMovie(model_config.displayRange, model_config.viewAngle, 'data/videos/kinematics_gui_output.avi', sim.timeVector(length(sim.timeVector)), 700, 700);
-    end
 end

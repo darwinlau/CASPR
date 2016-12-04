@@ -14,7 +14,7 @@
 #include <SoftwareSerial.h>
 
 #define NUMBER_CONNECTED_NANOS 8
-#define RADIUS 210 //spool, in average radius in 0.1mm precision  actual radius is 20mm **Improve in future
+   // #define RADIUS 210 //spool, in average radius in 0.1mm precision  actual radius is 20mm **Improve in future
 
 #define FEEDBACK_FREQUENCY 20// In Hz
 #define TIME_STEP 0.07
@@ -38,15 +38,12 @@
 #define CASPR_WAVE 'w'
 #define CASPR_SETUP 'k'
 
-#define NANO_ACTIVE_ID 'd'
 #define NANO_PWM_COMMAND 'p'
 #define NANO_FEEDBACK 'f'
 #define NANO_TEST 't'
 #define NANO_TESTDRIVE 'z'
 
 /////////////////////////// SERVO PARAMETERS //////////////
-int activeNanoID[8] = {0, 1, 2, 3, 4, 5, 6, 7}; 
-//int activeNanoID[8] = {4, 1, 2, 5, 0, 1, 7, 6};
 
 int maximumPWMFeedback[8] = {1501, 1494, 1501, 1493, 1501, 1499, 1501, 1520};
 int minimumPWMFeedback[8] = {484, 483, 484, 482, 484, 484, 484, 491};
@@ -82,6 +79,12 @@ int crossingCommand[NUMBER_CONNECTED_NANOS];
 unsigned int lengthCommand[NUMBER_CONNECTED_NANOS]; //unsigned int has 2 bytes, range 0 - 65535
 unsigned int lengthFeedback[NUMBER_CONNECTED_NANOS]; //with .1 mm precision, this equals ~6.5m
 
+// spool calibration
+int InitialSpoolRev[NUMBER_CONNECTED_NANOS]; //spool, initial revolution. Imporve in future after seld calibration
+float RADIUS[NUMBER_CONNECTED_NANOS];   // spool radius 
+float lengthToAngle[NUMBER_CONNECTED_NANOS];                 // = 720.0 / (M_PI * RADIUS); //1.091348181201570 with Radius 210
+float angleToLength[NUMBER_CONNECTED_NANOS];                // = (M_PI * RADIUS) / 720.0; // 0.9162978572970230 with Radius 210
+
 /////////////////////////// TEMPORARY VARIABLES //////////////
 
 int pwmFeedbackDiff = 0;
@@ -99,8 +102,8 @@ int readCounter = 0;
 
 String receivedCommand;
 
-float lengthToAngle = 720.0 / (M_PI * RADIUS); //1.091348181201570 with Radius 210
-float angleToLength = (M_PI * RADIUS) / 720.0; // 0.9162978572970230 with Radius 210
+//    float lengthToAngle = 720.0 / (M_PI * RADIUS); //1.091348181201570 with Radius 210
+//    float angleToLength = (M_PI * RADIUS) / 720.0; // 0.9162978572970230 with Radius 210
 
 unsigned long int t_ref;
 
@@ -146,7 +149,9 @@ void setup() {
     rangePWMOutput[i] = maximumPWMOutput[i] - minimumPWMOutput[i];
     stepPWMOutput[i] = (double)rangePWMOutput[i] / 1440.0; //360 degree in quarter degree precision -> 1440 steps
     pwmMapping[i] = (double)rangePWMOutput[i] / (double)rangePWMFeedback[i]; //factor for mapping PWMFeedback onto PWMOutput
-    printNanoActiveID(i);
+
+    ///////Spool Calibration//////
+ InitialSpoolRev[i] = 1;  //set spool initial revolution to  1
 
     /////// TEMPORARY - REVISE LATER AFTER CALIBRATION //////////
     readNanoFeedback(i);
@@ -162,12 +167,6 @@ void loop() {
   //  if ((millis() - t_ref) > TIME_STEP * 1000) { // Operate at roughly 20Hz time
   //  t_ref = millis(); // Reset the time
   //  }
-}
-
-void printNanoActiveID(int currentID) {
-  Serial1.print(NANO_ACTIVE_ID); //d
-  Serial1.print(currentID);
-  Serial1.println(activeNanoID[currentID]);
 }
 
 void readSerialUSB() {
@@ -215,11 +214,11 @@ void readSerialUSB() {
 
         if (enableMotors) {
           readNanoCommand();
-          //<<<<<<< HEAD
-          //     Serial1.print(NANO_PWM_COMMAND); // testing (feedback)
-          //=======
+//<<<<<<< HEAD
+         //     Serial1.print(NANO_PWM_COMMAND); // testing (feedback)
+//=======
           //    Serial1.print(NANO_PWM_COMMAND);
-          //>>>>>>> origin/ArduinoHardwareInterface
+//>>>>>>> origin/ArduinoHardwareInterface
           sendNanoCommand(); // Set up to send command for the nano
         }
       }
@@ -281,16 +280,16 @@ void setInitialLengths() {
     for (int k = 0; k < HEX_DIGITS_LENGTH; k++) {
       tmp[k] = receivedCommand[j * HEX_DIGITS_LENGTH + k + 1];
     }
-    pwmLastFeedback[j] = pwmFeedback[j];
+     pwmLastFeedback[j] = pwmFeedback[j];
     newInitLength = strtol(tmp, 0, 16); //32768
-    //   Serial.println(newInitLength);
+ //   Serial.println(newInitLength);
     lengthFeedback[j] += (newInitLength - initLength[j]);
     lengthCommand[j] += (newInitLength - initLength[j]);
     initLength[j] = newInitLength;
-    //    Serial.println("lengthfb");
-    //   Serial.print(lengthFeedback[j]);
-    //   Serial.println("lengthcmd");
-    //   Serial.print(lengthCommand[j]);
+//    Serial.println("lengthfb");
+ //   Serial.print(lengthFeedback[j]);
+ //   Serial.println("lengthcmd");
+ //   Serial.print(lengthCommand[j]);
 
   }
 }
@@ -315,6 +314,7 @@ void requestNanoFeedback() {
       if ((-rangePWMOutput[i] - pwmLastFeedback[i] + pwmFeedback[i]) > (pwmLastFeedback[i] - pwmFeedback[i])) {
         pwmFeedbackDiff = pwmFeedback[i] - rangePWMOutput[i] - pwmLastFeedback[i];
         crossingFeedback[i] = true;
+        InitialSpoolRev[i] = InitialSpoolRev[i] + 1; //after ccw crossing, increase the revolution by 1
       } else {
         pwmFeedbackDiff = pwmFeedback[i] - pwmLastFeedback[i];
         crossingFeedback[i] = false;
@@ -322,15 +322,18 @@ void requestNanoFeedback() {
     } else if ((rangePWMOutput[i] - pwmLastFeedback[i] + pwmFeedback[i]) < (pwmLastFeedback[i] - pwmFeedback[i])) { //crossing CW (left -> right)
       pwmFeedbackDiff = rangePWMOutput[i] - pwmLastFeedback[i] + pwmFeedback[i];
       crossingFeedback[i] = true;
+       InitialSpoolRev[i] = InitialSpoolRev[i] - 1; //after ccw crossing, decrease the revolution by 1
     } else {
       pwmFeedbackDiff = pwmFeedback[i] - pwmLastFeedback[i];
       crossingFeedback[i] = false;
     }
     pwmLastFeedback[i] = pwmFeedback[i];
-    lengthFeedback[i] += (int)(((pwmFeedbackDiff * stepPWMFeedback[i]) * angleToLength)); //conversion of pwmDiff to angleChange to lengthChange // some problem on this line which affect the initial length
-    // Serial.println(pwmFeedbackDiff);
+    radiusCalculation();
+    
+    lengthFeedback[i] += (int)(((pwmFeedbackDiff * stepPWMFeedback[i]) * angleToLength[i])); //conversion of pwmDiff to angleChange to lengthChange // some problem on this line which affect the initial length 
+   // Serial.println(pwmFeedbackDiff);
   }
-
+ 
 }
 
 void readNanoFeedback(int i) {
@@ -352,11 +355,11 @@ void readNanoFeedback(int i) {
       serialNano[i].read(); //clears the buffer of any other bytes
     }
     pwmFeedback[i] = strtol(feedbackNano, 0, 16);
-    //<<<<<<< HEAD
-    // Serial.println(pwmFeedback[i]);
-    //=======
+//<<<<<<< HEAD
+   // Serial.println(pwmFeedback[i]);
+//=======
     // Serial.print(pwmFeedback[i]);
-    //>>>>>>> origin/ArduinoHardwareInterface
+//>>>>>>> origin/ArduinoHardwareInterface
   }
 }
 
@@ -366,7 +369,7 @@ void sendNanoFeedback() {
   for (int i = 0; i < NUMBER_CONNECTED_NANOS; i++) {
 
     itoa(lengthFeedback[i], feedbackMega, 16);
-    //  Serial.println(lengthFeedback[i]); //not 32768 lol
+  //  Serial.println(lengthFeedback[i]); //not 32768 lol
     strLength = strlen(feedbackMega);
 
     for (int j = 0; j < (DIGITS_PWM_FEEDBACK + CROSSING_ID - strLength); j++) {
@@ -394,7 +397,8 @@ void readNanoCommand() {
         tmpSendLength = strtol(tmpRead, 0, 16);
         lengthChangeCommand = tmpSendLength - lengthCommand[i]; //strtol returns long int, lengthCommand is unsigned int (4byte - 2byte), changes will not be >int_max
         lengthCommand[i] += lengthChangeCommand; //update lengthCommand for next command
-        angularChangeCommand = (lengthChangeCommand * lengthToAngle);
+        radiusCalculation();             //find the updated spool radius & it's lengthToAngle
+        angularChangeCommand = (lengthChangeCommand * lengthToAngle[i]);
         if (angularChangeCommand > 0) {
           pwmCommand[i] += (int)((angularChangeCommand * stepPWMOutput[i] ) + 0.5);
         } else pwmCommand[i] += (int)((angularChangeCommand * stepPWMOutput[i] ) - 0.5);
@@ -446,5 +450,12 @@ void sendNanoCommand() {
   Serial1.flush();
   //Serial.flush();
 }
-
+void radiusCalculation() { 
+  //calculating the radius of the spool according to the revolutions
+  for ( int i = 0; i < NUMBER_CONNECTED_NANOS; i++){
+  RADIUS[i] = 1.1046 * InitialSpoolRev[i] + 204.16 ;
+ lengthToAngle[i] = 720.0 / (M_PI * RADIUS[i]);   //update the length to angle value
+  angleToLength[i] = (M_PI * RADIUS[i]) / 720.0;     //update the angle to length value 
+     }
+}
 

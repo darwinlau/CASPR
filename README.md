@@ -18,25 +18,26 @@ The CASPR software platform represents a unified development platform for the an
 * Workspace Analysis
 * Design Optimisation
 
-## Environment Requirements: ##
-### Operating System: ###
-CASPR can be operated any version of Windows and Linux that runs MATLAB (refer below). It should be noted that some optional features cannot be used when run on Linux.
+## Installing CASPR: ##
+### Environment Requirements: ###
+CASPR can be operated any version of Windows and Linux with MATLAB installed (refer below). It should be noted that some optional features cannot be used when run on Linux.
 
-### MATLAB: ###
-As the software is run through MATLAB, it is necessary that MATLAB is first installed before running CASPR. CASPR has been tested for MATLAB versions 2013a onwards. The core of CASPR will work for older versions, however certain newer functions may need to be replaced with the equivalent depreciated function call. **Note**: Unit testing requires MATLAB 2014a or later. 
+### MATLAB Requirements: ###
+CASPR has been tested for MATLAB versions 2013a onwards. The core of CASPR will work for older versions, however certain newer functions may need to be replaced with the equivalent depreciated function call. **Note**: Unit testing requires MATLAB 2014a or later.
 
-## Setup: ##
+### Setup Procedure: ###
+**Since CASPR is an actively developed and will be frequently updated, it is strongly advised NOT to simply download the zip. Please CLONE or FORK as recommended below so that you can easily obtain updates to CASPR.**
+
 1. There are two ways to download CASPR to your computer:
-
-  * [READ-ONLY ACCESS] - git clone https://github.com/darwinlau/CASPR.git
+  * [READ-ONLY ACCESS] - git clone https://github.com/darwinlau/CASPR.git  
   * [READ-CONTRIBUTE ACCESS] - Fork the CASPR repository onto your github account and then clone the new repository.
     git clone https://github.com/YOUR_USER_NAME/CASPR.git
-
+ 
  **Note:** For additional information regarding forking on github please refer to <https://help.github.com/articles/fork-a-repo/>
 
 2. (Optionally) install the CASPR depedencies. See [Dependency Installation](#dependency_install) for further details
 3. Open MATLAB and change the file path to be that of the extracted CASPR root directory.
-4. Run the script setup_CASPR.m within the *scripts/setup/* folder. This will test the installation and confirm that CASPR is ready to be run.
+4. Run the script initialise_CASPR.m from the root directory. This will test the installation and confirm that CASPR is ready to be run.
 
 ## Citation: ##
 If you use CASPR in your research please cite the 2016 IROS paper:
@@ -61,7 +62,7 @@ For notification of issues please use the issues tab within the github page <htt
 To start using CASPR, please follow the steps below
 
 1. Navigate to the CASPR root directory folder.
-2. Run the script initialise_CASPR.m.  This will ensure that your path libraries have been set up and should be run everytime that you use CASPR.
+2. Run the script initialise_CASPR.m.  This will ensure that your path libraries have been set up and **should be run everytime that you use CASPR**.
 3. Go into the script folders to look at examples or open up the CASPR GUI using the CASPR_GUI command.
 
 For further information regarding the operation of CASPR please refer to *CASPR_101.pdf* (located in the *docs* directory). Aditional documentation including the 2016 IROS paper can also be found within this directory.

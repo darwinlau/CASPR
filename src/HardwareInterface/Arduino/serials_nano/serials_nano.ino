@@ -2,7 +2,7 @@
 #include <Wire.h>
 #include <math.h>
 
-#define NANO_ID 0
+#define NANO_ID 0 //this should be keeping the same alinement with the motor data bank position
 #define MOTOR_PIN 2
 #define BAUD_RATE 74880
 #define DELTA 7 // freezing regions at crossing area
@@ -10,13 +10,16 @@
 #define LENGTH_PWM_COMMAND 4
 #define DIGITS_PWM_FEEDBACK 3
 
+#define SPEEDAVG 3
+
+#define RECEIVE_ACTIVE_ID 'd'
 #define RECEIVE_PWM_CMD 'p'
 #define RECEIVE_FEEDBACK_REQUEST 'f'
 #define RECEIVE_TEST_REQUEST 't'
 #define RECEIVE_TESTDRIVE_REQUEST 'z'
 
 /////////////////////////// MOTORS DATA BANK //////////////
-
+int activeNanoID = NANO_ID;
 int maximumPWMFeedback[8] = {1501, 1494, 1501, 1493, 1501, 1499, 1501, 1520};
 int minimumPWMFeedback[8] = {484, 483, 484, 482, 484, 484, 484, 491};
 int middlePWMFeedback[8] = {992, 988, 992, 987, 992, 991, 992, 1005}; // all numbers rounded down
@@ -40,7 +43,6 @@ int anticlockwise_min_speed[8] = { -133, -130, -132, -129, -124, -129, -128, -13
 
 String strReceived;
 char commandReceived;
-
 char pwmFeedback[DIGITS_PWM_FEEDBACK];
 
 
@@ -48,6 +50,7 @@ char pwmFeedback[DIGITS_PWM_FEEDBACK];
 
 int servoPWM; // servo position as 'pwm' value (see _feedback for scale above)
 int lastPWMServo = 0;
+int lastloopAveragePWM = 0;
 int loopAveragePWM = 0;
 
 /////////////////////////// COMMAND AND MOTOR CONTROL ///////////////////////////
@@ -69,7 +72,6 @@ unsigned long int t_ref;
 double delayTime;
 boolean cw = 1;
 int pwmTestrun = 700;
-
 
 /////////////////////////// FUNCTION PRECALLING ///////////////////////////
 
@@ -103,8 +105,6 @@ void readSerial() { //receive characterizing prefix (+ length in 2 digit Hex, wi
     if (commandReceived == RECEIVE_PWM_CMD) { //p
       lastCross = 0;
       loopAverage();
-      Serial.print(" avg: ");
-      Serial.println(loopAveragePWM);
 
       if (cross > 0) {
         if (crossingCounter > 0) {
@@ -123,10 +123,16 @@ void readSerial() { //receive characterizing prefix (+ length in 2 digit Hex, wi
       crossing();
       ctrl_motor(pwmCommand);
     }
-
-    else if (commandReceived == RECEIVE_FEEDBACK_REQUEST) { //f
+    else if (commandReceived == RECEIVE_ACTIVE_ID) {  //d
       char id = strReceived[1];
       if (id == NANO_ID + '0') {
+        activeNanoID = strReceived[2] - 48; //48 is the offset for ascii table
+        Serial.print(activeNanoID);
+      }
+    }
+    else if (commandReceived == RECEIVE_FEEDBACK_REQUEST) { //f
+      char id = strReceived[1];
+      if (id == activeNanoID + '0') {
         sendFeedback();
       }
     }
@@ -207,6 +213,20 @@ void crossing() { //for later optimization (exit crossing autonomously after del
   */
   lastPWMCommand = pwmCommand;
 }
+
+int crossPWM() {
+  int pulse; //PWM for cross
+  if (cross == 1)
+  {
+    pulse = clockwise_max_speed[NANO_ID];
+  }
+  else if (cross == 2)
+  {
+    pulse = anticlockwise_max_speed[NANO_ID];
+  }
+  return pulse;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void quitCrossing() {
   if (cross == 1) { // From left
@@ -227,12 +247,14 @@ void quitCrossing() {
 void ctrl_motor(int pwmMotor) { //transmits the output signal towards the motor
   if (cross == 1) {
     crossingCounter--;
-    crossPulse = clockwise_max[NANO_ID];
+    //crossPulse = clockwise_max[NANO_ID];
+    crossPulse = crossPWM();
     servoPulse(crossPulse);
     servoPulse(crossPulse);
   } else if (cross == 2) {
     crossingCounter--;
-    crossPulse = anticlockwise_max[NANO_ID];
+    //crossPulse = anticlockwise_max[NANO_ID];
+    crossPulse = crossPWM();
     servoPulse(crossPulse);
     servoPulse(crossPulse);
   } else if (sendCounter > 0) {
