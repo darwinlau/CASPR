@@ -49,11 +49,11 @@
 
 /////////////////////////// SERVO PARAMETERS //////////////
 // TODO: move to each nano
-int maximumPWMFeedback[8] = {1501, 1494, 1501, 1493, 1501, 1499, 1501, 1520};
-int minimumPWMFeedback[8] = {484, 483, 484, 482, 484, 484, 484, 491};
-int middlePWMFeedback[8] = {992, 988, 992, 987, 992, 991, 992, 1005}; // all numbers rounded down
-int maximumPWMOutput[8] = {1488, 1485, 1489, 1481, 1488, 1490, 1490, 1509};
-int minimumPWMOutput[8] = {469, 469, 471, 473, 469, 471, 474, 481}; //3, 6, 7 increased by 5
+int maximumPWMFeedback[8] = {1420, 1494, 1501, 1493, 1501, 1499, 1501, 1520};  //orginal value for servo0 on old dingbot: 1501
+int minimumPWMFeedback[8] = {453, 483, 484, 482, 484, 484, 484, 491};          //orginal value for servo0 on old dingbot: 484
+int middlePWMFeedback[8] = {936, 988, 992, 987, 992, 991, 992, 1005}; // all numbers rounded down  //orginal value for servo0 on old dingbot: 992
+int maximumPWMOutput[8] = {1487, 1485, 1489, 1481, 1488, 1490, 1490, 1509};    //orginal value for servo0 on old dingbot: 1488
+int minimumPWMOutput[8] = {471, 469, 471, 473, 469, 471, 474, 481};            //orginal value for servo0 on old dingbot: 469
 int clockwise_max[8] = {2194, 2175, 2185, 2175, 2189, 2188, 2188, 2215};
 int clockwise_min[8] = {2098, 2082, 2090, 2079, 2089, 2088, 2088, 2117};
 int clockwise_max_speed[8] = {55, 278, 272, 269, 272, 281, 278, 278};
