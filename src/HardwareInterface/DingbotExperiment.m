@@ -83,7 +83,7 @@ classdef DingbotExperiment < ExperimentBase
             clear;
             close all;
          %   trajectory_id = 'traj_1';
-            trajectory_id = 'straightLine';
+            trajectory_id = 'BackAndForth';
             
             
             exp = DingbotExperiment();
@@ -94,9 +94,9 @@ classdef DingbotExperiment < ExperimentBase
             plot(trajectory.timeVector, exp.l_cmd_traj);  hold on;
             exp.l_cmd_traj(:,1)
       %      figure;
-            timeOffset = 0 %-0.25
-            lengthScale = 1 %1.12
-            plot(trajectory.timeVector + timeOffset, (exp.l_feedback_traj -0.3176) * lengthScale + 0.3176);
+            timeOffset = 0; %-0.25;
+            lengthOffset = 0; %-0.0042;
+            plot(trajectory.timeVector + timeOffset, exp.l_feedback_traj + lengthOffset);
       %      plot(trajectory.timeVector, exp.l_feedback_traj);
             
               %New function, need testing
