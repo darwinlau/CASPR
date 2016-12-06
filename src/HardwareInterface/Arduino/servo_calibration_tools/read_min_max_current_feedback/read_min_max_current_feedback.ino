@@ -40,5 +40,6 @@ void loop() {
   Serial.print(maxPW);
   Serial.print("\t current:");
   Serial.println(PW);
+  Serial.flush();
 }
 
