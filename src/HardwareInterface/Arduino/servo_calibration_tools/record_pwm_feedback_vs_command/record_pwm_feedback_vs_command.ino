@@ -7,64 +7,70 @@
 
 //for my NEW motor: 471 - 1487
 #define MIN_PULSEWIDTH 471
-#define MAX_PULSEWIDTH 1487
+#define MAX_PULSEWIDTH 1520
 
 void setup() {
   Serial.begin(BAUD_RATE);
 }
 
 void loop() {
-  //on your mark, get set...
+  //on your mark, get set...//
   writePulseToServo(MIN_PULSEWIDTH);
-  delay(1);
-  writePulseToServo(MIN_PULSEWIDTH);
-  delay(1000);
-
-  //go!
-  for (int pulseWidthCmd = MIN_PULSEWIDTH; pulseWidthCmd <= MAX_PULSEWIDTH; pulseWidthCmd++){
-    //send command
+  writePulseToServo(MIN_PULSEWIDTH); //the servo won't go to the destination if we only send the pulse once
+  delay(4000);
+  
+  //go! //
+  for (int pulseWidthCmd = MIN_PULSEWIDTH; pulseWidthCmd <= MAX_PULSEWIDTH; pulseWidthCmd++) {
+    //send command//
     writePulseToServo(pulseWidthCmd);
-    delay(1);
     writePulseToServo(pulseWidthCmd);
-    delay(10);
 
-    //read feedback
-    int pulseWidthFeedback[4];
-    pulseWidthFeedback[0]= readFeedbackFromServo(); delay(1);
-    pulseWidthFeedback[1]= readFeedbackFromServo(); delay(1);
-    pulseWidthFeedback[2]= readFeedbackFromServo(); delay(1);
-    pulseWidthFeedback[3]= readFeedbackFromServo(); 
-    int avgPulseWidthFeedback = (pulseWidthFeedback[0] + pulseWidthFeedback[1] + pulseWidthFeedback[2] + pulseWidthFeedback[3] + 0.5)/4; 
+    //read feedback//
+    delay(40);
+    int avgFeedback = readAvgFeedback(4);
     
+
+    //output//
     Serial.print(pulseWidthCmd);
     Serial.print("\t");
-    Serial.println(avgPulseWidthFeedback);
+    Serial.println(avgFeedback);
+    Serial.flush();
   }
 
-  while(true){}  //do nothing after 1 sweep
+  //done! Go to sleep.//
+  while (true) {}
 }
 
-/* Send one PWM pulse to servo. 
-   pulseWith is in microsecond and should be non-negative number under 3000. 
+/* Send one PWM pulse to servo.
+   pulseWith is in microsecond and should be non-negative number under 3000.
    This function takes 3ms to complete. */
-void writePulseToServo(int pulseWidth){
+void writePulseToServo(int pulseWidth) {
   digitalWrite(MOTOR_PIN, HIGH);
   delayMicroseconds(pulseWidth);
   digitalWrite(MOTOR_PIN, LOW);
   delayMicroseconds(3000 - pulseWidth);
 }
 
-/*
- * Request the servo for feedback, read and return the feedback pulse width (in microsecond).
- */
-int readFeedbackFromServo(){
+/* Request the servo for feedback, read and return the feedback pulse width (in microsecond).*/
+int readFeedbackFromServo() {
   //send request for feedback
   digitalWrite(MOTOR_PIN, HIGH);
-  delayMicroseconds(50);  
+  delayMicroseconds(50);
   digitalWrite(MOTOR_PIN, LOW);
 
   //read feedback
   int feedback = pulseIn(MOTOR_PIN, HIGH, 2000); //measure the duration of the returning HIGH pulse (in microseconds), or time-out
   return feedback;
+}
+
+/* read feedback pulse width (in microsecond) from servo # times and return the average value. */
+int readAvgFeedback(int numOfReadings) {
+  double sumOfFeedback = 0;
+  for (int i = 0; i < numOfReadings; i++) {
+    sumOfFeedback += readFeedbackFromServo();
+    delay(1);
+  }
+  int avgFeedback = (sumOfFeedback / numOfReadings) + 0.5;  //+0.5 to turn truncate into round-off
+  return avgFeedback;
 }
 
