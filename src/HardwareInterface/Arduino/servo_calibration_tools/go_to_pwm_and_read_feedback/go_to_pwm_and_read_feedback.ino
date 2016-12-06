@@ -44,6 +44,7 @@ void loop() {
     Serial.print(pulseWidthCmd);
     Serial.print("\t");
     Serial.println(avgFeedback);
+    Serial.flush();
   }
 }
 
