@@ -68,8 +68,8 @@ int minimumPWMOutput[8] = {481, 469, 471, 473, 469, 471, 474, 481};            /
 int rangePWMOutput[NUMBER_CONNECTED_NANOS];
 int rangePWMFeedback[NUMBER_CONNECTED_NANOS];
 unsigned int initLength[NUMBER_CONNECTED_NANOS];
-double stepPWMFeedback[NUMBER_CONNECTED_NANOS];
-double stepPWMOutput[NUMBER_CONNECTED_NANOS];
+double pwmToAngle[NUMBER_CONNECTED_NANOS];
+double angleToPWM[NUMBER_CONNECTED_NANOS];
 double pwmMapping[NUMBER_CONNECTED_NANOS];
 
 /////////////////////////// OPERATION ARRAYS //////////////
@@ -92,7 +92,7 @@ char feedbackMega[HEX_DIGITS_LENGTH]; //4 digit hex length from a nano, sent to 
 int lengthChangeCommand;
 char tmpRead[HEX_DIGITS_LENGTH + 1]; //+1 to store the '\0' NUL terminator
 unsigned int tmpSendLength;
-int angularChangeCommand;
+float angularChangeCommand;
 int strLength = 0;
 int readCounter = 0;
 
@@ -100,8 +100,8 @@ int readCounter = 0;
 
 String receivedCommand;
 
-float lengthToAngle = 720.0 / (M_PI * RADIUS); //1.091348181201570 with Radius 210
-float angleToLength = (M_PI * RADIUS) / 720.0; // 0.9162978572970230 with Radius 210
+float lengthToAngle = 180.0 / (M_PI * RADIUS); //1.091348181201570 with Radius 210
+float angleToLength = (M_PI * RADIUS) / 180.0; // 0.9162978572970230 with Radius 210
 
 unsigned long int t_ref;
 
@@ -143,9 +143,9 @@ void setup() {
     lengthFeedback[i] = 32768;
     lengthCommand[i] = 32768;//+ 16;
     rangePWMFeedback[i] = maximumPWMFeedback[i] - minimumPWMFeedback[i];
-    stepPWMFeedback[i] = 1440.0 / (double)(rangePWMFeedback[i]);
+    pwmToAngle[i] = 360.0 / (double)(rangePWMFeedback[i]);  //Depends on the servo's pwm range. //TODO: this should not be 360 degree
     rangePWMOutput[i] = maximumPWMOutput[i] - minimumPWMOutput[i];
-    stepPWMOutput[i] = (double)rangePWMOutput[i] / 1440.0; //360 degree in quarter degree precision -> 1440 steps
+    angleToPWM[i] = (double)rangePWMOutput[i] / 360.0; //Depends on the servo's pwm range. //TODO: this should not be 360 degree
     pwmMapping[i] = (double)rangePWMOutput[i] / (double)rangePWMFeedback[i]; //factor for mapping PWMFeedback onto PWMOutput
 
 
@@ -308,7 +308,18 @@ void requestNanoFeedback() {
       crossingFeedback[i] = false;
     }
     pwmLastFeedback[i] = pwmFeedback[i];
-    lengthFeedback[i] += (int)(((pwmFeedbackDiff * stepPWMFeedback[i]) * angleToLength)); //conversion of pwmDiff to angleChange to lengthChange // some problem on this line which affect the initial length 
+
+    //convert PWM change to length change
+    double lengthFeedbackDiff = pwmFeedbackDiff * pwmToAngle[i] * angleToLength;
+
+    //add length change to the current length. For the double to int conversion, +-0.5 is used to round-off the value instead of truncating it.
+    if (lengthFeedbackDiff > 0){
+      lengthFeedback[i] += (int)(lengthFeedbackDiff + 0.5);
+    } else if (lengthFeedbackDiff < 0){
+      lengthFeedback[i] += (int)(lengthFeedbackDiff - 0.5);
+    }
+    
+    
    // Serial.println(pwmFeedbackDiff);
   }
  
@@ -373,10 +384,10 @@ void readNanoCommand() {
         lengthChangeCommand = tmpSendLength - lengthCommand[i]; //strtol returns long int, lengthCommand is unsigned int (4byte - 2byte), changes will not be >int_max
         lengthCommand[i] += lengthChangeCommand; //update lengthCommand for next command  
         //^the line above is the same as lengthCommand[i] = lengthCommand[i] + (tmpSendLength - lengthCommand[i]) = tmpSendLength????????????
-        angularChangeCommand = (lengthChangeCommand * lengthToAngle); //(int) = (int) * (float)
+        angularChangeCommand = (lengthChangeCommand * lengthToAngle); //(float) = (int) * (float)
         if (angularChangeCommand > 0) {
-          pwmCommand[i] += (int)((angularChangeCommand * stepPWMOutput[i] ) + 0.5);
-        } else pwmCommand[i] += (int)((angularChangeCommand * stepPWMOutput[i] ) - 0.5);
+          pwmCommand[i] += (int)((angularChangeCommand * angleToPWM[i] ) + 0.5);
+        } else pwmCommand[i] += (int)((angularChangeCommand * angleToPWM[i] ) - 0.5);
 
       } else {
         radCounter++;
@@ -392,7 +403,7 @@ void readNanoCommand() {
       crossingCommand[i] = 0;
       //pwmCommand[i] -= 5;
       if (pwmCommand[i] < minimumPWMOutput[i]) { //CROSSING RIGHT -> LEFT
-        pwmCommand[i] = maximumPWMOutput[i] - fabs(fmod(minimumPWMOutput[i], pwmCommand[i]));
+        pwmCommand[i] = maximumPWMOutput[i] - fabs(fmod(minimumPWMOutput[i], pwmCommand[i]));   //CLARIFY: does this assume the max and min PWMOutput is the same location?
         crossingCommand[i] = 2;
       } else if (pwmCommand[i] > maximumPWMOutput[i]) { //CROSSING LEFT -> RIGHT
         pwmCommand[i] = minimumPWMOutput[i] + fmod(pwmCommand[i], maximumPWMOutput[i]);
