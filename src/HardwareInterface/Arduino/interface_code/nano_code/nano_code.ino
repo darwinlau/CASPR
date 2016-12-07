@@ -7,6 +7,10 @@
 #define BAUD_RATE 74880
 #define DELTA 7 // freezing regions at crossing area
 
+
+
+
+
 #define LENGTH_PWM_COMMAND 4
 #define DIGITS_PWM_FEEDBACK 3
 
@@ -19,20 +23,21 @@
 
 
 /////////////////////////// MOTORS DATA BANK //////////////
-int maximumPWMFeedback[8] = {1501, 1494, 1501, 1493, 1501, 1499, 1501, 1520};  //orginal value for servo0 on old dingbot: 1501
-int minimumPWMFeedback[8] = {487, 483, 484, 482, 484, 484, 484, 491};          //orginal value for servo0 on old dingbot: 484
-int middlePWMFeedback[8] = {994, 988, 992, 987, 992, 991, 992, 1005}; // all numbers rounded down  //orginal value for servo0 on old dingbot: 992
-int maximumPWMOutput[8] = {1489, 1485, 1489, 1481, 1488, 1490, 1490, 1509};    //orginal value for servo0 on old dingbot: 1488
-int minimumPWMOutput[8] = {481, 469, 471, 473, 469, 471, 474, 481};            //orginal value for servo0 on old dingbot: 469
-int rangePWMOutput[8] = {1008, 1016, 1018, 1008, 1019, 1019, 1016, 1028};      //orginal value for servo0 on old dingbot: 1016
-int clockwise_max[8] = {2194, 2175, 2185, 2175, 2189, 2188, 2188, 2215};
-int clockwise_min[8] = {2094, 2082, 2090, 2079, 2089, 2088, 2088, 2117};
-int clockwise_max_speed[8] = {283, 278, 272, 269, 272, 281, 278, 278};
-int clockwise_min_speed[8] = {130, 131, 127, 127, 127, 128, 133, 130};
-int anticlockwise_max[8] = {1800, 1780, 1785, 1780, 1785, 1786, 1788, 1811};
-int anticlockwise_min[8] = {1891, 1880, 1887, 1876, 1885, 1886, 1888, 1910};
-int anticlockwise_max_speed[8] = { -281, -278, -273, -269, -270, -279, -273, -279};
-int anticlockwise_min_speed[8] = { -133, -130, -132, -129, -124, -129, -128, -131};
+#define FEEDBACK_PWM_MIN 487
+#define FEEDBACK_PWM_MAX 1501
+#define FEEDBACK_PWM_MIDDLE 994
+#define COMMAND_PWM_MIN 481
+#define COMMAND_PWM_MAX 1489
+#define COMMAND_PWM_RANGE (COMMAND_PWM_MAX - COMMAND_PWM_MIN)
+
+#define CLOCKWISE_PWM_MIN 2094
+#define CLOCKWISE_PWM_MAX 2194
+#define CLOCKWISE_SPEED_MIN 130
+#define CLOCKWISE_SPEED_MAX 283
+#define ANTICLOCKWISE_PWM_MIN 1891
+#define ANTICLOCKWISE_PWM_MAX 1800
+#define ANTICLOCKWISE_SPEED_MIN -133
+#define ANTICLOCKWISE_SPEED_MAX -281
 
 // speed: (deltaPWM / pwmRange) * (360 / 0.01) - time steps 10ms
 // roughly 8pwm / 10ms on clockwise max
@@ -183,11 +188,11 @@ int readPositionFeedback() { //reads position feedback and stores it in servoPWM
   if ((servoPWM < 300) || (servoPWM > 2000)) { //results outside these boundaries are faulty
     servoPWM = lastPWMServo;
   }
-  else if (servoPWM < minimumPWMFeedback[NANO_ID]) {
-    servoPWM = minimumPWMFeedback[NANO_ID];
+  else if (servoPWM < FEEDBACK_PWM_MIN) {
+    servoPWM = FEEDBACK_PWM_MIN;
   }
-  else if (servoPWM > maximumPWMFeedback[NANO_ID]) {
-    servoPWM = maximumPWMFeedback[NANO_ID];
+  else if (servoPWM > FEEDBACK_PWM_MAX) {
+    servoPWM = FEEDBACK_PWM_MAX;
   }
 }
 
@@ -195,13 +200,13 @@ int readPositionFeedback() { //reads position feedback and stores it in servoPWM
 void crossing() { //for later optimization (exit crossing autonomously after delay, calculation based on pwmDifference)
   pwmDifference = 0;
   if (cross == 1) { //->CW crossing
-    pwmDifference = rangePWMOutput[NANO_ID] + pwmCommand - lastPWMCommand;
+    pwmDifference = COMMAND_PWM_RANGE + pwmCommand - lastPWMCommand;
     crossingCounter = 2 + (pwmDifference / 40);
-    //delayTime = (double)(pwmDifference * 1000 / anticlockwise_max_speed[NANO_ID]);
+    //delayTime = (double)(pwmDifference * 1000 / ANTICLOCKWISE_SPEED_MAX);
   } else if (cross == 2) { //->CCW crossing
-    pwmDifference = pwmCommand - rangePWMOutput[NANO_ID] - lastPWMCommand;
+    pwmDifference = pwmCommand - COMMAND_PWM_RANGE - lastPWMCommand;
     crossingCounter = 2 + (pwmDifference / 40);
-    //delayTime = (double)(pwmDifference * 1000 / clockwise_max_speed[NANO_ID]);
+    //delayTime = (double)(pwmDifference * 1000 / CLOCKWISE_SPEED_MAX);
   }
   /*
      Serial.print(" diff: ");
@@ -216,36 +221,36 @@ int crossPWM() {
   int pulse; //PWM for cross
   if (cross == 1)
   {
-    if (( averageSpeed < clockwise_min_speed[NANO_ID]) && (averageSpeed > 0))
+    if (( averageSpeed < CLOCKWISE_SPEED_MIN) && (averageSpeed > 0))
     {
-      pulse = clockwise_min_speed[NANO_ID];
+      pulse = CLOCKWISE_SPEED_MIN;
     }
-    else if (( averageSpeed > clockwise_min_speed[NANO_ID]) && ( averageSpeed < clockwise_max_speed[NANO_ID]))
+    else if (( averageSpeed > CLOCKWISE_SPEED_MIN) && ( averageSpeed < CLOCKWISE_SPEED_MAX))
     {
-      int speedRange = clockwise_max_speed[NANO_ID] - clockwise_min_speed[NANO_ID];
-      int PWMRange = clockwise_max[NANO_ID] - clockwise_min[NANO_ID];
-      pulse = (int)((averageSpeed - clockwise_min_speed[NANO_ID]) / speedRange * PWMRange + clockwise_min[NANO_ID]);
+      int speedRange = CLOCKWISE_SPEED_MAX - CLOCKWISE_SPEED_MIN;
+      int PWMRange = CLOCKWISE_PWM_MAX - CLOCKWISE_PWM_MIN;
+      pulse = (int)((averageSpeed - CLOCKWISE_SPEED_MIN) / speedRange * PWMRange + CLOCKWISE_PWM_MIN);
     }
     else
     {
-      pulse = clockwise_max_speed[NANO_ID];
+      pulse = CLOCKWISE_SPEED_MAX;
     }
   }
   else if (cross == 2)
   {
-    if (( averageSpeed < anticlockwise_min_speed[NANO_ID]) && (averageSpeed < 0))
+    if (( averageSpeed < ANTICLOCKWISE_SPEED_MIN) && (averageSpeed < 0))
     {
-      pulse = anticlockwise_min_speed[NANO_ID];
+      pulse = ANTICLOCKWISE_SPEED_MIN;
     }
-    else if (( averageSpeed > anticlockwise_min_speed[NANO_ID]) && ( averageSpeed < anticlockwise_max_speed[NANO_ID]))
+    else if (( averageSpeed > ANTICLOCKWISE_SPEED_MIN) && ( averageSpeed < ANTICLOCKWISE_SPEED_MAX))
     {
-      int speedRange = anticlockwise_max_speed[NANO_ID] - anticlockwise_min_speed[NANO_ID];
-      int PWMRange = anticlockwise_max[NANO_ID] - anticlockwise_min[NANO_ID];
-      pulse = (int)((averageSpeed - anticlockwise_min_speed[NANO_ID]) / speedRange * PWMRange + anticlockwise_min[NANO_ID]);
+      int speedRange = ANTICLOCKWISE_SPEED_MAX - ANTICLOCKWISE_SPEED_MIN;
+      int PWMRange = ANTICLOCKWISE_PWM_MAX - ANTICLOCKWISE_PWM_MIN;
+      pulse = (int)((averageSpeed - ANTICLOCKWISE_SPEED_MIN) / speedRange * PWMRange + ANTICLOCKWISE_PWM_MIN);
     }
     else
     {
-      pulse = anticlockwise_max_speed[NANO_ID];
+      pulse = ANTICLOCKWISE_SPEED_MAX;
     }
   }
   return pulse;
@@ -253,13 +258,13 @@ int crossPWM() {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void quitCrossing() {
   if (cross == 1) { // From left
-    if ((loopAveragePWM > (minimumPWMFeedback[NANO_ID] + DELTA)) && (servoPWM <= middlePWMFeedback[NANO_ID])) { //smaller/equal because middlePWMFEedback is rounded down
+    if ((loopAveragePWM > (FEEDBACK_PWM_MIN + DELTA)) && (servoPWM <= FEEDBACK_PWM_MIDDLE)) { //smaller/equal because middlePWMFEedback is rounded down
       cross = 0;
     } else lastCross = cross;
   }
   else if (cross == 2) // From right
   {
-    if ((loopAveragePWM < (maximumPWMFeedback[NANO_ID] - DELTA)) && (servoPWM > middlePWMFeedback[NANO_ID] )) {
+    if ((loopAveragePWM < (FEEDBACK_PWM_MAX - DELTA)) && (servoPWM > FEEDBACK_PWM_MIDDLE )) {
       cross = 0;
     } else lastCross = cross;
   }
@@ -270,13 +275,13 @@ void quitCrossing() {
 void ctrl_motor(int pwmMotor) { //transmits the output signal towards the motor
   if (cross == 1) {
     crossingCounter--;
-    //crossPulse = clockwise_max[NANO_ID];
+    //crossPulse = CLOCKWISE_PWM_MAX;
     crossPulse = crossPWM();
     servoPulse(crossPulse);
     servoPulse(crossPulse);
   } else if (cross == 2) {
     crossingCounter--;
-    //crossPulse = anticlockwise_max[NANO_ID];
+    //crossPulse = ANTICLOCKWISE_PWM_MAX;
     crossPulse = crossPWM();
     servoPulse(crossPulse);
     servoPulse(crossPulse);
@@ -308,7 +313,7 @@ void sendFeedback() {
 
 void testdrive() {
   if (cw) {
-    if (pwmTestrun < (maximumPWMOutput[NANO_ID] + 20)) {
+    if (pwmTestrun < (COMMAND_PWM_MAX + 20)) {
       pwmTestrun += 20;
     }
     else {
@@ -316,7 +321,7 @@ void testdrive() {
       cw = 0;
     }
   } else {
-    if (pwmTestrun > (minimumPWMOutput[NANO_ID] - 20)) {
+    if (pwmTestrun > (COMMAND_PWM_MIN - 20)) {
       pwmTestrun -= 20;
     }
     else {

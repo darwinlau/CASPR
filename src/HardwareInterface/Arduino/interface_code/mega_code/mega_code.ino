@@ -51,17 +51,17 @@
 // TODO: move to each nano
 int maximumPWMFeedback[8] = {1501, 1494, 1501, 1493, 1501, 1499, 1501, 1520};  //orginal value for servo0 on old dingbot: 1501
 int minimumPWMFeedback[8] = {487, 483, 484, 482, 484, 484, 484, 491};          //orginal value for servo0 on old dingbot: 484
-int middlePWMFeedback[8] = {994, 988, 992, 987, 992, 991, 992, 1005}; // all numbers rounded down  //orginal value for servo0 on old dingbot: 992
+//int middlePWMFeedback[8] = {994, 988, 992, 987, 992, 991, 992, 1005}; // all numbers rounded down  //orginal value for servo0 on old dingbot: 992
 int maximumPWMOutput[8] = {1489, 1485, 1489, 1481, 1488, 1490, 1490, 1509};    //orginal value for servo0 on old dingbot: 1488
 int minimumPWMOutput[8] = {481, 469, 471, 473, 469, 471, 474, 481};            //orginal value for servo0 on old dingbot: 469
-int clockwise_max[8] = {2194, 2175, 2185, 2175, 2189, 2188, 2188, 2215};
-int clockwise_min[8] = {2098, 2082, 2090, 2079, 2089, 2088, 2088, 2117};
-int clockwise_max_speed[8] = {55, 278, 272, 269, 272, 281, 278, 278};
-int clockwise_min_speed[8] = {25, 131, 127, 127, 127, 128, 133, 130};
-int anticlockwise_max[8] = {1800, 1780, 1785, 1780, 1785, 1786, 1788, 1811};
-int anticlockwise_min[8] = {1891, 1880, 1887, 1876, 1885, 1886, 1888, 1910};
-int anticlockwise_max_speed[8] = { -55, -278, -273, -269, -270, -279, -273, -279};
-int anticlockwise_min_speed[8] = { -26, -130, -132, -129, -124, -129, -128, -131};
+//int clockwise_max[8] = {2194, 2175, 2185, 2175, 2189, 2188, 2188, 2215};
+//int clockwise_min[8] = {2098, 2082, 2090, 2079, 2089, 2088, 2088, 2117};
+//int clockwise_max_speed[8] = {55, 278, 272, 269, 272, 281, 278, 278};
+//int clockwise_min_speed[8] = {25, 131, 127, 127, 127, 128, 133, 130};
+//int anticlockwise_max[8] = {1800, 1780, 1785, 1780, 1785, 1786, 1788, 1811};
+//int anticlockwise_min[8] = {1891, 1880, 1887, 1876, 1885, 1886, 1888, 1910};
+//int anticlockwise_max_speed[8] = { -55, -278, -273, -269, -270, -279, -273, -279};
+//int anticlockwise_min_speed[8] = { -26, -130, -132, -129, -124, -129, -128, -131};
 
 // speed: deltaPWM per 50ms// roughly 8pwm / 10ms on clockwise max
 
