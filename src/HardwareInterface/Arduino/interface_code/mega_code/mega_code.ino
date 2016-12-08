@@ -49,10 +49,10 @@
 
 /////////////////////////// SERVO PARAMETERS //////////////
 // TODO: move to each nano
-int maximumPWMFeedback[8] = {1501, 1494, 1501, 1493, 1501, 1499, 1501, 1520};  //orginal value for servo0 on old dingbot: 1501
+int maximumPWMFeedback[8] = {1502, 1494, 1501, 1493, 1501, 1499, 1501, 1520};  //orginal value for servo0 on old dingbot: 1501
 int minimumPWMFeedback[8] = {487, 483, 484, 482, 484, 484, 484, 491};          //orginal value for servo0 on old dingbot: 484
 //int middlePWMFeedback[8] = {994, 988, 992, 987, 992, 991, 992, 1005}; // all numbers rounded down  //orginal value for servo0 on old dingbot: 992
-int maximumPWMOutput[8] = {1489, 1485, 1489, 1481, 1488, 1490, 1490, 1509};    //orginal value for servo0 on old dingbot: 1488
+int maximumPWMOutput[8] = {1487, 1485, 1489, 1481, 1488, 1490, 1490, 1509};    //orginal value for servo0 on old dingbot: 1488
 int minimumPWMOutput[8] = {481, 469, 471, 473, 469, 471, 474, 481};            //orginal value for servo0 on old dingbot: 469
 //int clockwise_max[8] = {2194, 2175, 2185, 2175, 2189, 2188, 2188, 2215};
 //int clockwise_min[8] = {2098, 2082, 2090, 2079, 2089, 2088, 2088, 2117};
@@ -143,15 +143,15 @@ void setup() {
     lengthFeedback[i] = 32768;
     lengthCommand[i] = 32768;//+ 16;
     rangePWMFeedback[i] = maximumPWMFeedback[i] - minimumPWMFeedback[i];
-    pwmToAngle[i] = 360.0 / (double)(rangePWMFeedback[i]);  //Depends on the servo's pwm range. //TODO: this should not be 360 degree
+    pwmToAngle[i] = 357.0 / (double)(rangePWMFeedback[i]);  //This pwm range corresponds to 357 degrees. The 3 degree left is unusable ("crossing").
     rangePWMOutput[i] = maximumPWMOutput[i] - minimumPWMOutput[i];
-    angleToPWM[i] = (double)rangePWMOutput[i] / 360.0; //Depends on the servo's pwm range. //TODO: this should not be 360 degree
+    angleToPWM[i] = (double)rangePWMOutput[i] / 357.0; //Depends on the servo's pwm range. This pwm range corresponds to 357 degrees.
     pwmMapping[i] = (double)rangePWMOutput[i] / (double)rangePWMFeedback[i]; //factor for mapping PWMFeedback onto PWMOutput
 
 
     /////// TEMPORARY - REVISE LATER AFTER CALIBRATION //////////
     readNanoFeedback(i);
-    pwmCommand[i] = (pwmFeedback[i] - minimumPWMFeedback[i]) * pwmMapping[i] + minimumPWMOutput[i];
+    pwmCommand[i] = (pwmFeedback[i] - minimumPWMFeedback[i]) * pwmMapping[i] + minimumPWMOutput[i] + 0.5;  //+0.5 to turn double-to-int truncation into round-off
   }
   t_ref = millis();
 }
