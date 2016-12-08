@@ -14,7 +14,7 @@ classdef DingbotExperiment < ExperimentBase
         function eb = DingbotExperiment()
             % Create the config
             model_config = DevModelConfig(DevModelConfigType.D_CUHK_DINGBOT);
-            cable_set_id = 'original';
+            cable_set_id = 'debugging';
             % Load the SystemKinematics object from the XML
             modelObj = model_config.getModel(cable_set_id);
             % Create the hardware interface
