@@ -23,14 +23,14 @@ void loop() {
     //process user input//
     int input = Serial.parseInt();
     if (input == 8) {                                // '8' to increase pwm command by 1
-      if (pulseWidthCmd < 1600) {
+      if (pulseWidthCmd < 2500) {
         pulseWidthCmd++;
       }
     } else if (input == 2) {                         // '2' to decrease pwm command by 1
       if (pulseWidthCmd > 400) {
         pulseWidthCmd--;
       }
-    } else if (input >= 400 && input <= 1600) {   // a number between 400-1600 to set pwm command
+    } else if (input >= 400 && input <= 2500) {   // a number between 400-2500 to set pwm command
       pulseWidthCmd = input;
     }
 
