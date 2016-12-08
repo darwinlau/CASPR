@@ -6,8 +6,8 @@
 #define BAUD_RATE 74880
 
 //for my NEW motor: 481 - 1487
-#define MIN_PULSEWIDTH 481
-#define MAX_PULSEWIDTH 1487
+#define MAX_PULSEWIDTH 1520
+#define MIN_PULSEWIDTH 460
 
 void setup() {
   Serial.begin(BAUD_RATE);
@@ -15,18 +15,18 @@ void setup() {
 
 void loop() {
   //on your mark, get set...//
-  writePulseToServo(MIN_PULSEWIDTH);
-  writePulseToServo(MIN_PULSEWIDTH); //the servo won't go to the destination if we only send the pulse once
+  writePulseToServo(MAX_PULSEWIDTH);
+  writePulseToServo(MAX_PULSEWIDTH); //the servo won't go to the destination if we only send the pulse once
   delay(4000);
   
   //go! //
-  for (int pulseWidthCmd = MIN_PULSEWIDTH; pulseWidthCmd <= MAX_PULSEWIDTH; pulseWidthCmd++) {
+  for (int pulseWidthCmd = MAX_PULSEWIDTH; pulseWidthCmd >= MIN_PULSEWIDTH; pulseWidthCmd--) {
     //send command//
     writePulseToServo(pulseWidthCmd);
     writePulseToServo(pulseWidthCmd);
 
     //read feedback//
-    delay(40);
+    delay(50);
     int avgFeedback = readAvgFeedback(4);
     
 
