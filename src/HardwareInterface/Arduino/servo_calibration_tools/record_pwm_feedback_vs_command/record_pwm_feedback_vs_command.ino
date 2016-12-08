@@ -5,9 +5,9 @@
 #define MOTOR_PIN 2
 #define BAUD_RATE 74880
 
-//for my NEW motor: 471 - 1487
-#define MIN_PULSEWIDTH 471
-#define MAX_PULSEWIDTH 1520
+//for my NEW motor: 481 - 1487
+#define MIN_PULSEWIDTH 481
+#define MAX_PULSEWIDTH 1487
 
 void setup() {
   Serial.begin(BAUD_RATE);

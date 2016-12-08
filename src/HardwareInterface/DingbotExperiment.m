@@ -83,7 +83,7 @@ classdef DingbotExperiment < ExperimentBase
             clear;
             close all;
          %   trajectory_id = 'traj_1';
-            trajectory_id = 'BackAndForth';
+            trajectory_id = 'straightLine';
             
             
             exp = DingbotExperiment();

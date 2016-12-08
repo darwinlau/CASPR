@@ -4,6 +4,8 @@
    Read feedback too.
    To quickly increase/decrease the pulse width value by 1,
    enter 8 and 2 respectivively.
+   To quickly send the previous command again,
+   enter 1, 3, or any number less than 400.
 */
 
 

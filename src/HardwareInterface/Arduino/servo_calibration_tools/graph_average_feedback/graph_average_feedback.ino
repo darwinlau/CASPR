@@ -1,7 +1,8 @@
 /*
    Read position feedback from the servo.(in pulse width in microseconds)
    Average the last few values.
-   Print to serial in a graph-friendly format.
+   Print to serial in a plotter-friendly format.
+   CAUTION: this code is displaying value under 500 at the moment
 */
 
 #define MOTOR_PIN 2
