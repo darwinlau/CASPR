@@ -1,7 +1,7 @@
 #include <string.h>
 #include <Wire.h>
 #include <math.h>
-#include "servo_properties/servo_00.h"   //servo-specific properties (e.g. the range of pwm command it can execute) is stored here
+#include "servo_properties/servo_01.h"   //servo-specific properties (e.g. the range of pwm command it can execute) is stored here
 
 #define MOTOR_PIN 2
 #define BAUD_RATE 74880
@@ -83,27 +83,27 @@ void readSerial() { //receive characterizing prefix (+ length in 2 digit Hex, wi
     strReceived = Serial.readStringUntil('\n');
     commandReceived = strReceived[0];
     if (commandReceived == RECEIVE_PWM_CMD) { //p
-      lastCross = 0;
+      lastCross = 0;                 //CLARIFY: what mean lastCross mean?
       loopAverage();
       speedCounter++;
       //Serial.print(" avg: ");
       //Serial.println(loopAveragePWM);
 
-      if (cross > 0) {
-        if (crossingCounter > 0) {
-          quitCrossing();
-        } else {
+      if (cross > 0) {               //CLARIFY: if crossing?
+        if (crossingCounter > 0) {   //CLARIFY: if not timing-out yet?
+          quitCrossing();            //CLARIFY: decide whether or not we can quit crossing (i.e. set cross = 0). If not, set lastCross = cross; ??
+        } else {                     //CLARIFY: if the crossing time-out?
           cross = 0;
           lastCross = 0;
           crossingCounter = 0;
         }
       }
       delay(5);
-      readPWMCommand();
+      readPWMCommand();             //CLARIFY: (this will set  cross  according to the command from mega)?
       if (lastCross > 0 && cross == 0) { //if lastCross > 0, the crossing has not been quit, but cross has been reassigned by the new incomming command
-        cross = lastCross;
+        cross = lastCross;          //CLARIFY: if crossing is not done yet, ignore the cmd from mega, continue our crossing?
       }
-      crossing();
+      crossing();                   //CLARIFY: set crossingCounter depending on......????
       ctrl_motor(pwmCommand);
     }
 
@@ -175,11 +175,11 @@ void crossing() { //for later optimization (exit crossing autonomously after del
   pwmDifference = 0;
   if (cross == 1) { //->CW crossing
     pwmDifference = COMMAND_PWM_RANGE + pwmCommand - lastPWMCommand;
-    crossingCounter = 2 + (pwmDifference / 40);
+    crossingCounter = 2 + (pwmDifference / 40);                     //CLARIFY: what is 2? 40?
     //delayTime = (double)(pwmDifference * 1000 / ANTICLOCKWISE_SPEED_MAX);
   } else if (cross == 2) { //->CCW crossing
     pwmDifference = pwmCommand - COMMAND_PWM_RANGE - lastPWMCommand;
-    crossingCounter = 2 + (pwmDifference / 40);
+    crossingCounter = 2 + (pwmDifference / 40);                     //CLARIFY: what is 2? 40?
     //delayTime = (double)(pwmDifference * 1000 / CLOCKWISE_SPEED_MAX);
   }
   /*
