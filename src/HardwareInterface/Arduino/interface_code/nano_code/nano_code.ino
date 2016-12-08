@@ -1,15 +1,11 @@
 #include <string.h>
 #include <Wire.h>
 #include <math.h>
+#include "servo_properties/servo_00.h"   //servo-specific properties (e.g. the range of pwm command it can execute) is stored here
 
-#define NANO_ID 0
 #define MOTOR_PIN 2
 #define BAUD_RATE 74880
-#define DELTA 7 // freezing regions at crossing area
-
-
-
-
+#define DELTA 7 // freezing regions at crossing area  
 
 #define LENGTH_PWM_COMMAND 4
 #define DIGITS_PWM_FEEDBACK 3
@@ -20,28 +16,6 @@
 #define RECEIVE_FEEDBACK_REQUEST 'f'
 #define RECEIVE_TEST_REQUEST 't'
 #define RECEIVE_TESTDRIVE_REQUEST 'z'
-
-
-/////////////////////////// MOTORS DATA BANK //////////////
-#define FEEDBACK_PWM_MIN 487
-#define FEEDBACK_PWM_MAX 1501
-#define FEEDBACK_PWM_MIDDLE 994
-#define COMMAND_PWM_MIN 481
-#define COMMAND_PWM_MAX 1489
-#define COMMAND_PWM_RANGE (COMMAND_PWM_MAX - COMMAND_PWM_MIN)
-
-#define CLOCKWISE_PWM_MIN 2094
-#define CLOCKWISE_PWM_MAX 2194
-#define CLOCKWISE_SPEED_MIN 130
-#define CLOCKWISE_SPEED_MAX 283
-#define ANTICLOCKWISE_PWM_MIN 1891
-#define ANTICLOCKWISE_PWM_MAX 1800
-#define ANTICLOCKWISE_SPEED_MIN -133
-#define ANTICLOCKWISE_SPEED_MAX -281
-
-// speed: (deltaPWM / pwmRange) * (360 / 0.01) - time steps 10ms
-// roughly 8pwm / 10ms on clockwise max
-
 
 /////////////////////////// COMMUNICATION ///////////////////////// //
 
