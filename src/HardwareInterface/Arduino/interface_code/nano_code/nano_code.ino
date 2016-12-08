@@ -2,6 +2,7 @@
 #include <Wire.h>
 #include <math.h>
 #include "servo_properties/servo_01.h"   //servo-specific properties (e.g. the range of pwm command it can execute) is stored here
+#include <SoftwareSerial.h> //DEBUG
 
 #define MOTOR_PIN 2
 #define BAUD_RATE 74880
@@ -66,8 +67,11 @@ void servOPulse(int pulseWidth);
 void sendFeedback();
 void testdrive();
 
+SoftwareSerial softSerial(6,7); //RX, TX DEBUG
+
 void setup() {
   Serial.begin(BAUD_RATE);
+  softSerial.begin(BAUD_RATE);
   while (servoPWM == 0) {
     loopAverage();
   }
@@ -191,13 +195,15 @@ void crossing() { //for later optimization (exit crossing autonomously after del
   lastPWMCommand = pwmCommand;
 }
 
+//Variable crossing speed
+// TODO: BUG! AVERAGE SPEED SEEMS TO BE ALWAYS 0. //
 int crossPWM() {
   int pulse; //PWM for cross
   if (cross == 1)
   {
     if (( averageSpeed < CLOCKWISE_SPEED_MIN) && (averageSpeed > 0))
     {
-      pulse = CLOCKWISE_SPEED_MIN;
+      pulse = CLOCKWISE_PWM_MIN;
     }
     else if (( averageSpeed > CLOCKWISE_SPEED_MIN) && ( averageSpeed < CLOCKWISE_SPEED_MAX))
     {
@@ -207,14 +213,14 @@ int crossPWM() {
     }
     else
     {
-      pulse = CLOCKWISE_SPEED_MAX;
+      pulse = CLOCKWISE_PWM_MAX;
     }
   }
   else if (cross == 2)
   {
     if (( averageSpeed < ANTICLOCKWISE_SPEED_MIN) && (averageSpeed < 0))
     {
-      pulse = ANTICLOCKWISE_SPEED_MIN;
+      pulse = ANTICLOCKWISE_PWM_MIN;
     }
     else if (( averageSpeed > ANTICLOCKWISE_SPEED_MIN) && ( averageSpeed < ANTICLOCKWISE_SPEED_MAX))
     {
@@ -224,7 +230,7 @@ int crossPWM() {
     }
     else
     {
-      pulse = ANTICLOCKWISE_SPEED_MAX;
+      pulse = ANTICLOCKWISE_PWM_MAX;  
     }
   }
   return pulse;
@@ -249,20 +255,26 @@ void quitCrossing() {
 void ctrl_motor(int pwmMotor) { //transmits the output signal towards the motor
   if (cross == 1) {
     crossingCounter--;
-    //crossPulse = CLOCKWISE_PWM_MAX;
-    crossPulse = crossPWM();
+    crossPulse = CLOCKWISE_PWM_MIN;  //cross at min speed
+    //crossPulse = crossPWM();
     servoPulse(crossPulse);
     servoPulse(crossPulse);
+    softSerial.println(crossPulse); //DEBUG
+    softSerial.flush();//DEBUG
   } else if (cross == 2) {
     crossingCounter--;
-    //crossPulse = ANTICLOCKWISE_PWM_MAX;
-    crossPulse = crossPWM();
+    crossPulse = ANTICLOCKWISE_PWM_MIN;  ////cross at min speed
+    //crossPulse = crossPWM();
     servoPulse(crossPulse);
     servoPulse(crossPulse);
+    softSerial.println(crossPulse); //DEBUG
+    softSerial.flush();//DEBUG
   } else if (sendCounter > 0) {
     servoPulse(pwmMotor);
     servoPulse(pwmMotor);
     sendCounter--;
+    softSerial.println(pwmMotor); //DEBUG
+    softSerial.flush();//DEBUG
   }
 }
 
