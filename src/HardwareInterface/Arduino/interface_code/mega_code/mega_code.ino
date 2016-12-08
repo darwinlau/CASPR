@@ -15,7 +15,7 @@
 #include <SoftwareSerial.h>
 
 // TODO: This should be sent by MATLAB in the future
-#define NUMBER_CONNECTED_NANOS 1
+#define NUMBER_CONNECTED_NANOS 2
 // TODO: Peter will update this to be dynamic
 #define RADIUS 210 //spool, in average radius in 0.1mm precision  actual radius is 20mm **Improve in future
 
@@ -49,10 +49,10 @@
 
 /////////////////////////// SERVO PARAMETERS //////////////
 // TODO: move to each nano
-int maximumPWMFeedback[8] = {1502, 1494, 1501, 1493, 1501, 1499, 1501, 1520};  //orginal value for servo0 on old dingbot: 1501
-int minimumPWMFeedback[8] = {487, 483, 484, 482, 484, 484, 484, 491};          //orginal value for servo0 on old dingbot: 484
-int maximumPWMOutput[8] = {1487, 1485, 1489, 1481, 1488, 1490, 1490, 1509};    //orginal value for servo0 on old dingbot: 1488
-int minimumPWMOutput[8] = {481, 469, 471, 473, 469, 471, 474, 481};            //orginal value for servo0 on old dingbot: 469
+int maximumPWMFeedback[8] = {1502, 1498, 1501, 1493, 1501, 1499, 1501, 1520};  //orginal value for servo0 on old dingbot: 1501
+int minimumPWMFeedback[8] = {487, 487, 484, 482, 484, 484, 484, 491};          //orginal value for servo0 on old dingbot: 484
+int maximumPWMOutput[8] = {1487, 1484, 1489, 1481, 1488, 1490, 1490, 1509};    //orginal value for servo0 on old dingbot: 1488
+int minimumPWMOutput[8] = {481, 476, 471, 473, 469, 471, 474, 481};            //orginal value for servo0 on old dingbot: 469
 
 //int middlePWMFeedback[8] = {994, 988, 992, 987, 992, 991, 992, 1005}; // all numbers rounded down  //orginal value for servo0 on old dingbot: 992
 //int clockwise_max[8] = {2194, 2175, 2185, 2175, 2189, 2188, 2188, 2215};

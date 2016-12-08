@@ -18,7 +18,7 @@ classdef DingbotExperiment < ExperimentBase
             % Load the SystemKinematics object from the XML
             modelObj = model_config.getModel(cable_set_id);
             % Create the hardware interface
-            hw_interface = ArduinoCASPRInterface('COM5', 1);
+            hw_interface = ArduinoCASPRInterface('COM5', 2);
             eb@ExperimentBase(hw_interface, modelObj);
             eb.modelConfig = model_config;
             eb.forwardKin = FKLeastSquares(modelObj, FK_LS_ApproxOptionType.FIRST_ORDER_INTEGRATE_QDOT, FK_LS_QdotOptionType.FIRST_ORDER_DERIV);
@@ -35,7 +35,7 @@ classdef DingbotExperiment < ExperimentBase
             % Update the model with the initial point so that the obj.model.cableLength has the initial lengths
             obj.model.update(trajectory.q{1}, trajectory.q_dot{1}, trajectory.q_ddot{1},zeros(size(trajectory.q_dot{1})));
             % Send the initial lengths to the hardware
-            obj.hardwareInterface.lengthInitialSend(obj.model.cableLengths(1)); %(1)
+            obj.hardwareInterface.lengthInitialSend(obj.model.cableLengths(1:2)); %(1)
             % Start the system to get feedback
             obj.hardwareInterface.systemOnSend();
             for t = 1:length(trajectory.timeVector)
@@ -43,12 +43,12 @@ classdef DingbotExperiment < ExperimentBase
                 % Print time for debugging
                 tic;
                 %send command length to Arduino Mega
-                obj.hardwareInterface.lengthCommandSend(obj.model.cableLengths(1)); %(1)
+                obj.hardwareInterface.lengthCommandSend(obj.model.cableLengths(1:2)); %(1)
                 %read incoming feedback from Arduino Mega
                 obj.hardwareInterface.cmdRead();
                 %update cable lengths for next command from trajectory
                 obj.model.update(trajectory.q{t}, trajectory.q_dot{t}, trajectory.q_ddot{t},zeros(size(trajectory.q_dot{t})));
-                obj.l_cmd_traj(:, t) = obj.model.cableLengths(1); %(1)
+                obj.l_cmd_traj(:, t) = obj.model.cableLengths(1:2); %(1)
                 obj.hardwareInterface.feedback
                 obj.l_feedback_traj(:, t) = obj.hardwareInterface.feedback; 
                 
