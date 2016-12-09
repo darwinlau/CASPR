@@ -26,7 +26,10 @@ classdef (Abstract) CableModelBase < handle
     end
     
     properties (SetAccess = protected)
-        segments = {}               % Cell array of CableSegmentKinematics
+        % The segments objects will use the attachments objects
+        segments = {}               % Cell array of CableSegmentModel objects
+        attachments = {}            % Cell array of CableAttachment objects
+        
         isActive = true             % Whether the cable is in passive state
         % Minimum and maximum allowable cable force
         forceMin
@@ -36,16 +39,20 @@ classdef (Abstract) CableModelBase < handle
     properties (SetAccess = private)
         name        = '';                  % Cable name
         numLinks    = -1;
-        numSegments = 0;
     end
     
     properties (Dependent)
-        length 
+        length                      % Length of the cable
+        numSegments                 % Total number of segments
     end
     
     properties (Abstract, Dependent)
-        % Stiffness of the cable
-        K
+        K                           % Stiffness of the cable
+    end
+    
+    methods (Abstract, Static)
+        % Function to load the XML properties for this cable
+        LoadXmlObj(xml, bodiesModel);
     end
         
     methods
@@ -54,45 +61,22 @@ classdef (Abstract) CableModelBase < handle
             ck.numLinks = numLinks;
         end
                 
-        % Add first segment and update CRM
-        function addSegment(obj, sLink, sLoc, eLink, eLoc, bodiesKin, attachmentRefType)
-            segmentId = obj.numSegments + 1;
-            obj.segments{segmentId} = CableSegmentModel(obj.numLinks, sLink, sLoc, eLink, eLoc, bodiesKin, attachmentRefType);
-            obj.numSegments = segmentId;
+        % NOT SURE HOW THIS IS USED YET, but just a demo of what can be
+        % done
+        function addSegment(obj, segment)
+            obj.segments{obj.numSegments + 1} = segment;
         end
         
         % NOT SURE HOW THIS IS USED YET, but just a demo of what can be
         % done
         function clear(obj)
-            obj.numSegments = 0;
             obj.segments = {};
+            obj.attachments = {};
         end
         
         function update(obj, bodyKinematics)
-            for j = 1:obj.numSegments
-                % cycle through links 0 to p, linkNum = k-1
-                segment = obj.segments{j};
-                segment.segmentVector = [0;0;0];
-                for k = 1:obj.numLinks+1
-                    CRMTerm = obj.getCRMTerm(j,k);
-                    % First : compute absolute attachment locations
-                    if CRMTerm ~= 0
-                        % k == 1 is base link
-                        if k == 1
-                            segment.r_OA{k} = segment.r_PA{k};
-                        else
-                            % bodies{k-1} because bodyNum = k - 1;
-                            segment.r_OA{k} = bodyKinematics.bodies{k-1}.r_OG + segment.r_GA{k};
-                        end
-                    end
-                    % Second : compute cable segment vectors
-                    % k == 1 is base link
-                    if k == 1
-                        segment.segmentVector = segment.segmentVector + CRMTerm*segment.r_OA{k};
-                    else
-                        segment.segmentVector = segment.segmentVector + CRMTerm*(bodyKinematics.bodies{k-1}.R_0k*segment.r_OA{k});
-                    end
-                end
+            for a = 1:length(obj.attachments)
+                obj.attachments{a}.update(bodyKinematics);
             end
         end
         
@@ -101,7 +85,10 @@ classdef (Abstract) CableModelBase < handle
             for j = 1:obj.numSegments
                 value = value + obj.segments{j}.length;
             end
-            %value = sum(obj.segments{:}.length);
+        end
+        
+        function value = get.numSegments(obj)
+            value = length(obj.segments);
         end
         
         function c_jk = getCRMTerm(obj, j, k)
@@ -112,4 +99,43 @@ classdef (Abstract) CableModelBase < handle
         end
     end
     
+    methods (Static)
+        function [segments, attachments] = LoadSegmentsXmlObj(cableName, attachmentXmlObjs, defaultAttachmentRef, bodiesModel)
+            numAttachments = attachmentXmlObjs.getLength;
+            CASPR_log.Assert(numAttachments >= 2, sprintf('Not enough attachments for cable ''%s'': %d attachment(s) specified', cableName, numAttachments));
+            attachments = cell(1, numAttachments);
+            segments = cell(1, numAttachments - 1); % Number of segments is one less than the number of attachments
+            
+            load_base_attachment_pulley = 0;
+            
+            % Setup the attachments
+            for a = 1:numAttachments
+                % XML java objects use 0 based index
+                attachmentObj = attachmentXmlObjs.item(a-1);
+                type = char(attachmentObj.getNodeName);
+                
+                % Check the type of attachment and then add to the set
+                if (strcmp(type, 'attachment'))
+                    attachments{a} = CableAttachmentPoint.LoadXmlObj(attachmentObj, defaultAttachmentRef, bodiesModel);
+                % Attachment base pulley is a bit special, we need to load
+                % the next attachment and then pass this into this one so
+                % it can determine its kinematics
+                elseif (strcmp(type, 'attachment_base_pulley'))
+                    CASPR_log.Assert(a == 1, '''attachment_base_pulley'' can only be used on the base attachment');
+                    load_base_attachment_pulley = 1;
+                else
+                    CASPR_log.Print(sprintf('Unknown cables type: %s', type),CASPRLogLevel.ERROR);
+                end
+            end
+            
+            if (load_base_attachment_pulley)
+                %attachments{1} = CableAttachmentBasePulley.LoadXmlObj(attachmentXmlObjs(0), attachments{2});
+            end
+            
+            % Using the attachments, setup the segment model
+            for s = 1:numAttachments - 1
+                segments{s} = CableSegmentModel(attachments{s}, attachments{s+1}, bodiesModel.numLinks);
+            end
+        end
+    end
 end

@@ -5,72 +5,26 @@
 % Description	:
 %   Cable segments are fundamental for MCDMs since cables can pass through
 %   multiple links and hence have multiple segments.
-classdef CableSegmentModel < handle
-    properties
-        r_OA            = {}          % Cell array of absolute attachment locations ^kr_{OA_{ijk}} for cable i segment j in local frame
-        segmentVector   = []          % vector \mathbf{l}_{ij} in frame {0}
-    end
-    
-    
+classdef CableSegmentModel < handle   
     properties (SetAccess = private)
-        numLinks        = -1          % The number of links
-        r_GA            = {}          % Cell array of relative attachment locations ^kr_{G_kA_{ijk}} from COG to attachment location for cable i segment j in local frame
-        r_PA            = {}          % Cell array of relative attachment locations ^kr_{P_kA_{ijk}} from joint to attachment location for cable i segment j in local frame
-        CRM             = []          % Cable Routing Matrix for this cable and segment
+        numLinks        = -1            % The number of links
+        attachments     = {}            % CEll array of two attachment locations (index 1 is the "from", index 2 is the "to")
+        CRM             = []            % Cable Routing Matrix for this cable and segment
     end
         
     properties (Dependent)
-        length
+        segmentVector                   % vector \mathbf{l}_{ij} in frame {0}
+        length                          % length of segment
     end
         
     methods
-        function ck = CableSegmentModel(numLinks, sLink, sLoc, eLink, eLoc, bodiesModel, attachmentRefType)
-            CASPR_log.Assert(sLink <= numLinks, '"sLink" exceeds total number of links');
-            CASPR_log.Assert(eLink <= numLinks, '"eLink" exceeds total number of links');
-            
+        function ck = CableSegmentModel(attachment_s, attachment_e, numLinks)
             ck.numLinks = numLinks;
-            ck.segmentVector = [0;0;0];
             ck.CRM = zeros(1, numLinks+1);
-            ck.r_PA = cell(1, numLinks+1);
-            ck.r_PA(:) = {[0;0;0]};
-            ck.r_GA = cell(1, numLinks+1);
-            ck.r_GA(:) = {[0;0;0]};
-            ck.r_OA = cell(1, numLinks+1);
-            ck.r_OA(:) = {[0;0;0]};
-            
-            ck.CRM(sLink+1) = -1;
-            ck.CRM(eLink+1) = 1;
-            
-            switch attachmentRefType
-                case CableAttachmentReferenceType.COM
-                    ck.r_GA{sLink+1} = sLoc;
-                    ck.r_GA{eLink+1} = eLoc;
-                    if sLink == 0
-                        ck.r_PA{sLink+1} = ck.r_GA{sLink+1};
-                    else
-                        ck.r_PA{sLink+1} = bodiesModel.bodies{sLink}.r_G + ck.r_GA{sLink+1};
-                    end
-                    if eLink == 0
-                        ck.r_PA{eLink+1} = ck.r_GA{eLink+1};
-                    else
-                        ck.r_PA{eLink+1} = bodiesModel.bodies{eLink}.r_G + ck.r_GA{eLink+1};
-                    end
-                case CableAttachmentReferenceType.JOINT
-                    ck.r_PA{sLink+1} = sLoc;
-                    ck.r_PA{eLink+1} = eLoc;
-                    if sLink == 0
-                        ck.r_GA{sLink+1} = ck.r_PA{sLink+1};
-                    else
-                        ck.r_GA{sLink+1} = -bodiesModel.bodies{sLink}.r_G + ck.r_PA{sLink+1};
-                    end
-                    if eLink == 0
-                        ck.r_GA{eLink+1} = ck.r_PA{eLink+1};
-                    else
-                        ck.r_GA{eLink+1} = -bodiesModel.bodies{eLink}.r_G + ck.r_PA{eLink+1};
-                    end
-                otherwise
-                    CASPR_log.Print('CableAttachmentReferenceType type is not defined',CASPRLogLevel.ERROR);
-            end
+            ck.attachments{1} = attachment_s;
+            ck.attachments{2} = attachment_e;
+            ck.CRM(attachment_s.link_num+1) = -1;
+            ck.CRM(attachment_e.link_num+1) = 1;
         end
         
         function c_k = getCRMTerm(obj, k)
@@ -82,14 +36,16 @@ classdef CableSegmentModel < handle
         % done
         function clear(obj)
             obj.CRM = zeros(1, obj.numLinks+1);
-            obj.r_PA(:) = {[0;0;0]};
-            obj.r_GA(:) = {[0;0;0]};
-            obj.r_OA(:) = {[0;0;0]};
+            obj.attachments = {};
+        end
+        
+        % The vectors r_OA are all in base frame
+        function value = get.segmentVector(obj)
+            value = obj.attachments{2}.r_OA - obj.attachments{1}.r_OA; 
         end
         
         function value = get.length(obj)
             value = sqrt(sum(obj.segmentVector.^2));
-%             value = norm(obj.segmentVector);
         end
     end
     

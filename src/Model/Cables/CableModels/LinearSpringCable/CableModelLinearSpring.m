@@ -35,7 +35,10 @@ classdef CableModelLinearSpring < CableModelBase
             % <cable_linear_spring> tag
             name = char(xmlobj.getAttribute('name'));
             attachRefString = char(xmlobj.getAttribute('attachment_reference'));
+            
+            CASPR_log.Assert(~isempty(name), 'No name specified for this cable');
             CASPR_log.Assert(~isempty(attachRefString), 'Invalid <cable_linear_spring> XML format: attachment_reference field empty');
+            
             if (strcmp(attachRefString, 'joint'))
                 attachmentRef = CableAttachmentReferenceType.JOINT;
             elseif (strcmp(attachRefString, 'com'))
@@ -57,23 +60,8 @@ classdef CableModelLinearSpring < CableModelBase
             c.forceMax = str2double(propertiesObj.getElementsByTagName('force_max').item(0).getFirstChild.getData);
             
             % <attachments> tag
-            attachmentObjs = xmlobj.getElementsByTagName('attachments').item(0).getElementsByTagName('attachment');
-            CASPR_log.Assert(~isempty(name), 'No name specified for this cable');
-            CASPR_log.Assert(attachmentObjs.getLength >= 2, sprintf('Not enough attachments for cable ''%s'': %d attachment(s) specified', name, attachmentObjs.getLength));
-            % Beginning attachment of segment 1
-            attachmentObj = attachmentObjs.item(0);
-            sLink = str2double(attachmentObj.getElementsByTagName('link').item(0).getFirstChild.getData);
-            sLoc = XmlOperations.StringToVector3(char(attachmentObj.getElementsByTagName('location').item(0).getFirstChild.getData));
-            for a = 2:attachmentObjs.getLength
-                attachmentObj = attachmentObjs.item(a-1);
-                eLink = str2double(attachmentObj.getElementsByTagName('link').item(0).getFirstChild.getData);
-                eLoc = XmlOperations.StringToVector3(char(attachmentObj.getElementsByTagName('location').item(0).getFirstChild.getData));
-                
-                c.addSegment(sLink, sLoc, eLink, eLoc, bodiesModel, attachmentRef);
-                
-                sLink = eLink;
-                sLoc = eLoc;                
-            end            
+            attachmentObjs = xmlobj.getElementsByTagName('attachments').item(0).getElementsByTagName('attachment');            
+            [c.segments, c.attachments] = CableModelBase.LoadSegmentsXmlObj(name, attachmentObjs, attachmentRef, bodiesModel);     
         end
     end
 end

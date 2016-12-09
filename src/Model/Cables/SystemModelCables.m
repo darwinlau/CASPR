@@ -91,7 +91,11 @@ classdef SystemModelCables < handle
                         segment = cable.segments{j};
                         V_ijk_T = obj.getCRMTerm(i,j,k+1)*body.R_0k.'*segment.segmentVector/segment.length;
                         V_ixk_T = V_ixk_T + V_ijk_T;
-                        V_itk_T = V_itk_T + cross(segment.r_GA{k+1}, V_ijk_T);
+                        if obj.getCRMTerm(i,j,k+1) == -1
+                            V_itk_T = V_itk_T + cross(segment.attachments{1}.r_GA, V_ijk_T);
+                        elseif obj.getCRMTerm(i,j,k+1) == 1
+                            V_itk_T = V_itk_T + cross(segment.attachments{2}.r_GA, V_ijk_T);
+                        end
                     end
                     obj.V(i, 6*k-5:6*k) = [V_ixk_T.' V_itk_T.'];
                 end
@@ -405,9 +409,9 @@ classdef SystemModelCables < handle
                 elseif (strcmp(type, 'cable_vsd_flexure_linear'))
                     xml_cables{k} = CableModelVSDFlexureLinear.LoadXmlObj(currentCableItem, bodiesModel);
                 elseif (strcmp(type, 'muscle_hill_type'))
-                    CASPR_log.Print('muscle_hill_type not implemented yet, please try again later.',CASPRLogLevel.ERROR);
+                    CASPR_log.Print('muscle_hill_type not implemented yet, please try again later.', CASPRLogLevel.ERROR);
                 elseif (strcmp(type, 'pneumatic_artificial_muscle'))
-                    CASPR_log.Print('pneumatic_artificial_muscle not implemented yet, please try again later.',CASPRLogLevel.ERROR);
+                    CASPR_log.Print('pneumatic_artificial_muscle not implemented yet, please try again later.', CASPRLogLevel.ERROR);
                 else
                     CASPR_log.Print(sprintf('Unknown cables type: %s', type),CASPRLogLevel.ERROR);
                 end
