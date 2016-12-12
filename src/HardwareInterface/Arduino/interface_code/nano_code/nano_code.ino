@@ -1,8 +1,7 @@
 #include <string.h>
 #include <Wire.h>
 #include <math.h>
-#include "servo_properties/servo_01.h"   //servo-specific properties (e.g. the range of pwm command it can execute) is stored here
-#include <SoftwareSerial.h> //DEBUG
+#include "servo_properties/servo_07.h"   //servo-specific properties (e.g. the range of pwm command it can execute) is stored here
 
 #define MOTOR_PIN 2
 #define BAUD_RATE 74880
@@ -67,11 +66,8 @@ void servOPulse(int pulseWidth);
 void sendFeedback();
 void testdrive();
 
-SoftwareSerial softSerial(6,7); //RX, TX DEBUG
-
 void setup() {
   Serial.begin(BAUD_RATE);
-  softSerial.begin(BAUD_RATE);
   while (servoPWM == 0) {
     loopAverage();
   }
@@ -259,22 +255,16 @@ void ctrl_motor(int pwmMotor) { //transmits the output signal towards the motor
     //crossPulse = crossPWM();
     servoPulse(crossPulse);
     servoPulse(crossPulse);
-    softSerial.println(crossPulse); //DEBUG
-    softSerial.flush();//DEBUG
   } else if (cross == 2) {
     crossingCounter--;
     crossPulse = ANTICLOCKWISE_PWM_MIN;  ////cross at min speed
     //crossPulse = crossPWM();
     servoPulse(crossPulse);
     servoPulse(crossPulse);
-    softSerial.println(crossPulse); //DEBUG
-    softSerial.flush();//DEBUG
   } else if (sendCounter > 0) {
     servoPulse(pwmMotor);
     servoPulse(pwmMotor);
     sendCounter--;
-    softSerial.println(pwmMotor); //DEBUG
-    softSerial.flush();//DEBUG
   }
 }
 
