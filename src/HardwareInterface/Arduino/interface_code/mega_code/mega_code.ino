@@ -144,9 +144,9 @@ void setup() {
     lengthFeedback[i] = 32768;
     lengthCommand[i] = 32768;//+ 16;
     rangePWMFeedback[i] = maximumPWMFeedback[i] - minimumPWMFeedback[i];
-    pwmToAngle[i] = 357.0 / (double)(rangePWMFeedback[i]);  //This pwm range corresponds to 357 degrees. The 3 degree left is unusable ("crossing").
+    pwmToAngle[i] = 353.0 / (double)(rangePWMFeedback[i]);  //This range of usable pwm command maps to 353 degrees. The 7 degree left is unreliable/unusable in position mode ("the crossing zone").
     rangePWMOutput[i] = maximumPWMOutput[i] - minimumPWMOutput[i];
-    angleToPWM[i] = (double)rangePWMOutput[i] / 357.0; //Depends on the servo's pwm range. This pwm range corresponds to 357 degrees.
+    angleToPWM[i] = (double)rangePWMOutput[i] / 353.0;      //This range of usable pwm command maps to 353 degrees.
     pwmMapping[i] = (double)rangePWMOutput[i] / (double)rangePWMFeedback[i]; //factor for mapping PWMFeedback onto PWMOutput
 
 
