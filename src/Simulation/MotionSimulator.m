@@ -372,15 +372,9 @@ classdef (Abstract) MotionSimulator < Simulator
                 for j = 1:cable_model.cables{i}.numSegments
                     for k = 1:cable_model.numLinks+1
                         if cable_model.getCRMTerm(i,j,k) == -1
-                            r_OAa0 = cable_model.cables{i}.segments{j}.r_OA{k};
-                            if k > 1
-                                r_OAa0 = body_model.bodies{k-1}.R_0k*r_OAa0;
-                            end
+                            r_OAa0 = cable_model.cables{i}.segments{j}.attachments{1}.r_OA;
                         elseif cable_model.getCRMTerm(i,j,k) == 1
-                            r_OAb0 = cable_model.cables{i}.segments{j}.r_OA{k};
-                            if k > 1
-                                r_OAb0 = body_model.bodies{k-1}.R_0k*r_OAb0;
-                            end
+                            r_OAb0 = cable_model.cables{i}.segments{j}.attachments{2}.r_OA;
                         end
                     end
                     if (cable_model.cables{i}.isActive)

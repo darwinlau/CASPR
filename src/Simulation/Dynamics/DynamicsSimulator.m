@@ -51,8 +51,12 @@ classdef DynamicsSimulator < MotionSimulator
                 title('Cable forces');                 
             else
                 hold on;
+                plot_axis
+                obj.timeVector(valid_forces_ind)
+                forces(cables_to_plot, valid_forces_ind)
+               
                 plot(plot_axis,obj.timeVector(valid_forces_ind), forces(cables_to_plot, valid_forces_ind), '.', 'LineWidth', 1.5, 'Color', 'k'); 
-                plot(plot_axis,obj.timeVector(valid_forces_ind_inv), forces(cables_to_plot, valid_forces_ind_inv), '.', 'LineWidth', 1.5, 'Color', 'r'); 
+                 plot(plot_axis,obj.timeVector(valid_forces_ind_inv), forces(cables_to_plot, valid_forces_ind_inv), '.', 'LineWidth', 1.5, 'Color', 'r'); 
                 hold off;                
             end
             xlabel('Time (seconds)')

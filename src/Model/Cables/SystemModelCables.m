@@ -91,7 +91,11 @@ classdef SystemModelCables < handle
                         segment = cable.segments{j};
                         V_ijk_T = obj.getCRMTerm(i,j,k+1)*body.R_0k.'*segment.segmentVector/segment.length;
                         V_ixk_T = V_ixk_T + V_ijk_T;
-                        V_itk_T = V_itk_T + cross(segment.r_GA{k+1}, V_ijk_T);
+                        if obj.getCRMTerm(i,j,k+1) == -1
+                            V_itk_T = V_itk_T + cross(segment.attachments{1}.r_GA, V_ijk_T);
+                        elseif obj.getCRMTerm(i,j,k+1) == 1
+                            V_itk_T = V_itk_T + cross(segment.attachments{2}.r_GA, V_ijk_T);
+                        end
                     end
                     obj.V(i, 6*k-5:6*k) = [V_ixk_T.' V_itk_T.'];
                 end
@@ -103,6 +107,15 @@ classdef SystemModelCables < handle
                     obj.numCablesPassive = obj.numCablesPassive + 1;
                 end
             end
+            
+%             if(obj.is_symbolic)
+%                 for i = size(obj.V,1)
+%                     for j =1:size(obj.V,2)
+%                         obj.V(i,j) = expand(obj.V(i,j),'ArithmeticOnly',true);
+%                         obj.V(i,j) = simplify(obj.V(i,j),10);
+%                     end
+%                 end
+%             end
             
             ind_active = 1;
             ind_passive = 1;
@@ -281,9 +294,9 @@ classdef SystemModelCables < handle
         end
         
         function value = get.V_grad(obj)
-            if(isempty(obj.V_grad))
-                obj.updateHessian();
-            end
+%             if(isempty(obj.V_grad))
+%                 obj.updateHessian(obj.bodyModel);
+%             end
             value = obj.V_grad;
         end
         
@@ -314,7 +327,7 @@ classdef SystemModelCables < handle
             end
             R_k0 = bodyModel.bodies{k}.R_0k.';
             S_KA = MatrixOperations.Initialise([3,bodyModel.numDofs],obj.is_symbolic);
-            if(bodyModel.bodiesPathGraph(k_min,k_max))
+            if(k_min == 0 || bodyModel.bodiesPathGraph(k_min,k_max))
                 if(k==k_min)
                     for i = k_min+1:k_max
                         if(bodyModel.bodiesPathGraph(i,k_max))
@@ -349,7 +362,7 @@ classdef SystemModelCables < handle
             end
             R_k0 = bodyModel.bodies{k}.R_0k.';
             S_KA = MatrixOperations.Initialise([3,bodyModel.numDofs],obj.is_symbolic);
-            if(bodyModel.bodiesPathGraph(k_min,k_max))
+            if(k_min == 0 || bodyModel.bodiesPathGraph(k_min,k_max))
                 for i =k_min+1:k_max
                     if(bodyModel.bodiesPathGraph(i,k_max))
                         ip = bodyModel.bodies{i}.parentLinkId;
@@ -405,9 +418,9 @@ classdef SystemModelCables < handle
                 elseif (strcmp(type, 'cable_vsd_flexure_linear'))
                     xml_cables{k} = CableModelVSDFlexureLinear.LoadXmlObj(currentCableItem, bodiesModel);
                 elseif (strcmp(type, 'muscle_hill_type'))
-                    CASPR_log.Print('muscle_hill_type not implemented yet, please try again later.',CASPRLogLevel.ERROR);
+                    CASPR_log.Print('muscle_hill_type not implemented yet, please try again later.', CASPRLogLevel.ERROR);
                 elseif (strcmp(type, 'pneumatic_artificial_muscle'))
-                    CASPR_log.Print('pneumatic_artificial_muscle not implemented yet, please try again later.',CASPRLogLevel.ERROR);
+                    CASPR_log.Print('pneumatic_artificial_muscle not implemented yet, please try again later.', CASPRLogLevel.ERROR);
                 else
                     CASPR_log.Print(sprintf('Unknown cables type: %s', type),CASPRLogLevel.ERROR);
                 end

@@ -14,7 +14,7 @@ ap_cables = cell(numCables, 1);
 
 for i = 1:numCables
     ap_const = AttachmentPointParamConstant(modelObj.cableModel.cables{i}.segments{1}.r_PA{2}, CableAttachmentReferenceType.JOINT);
-    ap_rad = AttachmentPointParamCylindricalFixedR(4, [0 2*pi], [0 5], CableAttachmentReferenceType.JOINT);
+    ap_rad = AttachmentPointParamCylindricalFixedR(4, [0 2*pi], [0 5], [0;0;0], [0;0;1], CableAttachmentReferenceType.JOINT);
     ap_cables{i} = AttachmentPointParamCable({ap_rad, ap_const});
 end
 
