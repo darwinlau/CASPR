@@ -9,5 +9,6 @@ classdef DevModelConfigType
         D_CUHK_WALLBOT
         D_CUHK_ARM
         D_CUHK_TEMP
+        D_CUHK_CUCABLEROBOT
     end
 end

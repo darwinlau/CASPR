@@ -99,6 +99,10 @@ classdef (Abstract) MotionSimulator < Simulator
             end
             xlabel('Time (s)');
             ylabel('Velocity (m/s)');
+            
+            %assignin('base','lengths',length_array);
+        
+            
             % ONLY USED IN DEBUGGING START
 %             length_array = cell2mat(obj.cableLengths);
 %             lengths_dot_num = zeros(obj.model.numCables, length(obj.timeVector));

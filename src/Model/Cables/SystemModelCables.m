@@ -108,6 +108,15 @@ classdef SystemModelCables < handle
                 end
             end
             
+%             if(obj.is_symbolic)
+%                 for i = size(obj.V,1)
+%                     for j =1:size(obj.V,2)
+%                         obj.V(i,j) = expand(obj.V(i,j),'ArithmeticOnly',true);
+%                         obj.V(i,j) = simplify(obj.V(i,j),10);
+%                     end
+%                 end
+%             end
+            
             ind_active = 1;
             ind_passive = 1;
             obj.cableIndicesActive = zeros(obj.numCablesActive, 1);
@@ -285,9 +294,9 @@ classdef SystemModelCables < handle
         end
         
         function value = get.V_grad(obj)
-            if(isempty(obj.V_grad))
-                obj.updateHessian();
-            end
+%             if(isempty(obj.V_grad))
+%                 obj.updateHessian(obj.bodyModel);
+%             end
             value = obj.V_grad;
         end
         
@@ -318,7 +327,7 @@ classdef SystemModelCables < handle
             end
             R_k0 = bodyModel.bodies{k}.R_0k.';
             S_KA = MatrixOperations.Initialise([3,bodyModel.numDofs],obj.is_symbolic);
-            if(bodyModel.bodiesPathGraph(k_min,k_max))
+            if(k_min == 0 || bodyModel.bodiesPathGraph(k_min,k_max))
                 if(k==k_min)
                     for i = k_min+1:k_max
                         if(bodyModel.bodiesPathGraph(i,k_max))
@@ -353,7 +362,7 @@ classdef SystemModelCables < handle
             end
             R_k0 = bodyModel.bodies{k}.R_0k.';
             S_KA = MatrixOperations.Initialise([3,bodyModel.numDofs],obj.is_symbolic);
-            if(bodyModel.bodiesPathGraph(k_min,k_max))
+            if(k_min == 0 || bodyModel.bodiesPathGraph(k_min,k_max))
                 for i =k_min+1:k_max
                     if(bodyModel.bodiesPathGraph(i,k_max))
                         ip = bodyModel.bodies{i}.parentLinkId;

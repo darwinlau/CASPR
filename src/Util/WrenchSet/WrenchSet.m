@@ -15,16 +15,16 @@ classdef WrenchSet < handle
     methods
         % Build the wrench set given the Jacobian matrix and force
         % bounds. This version calls qhull
-%         function id = WrenchSet(L,f_u,f_l)
+%         function id = WrenchSet(L,f_u,f_l,offset)
 %             n = size(L,2); m = size(L,1);
 %             q = 2^m;
 %             f = zeros(q,m);
 %             w = zeros(q,n);
 %             % Set up the correct directory for logging
 %             str = mfilename('fullpath');
-%             s_id = strfind(str,'mcdm-analysis.matlab');
-%             str  = str(1:s_id+19);
-%             str_logs = [str,'/logs'];
+%             s_id = strfind(str,'CASPR_private');
+%             str  = str(1:s_id+13);
+%             str_logs = [str,'data/logs'];
 %             if(~exist(str_logs,'dir'))
 %                 mkdir(str_logs)
 %             end
@@ -70,47 +70,51 @@ classdef WrenchSet < handle
                 f(k,:) = (eye(m) - diag(beta))*f_l + diag(beta)*f_u;
                 w(k,:) = -L'*f(k,:)';
             end
-            [K,id.v] = convhulln(w);
-            
-            id.n_faces = size(K,1);
-            n_shape = size(K,2);
-            n_f = id.n_faces;
-            t_A = zeros(n_f,n);
-            t_b = zeros(n_f,1);
-            count = 1;
-            for i = 1:n_f
-                W = w(K(i,2:end),:) - repmat(w(K(i,1),:),n_shape-1,1);
-                T = null(W)';
-                if(rank(T)>1)
-                else
-                    t_A(count,:) = T;
-                    t_b(count,:) = t_A(count,:)*w(K(i,1),:).'; 
-                    % Find a new vertext not in the face
-                    s_flag = 0; j = 1;
-                    while(s_flag == 0)
-                        if((sum(j==K(i,:))==0)&&(norm(t_A(count,:)*w(K(j,1),:)'-t_b(count))>1e-6))
-                            s_flag = 1;
-                        else
-                            j = j+1;
+            try
+                [K,id.v] = convhulln(w);
+
+                id.n_faces = size(K,1);
+                n_shape = size(K,2);
+                n_f = id.n_faces;
+                t_A = zeros(n_f,n);
+                t_b = zeros(n_f,1);
+                count = 1;
+                for i = 1:n_f
+                    W = w(K(i,2:end),:) - repmat(w(K(i,1),:),n_shape-1,1);
+                    T = null(W)';
+                    if(rank(T)>1)
+                    else
+                        t_A(count,:) = T;
+                        t_b(count,:) = t_A(count,:)*w(K(i,1),:).'; 
+                        % Find a new vertext not in the face
+                        s_flag = 0; j = 1;
+                        while(s_flag == 0)
+                            if((sum(j==K(i,:))==0)&&(norm(t_A(count,:)*w(K(j,1),:)'-t_b(count))>1e-6))
+                                s_flag = 1;
+                            else
+                                j = j+1;
+                            end
                         end
+                        if(t_A(count,:)*w(K(j,1),:)'>t_b(count))
+                            t_A(count,:) = -t_A(count,:);
+                            t_b(count) = -t_b(count);
+                        end
+                        count = count + 1;
                     end
-                    if(t_A(count,:)*w(K(j,1),:)'>t_b(count))
-                        t_A(count,:) = -t_A(count,:);
-                        t_b(count) = -t_b(count);
-                    end
-                    count = count + 1;
                 end
+                id.A = t_A(1:count-1,:);
+                id.b = t_b(1:count-1);
+    %             for i = 1:id.n_faces
+    %                 hold on
+    % %                 x = [-2000;2000];
+    % %                 y1 = pinv(id.A(i,:))*id.b(i) + null(id.A(i,:)).*x(1);
+    % %                 y2 = pinv(id.A(i,:))*id.b(i) + null(id.A(i,:)).*x(2);
+    % %                 plot([y1(1),y2(1)],[y1(2),y2(2)],'b')
+    %                 plot([w(K(i,1),1),w(K(i,2),1)]-offset(1),[w(K(i,1),2),w(K(i,2),2)]-offset(2),'b')
+    %             end
+            catch
+               id.n_faces = -1; id.A = []; id.b = []; 
             end
-            id.A = t_A(1:count-1,:);
-            id.b = t_b(1:count-1);
-%             for i = 1:id.n_faces
-%                 hold on
-% %                 x = [-2000;2000];
-% %                 y1 = pinv(id.A(i,:))*id.b(i) + null(id.A(i,:)).*x(1);
-% %                 y2 = pinv(id.A(i,:))*id.b(i) + null(id.A(i,:)).*x(2);
-% %                 plot([y1(1),y2(1)],[y1(2),y2(2)],'b')
-%                 plot([w(K(i,1),1),w(K(i,2),1)]-offset(1),[w(K(i,1),2),w(K(i,2),2)]-offset(2),'b')
-%             end
         end
         
         % Approximate the wrench set with a sphere at position G with
