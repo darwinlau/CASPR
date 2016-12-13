@@ -53,7 +53,7 @@ classdef CableSegmentModel < handle
             % Only get the offset from the first attachment for now, unless
             % in the future the last segment also needs the second
             % attachment length_offset
-            value = obj.attachments{1}.offset_length;
+            value = obj.attachments{1}.length_offset;
         end
     end
     
