@@ -15,6 +15,7 @@ classdef CableSegmentModel < handle
     properties (Dependent)
         segmentVector                   % vector \mathbf{l}_{ij} in frame {0}
         length                          % length of segment
+        length_offset                   % offset length that is in addition to the point to point segment depending on the attachment type (typically 0)
     end
         
     methods
@@ -46,6 +47,13 @@ classdef CableSegmentModel < handle
         
         function value = get.length(obj)
             value = sqrt(sum(obj.segmentVector.^2));
+        end
+        
+        function value = get.length_offset(obj)
+            % Only get the offset from the first attachment for now, unless
+            % in the future the last segment also needs the second
+            % attachment length_offset
+            value = obj.attachments{1}.offset_length;
         end
     end
     

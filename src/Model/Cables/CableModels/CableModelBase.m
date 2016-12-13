@@ -83,7 +83,7 @@ classdef (Abstract) CableModelBase < handle
         function value = get.length(obj)
             value = 0;
             for j = 1:obj.numSegments
-                value = value + obj.segments{j}.length;
+                value = value + obj.segments{j}.length + obj.segments{j}.length_offset;
             end
         end
         
@@ -120,16 +120,17 @@ classdef (Abstract) CableModelBase < handle
                 % Attachment base pulley is a bit special, we need to load
                 % the next attachment and then pass this into this one so
                 % it can determine its kinematics
-                elseif (strcmp(type, 'attachment_base_pulley'))
-                    CASPR_log.Assert(a == 1, '''attachment_base_pulley'' can only be used on the base attachment');
-                    load_base_attachment_pulley = 1;
+                elseif (strcmp(type, 'base_rotating_pulley'))
+                    CASPR_log.Assert(a == 1, '''base_rotating_pulley'' can only be used on the base attachment');
+                    load_base_attachment_pulley = 1; % Load this at the end
                 else
                     CASPR_log.Print(sprintf('Unknown cables type: %s', type),CASPRLogLevel.ERROR);
                 end
             end
             
+            % Load base attachment pulley (special type of attachment)
             if (load_base_attachment_pulley)
-                %attachments{1} = CableAttachmentBasePulley.LoadXmlObj(attachmentXmlObjs(0), attachments{2});
+                attachments{1} = BaseRotatingPulleyAttachment.LoadXmlObj(attachmentXmlObjs.item(0), attachments{2});
             end
             
             % Using the attachments, setup the segment model

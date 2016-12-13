@@ -85,7 +85,7 @@ classdef CableModelVSDFlexureLinear < CableModelBase
             c.forceMax = str2double(propertiesObj.getElementsByTagName('force_max').item(0).getFirstChild.getData);
             
             % <attachments> tag
-            attachmentObjs = xmlobj.getElementsByTagName('attachments').item(0).getElementsByTagName('attachment');            
+            attachmentObjs = xmlobj.getElementsByTagName('attachments').item(0).getChildNodes();
             [c.segments, c.attachments] = CableModelBase.LoadSegmentsXmlObj(name, attachmentObjs, attachmentRef, bodiesModel);         
         end
     end
