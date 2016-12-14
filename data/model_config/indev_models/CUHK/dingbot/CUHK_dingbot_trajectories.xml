@@ -42,6 +42,11 @@
                 <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
                 <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
             </point>    
+            <point time="15">
+                <q>0.0 0.0 0.035 0.0 0.0 0.0</q>
+                <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+                <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+            </point>   
         </points>
     </trajectory>
     <trajectory id="traj_2" time_step="0.05">
