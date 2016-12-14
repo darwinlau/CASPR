@@ -2,15 +2,16 @@
 #include <Wire.h>
 #include <math.h>
 #include "servo_properties/servo_07.h"   //servo-specific properties (e.g. the range of pwm command it can execute) is stored here
+#include <SoftwareSerial.h>
 
 #define MOTOR_PIN 2
 #define BAUD_RATE 74880
-#define DELTA 7 // freezing regions at crossing area  
+#define DELTA 0 // freezing regions at crossing area  //TODO:remove this?
 
 #define LENGTH_PWM_COMMAND 4
 #define DIGITS_PWM_FEEDBACK 3
 
-#define SPEEDAVG 3
+//#define SPEEDAVG 3
 
 #define RECEIVE_PWM_CMD 'p'
 #define RECEIVE_FEEDBACK_REQUEST 'f'
@@ -38,7 +39,7 @@ int pwmCommand = 0;
 int lastPWMCommand = 0;
 
 int cross = 0;
-int lastCross = 0;
+int stillCrossing = 0;
 int crossPulse = 0;
 int pwmDifference = 0;
 int crossingCounter = 0;
@@ -52,8 +53,8 @@ double delayTime;
 boolean cw = 1;
 int pwmTestrun = 700;
 
-int speedCounter = 0;
-int speedStore[SPEEDAVG];
+//int speedCounter = 0;
+//int speedStore[SPEEDAVG];
 
 /////////////////////////// FUNCTION PRECALLING ///////////////////////////
 
@@ -66,8 +67,11 @@ void servOPulse(int pulseWidth);
 void sendFeedback();
 void testdrive();
 
+SoftwareSerial softSerial(6, 7); //RX, TX. DEBUG
+
 void setup() {
   Serial.begin(BAUD_RATE);
+  softSerial.begin(BAUD_RATE);//DEBUG
   while (servoPWM == 0) {
     loopAverage();
   }
@@ -83,27 +87,40 @@ void readSerial() { //receive characterizing prefix (+ length in 2 digit Hex, wi
     strReceived = Serial.readStringUntil('\n');
     commandReceived = strReceived[0];
     if (commandReceived == RECEIVE_PWM_CMD) { //p
-      lastCross = 0;                 //CLARIFY: what mean lastCross mean?
+      stillCrossing = 0;                 //CLARIFY: what does stillCrossing mean?
       loopAverage();
-      speedCounter++;
+      //speedCounter++;
       //Serial.print(" avg: ");
       //Serial.println(loopAveragePWM);
 
+      //DEBUG GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
+      softSerial.print(stillCrossing);   //always 0 here, because a few lines earlier...
+      softSerial.print("\t");
+      softSerial.print(cross);
+      softSerial.print("\t");
+      softSerial.print(crossingCounter);
+      softSerial.print("\t");
+      softSerial.flush();
+      //DEBUG GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
+
+      
       if (cross > 0) {               //CLARIFY: if crossing?
-        if (crossingCounter > 0) {   //CLARIFY: if not timing-out yet?
-          quitCrossing();            //CLARIFY: decide whether or not we can quit crossing (i.e. set cross = 0). If not, set lastCross = cross; ??
-        } else {                     //CLARIFY: if the crossing time-out?
-          cross = 0;
-          lastCross = 0;
-          crossingCounter = 0;
-        }
+        quitCrossing();            //CLARIFY: decide whether we can quit crossing (i.e. set cross = 0) or not (i.e. set stillCrossing = cross) ??
+        
+//        if (crossingCounter > 0) {   //CLARIFY: if not timing-out yet?
+//          quitCrossing();            //CLARIFY: decide whether or not we can quit crossing (i.e. set cross = 0). If not, set stillCrossing = cross; ??
+//        } else {                     //CLARIFY: if the crossing time-out?
+//          cross = 0;
+//          stillCrossing = 0;
+//          crossingCounter = 0;
+//        }
       }
       delay(5);
-      readPWMCommand();             //CLARIFY: (this will set  cross  according to the command from mega)?
-      if (lastCross > 0 && cross == 0) { //if lastCross > 0, the crossing has not been quit, but cross has been reassigned by the new incomming command
-        cross = lastCross;          //CLARIFY: if crossing is not done yet, ignore the cmd from mega, continue our crossing?
+      readPWMCommand();                      //CLARIFY: (this will set  cross  according to the command from mega)?
+      if (stillCrossing > 0 && cross == 0) { //if stillCrossing > 0, the crossing has not been quit, but cross has been reassigned by the new incomming command
+        cross = stillCrossing;               //CLARIFY: if crossing is not done yet, ignore the cmd from mega, continue our crossing?
       }
-      crossing();                   //CLARIFY: set crossingCounter depending on......????
+      //crossing();                   //CLARIFY: set crossingCounter (time out) depending on......????
       ctrl_motor(pwmCommand);
     }
 
@@ -171,7 +188,10 @@ int readPositionFeedback() { //reads position feedback and stores it in servoPWM
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void crossing() { //for later optimization (exit crossing autonomously after delay, calculation based on pwmDifference)
+
+//THIS DOES NOT COUNT TIME PROPERLY. IT SEEMS TO RESET THE VALUE EVERY CYCLE.
+//setting crossingCounter, the crossing time out
+/* void crossing() { //for later optimization (exit crossing autonomously after delay, calculation based on pwmDifference)
   pwmDifference = 0;
   if (cross == 1) { //->CW crossing
     pwmDifference = COMMAND_PWM_RANGE + pwmCommand - lastPWMCommand;
@@ -180,20 +200,34 @@ void crossing() { //for later optimization (exit crossing autonomously after del
   } else if (cross == 2) { //->CCW crossing
     pwmDifference = pwmCommand - COMMAND_PWM_RANGE - lastPWMCommand;
     crossingCounter = 2 + (pwmDifference / 40);                     //CLARIFY: what is 2? 40?
+
+    //DEBUG GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
+    softSerial.print(pwmCommand);
+    softSerial.print("\t");
+    softSerial.print(COMMAND_PWM_RANGE);
+    softSerial.print("\t");
+    softSerial.print(lastPWMCommand);
+    softSerial.print("\t");
+    softSerial.print(pwmDifference);
+    softSerial.print("\t");
+    softSerial.println(crossingCounter);
+    softSerial.flush();
+      
     //delayTime = (double)(pwmDifference * 1000 / CLOCKWISE_SPEED_MAX);
-  }
-  /*
-     Serial.print(" diff: ");
-    Serial.print(pwmDifference);
-    Serial.print(" ");
-    Serial.println(crossingCounter);
-  */
+  } 
+  
+  
+//     Serial.print(" diff: ");
+//    Serial.print(pwmDifference);
+//    Serial.print(" ");
+//    Serial.println(crossingCounter);
+  
   lastPWMCommand = pwmCommand;
-}
+} */
 
 //Variable crossing speed
 // TODO: BUG! AVERAGE SPEED SEEMS TO BE ALWAYS 0. //
-int crossPWM() {
+/* int crossPWM() {
   int pulse; //PWM for cross
   if (cross == 1)
   {
@@ -230,19 +264,19 @@ int crossPWM() {
     }
   }
   return pulse;
-}
+} */
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void quitCrossing() {
   if (cross == 1) { // From left
     if ((loopAveragePWM > (FEEDBACK_PWM_MIN + DELTA)) && (servoPWM <= FEEDBACK_PWM_MIDDLE)) { //smaller/equal because middlePWMFEedback is rounded down
       cross = 0;
-    } else lastCross = cross;
+    } else stillCrossing = cross;
   }
   else if (cross == 2) // From right
   {
     if ((loopAveragePWM < (FEEDBACK_PWM_MAX - DELTA)) && (servoPWM > FEEDBACK_PWM_MIDDLE )) {
       cross = 0;
-    } else lastCross = cross;
+    } else stillCrossing = cross;
   }
   else {
   }
@@ -255,15 +289,21 @@ void ctrl_motor(int pwmMotor) { //transmits the output signal towards the motor
     //crossPulse = crossPWM();
     servoPulse(crossPulse);
     servoPulse(crossPulse);
+    softSerial.println(crossPulse); //DEBUG
+    softSerial.flush();//DEBUG
   } else if (cross == 2) {
     crossingCounter--;
     crossPulse = ANTICLOCKWISE_PWM_MIN;  ////cross at min speed
     //crossPulse = crossPWM();
     servoPulse(crossPulse);
     servoPulse(crossPulse);
+    softSerial.println(crossPulse); //DEBUG
+    softSerial.flush();//DEBUG
   } else if (sendCounter > 0) {
     servoPulse(pwmMotor);
     servoPulse(pwmMotor);
+    softSerial.println(pwmMotor); //DEBUG
+    softSerial.flush();//DEBUG
     sendCounter--;
   }
 }
