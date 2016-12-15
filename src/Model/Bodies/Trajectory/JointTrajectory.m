@@ -108,6 +108,69 @@ classdef JointTrajectory < handle
             trajectory_all.timeStep = time_step;
         end
         
+        % Loads a complete trajectory by reading a .traj file
+        function [trajectory_all, force_trajectory] = LoadCompleteTrajectory(traj_file,model)
+            % Initialise a new trajectry
+            trajectory_all = JointTrajectory();
+            
+            % Read through the trajectory file            
+            % Open the file
+            fid = fopen(traj_file,'r');
+            % Read the first line
+            l0 = fgetl(fid);
+            % Split the line
+            l_split = strsplit(l0,'t,');
+            % extract the double values
+            trajectory_all.timeStep = str2double(l_split{2});
+            
+            % For the remaining lines extract the data
+            num_points = 1;
+            % Initialise the trajectory vectors
+            n_q = model.bodyModel.numDofs; n_f = model.cableModel.numCables;
+            while(~feof(fid))
+                l1 = fgetl(fid);
+                % Split up the components
+                l_split = strsplit(l1,{'q,',',v,',',a,',',f,'});
+                
+                % First the pose
+                l_split_q = strsplit(l_split{2},',');
+                q = zeros(n_q,1);
+                for k=1:length(l_split_q)
+                    q(k) = str2double(l_split_q{k});
+                end
+                trajectory_all.q{num_points} = q;
+                
+                % Then the velocity
+                l_split_v = strsplit(l_split{3},',');
+                v = zeros(n_q,1);
+                for k=1:length(l_split_v)
+                    v(k) = str2double(l_split_v{k});
+                end
+                trajectory_all.q_dot{num_points} = v;
+                
+                % Then the acceleration
+                l_split_a = strsplit(l_split{4},',');
+                a = zeros(n_q,1);
+                for k=1:length(l_split_a)
+                    a(k) = str2double(l_split_a{k});
+                end
+                trajectory_all.q_ddot{num_points} = a;
+                
+                % Finally the force
+                l_split_f = strsplit(l_split{5},',');
+                f = zeros(n_f,1);
+                for k=1:length(l_split_f)-1
+                    f(k) = str2double(l_split_f{k});
+                end
+                force_trajectory{num_points} = f;
+                
+                num_points = num_points + 1;
+            end
+            trajectory_all.totalTime = (num_points-2)*trajectory_all.timeStep;
+            trajectory_all.timeVector = [0:trajectory_all.timeStep:trajectory_all.totalTime];            
+            fclose(fid);
+        end
+        
     
         % Generates trajectory from the starting and ending joint poses for
         % the entire system. Calls the generate trajectory function of each
