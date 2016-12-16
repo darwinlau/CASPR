@@ -17,7 +17,7 @@
 // TODO: This should be sent by MATLAB in the future
 #define NUMBER_CONNECTED_NANOS 8
 // TODO: Peter will update this to be dynamic
-#define RADIUS 210 //spool, in average radius in 0.1mm precision  actual radius is 20mm **Improve in future
+#define SPOOL_CIRCUMFERENCE 1355 //in 0.1mm precision.  //TODO: make it change as spool winds
 
 // These two are useless now because MATLAB is in control of time
 //#define FEEDBACK_FREQUENCY 20// In Hz
@@ -101,8 +101,8 @@ int readCounter = 0;
 
 String receivedCommand;
 
-float lengthToAngle = 180.0 / (M_PI * RADIUS); //1.091348181201570 with Radius 210
-float angleToLength = (M_PI * RADIUS) / 180.0; // 0.9162978572970230 with Radius 210
+float lengthToAngle = 360.0 / SPOOL_CIRCUMFERENCE; 
+float angleToLength = SPOOL_CIRCUMFERENCE / 360.0; 
 
 unsigned long int t_ref;
 
