@@ -108,15 +108,6 @@ classdef SystemModelCables < handle
                 end
             end
             
-%             if(obj.is_symbolic)
-%                 for i = size(obj.V,1)
-%                     for j =1:size(obj.V,2)
-%                         obj.V(i,j) = expand(obj.V(i,j),'ArithmeticOnly',true);
-%                         obj.V(i,j) = simplify(obj.V(i,j),10);
-%                     end
-%                 end
-%             end
-            
             ind_active = 1;
             ind_passive = 1;
             obj.cableIndicesActive = zeros(obj.numCablesActive, 1);
@@ -151,7 +142,7 @@ classdef SystemModelCables < handle
                     V_ik_r_grad = MatrixOperations.Initialise([1,3,bodyModel.numDofs],obj.is_symbolic);
                     for j = 1:num_cable_segments
                         c_ijk = obj.getCRMTerm(i,j,k+1);
-                        if(c_ijk)
+                        if(c_ijk~=0)
                             segment = cable.segments{j};
                             % Initialisations
                             l_ij_grad = MatrixOperations.Initialise([3,bodyModel.numDofs],obj.is_symbolic); %#ok<NASGU>
@@ -167,10 +158,12 @@ classdef SystemModelCables < handle
                                 % First deal with the translation derivative component
                                 l_ij_grad = obj.generate_SKA_trans(min([k_A,k_B]),max([k_A,k_B]),k,bodyModel);
                                 % Compute cross product term
-                                l_ij_grad = l_ij_grad + obj.generate_SKA_cross_rot(min([k_A,k_B]),max([k_A,k_B]),k,bodyModel,cable.segments{j}.r_OA{k_A+1});
+                                l_ij_grad = l_ij_grad + obj.generate_SKA_cross_rot(min([k_A,k_B]),max([k_A,k_B]),k,bodyModel,segment.attachments{1}.r_OA);
                                 l_ij = body_k.R_0k.'*segment.segmentVector;
-                                l_hat_ij_grad(1,:,:) = ((1/segment.length)*eye(3) - (1/segment.length^3)*(l_ij*l_ij.'))*l_ij_grad;
-                                rot_l_hat_ij_grad(1,:,:) = MatrixOperations.SkewSymmetric(segment.r_GA{k+1})*((1/segment.length)*eye(3) - (1/segment.length^3)*(l_ij*l_ij.'))*l_ij_grad;
+                                l_ij_length = segment.length;
+%                                 l_ij_hat = l_ij/l_ij_length;
+                                l_hat_ij_grad(1,:,:) = ((1/l_ij_length)*eye(3) - (1/l_ij_length^3)*(l_ij*l_ij.'))*l_ij_grad;                                  
+                                rot_l_hat_ij_grad(1,:,:) = MatrixOperations.SkewSymmetric(segment.attachments{2}.r_GA)*((1/segment.length)*eye(3) - (1/segment.length^3)*(l_ij*l_ij.'))*l_ij_grad;
                                 V_ik_t_grad(1,:,:) = V_ik_t_grad(1,:,:) + l_hat_ij_grad;
                                 V_ik_r_grad(1,:,:) = V_ik_r_grad(1,:,:) + rot_l_hat_ij_grad;
                             else
@@ -179,9 +172,9 @@ classdef SystemModelCables < handle
                                 % First deal with the translation derivative component
                                 l_ij_grad = obj.generate_SKA_trans(min([k_A,k_B]),max([k_A,k_B]),k,bodyModel);
                                 % Compute cross product term
-                                l_ij_grad = l_ij_grad + obj.generate_SKA_cross_rot(min([k_A,k_B]),max([k_A,k_B]),k,bodyModel,cable.segments{j}.r_OA{k_B+1});
+                                l_ij_grad = l_ij_grad + obj.generate_SKA_cross_rot(min([k_A,k_B]),max([k_A,k_B]),k,bodyModel,segment.attachments{2}.r_OA);
                                 l_hat_ij_grad(1,:,:) = ((1/segment.length)*eye(3) - (1/segment.length^3)*(segment.segmentVector*segment.segmentVector.'))*l_ij_grad;
-                                rot_l_hat_ij_grad(1,:,:) = MatrixOperations.SkewSymmetric(segment.r_GA{k+1})*((1/segment.length)*eye(3) - (1/segment.length^3)*(segment.segmentVector*segment.segmentVector.'))*l_ij_grad;
+                                rot_l_hat_ij_grad(1,:,:) = MatrixOperations.SkewSymmetric(segment.attachments{1}.r_GA)*((1/segment.length)*eye(3) - (1/segment.length^3)*(segment.segmentVector*segment.segmentVector.'))*l_ij_grad;
                                 V_ik_t_grad = V_ik_t_grad - l_hat_ij_grad; % Subtraction accounts for the c_ijk multiplication
                                 V_ik_r_grad(1,:,:) = V_ik_r_grad(1,:,:) - rot_l_hat_ij_grad;
                             end
@@ -202,16 +195,6 @@ classdef SystemModelCables < handle
             CASPR_log.Assert(i <= obj.numCables, 'Invalid cable number.');
             c_ijk = obj.cables{i}.getCRMTerm(j, k);
         end
-        
-        
-
-        %         function C = getCRM(obj)
-        %             C = zeros(obj.numCables, obj.numSegmentsMax, obj.numLinks+1);
-        %             for i = 1:obj.numCables
-        %                 C(i,:,:)
-        %             end
-        %             obj.cables{:}.numSegments
-        %         end
 
         % NOT SURE HOW THIS IS USED YET, but just a demo of what can be
         % done. This may be useful when automating the design of the cable

@@ -212,24 +212,12 @@ classdef SystemModelBodies < handle
                     R_ka = body_k.R_0k.'*body_a.R_0k;
                     Pak = obj.bodiesPathGraph(a,k)*[R_ka*body_a.joint.R_pe.' -R_ka*MatrixOperations.SkewSymmetric(-body_a.r_OP + R_ka.'*body_k.r_OG); ...
                         zeros(3,3) R_ka];
-%                     if(obj.is_symbolic)
-%                         obj.P(6*k-5:6*k, 6*a-5:6*a) = simplify(Pak);
-%                     else
                     obj.P(6*k-5:6*k, 6*a-5:6*a) = Pak;
-%                     end
                 end
             end
 
             % W = P*S
             obj.W = obj.P*obj.S;
-%             if(obj.is_symbolic)
-%                 for i = 1:size(obj.W,1)
-%                     for j = 1:size(obj.W,2)
-%                         obj.W(i,j) = expand(obj.W(i,j),'ArithmeticOnly',true);
-%                         obj.W(i,j) = simplify(obj.W(i,j));
-%                     end
-%                 end
-%             end
             
             % Determine x_dot
             obj.x_dot = obj.W*obj.q_dot;
@@ -253,30 +241,14 @@ classdef SystemModelBodies < handle
             end
 
             obj.C_a = obj.P*obj.S_dot*obj.q_dot + obj.P*ang_mat*obj.S*obj.q_dot;
-%             if(obj.is_symbolic)
-%                 for i = 1:size(obj.C_a,1)
-%                     for j = 1:size(obj.C_a,2)
-%                         obj.C_a(i,j) = expand(obj.C_a(i,j),'ArithmeticOnly',true);
-%                         obj.C_a(i,j) = simplify(obj.C_a(i,j));
-%                     end
-%                 end
-%             end
             for k = 1:obj.numLinks
                 for a = 1:k
                     ap = obj.bodies{a}.parentLinkId;
                     if (ap > 0 && obj.bodiesPathGraph(a,k))
-%                         if(obj.is_symbolic)
-%                             obj.C_a(6*k-5:6*k-3) = simplify(obj.C_a(6*k-5:6*k-3) + obj.bodies{k}.R_0k.'*obj.bodies{ap}.R_0k*cross(obj.bodies{ap}.w, cross(obj.bodies{ap}.w, obj.bodies{a}.r_Parent + obj.bodies{a}.joint.r_rel)));
-%                         else
                         obj.C_a(6*k-5:6*k-3) = obj.C_a(6*k-5:6*k-3) + obj.bodies{k}.R_0k.'*obj.bodies{ap}.R_0k*cross(obj.bodies{ap}.w, cross(obj.bodies{ap}.w, obj.bodies{a}.r_Parent + obj.bodies{a}.joint.r_rel));
-%                         end
                     end
                 end
-                if(obj.is_symbolic)
-                    obj.C_a(6*k-5:6*k-3) = simplify(obj.C_a(6*k-5:6*k-3) + cross(obj.bodies{k}.w, cross(obj.bodies{k}.w, obj.bodies{k}.r_G)));
-                else
-                    obj.C_a(6*k-5:6*k-3) = obj.C_a(6*k-5:6*k-3) + cross(obj.bodies{k}.w, cross(obj.bodies{k}.w, obj.bodies{k}.r_G));
-                end
+                obj.C_a(6*k-5:6*k-3) = obj.C_a(6*k-5:6*k-3) + cross(obj.bodies{k}.w, cross(obj.bodies{k}.w, obj.bodies{k}.r_G));
             end
             obj.x_ddot = obj.P*obj.S*obj.q_ddot + obj.C_a;
 
@@ -364,21 +336,6 @@ classdef SystemModelBodies < handle
             end
 
             % Joint space equation of motion terms
-%             if(obj.is_symbolic)
-%                 obj.M =   obj.W.' * obj.M_b;
-%                 for i = 1:size(obj.M,1)
-%                     for j = 1:size(obj.M,2)
-%                         obj.M(i,j) = expand(obj.M(i,j),'ArithmeticOnly',true);
-%                         obj.M(i,j) = simplify(obj.M(i,j));
-%                     end
-%                 end
-%                 obj.C =   obj.W.' * obj.C_b;
-%                 for i=1:size(obj.C,1)
-%                     obj.C(i) = expand(obj.C(i),'ArithmeticOnly',true);
-%                     obj.C(i) = simplify(obj.C(i));
-%                 end
-%                 obj.G = simplify(-obj.W.' * obj.G_b);
-%             else
             obj.M =   obj.W.' * obj.M_b;
             obj.C =   obj.W.' * obj.C_b;
             obj.G = - obj.W.' * obj.G_b;
@@ -496,7 +453,6 @@ classdef SystemModelBodies < handle
                     
                     % Final computation
                     block_grad = block_grad + P_ka*TensorOperations.VectorProduct(S_deriv_grad_q,obj.q_dot(index_a_dofs:index_a_dofs+body_dofs-1),2,obj.is_symbolic);
-%                     block_grad = simplify(block_grad,10);
                     
                     % Map the block gradient back into the relevant term
                     obj.C_grad_q = obj.C_grad_q + WtM(:,6*k-5:6*k)*block_grad;
