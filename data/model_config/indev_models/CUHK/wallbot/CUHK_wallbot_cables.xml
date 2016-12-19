@@ -8,64 +8,64 @@
     <cable_ideal name="cable 1" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>60</force_max>
+        <force_max>Inf</force_max>
       </properties>
       <attachments>
         <attachment>
           <link>0</link>
-          <location>0 -2.0 3.0</location>
+          <location>0 -2.0 2.0</location>
         </attachment>
         <attachment>
           <link>1</link>
-          <location>0 -0.3 -0.05</location>
+          <location>0 -0.2 -0.2</location>
         </attachment>
       </attachments>
     </cable_ideal>
     <cable_ideal name="cable 2" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>60</force_max>
+        <force_max>Inf</force_max>
       </properties>
       <attachments>
         <attachment>
           <link>0</link>
-          <location>0 -1.5 -3.0</location>
+          <location>0 -2.0 -2.0</location>
         </attachment>
         <attachment>
           <link>1</link>
-          <location>0 -0.3 -0.05</location>
+          <location>0 -0.2 0.2</location>
         </attachment>
       </attachments>
     </cable_ideal>
     <cable_ideal name="cable 3" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>60</force_max>
+        <force_max>Inf</force_max>
       </properties>
       <attachments>
         <attachment>
           <link>0</link>
-          <location>0 1.5 -3.0</location>
+          <location>0 2.0 -2.0</location>
         </attachment>
         <attachment>
           <link>1</link>
-          <location>0 0.3 0.05</location>
+          <location>0 0.2 0.2</location>
         </attachment>
       </attachments>
     </cable_ideal>
     <cable_ideal name="cable 4" attachment_reference="com">
       <properties>
         <force_min>0.001</force_min>
-        <force_max>60</force_max>
+        <force_max>Inf</force_max>
       </properties>
       <attachments>
         <attachment>
           <link>0</link>
-          <location>0 2.0 3.0</location>
+          <location>0 2.0 2.0</location>
         </attachment>
         <attachment>
           <link>1</link>
-          <location>0 0.3 0.05</location>
+          <location>0 0.2 -0.2</location>
         </attachment>
       </attachments>
     </cable_ideal>

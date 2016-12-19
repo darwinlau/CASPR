@@ -1,0 +1,1 @@
+End effector is 10 kg disk with radius of 0.2m and thickness 0.02m
