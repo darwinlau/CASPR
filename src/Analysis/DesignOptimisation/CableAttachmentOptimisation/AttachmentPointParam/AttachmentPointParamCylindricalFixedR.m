@@ -13,6 +13,8 @@ classdef AttachmentPointParamCylindricalFixedR < AttachmentPointParamBase
         radius;
         t_range;
         z_range;
+        centre;
+        normal_axis;
     end
     
     properties (Dependent)
@@ -25,11 +27,13 @@ classdef AttachmentPointParamCylindricalFixedR < AttachmentPointParamBase
     end
     
     methods
-        function ap = AttachmentPointParamCylindricalFixedR(r, t_range, z_range, attachmentRefType)
+        function ap = AttachmentPointParamCylindricalFixedR(r, t_range, z_range, centre, normal_axis, attachmentRefType)
             ap@AttachmentPointParamBase(attachmentRefType);
             ap.radius = r;
             ap.t_range = t_range;
             ap.z_range = z_range;
+            ap.centre = centre;
+            ap.normal_axis = normal_axis;
         end
                 
         function value = get.x_min(obj)
@@ -45,7 +49,8 @@ classdef AttachmentPointParamCylindricalFixedR < AttachmentPointParamBase
         function r = paramToAttachments(obj, x)
             theta = x(1);
             z = x(2);
-            r = [obj.radius * cos(theta); obj.radius * sin(theta); z];
+            v = [obj.radius * cos(theta); obj.radius * sin(theta); z];
+            r = [null(obj.normal_axis'),obj.normal_axis]*v + obj.centre;
         end
     end
 end
