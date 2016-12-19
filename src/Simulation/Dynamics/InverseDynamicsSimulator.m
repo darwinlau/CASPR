@@ -44,8 +44,6 @@ classdef InverseDynamicsSimulator < DynamicsSimulator
                 CASPR_log.Print(sprintf('Time : %f', obj.timeVector(t)),CASPRLogLevel.INFO);
                 % The model is already updated within the resolve function
                 [forces_active, obj.model, obj.IDFunctionCost(t), obj.IDExitType{t}, obj.compTime(t)] = obj.IDSolver.resolve(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t}, zeros(obj.model.numDofs,1));
-                trajectory.q{t}
-                obj.timeVector(t)
                 obj.cableForcesActive{t} = forces_active;
                 obj.cableForces{t} = obj.model.cableForces;
                 obj.cableIndicesActive{t} = obj.model.cableModel.cableIndicesActive;
