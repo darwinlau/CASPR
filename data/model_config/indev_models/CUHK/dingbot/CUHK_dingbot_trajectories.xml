@@ -4,19 +4,19 @@
 ]>
 
 <trajectories>
-  <trajectory id="traj_1" time_step="0.1">
+  <trajectory id="traj_1" time_step="0.05">
     <points>
       <point>
         <q>0.2 0.2 0.2 0.0 0.0 0.0</q>
         <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
         <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
       </point>
-      <point time="5.0">
+      <point time="4.0">
         <q>0.4 0.2 0.2 0.0 0.0 0.0</q>
         <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
         <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
       </point>
-      <point time="10.0">
+      <point time="8.0">
         <q>0.2 0.2 0.2 0.0 0.0 0.0</q>
         <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
         <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>

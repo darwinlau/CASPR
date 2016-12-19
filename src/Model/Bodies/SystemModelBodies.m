@@ -241,6 +241,7 @@ classdef SystemModelBodies < handle
 
             % W = P*S
             obj.W = obj.P*obj.S;
+            
             % Determine x_dot
             obj.x_dot = obj.W*obj.q_dot;
             % Extract absolute velocities
@@ -439,25 +440,25 @@ classdef SystemModelBodies < handle
                     % X_a
                     X_a = ang_mat(6*a-5:6*a, 6*a-5:6*a);
                     % \dot{S}_a + X_aS_a
-                    S_deriv_a = obj.S_dot(6*a-5:6*a,index_a_dofs:index_a_dofs+body_dofs-1) + X_a*obj.S(6*a-5:6*a,index_a_dofs:index_a_dofs+body_dofs-1);
+                    S_deriv_a = obj.bodies{a}.joint.S_dot + X_a*obj.bodies{a}.joint.S;
                     % P_ka
                     P_ka = obj.P(6*k-5:6*k, 6*a-5:6*a);
-
                     % Block gradient computation
                     % Grad(P_ka)S_deriv_a\dot{q}_a component
                     P_ka_grad = obj.compute_Pka_grad(k,a);
                     block_grad = TensorOperations.VectorProduct(P_ka_grad,S_deriv_a*obj.q_dot(index_a_dofs:index_a_dofs+body_dofs-1),2,obj.is_symbolic);
                     % P_ka Grad(S_deriv_a)\dot{q}_a component
-                    % Grad(S_deriv_a) = Grad(\dot{S}) + Grad(X_a)S +
-                    % X_a Grad(S)
+                    % Grad(S_deriv_a) = Grad(\dot{S}) + Grad(X_a)S + X_a Grad(S)
+                    % Initialise the terms
                     S_deriv_grad_q = MatrixOperations.Initialise([6,body_dofs,obj.numDofs],obj.is_symbolic);
                     S_deriv_grad_q_dot = MatrixOperations.Initialise([6,body_dofs,obj.numDofs],obj.is_symbolic);
-                    % Grad(\dot{S})
+                    % Add the Grad(\dot{S}) terms
                     S_deriv_grad_q(:,:,index_a_dofs:index_a_dofs+body_dofs-1) = obj.bodies{a}.joint.S_dot_grad;
                     S_deriv_grad_q_dot(:,:,index_a_dofs:index_a_dofs+body_dofs-1) = obj.bodies{a}.joint.S_grad;
                     % Grad(X_a)S
                     X_a_grad_q = MatrixOperations.Initialise([6,6,obj.numDofs],obj.is_symbolic);
                     X_a_grad_q_dot = MatrixOperations.Initialise([6,6,obj.numDofs],obj.is_symbolic);
+                    
                     [w_ap_grad_q,w_ap_grad_q_dot]   = obj.generate_omega_grad(ap);
                     [w_a_grad_q,w_a_grad_q_dot]     = obj.generate_omega_grad(a);
                     for i=1:obj.numDofs
@@ -469,9 +470,11 @@ classdef SystemModelBodies < handle
                     S_deriv_grad_q = S_deriv_grad_q + TensorOperations.RightMatrixProduct(X_a_grad_q,obj.bodies{a}.joint.S,obj.is_symbolic);
                     S_deriv_grad_q_dot = S_deriv_grad_q_dot + TensorOperations.RightMatrixProduct(X_a_grad_q_dot,obj.bodies{a}.joint.S,obj.is_symbolic);
                     % X_a Grad(S)
-                    S_deriv_grad_q(:,:,index_a_dofs:index_a_dofs+body_dofs-1) = TensorOperations.LeftMatrixProduct(X_a,obj.bodies{a}.joint.S_grad,obj.is_symbolic);
+                    S_deriv_grad_q(:,:,index_a_dofs:index_a_dofs+body_dofs-1) = S_deriv_grad_q(:,:,index_a_dofs:index_a_dofs+body_dofs-1) + TensorOperations.LeftMatrixProduct(X_a,obj.bodies{a}.joint.S_grad,obj.is_symbolic);
+                    
                     % Final computation
                     block_grad = block_grad + P_ka*TensorOperations.VectorProduct(S_deriv_grad_q,obj.q_dot(index_a_dofs:index_a_dofs+body_dofs-1),2,obj.is_symbolic);
+                    
                     % Map the block gradient back into the relevant term
                     obj.C_grad_q = obj.C_grad_q + WtM(:,6*k-5:6*k)*block_grad;
 
@@ -487,6 +490,7 @@ classdef SystemModelBodies < handle
                         ap_w = obj.bodies{ap}.w;
                     end
                     R_kam1_grad = obj.compute_Rka_grad(k,ap);
+                            
                     % Grad(W)*c
                     obj.C_grad_q = obj.C_grad_q + m_k*TensorOperations.VectorProduct(W_t_grad(:,6*k-5:6*k-3,:),R_kam1*cross(ap_w, cross(ap_w, obj.bodies{a}.r_Parent + obj.bodies{a}.joint.r_rel)),2,obj.is_symbolic);
                     % Grad of R
@@ -501,6 +505,9 @@ classdef SystemModelBodies < handle
                     % q_dot
                     obj.C_grad_qdot = obj.C_grad_qdot + m_k*obj.W(6*k-5:6*k-3,:).'*R_kam1*TensorOperations.VectorProduct(0.5*X_a_grad_q_dot(1:3,1:3,:),cross(ap_w, obj.bodies{a}.r_Parent + obj.bodies{a}.joint.r_rel),2,obj.is_symbolic);
                     obj.C_grad_qdot = obj.C_grad_qdot + m_k*obj.W(6*k-5:6*k-3,:).'*R_kam1*MatrixOperations.SkewSymmetric(ap_w)*TensorOperations.VectorProduct(0.5*X_a_grad_q_dot(1:3,1:3,:),obj.bodies{a}.r_Parent + obj.bodies{a}.joint.r_rel,2,obj.is_symbolic);
+                    
+                    % update a_dofs
+                    index_a_dofs = index_a_dofs + body_dofs;
                 end
                 % This is where the other terms go.  They are pretty much
                 % Grad(W)*c
@@ -510,7 +517,7 @@ classdef SystemModelBodies < handle
                 % Grad of omega
                 obj.C_grad_q = obj.C_grad_q + m_k*obj.W(6*k-5:6*k-3,:).'*MatrixOperations.SkewSymmetric(obj.bodies{k}.w)*TensorOperations.VectorProduct(X_a_grad_q(4:6,4:6,:),obj.bodies{k}.r_G,2,obj.is_symbolic);
                 %
-                obj.C_grad_q = obj.C_grad_q + TensorOperations.VectorProduct(W_t_grad(:,6*k-5:6*k-3,:),cross(obj.bodies{k}.w, obj.bodies{k}.I_G*obj.bodies{k}.w),2,obj.is_symbolic);
+                obj.C_grad_q = obj.C_grad_q + TensorOperations.VectorProduct(W_t_grad(:,6*k-2:6*k,:),cross(obj.bodies{k}.w, obj.bodies{k}.I_G*obj.bodies{k}.w),2,obj.is_symbolic);
                 obj.C_grad_q = obj.C_grad_q + obj.W(6*k-2:6*k,:).'*TensorOperations.VectorProduct(X_a_grad_q(4:6,4:6,:),obj.bodies{k}.I_G*obj.bodies{k}.w,2,obj.is_symbolic);
                 obj.C_grad_q = obj.C_grad_q + obj.W(6*k-2:6*k,:).'*MatrixOperations.SkewSymmetric(obj.bodies{k}.w)*obj.bodies{k}.I_G*w_a_grad_q;
 
@@ -874,6 +881,10 @@ classdef SystemModelBodies < handle
         end
 
         function W_grad = get.W_grad(obj)
+%             if(~obj.occupied.hessian)
+%                 obj.occupied.hessian = true;
+%                 obj.updateHessian();
+%             end
             W_grad = obj.W_grad;
         end
 
@@ -972,7 +983,7 @@ classdef SystemModelBodies < handle
                 R_a0 = obj.bodies{a}.R_0k.';
             end
             S_KA = MatrixOperations.Initialise([3,obj.index_k(k)+obj.bodies{k}.numDofs-1],obj.is_symbolic);
-            if(obj.bodiesPathGraph(a,k)||obj.bodiesPathGraph(k,a))
+            if((k==0)||(a==0)||obj.bodiesPathGraph(a,k)||obj.bodiesPathGraph(k,a))
                 % The bodies are connected
                 if(a<=k)
                     for i =a+1:k
@@ -1000,9 +1011,9 @@ classdef SystemModelBodies < handle
             R_a0 = body_a.R_0k.';
             R_k0 = body_k.R_0k.';
             S_K = MatrixOperations.Initialise([3,obj.index_k(k)+obj.bodies{k}.numDofs-1],obj.is_symbolic);
-            if(obj.bodiesPathGraph(a,k))
+            if(obj.bodiesPathGraph(a,k)||obj.bodiesPathGraph(k,a))
                 for i = a+1:k
-                    if(obj.bodiesPathGraph(i,a))
+                    if((obj.bodiesPathGraph(i,a))||(obj.bodiesPathGraph(a,i)))
                         body_i = obj.bodies{i};
                         R_0i = body_i.R_0k;
                         S_K(:,obj.index_k(i):obj.index_k(i)+body_i.numDofs-1) = -R_a0*R_0i*MatrixOperations.SkewSymmetric(-body_i.r_OP + (R_k0*R_0i).'*body_k.r_OG)*obj.S(6*i-2:6*i,obj.index_k(i):obj.index_k(i)+body_i.numDofs-1);
@@ -1017,9 +1028,9 @@ classdef SystemModelBodies < handle
             CASPR_log.Assert(k>=a,'Invalid input to generateSKATrans')
             R_a0 = obj.bodies{a}.R_0k.';
             S_KA = MatrixOperations.Initialise([3,obj.index_k(k)+obj.bodies{k}.numDofs-1],obj.is_symbolic);
-            if(obj.bodiesPathGraph(a,k))
+            if(obj.bodiesPathGraph(a,k)||obj.bodiesPathGraph(k,a))
                 for i =a+1:k
-                    if(obj.bodiesPathGraph(i,a))
+                    if(obj.bodiesPathGraph(i,a)||(obj.bodiesPathGraph(a,i)))
                         body_ip = obj.bodies{obj.bodies{i}.parentLinkId};
                         body_i = obj.bodies{i};
                         S_KA(:,obj.index_k(i):obj.index_k(i)+body_i.numDofs-1) = R_a0*body_ip.R_0k*obj.S(6*i-5:6*i-3,obj.index_k(i):obj.index_k(i)+body_i.numDofs-1);
@@ -1039,7 +1050,7 @@ classdef SystemModelBodies < handle
             if(k~=0)
                 body_k = obj.bodies{k};
                 for a = 1:k
-                    if(obj.bodiesPathGraph(a,k))
+                    if(obj.bodiesPathGraph(a,k)||(obj.bodiesPathGraph(a,k)))
                         body_a = obj.bodies{a};
                         R_ka    = body_k.R_0k.'*body_a.R_0k;
                         % Grad(R)S
@@ -1057,8 +1068,8 @@ classdef SystemModelBodies < handle
                 % Gradient with respect to qdot
                 omega_grad_q_dot = MatrixOperations.Initialise([3,obj.numDofs],obj.is_symbolic);
                 for i = 1:k
-                    if(obj.bodiesPathGraph(i,k))
-                        R_ki = obj.bodies{k}.R_0k'*obj.bodies{i}.R_0k;
+                    if(obj.bodiesPathGraph(i,k)||obj.bodiesPathGraph(k,i))
+                        R_ki = obj.bodies{k}.R_0k.'*obj.bodies{i}.R_0k;
                         omega_grad_q_dot(:,obj.index_k(i):obj.index_k(i)+obj.bodies{i}.numDofs-1) = R_ki*obj.S(6*i-2:6*i,obj.index_k(i):obj.index_k(i)+obj.bodies{i}.numDofs-1);
                     end
                 end
@@ -1105,6 +1116,7 @@ classdef SystemModelBodies < handle
                 temp_grad = MatrixOperations.Initialise([3,3,obj.numDofs],obj.is_symbolic);
                 temp_grad(:,:,:) = R_ka_grad;
                 P_ka_grad(1:3,4:6,:) = P_ka_grad(1:3,4:6,:) - TensorOperations.RightMatrixProduct(temp_grad,MatrixOperations.SkewSymmetric(-body_a.r_OP + R_ka.'*body_k.r_OG),obj.is_symbolic);
+                    
                 % Then the skew symettric matrix gradient term
                 % Within this start with the relative translation
                 temp_grad = MatrixOperations.Initialise([3,3,obj.numDofs],obj.is_symbolic);

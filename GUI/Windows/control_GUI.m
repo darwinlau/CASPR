@@ -31,7 +31,7 @@ function varargout = control_GUI(varargin)
 
     % Edit the above text to modify the response to help control_GUI
 
-    % Last Modified by GUIDE v2.5 26-Apr-2016 11:24:26
+    % Last Modified by GUIDE v2.5 21-Oct-2016 09:56:42
 
     % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
@@ -170,7 +170,11 @@ function trajectory_popup_Update(~, ~, handles)
     % Determine the trajectories
     trajectories_str = model_config.getTrajectoriesList();    
     set(handles.trajectory_popup, 'Value', 1);
-    set(handles.trajectory_popup, 'String', trajectories_str);
+    if(~isempty(trajectories_str))
+        set(handles.trajectory_popup, 'Value', 1);   set(handles.trajectory_popup, 'String', trajectories_str);
+    else
+        set(handles.trajectory_popup, 'Value', 1);   set(handles.trajectory_popup, 'String', 'No trajectories are defined for this robot');
+    end
 end
 
 % --- Executes during object creation, after setting all properties.
@@ -641,6 +645,14 @@ function plot_button_Callback(~, ~, handles) %#ok<DEFNU>
         plot_type = contents{get(handles.plot_type_popup,'Value')};
         GUIOperations.GUIPlot(plot_type,sim,handles,str2double(getappdata(handles.plot_type_popup,'num_plots')),get(handles.undock_box,'Value'));
     end
+end
+
+% --- Executes on button press in update_button.
+function update_button_Callback(hObject, eventdata, handles) %#ok<DEFNU>
+% hObject    handle to update_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    trajectory_popup_Update(hObject, eventdata, handles);
 end
 
 %--------------------------------------------------------------------------

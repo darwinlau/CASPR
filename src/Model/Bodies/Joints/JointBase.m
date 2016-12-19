@@ -150,6 +150,7 @@ classdef (Abstract) JointBase < handle
         function j = LoadXmlObj(xmlObj)
             jointType = JointType.(char(xmlObj.getAttribute('type')));
             q_initial = XmlOperations.StringToVector(char(xmlObj.getAttribute('q_initial')));
+            assert(sum(isnan(q_initial))==0,'q_initial must be defined in the xml file');
             j = JointBase.CreateJoint(jointType, q_initial);
             if (~isempty(xmlObj.getAttribute('actuated') == '') && strcmp(xmlObj.getAttribute('actuated'), 'true'))
                 j.isActuated = 1;

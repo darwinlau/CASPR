@@ -31,17 +31,22 @@ function initialise_CASPR()
         % Determine if CASPR needs to be updated
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % load the previous version information
-        previous_version = load([home_path,'/data/config/CASPR_environment.mat'],'version');
-        if(isempty(fieldnames(previous_version))||(version>previous_version.version))
+        if(~exist([home_path,'/data/config/CASPR_environment.mat'],'file'))
             save([home_path,'/data/config/CASPR_environment.mat'],'home_path','version');
             update_CASPR;
         else
-            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            % Add the libraries
-            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            save([home_path,'/data/config/CASPR_environment.mat'],'home_path','version');
-            set_CASPR_environment;
-            fprintf('CASPR initialisation complete. Enjoy !\n')
+            previous_version = load([home_path,'/data/config/CASPR_environment.mat'],'version');
+            if(isempty(fieldnames(previous_version))||(version>previous_version.version))
+                save([home_path,'/data/config/CASPR_environment.mat'],'home_path','version');
+                update_CASPR;
+            else
+                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                % Add the libraries
+                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                save([home_path,'/data/config/CASPR_environment.mat'],'home_path','version');
+                set_CASPR_environment;
+                fprintf('CASPR initialisation complete. Enjoy !\n')
+            end
         end
     end
 end
