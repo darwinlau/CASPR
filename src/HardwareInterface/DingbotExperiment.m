@@ -14,11 +14,11 @@ classdef DingbotExperiment < ExperimentBase
         function eb = DingbotExperiment()
             % Create the config
             model_config = DevModelConfig(DevModelConfigType.D_CUHK_DINGBOT);
-            cable_set_id = 'original';
+            cable_set_id = 'crossZX';
             % Load the SystemKinematics object from the XML
             modelObj = model_config.getModel(cable_set_id);
             % Create the hardware interface
-            hw_interface = ArduinoCASPRInterface('COM9', 8);
+            hw_interface = ArduinoCASPRInterface('COM4', 8);
             eb@ExperimentBase(hw_interface, modelObj);
             eb.modelConfig = model_config;
             eb.forwardKin = FKDifferential(modelObj);
@@ -36,7 +36,7 @@ classdef DingbotExperiment < ExperimentBase
             % Update the model with the initial point so that the obj.model.cableLength has the initial lengths
             obj.model.update(trajectory.q{1}, trajectory.q_dot{1}, trajectory.q_ddot{1},zeros(size(trajectory.q_dot{1})));
             % Send the initial lengths to the hardware
-            obj.hardwareInterface.lengthInitialSend(obj.model.cableLengths);
+            obj.hardwareInterface.lengthInitialSend(obj.model.cableLengths); %(1)
             % Start the system to get feedback
             obj.hardwareInterface.systemOnSend();
             
@@ -49,15 +49,15 @@ classdef DingbotExperiment < ExperimentBase
                 % Print time for debugging
                 tic;
                 %send command length to Arduino Mega
-                obj.hardwareInterface.lengthCommandSend(obj.model.cableLengths);
+                obj.hardwareInterface.lengthCommandSend(obj.model.cableLengths);% - 0.002 * ones(8,1)); %(1)
                 %read incoming feedback from Arduino Mega
                 obj.hardwareInterface.cmdRead();
                 % update cable lengths for next command from trajectory
                 obj.model.update(trajectory.q{t}, trajectory.q_dot{t}, trajectory.q_ddot{t},zeros(size(trajectory.q_dot{t})));
-                obj.l_cmd_traj(:, t) = obj.model.cableLengths;
-                obj.l_feedback_traj(:, t) = obj.hardwareInterface.feedback; 
-                
+                obj.l_cmd_traj(:, t) = obj.model.cableLengths; %(1)
                 obj.hardwareInterface.feedback
+                obj.l_feedback_traj(:, t) = obj.hardwareInterface.feedback; 
+
               
                                % testing 17th Nov, Peter
                 % update end-effector postition and rotation
@@ -94,27 +94,33 @@ classdef DingbotExperiment < ExperimentBase
             clear;
             close all;
             trajectory_id = 'traj_1';
+%             trajectory_id = 'up';
+%             trajectory_id = 'down';
+            
             
             exp = DingbotExperiment();
             trajectory = exp.modelConfig.getTrajectory(trajectory_id);
             exp.runTrajectory(trajectory); 
+            
             figure;
-            plot(trajectory.timeVector, exp.l_cmd_traj);
+            plot(trajectory.timeVector, exp.l_cmd_traj);  hold on;
             exp.l_cmd_traj(:,1)
-            figure;
-            plot(trajectory.timeVector, exp.l_feedback_traj);
-              %testing, Peter
-     %       figure;
+
+      %      figure;
+            timeOffset = 0; %-0.25;
+            lengthOffset = 0; %-0.0042;
+            plot(trajectory.timeVector + timeOffset, exp.l_feedback_traj + lengthOffset);
+      %      plot(trajectory.timeVector, exp.l_feedback_traj);
+            
+              %New function, need testing
+      %      figure;
      %       plot(trajectory.timeVector, exp.q_feedback);
      %       figure;
      %       plot(trajectory.timeVector,exp.q_d_feedback);
             %testing,Peter
         end
         
-        
-        
-        
-        % A simpler example to just lengthen each cable by 1cm
+        % A simpler example to just lengthen each cable by a sine wave
         function ExperimentLengthenCableSin()
             clc;
             clear;
@@ -160,44 +166,5 @@ classdef DingbotExperiment < ExperimentBase
             
         end
         
-        
-        % A simpler example to just lengthen each cable by 1cm
-        function ExperimentLengthenCableOneCm()
-            clc;
-            clear;
-            close all;
-            exp = DingbotExperiment();
-            % Open the hardware interface
-            exp.openHardwareInterface();
-            
-            % Detect the device to see if it is correct (should change
-            % it later to exit cleanly and throw an error in the future
-            exp.hardwareInterface.detectDevice()
-            
-            % Set the initial lengths all to be 0.5m
-            %l0 = [0.5];
-            %l0 = [0.5; 0.5; 0.5; 0.5; 0.5; 0.5; 0.5; 0.5];
-            %exp.hardwareInterface.lengthInitialSend(l0);
-            
-            % Start the system to get feedback
-            exp.hardwareInterface.systemOnSend();
-            % Should drive the system for 3 seconds (60 * 0.05s)
-            for t=1:6000
-                % Wait for feedback to start the 50ms loop
-                exp.hardwareInterface.cmdRead();
-                % Send the 1cm movement down
-                % exp.hardwareInterface.lengthCommandSend(l0 + [0.010; 0.010; 0.010; 0.010; 0.010; 0.010; 0.010; 0.010]);
-                % Store the feedback received
-                exp.l_feedback_traj(:, t) = exp.hardwareInterface.feedback;
-                exp.l_feedback_traj(:, t)
-            end
-            
-            % Stop the feedback
-            exp.hardwareInterface.systemOffSend();
-            % Close the hardware interface
-            exp.closeHardwareInterface();
-            plot(0.05:0.05:3, exp.l_feedback_traj);
-            
-        end
     end
 end

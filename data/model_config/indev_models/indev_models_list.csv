@@ -1,6 +1,6 @@
 D_CUHK_WALLBOT,/CUHK/wallbot/,CUHK_wallbot_bodies.xml,CUHK_wallbot_cables.xml,CUHK_wallbot_trajectories.xml
 D_CUHK_DINGBOT,/CUHK/dingbot/,CUHK_dingbot_bodies.xml,CUHK_dingbot_cables.xml,CUHK_dingbot_trajectories.xml
-D_CUHK_PLANARDINGBOT,/CUHK/Planar_dingbot/,CUHK_Planar_dingbot_bodies.xml,CUHK_Planar_dingbot_cables.xml,CUHK_Planar_dingbot_trajectories.xml
+D_CUHK_DINGBOT_PLANAR,/CUHK/dingbot_planar/,CUHK_dingbot_planar_bodies.xml,CUHK_dingbot_planar_cables.xml,CUHK_dingbot_planar_trajectories.xml
 D_CUHK_ARM,/CUHK/CUHK_arm/,CUHK_arm_bodies.xml,CUHK_arm_cables.xml,CUHK_arm_trajectories.xml
 D_CUHK_CUCABLEROBOT,/CUHK/CUCableRobot/,CUHK_CUCableRobot_bodies.xml,CUHK_CUCableRobot_cables.xml,CUHK_CUCableRobot_trajectories.xml
 D_CUHK_TEMP,/CUHK/temp_ball_joint/,temp_ball_joint_bodies.xml,temp_ball_joint_cables.xml,temp_ball_joint_trajectories.xml
