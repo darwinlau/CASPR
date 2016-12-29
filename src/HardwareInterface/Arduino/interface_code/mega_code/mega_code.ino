@@ -42,7 +42,6 @@
 #define CASPR_WAVE 'w'
 #define CASPR_SETUP 'k'
 
-#define NANO_ACTIVE_ID 'd'
 #define NANO_PWM_COMMAND 'p'
 #define NANO_FEEDBACK 'f'
 #define NANO_TEST 't'
@@ -149,7 +148,7 @@ void setup() {
     rangePWMOutput[i] = maximumPWMOutput[i] - minimumPWMOutput[i];
     angleToPWM[i] = (double)rangePWMOutput[i] / 353.0;      //This range of usable pwm command maps to 353 degrees.
     pwmMapping[i] = (double)rangePWMOutput[i] / (double)rangePWMFeedback[i]; //factor for mapping PWMFeedback onto PWMOutput
-    printNanoActiveID(i);
+
 
     /////// TEMPORARY - REVISE LATER AFTER CALIBRATION //////////
     readNanoFeedback(i);
@@ -164,12 +163,6 @@ void loop() {
   //  if ((millis() - t_ref) > TIME_STEP * 1000) { // Operate at roughly 20Hz time
   //  t_ref = millis(); // Reset the time
   //  }
-}
-
-void printNanoActiveID(int currentID) {
-  Serial1.print(NANO_ACTIVE_ID); //d
-  Serial1.print(currentID);
-  Serial1.println(activeNanoID[currentID]);
 }
 
 void readSerialUSB() {
@@ -330,7 +323,7 @@ void requestNanoFeedback() {
     
    // Serial.println(pwmFeedbackDiff);
   }
-
+ 
 }
 
 /* Request and read feedback from nano. Convert feedback from HEX to DEC, and store in pwmFeedback. */
@@ -352,7 +345,8 @@ void readNanoFeedback(int i) {
     while (serialNano[i].available() > 0) {
       serialNano[i].read(); //clears the buffer of any other bytes
     }
-    pwmFeedback[i] = strtol(feedbackNano, 0, 16);
+
+    pwmFeedback[i] = strtol(feedbackNano, 0, 16); 
   }
 }
 
@@ -362,7 +356,6 @@ void sendNanoFeedback() {
   for (int i = 0; i < NUMBER_CONNECTED_NANOS; i++) {
 
     itoa(lengthFeedback[i], feedbackMega, 16);
-
   //  Serial.println(lengthFeedback[i]); //not 32768 lol
     strLength = strlen(feedbackMega);  //will strLength work when feedbackMega has 4 digit instead of 3, and no room for \0?
 
