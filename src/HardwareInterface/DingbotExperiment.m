@@ -40,16 +40,22 @@ classdef DingbotExperiment < ExperimentBase
             % Start the system to get feedback
             obj.hardwareInterface.systemOnSend();
             
-            l_prev = obj.model.cableLengths;
-            q_prev = trajectory.q{1};
-            q_d_prev = trajectory.q_dot{1};
+%             l_prev = obj.model.cableLengths;
+%             q_prev = trajectory.q{1};
+%             q_d_prev = trajectory.q_dot{1};
             
             for t = 1:length(trajectory.timeVector)
                 trajectory.timeVector(t)
                 % Print time for debugging
                 tic;
                 %send command length to Arduino Mega
-                obj.hardwareInterface.lengthCommandSend(obj.model.cableLengths);% - 0.002 * ones(8,1)); %(1)
+                if (t < length(trajectory.timeVector))
+                    %tighten cables while running trajectory
+                    obj.hardwareInterface.lengthCommandSend(obj.model.cableLengths - 0.003 * ones(8,1));   %(1)
+                else
+                    %loosen all cables at the end
+                    obj.hardwareInterface.lengthCommandSend(obj.model.cableLengths); %(1)
+                end
                 %read incoming feedback from Arduino Mega
                 obj.hardwareInterface.cmdRead();
                 % update cable lengths for next command from trajectory
@@ -58,7 +64,6 @@ classdef DingbotExperiment < ExperimentBase
                 obj.hardwareInterface.feedback
                 obj.l_feedback_traj(:, t) = obj.hardwareInterface.feedback; 
 
-              
                                % testing 17th Nov, Peter
                 % update end-effector postition and rotation
                 %[q, q_dot] = obj.forwardKin.compute(obj.hardwareInterface.feedback, l_prev, 1:8,  q_prev, q_d_prev, 0.05);
@@ -67,9 +72,7 @@ classdef DingbotExperiment < ExperimentBase
                 %l_prev = obj.model.cableLengths;
                 %q_prev = q;
                 %q_d_prev = q_dot;
-                
                                 % testing17th Nov, Peter
-         
                 
                 elapsed = toc * 1000;
                 if(elapsed < 50)
@@ -107,10 +110,7 @@ classdef DingbotExperiment < ExperimentBase
             exp.l_cmd_traj(:,1)
 
       %      figure;
-            timeOffset = 0; %-0.25;
-            lengthOffset = 0; %-0.0042;
-            plot(trajectory.timeVector + timeOffset, exp.l_feedback_traj + lengthOffset);
-      %      plot(trajectory.timeVector, exp.l_feedback_traj);
+           plot(trajectory.timeVector, exp.l_feedback_traj);
             
               %New function, need testing
       %      figure;
