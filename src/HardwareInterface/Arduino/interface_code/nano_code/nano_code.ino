@@ -35,10 +35,8 @@ int averageSpeed = 0;
 int pwmCommand = 0;
 int lastPWMCommand = 0;
 
-int cross = 0;
+int crossingCommand = 0;
 int stillCrossing = 0;
-int crossPulse = 0;
-int pwmDifference = 0;
 
 int sendCounter = 0;
 
@@ -54,19 +52,19 @@ int pwmTestrun = 700;
 
 /////////////////////////// FUNCTION PRECALLING ///////////////////////////
 
-int readPositionFeedback();
-void loopAverage();
+int readFeedbackFromServo();
+void readAvgFeedback();
 void crossing();
-void quitCrossing();
+void updateCrossingStatus();
 void ctrl_motor(int pwmMotor);
-void servOPulse(int pulseWidth);
+void writePulseToServo(int pulseWidth);
 void sendFeedback();
 void testdrive();
 
 void setup() {
   Serial.begin(BAUD_RATE);
   while (servoPWM == 0) {
-    loopAverage();
+    readAvgFeedback();
   }
   lastPWMServo = servoPWM;
 }
@@ -75,76 +73,94 @@ void loop() {
   readSerial();
 }
 
+/* Read serial from mega and decide what to do depending on the 1 character command.  */
 void readSerial() { //receive characterizing prefix (+ length in 2 digit Hex, with manipulation of first bit for sign)
   if (Serial.available() > 0) {
     strReceived = Serial.readStringUntil('\n');
     commandReceived = strReceived[0];
-    if (commandReceived == RECEIVE_PWM_CMD) { //p
-      stillCrossing = 0;                 //CLARIFY: what does stillCrossing mean?
-      loopAverage();
+
+    switch (commandReceived){
+      case RECEIVE_PWM_CMD: {          //p
+        stillCrossing = 0;                 //stillCrossing is 0 if servo is not crossing; 1 if crossing clockwise, 2 if anticlockwise
+        readAvgFeedback();
       
-      if (cross > 0) {               //CLARIFY: if crossing?
-        quitCrossing();            //CLARIFY: decide whether we can quit crossing (i.e. set cross = 0) or not (i.e. set stillCrossing = cross) ??
+        if (crossingCommand > 0) {       //if servo is in the crossing process
+          updateCrossingStatus();        //decide whether we can quit crossing or not
+        }
+        delay(5);
+        readPWMCommand();                  //CLARIFY: (this will set  cross  according to the command from mega)?
+        if (stillCrossing > 0 && crossingCommand == 0) { //if stillCrossing > 0, the crossing has not been quit, but cross has been reassigned by the new incomming command
+          crossingCommand = stillCrossing;               //CLARIFY: if crossing is not done yet, ignore the cmd from mega, continue our crossing?
+        }
+        ctrl_motor(pwmCommand);
+        break;
       }
-      delay(5);
-      readPWMCommand();                      //CLARIFY: (this will set  cross  according to the command from mega)?
-      if (stillCrossing > 0 && cross == 0) { //if stillCrossing > 0, the crossing has not been quit, but cross has been reassigned by the new incomming command
-        cross = stillCrossing;               //CLARIFY: if crossing is not done yet, ignore the cmd from mega, continue our crossing?
+      case RECEIVE_FEEDBACK_REQUEST: {  //f
+        char id = strReceived[1];
+        if (id == NANO_ID + '0') {  //if the request is for this nano
+          sendFeedback();
+        }
+        break;
       }
-      ctrl_motor(pwmCommand);
-    }
-
-    else if (commandReceived == RECEIVE_FEEDBACK_REQUEST) { //f
-      char id = strReceived[1];
-      if (id == NANO_ID + '0') {
-        sendFeedback();
+      case RECEIVE_TEST_REQUEST: {      //t
+        Serial.print('c');
+        Serial.println('c');
+        Serial.flush();
+        delayMicroseconds(10);
+        break;
       }
-    }
-    else if (commandReceived == RECEIVE_TEST_REQUEST) { //t
-      Serial.print('c');
-      Serial.println('c');
-      Serial.flush();
-      delayMicroseconds(10);
-    }
-    else if (commandReceived == RECEIVE_TESTDRIVE_REQUEST) { //z
-      testdrive();
-
-    }
-  }
+      case RECEIVE_TESTDRIVE_REQUEST: { //z
+        testdrive();
+        break;
+      }
+    }//switch
+  }//if Serial.available()
+  
   // ADD CALIBRATION LATER
 }
 
-void loopAverage() {
-  readPositionFeedback();
+/* read feedback pulse width (in microsecond) from servo 4 times and save the average value to loopAveragePWM. 
+   Will update servoPWM in the process. */
+void readAvgFeedback() {
+  readFeedbackFromServo();
   loopAveragePWM = servoPWM;
   for (int i = 0; i < 3; i++) {
     delay(3);
-    readPositionFeedback();
+    readFeedbackFromServo();
     loopAveragePWM += servoPWM;
   }
   loopAveragePWM = (int)(loopAveragePWM / 4.0);
 }
 
+/* Extract crossing command and pwm command from the received string. 
+   crossing command is saved in crossingCommand,
+   pwm command is converted to DEC and saved in pwmCommand. */
 void readPWMCommand() {
   char pwmReceived[LENGTH_PWM_COMMAND];
-  cross = strReceived[1 + (LENGTH_PWM_COMMAND * NANO_ID)] - '0';
+  crossingCommand = strReceived[1 + (LENGTH_PWM_COMMAND * NANO_ID)] - '0';
   for (int i = 0; i < LENGTH_PWM_COMMAND - 1; i++) {
     pwmReceived[i] = strReceived[1 + i + 1 + (LENGTH_PWM_COMMAND * NANO_ID)]; //+1 for prefix, another +1 to omit the crossing boolean
   }
   pwmCommand = strtol(pwmReceived, 0, 16);
   if (pwmCommand != lastPWMCommand) {
-    sendCounter = 3;
+    sendCounter = 3;     //CLARIFY: what is send counter?
   }
 }
 
-int readPositionFeedback() { //reads position feedback and stores it in servoPWM
-  int lastPWMServo = servoPWM; //temporarily stores last value as backup, if new measurement fails - not used anywhere else
-
+/* Request the servo for feedback, and save the feedback pulse width (in microsecond) to servoPWM.*/
+int readFeedbackFromServo() {
+  //backup last value in case new measurement fails. (Not used anywhere else.)
+  int lastPWMServo = servoPWM; 
+  
+  //request servo position feedback by sending it a 50us pulse
   digitalWrite(MOTOR_PIN, HIGH);
   delayMicroseconds(50);
   digitalWrite(MOTOR_PIN, LOW);
-  servoPWM = pulseIn(MOTOR_PIN, HIGH, 2000); //triggers servo, then measures time until next HIGH signal, cuts off after 3000us or 3ms
+  
+  //read feedback
+  servoPWM = pulseIn(MOTOR_PIN, HIGH, 2000); //measure the duration of the returning HIGH pulse (in microseconds), or time-out
 
+  //fix faulty measurements
   if ((servoPWM < 300) || (servoPWM > 2000)) { //results outside these boundaries are faulty
     servoPWM = lastPWMServo;
   }
@@ -156,47 +172,54 @@ int readPositionFeedback() { //reads position feedback and stores it in servoPWM
   }
 }
 
-void quitCrossing() {
-  if (cross == 1) { // From left
+/* Decide whether a servo can quit crossing or not.
+   If it has successfully cross, set crossingCommand to 0; 
+   else, keep the crossingCommand in variable stillCrossing.
+ */
+void updateCrossingStatus() {
+  if (crossingCommand == 1) { // From left
     if ((loopAveragePWM > (FEEDBACK_PWM_MIN)) && (servoPWM <= FEEDBACK_PWM_MIDDLE)) { //smaller/equal because middlePWMFEedback is rounded down
-      cross = 0;
-    } else stillCrossing = cross;
+      crossingCommand = 0;
+    } else {
+      stillCrossing = crossingCommand;
+    }
   }
-  else if (cross == 2) // From right
-  {
+  else if (crossingCommand == 2){ // From right
     if ((loopAveragePWM < (FEEDBACK_PWM_MAX)) && (servoPWM > FEEDBACK_PWM_MIDDLE )) {
-      cross = 0;
-    } else stillCrossing = cross;
-  }
-  else {
+      crossingCommand = 0;
+    } else {
+      stillCrossing = crossingCommand;
+    }
   }
 }
 
-void ctrl_motor(int pwmMotor) { //transmits the output signal towards the motor
-  if (cross == 1) {
-    crossPulse = CLOCKWISE_PWM_MIN;  //cross at min speed
-    //crossPulse = crossPWM();
-    servoPulse(crossPulse);
-    servoPulse(crossPulse);
-  } else if (cross == 2) {
-    crossPulse = ANTICLOCKWISE_PWM_MIN;  ////cross at min speed
-    //crossPulse = crossPWM();
-    servoPulse(crossPulse);
-    servoPulse(crossPulse);
+/* Send appropriate pwm command to servo, depending on whether it's crossing or not. 
+   If it's crossing, send velocity command; otherwise, position command. */
+void ctrl_motor(int pwmMotor) {
+  if (crossingCommand == 1) {          //crossing from the left
+    writePulseToServo(CLOCKWISE_PWM_MIN); //min speed
+    writePulseToServo(CLOCKWISE_PWM_MIN);
+  } else if (crossingCommand == 2){   //crossing from the right
+    writePulseToServo(ANTICLOCKWISE_PWM_MIN); //min speed
+    writePulseToServo(ANTICLOCKWISE_PWM_MIN);
   } else if (sendCounter > 0) {
-    servoPulse(pwmMotor);
-    servoPulse(pwmMotor);
+    writePulseToServo(pwmMotor);
+    writePulseToServo(pwmMotor);
     sendCounter--;
   }
 }
 
-void servoPulse(int pulseWidth) {
+/* Send one PWM pulse to servo.
+   pulseWith is in microsecond and should be non-negative number under 3000.
+   This function takes 3ms to complete. */
+void writePulseToServo(int pulseWidth) {
   digitalWrite(MOTOR_PIN, HIGH);
   delayMicroseconds(pulseWidth);
   digitalWrite(MOTOR_PIN, LOW);
   delayMicroseconds(3000 - pulseWidth);
 }
 
+/* Convert averaged length feedback from DEC to HEX char, and send to mega via Serial. */
 void sendFeedback() {
   itoa(loopAveragePWM, pwmFeedback, 16); 
   for (int i = 0; i < DIGITS_PWM_FEEDBACK; i++) {
@@ -204,9 +227,8 @@ void sendFeedback() {
   }
   Serial.println();
   Serial.flush();
-
-
 }
+
 
 void testdrive() {
   if (cw) {
