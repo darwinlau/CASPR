@@ -39,7 +39,6 @@
 #define CASPR_INITIAL 'i'
 #define CASPR_RESET 'r'
 #define CASPR_HOLD 'h'
-#define CASPR_WAVE 'w'
 #define CASPR_SETUP 'k'
 
 //set in an h file in the future?
@@ -73,6 +72,8 @@ int crossingCommand[NUMBER_CONNECTED_NANOS];
 unsigned int lengthCommand[NUMBER_CONNECTED_NANOS]; //unsigned int has 2 bytes, range 0 - 65535
 unsigned int lengthFeedback[NUMBER_CONNECTED_NANOS]; //with .1 mm precision, this equals ~6.5m
 
+//unsigned int angleCommand[NUMBER_CONNECTED_NANOS]; //0.1 degree precision, e.g. 3600 => 360 degree
+
 /////////////////////////// TEMPORARY VARIABLES //////////////
 
 int pwmFeedbackDiff = 0;
@@ -80,8 +81,6 @@ char feedbackNano[DIGITS_PWM_FEEDBACK + 1]; // Array to store the nano feedback,
 char commandNano[DIGITS_PWM_COMMAND];
 char feedbackMega[HEX_DIGITS_LENGTH]; //4 digit hex length from a nano, sent to mega
 int lengthChangeCommand;
-char tmpRead[HEX_DIGITS_LENGTH + 1]; //+1 to store the '\0' NUL terminator
-unsigned int tmpSendLength;
 float angularChangeCommand;
 int strLength = 0;
 int readCounter = 0;
@@ -95,15 +94,7 @@ float angleToLength = SPOOL_CIRCUMFERENCE / 360.0;
 
 unsigned long int t_ref;
 
-boolean systemOn, enableMotors, wave;
-
-
-/////////////////////////// SIN WAVE TESTING //////////////
-
-int radCounter = 0;
-float rad = 0;
-int sinPWM = 0;
-double waveFactor = 0.025;
+boolean systemOn, enableMotors;
 
 // TODO: Decide on the maximum number of Nanos we would ever connect
 SoftwareSerial serialNano[8] = {
@@ -160,7 +151,6 @@ void readSerialUSB() {
       case CASPR_ACKNOWLEDGE: {                        //a: handshake with matlab
         if (receivedCommand.length() == 1){
           systemOn = 0;
-          wave = 0;
           Serial.println(CASPR_ACKNOWLEDGE);
         }
         break;
@@ -168,7 +158,6 @@ void readSerialUSB() {
       case CASPR_START: {                              //s: start system
         if (receivedCommand.length() == 1){
           systemOn = 1;
-          wave = 0;
         }
         break;
       }
@@ -176,7 +165,6 @@ void readSerialUSB() {
         if (receivedCommand.length() == 1){
           systemOn = 0;
           enableMotors = 1;      //CLARIFY: why??????
-          wave = 0;
         }
         break;
       }
@@ -185,12 +173,10 @@ void readSerialUSB() {
         requestNanoFeedback();
         sendNanoFeedback();
         enableMotors = 1;
-        wave = 0;
         break;
       }
       case CASPR_LENGTH_CMD:{                          //l: move cables to set length
         enableMotors = 1;
-        wave = 0;
         if (systemOn) {
           requestNanoFeedback();
           sendNanoFeedback();
@@ -205,25 +191,14 @@ void readSerialUSB() {
       case CASPR_RESET: {                             //r: resetLengths()?
         resetLengths();
         enableMotors = 1;
-        wave = 0;
         break;
       }
       case CASPR_HOLD: {                               //h: tighten all cables
         enableMotors = 1;
-        wave = 0;
         for (int i = 0; i < NUMBER_CONNECTED_NANOS; i++) {
           pwmCommand[i] = mapFeedbackToCommand(pwmFeedback[i], i) - 10;
         }
         sendNanoCommand();
-        break;
-      }
-      case CASPR_WAVE: {                               //w: wave??
-        wave = 1;
-        enableMotors = 1;
-        waveFactor = 0.025 * (receivedCommand[1] - '0');
-        if (waveFactor > 0.125) {
-          waveFactor = 0.125;
-        }
         break;
       }
       case CASPR_SETUP: {                              //k: make the servo go to where it think it is
@@ -366,36 +341,33 @@ void sendNanoFeedback() {
   Serial.flush();
 }
 
-/* Extract length command from the received matlab string, OR generate a length command with a sine wave, 
+/* Extract length command from the received matlab string, 
    and save to pwmCommand[] and crossingCommand[], and set enableMotors = 1. */
-   //BUG: generate sine wave should not be in "read" nano command
 void readNanoCommand() {
-  if (receivedCommand[0] == CASPR_LENGTH_CMD || wave) {
+  if (receivedCommand[0] == CASPR_LENGTH_CMD) {
     for (int i = 0; i < NUMBER_CONNECTED_NANOS; i++) {
-      if (!wave) {
+        char hexCommand[HEX_DIGITS_LENGTH + 1]; //+1 to store the '\0' NUL terminator //CLARIFY: is this need?
+
+        //if receivedCommand is a string (ended with \0)
+        //string.substring(from-inclusive, to-exclusive)
+        //hexCommand = receivedCommand.substring(1 + (HEX_DIGITS_LENGTH * i), 1 + (HEX_DIGITS_LENGTH * i) + HEX_DIGITS_LENGTH);
         for (int j = 0; j < HEX_DIGITS_LENGTH; j++) {
-          tmpRead[j] = receivedCommand[1 + (HEX_DIGITS_LENGTH * i) + j]; // +1 omits command prefix, HEX_DIGITS_LENGTH*i gives position in array for respective ID
+          hexCommand[j] = receivedCommand[1 + (HEX_DIGITS_LENGTH * i) + j]; // +1 omits command prefix, HEX_DIGITS_LENGTH*i gives position in array for respective ID
         }
-        tmpRead[HEX_DIGITS_LENGTH] = '\0';
-        tmpSendLength = strtol(tmpRead, 0, 16);  //HEX string -> long -> unsigned int tmpSendLength???????????
+        hexCommand[HEX_DIGITS_LENGTH] = '\0'; 
+        
+        unsigned int tmpSendLength = strtol(hexCommand, 0, 16);  //HEX string -> long -> unsigned int tmpSendLength???????????
         lengthChangeCommand = tmpSendLength - lengthCommand[i]; //strtol returns long int, lengthCommand is unsigned int (4byte - 2byte), changes will not be >int_max
         lengthCommand[i] += lengthChangeCommand; //update lengthCommand for next command  
-        //^the line above is the same as lengthCommand[i] = lengthCommand[i] + (tmpSendLength - lengthCommand[i]) = tmpSendLength????????????
         angularChangeCommand = (lengthChangeCommand * lengthToAngle); //(float) = (int) * (float)
+
+
+        
         if (angularChangeCommand > 0) {
           pwmCommand[i] += (int)((angularChangeCommand * angleToPWM[i] ) + 0.5);
         } else pwmCommand[i] += (int)((angularChangeCommand * angleToPWM[i] ) - 0.5);
 
-      } else {
-        radCounter++;
-        rad = radCounter * waveFactor;
-        sinPWM = sin(rad) * 480;
-        sinPWM += 977;
-        for (int i = 0; i < NUMBER_CONNECTED_NANOS; i++) {
-          pwmCommand[i] = sinPWM;
-          crossingCommand[i] = 0;
-        }
-      }
+      
       // keeping pwmCommand in boundaries, enabling crossing
       crossingCommand[i] = 0;
       //pwmCommand[i] -= 5;
@@ -407,8 +379,6 @@ void readNanoCommand() {
         crossingCommand[i] = 1;
       }
     }
-    //  Serial.print(crossingCommand[0]);
-    //  Serial.println(pwmCommand[0]);
   }
   receivedCommand[0] = '\0'; //resets array, so it is not read twice
   enableMotors = 1;
