@@ -1,7 +1,7 @@
 #include <string.h>
 #include <Wire.h>
 #include <math.h>
-#include "servo_properties/servo_07.h"   //servo-specific properties (e.g. the range of pwm command it can execute) is stored here
+#include "servo_properties/servo_08.h"   //servo-specific properties (e.g. the range of pwm command it can execute) is stored here
 
 #define MOTOR_PIN 2
 #define BAUD_RATE 74880
@@ -73,7 +73,7 @@ void loop() {
   readSerial();
 }
 
-/* Read serial from mega and decide what to do depending on the 1 character command.  */
+/* Read serial from mega and decide what to do depending on the 1-character command.  */
 void readSerial() { //receive characterizing prefix (+ length in 2 digit Hex, with manipulation of first bit for sign)
   if (Serial.available() > 0) {
     strReceived = Serial.readStringUntil('\n');
