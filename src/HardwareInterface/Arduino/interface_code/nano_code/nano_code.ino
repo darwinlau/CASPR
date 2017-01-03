@@ -15,6 +15,9 @@
 #define RECEIVE_TEST_REQUEST 't'
 #define RECEIVE_TESTDRIVE_REQUEST 'z'
 
+#define CLOCKWISE 1
+#define ANTICLOCKWISE 2
+
 /////////////////////////// COMMUNICATION ///////////////////////// //
 
 String strReceived;
@@ -81,18 +84,36 @@ void readSerial() { //receive characterizing prefix (+ length in 2 digit Hex, wi
 
     switch (commandReceived){
       case RECEIVE_PWM_CMD: {          //p
-        stillCrossing = 0;                 //stillCrossing is 0 if servo is not crossing; 1 if crossing clockwise, 2 if anticlockwise
-        readAvgFeedback();
-      
-        if (crossingCommand > 0) {       //if servo is in the crossing process
-          updateCrossingStatus();        //decide whether we can quit crossing or not
+        //read command
+        int newCrossingCommand = readCrossingCommand();
+        
+        if (newCrossingCommand > 0){                   //if there's new crossing command, execute it
+          crossingCommand = newCrossingCommand;
         }
-        delay(5);
-        readPWMCommand();                  //CLARIFY: (this will set  cross  according to the command from mega)?
-        if (stillCrossing > 0 && crossingCommand == 0) { //if stillCrossing > 0, the crossing has not been quit, but cross has been reassigned by the new incomming command
-          crossingCommand = stillCrossing;               //CLARIFY: if crossing is not done yet, ignore the cmd from mega, continue our crossing?
+        else {
+          int crossingStatus = checkCrossingStatus();
+          if (crossingStatus > 0){                    //else, finish the previous crossing
+            crossingCommand = crossingStatus;
+          }
+          else {                                      //else, read new position command
+            readPWMCommand();//update int pwmCommand
+          }
         }
         ctrl_motor(pwmCommand);
+        
+//        stillCrossing = 0;                 //stillCrossing is 0 if servo is not crossing; 1 if crossing clockwise, 2 if anticlockwise
+//        readAvgFeedback();
+//      
+//        if (crossingCommand > 0) {       //if servo is in the crossing process
+//          updateCrossingStatus();        //decide whether we can quit crossing or not
+//        }
+//        delay(5);
+//        readPWMCommand();                  //update crossingCommand and pwmCommand
+//        if (stillCrossing > 0 && crossingCommand == 0) { //if stillCrossing > 0, the crossing has not been quit, but cross has been reassigned by the new incomming command
+//          crossingCommand = stillCrossing;               //CLARIFY: if crossing is not done yet, ignore the cmd from mega, continue our crossing?
+//        }
+//        ctrl_motor(pwmCommand);
+
         break;
       }
       case RECEIVE_FEEDBACK_REQUEST: {  //f
@@ -132,12 +153,16 @@ void readAvgFeedback() {
   loopAveragePWM = (int)(loopAveragePWM / 4.0);
 }
 
-/* Extract crossing command and pwm command from the received string. 
-   crossing command is saved in crossingCommand,
-   pwm command is converted to DEC and saved in pwmCommand. */
+
+/* Extract crossing command from the received string. */
+int readCrossingCommand() {
+  return strReceived[1 + (LENGTH_PWM_COMMAND * NANO_ID)] - '0';
+}
+
+/* Extract pwm command from the received string, convert it from HEX to DEC,
+   and update pwmCommand. */
 void readPWMCommand() {
   char pwmReceived[LENGTH_PWM_COMMAND];
-  crossingCommand = strReceived[1 + (LENGTH_PWM_COMMAND * NANO_ID)] - '0';
   for (int i = 0; i < LENGTH_PWM_COMMAND - 1; i++) {
     pwmReceived[i] = strReceived[1 + i + 1 + (LENGTH_PWM_COMMAND * NANO_ID)]; //+1 for prefix, another +1 to omit the crossing boolean
   }
@@ -172,34 +197,35 @@ int readFeedbackFromServo() {
   }
 }
 
-/* Decide whether a servo can quit crossing or not.
-   If it has successfully cross, set crossingCommand to 0; 
-   else, keep the crossingCommand in variable stillCrossing.
- */
-void updateCrossingStatus() {
-  if (crossingCommand == 1) { // From left
+/* Return the servo's crossing status.
+   Return 0 if it has exited the crossing zone, or CLOCKWISE/ANTICLOCKWISE if it's still crossing. */
+int checkCrossingStatus(){
+  if (crossingCommand == CLOCKWISE) { // From left
     if ((loopAveragePWM > (FEEDBACK_PWM_MIN)) && (servoPWM <= FEEDBACK_PWM_MIDDLE)) { //smaller/equal because middlePWMFEedback is rounded down
-      crossingCommand = 0;
+      return 0;
     } else {
-      stillCrossing = crossingCommand;
+      return CLOCKWISE;
     }
   }
-  else if (crossingCommand == 2){ // From right
+  else if (crossingCommand == ANTICLOCKWISE){ // From right
     if ((loopAveragePWM < (FEEDBACK_PWM_MAX)) && (servoPWM > FEEDBACK_PWM_MIDDLE )) {
-      crossingCommand = 0;
+      return 0;
     } else {
-      stillCrossing = crossingCommand;
+      return ANTICLOCKWISE;
     }
   }
+
+  //if all else failed
+  return 0;
 }
 
 /* Send appropriate pwm command to servo, depending on whether it's crossing or not. 
    If it's crossing, send velocity command; otherwise, position command. */
 void ctrl_motor(int pwmMotor) {
-  if (crossingCommand == 1) {          //crossing from the left
+  if (crossingCommand == CLOCKWISE) {          //crossing from the left
     writePulseToServo(CLOCKWISE_PWM_MIN); //min speed
     writePulseToServo(CLOCKWISE_PWM_MIN);
-  } else if (crossingCommand == 2){   //crossing from the right
+  } else if (crossingCommand == ANTICLOCKWISE){   //crossing from the right
     writePulseToServo(ANTICLOCKWISE_PWM_MIN); //min speed
     writePulseToServo(ANTICLOCKWISE_PWM_MIN);
   } else if (sendCounter > 0) {
