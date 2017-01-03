@@ -18,7 +18,7 @@ classdef DingbotExperiment < ExperimentBase
             % Load the SystemKinematics object from the XML
             modelObj = model_config.getModel(cable_set_id);
             % Create the hardware interface
-            hw_interface = ArduinoCASPRInterface('COM4', 8);
+            hw_interface = ArduinoCASPRInterface('COM4', 1);  %1
             eb@ExperimentBase(hw_interface, modelObj);
             eb.modelConfig = model_config;
             eb.forwardKin = FKDifferential(modelObj);
@@ -36,7 +36,7 @@ classdef DingbotExperiment < ExperimentBase
             % Update the model with the initial point so that the obj.model.cableLength has the initial lengths
             obj.model.update(trajectory.q{1}, trajectory.q_dot{1}, trajectory.q_ddot{1},zeros(size(trajectory.q_dot{1})));
             % Send the initial lengths to the hardware
-            obj.hardwareInterface.lengthInitialSend(obj.model.cableLengths); %(1)
+            obj.hardwareInterface.lengthInitialSend(obj.model.cableLengths(1)); %(1)
             % Start the system to get feedback
             obj.hardwareInterface.systemOnSend();
             
@@ -51,16 +51,19 @@ classdef DingbotExperiment < ExperimentBase
                 %send command length to Arduino Mega
                 if (t < length(trajectory.timeVector))
                     %tighten cables while running trajectory
-                    obj.hardwareInterface.lengthCommandSend(obj.model.cableLengths - 0.003 * ones(8,1));   %(1)
+                    %obj.hardwareInterface.lengthCommandSend(obj.model.cableLengths(1) - 0.003 * ones((1),1));   %(1)
+                    
+                    %no tightening
+                    obj.hardwareInterface.lengthCommandSend(obj.model.cableLengths(1)); %(1)
                 else
                     %loosen all cables at the end
-                    obj.hardwareInterface.lengthCommandSend(obj.model.cableLengths); %(1)
+                    obj.hardwareInterface.lengthCommandSend(obj.model.cableLengths(1)); %(1)
                 end
                 %read incoming feedback from Arduino Mega
                 obj.hardwareInterface.cmdRead();
                 % update cable lengths for next command from trajectory
                 obj.model.update(trajectory.q{t}, trajectory.q_dot{t}, trajectory.q_ddot{t},zeros(size(trajectory.q_dot{t})));
-                obj.l_cmd_traj(:, t) = obj.model.cableLengths; %(1)
+                obj.l_cmd_traj(:, t) = obj.model.cableLengths(1); %(1)
                 obj.hardwareInterface.feedback
                 obj.l_feedback_traj(:, t) = obj.hardwareInterface.feedback; 
 
