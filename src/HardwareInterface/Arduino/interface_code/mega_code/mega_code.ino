@@ -141,7 +141,7 @@ void setup() {
 
     /////// TEMPORARY - REVISE LATER AFTER CALIBRATION //////////
     readNanoFeedback(i);
-    pwmCommand[i] = (pwmFeedback[i] - minimumPWMFeedback[i]) * pwmMapping[i] + minimumPWMOutput[i] + 0.5;  //+0.5 to turn double-to-int truncation into round-off
+    pwmCommand[i] = mapFeedbackToCommand(pwmFeedback[i], i);
   }
   t_ref = millis();
 }
@@ -212,7 +212,7 @@ void readSerialUSB() {
         enableMotors = 1;
         wave = 0;
         for (int i = 0; i < NUMBER_CONNECTED_NANOS; i++) {
-          pwmCommand[i] = (int)((pwmFeedback[i] - minimumPWMFeedback[i]) * pwmMapping[i]) + minimumPWMOutput[i] - 10;
+          pwmCommand[i] = mapFeedbackToCommand(pwmFeedback[i], i) - 10;
         }
         sendNanoCommand();
         break;
@@ -229,7 +229,7 @@ void readSerialUSB() {
       case CASPR_SETUP: {                              //k: make the servo go to where it think it is
         for (int i = 0; i < NUMBER_CONNECTED_NANOS; i++) {
           readNanoFeedback(i);
-          pwmCommand[i] = (pwmFeedback[i] - minimumPWMFeedback[i]) * pwmMapping[i] + minimumPWMOutput[i];
+          pwmCommand[i] = mapFeedbackToCommand(pwmFeedback[i], i);
         }
         break;
       }
@@ -436,7 +436,7 @@ void sendNanoCommand() {
 
 //To be put into use
 /* Map pwm feedback of the specified position to pwm command */
-int  pwmFeedbackToCommand(int feedback, int id){
+int mapFeedbackToCommand(int feedback, int id){
   return (pwmFeedback[id] - minimumPWMFeedback[id]) * pwmMapping[id] + minimumPWMOutput[id] + 0.5;  //+0.5 to turn double-to-int truncation into round-off
 }
 
