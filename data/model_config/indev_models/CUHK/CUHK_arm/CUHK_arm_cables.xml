@@ -16,7 +16,7 @@
         </attachment>
         <attachment>
           <link>1</link>
-          <location>-0.025 0.0780 0.0</location>
+          <location>-0.025 0.1180 0.0</location>
         </attachment>
       </attachments>
     </cable_ideal>
@@ -32,7 +32,7 @@
         </attachment>
         <attachment>
           <link>1</link>
-          <location>-0.025 0.0980 0.0</location>
+          <location>-0.025 0.1380 0.0</location>
         </attachment>
       </attachments>
     </cable_ideal>
@@ -48,7 +48,7 @@
         </attachment>
         <attachment>
           <link>1</link>
-          <location>0.025 0.0780 0.0</location>
+          <location>0.025 0.1180 0.0</location>
         </attachment>
       </attachments>
     </cable_ideal>
@@ -64,7 +64,7 @@
         </attachment>
         <attachment>
           <link>1</link>
-          <location>0.025 0.0980 0.0</location>
+          <location>0.025 0.1380 0.0</location>
         </attachment>
       </attachments>
     </cable_ideal>
@@ -80,7 +80,7 @@
         </attachment>
         <attachment>
           <link>2</link>
-          <location>0.0 -0.0215 0.025</location>
+          <location>0.0 0.0385 0.025</location>
         </attachment>
       </attachments>
     </cable_ideal>
@@ -96,7 +96,7 @@
         </attachment>
         <attachment>
           <link>2</link>
-          <location>0.0 -0.0215 -0.025</location>
+          <location>0.0 0.03855 -0.025</location>
         </attachment>
       </attachments>
     </cable_ideal>

@@ -1,17 +1,9 @@
 % Script file to show how to simply load a robot
-%
-% Author        : Darwin LAU
-% Created       : 2016
-% Description    :
-
-% Clear the variables, command window, and all windows
-clear; clc; close all;
-
-% Set up the type of model:
+% 1) Set up the type of model:
 model_config = ModelConfig(ModelConfigType.M_SEGESTA);
-
-% The SystemModel is created
+% 2) Get the model for a given cable configuration
 cdpr = model_config.getModel(model_config.defaultCableSetId);
-
-% Plot to see the robot
+% 3) Update the pose of the robot
+cdpr.update([0; 0; 0.5; 0; 0; 0], zeros(6,1), zeros(6,1), zeros(6,1));
+% 4) Plot to see the robot
 MotionSimulator.PlotFrame(cdpr, model_config.displayRange, model_config.viewAngle);
