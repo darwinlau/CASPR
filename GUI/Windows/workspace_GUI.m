@@ -319,7 +319,6 @@ function generate_button_Callback(~, ~, handles) %#ok<DEFNU>
     modObj = getappdata(handles.cable_text,'modObj');
     %% Workspace Setup
     % First the condition
-    % THIS CAN BE NEATENED
     contents = cellstr(get(handles.workspace_condition_popup,'String'));
     wc_string = contents{get(handles.workspace_condition_popup,'Value')};
     contents = cellstr(get(handles.workspace_generation_popup,'String'));
@@ -346,7 +345,7 @@ function generate_button_Callback(~, ~, handles) %#ok<DEFNU>
     uGrid           =   UniformGrid(q_info(:,1),q_info(:,2),q_info(:,3));
     contents = cellstr(get(handles.plot_type_popup,'String'));
     plot_type = contents{get(handles.plot_type_popup,'Value')};
-    opt = WorkspaceSimulatorOptions(true); % I need to add this as an option
+    opt = WorkspaceSimulatorOptions(true); % This should be made into an object
     wsim            =   WorkspaceSimulator(modObj,uGrid,opt);
     %% Now set up the grid information
     time_elapsed    =   toc(start_tic);
@@ -546,15 +545,9 @@ function format_q_table(numDofs,qtable)
     set(qtable,'ColumnEditable',true(1,3));
     set(qtable,'ColumnName',{'q_start','q_end','q_step'});
     q_position = get(qtable,'Position');
-    if(numDofs>2)
-        q_position(1) = 103;
-        q_position(3) = 200;
-        set(qtable,'Position',q_position);
-    else
-        q_position(1) = 118;
-        q_position(3) = 185;
-        set(qtable,'Position',q_position);
-    end
+    q_position(1) = 0.713;
+    q_position(3) = 0.235;
+    set(qtable,'Position',q_position);
 end
 
 %% TO BE DONE

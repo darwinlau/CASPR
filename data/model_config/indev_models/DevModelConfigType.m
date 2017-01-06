@@ -6,6 +6,7 @@
 classdef DevModelConfigType
     enumeration
         D_CUHK_DINGBOT
+        D_CUHK_DINGBOT_PLANAR
         D_CUHK_WALLBOT
         D_CUHK_ARM
         D_CUHK_TEMP

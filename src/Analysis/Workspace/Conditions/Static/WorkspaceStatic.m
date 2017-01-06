@@ -27,7 +27,7 @@ classdef WorkspaceStatic < WorkspaceConditionBase
             if(isempty(obj.method))
                 inWorkspace = obj.metrics_evaluation(dynamics,workspace_point);
             else
-                switch(method)
+                switch(obj.method)
                     case WorkspaceStaticMethods.M_QUAD_PROG
                         inWorkspace = static_quadprog(dynamics,obj.options);
                     case WorkspaceStaticMethods.M_CAPACITY_MARGIN

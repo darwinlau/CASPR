@@ -6,12 +6,12 @@
 classdef JointTrajectory < handle
     
     properties
-        q           % The joint space coordinate
-        q_dot       % The joint space coordinate derivative
-        q_ddot      % The joint space coordinate double derivative
+        q           % The joint space coordinate as a cell array
+        q_dot       % The joint space coordinate derivative as a cell array
+        q_ddot      % The joint space coordinate double derivative as a cell array
         timeVector  % The time vector
         totalTime   % The total time step
-        timeStep    % The time step
+        timeStep    % The time step (constant)
     end
     
     methods
