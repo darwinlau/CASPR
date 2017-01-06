@@ -3,141 +3,281 @@
   <!ATTLIST cable_set id ID #REQUIRED>
 ]>
 
-<cables default_cable_set="original">
-  <cable_set id="original">
+<cables default_cable_set="calibration_frame">
+  <cable_set id="calibration_frame">
 	<cable_ideal name="motor X1" attachment_reference="joint">
       <properties>
-        <force_min>5</force_min>
-        <force_max>1000</force_max>
+        <force_min>1</force_min>
+        <force_max>2000</force_max>
       </properties>
       <attachments>
         <base_rotating_pulley>
-          <fixed_location>0.0782 2.2018 1.9046</fixed_location>
-          <pulley_radius>0.0453</pulley_radius>
+          <fixed_location>0.083 2.197 1.905</fixed_location>
+          <pulley_radius>0.045</pulley_radius>
           <cable_entry_vector>0 0 1</cable_entry_vector>
         </base_rotating_pulley>
         <attachment>
           <link>1</link>
-          <location>-0.135 0.149 0.170</location>
+          <location>-0.1825 0.1475 0.140</location>
         </attachment>
       </attachments>
     </cable_ideal>
     <cable_ideal name="motor Y2" attachment_reference="joint">
       <properties>
-        <force_min>5</force_min>
-        <force_max>1000</force_max>
+        <force_min>1</force_min>
+        <force_max>2000</force_max>
       </properties>
       <attachments>
         <base_rotating_pulley>
-          <fixed_location>2.2018 2.2018 0.0954</fixed_location>
-          <pulley_radius>0.0453</pulley_radius>
+          <fixed_location>2.197 2.197 0.095</fixed_location>
+          <pulley_radius>0.045</pulley_radius>
           <cable_entry_vector>0 0 -1</cable_entry_vector>
         </base_rotating_pulley>
         <attachment>
           <link>1</link>
-          <location>0.135 0.149 -0.170</location>
+          <location>0.1825 0.1475 -0.140</location>
         </attachment>
       </attachments>
     </cable_ideal>
 	<cable_ideal name="motor Z3" attachment_reference="joint">
       <properties>
-        <force_min>5</force_min>
-        <force_max>1000</force_max>
+        <force_min>1</force_min>
+        <force_max>2000</force_max>
       </properties>
       <attachments>
         <base_rotating_pulley>
-          <fixed_location>2.2018 2.2018 1.9046</fixed_location>
-          <pulley_radius>0.0453</pulley_radius>
+          <fixed_location>2.197 2.197 1.905</fixed_location>
+          <pulley_radius>0.045</pulley_radius>
           <cable_entry_vector>0 0 1</cable_entry_vector>
         </base_rotating_pulley>
         <attachment>
           <link>1</link>
-          <location>0.135 0.149 0.170</location>
+          <location>0.1825 0.1475 0.140</location>
         </attachment>
       </attachments>
     </cable_ideal>
     <cable_ideal name="motor A4" attachment_reference="joint">
       <properties>
-        <force_min>5</force_min>
-        <force_max>1000</force_max>
+        <force_min>1</force_min>
+        <force_max>2000</force_max>
       </properties>
       <attachments>
         <base_rotating_pulley>
-          <fixed_location>2.2018 0.0782 0.0954</fixed_location>
-          <pulley_radius>0.0453</pulley_radius>
+          <fixed_location>2.197 0.083 0.095</fixed_location>
+          <pulley_radius>0.045</pulley_radius>
           <cable_entry_vector>0 0 -1</cable_entry_vector>
         </base_rotating_pulley>
         <attachment>
           <link>1</link>
-          <location>0.135 -0.149 -0.170</location>
+          <location>0.1825 -0.1475 -0.140</location>
         </attachment>
       </attachments>
     </cable_ideal>
 	<cable_ideal name="motor B5" attachment_reference="joint">
       <properties>
-        <force_min>5</force_min>
-        <force_max>1000</force_max>
+        <force_min>1</force_min>
+        <force_max>2000</force_max>
       </properties>
       <attachments>
         <base_rotating_pulley>
-          <fixed_location>2.2018 0.0782 1.9046</fixed_location>
-          <pulley_radius>0.0453</pulley_radius>
+          <fixed_location>2.197 0.083 1.905</fixed_location>
+          <pulley_radius>0.045</pulley_radius>
           <cable_entry_vector>0 0 1</cable_entry_vector>
         </base_rotating_pulley>
         <attachment>
           <link>1</link>
-          <location>0.135 -0.149 0.170</location>
+          <location>0.1825 -0.1475 0.140</location>
         </attachment>
       </attachments>
     </cable_ideal>
     <cable_ideal name="motor C6" attachment_reference="joint">
       <properties>
-        <force_min>5</force_min>
-        <force_max>1000</force_max>
+        <force_min>1</force_min>
+        <force_max>2000</force_max>
       </properties>
       <attachments>
         <base_rotating_pulley>
-          <fixed_location>0.0782 0.0782 0.0954</fixed_location>
-          <pulley_radius>0.0453</pulley_radius>
+          <fixed_location>0.083 0.083 0.095</fixed_location>
+          <pulley_radius>0.045</pulley_radius>
           <cable_entry_vector>0 0 -1</cable_entry_vector>
         </base_rotating_pulley>
         <attachment>
           <link>1</link>
-          <location>-0.135 -0.149 -0.170</location>
+          <location>-0.1825 -0.1475 -0.140</location>
         </attachment>
       </attachments>
     </cable_ideal>
 	<cable_ideal name="motor U7" attachment_reference="joint">
       <properties>
-        <force_min>5</force_min>
-        <force_max>1000</force_max>
+        <force_min>1</force_min>
+        <force_max>2000</force_max>
       </properties>
       <attachments>
         <base_rotating_pulley>
-          <fixed_location>0.0782 0.0782 1.9046</fixed_location>
-          <pulley_radius>0.0453</pulley_radius>
+          <fixed_location>0.083 0.083 1.905</fixed_location>
+          <pulley_radius>0.045</pulley_radius>
           <cable_entry_vector>0 0 1</cable_entry_vector>
         </base_rotating_pulley>
         <attachment>
           <link>1</link>
-          <location>-0.135 -0.149 0.170</location>
+          <location>-0.1825 -0.1475 0.140</location>
         </attachment>
       </attachments>
     </cable_ideal>
     <cable_ideal name="motor V8" attachment_reference="joint">
       <properties>
-        <force_min>5</force_min>
-        <force_max>1000</force_max>
+        <force_min>1</force_min>
+        <force_max>2000</force_max>
       </properties>
       <attachments>
         <base_rotating_pulley>
-          <fixed_location>0.0782 2.2018 0.0954</fixed_location>
-          <pulley_radius>0.0453</pulley_radius>
+          <fixed_location>0.083 2.197 0.095</fixed_location>
+          <pulley_radius>0.045</pulley_radius>
           <cable_entry_vector>0 0 -1</cable_entry_vector>
         </base_rotating_pulley>
         <attachment>
           <link>1</link>
-          <location>-0.135 0.149 -0.170</location>
+          <location>-0.1825 0.1475 -0.140</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+  </cable_set>
+  
+  
+  <cable_set id="H_frame">
+	<cable_ideal name="motor X1" attachment_reference="joint">
+      <properties>
+        <force_min>1</force_min>
+        <force_max>2000</force_max>
+      </properties>
+      <attachments>
+        <base_rotating_pulley>
+          <fixed_location>0.083 2.197 1.905</fixed_location>
+          <pulley_radius>0.045</pulley_radius>
+          <cable_entry_vector>0 0 1</cable_entry_vector>
+        </base_rotating_pulley>
+        <attachment>
+          <link>1</link>
+          <location>-0.199 0.155 0.07</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="motor Y2" attachment_reference="joint">
+      <properties>
+        <force_min>1</force_min>
+        <force_max>2000</force_max>
+      </properties>
+      <attachments>
+        <base_rotating_pulley>
+          <fixed_location>2.197 2.197 0.095</fixed_location>
+          <pulley_radius>0.045</pulley_radius>
+          <cable_entry_vector>0 0 -1</cable_entry_vector>
+        </base_rotating_pulley>
+        <attachment>
+          <link>1</link>
+          <location>0.199 0.155 -0.07</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+	<cable_ideal name="motor Z3" attachment_reference="joint">
+      <properties>
+        <force_min>1</force_min>
+        <force_max>2000</force_max>
+      </properties>
+      <attachments>
+        <base_rotating_pulley>
+          <fixed_location>2.197 2.197 1.905</fixed_location>
+          <pulley_radius>0.045</pulley_radius>
+          <cable_entry_vector>0 0 1</cable_entry_vector>
+        </base_rotating_pulley>
+        <attachment>
+          <link>1</link>
+          <location>0.199 0.155 0.07</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="motor A4" attachment_reference="joint">
+      <properties>
+        <force_min>1</force_min>
+        <force_max>2000</force_max>
+      </properties>
+      <attachments>
+        <base_rotating_pulley>
+          <fixed_location>2.197 0.083 0.095</fixed_location>
+          <pulley_radius>0.045</pulley_radius>
+          <cable_entry_vector>0 0 -1</cable_entry_vector>
+        </base_rotating_pulley>
+        <attachment>
+          <link>1</link>
+          <location>0.199 -0.155 -0.07</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+	<cable_ideal name="motor B5" attachment_reference="joint">
+      <properties>
+        <force_min>1</force_min>
+        <force_max>2000</force_max>
+      </properties>
+      <attachments>
+        <base_rotating_pulley>
+          <fixed_location>2.197 0.083 1.905</fixed_location>
+          <pulley_radius>0.045</pulley_radius>
+          <cable_entry_vector>0 0 1</cable_entry_vector>
+        </base_rotating_pulley>
+        <attachment>
+          <link>1</link>
+          <location>0.199 -0.155 0.07</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="motor C6" attachment_reference="joint">
+      <properties>
+        <force_min>1</force_min>
+        <force_max>2000</force_max>
+      </properties>
+      <attachments>
+        <base_rotating_pulley>
+          <fixed_location>0.083 0.083 0.095</fixed_location>
+          <pulley_radius>0.045</pulley_radius>
+          <cable_entry_vector>0 0 -1</cable_entry_vector>
+        </base_rotating_pulley>
+        <attachment>
+          <link>1</link>
+          <location>-0.199 -0.155 -0.07</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+	<cable_ideal name="motor U7" attachment_reference="joint">
+      <properties>
+        <force_min>1</force_min>
+        <force_max>2000</force_max>
+      </properties>
+      <attachments>
+        <base_rotating_pulley>
+          <fixed_location>0.083 0.083 1.905</fixed_location>
+          <pulley_radius>0.045</pulley_radius>
+          <cable_entry_vector>0 0 1</cable_entry_vector>
+        </base_rotating_pulley>
+        <attachment>
+          <link>1</link>
+          <location>-0.199 -0.155 0.07</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="motor V8" attachment_reference="joint">
+      <properties>
+        <force_min>1</force_min>
+        <force_max>2000</force_max>
+      </properties>
+      <attachments>
+        <base_rotating_pulley>
+          <fixed_location>0.083 2.197 0.095</fixed_location>
+          <pulley_radius>0.045</pulley_radius>
+          <cable_entry_vector>0 0 -1</cable_entry_vector>
+        </base_rotating_pulley>
+        <attachment>
+          <link>1</link>
+          <location>-0.199 0.155 -0.07</location>
         </attachment>
       </attachments>
     </cable_ideal>
