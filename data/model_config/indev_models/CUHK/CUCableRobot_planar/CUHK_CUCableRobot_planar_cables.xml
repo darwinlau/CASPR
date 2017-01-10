@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE cables [
+  <!ATTLIST cable_set id ID #REQUIRED>
+]>
+
+<cables default_cable_set="vertical_XZ">
+  <cable_set id="vertical_XZ">
+    <cable_ideal name="A" attachment_reference="com">
+      <properties>
+        <force_min>1</force_min>
+        <force_max>2000</force_max>
+      </properties>
+      <attachments>
+        <base_rotating_pulley>
+          <fixed_location>2.197 0.083 0.095</fixed_location>
+          <pulley_radius>0.045</pulley_radius>
+          <cable_entry_vector>0 0 -1</cable_entry_vector>
+        </base_rotating_pulley>
+        <attachment>
+          <link>1</link>
+          <location>0.215 0 -0.105</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+	<cable_ideal name="B" attachment_reference="joint">
+      <properties>
+        <force_min>1</force_min>
+        <force_max>2000</force_max>
+      </properties>
+      <attachments>
+        <base_rotating_pulley>
+          <fixed_location>2.197 0.083 1.905</fixed_location>
+          <pulley_radius>0.045</pulley_radius>
+          <cable_entry_vector>0 0 1</cable_entry_vector>
+        </base_rotating_pulley>
+        <attachment>
+          <link>1</link>
+          <location>0.215 0 0.105</location> <!--in the form of [x, y, z]-->
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="C" attachment_reference="joint">
+      <properties>
+        <force_min>1</force_min>
+        <force_max>2000</force_max>
+      </properties>
+      <attachments>
+        <base_rotating_pulley>
+          <fixed_location>0.083 0.083 0.095</fixed_location>
+          <pulley_radius>0.045</pulley_radius>
+          <cable_entry_vector>0 0 -1</cable_entry_vector>
+        </base_rotating_pulley>
+        <attachment>
+          <link>1</link>
+          <location>-0.215 0 -0.105</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+	<cable_ideal name="U" attachment_reference="joint">
+      <properties>
+        <force_min>1</force_min>
+        <force_max>2000</force_max>
+      </properties>
+      <attachments>
+        <base_rotating_pulley>
+          <fixed_location>0.083 0.083 1.905</fixed_location>
+          <pulley_radius>0.045</pulley_radius>
+          <cable_entry_vector>0 0 1</cable_entry_vector>
+        </base_rotating_pulley>
+        <attachment>
+          <link>1</link>
+          <location>-0.215 0 0.105</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+  </cable_set>
+</cables>
