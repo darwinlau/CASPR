@@ -49,10 +49,11 @@
 
 /////////////////////////// SERVO PARAMETERS //////////////
 // TODO: move to each nano
-int maximumPWMFeedback[8] = {1494, 1500, 1496, 1496, 1509, 1496, 1504, 1494};
-int minimumPWMFeedback[8] = {499, 500, 499, 499, 504, 499, 499, 499};
-int maximumPWMOutput[8] = {1482, 1488, 1484, 1483, 1495, 1482, 1492, 1482};
-int minimumPWMOutput[8] = {485, 485, 485, 485, 491, 485, 485, 485};
+//the first entry of each array is representing servo_08 in this testing phase
+int maximumPWMFeedback[8] = {1484, 1500, 1496, 1496, 1509, 1496, 1504, 1494};
+int minimumPWMFeedback[8] = {493, 500, 499, 499, 504, 499, 499, 499};
+int maximumPWMOutput[8] = {1473, 1488, 1484, 1483, 1495, 1482, 1492, 1482};
+int minimumPWMOutput[8] = {479, 485, 485, 485, 491, 485, 485, 485};
 
 int rangePWMOutput[NUMBER_CONNECTED_NANOS];
 int rangePWMFeedback[NUMBER_CONNECTED_NANOS];
@@ -175,7 +176,7 @@ void readSerialUSB() {
         enableMotors = 1;
         break;
       }
-      case CASPR_LENGTH_CMD:{                          //l: move cables to set length
+      case CASPR_LENGTH_CMD:{                          //l: move cables to set length. But before that, gather feedback from nano and send to matlab
         enableMotors = 1;
         if (systemOn) {
           requestNanoFeedback();
