@@ -5,7 +5,6 @@
 
 <cables default_cable_set="calibration_frame">
   <cable_set id="calibration_frame">
-    <!-- motor X1 -->
 	<cable_ideal name="X" attachment_reference="joint">
       <properties>
         <force_min>1</force_min>
@@ -23,7 +22,6 @@
         </attachment>
       </attachments>
     </cable_ideal>
-    <!-- motor Y2 -->
     <cable_ideal name="Y" attachment_reference="joint">
       <properties>
         <force_min>1</force_min>
@@ -41,7 +39,6 @@
         </attachment>
       </attachments>
     </cable_ideal>
-    <!-- motor Z3 -->
 	<cable_ideal name="Z" attachment_reference="joint">
       <properties>
         <force_min>1</force_min>
@@ -59,7 +56,6 @@
         </attachment>
       </attachments>
     </cable_ideal>
-    <!-- motor A4 -->
     <cable_ideal name="A" attachment_reference="joint">
       <properties>
         <force_min>1</force_min>
@@ -77,7 +73,6 @@
         </attachment>
       </attachments>
     </cable_ideal>
-    <!-- motor B5 -->
 	<cable_ideal name="B" attachment_reference="joint">
       <properties>
         <force_min>1</force_min>
@@ -95,7 +90,6 @@
         </attachment>
       </attachments>
     </cable_ideal>
-    <!-- motor C6 -->
     <cable_ideal name="C" attachment_reference="joint">
       <properties>
         <force_min>1</force_min>
@@ -113,7 +107,6 @@
         </attachment>
       </attachments>
     </cable_ideal>
-    <!-- motor U7 -->
 	<cable_ideal name="U" attachment_reference="joint">
       <properties>
         <force_min>1</force_min>
@@ -131,7 +124,6 @@
         </attachment>
       </attachments>
     </cable_ideal>
-    <!-- motor V8 -->
     <cable_ideal name="V" attachment_reference="joint">
       <properties>
         <force_min>1</force_min>
@@ -153,7 +145,6 @@
   
   
   <cable_set id="H_frame">
-    <!-- motor X1 -->
 	<cable_ideal name="X" attachment_reference="joint">
       <properties>
         <force_min>1</force_min>
@@ -171,7 +162,6 @@
         </attachment>
       </attachments>
     </cable_ideal>
-    <!-- motor Y2 -->
     <cable_ideal name="Y" attachment_reference="joint">
       <properties>
         <force_min>1</force_min>
@@ -189,7 +179,6 @@
         </attachment>
       </attachments>
     </cable_ideal>
-    <!-- motor Z3 -->
 	<cable_ideal name="Z" attachment_reference="joint">
       <properties>
         <force_min>1</force_min>
@@ -207,7 +196,6 @@
         </attachment>
       </attachments>
     </cable_ideal>
-    <!-- motor A4 -->
     <cable_ideal name="A" attachment_reference="joint">
       <properties>
         <force_min>1</force_min>
@@ -225,7 +213,6 @@
         </attachment>
       </attachments>
     </cable_ideal>
-    <!-- motor B5 -->
 	<cable_ideal name="B" attachment_reference="joint">
       <properties>
         <force_min>1</force_min>
@@ -243,7 +230,6 @@
         </attachment>
       </attachments>
     </cable_ideal>
-    <!-- motor C6 -->
     <cable_ideal name="C" attachment_reference="joint">
       <properties>
         <force_min>1</force_min>
@@ -261,7 +247,6 @@
         </attachment>
       </attachments>
     </cable_ideal>
-    <!-- motor U7 -->
 	<cable_ideal name="U" attachment_reference="joint">
       <properties>
         <force_min>1</force_min>
@@ -279,7 +264,6 @@
         </attachment>
       </attachments>
     </cable_ideal>
-    <!-- motor V8 -->
     <cable_ideal name="V" attachment_reference="joint">
       <properties>
         <force_min>1</force_min>
