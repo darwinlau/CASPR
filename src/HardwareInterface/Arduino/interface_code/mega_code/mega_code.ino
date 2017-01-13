@@ -14,21 +14,17 @@
 
 #include <SoftwareSerial.h>
 
-// TODO: This should be sent by MATLAB in the future
-#define NUMBER_CONNECTED_NANOS 1
-// TODO: Peter will update this to be dynamic
-#define SPOOL_CIRCUMFERENCE 1355 //in 0.1mm precision.  //TODO: make it change as spool winds
+#define NUMBER_CONNECTED_NANOS 1                        //TODO: This should be sent by MATLAB in the future
+#define SPOOL_CIRCUMFERENCE 1355 //in 0.1mm precision.  //TODO: make it dynamic
 
-// These two are useless now because MATLAB is in control of time
-//#define FEEDBACK_FREQUENCY 20// In Hz
-//#define TIME_STEP 0.07
+#define CROSSING_ZONE_SIZE 70   //in 0.1degree
 
 #define BAUD_RATE_NANO 74880
 #define BAUD_RATE_CASPR 74880
 
 #define HEX_DIGITS_LENGTH 4
-#define DIGITS_PWM_COMMAND 3
-#define DIGITS_PWM_FEEDBACK 3
+#define DIGITS_ANGLE_COMMAND 3
+#define DIGITS_ANGLE_FEEDBACK 3
 #define DIGITS_CROSSING_COMMAND 1
 
 #define CASPR_FEEDBACK 'f'
@@ -44,58 +40,27 @@
 //set in an h file in the future?
 #define NANO_PWM_COMMAND 'p'
 #define NANO_FEEDBACK 'f'
-#define NANO_TEST 't'
-#define NANO_TESTDRIVE 'z'
 
-/////////////////////////// SERVO PARAMETERS //////////////
-// TODO: move to each nano
-//the first entry of each array is representing servo_08 in this testing phase
-int maximumPWMFeedback[8] = {1484, 1500, 1496, 1496, 1509, 1496, 1504, 1494};
-int minimumPWMFeedback[8] = {493, 500, 499, 499, 504, 499, 499, 499};
-int maximumPWMOutput[8] = {1473, 1488, 1484, 1483, 1495, 1482, 1492, 1482};
-int minimumPWMOutput[8] = {479, 485, 485, 485, 491, 485, 485, 485};
+#define CLOCKWISE 1
+#define ANTICLOCKWISE 2
 
-int rangePWMOutput[NUMBER_CONNECTED_NANOS];
-int rangePWMFeedback[NUMBER_CONNECTED_NANOS];
-unsigned int initLength[NUMBER_CONNECTED_NANOS];
-double pwmToAngle[NUMBER_CONNECTED_NANOS];
-double angleToPWM[NUMBER_CONNECTED_NANOS];
-double pwmMapping[NUMBER_CONNECTED_NANOS];
+boolean systemOn = false;      //no servo movement or feedback when off
+boolean motorsEnabled = false;  //no servo movement when off
 
-/////////////////////////// OPERATION ARRAYS //////////////
 
-int pwmFeedback[NUMBER_CONNECTED_NANOS];
-int pwmLastFeedback[NUMBER_CONNECTED_NANOS];
-int pwmCommand[NUMBER_CONNECTED_NANOS];
-
-boolean crossingFeedback[NUMBER_CONNECTED_NANOS];
 int crossingCommand[NUMBER_CONNECTED_NANOS];
-unsigned int lengthCommand[NUMBER_CONNECTED_NANOS]; //unsigned int has 2 bytes, range 0 - 65535
-unsigned int lengthFeedback[NUMBER_CONNECTED_NANOS]; //with .1 mm precision, this equals ~6.5m
+boolean crossingFeedback[NUMBER_CONNECTED_NANOS];
 
-//unsigned int angleCommand[NUMBER_CONNECTED_NANOS]; //0.1 degree precision, e.g. 3600 => 360 degree
+//unsigned int has 2 bytes, range 0 - 65535.
+//In 0.1 mm precision. This represents 6553.5mm or ~6.5m
+unsigned int currentCableLength[NUMBER_CONNECTED_NANOS];  //i.e. where the cable robot think it is
+unsigned int lastLengthCommand[NUMBER_CONNECTED_NANOS];   //help calculate angle change command
 
-/////////////////////////// TEMPORARY VARIABLES //////////////
+//TODO: populate this before using in requestNanoFeedback()
+//TODO: make this static?
+//help decide whether crossing has happened
+unsigned int lastAngleFeedback[NUMBER_CONNECTED_NANOS]; //in 0.1 degree precision
 
-int pwmFeedbackDiff = 0;
-char feedbackNano[DIGITS_PWM_FEEDBACK + 1]; // Array to store the nano feedback, +1 to store the '\0' NUL terminator
-char commandNano[DIGITS_PWM_COMMAND];
-char feedbackMega[HEX_DIGITS_LENGTH]; //4 digit hex length from a nano, sent to mega
-int lengthChangeCommand;
-float angularChangeCommand;
-int strLength = 0;
-int readCounter = 0;
-
-/////////////////////////// MISC //////////////
-
-String receivedCommand;
-
-float lengthToAngle = 360.0 / SPOOL_CIRCUMFERENCE; 
-float angleToLength = SPOOL_CIRCUMFERENCE / 360.0; 
-
-unsigned long int t_ref;
-
-boolean systemOn, enableMotors;
 
 // TODO: Decide on the maximum number of Nanos we would ever connect
 SoftwareSerial serialNano[8] = {
@@ -110,305 +75,326 @@ SoftwareSerial serialNano[8] = {
 };
 
 /* Setup 3 different serial lines.
-   Serial for MATLAB
-   Serial1. for transmission to Nano devices
-   SoftwareSerial for receiving from individual Nanos
-*/
-
+   Serial for MATLAB/CASPRROS (via USB)
+   Serial1 for broadcasting to Nano devices
+   SoftwareSerial for receiving from individual Nanos */
 void setup() {
   Serial.begin(BAUD_RATE_CASPR);  //USB
-  Serial1.begin(BAUD_RATE_NANO); //broadcast
-  //pinMode(LED_BUILTIN, OUTPUT);
-  for (int i = 0; i < NUMBER_CONNECTED_NANOS; i++) { //all the softwareSerials for arduino nano
-    serialNano[i].begin(BAUD_RATE_NANO);
-    initLength[i] = 32768; //middle
-    lengthFeedback[i] = 32768;
-    lengthCommand[i] = 32768;//+ 16;
-    rangePWMFeedback[i] = maximumPWMFeedback[i] - minimumPWMFeedback[i];
-    rangePWMOutput[i] = maximumPWMOutput[i] - minimumPWMOutput[i];
-    pwmToAngle[i] = 353.0 / (double)(rangePWMFeedback[i]);  //This range of usable pwm command maps to 353 degrees. The 7 degree left is unreliable/unusable in position mode ("the crossing zone").
-    angleToPWM[i] = (double)rangePWMOutput[i] / 353.0;      //This range of usable pwm command maps to 353 degrees.
-    pwmMapping[i] = (double)rangePWMOutput[i] / (double)rangePWMFeedback[i]; //factor for mapping PWMFeedback onto PWMOutput
+  Serial1.begin(BAUD_RATE_NANO); //for broadcasting to nano
 
+  for (int i = 0; i < NUMBER_CONNECTED_NANOS; i++) {
+    serialNano[i].begin(BAUD_RATE_NANO); //for receiving from nano
 
-    /////// TEMPORARY - REVISE LATER AFTER CALIBRATION //////////
-    readNanoFeedback(i);
-    pwmCommand[i] = mapFeedbackToCommand(pwmFeedback[i], i);
+    //Arbitrarily assume all cables to be 3.2768m long at the start.
+    //They should be updated by updateInitialLengths() before use.        TODO: still true?
+    unsigned int lastLengthCommand[i] = 32768;
+    unsigned int currentCableLength[i] = 32768;
   }
-  t_ref = millis();
+
 }
 
-/* Main loop acts to interface with MATLAB (asynchronously) and nano at 20Hz */
+/* Main loop acts to interface with MATLAB/CASPRROS (asynchronously) and nano at 20Hz */
 void loop() {
-  readSerialUSB();
-}
+  if (Serial.available() > 0) {  //USB
+    String receivedCommand = Serial.readStringUntil('\n');  //TODO: make it local?
 
-/* Read serial from matlab and decide what to do depending on the 1-character command.  */
-void readSerialUSB() {
-  if (Serial.available() > 0) {  //MATLAB via USB
-    receivedCommand = Serial.readStringUntil('\n');
-
-    switch (receivedCommand[0]){
-      case CASPR_ACKNOWLEDGE: {                        //a: handshake with matlab
-        if (receivedCommand.length() == 1){
-          systemOn = 0;
-          Serial.println(CASPR_ACKNOWLEDGE);
-        }
-        break;
-      }
-      case CASPR_START: {                              //s: start system
-        if (receivedCommand.length() == 1){
-          systemOn = 1;
-        }
-        break;
-      }
-      case CASPR_END: {                                //e: end/ turn off system
-        if (receivedCommand.length() == 1){
-          systemOn = 0;
-          enableMotors = 1;      //CLARIFY: why??????
-        }
-        break;
-      }
-      case CASPR_INITIAL:{                             //i: initialise system (e.g. set initial length)
-        setInitialLengths();
-        requestNanoFeedback();
-        sendNanoFeedback();
-        enableMotors = 1;
-        break;
-      }
-      case CASPR_LENGTH_CMD:{                          //l: move cables to set length. But before that, gather feedback from nano and send to matlab
-        enableMotors = 1;
-        if (systemOn) {
-          requestNanoFeedback();
-          sendNanoFeedback();
-
-          if (enableMotors) {
-            readNanoCommand();
-            sendNanoCommand();
+    switch (receivedCommand[0]) {
+      case CASPR_ACKNOWLEDGE:                 //a: handshake with matlab
+        { 
+          if (receivedCommand.length() == 1) {
+            systemOn = false;
+            Serial.println(CASPR_ACKNOWLEDGE);
           }
         }
         break;
-      }
-      case CASPR_RESET: {                             //r: resetLengths()?
-        resetLengths();
-        enableMotors = 1;
-        break;
-      }
-      case CASPR_HOLD: {                               //h: tighten all cables
-        enableMotors = 1;
-        for (int i = 0; i < NUMBER_CONNECTED_NANOS; i++) {
-          pwmCommand[i] = mapFeedbackToCommand(pwmFeedback[i], i) - 10;
-        }
-        sendNanoCommand();
-        break;
-      }
-      case CASPR_SETUP: {                              //k: make the servo go to where it think it is
-        for (int i = 0; i < NUMBER_CONNECTED_NANOS; i++) {
-          readNanoFeedback(i);
-          pwmCommand[i] = mapFeedbackToCommand(pwmFeedback[i], i);
+      case CASPR_START:                       //s: start system
+        {
+          if (receivedCommand.length() == 1) {
+            systemOn = true;
+          }
         }
         break;
-      }
-      case NANO_TEST: {                                //t: 
-        enableMotors = 1;
-        if (systemOn) {
-          Serial1.print('p');
-          Serial1.print("f00");
+      case CASPR_END:                         //e: end (turn off) system
+        {
+          if (receivedCommand.length() == 1) {
+            systemOn = false;
+            motorsEnabled = false;
+          }
+        }
+        break;
+      case CASPR_INITIAL:                    //i: update initial lengths
+        {
+          updateInitialLengths(receivedCommand);
+          updateCableLengths();
+          sendLengthFeedback();
+          motorsEnabled = true;    //CLARIFY: why?
+        }
+        break;
+      case CASPR_LENGTH_CMD:                //l: Gather feedback from nano, send to matlab/CASPRROS, then move cables to length specified.
+        { 
+          motorsEnabled = true;    //CLARIFY: why?
+          if (systemOn) {
+            updateCableLengths();
+            sendLengthFeedback();
 
-          requestNanoFeedback();
-          sendNanoFeedback();
-        }
-        if (enableMotors) {
-          readNanoCommand();
-          Serial1.print(NANO_PWM_COMMAND);
+            if (motorsEnabled) {
+              translateCommandAndSendToNano();
+            }
+          }
         }
         break;
-      }
+      case CASPR_RESET:                   //r: reset lengths (make the cable robot think it is at a specific location)
+        {
+          resetLengths(receivedCommand);
+          motorsEnabled = true;    //CLARIFY: why?
+        }
+        break;
+      case CASPR_HOLD:                    //h: tighten all cables
+        {
+          //tighten all cables, while the robot think it hasn't move anywhere
+          //tighten by percentage?
+          //TODO: are all array needed populated?
+
+
+          //get currentCableLength
+          //-x and set as new length command
+          //send command to nano
+        }
+
     } //switch
   } //if
-} //void
 
-/* ????????????????? */
-void setInitialLengths() {
-  char tmp[4];
-  unsigned long int newInitLength;
-  for (int j = 0; j < NUMBER_CONNECTED_NANOS; j++) {
-    for (int k = 0; k < HEX_DIGITS_LENGTH; k++) {
-      tmp[k] = receivedCommand[1 + j * HEX_DIGITS_LENGTH + k];
+}
+
+/* Update the initial lengths, i.e. length of each cable when the cable robot starts.
+   Will update currentCableLength[] and lastLengthCommand[].
+   -- Why? --
+   The cable robot moves depending on where it think it is (currentCableLength[], lastLengthCommand[]),
+   and that depends on where it think it started (initialLength[]).
+   If during movement/calibration, we realize that its movement is off because it actually started somewhere else,
+   we can use this function to update the initial lengths, and also correct its perceived current location on the fly. */
+void updateInitialLengths(const String &receivedCommand) {
+  char hexNewInitialLength[4];
+  unsigned int newInitialLength;
+  static int initialLength[NUMBER_CONNECTED_NANOS];  //0 at the start. Must be updated before running the robot.
+
+  for (int n = 0; n < NUMBER_CONNECTED_NANOS; n++) {
+    //read to hexNewInitLength[]
+    for (int d = 0; d < HEX_DIGITS_LENGTH; d++) {
+      hexNewInitLength[d] = receivedCommand[1 + (n * HEX_DIGITS_LENGTH) + d];  //this ignores the 1-char command and the lengths for other nanos
     }
-    pwmLastFeedback[j] = pwmFeedback[j];
-    newInitLength = strtol(tmp, 0, 16); //32768
-    lengthFeedback[j] += (newInitLength - initLength[j]);
-    lengthCommand[j] += (newInitLength - initLength[j]);
-    initLength[j] = newInitLength;
+
+    //convert from HEX to DEC
+    newInitLength = strtol(hexNewInitLength, 0, 16);
+
+    //update where the robot think it currently is
+    currentCableLength[n] += newInitLength - initialLength[n];
+    lastLengthCommand[n] += newInitLength - initialLength[n];
+
+    //update where the robot thinks it started
+    initialLength[n] = newInitLength;
+
+    //pwmLastFeedback[n] = pwmFeedback[n]; //TODO: change to lastAngleFeedback? //TODO: can i remove this line??
   }
 }
 
-/* ????????????????? */
-void resetLengths() {
-  char tmp[4];
-  unsigned long int resetLength;
-  for (int j = 0; j < NUMBER_CONNECTED_NANOS; j++) {
-    for (int k = 0; k < HEX_DIGITS_LENGTH; k++) {
-      tmp[k] = receivedCommand[j * HEX_DIGITS_LENGTH + k + 1];
+/* Make the cable robot think it is at a specific location.
+   Will update currentCableLength[] and lastLengthCommand[]. */
+void resetLengths(const String &receivedCommand) {
+  char hexNewLength[4];
+  unsigned int newLength;
+  for (int n = 0; n < NUMBER_CONNECTED_NANOS; n++) {
+    for (int d = 0; d < HEX_DIGITS_LENGTH; d++) {
+      hexNewLength[d] = receivedCommand[1 + (n * HEX_DIGITS_LENGTH) + d];  //this ignores the 1-char command and the lengths for other nanos
     }
-    resetLength = strtol(tmp, 0, 16);
-    lengthFeedback[j] = resetLength;
-    lengthCommand[j] = resetLength;
+    newLength = strtol(hexNewLength, 0, 16);
+    currentCableLength[n] = newLength;
+    lastLengthCommand[n] = newLength;
   }
 }
 
-/* Read feedback from ALL nano, adjust for crossing, and update lengthFeedback[]. */
-void requestNanoFeedback() {
-  for (int i = 0; i < NUMBER_CONNECTED_NANOS; i++) {
-    //read feedback from nano
-    readNanoFeedback(i);
+/* Read feedback from ALL nanos, adjust for crossing, and update currentCableLength[].
+   Will also update lastAngleFeedback[].  */
+void updateCableLengths() {
+  for (int n = 0; n < NUMBER_CONNECTED_NANOS; n++) {
+    //read angle feedback from nano
+    unsigned int angle = readNanoFeedback(n); //nano should return angle in 0.1 degree precision
 
-    //determine if crossing happened or not
-    if (pwmFeedback[i] > pwmLastFeedback[i]) { //possible crossing CCW (right -> left)
-      if ((-rangePWMOutput[i] - pwmLastFeedback[i] + pwmFeedback[i]) > (pwmLastFeedback[i] - pwmFeedback[i])) {
-        pwmFeedbackDiff = pwmFeedback[i] - rangePWMOutput[i] - pwmLastFeedback[i];
-        crossingFeedback[i] = true;                                                       //<<<<<<<<<<<<< BUG: crossing feedback is not used anywhere
-      } else {
-        pwmFeedbackDiff = pwmFeedback[i] - pwmLastFeedback[i];
-        crossingFeedback[i] = false;
+    //Calculate the change in angle comparing to the last position.
+    //Adjust for crossing (i.e. the sudden jump in angle feedback when the value goes below min./above max.)
+    int angleChange = 0;   //in 0.1 degree precision
+    if (angle != lastAngleFeedback[n]) {
+      long angleChangeNoCrossing;
+      long angleChangeWithCrossing;
+
+      if (angle > lastAngleFeedback[n]) {    //angle reading increased
+        angleChangeNoCrossing = angle - lastAngleFeedback[n];  //positive
+        angleChangeWithCrossing = angleChangeNoCrossing - 360; //drop below min. -> negative
       }
-    } else if ((rangePWMOutput[i] - pwmLastFeedback[i] + pwmFeedback[i]) < (pwmLastFeedback[i] - pwmFeedback[i])) { //crossing CW (left -> right)
-      pwmFeedbackDiff = rangePWMOutput[i] - pwmLastFeedback[i] + pwmFeedback[i];
-      crossingFeedback[i] = true;
-    } else {
-      pwmFeedbackDiff = pwmFeedback[i] - pwmLastFeedback[i];
-      crossingFeedback[i] = false;
-    }
-    pwmLastFeedback[i] = pwmFeedback[i];
+      else if (angle < lastAngleFeedback[n]) { //angle reading decreased
+        angleChangeNoCrossing = angle - lastAngleFeedback[n];  //negative
+        angleChangeWithCrossing = angleChangeNoCrossing + 360; //go over max. -> positive
+      }
 
-    //convert PWM change to length change
-    double lengthFeedbackDiff = pwmFeedbackDiff * pwmToAngle[i] * angleToLength;
-
-    //add length change to the current length. For the double to int conversion, +-0.5 is used to round-off the value instead of truncating it.
-    if (lengthFeedbackDiff > 0){
-      lengthFeedback[i] += (int)(lengthFeedbackDiff + 0.5);
-    } else if (lengthFeedbackDiff < 0){
-      lengthFeedback[i] += (int)(lengthFeedbackDiff - 0.5);
+      //shortest path is (assumed to be) the actual path taken
+      if ( abs(angleChangeNoCrossing) < abs(angleChangeWithCrossing) ) {
+        angleChange = angleChangeNoCrossing;
+      } else {
+        angleChange = angleChangeWithCrossing;
+      }
     }
+    //save angle for comparison next time
+    lastAngleFeedback[n] = angle;
+
+    //convert angle change to length change
+    int lengthChange = round( (double)angleChange / 3600.0 * SPOOL_CIRCUMFERENCE ); //convert unit from 0.1degree to 0.1mm
+
+    //add the length change to the current length
+    currentCableLength[n] += lengthChange;
   }
 }
 
-/* Request and read feedback from ONE nano. Convert feedback from HEX to DEC, and store in pwmFeedback. */
-void readNanoFeedback(int i) {
-  serialNano[i].listen();
-  Serial1.println(NANO_FEEDBACK + String(i)); //requests feedback from nano
+/* Request and read position feedback from ONE nano (the specified one), and return the feedback angle. */
+unsigned int readNanoFeedback(int nanoID) {
+  //listen to the specified nano (mega can only listen to one software serial at a time)
+  serialNano[nanoID].listen();
+
+  //requests feedback from nano
+  Serial1.println(NANO_FEEDBACK + String(nanoID));
   Serial1.flush(); //waits for the sending of Serial to be complete before moving on
-  
-  readCounter = 0;
-  while ((serialNano[i].available() == 0) && readCounter < 200) { //wait for the feedback from nano
+
+  //wait for the feedback
+  int readCounter = 0;
+  while ((serialNano[nanoID].available() == 0) && readCounter < 200) { //TODO: 200 is a magic number. CLARIFY
     readCounter++;
   }
-  if (serialNano[i].available() > 0) {
-    for (int j = 0; j < DIGITS_PWM_FEEDBACK; j++) { //read feedback
-      feedbackNano[j] = serialNano[i].read();
-    }
-    feedbackNano[DIGITS_PWM_FEEDBACK] = '\0';  
 
-    while (serialNano[i].available() > 0) {
-      serialNano[i].read(); //clears the buffer of any other bytes
+  //read feedback
+  if (serialNano[nanoID].available() > 0) {
+    char hexFeedback[DIGITS_ANGLE_FEEDBACK + 1]; //+1 to store the '\0' NUL terminator at the end, to make it a string
+
+    //read feedback
+    for (int d = 0; d < DIGITS_ANGLE_FEEDBACK; d++) {
+      hexFeedback[d] = serialNano[nanoID].read();
+    }
+    hexFeedback[DIGITS_ANGLE_FEEDBACK] = '\0';
+
+    //clears the buffer of any other bytes
+    while (serialNano[nanoID].available() > 0) {
+      serialNano[nanoID].read();
     }
 
-    pwmFeedback[i] = strtol(feedbackNano, 0, 16); 
+    //convert from HEX to DEC
+    return strtol(hexFeedback, 0, 16);
   }
 }
 
-/* Format and send cable length feedback(stored in lengthFeedback[]) to matlab. */
-void sendNanoFeedback() {
+/* Convert currentCableLength[] to HEX and send to matlab/CASPRROS as feedback. */
+void sendLengthFeedback() {
   Serial.print(CASPR_FEEDBACK);
-  for (int i = 0; i < NUMBER_CONNECTED_NANOS; i++) {
+  for (int n = 0; n < NUMBER_CONNECTED_NANOS; n++) {
     //convert feedback from DEC to HEX
-    itoa(lengthFeedback[i], feedbackMega, 16);
-    strLength = strlen(feedbackMega);  //will strLength work when feedbackMega has 4 digit instead of 3, and no room for \0?
+    char hexFeedback[HEX_DIGITS_LENGTH + 1]; //+1 for the null terminator '\0' at the end
+    itoa(lengthFeedback[n], hexFeedback, 16);//convert to HEX
+    int strLength = strlen(hexFeedback);     //count the number of characters in the resulting string
 
     //pad 0 in front
-    for (int j = 0; j < (DIGITS_PWM_FEEDBACK + DIGITS_CROSSING_COMMAND - strLength); j++) {
+    for (int z = 0; z < (HEX_DIGITS_LENGTH - strLength); z++) {
       Serial.print('0');
-      Serial.flush();
     }
 
     //print the HEX string
-    for (int j = 0; j < strLength; j++) { //fills sendFeedback array at right position, no conversion necessary
-      Serial.print(feedbackMega[j]);
-      Serial.flush();
-    }
+    Serial.println(hexFeedback);
+    Serial.flush();
   }
-  Serial.println();
-  Serial.flush();
 }
 
-/* Extract length command from the received matlab string, 
-   and save to pwmCommand[] and crossingCommand[], and set enableMotors = 1. */
-void readNanoCommand() {
-  if (receivedCommand[0] == CASPR_LENGTH_CMD) {
-    for (int i = 0; i < NUMBER_CONNECTED_NANOS; i++) {
-        char hexCommand[HEX_DIGITS_LENGTH + 1]; //+1 to store the '\0' NUL terminator //CLARIFY: is this need?
+/* Translate length commands from the received matlab string to crossing commands and angle commands, and broadcast to nanos.
+   Requires an updated lastLengthCommand[] to calculate 
+   Requires an updated lastAngleFeedback[] to correctly decide whether crossing is need.
+   Will also update lastLengthCommand[]. */
+void translateCommandAndSendToNano() {
+  //if (receivedCommand[0] == CASPR_LENGTH_CMD) {  //TODO: how will it be read twice?
 
-        //if receivedCommand is a string (ended with \0)
-        //string.substring(from-inclusive, to-exclusive)
-        //hexCommand = receivedCommand.substring(1 + (HEX_DIGITS_LENGTH * i), 1 + (HEX_DIGITS_LENGTH * i) + HEX_DIGITS_LENGTH);
-        for (int j = 0; j < HEX_DIGITS_LENGTH; j++) {
-          hexCommand[j] = receivedCommand[1 + (HEX_DIGITS_LENGTH * i) + j]; // +1 omits command prefix, HEX_DIGITS_LENGTH*i gives position in array for respective ID
-        }
-        hexCommand[HEX_DIGITS_LENGTH] = '\0'; 
-        
-        unsigned int tmpSendLength = strtol(hexCommand, 0, 16);  //HEX string -> long -> unsigned int tmpSendLength???????????
-        lengthChangeCommand = tmpSendLength - lengthCommand[i]; //strtol returns long int, lengthCommand is unsigned int (4byte - 2byte), changes will not be >int_max
-        lengthCommand[i] += lengthChangeCommand; //update lengthCommand for next command  
-        angularChangeCommand = (lengthChangeCommand * lengthToAngle); //(float) = (int) * (float)
+  for (int n = 0; n < NUMBER_CONNECTED_NANOS; n++) { //for each nano
 
+    //extract length command for this nano
+    char hexCommand[HEX_DIGITS_LENGTH + 1]; //+1 to store the '\0' NUL terminator
+    for (int d = 0; d < HEX_DIGITS_LENGTH; d++) {
+      hexCommand[d] = receivedCommand[1 + (HEX_DIGITS_LENGTH * n) + d]; //this ignores the command from matlab, and length command for other nanos
+    }
+    hexCommand[HEX_DIGITS_LENGTH] = '\0';
+    unsigned int lengthCommand = strtol(hexCommand, 0, 16); //convert from HEX to DEC
 
-        
-        if (angularChangeCommand > 0) {
-          pwmCommand[i] += (int)((angularChangeCommand * angleToPWM[i] ) + 0.5);
-        } else pwmCommand[i] += (int)((angularChangeCommand * angleToPWM[i] ) - 0.5);
+    ///////////////////////////////////// lengthCommand -> crossingCommand, angleCommand ////////////////////////////////
 
-      
-      // keeping pwmCommand in boundaries, enabling crossing
-      crossingCommand[i] = 0;
-      //pwmCommand[i] -= 5;
-      if (pwmCommand[i] < minimumPWMOutput[i]) { //CROSSING RIGHT -> LEFT
-        pwmCommand[i] = maximumPWMOutput[i] - fabs(fmod(minimumPWMOutput[i], pwmCommand[i]));   //CLARIFY: does this assume the max and min PWMOutput is the same location?
-        crossingCommand[i] = 2;
-      } else if (pwmCommand[i] > maximumPWMOutput[i]) { //CROSSING LEFT -> RIGHT
-        pwmCommand[i] = minimumPWMOutput[i] + fmod(pwmCommand[i], maximumPWMOutput[i]);
-        crossingCommand[i] = 1;
+    //convert length command to angle change command
+    int lengthChangeCommand = lengthCommand - lastLengthCommand[n];
+    int angleChangeCommand = round( (double)lengthChangeCommand / (double)SPOOL_CIRCUMFERENCE * 3600 ); //convert unit from 0.1mm to 0.1degree
+
+    //convert angle change command to crossing command and angle command (decide whether crossing is needed)
+    int crossingCommand = 0;   //either 0, CLOCKWISE, or ANTICLOCKWISE
+    int angleCommand = lastAngleFeedback[n] + angleChangeCommand; //in 0.1 degree precision
+    //=== went under min. angle while spinning anticlockwise ==========================================================
+    if (angleCommand < 0) {
+      if (angleCommand < - CROSSING_ZONE_SIZE) {         //went past crossing zone
+        //cross to the other side
+        crossingCommand = ANTICLOCKWISE;
+        angleCommand += 3600;
+      }
+      else if (angleCommand < - CROSSING_ZONE_SIZE / 2) { //in the crossing zone, went past tipping point
+        //cross and stay at the far edge of the crossing zone
+        crossingCommand = ANTICLOCKWISE;
+        angleCommand = 3600 - CROSSING_ZONE_SIZE;
+      }
+      else {                                             //in the crossing zone, didn't went past the tipping point
+        //stay on the near edge of the crossing zone
+        crossingCommand = 0;
+        angleCommand = 0;
       }
     }
-  }
-  receivedCommand[0] = '\0'; //resets array, so it is not read twice
-  enableMotors = 1;
-}
+    //=== went over max. angle while spinning clockwise ==========================================================
+    else if (angleCommand > (3600 - CROSSING_ZONE_SIZE) ) {
+      if (angleCommand > 3600) {                                  //went past crossing zone
+        //cross to the other side
+        crossingCommand = CLOCKWISE;
+        angleCommand -= 3600;
+      }
+      else if (angleCommand > (3600 - CROSSING_ZONE_SIZE / 2) ) { //in the crossing zone, went past tipping point
+        //cross and stay at the far edge of the crossing zone
+        crossingCommand = CLOCKWISE;
+        angleCommand = 0;
+      }
+      else {                                                      //in the crossing zone, didn't went past the tipping point
+        //stay on the near edge of the crossing zone
+        crossingCommand = 0;
+        angleCommand = 3600 - CROSSING_ZONE_SIZE;
+      }
+    }
 
-/* Broadcast command to all nanos via Serial1 */
-void sendNanoCommand() {
-  Serial1.print(NANO_PWM_COMMAND);  //tell the nanos that this is a pwm command
-  for (int i = 0; i < NUMBER_CONNECTED_NANOS; i++) {
+
+
+    /////////////////////////////send crossing command and angle command//////////////////////////////////////////////////
+
     //send crossing command
-    Serial1.print(crossingCommand[i]);
-    if (crossingCommand[i] > 0) {
-      crossingCommand[i] = 0;
-    }
+    Serial1.print(crossingCommand);
 
-    //convert pwm command to HEX chars and send
-    itoa(pwmCommand[i], commandNano, 16);
-    for (int j = 0; j < DIGITS_PWM_COMMAND; j++) {
-      Serial1.print(commandNano[j]);
-    }
-  }
+    //convert angle command to HEX and send
+    char hexAngleCommand[DIGITS_ANGLE_COMMAND + 1];  //+1 for the NUL terminator \0
+    itoa(angleCommand, hexAngleCommand, 16);
+    Serial1.print(hexAngleCommand);
+
+    //update lastLengthCommand[] for comparison with the next command
+    lastLengthCommand[n] = lengthCommand;
+
+  }//for each nano
+
   Serial1.println();
   Serial1.flush();
-}
 
-//To be put into use
-/* Map pwm feedback of the specified position to pwm command */
-int mapFeedbackToCommand(int feedback, int id){
-  return (pwmFeedback[id] - minimumPWMFeedback[id]) * pwmMapping[id] + minimumPWMOutput[id] + 0.5;  //+0.5 to turn double-to-int truncation into round-off
+
+  //  receivedCommand[0] = '\0'; //resets array, so it is not read twice          //TODO: how will it be read twice?
+  //  enableMotors = 1;                                                           //TODO: is it necessary?
 }
 
 
