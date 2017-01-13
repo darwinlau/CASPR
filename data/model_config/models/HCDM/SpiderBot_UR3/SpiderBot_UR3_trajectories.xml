@@ -18,7 +18,7 @@
       </point>
     </points>
   </trajectory>
-  <trajectory id="wall_motion" time_step="0.05">
+  <trajectory id="wall_motion_square_motion" time_step="0.05">
     <points>
       <point>
         <q>1.14 1.14 1.0 0.0 0.0 0.0 -1.5708 0.0 0.0 0.0 0.0 0.0</q>
@@ -67,7 +67,7 @@
       </point>
     </points>
   </trajectory>
-  <trajectory id="O0006" time_step="0.05">
+  <trajectory id="wall_motion" time_step="0.05">
     <points>
       <point>
         <q>1.14 1.14 1.0 0.0 0.0 0.0 -1.5708 0.0 0.0 0.0 0.0 0.0</q>
