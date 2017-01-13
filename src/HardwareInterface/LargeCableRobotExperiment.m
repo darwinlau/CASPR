@@ -1,23 +1,23 @@
 % Will make abstract later
 classdef LargeCableRobotExperiment < ExperimentBase
+    properties (Constant)
+        ZERO_CABLE_LENGTHS = [1.533880; 1.533880; 1.533880; 1.533880; 1.533880; 1.533880; 1.533880; 1.533880];
+    end
+    
     properties (SetAccess = private)
-        l_feedback_traj    % Temporary variable to store things for now
-        l_cmd_traj         % Temporary variable to store things for now
+        l_feedback_traj    % Temporary variable to store things for now (NOT USED HERE YET)
+        l_cmd_traj         % Temporary variable to store things for now (NOT USED HERE YET)
         
         modelConfig
+        modelObj
     end
         
     methods
-        function eb = LargeCableRobotExperiment()
-            % Create the config
-            model_config = DevModelConfig(DevModelConfigType.D_CUHK_CUCABLEROBOT);
-            cable_set_id = 'original';            
-            % Load the SystemKinematics object from the XML
-            modelObj = model_config.getModel(cable_set_id);
-            % Create the hardware interface
-            hw_interface = GSK_EightAxisStaticCASPRInterface(8, '', '');            
-            eb@ExperimentBase(hw_interface, modelObj);
+        function eb = LargeCableRobotExperiment(hw_interface, model_config, model_obj)
+            % Create the hardware interface          
+            eb@ExperimentBase(hw_interface, model_obj);
             eb.modelConfig = model_config;
+            eb.modelObj = model_obj;
         end
         
         function runTrajectory(obj, trajectory)
@@ -32,13 +32,13 @@ classdef LargeCableRobotExperiment < ExperimentBase
             obj.model.update(trajectory.q{1}, trajectory.q_dot{1}, trajectory.q_ddot{1},zeros(size(trajectory.q_dot{1})));
             % Send the initial lengths to the hardware
             l0 = obj.model.cableLengths;
-            obj.hardwareInterface.lengthInitialSend(l0);                  
+            obj.hardwareInterface.lengthInitialSend(l0); 
             % Start the system to get feedback     
             obj.hardwareInterface.systemOnSend();
                         
             for t = 1:length(trajectory.timeVector)
                 % Print time for debugging
-                t
+                %t
                 % Wait for feedback to start the 50ms loop
                 obj.hardwareInterface.cmdRead();                
                 % Update the model with the trajectory to get lengths to
@@ -67,12 +67,27 @@ classdef LargeCableRobotExperiment < ExperimentBase
             clc;
             clear;
             close all;
-            trajectory_id = 'O00014';
             
-            exp = LargeCableRobotExperiment();
-            trajectory = exp.modelConfig.getTrajectory(trajectory_id);
-            exp.hardwareInterface.filefolder = 'data/temp/curobot_trajectories/';
-            exp.hardwareInterface.filename = trajectory_id;
+%             % Create the config properties
+            model_config = DevModelConfig(DevModelConfigType.D_CUHK_CUCABLEROBOT);
+            cable_set_id = 'H_frame';
+            trajectory_id = 'O0006';
+            
+            % Create the config properties
+%             model_config = DevModelConfig(DevModelConfigType.D_CUHK_CUCABLEROBOT_PLANAR);
+%             cable_set_id = 'vertical_XZ';
+%             trajectory_id = 'O1001';
+            
+            
+            % Load the SystemKinematics object from the XML
+            model_obj = model_config.getModel(cable_set_id);
+            
+            % Setup the hardware interface
+            hw_interface = GSK_EightAxisStaticCASPRInterface(model_obj, 'data/temp/curobot_trajectories/', trajectory_id, LargeCableRobotExperiment.ZERO_CABLE_LENGTHS);
+            exp = LargeCableRobotExperiment(hw_interface, model_config, model_obj);
+            
+            % Setup the trajectory and run the experiment
+            trajectory = model_config.getTrajectory(trajectory_id);
             exp.hardwareInterface.timeStep = trajectory.timeStep;
             exp.runTrajectory(trajectory);
         end
