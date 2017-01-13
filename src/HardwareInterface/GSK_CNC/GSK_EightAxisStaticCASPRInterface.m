@@ -117,12 +117,12 @@ classdef GSK_EightAxisStaticCASPRInterface < HardwareInterfaceBase
             % Print the initial lengths program (with length offset) to 'XXXXX8' file  
             fp = fopen([obj.filefolder obj.filename '8.txt'], 'w');
             fprintf(fp, '%s8;\r\n', obj.filename);
-            fprintf(fp, 'G00');
+            fprintf(fp, 'G01 G90');
             l_rel_mm = roundn(obj.toAbsoluteMachineLength(l0_mm) - obj.CABLE_LENGTH_OFFSET_MM, obj.MM_DECIMAL_PLACE);
             for i = 1:obj.modelObj.numCables
                 fprintf(fp, ' %c%.3f', obj.modelObj.cableModel.cables{i}.name, l_rel_mm(i));
             end
-            fprintf(fp, ';\r\n');
+            fprintf(fp, ' F%d;\r\n', obj.MACHINE_LOW_F_SPEED);
             fprintf(fp, 'M30;\r\n');
             fprintf(fp, '%%\r\n');
             fclose(fp);
