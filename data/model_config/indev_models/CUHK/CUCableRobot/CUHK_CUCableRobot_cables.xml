@@ -5,7 +5,7 @@
 
 <cables default_cable_set="calibration_frame">
   <cable_set id="calibration_frame">
-	<cable_ideal name="motor X1" attachment_reference="joint">
+	<cable_ideal name="X" attachment_reference="joint">
       <properties>
         <force_min>1</force_min>
         <force_max>2000</force_max>
@@ -22,7 +22,7 @@
         </attachment>
       </attachments>
     </cable_ideal>
-    <cable_ideal name="motor Y2" attachment_reference="joint">
+    <cable_ideal name="Y" attachment_reference="joint">
       <properties>
         <force_min>1</force_min>
         <force_max>2000</force_max>
@@ -39,7 +39,7 @@
         </attachment>
       </attachments>
     </cable_ideal>
-	<cable_ideal name="motor Z3" attachment_reference="joint">
+	<cable_ideal name="Z" attachment_reference="joint">
       <properties>
         <force_min>1</force_min>
         <force_max>2000</force_max>
@@ -56,7 +56,7 @@
         </attachment>
       </attachments>
     </cable_ideal>
-    <cable_ideal name="motor A4" attachment_reference="joint">
+    <cable_ideal name="A" attachment_reference="joint">
       <properties>
         <force_min>1</force_min>
         <force_max>2000</force_max>
@@ -73,7 +73,7 @@
         </attachment>
       </attachments>
     </cable_ideal>
-	<cable_ideal name="motor B5" attachment_reference="joint">
+	<cable_ideal name="B" attachment_reference="joint">
       <properties>
         <force_min>1</force_min>
         <force_max>2000</force_max>
@@ -90,7 +90,7 @@
         </attachment>
       </attachments>
     </cable_ideal>
-    <cable_ideal name="motor C6" attachment_reference="joint">
+    <cable_ideal name="C" attachment_reference="joint">
       <properties>
         <force_min>1</force_min>
         <force_max>2000</force_max>
@@ -107,7 +107,7 @@
         </attachment>
       </attachments>
     </cable_ideal>
-	<cable_ideal name="motor U7" attachment_reference="joint">
+	<cable_ideal name="U" attachment_reference="joint">
       <properties>
         <force_min>1</force_min>
         <force_max>2000</force_max>
@@ -124,7 +124,7 @@
         </attachment>
       </attachments>
     </cable_ideal>
-    <cable_ideal name="motor V8" attachment_reference="joint">
+    <cable_ideal name="V" attachment_reference="joint">
       <properties>
         <force_min>1</force_min>
         <force_max>2000</force_max>
@@ -145,7 +145,7 @@
   
   
   <cable_set id="H_frame">
-	<cable_ideal name="motor X1" attachment_reference="joint">
+	<cable_ideal name="X" attachment_reference="joint">
       <properties>
         <force_min>1</force_min>
         <force_max>2000</force_max>
@@ -158,11 +158,11 @@
         </base_rotating_pulley>
         <attachment>
           <link>1</link>
-          <location>-0.199 0.155 0.07</location>
+          <location>-0.200 0.160 0.07</location>
         </attachment>
       </attachments>
     </cable_ideal>
-    <cable_ideal name="motor Y2" attachment_reference="joint">
+    <cable_ideal name="Y" attachment_reference="joint">
       <properties>
         <force_min>1</force_min>
         <force_max>2000</force_max>
@@ -175,11 +175,11 @@
         </base_rotating_pulley>
         <attachment>
           <link>1</link>
-          <location>0.199 0.155 -0.07</location>
+          <location>0.200 0.160 -0.07</location>
         </attachment>
       </attachments>
     </cable_ideal>
-	<cable_ideal name="motor Z3" attachment_reference="joint">
+	<cable_ideal name="Z" attachment_reference="joint">
       <properties>
         <force_min>1</force_min>
         <force_max>2000</force_max>
@@ -192,11 +192,11 @@
         </base_rotating_pulley>
         <attachment>
           <link>1</link>
-          <location>0.199 0.155 0.07</location>
+          <location>0.200 0.160 0.07</location>
         </attachment>
       </attachments>
     </cable_ideal>
-    <cable_ideal name="motor A4" attachment_reference="joint">
+    <cable_ideal name="A" attachment_reference="joint">
       <properties>
         <force_min>1</force_min>
         <force_max>2000</force_max>
@@ -209,11 +209,11 @@
         </base_rotating_pulley>
         <attachment>
           <link>1</link>
-          <location>0.199 -0.155 -0.07</location>
+          <location>0.200 -0.160 -0.07</location>
         </attachment>
       </attachments>
     </cable_ideal>
-	<cable_ideal name="motor B5" attachment_reference="joint">
+	<cable_ideal name="B" attachment_reference="joint">
       <properties>
         <force_min>1</force_min>
         <force_max>2000</force_max>
@@ -226,11 +226,11 @@
         </base_rotating_pulley>
         <attachment>
           <link>1</link>
-          <location>0.199 -0.155 0.07</location>
+          <location>0.200 -0.160 0.07</location>
         </attachment>
       </attachments>
     </cable_ideal>
-    <cable_ideal name="motor C6" attachment_reference="joint">
+    <cable_ideal name="C" attachment_reference="joint">
       <properties>
         <force_min>1</force_min>
         <force_max>2000</force_max>
@@ -243,11 +243,11 @@
         </base_rotating_pulley>
         <attachment>
           <link>1</link>
-          <location>-0.199 -0.155 -0.07</location>
+          <location>-0.200 -0.160 -0.07</location>
         </attachment>
       </attachments>
     </cable_ideal>
-	<cable_ideal name="motor U7" attachment_reference="joint">
+	<cable_ideal name="U" attachment_reference="joint">
       <properties>
         <force_min>1</force_min>
         <force_max>2000</force_max>
@@ -260,11 +260,11 @@
         </base_rotating_pulley>
         <attachment>
           <link>1</link>
-          <location>-0.199 -0.155 0.07</location>
+          <location>-0.200 -0.160 0.07</location>
         </attachment>
       </attachments>
     </cable_ideal>
-    <cable_ideal name="motor V8" attachment_reference="joint">
+    <cable_ideal name="V" attachment_reference="joint">
       <properties>
         <force_min>1</force_min>
         <force_max>2000</force_max>
@@ -277,7 +277,7 @@
         </base_rotating_pulley>
         <attachment>
           <link>1</link>
-          <location>-0.199 0.155 -0.07</location>
+          <location>-0.200 0.160 -0.07</location>
         </attachment>
       </attachments>
     </cable_ideal>

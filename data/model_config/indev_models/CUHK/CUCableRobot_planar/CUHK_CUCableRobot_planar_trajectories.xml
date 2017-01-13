@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE trajectories [
+  <!ATTLIST trajectory id ID #REQUIRED>
+]>
+
+<trajectories>
+  <!-- Simple up and down trajectory -->  
+  <trajectory id="O1001" time_step="0.05">
+    <points>
+      <point>
+        <q>1.14 1.0 0.0</q>
+        <q_dot>0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0</q_ddot>
+      </point>
+      <point time="5.0">
+        <q>1.14 1.5 0.0</q>
+        <q_dot>0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0</q_ddot>
+      </point>
+      <point time="10.0">
+        <q>1.14 1.0 0.0</q>
+        <q_dot>0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0</q_ddot>
+      </point>
+    </points>
+  </trajectory>
+</trajectories>

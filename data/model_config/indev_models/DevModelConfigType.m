@@ -11,5 +11,6 @@ classdef DevModelConfigType
         D_CUHK_ARM
         D_CUHK_TEMP
         D_CUHK_CUCABLEROBOT
+        D_CUHK_CUCABLEROBOT_PLANAR
     end
 end
