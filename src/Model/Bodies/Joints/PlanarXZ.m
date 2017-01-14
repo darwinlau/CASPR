@@ -2,7 +2,7 @@
 %
 % Author        : Benji ZHANG
 % Created       : 2017
-% Description   :
+% Description   : 
 classdef PlanarXZ < JointBase        
     properties (Constant = true)
         numDofs = 3;
