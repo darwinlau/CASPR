@@ -30,5 +30,6 @@ classdef ModelConfigType
         M_2R_PLANAR_XZ
         M_NECK_8S
         M_CAREX
+        M_4M_MODULAR_CDM
     end
 end
