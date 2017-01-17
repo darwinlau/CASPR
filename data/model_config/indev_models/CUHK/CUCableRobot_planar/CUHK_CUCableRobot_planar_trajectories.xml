@@ -5,82 +5,27 @@
 
 <trajectories>
   <!-- Simple up and down trajectory -->  
-  <trajectory id="O0001" time_step="0.01">
+  <trajectory id="O1001" time_step="0.01">
     <points>
       <point>
         <q>1.14 1.0 0.0</q>
+        <q_dot>0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0</q_ddot>
+      </point>
+      <point time="5.0">
+        <q>1.14 1.5 0.0</q>
         <q_dot>0.0 0.0 0.0</q_dot>
         <q_ddot>0.0 0.0 0.0</q_ddot>
       </point>
       <point time="10.0">
-        <q>1.14 0.5 0.0</q>
-        <q_dot>0.0 0.0 0.0</q_dot>
-        <q_ddot>0.0 0.0 0.0</q_ddot>
-      </point>
-      <point time="20.0">
         <q>1.14 1.0 0.0</q>
         <q_dot>0.0 0.0 0.0</q_dot>
         <q_ddot>0.0 0.0 0.0</q_ddot>
       </point>
     </points>
   </trajectory>
-  <!-- from right to left and then down, fol -->
-  <trajectory id="O0002" time_step="0.05">
-    <points>
-      <point>
-        <q>1.64 1.5 0.0 </q>
-        <q_dot>0.0 0.0 0.0 </q_dot>
-        <q_ddot>0.0 0.0 0.0 </q_ddot>
-      </point>
-      <point time="1.0">
-        <q>1.64 1.5 0.5 </q>
-        <q_dot>0.0 0.0 0.0 </q_dot>
-        <q_ddot>0.0 0.0 0.0 </q_ddot>
-      </point>
-      <point time="6.0">
-        <q>0.64 1.5 0.5 </q>
-        <q_dot>0.0 0.0 0.0 </q_dot>
-        <q_ddot>0.0 0.0 0.0 </q_ddot>
-      </point>
-      <point time="7.0">
-        <q>0.64 1.3 -0.5 </q>
-        <q_dot>0.0 0.0 0.0 </q_dot>
-        <q_ddot>0.0 0.0 0.0 </q_ddot>
-      </point>
-      <point time="12.0">
-        <q>1.64 1.3 -0.5 </q>
-        <q_dot>0.0 0.0 0.0 </q_dot>
-        <q_ddot>0.0 0.0 0.0 </q_ddot>
-      </point>
-      <point time="13.0">
-        <q>1.64 1.1 0.5 </q>
-        <q_dot>0.0 0.0 0.0 </q_dot>
-        <q_ddot>0.0 0.0 0.0 </q_ddot>
-      </point>
-      <point time="18.0">
-        <q>0.64 1.1 0.5 </q>
-        <q_dot>0.0 0.0 0.0 </q_dot>
-        <q_ddot>0.0 0.0 0.0 </q_ddot>
-      </point>
-      <point time="19.0">
-        <q>0.64 0.9 -0.5 </q>
-        <q_dot>0.0 0.0 0.0 </q_dot>
-        <q_ddot>0.0 0.0 0.0 </q_ddot>
-      </point>
-      <point time="24.0">
-        <q>1.64 0.9 -0.5 </q>
-        <q_dot>0.0 0.0 0.0 </q_dot>
-        <q_ddot>0.0 0.0 0.0 </q_ddot>
-      </point>
-      <point time="25.0">
-        <q>1.64 0.9 -0.5 </q>
-        <q_dot>0.0 0.0 0.0 </q_dot>
-        <q_ddot>0.0 0.0 0.0 </q_ddot>
-      </point>
-    </points>
-  </trajectory>
-  <!-- right to left and down etc.-->
-  <trajectory id="O0003" time_step="0.1">
+  <!-- right to left, down, left to right with rotation-->
+  <trajectory id="O1002" time_step="0.05">
     <points>
       <point>
         <q>1.64 1.5 0.0 </q>
@@ -135,12 +80,12 @@
     </points>
   </trajectory>
   <!-- circle with constant speed -->
-  <trajectory id="O0004" time_step="0.010">
+  <trajectory id="O1003" time_step="0.010">
    <points>
     <point>
       <q>1.5400 1.0000 0.0000 </q>
-      <q_dot>-0.0000 -0.2516 0.0000 </q_dot>
-      <q_ddot>-0.1583 -0.0000 0.0000 </q_ddot>
+      <q_dot>0 0 0.0000 </q_dot>
+      <q_ddot>0 0 0.0000 </q_ddot>
     </point>
     <point time="0.050">
       <q>1.5398 0.9874 0.0000 </q>
@@ -1139,9 +1084,49 @@
     </point>
     <point time="10.000">
       <q>1.5400 0.9973 0.0000 </q>
-      <q_dot>-0.0017 -0.2516 0.0000 </q_dot>
-      <q_ddot>-0.1583 0.0011 0.0000 </q_ddot>
+      <q_dot>0 0 0.0000 </q_dot>
+      <q_ddot>0 0 0.0000 </q_ddot>
     </point>
   </points>
  </trajectory>
+ <!-- transition (arc) -->
+ <trajectory id="O1004" time_step="0.05">
+    <points>
+      <point>
+        <q>1.14 1.2 0.0 </q>
+        <q_dot>0.0 -0.05 0.0 </q_dot>
+        <q_ddot>0.0 0.0 0.0 </q_ddot>
+      </point>
+      <point time="12.0">
+        <q>0.74 0.8 0.0</q>
+        <q_dot>-0.1 0.0 0.0 </q_dot>
+        <q_ddot>0.0 0.0 0.0 </q_ddot>
+      </point>
+     </points>
+   </trajectory>
+   <!-- two segments of different level with transition -->
+   <trajectory id="O1005" time_step="0.05">
+    <points>
+      <point>
+        <q>1.14 1.2 0.0 </q>
+        <q_dot>0.0 0.0 0.0 </q_dot>
+        <q_ddot>0.0 0.0 0.0 </q_ddot>
+      </point>
+      <point time="4.0">
+        <q>0.94 1.2 0.0</q>
+        <q_dot>-0.05 0.0 0.0 </q_dot>
+        <q_ddot>0.0 0.0 0.0 </q_ddot>
+      </point>
+      <point time="8.0">
+        <q>0.94 1.0 0.0 </q>
+        <q_dot>0.1 0.0 0.0 </q_dot>
+        <q_ddot>0.0 0.0 0.0 </q_ddot>
+      </point>
+      <point time="12.0">
+        <q>1.14 1.0 0.0</q>
+        <q_dot>0.0 0.0 0.0 </q_dot>
+        <q_ddot>0.0 0.0 0.0 </q_ddot>
+      </point>
+     </points>
+   </trajectory>
 </trajectories>
