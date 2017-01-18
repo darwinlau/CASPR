@@ -177,7 +177,11 @@ classdef JointTrajectory < handle
         % type of joint.
         function trajectory = GenerateTrajectory(bodiesObj, q_s, q_s_d, q_s_dd, q_e, q_e_d, q_e_dd, total_time, time_step)
             trajectory = JointTrajectory;
-            n_dof = bodiesObj.numDofs;    
+            n_dof = bodiesObj.numDofs; 
+            %%%%%%%%%%[14/1]
+            time_step = round(time_step, 10); % probably due to the numerical errors in total_time & time_step generated  
+            total_time = round(total_time, 10); % by specific function in traj.xml, sometime we can not get correct t calculated below
+            %%%%%%%%%%
             t = 0:time_step:total_time;
             trajectory.timeVector = t;
             trajectory.totalTime = total_time;

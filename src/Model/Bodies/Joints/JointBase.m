@@ -89,6 +89,8 @@ classdef (Abstract) JointBase < handle
                     j = RevoluteZ;
                 case JointType.U_XY
                     j = UniversalXY;
+                case JointType.U_YZ  %%
+                    j = UniversalYZ;
                 case JointType.P_XY
                     j = PrismaticXY;
                 case JointType.PLANAR_XY
