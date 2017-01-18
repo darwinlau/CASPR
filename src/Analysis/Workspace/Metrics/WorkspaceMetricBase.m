@@ -67,6 +67,8 @@ classdef (Abstract) WorkspaceMetricBase < handle
                     wm = TensionFactorModifiedMetric;
                 case WorkspaceMetricType.UNILATERAL_DEXTERITY
                     wm = UnilateralDexterityMetric;
+                case WorkspaceMetricType.MIN_CABLE_CABLE_DISTANCE
+                    wm = MinCableCableDistanceMetric;
                 otherwise
                     CASPR_log.Print('Workspace metric type is not defined',CASPRLogLevel.ERROR);
             end

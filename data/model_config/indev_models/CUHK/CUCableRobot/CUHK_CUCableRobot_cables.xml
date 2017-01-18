@@ -5,7 +5,7 @@
 
 <cables default_cable_set="calibration_frame">
   <cable_set id="calibration_frame">
-	<cable_ideal name="X" attachment_reference="joint">
+    <cable_ideal name="X" attachment_reference="joint">
       <properties>
         <force_min>1</force_min>
         <force_max>2000</force_max>
@@ -39,7 +39,7 @@
         </attachment>
       </attachments>
     </cable_ideal>
-	<cable_ideal name="Z" attachment_reference="joint">
+    <cable_ideal name="Z" attachment_reference="joint">
       <properties>
         <force_min>1</force_min>
         <force_max>2000</force_max>
@@ -107,7 +107,7 @@
         </attachment>
       </attachments>
     </cable_ideal>
-	<cable_ideal name="U" attachment_reference="joint">
+    <cable_ideal name="U" attachment_reference="joint">
       <properties>
         <force_min>1</force_min>
         <force_max>2000</force_max>
@@ -179,7 +179,7 @@
         </attachment>
       </attachments>
     </cable_ideal>
-	<cable_ideal name="Z" attachment_reference="joint">
+    <cable_ideal name="Z" attachment_reference="joint">
       <properties>
         <force_min>1</force_min>
         <force_max>2000</force_max>
@@ -213,7 +213,7 @@
         </attachment>
       </attachments>
     </cable_ideal>
-	<cable_ideal name="B" attachment_reference="joint">
+    <cable_ideal name="B" attachment_reference="joint">
       <properties>
         <force_min>1</force_min>
         <force_max>2000</force_max>
@@ -247,7 +247,7 @@
         </attachment>
       </attachments>
     </cable_ideal>
-	<cable_ideal name="U" attachment_reference="joint">
+    <cable_ideal name="U" attachment_reference="joint">
       <properties>
         <force_min>1</force_min>
         <force_max>2000</force_max>
