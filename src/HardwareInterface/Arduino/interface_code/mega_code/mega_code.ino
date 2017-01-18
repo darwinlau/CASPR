@@ -17,8 +17,6 @@
 #define NUMBER_CONNECTED_NANOS 1                        //TODO: This should be sent by MATLAB in the future
 #define SPOOL_CIRCUMFERENCE 1355 //in 0.1mm precision.  //TODO: make it dynamic
 
-#define CROSSING_ZONE_SIZE 70   //in 0.1degree
-
 #define BAUD_RATE_NANO 74880
 #define BAUD_RATE_CASPR 74880
 
@@ -38,11 +36,13 @@
 #define CASPR_SETUP 'k'
 
 //set in an h file in the future?
-#define NANO_PWM_COMMAND 'p'
+#define NANO_ANGLE_COMMAND 'c'
 #define NANO_FEEDBACK 'f'
 
 #define CLOCKWISE 1
 #define ANTICLOCKWISE 2
+
+#define CROSSING_ZONE_SIZE 70   //in 0.1degree
 
 #define CABLE_TIGHTEN_INCREMENT 10  //in 0.1mm precision. e.g. tighten all cables by 1mm when matlab sends an 'h' command
 
@@ -91,7 +91,7 @@ void loop() {
   if (Serial.available() > 0){
     String receivedCommand = Serial.readStringUntil('\n');
 
-    if (receivedCommand.length() == 1){ //////////////////////////////////////////////////////////////
+    if (receivedCommand.length() == 1){ /////////////////////////////////////////////////////////////////
       switch (receivedCommand[0]){
         case CASPR_ACKNOWLEDGE:                //a: handshake with matlab
           {
@@ -99,14 +99,14 @@ void loop() {
             Serial.println(CASPR_ACKNOWLEDGE);
           }
           break;
-        case CASPR_SETUP:                      //k:   TODO: [leave this empty for now?]     [fix last]
+        case CASPR_SETUP:                      //k: [current usage: populate necessary arrays]
           {
-            //old code:
-            //for each nano:
-            //update angle feedback (pwmFeedback)
-            //convert to angle command and populate/update angle command (pwmCommand)
-            //(this use to help calculate crossing while sending command)
+              //populate lastAngleFeedbacks[]
+              for (int n = 0; n < NUMBER_CONNECTED_NANOS; n++){
+                lastAngleFeedbacks[n] = readAngleFromNano(n);
+              }
 
+              //initialLengths[], currentCableLengths[], and lastLengthCommands[] will be populated in the CASPR_INITIAL case
           }
           break;
         case CASPR_START:                      //s: start system
@@ -143,19 +143,13 @@ void loop() {
           }
           break;
       }//switch
-    } else { /////////////////////////////////////////////////////////////////////////////////////////
+    } else { //receivedCommand.length() > 1  ////////////////////////////////////////////////////////////
       switch (receivedCommand[0]) {
         case CASPR_INITIAL:                    //i: update initial lengths
           {
             unsigned int newInitialLengths[NUMBER_CONNECTED_NANOS];
             extractLengths(receivedCommand, newInitialLengths); //from receivedCommand, extract length info to newInitialLengths[]
             updateInitialLengths(newInitialLengths); //use newInitialLengths to update initialLengths[], currentCableLengths[], and lastLengthCommands[]
-
-           //TODO: can these be omited?
-
-            //gather angle feedback from nanos
-           //calculate currentCableLength
-           //send (the double-updated) currentCableLength to matlab (as feedback)
           }
           break;
         case CASPR_LENGTH_CMD:                 //l: Get nano feedback to matlab, then matlab command to nano
@@ -167,6 +161,9 @@ void loop() {
               }
               computeCurrentCableLengths(currentAngles); //using currentAngles[], currentCableLengths[], and lastAngleFeedbacks[]; update currentCableLengths[]
               sendCurrentCableLengths(); //send currentCableLengths[] to Serial
+              for (int n = 0; n < NUMBER_CONNECTED_NANOS; n++){
+                lastAngleFeedbacks[n] = currentAngles[n];
+              }
 
               if (motorsEnabled){
                 unsigned int lengthCommands[NUMBER_CONNECTED_NANOS];
@@ -284,6 +281,7 @@ void computeCrossingAndAngleCommands(unsigned int lengthCommands[NUMBER_CONNECTE
 
 /* write to: Serial1 */
 void broadcastCommandsToNanos(int &crossingCommands[NUMBER_CONNECTED_NANOS], unsigned int &angleCommands[NUMBER_CONNECTED_NANOS]){
+  Serial1.print(NANO_ANGLE_COMMAND);
   for (int n = 0; n < NUMBER_CONNECTED_NANOS; n++) {
     //send crossing command
     Serial1.print(crossingCommands[n]);
@@ -364,8 +362,6 @@ void computeCurrentCableLengths(unsigned int currentAngles[NUMBER_CONNECTED_NANO
         angleChange = angleChangeWithCrossing;
       }
     }
-    //save angle for comparison next time
-    lastAngleFeedbacks[n] = currentAngles[n];
 
     //convert angle change to length change
     int lengthChange = round( (double)angleChange / 3600.0 * SPOOL_CIRCUMFERENCE ); //convert unit from 0.1degree to 0.1mm

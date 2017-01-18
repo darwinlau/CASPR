@@ -5,29 +5,31 @@
 #define MOTOR_PIN 2
 #define BAUD_RATE 74880
 
-#define LENGTH_PWM_COMMAND 4
-#define DIGITS_PWM_FEEDBACK 3
+#define LENGTH_ANGLE_COMMAND 4
+#define DIGITS_ANGLE_FEEDBACK 3
 
-#define RECEIVE_PWM_CMD 'p'
+#define RECEIVE_ANGLE_CMD 'c'
 #define RECEIVE_FEEDBACK_REQUEST 'f'
 
 #define CLOCKWISE 1
 #define ANTICLOCKWISE 2
 
-int avgFeedback; //stores the position of the servo.
-int lastFeedback = 0; //This variable can be use in a pinch when new feedback is faulty
+#define CROSSING_ZONE_SIZE 70   //in 0.1degree
+
+int avgPWMFeedback; //stores the position of the servo.
+int lastPWMFeedback = 0; //This variable can be use in a pinch when new feedback is faulty
 int lastCrossingCommand = 0; //for use in checkCrossingStatus()
 
 void setup() {
   Serial.begin(BAUD_RATE);
 
-  //read servo position to lastFeedback. This variable can be use in a pinch when new readings are faulty
-  while (lastFeedback == 0) {
-    lastFeedback = readFeedbackFromServo();
+  //read servo position to lastPWMFeedback. This variable can be use in a pinch when new readings are faulty
+  while (lastPWMFeedback == 0) {
+    lastPWMFeedback = readFeedbackFromServo();
   }
   
   //read average feedback -- prepare itself to answer a request from mega
-  avgFeedback = readAvgFeedback(4); //average 4 measurements
+  avgPWMFeedback = readAvgFeedback(4); //average 4 measurements
 }
 
 /* Read command from mega and decide what to do depending on the 1-character command (first char of the command string).  */
@@ -41,27 +43,27 @@ void loop() {
         {
           char id = strReceived[1];
           if (id == NANO_ID + '0') {//if the request is for this nano
-            sendFeedback();
+            int angleFeedback = mapping(avgPWMFeedback, FEEDBACK_PWM_MIN, FEEDBACK_PWM_MAX, 0, (3600 - CROSSING_ZONE_SIZE));
+            sendFeedback(angleFeedback);
           }
         }
         break;
       
-      case RECEIVE_PWM_CMD:              //p
-        executePWMCommand(strReceived);//pass a pointer to strReceived
-        avgFeedback = readAvgFeedback(4); //prepare for the next time when mega send a feedback request. Average 4 measurements.
+      case RECEIVE_ANGLE_CMD:              //c
+        executeAngleCommand(strReceived);//pass a pointer to strReceived
+        avgPWMFeedback = readAvgFeedback(4); //prepare for the next time when mega send a feedback request. Average 4 measurements.
         break;
       
-    //testdrive() is removed
     }//switch
   }
   // else {
-  //   avgFeedback = readAvgFeedback(); //if nano has some spare time, read servo feedback
+  //   avgPWMFeedback = readAvgFeedback(); //if nano has some spare time, read servo feedback
   //   //FIX: will this interfere with listening to command from mega? How lond does readAvgFeedback() take? 12ms?
   // }
 }
 
-/* execute pwm command from mega: move to the specified position, or cross the "crossing zone" in velocity mode */
-void executePWMCommand(const String &strReceived){
+/* execute angle command from mega: move to the specified position with position mode, or cross the "crossing zone" with velocity mode */
+void executeAngleCommand(const String &strReceived){
   //extract new crossing command
   int newCrossingCommand = extractCrossingCommand(strReceived);
 
@@ -75,7 +77,8 @@ void executePWMCommand(const String &strReceived){
       cross(crossingStatus);
     }
     else {                                       //else, extract new position command and execute it
-      int newPWMCommand = extractPWMCommand(strReceived);
+      int newAngleCommand = extractAngleCommand(strReceived);
+      int newPWMCommand = maps(newAngleCommand, 0, (3600 - CROSSING_ZONE_SIZE), COMMAND_PWM_MIN, COMMAND_PWM_MAX);
       writePulseToServo(newPWMCommand);
       writePulseToServo(newPWMCommand);
       //FIX: send counter? stop sending the same thing after 3 times, to stop vibration caused by noise
@@ -83,11 +86,11 @@ void executePWMCommand(const String &strReceived){
   }
 }
 
-/* Convert averaged length feedback from DEC to HEX chars, and send to mega via Serial. */
-void sendFeedback(){
-  //convert int avgFeedback to HEX
-  char hexFeedback[DIGITS_PWM_FEEDBACK + 1]; //+1 for the null terminator \0
-  itoa(avgFeedback, hexFeedback, 16); 
+/* Convert feedback from DEC to HEX chars, and send to mega via Serial. */
+void sendFeedback(int feedback){
+  //convert from DEC to HEX
+  char hexFeedback[DIGITS_ANGLE_FEEDBACK + 1]; //+1 for the null terminator \0
+  itoa(feedback, hexFeedback, 16); 
   //send HEX string
   Serial.println(hexFeedback);
   Serial.flush();
@@ -105,7 +108,7 @@ int readAvgFeedback(int numOfReadings){
 }
 
 /* Request the servo for feedback, and return the feedback pulse width (in microsecond). 
-   Faulty value will be corrected using lastFeedback, FEEDBACK_PWM_MIN or FEEDBACK_PWM_MAX. */
+   Faulty value will be corrected using lastPWMFeedback, FEEDBACK_PWM_MIN or FEEDBACK_PWM_MAX. */
 int readFeedbackFromServo(){
   //send request for feedback
   digitalWrite(MOTOR_PIN, HIGH);
@@ -117,7 +120,7 @@ int readFeedbackFromServo(){
   
   //fix faulty measurements
   if ((feedback < 300) || (feedback > 1700)){ //if result is terribly off. (Typical feedback value is around 500-1500)
-    feedback = lastFeedback; //use an old value
+    feedback = lastPWMFeedback; //use an old value
   }
   else if (feedback < FEEDBACK_PWM_MIN) { //if result is slightly off
     feedback = FEEDBACK_PWM_MIN;
@@ -128,13 +131,13 @@ int readFeedbackFromServo(){
   //the result is always between FEEDBACK_PWM_MIN and FEEDBACK_PWM_MAX.
   //there is no bound to how outdated the result is though.
 
-  lastFeedback = feedback; //store feedback in case the next feedback is terribly off
+  lastPWMFeedback = feedback; //store feedback in case the next feedback is terribly off
   return feedback;
 }
 
 /* Extract crossing command from the received string. */
 int extractCrossingCommand(const String &strReceived){
-  return strReceived[1 + (LENGTH_PWM_COMMAND * NANO_ID)] - '0';
+  return strReceived[1 + (LENGTH_ANGLE_COMMAND * NANO_ID)] - '0';
 }
 
 /* Send velocity command to servo to cross the "crossing zone" 
@@ -187,12 +190,12 @@ void writePulseToServo(int pulseWidth) {
   delayMicroseconds(3000 - pulseWidth);
 }
 
-/* Extract pwm command from the received string and convert it from HEX to DEC. */
-int extractPWMCommand(const String &strReceived){
+/* Extract angle command from the received string and convert it from HEX to DEC. */
+int extractAngleCommand(const String &strReceived){
   //extract the HEX string for THIS servo
-  char hexCommand[LENGTH_PWM_COMMAND]; //array size is (LENGTH_PWM_COMMAND - 1 + 1). -1 for crossingCommand and +1 for null terminator \0
-  const int indexOfCommand = 1 + (LENGTH_PWM_COMMAND * NANO_ID) + 1;  //this skips the mega command, command for other servos, and the crossingCommand
-  for (int i = 0; i < LENGTH_PWM_COMMAND - 1; i++) {
+  char hexCommand[LENGTH_ANGLE_COMMAND]; //array size is (LENGTH_ANGLE_COMMAND - 1 + 1): -1 for crossingCommand and +1 for null terminator \0
+  const int indexOfCommand = 1 + (LENGTH_ANGLE_COMMAND * NANO_ID) + 1;  //this skips the mega command, command for other servos, and the crossingCommand
+  for (int i = 0; i < LENGTH_ANGLE_COMMAND - 1; i++) {
     hexCommand[i] = strReceived[indexOfCommand + i];
   }
 
@@ -200,5 +203,10 @@ int extractPWMCommand(const String &strReceived){
   int intCommand = strtol(hexCommand, 0, 16); 
   
   return intCommand;
+}
+
+/* Re-maps a number from one range to another. Unlike the arduino map(), it rounds the result instead of truncating it. */
+long mapping(long x, long in_min, long in_max, long out_min, long out_max){
+  return round( (double)(x - in_min) * (double)(out_max - out_min) / (double)(in_max - in_min) + out_min );
 }
 
