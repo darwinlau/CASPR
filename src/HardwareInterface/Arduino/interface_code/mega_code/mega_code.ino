@@ -24,8 +24,8 @@
 
 #define HEX_DIGITS_LENGTH 4
 #define DIGITS_ANGLE_COMMAND 3
-#define DIGITS_ANGLE_FEEDBACK 3
 #define DIGITS_CROSSING_COMMAND 1
+#define DIGITS_ANGLE_FEEDBACK 3
 
 #define CASPR_FEEDBACK 'f'
 #define CASPR_LENGTH_CMD 'l'
@@ -44,22 +44,20 @@
 #define CLOCKWISE 1
 #define ANTICLOCKWISE 2
 
+#define CABLE_TIGHTEN_INCREMENT 10  //in 0.1mm precision. e.g. tighten all cables by 1mm when matlab sends an 'h' command
+
 boolean systemOn = false;      //no servo movement or feedback when off
 boolean motorsEnabled = false;  //no servo movement when off
 
+//TODO: make sure these are populated before use
+unsigned int lastAngleFeedbacks[NUMBER_CONNECTED_NANOS]; //in 0.1 degree precision
+//help determine whether crossing has happened (used in processing feedback data) or will happen(processing command data)
 
-int crossingCommand[NUMBER_CONNECTED_NANOS];
-boolean crossingFeedback[NUMBER_CONNECTED_NANOS];
+unsigned int currentCableLengths[NUMBER_CONNECTED_NANOS];  //in 0.1mm precision
+//help convert angle change feedback (relative) to an updated current cable length (absolute), to feed back to matlab/CASPRROS
 
-//unsigned int has 2 bytes, range 0 - 65535.
-//In 0.1 mm precision. This represents 6553.5mm or ~6.5m
-unsigned int currentCableLength[NUMBER_CONNECTED_NANOS];  //i.e. where the cable robot think it is
-unsigned int lastLengthCommand[NUMBER_CONNECTED_NANOS];   //help calculate angle change command
-
-//TODO: populate this before using in requestNanoFeedback()
-//TODO: make this static?
-//help decide whether crossing has happened
-unsigned int lastAngleFeedback[NUMBER_CONNECTED_NANOS]; //in 0.1 degree precision
+unsigned int lastLengthCommands[NUMBER_CONNECTED_NANOS]; //in 0.1mm precision
+//help convert new length command (absolute) to angle change (relative). This help decide whether crossing is needed or not
 
 
 // TODO: Decide on the maximum number of Nanos we would ever connect
@@ -77,271 +75,175 @@ SoftwareSerial serialNano[8] = {
 /* Setup 3 different serial lines.
    Serial for MATLAB/CASPRROS (via USB)
    Serial1 for broadcasting to Nano devices
-   SoftwareSerial for receiving from individual Nanos */
+   SoftwareSerial for receiving from individual Nanos.
+   
+   Populate 3 global arrays. */
 void setup() {
   Serial.begin(BAUD_RATE_CASPR);  //USB
   Serial1.begin(BAUD_RATE_NANO); //for broadcasting to nano
 
   for (int i = 0; i < NUMBER_CONNECTED_NANOS; i++) {
     serialNano[i].begin(BAUD_RATE_NANO); //for receiving from nano
-
-    //Arbitrarily assume all cables to be 3.2768m long at the start.
-    //They should be updated by updateInitialLengths() before use.        TODO: still true?
-    unsigned int lastLengthCommand[i] = 32768;
-    unsigned int currentCableLength[i] = 32768;
   }
-
 }
 
-/* Main loop acts to interface with MATLAB/CASPRROS (asynchronously) and nano at 20Hz */
 void loop() {
-  if (Serial.available() > 0) {  //USB
-    String receivedCommand = Serial.readStringUntil('\n');  //TODO: make it local?
+  if (Serial.available() > 0){
+    String receivedCommand = Serial.readStringUntil('\n');
 
-    switch (receivedCommand[0]) {
-      case CASPR_ACKNOWLEDGE:                 //a: handshake with matlab
-        { 
-          if (receivedCommand.length() == 1) {
+    if (receivedCommand.length() == 1){ //////////////////////////////////////////////////////////////
+      switch (receivedCommand[0]){
+        case CASPR_ACKNOWLEDGE:                //a: handshake with matlab
+          {
             systemOn = false;
             Serial.println(CASPR_ACKNOWLEDGE);
           }
-        }
-        break;
-      case CASPR_START:                       //s: start system
-        {
-          if (receivedCommand.length() == 1) {
+          break;
+        case CASPR_SETUP:                      //k:   TODO: [leave this empty for now?]     [fix last]
+          {
+            //old code:
+            //for each nano:
+            //update angle feedback (pwmFeedback)
+            //convert to angle command and populate/update angle command (pwmCommand)
+            //(this use to help calculate crossing while sending command)
+
+          }
+          break;
+        case CASPR_START:                      //s: start system
+          {
             systemOn = true;
           }
-        }
-        break;
-      case CASPR_END:                         //e: end (turn off) system
-        {
-          if (receivedCommand.length() == 1) {
+          break;
+        case CASPR_END:                        //e: end (turn off) system
+          {
             systemOn = false;
             motorsEnabled = false;
           }
-        }
-        break;
-      case CASPR_INITIAL:                    //i: update initial lengths
-        {
-          updateInitialLengths(receivedCommand);
-          updateCableLengths();
-          sendLengthFeedback();
-          motorsEnabled = true;    //CLARIFY: why?
-        }
-        break;
-      case CASPR_LENGTH_CMD:                //l: Gather feedback from nano, send to matlab/CASPRROS, then move cables to length specified.
-        { 
-          motorsEnabled = true;    //CLARIFY: why?
-          if (systemOn) {
-            updateCableLengths();
-            sendLengthFeedback();
+          break;
+        case CASPR_HOLD:                       //h: tighten all cables  [TODO: implemnt later]
+          {
+            //tighten all cables, while the robot think it hasn't move anywhere
+            //TODO: tighten by percentage?
+            //TODO: check: are all array needed populated?
 
-            if (motorsEnabled) {
-              translateCommandAndSendToNano();
+
+            //get currentCableLength
+            //-x and set as new length command
+            //calculate crossing command and angle command
+            //send command to nano
+
+            // unsigned int tightenedLength[NUMBER_CONNECTED_NANOS];
+            // for (int n = 0; n < NUMBER_CONNECTED_NANOS; n++) {
+            //   tightenedLength[n] = currentCableLength[n] - 10; //1mm, TODO: remove magic number
+            // }
+            // int crossingCommand[NUMBER_CONNECTED_NANOS];
+            // unsigned int angleCommand[NUMBER_CONNECTED_NANOS];
+            // computeCrossingAndAngleCommands(tightenedLength, crossingCommand, angleCommand);
+            // broadcastToNanos(crossingCommand, angleCommand);
+          }
+          break;
+      }//switch
+    } else { /////////////////////////////////////////////////////////////////////////////////////////
+      switch (receivedCommand[0]) {
+        case CASPR_INITIAL:                    //i: update initial lengths
+          {
+            unsigned int newInitialLengths[NUMBER_CONNECTED_NANOS];
+            extractLengths(receivedCommand, newInitialLengths); //from receivedCommand, extract length info to newInitialLengths[]
+            updateInitialLengths(newInitialLengths); //use newInitialLengths to update initialLengths[], currentCableLengths[], and lastLengthCommands[]
+
+           //TODO: can these be omited?
+
+            //gather angle feedback from nanos
+           //calculate currentCableLength
+           //send (the double-updated) currentCableLength to matlab (as feedback)
+          }
+          break;
+        case CASPR_LENGTH_CMD:                 //l: Get nano feedback to matlab, then matlab command to nano
+          {
+            if (systemOn){
+              unsigned int currentAngles[NUMBER_CONNECTED_NANOS];
+              for (int n = 0; n < NUMBER_CONNECTED_NANOS; n++){
+                currentAngles[n] = readAngleFromNano(n);
+              }
+              computeCurrentCableLengths(currentAngles); //using currentAngles[], currentCableLengths[], and lastAngleFeedbacks[]; update currentCableLengths[]
+              sendCurrentCableLengths(); //send currentCableLengths[] to Serial
+
+              if (motorsEnabled){
+                unsigned int lengthCommands[NUMBER_CONNECTED_NANOS];
+                extractLengths(receivedCommand, lengthCommands); //from receivedCommand, extract length info to lengthCommands[]
+                int crossingCommands[NUMBER_CONNECTED_NANOS];
+                unsigned int angleCommands[NUMBER_CONNECTED_NANOS];
+                computeCrossingAndAngleCommands(lengthCommands, crossingCommands, angleCommands); //using lengthCommands[], lastLengthCommands[], and lastAngleFeedbacks[] to generate crossingCommands[] and angleCommands[]
+                broadcastCommandsToNanos(crossingCommands, angleCommands);
+              }
             }
           }
-        }
-        break;
-      case CASPR_RESET:                   //r: reset lengths (make the cable robot think it is at a specific location)
-        {
-          resetLengths(receivedCommand);
-          motorsEnabled = true;    //CLARIFY: why?
-        }
-        break;
-      case CASPR_HOLD:                    //h: tighten all cables
-        {
-          //tighten all cables, while the robot think it hasn't move anywhere
-          //tighten by percentage?
-          //TODO: are all array needed populated?
+          break;
+        case CASPR_RESET:                   //r: reset lengths (make the cable robot think it is at a specific location)
+          {
+            unsigned int newLengths[NUMBER_CONNECTED_NANOS];
+            extractLengths(receivedCommand, newLengths);
+            resetLengths(newLengths);  //using newLengths[], update currentCableLengths[] and lastLengthCommands[]
 
-
-          //get currentCableLength
-          //-x and set as new length command
-          //send command to nano
-        }
-
-    } //switch
-  } //if
-
+            motorsEnabled = true;    //CLARIFY: why?
+          }
+          break;
+      }//switch
+    }//is multi-char cmd
+  }//if Serial.available
 }
 
-/* Update the initial lengths, i.e. length of each cable when the cable robot starts.
-   Will update currentCableLength[] and lastLengthCommand[].
-   -- Why? --
-   The cable robot moves depending on where it think it is (currentCableLength[], lastLengthCommand[]),
-   and that depends on where it think it started (initialLength[]).
-   If during movement/calibration, we realize that its movement is off because it actually started somewhere else,
-   we can use this function to update the initial lengths, and also correct its perceived current location on the fly. */
-void updateInitialLengths(const String &receivedCommand) {
-  char hexNewInitialLength[4];
-  unsigned int newInitialLength;
-  static int initialLength[NUMBER_CONNECTED_NANOS];  //0 at the start. Must be updated before running the robot.
+void extractLengths(const String &receivedCommand, unsigned int &lengths[NUMBER_CONNECTED_NANOS]) {
+  for (int n = 0; n < NUMBER_CONNECTED_NANOS; n++) {
+    char hexLength[HEX_DIGITS_LENGTH + 1]; //+1 to store the '\0' NUL terminator
+    for (int d = 0; d < HEX_DIGITS_LENGTH; d++) {
+      hexLength[d] = receivedCommand[1 + (HEX_DIGITS_LENGTH * n) + d]; //this ignores the 1-char command from matlab, and lengths for other nanos
+    }
+    hexLength[HEX_DIGITS_LENGTH] = '\0';
+    lengths[n] = strtol(hexLength, 0, 16); //convert from HEX to DEC
+  }
+}
+
+/* Write to: currentCableLengths[], lastLengthCommands[] */
+void updateInitialLengths(unsigned int newInitialLengths[NUMBER_CONNECTED_NANOS]){
+  static unsigned int initialLengths[NUMBER_CONNECTED_NANOS]; //equals 0 at the very beginning. Must be updated before running the robot.
 
   for (int n = 0; n < NUMBER_CONNECTED_NANOS; n++) {
-    //read to hexNewInitLength[]
-    for (int d = 0; d < HEX_DIGITS_LENGTH; d++) {
-      hexNewInitLength[d] = receivedCommand[1 + (n * HEX_DIGITS_LENGTH) + d];  //this ignores the 1-char command and the lengths for other nanos
-    }
-
-    //convert from HEX to DEC
-    newInitLength = strtol(hexNewInitLength, 0, 16);
-
-    //update where the robot think it currently is
-    currentCableLength[n] += newInitLength - initialLength[n];
-    lastLengthCommand[n] += newInitLength - initialLength[n];
+    //update where the robot thinks it currently is
+    currentCableLengths[n] += newInitialLengths[n] - initialLengths[n];
+    lastLengthCommands[n] += newInitialLengths[n] - initialLengths[n];
 
     //update where the robot thinks it started
-    initialLength[n] = newInitLength;
-
-    //pwmLastFeedback[n] = pwmFeedback[n]; //TODO: change to lastAngleFeedback? //TODO: can i remove this line??
+    initialLengths[n] = newInitialLengths[n];
   }
 }
 
-/* Make the cable robot think it is at a specific location.
-   Will update currentCableLength[] and lastLengthCommand[]. */
-void resetLengths(const String &receivedCommand) {
-  char hexNewLength[4];
-  unsigned int newLength;
+/* Write to: currentCableLengths[], lastLengthCommands[] */
+void resetLengths(unsigned int newLengths[NUMBER_CONNECTED_NANOS]){
   for (int n = 0; n < NUMBER_CONNECTED_NANOS; n++) {
-    for (int d = 0; d < HEX_DIGITS_LENGTH; d++) {
-      hexNewLength[d] = receivedCommand[1 + (n * HEX_DIGITS_LENGTH) + d];  //this ignores the 1-char command and the lengths for other nanos
-    }
-    newLength = strtol(hexNewLength, 0, 16);
-    currentCableLength[n] = newLength;
-    lastLengthCommand[n] = newLength;
+    currentCableLengths[n] = newLengths[n];
+    lastLengthCommands[n] = newLengths[n];
   }
 }
 
-/* Read feedback from ALL nanos, adjust for crossing, and update currentCableLength[].
-   Will also update lastAngleFeedback[].  */
-void updateCableLengths() {
+//Convert lengthCommands to crossingCommands and angleCommands
+/* read from: lastLengthCommands[], lastAngleFeedbacks[]
+   write to: lastLengthCommands[] */
+void computeCrossingAndAngleCommands(unsigned int lengthCommands[NUMBER_CONNECTED_NANOS], int &crossingCommands[NUMBER_CONNECTED_NANOS], unsigned int &angleCommands[NUMBER_CONNECTED_NANOS]) {
   for (int n = 0; n < NUMBER_CONNECTED_NANOS; n++) {
-    //read angle feedback from nano
-    unsigned int angle = readNanoFeedback(n); //nano should return angle in 0.1 degree precision
-
-    //Calculate the change in angle comparing to the last position.
-    //Adjust for crossing (i.e. the sudden jump in angle feedback when the value goes below min./above max.)
-    int angleChange = 0;   //in 0.1 degree precision
-    if (angle != lastAngleFeedback[n]) {
-      long angleChangeNoCrossing;
-      long angleChangeWithCrossing;
-
-      if (angle > lastAngleFeedback[n]) {    //angle reading increased
-        angleChangeNoCrossing = angle - lastAngleFeedback[n];  //positive
-        angleChangeWithCrossing = angleChangeNoCrossing - 360; //drop below min. -> negative
-      }
-      else if (angle < lastAngleFeedback[n]) { //angle reading decreased
-        angleChangeNoCrossing = angle - lastAngleFeedback[n];  //negative
-        angleChangeWithCrossing = angleChangeNoCrossing + 360; //go over max. -> positive
-      }
-
-      //shortest path is (assumed to be) the actual path taken
-      if ( abs(angleChangeNoCrossing) < abs(angleChangeWithCrossing) ) {
-        angleChange = angleChangeNoCrossing;
-      } else {
-        angleChange = angleChangeWithCrossing;
-      }
-    }
-    //save angle for comparison next time
-    lastAngleFeedback[n] = angle;
-
-    //convert angle change to length change
-    int lengthChange = round( (double)angleChange / 3600.0 * SPOOL_CIRCUMFERENCE ); //convert unit from 0.1degree to 0.1mm
-
-    //add the length change to the current length
-    currentCableLength[n] += lengthChange;
-  }
-}
-
-/* Request and read position feedback from ONE nano (the specified one), and return the feedback angle. */
-unsigned int readNanoFeedback(int nanoID) {
-  //listen to the specified nano (mega can only listen to one software serial at a time)
-  serialNano[nanoID].listen();
-
-  //requests feedback from nano
-  Serial1.println(NANO_FEEDBACK + String(nanoID));
-  Serial1.flush(); //waits for the sending of Serial to be complete before moving on
-
-  //wait for the feedback
-  int readCounter = 0;
-  while ((serialNano[nanoID].available() == 0) && readCounter < 200) { //TODO: 200 is a magic number. CLARIFY
-    readCounter++;
-  }
-
-  //read feedback
-  if (serialNano[nanoID].available() > 0) {
-    char hexFeedback[DIGITS_ANGLE_FEEDBACK + 1]; //+1 to store the '\0' NUL terminator at the end, to make it a string
-
-    //read feedback
-    for (int d = 0; d < DIGITS_ANGLE_FEEDBACK; d++) {
-      hexFeedback[d] = serialNano[nanoID].read();
-    }
-    hexFeedback[DIGITS_ANGLE_FEEDBACK] = '\0';
-
-    //clears the buffer of any other bytes
-    while (serialNano[nanoID].available() > 0) {
-      serialNano[nanoID].read();
-    }
-
-    //convert from HEX to DEC
-    return strtol(hexFeedback, 0, 16);
-  }
-}
-
-/* Convert currentCableLength[] to HEX and send to matlab/CASPRROS as feedback. */
-void sendLengthFeedback() {
-  Serial.print(CASPR_FEEDBACK);
-  for (int n = 0; n < NUMBER_CONNECTED_NANOS; n++) {
-    //convert feedback from DEC to HEX
-    char hexFeedback[HEX_DIGITS_LENGTH + 1]; //+1 for the null terminator '\0' at the end
-    itoa(lengthFeedback[n], hexFeedback, 16);//convert to HEX
-    int strLength = strlen(hexFeedback);     //count the number of characters in the resulting string
-
-    //pad 0 in front
-    for (int z = 0; z < (HEX_DIGITS_LENGTH - strLength); z++) {
-      Serial.print('0');
-    }
-
-    //print the HEX string
-    Serial.println(hexFeedback);
-    Serial.flush();
-  }
-}
-
-/* Translate length commands from the received matlab string to crossing commands and angle commands, and broadcast to nanos.
-   Requires an updated lastLengthCommand[] to calculate 
-   Requires an updated lastAngleFeedback[] to correctly decide whether crossing is need.
-   Will also update lastLengthCommand[]. */
-void translateCommandAndSendToNano() {
-  //if (receivedCommand[0] == CASPR_LENGTH_CMD) {  //TODO: how will it be read twice?
-
-  for (int n = 0; n < NUMBER_CONNECTED_NANOS; n++) { //for each nano
-
-    //extract length command for this nano
-    char hexCommand[HEX_DIGITS_LENGTH + 1]; //+1 to store the '\0' NUL terminator
-    for (int d = 0; d < HEX_DIGITS_LENGTH; d++) {
-      hexCommand[d] = receivedCommand[1 + (HEX_DIGITS_LENGTH * n) + d]; //this ignores the command from matlab, and length command for other nanos
-    }
-    hexCommand[HEX_DIGITS_LENGTH] = '\0';
-    unsigned int lengthCommand = strtol(hexCommand, 0, 16); //convert from HEX to DEC
-
-    ///////////////////////////////////// lengthCommand -> crossingCommand, angleCommand ////////////////////////////////
-
-    //convert length command to angle change command
-    int lengthChangeCommand = lengthCommand - lastLengthCommand[n];
+    //convert length command (absolute) to angle change command (relative), to determine whether crossing is needed
+    int lengthChangeCommand = lengthCommands[n] - lastLengthCommands[n];
     int angleChangeCommand = round( (double)lengthChangeCommand / (double)SPOOL_CIRCUMFERENCE * 3600 ); //convert unit from 0.1mm to 0.1degree
 
-    //convert angle change command to crossing command and angle command (decide whether crossing is needed)
-    int crossingCommand = 0;   //either 0, CLOCKWISE, or ANTICLOCKWISE
-    int angleCommand = lastAngleFeedback[n] + angleChangeCommand; //in 0.1 degree precision
-    //=== went under min. angle while spinning anticlockwise ==========================================================
-    if (angleCommand < 0) {
+    //determine whether crossing is needed, and generate crossing command and angle command (absolute)
+    int crossingCommand = 0;  //0, CLOCKWISE, or ANTICLOCKWISE
+    int angleCommand = lastAngleFeedbacks[n] + angleChangeCommand; //in 0.1 degree precision
+    if (angleCommand < 0) {   //========================================= went under min. angle (while spinning anticlockwise) =======
       if (angleCommand < - CROSSING_ZONE_SIZE) {         //went past crossing zone
         //cross to the other side
         crossingCommand = ANTICLOCKWISE;
         angleCommand += 3600;
-      }
+      } 
       else if (angleCommand < - CROSSING_ZONE_SIZE / 2) { //in the crossing zone, went past tipping point
         //cross and stay at the far edge of the crossing zone
         crossingCommand = ANTICLOCKWISE;
@@ -353,8 +255,7 @@ void translateCommandAndSendToNano() {
         angleCommand = 0;
       }
     }
-    //=== went over max. angle while spinning clockwise ==========================================================
-    else if (angleCommand > (3600 - CROSSING_ZONE_SIZE) ) {
+    else if (angleCommand > (3600 - CROSSING_ZONE_SIZE) ) { //=========== went over max. angle (while spinning clockwise) ============
       if (angleCommand > 3600) {                                  //went past crossing zone
         //cross to the other side
         crossingCommand = CLOCKWISE;
@@ -372,29 +273,127 @@ void translateCommandAndSendToNano() {
       }
     }
 
+    //return data
+    crossingCommands[n] = crossingCommand;
+    angleCommands[n] = angleCommand;
 
-
-    /////////////////////////////send crossing command and angle command//////////////////////////////////////////////////
-
-    //send crossing command
-    Serial1.print(crossingCommand);
-
-    //convert angle command to HEX and send
-    char hexAngleCommand[DIGITS_ANGLE_COMMAND + 1];  //+1 for the NUL terminator \0
-    itoa(angleCommand, hexAngleCommand, 16);
-    Serial1.print(hexAngleCommand);
-
-    //update lastLengthCommand[] for comparison with the next command
-    lastLengthCommand[n] = lengthCommand;
-
+    //update lastLengthCommands[] for comparison with the next command
+    lastLengthCommands[n] = lengthCommands[n];
   }//for each nano
+}
+
+/* write to: Serial1 */
+void broadcastCommandsToNanos(int &crossingCommands[NUMBER_CONNECTED_NANOS], unsigned int &angleCommands[NUMBER_CONNECTED_NANOS]){
+  for (int n = 0; n < NUMBER_CONNECTED_NANOS; n++) {
+    //send crossing command
+    Serial1.print(crossingCommands[n]);
+
+    //convert angle command to HEX and send it 
+    char hexAngleCommand[DIGITS_ANGLE_COMMAND + 1];  //+1 for the NUL terminator \0
+    itoa(angleCommands[n], hexAngleCommand, 16);
+    Serial1.print(hexAngleCommand);
+  }
 
   Serial1.println();
   Serial1.flush();
+}
 
+//return 65535 if no feedback from nano
+/* read from: serialNano[nanoID] <- ONE nano, not all
+   write to: Serial1   */
+unsigned int readAngleFromNano(int nanoID){
+  //listen to the specified nano (mega can only listen to one software serial at a time)
+  serialNano[nanoID].listen();
 
-  //  receivedCommand[0] = '\0'; //resets array, so it is not read twice          //TODO: how will it be read twice?
-  //  enableMotors = 1;                                                           //TODO: is it necessary?
+  //send a request for feedback to nano
+  Serial1.println(NANO_FEEDBACK + String(nanoID));
+  Serial1.flush();
+
+  //wait for the feedback
+  int readCounter = 0;
+  while ((serialNano[nanoID].available() == 0) && readCounter < 200) { //TODO: 200 is a magic number. CHANGE THIS!
+    readCounter++;
+  }
+
+  //read feedback
+  if (serialNano[nanoID].available() > 0) {
+    char hexAngleFeedback[DIGITS_ANGLE_FEEDBACK + 1]; //+1 to store the '\0' NUL terminator at the end, to make it a string
+
+    //read feedback
+    for (int d = 0; d < DIGITS_ANGLE_FEEDBACK; d++) {
+      hexAngleFeedback[d] = serialNano[nanoID].read();
+    }
+    hexAngleFeedback[DIGITS_ANGLE_FEEDBACK] = '\0';
+
+    //clears the buffer of any other bytes
+    while (serialNano[nanoID].available() > 0) {
+      serialNano[nanoID].read();
+    }
+
+    //convert from HEX to DEC
+    return strtol(hexAngleFeedback, 0, 16);
+  }
+
+  //what if SerialNano[nanoID] is not available? Return a flag (>3600)
+  return 65535;
+}
+
+/* read from: currentCableLengths[], lastAngleFeedbacks[]
+   write to: currentCableLengths[] */
+void computeCurrentCableLengths(unsigned int currentAngles[NUMBER_CONNECTED_NANOS]){
+  for (int n = 0; n < NUMBER_CONNECTED_NANOS; n++) {
+    //Calculate the change in angle comparing to the last position. (the effect of possible crossing is accounted for.)
+    int angleChange = 0;   //in 0.1 degree precision
+    if (currentAngles[n] != lastAngleFeedbacks[n]) {
+      long angleChangeNoCrossing;
+      long angleChangeWithCrossing;
+
+      if (currentAngles[n] > lastAngleFeedbacks[n]) {    //angle reading increased
+        angleChangeNoCrossing = currentAngles[n] - lastAngleFeedbacks[n];  //positive
+        angleChangeWithCrossing = angleChangeNoCrossing - 360; //drop below min. -> negative
+      }
+      else if (currentAngles[n] < lastAngleFeedbacks[n]) { //angle reading decreased
+        angleChangeNoCrossing = currentAngles[n] - lastAngleFeedbacks[n];  //negative
+        angleChangeWithCrossing = angleChangeNoCrossing + 360; //go over max. -> positive
+      }
+
+      //shortest path is (assumed to be) the actual path taken
+      if ( abs(angleChangeNoCrossing) < abs(angleChangeWithCrossing) ) {
+        angleChange = angleChangeNoCrossing;
+      } else {
+        angleChange = angleChangeWithCrossing;
+      }
+    }
+    //save angle for comparison next time
+    lastAngleFeedbacks[n] = currentAngles[n];
+
+    //convert angle change to length change
+    int lengthChange = round( (double)angleChange / 3600.0 * SPOOL_CIRCUMFERENCE ); //convert unit from 0.1degree to 0.1mm
+
+    //add the length change to the current length
+    currentCableLengths[n] += lengthChange;
+  }
+}
+
+/* read from: currentCableLengths[]
+   write to: Serial */
+void sendCurrentCableLengths() {
+  Serial.print(CASPR_FEEDBACK);
+  for (int n = 0; n < NUMBER_CONNECTED_NANOS; n++) {
+    //convert feedback from DEC to HEX
+    char hexFeedback[HEX_DIGITS_LENGTH + 1]; //+1 for the null terminator '\0' at the end
+    itoa(currentCableLengths[n], hexFeedback, 16);//convert to HEX
+    int strLength = strlen(hexFeedback);     //count the number of characters in the resulting string
+
+    //pad 0 in front (in case hexFeedback is shorter than HEX_DIGITS_LENGTH)
+    for (int zeros = 0; zeros < (HEX_DIGITS_LENGTH - strLength); zeros++) {
+      Serial.print('0');
+    }
+
+    //print the HEX string
+    Serial.println(hexFeedback);
+  }
+  Serial.flush();
 }
 
 
