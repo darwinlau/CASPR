@@ -59,6 +59,16 @@ unsigned int currentCableLengths[NUMBER_CONNECTED_NANOS];  //in 0.1mm precision
 unsigned int lastLengthCommands[NUMBER_CONNECTED_NANOS]; //in 0.1mm precision
 //help convert new length command (absolute) to angle change (relative). This help decide whether crossing is needed or not
 
+////////////////// function prototypes (needed because arduino won't do it for you if you use & references ///////////////////////////////////
+void extractLengths(const String &receivedCommand, unsigned int lengths[NUMBER_CONNECTED_NANOS]);
+void updateInitialLengths(unsigned int newInitialLengths[NUMBER_CONNECTED_NANOS]);
+void resetLengths(unsigned int newLengths[NUMBER_CONNECTED_NANOS]);
+void computeCrossingAndAngleCommands(unsigned int lengthCommands[NUMBER_CONNECTED_NANOS], int crossingCommands[NUMBER_CONNECTED_NANOS], unsigned int angleCommands[NUMBER_CONNECTED_NANOS]);
+void broadcastCommandsToNanos(int crossingCommands[NUMBER_CONNECTED_NANOS], unsigned int angleCommands[NUMBER_CONNECTED_NANOS]);
+unsigned int readAngleFromNano(int nanoID);
+void computeCurrentCableLengths(unsigned int currentAngles[NUMBER_CONNECTED_NANOS]);
+void sendCurrentCableLengths();
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // TODO: Decide on the maximum number of Nanos we would ever connect
 SoftwareSerial serialNano[8] = {
@@ -154,6 +164,8 @@ void loop() {
           break;
         case CASPR_LENGTH_CMD:                 //l: Get nano feedback to matlab, then matlab command to nano
           {
+            motorsEnabled = true; //BUG/TODO: this setting is useless?
+            
             if (systemOn){
               unsigned int currentAngles[NUMBER_CONNECTED_NANOS];
               for (int n = 0; n < NUMBER_CONNECTED_NANOS; n++){
@@ -190,7 +202,7 @@ void loop() {
   }//if Serial.available
 }
 
-void extractLengths(const String &receivedCommand, unsigned int &lengths[NUMBER_CONNECTED_NANOS]) {
+void extractLengths(const String &receivedCommand, unsigned int lengths[NUMBER_CONNECTED_NANOS]) {
   for (int n = 0; n < NUMBER_CONNECTED_NANOS; n++) {
     char hexLength[HEX_DIGITS_LENGTH + 1]; //+1 to store the '\0' NUL terminator
     for (int d = 0; d < HEX_DIGITS_LENGTH; d++) {
@@ -226,7 +238,7 @@ void resetLengths(unsigned int newLengths[NUMBER_CONNECTED_NANOS]){
 //Convert lengthCommands to crossingCommands and angleCommands
 /* read from: lastLengthCommands[], lastAngleFeedbacks[]
    write to: lastLengthCommands[] */
-void computeCrossingAndAngleCommands(unsigned int lengthCommands[NUMBER_CONNECTED_NANOS], int &crossingCommands[NUMBER_CONNECTED_NANOS], unsigned int &angleCommands[NUMBER_CONNECTED_NANOS]) {
+void computeCrossingAndAngleCommands(unsigned int lengthCommands[NUMBER_CONNECTED_NANOS], int crossingCommands[NUMBER_CONNECTED_NANOS], unsigned int angleCommands[NUMBER_CONNECTED_NANOS]) {
   for (int n = 0; n < NUMBER_CONNECTED_NANOS; n++) {
     //convert length command (absolute) to angle change command (relative), to determine whether crossing is needed
     int lengthChangeCommand = lengthCommands[n] - lastLengthCommands[n];
@@ -280,7 +292,7 @@ void computeCrossingAndAngleCommands(unsigned int lengthCommands[NUMBER_CONNECTE
 }
 
 /* write to: Serial1 */
-void broadcastCommandsToNanos(int &crossingCommands[NUMBER_CONNECTED_NANOS], unsigned int &angleCommands[NUMBER_CONNECTED_NANOS]){
+void broadcastCommandsToNanos(int crossingCommands[NUMBER_CONNECTED_NANOS], unsigned int angleCommands[NUMBER_CONNECTED_NANOS]){
   Serial1.print(NANO_ANGLE_COMMAND);
   for (int n = 0; n < NUMBER_CONNECTED_NANOS; n++) {
     //send crossing command

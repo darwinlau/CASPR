@@ -78,7 +78,7 @@ void executeAngleCommand(const String &strReceived){
     }
     else {                                       //else, extract new position command and execute it
       int newAngleCommand = extractAngleCommand(strReceived);
-      int newPWMCommand = maps(newAngleCommand, 0, (3600 - CROSSING_ZONE_SIZE), COMMAND_PWM_MIN, COMMAND_PWM_MAX);
+      int newPWMCommand = mapping(newAngleCommand, 0, (3600 - CROSSING_ZONE_SIZE), COMMAND_PWM_MIN, COMMAND_PWM_MAX);
       writePulseToServo(newPWMCommand);
       writePulseToServo(newPWMCommand);
       //FIX: send counter? stop sending the same thing after 3 times, to stop vibration caused by noise
