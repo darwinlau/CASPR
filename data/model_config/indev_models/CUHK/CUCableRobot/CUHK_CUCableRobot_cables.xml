@@ -73,7 +73,6 @@
         </attachment>
       </attachments>
     </cable_ideal>
-    <!-- motor B5 -->
 	<cable_ideal name="B" attachment_reference="joint">
       <properties>
         <force_min>1</force_min>
@@ -146,7 +145,6 @@
   
   
   <cable_set id="H_frame">
-    <!-- motor X1 -->
 	<cable_ideal name="X" attachment_reference="joint">
       <properties>
         <force_min>1</force_min>
