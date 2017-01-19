@@ -43,7 +43,7 @@ void loop() {
         {
           char id = strReceived[1];
           if (id == NANO_ID + '0') {//if the request is for this nano
-            int angleFeedback = mapping(avgPWMFeedback, FEEDBACK_PWM_MIN, FEEDBACK_PWM_MAX, 0, (3600 - CROSSING_ZONE_SIZE));
+            int angleFeedback = mapping(avgPWMFeedback, FEEDBACK_PWM_MIN, FEEDBACK_PWM_MAX, (CROSSING_ZONE_SIZE / 2), (3600 - CROSSING_ZONE_SIZE / 2) );
             sendFeedback(angleFeedback);
           }
         }
@@ -78,7 +78,7 @@ void executeAngleCommand(const String &strReceived){
     }
     else {                                       //else, extract new position command and execute it
       int newAngleCommand = extractAngleCommand(strReceived);
-      int newPWMCommand = mapping(newAngleCommand, 0, (3600 - CROSSING_ZONE_SIZE), COMMAND_PWM_MIN, COMMAND_PWM_MAX);
+      int newPWMCommand = mapping(newAngleCommand, (CROSSING_ZONE_SIZE / 2), (3600 - CROSSING_ZONE_SIZE / 2), COMMAND_PWM_MIN, COMMAND_PWM_MAX);
       writePulseToServo(newPWMCommand);
       writePulseToServo(newPWMCommand);
       //FIX: send counter? stop sending the same thing after 3 times, to stop vibration caused by noise

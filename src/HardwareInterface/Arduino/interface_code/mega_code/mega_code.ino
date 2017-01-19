@@ -52,12 +52,16 @@ boolean motorsEnabled = false;  //no servo movement when off
 //TODO: make sure these are populated before use
 unsigned int lastAngleFeedbacks[NUMBER_CONNECTED_NANOS]; //in 0.1 degree precision
 //help determine whether crossing has happened (used in processing feedback data) or will happen(processing command data)
+//help convert angle feedback (absolute) to angle change feedback (relative). This help decide whether crossing has happened or not
 
 unsigned int currentCableLengths[NUMBER_CONNECTED_NANOS];  //in 0.1mm precision
 //help convert angle change feedback (relative) to an updated current cable length (absolute), to feed back to matlab/CASPRROS
 
 unsigned int lastLengthCommands[NUMBER_CONNECTED_NANOS]; //in 0.1mm precision
-//help convert new length command (absolute) to angle change (relative). This help decide whether crossing is needed or not
+//help convert new length command (absolute) to angle change command (relative). This help decide whether crossing is needed or not
+
+unsigned int lastAngleCommands[NUMBER_CONNECTED_NANOS];  //in 0.1 degree precision
+//help convert angle change command (relative) to angle command (absolute), to send to nano.
 
 ////////////////// function prototypes (needed because arduino won't do it for you if you use & references ///////////////////////////////////
 void extractLengths(const String &receivedCommand, unsigned int lengths[NUMBER_CONNECTED_NANOS]);
@@ -111,9 +115,10 @@ void loop() {
           break;
         case CASPR_SETUP:                      //k: [current usage: populate necessary arrays]
           {
-              //populate lastAngleFeedbacks[]
+              //populate lastAngleFeedbacks[] and lastAngleCommands[]
               for (int n = 0; n < NUMBER_CONNECTED_NANOS; n++){
                 lastAngleFeedbacks[n] = readAngleFromNano(n);
+                lastAngleCommands[n] = lastAngleFeedbacks[n];
               }
 
               //initialLengths[], currentCableLengths[], and lastLengthCommands[] will be populated in the CASPR_INITIAL case
@@ -246,48 +251,33 @@ void computeCrossingAndAngleCommands(unsigned int lengthCommands[NUMBER_CONNECTE
 
     //determine whether crossing is needed, and generate crossing command and angle command (absolute)
     int crossingCommand = 0;  //0, CLOCKWISE, or ANTICLOCKWISE
-    int angleCommand = lastAngleFeedbacks[n] + angleChangeCommand; //in 0.1 degree precision
-    if (angleCommand < 0) {   //========================================= went under min. angle (while spinning anticlockwise) =======
-      if (angleCommand < - CROSSING_ZONE_SIZE) {         //went past crossing zone
-        //cross to the other side
-        crossingCommand = ANTICLOCKWISE;
-        angleCommand += 3600;
-      } 
-      else if (angleCommand < - CROSSING_ZONE_SIZE / 2) { //in the crossing zone, went past tipping point
-        //cross and stay at the far edge of the crossing zone
-        crossingCommand = ANTICLOCKWISE;
-        angleCommand = 3600 - CROSSING_ZONE_SIZE;
-      }
-      else {                                             //in the crossing zone, didn't went past the tipping point
-        //stay on the near edge of the crossing zone
-        crossingCommand = 0;
-        angleCommand = 0;
-      }
+    int angleCommand = lastAngleCommands[n] + angleChangeCommand; //in 0.1 degree precision
+    if (angleCommand >= 3600){
+      angleCommand -= 3600;
+      crossingCommand = CLOCKWISE;
     }
-    else if (angleCommand > (3600 - CROSSING_ZONE_SIZE) ) { //=========== went over max. angle (while spinning clockwise) ============
-      if (angleCommand > 3600) {                                  //went past crossing zone
-        //cross to the other side
-        crossingCommand = CLOCKWISE;
-        angleCommand -= 3600;
-      }
-      else if (angleCommand > (3600 - CROSSING_ZONE_SIZE / 2) ) { //in the crossing zone, went past tipping point
-        //cross and stay at the far edge of the crossing zone
-        crossingCommand = CLOCKWISE;
-        angleCommand = 0;
-      }
-      else {                                                      //in the crossing zone, didn't went past the tipping point
-        //stay on the near edge of the crossing zone
-        crossingCommand = 0;
-        angleCommand = 3600 - CROSSING_ZONE_SIZE;
-      }
+    else if (angleCommand < 0){
+      angleCommand += 3600;
+      crossingCommand = ANTICLOCKWISE;
+    }
+
+    //adjust angle command: tell the servo to stay outside crossing zone before and after crossing 
+    //(during crossing, crossingCommand trumps adjustedAngleCommand)
+    int adjustedAngleCommand = angleCommand;
+    if (adjustedAngleCommand > 3600 - (CROSSING_ZONE_SIZE / 2) ){
+      adjustedAngleCommand = 3600 - (CROSSING_ZONE_SIZE / 2);
+    }
+    else if (adjustedAngleCommand < (CROSSING_ZONE_SIZE / 2) ){
+      adjustedAngleCommand = (CROSSING_ZONE_SIZE / 2);
     }
 
     //return data
     crossingCommands[n] = crossingCommand;
-    angleCommands[n] = angleCommand;
+    angleCommands[n] = adjustedAngleCommand; //send adjusted angle command for actual movement
 
-    //update lastLengthCommands[] for comparison with the next command
+    //update these for comparison with the next command
     lastLengthCommands[n] = lengthCommands[n];
+    lastAngleCommands[n] = angleCommand;     //keep the authentic angleCommand, not the transitional adjustedAngleCommand
   }//for each nano
 }
 
