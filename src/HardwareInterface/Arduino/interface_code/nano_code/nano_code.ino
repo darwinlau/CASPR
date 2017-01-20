@@ -14,7 +14,9 @@
 #define CLOCKWISE 1
 #define ANTICLOCKWISE 2
 
-#define CROSSING_ZONE_SIZE 70   //in 0.1degree
+#define CROSSING_ZONE_SIZE 70   //(in 0.1degree)
+#define REASONABLE_VARIATION_IN_PWM_FEEDBACKS 50 //(in microsecond) used to check whether feedback varies too much = faulty
+//the normal variation is around 7. Abnormal variation (e.g. during crossing) could be 500 or higher
 
 int avgPWMFeedback; //stores the position of the servo.
 int lastPWMFeedback = 0; //This variable can be use in a pinch when new feedback is faulty
@@ -98,12 +100,32 @@ void sendFeedback(int feedback){
 
 /* read feedback pulse width (in microsecond) from servo # times and return the average value. */
 int readAvgFeedback(int numOfReadings){
+  static int lastValidAvgFeedback; //needed in crossing zone where feedback is buggy
+
   double sumOfFeedback = 0;
+  int feedback;
+  int maxFeedback = 0;
+  int minFeedback = 32767;
   for (int i = 0; i < numOfReadings; i++){
-    sumOfFeedback += readFeedbackFromServo();
+    feedback = readFeedbackFromServo();
+
+    //error checking and compensation
+    if (feedback > maxFeedback){
+      maxFeedback = feedback;
+    }
+    if (feedback < minFeedback){
+      minFeedback = feedback;
+    }
+    if (maxFeedback - minFeedback > REASONABLE_VARIATION_IN_PWM_FEEDBACKS){
+      return lastValidAvgFeedback;
+    }
+
+    sumOfFeedback += feedback;
     delay(1);
   }
+
   int average = lround(sumOfFeedback / numOfReadings);  //average the feedback. Round result from double to long
+  lastValidAvgFeedback = average; //backup in case feedback is faulty in the future
   return average;
 }
 

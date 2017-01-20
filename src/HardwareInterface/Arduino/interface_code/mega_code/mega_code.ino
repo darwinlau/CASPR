@@ -95,6 +95,7 @@ SoftwareSerial serialNano[8] = {
 void setup() {
   Serial.begin(BAUD_RATE_CASPR);  //USB
   Serial1.begin(BAUD_RATE_NANO); //for broadcasting to nano
+  Serial3.begin(BAUD_RATE_NANO); //DEBUG TODO:REMOVE
 
   for (int i = 0; i < NUMBER_CONNECTED_NANOS; i++) {
     serialNano[i].begin(BAUD_RATE_NANO); //for receiving from nano
@@ -349,13 +350,14 @@ void computeCurrentCableLengths(unsigned int currentAngles[NUMBER_CONNECTED_NANO
       long angleChangeWithCrossing;
 
       if (currentAngles[n] > lastAngleFeedbacks[n]) {    //angle reading increased
-        angleChangeNoCrossing = currentAngles[n] - lastAngleFeedbacks[n];  //positive
-        angleChangeWithCrossing = angleChangeNoCrossing - 360; //drop below min. -> negative
+        angleChangeNoCrossing = (long)currentAngles[n] - lastAngleFeedbacks[n];  //positive
+        angleChangeWithCrossing = angleChangeNoCrossing - 3600; //drop below min. -> negative
       }
       else if (currentAngles[n] < lastAngleFeedbacks[n]) { //angle reading decreased
-        angleChangeNoCrossing = currentAngles[n] - lastAngleFeedbacks[n];  //negative
-        angleChangeWithCrossing = angleChangeNoCrossing + 360; //go over max. -> positive
+        angleChangeNoCrossing = (long)currentAngles[n] - lastAngleFeedbacks[n];  //negative
+        angleChangeWithCrossing = angleChangeNoCrossing + 3600; //go over max. -> positive
       }
+      //must cast currentAngles[n] to long, otherwise unsigned int minus a big number will cause underflow.
 
       //shortest path is (assumed to be) the actual path taken
       if ( abs(angleChangeNoCrossing) < abs(angleChangeWithCrossing) ) {
@@ -363,13 +365,27 @@ void computeCurrentCableLengths(unsigned int currentAngles[NUMBER_CONNECTED_NANO
       } else {
         angleChange = angleChangeWithCrossing;
       }
+
+      //convert angle change to length change
+      int lengthChange = round( (double)angleChange / 3600.0 * SPOOL_CIRCUMFERENCE ); //convert unit from 0.1degree to 0.1mm
+
+      //add the length change to the current length
+      currentCableLengths[n] += lengthChange;
+
+      Serial3.print(currentAngles[n]);
+      Serial3.print("\t");
+      Serial3.print(lastAngleFeedbacks[n]);
+      Serial3.print("\t");
+      Serial3.print(angleChangeNoCrossing);
+      Serial3.print("\t");
+      Serial3.print(angleChangeWithCrossing);
+      Serial3.print("\t");
+      Serial3.print(angleChange);
+      Serial3.print("\t");
+      Serial3.print(lengthChange);
+      Serial3.print("\t");
+      Serial3.println(currentCableLengths[n]);
     }
-
-    //convert angle change to length change
-    int lengthChange = round( (double)angleChange / 3600.0 * SPOOL_CIRCUMFERENCE ); //convert unit from 0.1degree to 0.1mm
-
-    //add the length change to the current length
-    currentCableLengths[n] += lengthChange;
   }
 }
 
