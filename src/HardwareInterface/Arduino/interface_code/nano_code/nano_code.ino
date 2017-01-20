@@ -20,7 +20,7 @@
 
 int avgPWMFeedback; //stores the position of the servo.
 int lastPWMFeedback = 0; //This variable can be use in a pinch when new feedback is faulty
-int lastCrossingCommand = 0; //for use in checkCrossingStatus()
+int lastCrossingAction = 0; //for the doneCrossing()? check, and for continuing of crossing if it's not done
 
 void setup() {
   Serial.begin(BAUD_RATE);
@@ -52,7 +52,7 @@ void loop() {
         break;
       
       case RECEIVE_ANGLE_CMD:              //c
-        executeAngleCommand(strReceived);//pass a pointer to strReceived
+        executeAngleCommand(strReceived);//pass a pointer to strReceived to the function
         avgPWMFeedback = readAvgFeedback(4); //prepare for the next time when mega send a feedback request. Average 4 measurements.
         break;
       
@@ -66,26 +66,72 @@ void loop() {
 
 /* execute angle command from mega: move to the specified position with position mode, or cross the "crossing zone" with velocity mode */
 void executeAngleCommand(const String &strReceived){
+  static int lastCrossingCommand = 0;
+  
   //extract new crossing command
   int newCrossingCommand = extractCrossingCommand(strReceived);
 
-  if (newCrossingCommand > 0){                   //if there's new crossing command, execute it
-     cross(newCrossingCommand);
-     lastCrossingCommand = newCrossingCommand;
+  //lastCrossingCommand -> newCrossingCommand scenarios:
+  // 0 -> 1, clockwise
+  // 0 -> 2, anticlockwise
+  // 1 -> 2, anticlockwise
+  // 2 -> 1, clockwise
+  // 1 -> 1, not done crossing(x) clockwise, or done(v) stop
+  // 2 -> 2, (x) anticlockwise or (v) stop
+  // 1 -> 0, (x) clockwise, or (v) goto
+  // 2 -> 0, (x) anticlockwise, or (v) goto
+  // 0 -> 0, (x) clockwise/anticlockwise, or (v) goto
+
+  //if mega command says:
+  if (lastCrossingCommand == 0 && newCrossingCommand > 0){ //"start new crossing"
+    cross(newCrossingCommand);
   }
-  else {
-    int crossingStatus = checkCrossingStatus();
-    if (crossingStatus > 0){                     //else, finish the previous crossing
-      cross(crossingStatus);
-    }
-    else {                                       //else, extract new position command and execute it
-      int newAngleCommand = extractAngleCommand(strReceived);
-      int newPWMCommand = mapping(newAngleCommand, (CROSSING_ZONE_SIZE / 2), (3600 - CROSSING_ZONE_SIZE / 2), COMMAND_PWM_MIN, COMMAND_PWM_MAX);
-      writePulseToServo(newPWMCommand);
-      writePulseToServo(newPWMCommand);
-      //FIX: send counter? stop sending the same thing after 3 times, to stop vibration caused by noise
+  else if (lastCrossingCommand > 0 && newCrossingCommand > 0 && newCrossingCommand != lastCrossingCommand){  //"change crossing direction"
+    cross(newCrossingCommand);
+  }
+  else if (lastCrossingCommand > 0 && newCrossingCommand == lastCrossingCommand){ //"continue crossing"
+    if (doneCrossing()){
+      //do nothing
+    } 
+    else {
+      cross(newCrossingCommand);
     }
   }
+  else if (lastCrossingCommand > 0 && newCrossingCommand == 0){ //"stop crossing; follow angle command"
+    if (doneCrossing()){
+      goToPosition(strReceived);
+    }
+    else {
+      cross(lastCrossingCommand);
+    }
+  }
+  else if (lastCrossingCommand == 0 && newCrossingCommand == 0){ //"just follow angle command"
+    if (doneCrossing()){
+      goToPosition(strReceived);
+    }
+    else {
+      cross(-1);  //repeating last crossing command
+    }
+  }
+
+  lastCrossingCommand = newCrossingCommand;
+
+  //FIX: send counter? stop sending the same thing after 3 times, to stop vibration caused by noise
+}
+
+/* Move servo to position specified in strReceived. Faulty value is corrected. */
+void goToPosition(const String &strReceived){
+  int newAngleCommand = extractAngleCommand(strReceived);
+  int newPWMCommand = mapping(newAngleCommand, (CROSSING_ZONE_SIZE / 2), (3600 - CROSSING_ZONE_SIZE / 2), COMMAND_PWM_MIN, COMMAND_PWM_MAX);
+
+  if (newPWMCommand > COMMAND_PWM_MAX){
+    newPWMCommand = COMMAND_PWM_MAX;
+  } else if (newPWMCommand < COMMAND_PWM_MIN){
+    newPWMCommand = COMMAND_PWM_MIN;
+  }
+
+  writePulseToServo(newPWMCommand);
+  writePulseToServo(newPWMCommand);
 }
 
 /* Convert feedback from DEC to HEX chars, and send to mega via Serial. */
@@ -164,8 +210,14 @@ int extractCrossingCommand(const String &strReceived){
 
 /* Send velocity command to servo to cross the "crossing zone" 
    where position command and feedback doesn't work. */
-void cross(int crossingCommand){
-  switch (crossingCommand){
+void cross(int command){
+  //repeat the last crossing action if -1 is received
+  if (command == -1){
+    command = lastCrossingAction;
+  }
+
+  //execute crossing command
+  switch (command){
     case CLOCKWISE:
       writePulseToServo(CLOCKWISE_PWM_MIN); //min speed
       writePulseToServo(CLOCKWISE_PWM_MIN); //write twice to make sure it moves. FIX?
@@ -175,31 +227,33 @@ void cross(int crossingCommand){
       writePulseToServo(ANTICLOCKWISE_PWM_MIN);
       break;
   }
+
+  lastCrossingAction = command;
 }
 
 /* Return the servo's crossing status.
    Return 0 if it has exited the crossing zone, or CLOCKWISE/ANTICLOCKWISE if it's still crossing. */
-int checkCrossingStatus(){
+bool doneCrossing(){
   int servoPosition = readAvgFeedback(4);
-  switch (lastCrossingCommand){
+  switch (lastCrossingAction){
     case CLOCKWISE:  //if it was crossing clockwise
       if ((servoPosition > (FEEDBACK_PWM_MIN)) && (servoPosition <= FEEDBACK_PWM_MIDDLE)) {
-        return 0;
+        return true;
       } else {
-        return CLOCKWISE;
+        return false;
       }
       break;
     case ANTICLOCKWISE: //if it was crossing anticlockwise
       if ((servoPosition < (FEEDBACK_PWM_MAX)) && (servoPosition > FEEDBACK_PWM_MIDDLE )) {
-        return 0;
+        return true;
       } else {
-        return ANTICLOCKWISE;
+        return false;
       }
       break;
   } //switch
 
-  //if all else failed
-  return 0;
+  //if wasn't crossing at all, or if all else failed
+  return true;
 }
 
 /* Send one PWM pulse to servo.

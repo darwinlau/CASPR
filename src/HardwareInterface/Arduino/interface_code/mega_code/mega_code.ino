@@ -253,32 +253,31 @@ void computeCrossingAndAngleCommands(unsigned int lengthCommands[NUMBER_CONNECTE
     //determine whether crossing is needed, and generate crossing command and angle command (absolute)
     int crossingCommand = 0;  //0, CLOCKWISE, or ANTICLOCKWISE
     int angleCommand = lastAngleCommands[n] + angleChangeCommand; //in 0.1 degree precision
+
+    //keep angleCommand between 0 to 3599
     if (angleCommand >= 3600){
       angleCommand -= 3600;
-      crossingCommand = CLOCKWISE;
     }
     else if (angleCommand < 0){
       angleCommand += 3600;
-      crossingCommand = ANTICLOCKWISE;
     }
 
-    //adjust angle command: tell the servo to stay outside crossing zone before and after crossing 
-    //(during crossing, crossingCommand trumps adjustedAngleCommand)
-    int adjustedAngleCommand = angleCommand;
-    if (adjustedAngleCommand > 3600 - (CROSSING_ZONE_SIZE / 2) ){
-      adjustedAngleCommand = 3600 - (CROSSING_ZONE_SIZE / 2);
-    }
-    else if (adjustedAngleCommand < (CROSSING_ZONE_SIZE / 2) ){
-      adjustedAngleCommand = (CROSSING_ZONE_SIZE / 2);
+    //as long as it's inside crossing zone, send crossing command
+    if (angleCommand > 3600 - CROSSING_ZONE_SIZE / 2 || angleCommand < CROSSING_ZONE_SIZE / 2){  
+      if (angleChangeCommand >= 0){
+        crossingCommand = CLOCKWISE;
+      } else {
+        crossingCommand = ANTICLOCKWISE;
+      }
     }
 
     //return data
     crossingCommands[n] = crossingCommand;
-    angleCommands[n] = adjustedAngleCommand; //send adjusted angle command for actual movement
+    angleCommands[n] = angleCommand;
 
     //update these for comparison with the next command
     lastLengthCommands[n] = lengthCommands[n];
-    lastAngleCommands[n] = angleCommand;     //keep the authentic angleCommand, not the transitional adjustedAngleCommand
+    lastAngleCommands[n] = angleCommand;
   }//for each nano
 }
 
