@@ -13,11 +13,11 @@
             <attachments>
                 <attachment>
                     <link>0</link>
-                    <location>-0.2914 0.0 0.388</location>
+                    <location>-0.28 0.0 -0.388</location>
                 </attachment>
                 <attachment>
                     <link>1</link>
-                    <location>-0.033165 0.0 0.033165</location>
+                    <location>-0.0428 0.0 -0.0228</location>
                 </attachment>
             </attachments>
         </cable_ideal>
@@ -29,11 +29,11 @@
             <attachments>
                 <attachment>
                     <link>0</link>
-                    <location>0.2914 0.0 0.388</location>
+                    <location>-0.28 0.0 0.388</location>
                 </attachment>
                 <attachment>
                     <link>1</link>
-                    <location>0.033165 0.0 0.033165</location>
+                    <location>-0.0428 0.0 0.0228</location>
                 </attachment>
             </attachments>
         </cable_ideal>
@@ -45,11 +45,11 @@
             <attachments>
                 <attachment>
                     <link>0</link>
-                    <location>0.2914 0.0 -0.388</location>
+                    <location>0.28 0.0 0.388</location>
                 </attachment>
                 <attachment>
                     <link>1</link>
-                    <location>0.033165 0.0 -0.033165</location>
+                    <location>0.0428 0.0 0.0228</location>
                 </attachment>
             </attachments>
         </cable_ideal>
@@ -61,11 +61,11 @@
             <attachments>
                 <attachment>
                     <link>0</link>
-                    <location>-0.2914 0.0 -0.388</location>
+                    <location>0.28 0.0 -0.388</location>
                 </attachment>
                 <attachment>
                     <link>1</link>
-                    <location>-0.033165 0.0 -0.033165</location>
+                    <location>0.0428 0.0 -0.0228</location>
                 </attachment>
             </attachments>
         </cable_ideal>
