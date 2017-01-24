@@ -14,7 +14,7 @@
 
 #include <SoftwareSerial.h>
 
-#define NUMBER_CONNECTED_NANOS 1                        //TODO: This should be sent by MATLAB in the future
+#define NUMBER_CONNECTED_NANOS 2                        //TODO: This should be sent by MATLAB in the future
 #define SPOOL_CIRCUMFERENCE 1355 //in 0.1mm precision.  //TODO: make it dynamic
 
 #define BAUD_RATE_NANO 74880
@@ -95,7 +95,6 @@ SoftwareSerial serialNano[8] = {
 void setup() {
   Serial.begin(BAUD_RATE_CASPR);  //USB
   Serial1.begin(BAUD_RATE_NANO); //for broadcasting to nano
-  Serial3.begin(BAUD_RATE_NANO); //DEBUG TODO:REMOVE
 
   for (int i = 0; i < NUMBER_CONNECTED_NANOS; i++) {
     serialNano[i].begin(BAUD_RATE_NANO); //for receiving from nano
@@ -138,24 +137,14 @@ void loop() {
           break;
         case CASPR_HOLD:                       //h: tighten all cables  [TODO: implemnt later]
           {
-            //tighten all cables, while the robot think it hasn't move anywhere
-            //TODO: tighten by percentage?
-            //TODO: check: are all array needed populated?
-
-
-            //get currentCableLength
-            //-x and set as new length command
-            //calculate crossing command and angle command
-            //send command to nano
-
-            // unsigned int tightenedLength[NUMBER_CONNECTED_NANOS];
-            // for (int n = 0; n < NUMBER_CONNECTED_NANOS; n++) {
-            //   tightenedLength[n] = currentCableLength[n] - 10; //1mm, TODO: remove magic number
-            // }
-            // int crossingCommand[NUMBER_CONNECTED_NANOS];
-            // unsigned int angleCommand[NUMBER_CONNECTED_NANOS];
-            // computeCrossingAndAngleCommands(tightenedLength, crossingCommand, angleCommand);
-            // broadcastToNanos(crossingCommand, angleCommand);
+//            unsigned int tightenedLengths[NUMBER_CONNECTED_NANOS];
+//            for (int n = 0; n < NUMBER_CONNECTED_NANOS; n++) {
+//              tightenedLengths[n] = lastLengthCommands[n] - 10; //1mm, TODO: remove magic number
+//            }
+//            int crossingCommands[NUMBER_CONNECTED_NANOS];
+//            unsigned int angleCommands[NUMBER_CONNECTED_NANOS];
+//            computeCrossingAndAngleCommands(tightenedLengths, crossingCommands, angleCommands);
+//            broadcastCommandsToNanos(crossingCommands, angleCommands);
           }
           break;
       }//switch
@@ -370,20 +359,6 @@ void computeCurrentCableLengths(unsigned int currentAngles[NUMBER_CONNECTED_NANO
 
       //add the length change to the current length
       currentCableLengths[n] += lengthChange;
-
-      Serial3.print(currentAngles[n]);
-      Serial3.print("\t");
-      Serial3.print(lastAngleFeedbacks[n]);
-      Serial3.print("\t");
-      Serial3.print(angleChangeNoCrossing);
-      Serial3.print("\t");
-      Serial3.print(angleChangeWithCrossing);
-      Serial3.print("\t");
-      Serial3.print(angleChange);
-      Serial3.print("\t");
-      Serial3.print(lengthChange);
-      Serial3.print("\t");
-      Serial3.println(currentCableLengths[n]);
     }
   }
 }
@@ -404,8 +379,9 @@ void sendCurrentCableLengths() {
     }
 
     //print the HEX string
-    Serial.println(hexFeedback);
+    Serial.print(hexFeedback);
   }
+  Serial.println();
   Serial.flush();
 }
 

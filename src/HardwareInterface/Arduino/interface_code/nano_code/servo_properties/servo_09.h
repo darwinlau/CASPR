@@ -1,4 +1,4 @@
-#define NANO_ID 9
+#define NANO_ID 1 //it's 1 for testing purposes. CHANGE AFTERWARDS
 #define FEEDBACK_PWM_MIN 502
 #define FEEDBACK_PWM_MAX 1505
 #define FEEDBACK_PWM_MIDDLE ( (FEEDBACK_PWM_MAX + FEEDBACK_PWM_MIN) / 2 )
