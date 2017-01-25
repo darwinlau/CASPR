@@ -39,6 +39,7 @@
 #define NANO_ANGLE_COMMAND 'c'
 #define NANO_QUICK_FEEDBACK_REQUEST 'f'
 #define NANO_UPDATE_FEEDBACK 'u'
+#define NANO_FINISH_TRAJECTORY 'e'
 
 #define CLOCKWISE 1
 #define ANTICLOCKWISE 2
@@ -99,6 +100,8 @@ void setup() {
   Serial3.begin(BAUD_RATE_CASPR); //DEBUG
 
   for (int i = 0; i < NUMBER_CONNECTED_NANOS; i++) {
+    serialNano[i].end(); //end previous session DEBUG: does it work?
+    
     serialNano[i].begin(BAUD_RATE_NANO); //for receiving from nano
   }
 }
@@ -138,6 +141,7 @@ void loop() {
           {
             systemOn = false;
             motorsEnabled = false;
+            Serial1.println(NANO_FINISH_TRAJECTORY);
           }
           break;
         case CASPR_HOLD:                       //h: tighten all cables  [TODO: implemnt later]
@@ -294,9 +298,17 @@ void broadcastCommandsToNanos(int crossingCommands[NUMBER_CONNECTED_NANOS], unsi
     //send crossing command
     Serial1.print(crossingCommands[n]);
 
-    //convert angle command to HEX and send it 
+    //convert angle command from DEC to HEX
     char hexAngleCommand[DIGITS_ANGLE_COMMAND + 1];  //+1 for the NUL terminator \0
     itoa(angleCommands[n], hexAngleCommand, 16);
+    int strLength = strlen(hexAngleCommand);     //count the number of characters in the resulting string
+
+    //pad 0 in front (in case hexAngleCommand is shorter than DIGITS_ANGLE_COMMAND)
+    for (int zeros = 0; zeros < (DIGITS_ANGLE_COMMAND - strLength); zeros++) {
+      Serial1.print('0');
+    }
+
+    //print the HEX string
     Serial1.print(hexAngleCommand);
   }
 

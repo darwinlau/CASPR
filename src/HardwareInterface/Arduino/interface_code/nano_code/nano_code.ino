@@ -11,6 +11,7 @@
 #define RECEIVE_ANGLE_CMD 'c'
 #define RECEIVE_QUICK_FEEDBACK_REQUEST 'f'
 #define RECEIVE_UPDATE_FEEDBACK 'u'
+#define RECEIVE_FINISH_TRAJECTORY 'e'
 
 #define CLOCKWISE 1
 #define ANTICLOCKWISE 2
@@ -60,6 +61,17 @@ void loop() {
 
       case RECEIVE_UPDATE_FEEDBACK:           //u (nano need to update its avgPWMFeedback after idling between trajectories)
         avgPWMFeedback = readAvgFeedback(4); 
+        break;
+
+      case RECEIVE_FINISH_TRAJECTORY:         //e
+        while (!doneCrossing){
+          //wait
+        }
+        //stay where it is
+        avgPWMFeedback = readAvgFeedback(4); 
+        int currentLocationPW = mapping(avgPWMFeedback, FEEDBACK_PWM_MIN, FEEDBACK_PWM_MAX, COMMAND_PWM_MIN, COMMAND_PWM_MAX);
+        writePulseToServo(currentLocationPW);
+        writePulseToServo(currentLocationPW);
         break;
     }//switch
   }
@@ -144,6 +156,13 @@ void sendFeedback(int feedback){
   //convert from DEC to HEX
   char hexFeedback[DIGITS_ANGLE_FEEDBACK + 1]; //+1 for the null terminator \0
   itoa(feedback, hexFeedback, 16); 
+  int strLength = strlen(hexFeedback);     //count the number of characters in the resulting string
+
+  //pad 0 in front (in case hexFeedback is shorter than DIGITS_ANGLE_FEEDBACK)
+  for (int zeros = 0; zeros < (DIGITS_ANGLE_FEEDBACK - strLength); zeros++) {
+    Serial.print('0');
+  }
+  
   //send HEX string
   Serial.println(hexFeedback);
   Serial.flush();
@@ -236,8 +255,7 @@ void cross(int command){
   lastCrossingAction = command;
 }
 
-/* Return the servo's crossing status.
-   Return 0 if it has exited the crossing zone, or CLOCKWISE/ANTICLOCKWISE if it's still crossing. */
+/* Return the servo's crossing status. */
 bool doneCrossing(){
   int servoPosition = readAvgFeedback(4);
   switch (lastCrossingAction){
