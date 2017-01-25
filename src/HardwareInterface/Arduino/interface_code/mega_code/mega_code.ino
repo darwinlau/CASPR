@@ -14,7 +14,7 @@
 
 #include <SoftwareSerial.h>
 
-#define NUMBER_CONNECTED_NANOS 4                        //TODO: This should be sent by MATLAB in the future
+#define NUMBER_CONNECTED_NANOS 1                        //TODO: This should be sent by MATLAB in the future
 #define SPOOL_CIRCUMFERENCE 1355 //in 0.1mm precision.  //TODO: make it dynamic
 
 #define BAUD_RATE_NANO 74880
@@ -37,7 +37,8 @@
 
 //set in an h file in the future?
 #define NANO_ANGLE_COMMAND 'c'
-#define NANO_FEEDBACK 'f'
+#define NANO_QUICK_FEEDBACK_REQUEST 'f'
+#define NANO_UPDATE_FEEDBACK 'u'
 
 #define CLOCKWISE 1
 #define ANTICLOCKWISE 2
@@ -95,13 +96,14 @@ SoftwareSerial serialNano[8] = {
 void setup() {
   Serial.begin(BAUD_RATE_CASPR);  //USB
   Serial1.begin(BAUD_RATE_NANO); //for broadcasting to nano
+  Serial3.begin(BAUD_RATE_CASPR); //DEBUG
 
   for (int i = 0; i < NUMBER_CONNECTED_NANOS; i++) {
     serialNano[i].begin(BAUD_RATE_NANO); //for receiving from nano
   }
 }
 
-void loop() {
+void loop() { 
   if (Serial.available() > 0){
     String receivedCommand = Serial.readStringUntil('\n');
 
@@ -115,6 +117,9 @@ void loop() {
           break;
         case CASPR_SETUP:                      //k: [current usage: populate necessary arrays]
           {
+              Serial1.println(NANO_UPDATE_FEEDBACK); //nano need to update its feedback value after idling between trajectories
+              delay(12);  //wait for nano to get data from servo. (~2050us/feedback * 4 feedbacks, averaged?)
+              
               //populate lastAngleFeedbacks[] and lastAngleCommands[]
               for (int n = 0; n < NUMBER_CONNECTED_NANOS; n++){
                 lastAngleFeedbacks[n] = readAngleFromNano(n);
@@ -234,6 +239,18 @@ void resetLengths(unsigned int newLengths[NUMBER_CONNECTED_NANOS]){
 /* read from: lastLengthCommands[], lastAngleFeedbacks[]
    write to: lastLengthCommands[] */
 void computeCrossingAndAngleCommands(unsigned int lengthCommands[NUMBER_CONNECTED_NANOS], int crossingCommands[NUMBER_CONNECTED_NANOS], unsigned int angleCommands[NUMBER_CONNECTED_NANOS]) {
+  //DEBUG
+  static bool firstRun = true;
+  if (firstRun){
+    Serial3.println(lastAngleFeedbacks[0]);
+    Serial3.println(currentCableLengths[0]);
+    Serial3.println(lastLengthCommands[0]);
+    Serial3.println(lastAngleCommands[0]);
+    Serial3.println("-----");
+    Serial3.flush();
+    firstRun = false;
+  }
+  
   for (int n = 0; n < NUMBER_CONNECTED_NANOS; n++) {
     //convert length command (absolute) to angle change command (relative), to determine whether crossing is needed
     int lengthChangeCommand = lengthCommands[n] - lastLengthCommands[n];
@@ -295,12 +312,13 @@ unsigned int readAngleFromNano(int nanoID){
   serialNano[nanoID].listen();
 
   //send a request for feedback to nano
-  Serial1.println(NANO_FEEDBACK + String(nanoID));
+  Serial1.println(NANO_QUICK_FEEDBACK_REQUEST + String(nanoID));  
   Serial1.flush();
 
   //wait for the feedback
   int readCounter = 0;
-  while ((serialNano[nanoID].available() == 0) && readCounter < 200) { //TODO: 200 is a magic number. CHANGE THIS!
+  int timeOut = 200;                              //TODO: REMOVE MAGIC NUMBER
+  while ((serialNano[nanoID].available() == 0) && readCounter < timeOut) { 
     readCounter++;
   }
 

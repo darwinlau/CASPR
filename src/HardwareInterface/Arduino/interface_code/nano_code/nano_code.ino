@@ -9,7 +9,8 @@
 #define DIGITS_ANGLE_FEEDBACK 3
 
 #define RECEIVE_ANGLE_CMD 'c'
-#define RECEIVE_FEEDBACK_REQUEST 'f'
+#define RECEIVE_QUICK_FEEDBACK_REQUEST 'f'
+#define RECEIVE_UPDATE_FEEDBACK 'u'
 
 #define CLOCKWISE 1
 #define ANTICLOCKWISE 2
@@ -40,22 +41,26 @@ void loop() {
     String strReceived = Serial.readStringUntil('\n');
     char commandReceived = strReceived[0];
 
-    switch (commandReceived){
-      case RECEIVE_FEEDBACK_REQUEST:     //f
+    switch (commandReceived){    
+      case RECEIVE_ANGLE_CMD:                 //c
+        executeAngleCommand(strReceived);//pass a pointer to strReceived to the function
+        avgPWMFeedback = readAvgFeedback(4); //prepare for the next time when mega send a feedback request. Average 4 measurements.
+        break;
+      
+      case RECEIVE_QUICK_FEEDBACK_REQUEST:    //f
         {
           char id = strReceived[1];
           if (id == NANO_ID + '0') {//if the request is for this nano
+            //send an old feeedback value (updated in the previous RECEIVE_ANGLE_CMD)
             int angleFeedback = mapping(avgPWMFeedback, FEEDBACK_PWM_MIN, FEEDBACK_PWM_MAX, (CROSSING_ZONE_SIZE / 2), (3600 - CROSSING_ZONE_SIZE / 2) );
             sendFeedback(angleFeedback);
           }
         }
         break;
-      
-      case RECEIVE_ANGLE_CMD:              //c
-        executeAngleCommand(strReceived);//pass a pointer to strReceived to the function
-        avgPWMFeedback = readAvgFeedback(4); //prepare for the next time when mega send a feedback request. Average 4 measurements.
+
+      case RECEIVE_UPDATE_FEEDBACK:           //u (nano need to update its avgPWMFeedback after idling between trajectories)
+        avgPWMFeedback = readAvgFeedback(4); 
         break;
-      
     }//switch
   }
   // else {
