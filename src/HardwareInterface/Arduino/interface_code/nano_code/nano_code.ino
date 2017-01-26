@@ -17,7 +17,7 @@
 #define ANTICLOCKWISE 2
 
 #define CROSSING_ZONE_SIZE 70   //(in 0.1degree)
-#define REASONABLE_VARIATION_IN_PWM_FEEDBACKS 50 //(in microsecond) used to check whether feedback varies too much = faulty
+#define REASONABLE_VARIATION_IN_PWM_FEEDBACKS 35 //(in microsecond) used to check whether feedback varies too much = faulty
 //the normal variation is around 7. Abnormal variation (e.g. during crossing) could be 500 or higher
 
 int avgPWMFeedback; //stores the position of the servo.
@@ -95,8 +95,8 @@ void executeAngleCommand(const String &strReceived){
   // 0 -> 2, anticlockwise
   // 1 -> 2, anticlockwise
   // 2 -> 1, clockwise
-  // 1 -> 1, not done crossing(x) clockwise, or done(v) stop
-  // 2 -> 2, (x) anticlockwise or (v) stop
+  // 1 -> 1, (x: not done crossing) clockwise, or (v: done) stay
+  // 2 -> 2, (x) anticlockwise or (v) stay 
   // 1 -> 0, (x) clockwise, or (v) goto
   // 2 -> 0, (x) anticlockwise, or (v) goto
   // 0 -> 0, (x) clockwise/anticlockwise, or (v) goto
@@ -109,15 +109,22 @@ void executeAngleCommand(const String &strReceived){
     cross(newCrossingCommand);
   }
   else if (lastCrossingCommand > 0 && newCrossingCommand == lastCrossingCommand){ //"continue crossing"
+    avgPWMFeedback = readAvgFeedback(4); 
     if (doneCrossing()){
-      //do nothing
+      lastCrossingAction = 0;
+      //stay where it is
+      int currentLocationPW = mapping(avgPWMFeedback, FEEDBACK_PWM_MIN, FEEDBACK_PWM_MAX, COMMAND_PWM_MIN, COMMAND_PWM_MAX);
+      writePulseToServo(currentLocationPW);
+      writePulseToServo(currentLocationPW);
     } 
     else {
       cross(newCrossingCommand);
     }
   }
   else if (lastCrossingCommand > 0 && newCrossingCommand == 0){ //"stop crossing; follow angle command"
+    avgPWMFeedback = readAvgFeedback(4); 
     if (doneCrossing()){
+      lastCrossingAction = 0;
       goToPosition(strReceived);
     }
     else {
@@ -125,7 +132,9 @@ void executeAngleCommand(const String &strReceived){
     }
   }
   else if (lastCrossingCommand == 0 && newCrossingCommand == 0){ //"just follow angle command"
+    avgPWMFeedback = readAvgFeedback(4); 
     if (doneCrossing()){
+      lastCrossingAction = 0;
       goToPosition(strReceived);
     }
     else {
@@ -257,19 +266,25 @@ void cross(int command){
   lastCrossingAction = command;
 }
 
-/* Return the servo's crossing status. */
+/* Return the servo's crossing status. 
+   Require an updated avgFeedback. */
 bool doneCrossing(){
-  int servoPosition = readAvgFeedback(4);
+  //not need to check if there's no crossing in the first place/ crossing was completed long ago
+  if (lastCrossingAction == 0){
+    return true;
+  }
+
+  //check crossing
   switch (lastCrossingAction){
     case CLOCKWISE:  //if it was crossing clockwise
-      if ((servoPosition > (FEEDBACK_PWM_MIN)) && (servoPosition <= FEEDBACK_PWM_MIDDLE)) {
+      if ((avgPWMFeedback > (FEEDBACK_PWM_MIN)) && (avgPWMFeedback <= FEEDBACK_PWM_MIDDLE)) {
         return true;
       } else {
         return false;
       }
       break;
     case ANTICLOCKWISE: //if it was crossing anticlockwise
-      if ((servoPosition < (FEEDBACK_PWM_MAX)) && (servoPosition > FEEDBACK_PWM_MIDDLE )) {
+      if ((avgPWMFeedback < (FEEDBACK_PWM_MAX)) && (avgPWMFeedback > FEEDBACK_PWM_MIDDLE )) {
         return true;
       } else {
         return false;
