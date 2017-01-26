@@ -99,9 +99,7 @@ void setup() {
   Serial1.begin(BAUD_RATE_NANO); //for broadcasting to nano
   Serial3.begin(BAUD_RATE_CASPR); //DEBUG
 
-  for (int i = 0; i < NUMBER_CONNECTED_NANOS; i++) {
-    serialNano[i].end(); //end previous session DEBUG: does it work?
-    
+  for (int i = 0; i < NUMBER_CONNECTED_NANOS; i++) {   
     serialNano[i].begin(BAUD_RATE_NANO); //for receiving from nano
   }
 }

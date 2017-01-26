@@ -72,6 +72,8 @@ void loop() {
         int currentLocationPW = mapping(avgPWMFeedback, FEEDBACK_PWM_MIN, FEEDBACK_PWM_MAX, COMMAND_PWM_MIN, COMMAND_PWM_MAX);
         writePulseToServo(currentLocationPW);
         writePulseToServo(currentLocationPW);
+        //start fresh for next trajectory
+        lastCrossingAction = 0;
         break;
     }//switch
   }
