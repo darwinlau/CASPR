@@ -1,6 +1,6 @@
 #include <string.h>
 #include <math.h>
-#include "servo_properties/servo_08.h"   //servo-specific properties (e.g. the range of pwm command it can execute) is stored here
+#include "servo_properties/servo_06.h"   //servo-specific properties (e.g. the range of pwm command it can execute) is stored here
 
 #define MOTOR_PIN 2
 #define BAUD_RATE 74880
@@ -53,7 +53,7 @@ void loop() {
           char id = strReceived[1];
           if (id == NANO_ID + '0') {//if the request is for this nano
             //send an old feeedback value (updated in the previous RECEIVE_ANGLE_CMD)
-            int angleFeedback = mapping(avgPWMFeedback, FEEDBACK_PWM_MIN, FEEDBACK_PWM_MAX, (CROSSING_ZONE_SIZE / 2), (3600 - CROSSING_ZONE_SIZE / 2) );
+            int angleFeedback = mapping(avgPWMFeedback, FEEDBACK_PWM_MIN, FEEDBACK_PWM_MAX, 0, 3600 - CROSSING_ZONE_SIZE);
             sendFeedback(angleFeedback);
           }
         }
@@ -150,13 +150,9 @@ void executeAngleCommand(const String &strReceived){
 /* Move servo to position specified in strReceived. Faulty value is corrected. */
 void goToPosition(const String &strReceived){
   int newAngleCommand = extractAngleCommand(strReceived);
-  int newPWMCommand = mapping(newAngleCommand, (CROSSING_ZONE_SIZE / 2), (3600 - CROSSING_ZONE_SIZE / 2), COMMAND_PWM_MIN, COMMAND_PWM_MAX);
+  int newPWMCommand = mapping(newAngleCommand, 0, 3600 - CROSSING_ZONE_SIZE, COMMAND_PWM_MIN, COMMAND_PWM_MAX);
 
-  if (newPWMCommand > COMMAND_PWM_MAX){
-    newPWMCommand = COMMAND_PWM_MAX;
-  } else if (newPWMCommand < COMMAND_PWM_MIN){
-    newPWMCommand = COMMAND_PWM_MIN;
-  }
+  newPWMCommand = constrain(newPWMCommand, COMMAND_PWM_MIN, COMMAND_PWM_MAX);
 
   writePulseToServo(newPWMCommand);
   writePulseToServo(newPWMCommand);
@@ -191,12 +187,9 @@ int readAvgFeedback(int numOfReadings){
     feedback = readFeedbackFromServo();
 
     //error checking and compensation
-    if (feedback > maxFeedback){
-      maxFeedback = feedback;
-    }
-    if (feedback < minFeedback){
-      minFeedback = feedback;
-    }
+    maxFeedback = max(feedback, maxFeedback);
+    minFeedback = min(feedback, minFeedback);
+
     if (maxFeedback - minFeedback > REASONABLE_VARIATION_IN_PWM_FEEDBACKS){
       return lastValidAvgFeedback;
     }
@@ -212,6 +205,8 @@ int readAvgFeedback(int numOfReadings){
 
 /* Request the servo for feedback, and return the feedback pulse width (in microsecond). 
    Faulty value will be corrected using lastPWMFeedback, FEEDBACK_PWM_MIN or FEEDBACK_PWM_MAX. */
+//the result is always between FEEDBACK_PWM_MIN and FEEDBACK_PWM_MAX.
+//there is no bound to how outdated the result is though, if new result always fails.
 int readFeedbackFromServo(){
   //send request for feedback
   digitalWrite(MOTOR_PIN, HIGH);
@@ -225,14 +220,9 @@ int readFeedbackFromServo(){
   if ((feedback < 300) || (feedback > 1700)){ //if result is terribly off. (Typical feedback value is around 500-1500)
     feedback = lastPWMFeedback; //use an old value
   }
-  else if (feedback < FEEDBACK_PWM_MIN) { //if result is slightly off
-    feedback = FEEDBACK_PWM_MIN;
+  else {
+    feedback = constrain(feedback, FEEDBACK_PWM_MIN, FEEDBACK_PWM_MAX); //if result is slightly off
   }
-  else if (feedback > FEEDBACK_PWM_MAX) {
-    feedback = FEEDBACK_PWM_MAX;
-  }
-  //the result is always between FEEDBACK_PWM_MIN and FEEDBACK_PWM_MAX.
-  //there is no bound to how outdated the result is though.
 
   lastPWMFeedback = feedback; //store feedback in case the next feedback is terribly off
   return feedback;
@@ -254,12 +244,12 @@ void cross(int command){
   //execute crossing command
   switch (command){
     case CLOCKWISE:
-      writePulseToServo(CLOCKWISE_PWM_MIN); //min speed
-      writePulseToServo(CLOCKWISE_PWM_MIN); //write twice to make sure it moves. FIX?
+      writePulseToServo((CLOCKWISE_PWM_MIN + CLOCKWISE_PWM_MAX)/2); //avg. speed
+      writePulseToServo((CLOCKWISE_PWM_MIN + CLOCKWISE_PWM_MAX)/2); //write twice to make sure it moves. FIX?
       break;
     case ANTICLOCKWISE:
-      writePulseToServo(ANTICLOCKWISE_PWM_MIN); //min speed
-      writePulseToServo(ANTICLOCKWISE_PWM_MIN);
+      writePulseToServo((ANTICLOCKWISE_PWM_MIN + ANTICLOCKWISE_PWM_MAX)/2); //avg. speed
+      writePulseToServo((ANTICLOCKWISE_PWM_MIN + ANTICLOCKWISE_PWM_MAX)/2);
       break;
   }
 

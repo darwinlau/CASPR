@@ -14,7 +14,7 @@
 
 #include <SoftwareSerial.h>
 
-#define NUMBER_CONNECTED_NANOS 1                        //TODO: This should be sent by MATLAB in the future
+#define NUMBER_CONNECTED_NANOS 8                        //TODO: This should be sent by MATLAB in the future
 #define SPOOL_CIRCUMFERENCE 1355 //in 0.1mm precision.  //TODO: make it dynamic
 
 #define BAUD_RATE_NANO 74880
@@ -238,6 +238,7 @@ void resetLengths(unsigned int newLengths[NUMBER_CONNECTED_NANOS]){
 }
 
 //Convert lengthCommands to crossingCommands and angleCommands
+//angleCommand can be in the crossing zone
 /* read from: lastLengthCommands[], lastAngleFeedbacks[]
    write to: lastLengthCommands[] */
 void computeCrossingAndAngleCommands(unsigned int lengthCommands[NUMBER_CONNECTED_NANOS], int crossingCommands[NUMBER_CONNECTED_NANOS], unsigned int angleCommands[NUMBER_CONNECTED_NANOS]) {
@@ -262,21 +263,22 @@ void computeCrossingAndAngleCommands(unsigned int lengthCommands[NUMBER_CONNECTE
     int crossingCommand = 0;  //0, CLOCKWISE, or ANTICLOCKWISE
     int angleCommand = lastAngleCommands[n] + angleChangeCommand; //in 0.1 degree precision
 
+    if (angleChangeCommand > 0 && angleCommand > 3600 - CROSSING_ZONE_SIZE){  //goes over safe zone limit
+      crossingCommand = CLOCKWISE;
+    }
+    else if (angleChangeCommand < 0 && angleCommand < 0){  //goes under safe zone limit (angleCommand temporarily goes under 0. Will be adjusted soon.)
+      crossingCommand = ANTICLOCKWISE;
+    }
+    else if (angleChangeCommand < 0 && lastAngleCommands[n] > 3600 - CROSSING_ZONE_SIZE){  //still under safe zone limit (angleCommand adjusted to a value between 0-3599)
+      crossingCommand = ANTICLOCKWISE;
+    }
+
     //keep angleCommand between 0 to 3599
     if (angleCommand >= 3600){
       angleCommand -= 3600;
     }
     else if (angleCommand < 0){
       angleCommand += 3600;
-    }
-
-    //as long as it's inside crossing zone, send crossing command
-    if (angleCommand > 3600 - CROSSING_ZONE_SIZE / 2 || angleCommand < CROSSING_ZONE_SIZE / 2){  
-      if (angleChangeCommand >= 0){
-        crossingCommand = CLOCKWISE;
-      } else {
-        crossingCommand = ANTICLOCKWISE;
-      }
     }
 
     //return data
