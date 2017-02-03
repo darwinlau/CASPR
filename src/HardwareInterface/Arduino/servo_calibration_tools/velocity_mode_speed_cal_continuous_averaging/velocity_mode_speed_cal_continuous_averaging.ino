@@ -27,46 +27,70 @@ void setup() {
 }
 
 void loop() {
+  //for calculating average angular velocity
+  static double sum;
+  static long num;
+
   if (Serial.available() > 0) {
     //process user input//
     int input = Serial.parseInt();
     if (input == 8) {                                // '8' to increase pwm command by 1
       if (pulseWidthCmd < 2500) {
         pulseWidthCmd++;
+        sum = 0;
+        num = 0;
       }
     } else if (input == 2) {                         // '2' to decrease pwm command by 1
       if (pulseWidthCmd > 400) {
         pulseWidthCmd--;
+        sum = 0;
+        num = 0;
       }
     } else if (input >= 400 && input <= 2500) {   // a number between 400-2500 to set pwm command
       pulseWidthCmd = input;
+      sum = 0;
+      num = 0;
     }
 
     //send command to servo//
     writePulseToServo(pulseWidthCmd);
     writePulseToServo(pulseWidthCmd);  //the servo won't go to the destination if we only send the pulse once
-
-
-  } else {  //no user input
-    
-    int pwm = readAvgFeedback(4);
-    long timeNow = millis();
-
-    int pwmChange = pwm - LastPWM;
-    double pwmChangeOverTime = (double)pwmChange / (timeNow - LastTime) * 50;  //pulse width in microsecond / 50ms   
-    double angleChangeOverTime = pwmChangeOverTime / (FEEDBACK_PWM_MAX - FEEDBACK_PWM_MIN) * (3600 - CROSSING_ZONE_SIZE);    //0.1 degree / 50ms
-
-    //output//
-    Serial.print(pulseWidthCmd);
-    Serial.print("\t");
-    Serial.println(angleChangeOverTime);
-    Serial.flush();
-
-    LastPWM = pwm;
-    LastTime = timeNow;
-
-    delay(40); //40
   }
+
+  //measure and calculate angular velocity
+  int pwm = readAvgFeedback(4);
+  long timeNow = millis();
+
+  int pwmChange = pwm - LastPWM;
+  double pwmChangeOverTime = (double)pwmChange / (timeNow - LastTime) * 50;  //pulse width in microsecond / 50ms   
+  double angleChangeOverTime = pwmChangeOverTime / (FEEDBACK_PWM_MAX - FEEDBACK_PWM_MIN) * (3600 - CROSSING_ZONE_SIZE);    //0.1 degree / 50ms
+
+  //record the valid angular velocity values for averaging
+  if (2000 <= pulseWidthCmd && pulseWidthCmd <= 2500){  //clockwise command (~2100-2200)
+    if (angleChangeOverTime > 0){
+      sum += angleChangeOverTime;
+      num++;
+    }
+  } else if (1600 <= pulseWidthCmd && pulseWidthCmd < 2000){ //anticlockwise command (~1800-1890)
+    if (angleChangeOverTime < 0){
+      sum += angleChangeOverTime;
+      num++;
+    }
+  }
+
+  //output//
+  Serial.print(pulseWidthCmd);
+  Serial.print("\t");
+  Serial.print(angleChangeOverTime);
+  Serial.print("\t");
+  Serial.println(sum/num);
+  Serial.flush();
+
+  LastPWM = pwm;
+  LastTime = timeNow;
+
+  delay(40); //40
+
 }
 
 /* Send one PWM pulse to servo.
