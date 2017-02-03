@@ -97,7 +97,7 @@ SoftwareSerial serialNano[8] = {
 void setup() {
   Serial.begin(BAUD_RATE_CASPR);  //USB
   Serial1.begin(BAUD_RATE_NANO); //for broadcasting to nano
-  Serial3.begin(BAUD_RATE_CASPR); //DEBUG
+  Serial3.begin(74880); //DEBUG
 
   for (int i = 0; i < NUMBER_CONNECTED_NANOS; i++) {   
     serialNano[i].begin(BAUD_RATE_NANO); //for receiving from nano
@@ -162,6 +162,7 @@ void loop() {
             unsigned int newInitialLengths[NUMBER_CONNECTED_NANOS];
             extractLengths(receivedCommand, newInitialLengths); //from receivedCommand, extract length info to newInitialLengths[]
             updateInitialLengths(newInitialLengths); //use newInitialLengths to update initialLengths[], currentCableLengths[], and lastLengthCommands[]
+            sendCurrentCableLengths(); //assure CASPROS/matlab side that it's at the right position
           }
           break;
         case CASPR_LENGTH_CMD:                 //l: Get nano feedback to matlab, then matlab command to nano
@@ -201,6 +202,9 @@ void loop() {
           break;
       }//switch
     }//is multi-char cmd
+
+    //debug
+    Serial3.println(receivedCommand);
   }//if Serial.available
 }
 
@@ -242,18 +246,6 @@ void resetLengths(unsigned int newLengths[NUMBER_CONNECTED_NANOS]){
 /* read from: lastLengthCommands[], lastAngleFeedbacks[]
    write to: lastLengthCommands[] */
 void computeCrossingAndAngleCommands(unsigned int lengthCommands[NUMBER_CONNECTED_NANOS], int crossingCommands[NUMBER_CONNECTED_NANOS], unsigned int angleCommands[NUMBER_CONNECTED_NANOS]) {
-  //DEBUG
-  static bool firstRun = true;
-  if (firstRun){
-    Serial3.println(lastAngleFeedbacks[0]);
-    Serial3.println(currentCableLengths[0]);
-    Serial3.println(lastLengthCommands[0]);
-    Serial3.println(lastAngleCommands[0]);
-    Serial3.println("-----");
-    Serial3.flush();
-    firstRun = false;
-  }
-  
   for (int n = 0; n < NUMBER_CONNECTED_NANOS; n++) {
     //convert length command (absolute) to angle change command (relative), to determine whether crossing is needed
     int lengthChangeCommand = lengthCommands[n] - lastLengthCommands[n];
