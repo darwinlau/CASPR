@@ -1,6 +1,6 @@
 #include <string.h>
 #include <math.h>
-#include "servo_properties/servo_06.h"   //servo-specific properties (e.g. the range of pwm command it can execute) is stored here
+#include "servo_properties/servo_08.h"   //servo-specific properties (e.g. the range of pwm command it can execute) is stored here
 
 #define MOTOR_PIN 2
 #define BAUD_RATE 74880
@@ -19,6 +19,7 @@
 #define CROSSING_ZONE_SIZE 70   //(in 0.1degree)
 #define REASONABLE_VARIATION_IN_PWM_FEEDBACKS 35 //(in microsecond) used to check whether feedback varies too much = faulty
 //the normal variation is around 7. Abnormal variation (e.g. during crossing) could be 500 or higher
+#define CYCLE_TIME 50.0 //(in ms) i.e. 20HZ
 
 int avgPWMFeedback; //stores the position of the servo.
 int lastPWMFeedback = 0; //This variable can be use in a pinch when new feedback is faulty
@@ -86,9 +87,13 @@ void loop() {
 /* execute angle command from mega: move to the specified position with position mode, or cross the "crossing zone" with velocity mode */
 void executeAngleCommand(const String &strReceived){
   static int lastCrossingCommand = 0;
+  static int lastAngleCommand = 0;
   
-  //extract new crossing command
+  //parse command
   int newCrossingCommand = extractCrossingCommand(strReceived);
+  int newAngleCommand = extractAngleCommand(strReceived);
+
+  double desiredAngularVelocity = ((double)(newAngleCommand - lastAngleCommand)) / CYCLE_TIME;  //used to determine crossing speed
 
   //lastCrossingCommand -> newCrossingCommand scenarios:
   // 0 -> 1, clockwise
@@ -100,13 +105,15 @@ void executeAngleCommand(const String &strReceived){
   // 1 -> 0, (x) clockwise, or (v) goto
   // 2 -> 0, (x) anticlockwise, or (v) goto
   // 0 -> 0, (x) clockwise/anticlockwise, or (v) goto
+  //*note that the crossing speed used is desiredAngularVelocity from this cycle. 
+  //If the servo is ahead of or behind schedule, the crossing may not look nice, but the crossing speed will still be kept in safe boundaries.
 
   //if mega command says:
   if (lastCrossingCommand == 0 && newCrossingCommand > 0){ //"start new crossing"
-    cross(newCrossingCommand);
+    cross(newCrossingCommand, desiredAngularVelocity);
   }
   else if (lastCrossingCommand > 0 && newCrossingCommand > 0 && newCrossingCommand != lastCrossingCommand){  //"change crossing direction"
-    cross(newCrossingCommand);
+    cross(newCrossingCommand, desiredAngularVelocity);
   }
   else if (lastCrossingCommand > 0 && newCrossingCommand == lastCrossingCommand){ //"continue crossing"
     avgPWMFeedback = readAvgFeedback(4); 
@@ -118,44 +125,44 @@ void executeAngleCommand(const String &strReceived){
       writePulseToServo(currentLocationPW);
     } 
     else {
-      cross(newCrossingCommand);
+      cross(newCrossingCommand, desiredAngularVelocity);
     }
   }
   else if (lastCrossingCommand > 0 && newCrossingCommand == 0){ //"stop crossing; follow angle command"
     avgPWMFeedback = readAvgFeedback(4); 
     if (doneCrossing()){
       lastCrossingAction = 0;
-      goToPosition(strReceived);
+      goToPosition(newAngleCommand);
     }
     else {
-      cross(lastCrossingCommand);
+      cross(lastCrossingCommand, desiredAngularVelocity);
     }
   }
   else if (lastCrossingCommand == 0 && newCrossingCommand == 0){ //"just follow angle command"
     avgPWMFeedback = readAvgFeedback(4); 
     if (doneCrossing()){
       lastCrossingAction = 0;
-      goToPosition(strReceived);
+      goToPosition(newAngleCommand);
     }
     else {
-      cross(-1);  //repeating last crossing command
+      cross(-1, desiredAngularVelocity);  //repeating last crossing command
     }
   }
 
   lastCrossingCommand = newCrossingCommand;
+  lastAngleCommand = newAngleCommand;
 
-  //FIX: send counter? stop sending the same thing after 3 times, to stop vibration caused by noise
+  //TODO: send counter? stop sending the same thing after 3 times, to stop vibration caused by noise
 }
 
-/* Move servo to position specified in strReceived. Faulty value is corrected. */
-void goToPosition(const String &strReceived){
-  int newAngleCommand = extractAngleCommand(strReceived);
-  int newPWMCommand = mapping(newAngleCommand, 0, 3600 - CROSSING_ZONE_SIZE, COMMAND_PWM_MIN, COMMAND_PWM_MAX);
+/* Move servo to position specified. Faulty value is corrected. */
+void goToPosition(int angle){
+  int pwmCommand = mapping(angle, 0, 3600 - CROSSING_ZONE_SIZE, COMMAND_PWM_MIN, COMMAND_PWM_MAX);
 
-  newPWMCommand = constrain(newPWMCommand, COMMAND_PWM_MIN, COMMAND_PWM_MAX);
+  pwmCommand = constrain(pwmCommand, COMMAND_PWM_MIN, COMMAND_PWM_MAX);
 
-  writePulseToServo(newPWMCommand);
-  writePulseToServo(newPWMCommand);
+  writePulseToServo(pwmCommand);
+  writePulseToServo(pwmCommand);
 }
 
 /* Convert feedback from DEC to HEX chars, and send to mega via Serial. */
@@ -235,7 +242,7 @@ int extractCrossingCommand(const String &strReceived){
 
 /* Send velocity command to servo to cross the "crossing zone" 
    where position command and feedback doesn't work. */
-void cross(int command){
+void cross(int command, double desiredAngularVelocity){
   //repeat the last crossing action if -1 is received
   if (command == -1){
     command = lastCrossingAction;
@@ -244,12 +251,20 @@ void cross(int command){
   //execute crossing command
   switch (command){
     case CLOCKWISE:
-      writePulseToServo((CLOCKWISE_PWM_MIN + CLOCKWISE_PWM_MAX)/2); //avg. speed
-      writePulseToServo((CLOCKWISE_PWM_MIN + CLOCKWISE_PWM_MAX)/2); //write twice to make sure it moves. FIX?
+      {
+      double crossingAngularVelocity = constrain(desiredAngularVelocity, CLOCKWISE_SPEED_MIN, CLOCKWISE_SPEED_MAX);
+      int crossingPWMCommand = mapping(crossingAngularVelocity, CLOCKWISE_SPEED_MIN, CLOCKWISE_SPEED_MAX, CLOCKWISE_PWM_MIN, CLOCKWISE_PWM_MAX);
+      writePulseToServo(crossingPWMCommand); 
+      writePulseToServo(crossingPWMCommand); //write twice to make sure it moves. FIX?
+      }
       break;
     case ANTICLOCKWISE:
-      writePulseToServo((ANTICLOCKWISE_PWM_MIN + ANTICLOCKWISE_PWM_MAX)/2); //avg. speed
-      writePulseToServo((ANTICLOCKWISE_PWM_MIN + ANTICLOCKWISE_PWM_MAX)/2);
+      {
+      double crossingAngularVelocity = constrain(desiredAngularVelocity, ANTICLOCKWISE_SPEED_MAX, ANTICLOCKWISE_SPEED_MIN); //MIN and MAX are switched because anticlockwise speed values are negative
+      int crossingPWMCommand = mapping(crossingAngularVelocity, ANTICLOCKWISE_SPEED_MIN, ANTICLOCKWISE_SPEED_MAX, ANTICLOCKWISE_PWM_MIN, ANTICLOCKWISE_PWM_MAX); 
+      writePulseToServo(crossingPWMCommand);
+      writePulseToServo(crossingPWMCommand);
+      }
       break;
   }
 

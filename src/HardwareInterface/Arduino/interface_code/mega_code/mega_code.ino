@@ -14,7 +14,7 @@
 
 #include <SoftwareSerial.h>
 
-#define NUMBER_CONNECTED_NANOS 8                        //TODO: This should be sent by MATLAB in the future
+#define NUMBER_CONNECTED_NANOS 1                        //TODO: This should be sent by MATLAB in the future
 #define SPOOL_CIRCUMFERENCE 1355 //in 0.1mm precision.  //TODO: make it dynamic
 
 #define BAUD_RATE_NANO 74880
