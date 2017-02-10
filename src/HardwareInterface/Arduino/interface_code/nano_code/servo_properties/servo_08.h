@@ -5,11 +5,11 @@
 #define COMMAND_PWM_MIN 479
 #define COMMAND_PWM_MAX 1473
 
-#define CLOCKWISE_PWM_MIN 2080
-#define CLOCKWISE_PWM_MAX 2170
-#define CLOCKWISE_SPEED_MIN 64  //unit: 0.1degree/50ms
-#define CLOCKWISE_SPEED_MAX 130
-#define ANTICLOCKWISE_PWM_MIN 1870  //pwm command that will produce mininum anticlockwise speed
-#define ANTICLOCKWISE_PWM_MAX 1780
-#define ANTICLOCKWISE_SPEED_MIN -65
-#define ANTICLOCKWISE_SPEED_MAX -131
+#define CLOCKWISE_PWM_MIN 2077
+#define CLOCKWISE_PWM_MAX 2164
+#define CLOCKWISE_SPEED_MIN 67  //unit: 0.1degree/50ms
+#define CLOCKWISE_SPEED_MAX 127
+#define ANTICLOCKWISE_PWM_MIN 1871  //this pwm command will produce mininum anticlockwise speed
+#define ANTICLOCKWISE_PWM_MAX 1784
+#define ANTICLOCKWISE_SPEED_MIN -68
+#define ANTICLOCKWISE_SPEED_MAX -127
