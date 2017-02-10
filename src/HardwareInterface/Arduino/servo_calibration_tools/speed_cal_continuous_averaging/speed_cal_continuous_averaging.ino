@@ -4,8 +4,10 @@
    Calculates angular velocity (in 0.1gree/millisecond).
    To quickly increase/decrease the pulse width value by 1,
    enter 8 and 2 respectivively.
+   To quickly increase/decrease the pulse width value by 10,
+   enter 9 and 3 respectivively.
    To quickly send the previous command again,
-   enter 1, 3, or any number less than 400.
+   enter any other number less than 400.
 */
 
 #define MOTOR_PIN 2
@@ -40,9 +42,21 @@ void loop() {
         sum = 0;
         num = 0;
       }
+    } else if (input == 9) {                         // '9' to increase pwm command by 10
+      if (pulseWidthCmd < 2500) {
+        pulseWidthCmd += 10;
+        sum = 0;
+        num = 0;
+      }
     } else if (input == 2) {                         // '2' to decrease pwm command by 1
       if (pulseWidthCmd > 400) {
         pulseWidthCmd--;
+        sum = 0;
+        num = 0;
+      }
+    } else if (input == 3) {                         // '3' to decrease pwm command by 10
+      if (pulseWidthCmd > 400) {
+        pulseWidthCmd -= 10;
         sum = 0;
         num = 0;
       }
