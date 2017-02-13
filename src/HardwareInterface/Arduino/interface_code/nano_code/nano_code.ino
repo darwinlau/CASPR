@@ -1,6 +1,6 @@
 #include <string.h>
 #include <math.h>
-#include "servo_properties/servo_08.h"   //servo-specific properties (e.g. the range of pwm command it can execute) is stored here
+#include "servo_properties/servo_04.h"   //servo-specific properties (e.g. the range of pwm command it can execute) is stored here
 
 #define MOTOR_PIN 2
 #define BAUD_RATE 74880
@@ -20,6 +20,7 @@
 #define REASONABLE_VARIATION_IN_PWM_FEEDBACKS 35 //(in microsecond) used to check whether feedback varies too much = faulty
 //the normal variation is around 7. Abnormal variation (e.g. during crossing) could be 500 or higher
 #define CYCLE_TIME 50.0 //(in ms) i.e. 20HZ
+#define MAX_PWM_REPETITIONS_ALLOWED 2//this helps mute pwm commands when they are repeated to many times, to prevent the servos from unnecessary vibration.
 
 int avgPWMFeedback; //stores the position of the servo.
 int lastPWMFeedback = 0; //This variable can be use in a pinch when new feedback is faulty
@@ -155,14 +156,31 @@ void executeAngleCommand(const String &strReceived){
   //TODO: send counter? stop sending the same thing after 3 times, to stop vibration caused by noise
 }
 
-/* Move servo to position specified. Faulty value is corrected. */
+/* Move servo to position specified. Faulty value is corrected. Repeating value will be muted after a while
+   to prevent the servos from vibrating back and forth. */
 void goToPosition(int angle){
+  static int lastPWMCommand = 0;
+  static int repeated = 0;
+  
   int pwmCommand = mapping(angle, 0, 3600 - CROSSING_ZONE_SIZE, COMMAND_PWM_MIN, COMMAND_PWM_MAX);
+  pwmCommand = constrain(pwmCommand, COMMAND_PWM_MIN, COMMAND_PWM_MAX);  //keep pwmCommand in bound
 
-  pwmCommand = constrain(pwmCommand, COMMAND_PWM_MIN, COMMAND_PWM_MAX);
+  //reset send counter when new command arrives
+  if (pwmCommand == lastPWMCommand){
+    repeated++;
+  } else {
+    repeated = 0;
+  }
 
+  //skip the sending of pwmCommand if it's been repeated enough times
+  if (repeated > MAX_PWM_REPETITIONS_ALLOWED){
+    return;
+  }
+  
   writePulseToServo(pwmCommand);
   writePulseToServo(pwmCommand);
+
+  lastPWMCommand = pwmCommand;
 }
 
 /* Convert feedback from DEC to HEX chars, and send to mega via Serial. */

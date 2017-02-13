@@ -14,7 +14,7 @@
 
 #include <SoftwareSerial.h>
 
-#define NUMBER_CONNECTED_NANOS 1                        //TODO: This should be sent by MATLAB in the future
+#define NUMBER_CONNECTED_NANOS 8                        //TODO: This should be sent by MATLAB in the future
 
 //for ccalculation of varying spool circumference
 #define MAX_CABLE_LENGTH 20400               //(unit: 0.1mm)  MAX_CABLE_LENGTH - length not on the spool = length on the spool
