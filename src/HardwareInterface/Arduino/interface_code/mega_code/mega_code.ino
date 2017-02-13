@@ -15,7 +15,12 @@
 #include <SoftwareSerial.h>
 
 #define NUMBER_CONNECTED_NANOS 1                        //TODO: This should be sent by MATLAB in the future
-#define SPOOL_CIRCUMFERENCE 1355 //in 0.1mm precision.  //TODO: make it dynamic
+
+//for ccalculation of varying spool circumference
+#define MAX_CABLE_LENGTH 20400               //(unit: 0.1mm)  MAX_CABLE_LENGTH - length not on the spool = length on the spool
+#define AVERAGE_SPOOL_CIRCUMFERENCE 1345     //(unit: 0.1mm)  length on the spool / AVERAGE_SPOOL_CIRCUMFERENCE = estimated number of loops on the spool
+#define VARYING_SPOOL_CIRCUMFERENCE_M 5.5051 //(unit: 0.1mm)  linear euqation that maps number of loops on the spool to spool cirucmference
+#define VARYING_SPOOL_CIRCUMFERENCE_B 1304   //(unit: 0.1mm)
 
 #define BAUD_RATE_NANO 74880
 #define BAUD_RATE_CASPR 74880
@@ -249,7 +254,7 @@ void computeCrossingAndAngleCommands(unsigned int lengthCommands[NUMBER_CONNECTE
   for (int n = 0; n < NUMBER_CONNECTED_NANOS; n++) {
     //convert length command (absolute) to angle change command (relative), to determine whether crossing is needed
     int lengthChangeCommand = lengthCommands[n] - lastLengthCommands[n];
-    int angleChangeCommand = round( (double)lengthChangeCommand / (double)SPOOL_CIRCUMFERENCE * 3600 ); //convert unit from 0.1mm to 0.1degree
+    int angleChangeCommand = round( (double)lengthChangeCommand / spoolCircumference(MAX_CABLE_LENGTH - lengthCommands[n]) * 3600 ); //convert unit from 0.1mm to 0.1degree
 
     //determine whether crossing is needed, and generate crossing command and angle command (absolute)
     int crossingCommand = 0;  //0, CLOCKWISE, or ANTICLOCKWISE
@@ -377,7 +382,7 @@ void computeCurrentCableLengths(unsigned int currentAngles[NUMBER_CONNECTED_NANO
       }
 
       //convert angle change to length change
-      int lengthChange = round( (double)angleChange / 3600.0 * SPOOL_CIRCUMFERENCE ); //convert unit from 0.1degree to 0.1mm
+      int lengthChange = round( (double)angleChange / 3600.0 * spoolCircumference(MAX_CABLE_LENGTH - lastLengthCommands[n])); //convert unit from 0.1degree to 0.1mm
 
       //add the length change to the current length
       currentCableLengths[n] += lengthChange;
@@ -407,4 +412,10 @@ void sendCurrentCableLengths() {
   Serial.flush();
 }
 
+/* return the spool circumference (increases as more cable wraps onto the spool) */
+double spoolCircumference(unsigned int lengthOnSpool){
+  //y = mx + b
+  //spool circumference = m * (estimated number of loops on the spool) + b
+  return VARYING_SPOOL_CIRCUMFERENCE_M * ((double)lengthOnSpool / (double)AVERAGE_SPOOL_CIRCUMFERENCE) + VARYING_SPOOL_CIRCUMFERENCE_B;
+}
 
