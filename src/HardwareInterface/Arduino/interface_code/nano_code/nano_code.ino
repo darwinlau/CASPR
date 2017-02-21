@@ -117,7 +117,7 @@ void executeAngleCommand(const String &strReceived){
     cross(newCrossingCommand, desiredAngularVelocity);
   }
   else if (lastCrossingCommand > 0 && newCrossingCommand == lastCrossingCommand){ //"continue crossing"
-    avgPWMFeedback = readAvgFeedback(4); 
+    avgPWMFeedback = readAvgFeedback(2); 
     if (doneCrossing()){
       lastCrossingAction = 0;
       //stay where it is
@@ -130,7 +130,7 @@ void executeAngleCommand(const String &strReceived){
     }
   }
   else if (lastCrossingCommand > 0 && newCrossingCommand == 0){ //"stop crossing; follow angle command"
-    avgPWMFeedback = readAvgFeedback(4); 
+    avgPWMFeedback = readAvgFeedback(2); 
     if (doneCrossing()){
       lastCrossingAction = 0;
       goToPosition(newAngleCommand);
@@ -140,7 +140,7 @@ void executeAngleCommand(const String &strReceived){
     }
   }
   else if (lastCrossingCommand == 0 && newCrossingCommand == 0){ //"just follow angle command"
-    avgPWMFeedback = readAvgFeedback(4); 
+    avgPWMFeedback = readAvgFeedback(2); 
     if (doneCrossing()){
       lastCrossingAction = 0;
       goToPosition(newAngleCommand);
