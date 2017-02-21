@@ -14,7 +14,7 @@ classdef DingbotExperiment < ExperimentBase
         function eb = DingbotExperiment()
             % Create the config
             model_config = DevModelConfig(DevModelConfigType.D_CUHK_DINGBOT);
-            cable_set_id = 'crossZX';
+            cable_set_id = 'original';
 %             model_config = DevModelConfig(DevModelConfigType.D_CUHK_DINGBOT_PLANAR);
 %             cable_set_id = 'original';
             % Load the SystemKinematics object from the XML
@@ -52,9 +52,9 @@ classdef DingbotExperiment < ExperimentBase
                 % Print time for debugging
                 tic;
                 %send command length to Arduino Mega
-                if (t < length(trajectory.timeVector))
+                if (t < length(trajectory.timeVector - 2))
                     %tighten cables while running trajectory
-                    obj.hardwareInterface.lengthCommandSend(obj.model.cableLengths - 0.004);   %(1)
+                    obj.hardwareInterface.lengthCommandSend(obj.model.cableLengths - 0.002);   %(1)
                     
                     %no tightening
 %                     obj.hardwareInterface.lengthCommandSend(obj.model.cableLengths); %(1)
