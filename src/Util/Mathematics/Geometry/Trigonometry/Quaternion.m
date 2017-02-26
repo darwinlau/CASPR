@@ -208,9 +208,9 @@ classdef Quaternion
                 2*q1_dd*q2_d+4*q1_d*q2_d+2*q_1*q2_dd+2*q0_dd*q_3+4*q0_d*q3_d+2*q_0*q3_dd, -4*q1_dd*q_1-4*q1_d^2-4*q3_dd*q_3-4*q3_d^2, -2*q0_dd*q_1-4*q0_d*q1_d-2*q_0*q1_dd+2*q2_dd*q_3+4*q2_d*q3_d+2*q_2*q3_dd; ...
                 -2*q0_dd*q_2-4*q0_d*q2_d-2*q_0*q2_dd+2*q1_dd*q_3+4*q1_d*q3_d+2*q_1*q3_dd, 2*q0_dd*q_1+4*q0_d*q1_d+2*q_0*q1_dd+2*q2_dd*q_3+4*q2_d*q3_d+2*q_2*q3_dd, -4*q1_dd*q_1-4*q1_d^2-4*q2_dd*q_2-4*q2_d^2];
         end
-
-        % Interpolation for a quaternion
-        function [q, q_d, q_dd] = GenerateInterpolation(q_s, q_e, time)
+        
+        % Interpolation for a quaternion using linear spline
+        function [q, q_d, q_dd] = LinearInterpolation(q_s, q_e, time_vector)
             % Step 1 Quaternion axis and rotation (possibly to optimise in
             % the future)
             R_0s = Quaternion.ToRotationMatrix(q_s);
@@ -219,12 +219,48 @@ classdef Quaternion
             q_se = Quaternion.FromRotationMatrix(R_se);
             axis_angle_se = AxisAngle.FromQuaternion(q_se);
             % Step 2 Interpolate quaternion angle
-            [th_t, th_dot_t, th_ddot_t] = Spline.QuinticInterpolation(0, 0, 0, axis_angle_se.th, 0, 0, time);
+            [th, th_dot, th_ddot] = Spline.LinearInterpolation(0, axis_angle_se.th, time_vector);
+            % Step 3 Convert back to quaternion trajectory
+            [q, q_d, q_dd] = Quaternion.from_axis_angle_traj_to_quaternion_traj(axis_angle_se, th, th_dot, th_ddot, time_vector);
+        end
+        
+        % Interpolation for a quaternion using cubic spline
+        function [q, q_d, q_dd] = CubicInterpolation(q_s, q_e, time_vector)
+            % Step 1 Quaternion axis and rotation (possibly to optimise in
+            % the future)
+            R_0s = Quaternion.ToRotationMatrix(q_s);
+            R_0e = Quaternion.ToRotationMatrix(q_e);
+            R_se = R_0s'*R_0e;
+            q_se = Quaternion.FromRotationMatrix(R_se);
+            axis_angle_se = AxisAngle.FromQuaternion(q_se);
+            % Step 2 Interpolate quaternion angle
+            [th, th_dot, th_ddot] = Spline.CubicInterpolation(0, 0, axis_angle_se.th, 0, time_vector);
+            % Step 3 Convert back to quaternion trajectory
+            [q, q_d, q_dd] = Quaternion.from_axis_angle_traj_to_quaternion_traj(axis_angle_se, th, th_dot, th_ddot, time_vector);
+        end
 
-            for t = 1:length(time)
-                th = th_t(t);
-                th_dot = th_dot_t(t);
-                th_ddot = th_ddot_t(t);
+        % Interpolation for a quaternion using quintic
+        function [q, q_d, q_dd] = QuinticInterpolation(q_s, q_e, time_vector)
+            % Step 1 Quaternion axis and rotation (possibly to optimise in
+            % the future)
+            R_0s = Quaternion.ToRotationMatrix(q_s);
+            R_0e = Quaternion.ToRotationMatrix(q_e);
+            R_se = R_0s'*R_0e;
+            q_se = Quaternion.FromRotationMatrix(R_se);
+            axis_angle_se = AxisAngle.FromQuaternion(q_se);
+            % Step 2 Interpolate quaternion angle
+            [th, th_dot, th_ddot] = Spline.QuinticInterpolation(0, 0, 0, axis_angle_se.th, 0, 0, time_vector);
+            % Step 3 Convert back to quaternion trajectory
+            [q, q_d, q_dd] = Quaternion.from_axis_angle_traj_to_quaternion_traj(axis_angle_se, th, th_dot, th_ddot, time_vector);
+        end
+    end
+    
+    methods (Static, Access = private)
+        function [q, q_dot, q_ddot] = from_axis_angle_traj_to_quaternion_traj(axis_angle_se, th_traj, th_dot_traj, th_ddot_traj, time_vector)
+            for t = 1:length(time_vector)
+                th = th_traj(t);
+                th_dot = th_dot_traj(t);
+                th_ddot = th_ddot_traj(t);
 
                 % Step 3 Determine quaternion variables and rotation matrix for
                 % trajectory
@@ -233,8 +269,8 @@ classdef Quaternion
                 a_dd = AxisAngle(th_ddot, axis_angle_se.kx, axis_angle_se.ky, axis_angle_se.kz);
 
                 q(t) = Quaternion.FromAxisAngle(a);
-                q_d(t) = Quaternion.DerivativeFromAxisAngle(a, a_d);
-                q_dd(t) = Quaternion.DoubleDerivativeFromAxisAngle(a, a_d, a_dd);
+                q_dot(t) = Quaternion.DerivativeFromAxisAngle(a, a_d);
+                q_ddot(t) = Quaternion.DoubleDerivativeFromAxisAngle(a, a_d, a_dd);
             end
         end
     end

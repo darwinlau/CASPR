@@ -14,6 +14,8 @@ classdef WorkspaceMetricType
         TENSION_FACTOR_MODIFIED
         UNILATERAL_DEXTERITY
         CONDITION_NUMBER
+        %Interference
+        MIN_CABLE_CABLE_DISTANCE
     end
 end
 

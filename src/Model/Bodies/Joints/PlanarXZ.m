@@ -2,7 +2,7 @@
 %
 % Author        : Benji ZHANG
 % Created       : 2017
-% Description   :
+% Description   : 
 classdef PlanarXZ < JointBase        
     properties (Constant = true)
         numDofs = 3;
@@ -96,14 +96,6 @@ classdef PlanarXZ < JointBase
         % Should this be a separate function
         function theta_d = GetThetaDot(q_dot)
             theta_d = q_dot(3);
-        end
-        
-        % Generate trajectories
-        function [q, q_dot, q_ddot] = GenerateTrajectory(q_s, q_s_d, q_s_dd, q_e, q_e_d, q_e_dd, total_time, time_step)
-            t = 0:time_step:total_time;
-            [q(1,:), q_dot(1,:), q_ddot(1,:)] = Spline.QuinticInterpolation(q_s(1), q_s_d(1), q_s_dd(1), q_e(1), q_e_d(1), q_e_dd(1), t);
-            [q(2,:), q_dot(2,:), q_ddot(2,:)] = Spline.QuinticInterpolation(q_s(2), q_s_d(2), q_s_dd(2), q_e(2), q_e_d(2), q_e_dd(2), t);
-            [q(3,:), q_dot(3,:), q_ddot(3,:)] = Spline.QuinticInterpolation(q_s(3), q_s_d(3), q_s_dd(3), q_e(3), q_e_d(3), q_e_dd(3), t);
         end
     end
 end

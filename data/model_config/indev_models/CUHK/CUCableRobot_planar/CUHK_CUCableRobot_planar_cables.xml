@@ -35,7 +35,7 @@
         </base_rotating_pulley>
         <attachment>
           <link>1</link>
-          <location>0.215 0 0.105</location> <!--in the form of [x, y, z]-->
+          <location>0.215 0 0.105</location>
         </attachment>
       </attachments>
     </cable_ideal>
