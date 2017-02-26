@@ -40,6 +40,37 @@ classdef SphericalQuaternion < JointBase
             update@JointBase(obj, q_quat_norm.toVector(), q_dot, q_ddot);
         end
         
+        
+        function [q, q_dot, q_ddot] = generateTrajectoryLinearSpline(obj, q_s, q_e, time_vector)
+            quat_0s = Quaternion(q_s(1), q_s(2), q_s(3), q_s(4));
+            quat_0e = Quaternion(q_e(1), q_e(2), q_e(3), q_e(4));
+                        
+            [quat_sp, quat_sp_dot, quat_sp_ddot] = Quaternion.LinearInterpolation(quat_0s, quat_0e, time);      
+            [q, q_dot, q_ddot] = Quaternion.quaternion_traj_to_q_traj(quat_sp, quat_sp_dot, quat_sp_ddot, quat_0s, time_vector);
+        end
+        
+        function [q, q_dot, q_ddot] = generateTrajectoryCubicSpline(obj, q_s, q_s_d, q_e, q_e_d, time_vector)
+            n_dof = obj.numDofs;
+            CASPR_log.Assert(isequal(q_s_d, zeros(n_dof, 1)) && isequal(q_e_d, zeros(n_dof, 1)), ...
+                'Non-zero joint velocity are currently not supported for quaternion splines');                 
+            quat_0s = Quaternion(q_s(1), q_s(2), q_s(3), q_s(4));
+            quat_0e = Quaternion(q_e(1), q_e(2), q_e(3), q_e(4));
+                        
+            [quat_sp, quat_sp_dot, quat_sp_ddot] = Quaternion.CubicInterpolation(quat_0s, quat_0e, time);      
+            [q, q_dot, q_ddot] = Quaternion.quaternion_traj_to_q_traj(quat_sp, quat_sp_dot, quat_sp_ddot, quat_0s, time_vector);
+        end
+        
+        function [q, q_dot, q_ddot] = generateTrajectoryQuinticSpline(obj, q_s, q_s_d, q_s_dd, q_e, q_e_d, q_e_dd, time_vector)
+            n_dof = obj.numDofs;
+            CASPR_log.Assert(isequal(q_s_d, zeros(n_dof, 1)) && isequal(q_e_d, zeros(n_dof, 1)) && isequal(q_s_dd, zeros(n_dof, 1)) && isequal(q_e_dd, zeros(n_dof, 1)), ...
+                'Non-zero joint velocity and accelerations are currently not supported for quaternion splines');     
+            quat_0s = Quaternion(q_s(1), q_s(2), q_s(3), q_s(4));
+            quat_0e = Quaternion(q_e(1), q_e(2), q_e(3), q_e(4));
+                        
+            [quat_sp, quat_sp_dot, quat_sp_ddot] = Quaternion.QuinticInterpolation(quat_0s, quat_0e, time);      
+            [q, q_dot, q_ddot] = Quaternion.quaternion_traj_to_q_traj(quat_sp, quat_sp_dot, quat_sp_ddot, quat_0s, time_vector);
+        end
+        
         % -------
         % Getters
         % -------
@@ -179,6 +210,33 @@ classdef SphericalQuaternion < JointBase
         end
         function wz = GetWz(q_dot)
             wz = q_dot(3);
+        end
+    end
+    
+    methods (Static, Access = private)
+        function [q, q_dot, q_ddot] = quaternion_traj_to_q_traj(quat_sp, quat_sp_dot, quat_sp_ddot, quat_0s, time_vector)            
+            q = zeros(4, length(time_vector));
+            q_dot = zeros(3, length(time_vector));
+            q_ddot = zeros(3, length(time_vector));
+            
+            for t = 1:length(time_vector)
+                q_0p = quat_sp(t)*quat_0s;
+                q_0p_dot = quat_sp_dot(t)*quat_0s;
+                                
+                w_quat = 2*q_0p_dot*inv(q_0p);
+                w_quat_d = 2*(quat_sp_ddot(t)*inv(q_0p) + q_0p_dot*inv(q_0p_dot));
+                
+                q(1,t) = q_0p.q0;
+                q(2,t) = q_0p.q1;
+                q(3,t) = q_0p.q2;
+                q(4,t) = q_0p.q3;
+                q_dot(1,t) = w_quat.q1;
+                q_dot(2,t) = w_quat.q2;
+                q_dot(3,t) = w_quat.q3;
+                q_ddot(1,t) = w_quat_d.q1;
+                q_ddot(2,t) = w_quat_d.q2;
+                q_ddot(3,t) = w_quat_d.q3;
+            end
         end
     end
 end

@@ -77,21 +77,8 @@ classdef UniversalYZ < JointBase
             S_dot_grad(:,:,2)   =   [zeros(3,2); -c_d*sin(c) 0; -c_d*cos(c) 0; 0 0];    
         end   
         
-%         function S_dot = RelVelocityMatrixDeriv(q, q_dot)
-%             b = SphericalEulerXYZ.GetBeta(q);
-%             b_d = SphericalEulerXYZ.GetBeta(q_dot);
-%             S_dot = [zeros(3,2); -b_d*sin(b) 0; ...
-%                 0 0; ...
-%                 b_d*cos(b) 0];
-%         end
-        
         %%%%%%%[No N_j and A matrixes]%%%%%%%%%%%%%%
         
-        % Generate the trajectory for this joint
-        function [q, q_dot, q_ddot] = GenerateTrajectory(q_s, q_s_d, q_s_dd, q_e, q_e_d, q_e_dd, total_time, time_step)       
-            t = 0:time_step:total_time;
-            [q, q_dot, q_ddot] = Spline.QuinticInterpolation(q_s, q_s_d, q_s_dd, q_e, q_e_d, q_e_dd, t);
-        end
         
         % Get variables from the gen coordinates
         function beta = GetBeta(q)

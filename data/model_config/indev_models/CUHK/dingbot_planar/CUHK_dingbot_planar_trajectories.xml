@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE trajectories [
-<!ATTLIST trajectory id ID #REQUIRED>
+  <!ATTLIST linear_spline_trajectory id ID #REQUIRED>
+  <!ATTLIST cubic_spline_trajectory id ID #REQUIRED>
+  <!ATTLIST quintic_spline_trajectory id ID #REQUIRED>
 ]>
 
 <trajectories>
-    <!-- up and down then go back -->
-    <trajectory id="traj_1" time_step="0.05">
+    <quintic_spline_trajectory id="traj_1" time_definition="absolute" time_step="0.05">
+        <description>up and down then go back</description>
         <points>
             <point>
                 <q>0.0 0.4 0.0 </q>
@@ -28,9 +30,9 @@
                 <q_ddot>0.0 0.0 0.0 </q_ddot>
             </point>
         </points>
-    </trajectory>
-     <!-- polishing -->
-    <trajectory id="traj_2" time_step="0.05">
+    </quintic_spline_trajectory>
+    <quintic_spline_trajectory id="traj_2" time_definition="absolute" time_step="0.05">
+        <description>polishing</description>
         <points>
             <point>
                 <q>0.0 0.4 0.0 </q>
@@ -68,5 +70,5 @@
                 <q_ddot>0.0 0.0 0.0 </q_ddot>
             </point>
         </points>
-    </trajectory>
+    </quintic_spline_trajectory>
 </trajectories>
