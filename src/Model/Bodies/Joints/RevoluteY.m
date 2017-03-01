@@ -65,12 +65,6 @@ classdef RevoluteY < JointBase
             A = zeros(6,1);
         end
         
-        % Generate trajectories
-        function [q, q_dot, q_ddot] = GenerateTrajectory(q_s, q_s_d, q_s_dd, q_e, q_e_d, q_e_dd, total_time, time_step)
-            t = 0:time_step:total_time;
-            [q, q_dot, q_ddot] = Spline.QuinticInterpolation(q_s, q_s_d, q_s_dd, q_e, q_e_d, q_e_dd, t);
-        end
-        
         % Get variables from the gen coordinates
         function theta = GetTheta(q)
             theta = q(1);

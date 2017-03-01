@@ -105,6 +105,7 @@ classdef (Abstract) ModelConfigBase < handle
             end
         end
         
+        % Should change this to getJointTrajectory()
         function [traj] = getTrajectory(obj, trajectory_id)
             traj_xmlobj = obj.getTrajectoryXmlObj(trajectory_id);
             traj = JointTrajectory.LoadXmlObj(traj_xmlobj, obj.bodiesModel);
@@ -121,7 +122,7 @@ classdef (Abstract) ModelConfigBase < handle
         end
         
         function trajectories_str = getTrajectoriesList(obj)
-            trajectories_str = GUIOperations.XmlObj2StringCellArray(obj.trajectoriesXmlObj.getElementsByTagName('trajectories').item(0).getElementsByTagName('trajectory'),'id');
+            trajectories_str = GUIOperations.XmlObj2StringCellArray(obj.trajectoriesXmlObj.getElementsByTagName('trajectories').item(0).getChildNodes,'id');
         end
     end
     

@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE trajectories [
-  <!ATTLIST trajectory id ID #REQUIRED>
+  <!ATTLIST linear_spline_trajectory id ID #REQUIRED>
+  <!ATTLIST cubic_spline_trajectory id ID #REQUIRED>
+  <!ATTLIST quintic_spline_trajectory id ID #REQUIRED>
 ]>
 
 <trajectories>
-  <!-- Simple up and down trajectory -->  
-  <trajectory id="O1001" time_step="0.01">
+  <quintic_spline_trajectory id="O1001" time_definition="absolute" time_step="0.01">
+    <description>Simple up and down quintic_spline_trajectory</description>
     <points>
       <point>
         <q>1.14 1.0 0.0</q>
@@ -23,9 +25,9 @@
         <q_ddot>0.0 0.0 0.0</q_ddot>
       </point>
     </points>
-  </trajectory>
-  <!-- right to left, down, left to right with rotation-->
-  <trajectory id="O1002" time_step="0.05">
+  </quintic_spline_trajectory>
+  <quintic_spline_trajectory id="O1002" time_definition="absolute" time_step="0.05">
+    <description>Right to left, down, left to right with rotation</description>
     <points>
       <point>
         <q>1.14 1.0 0.0</q>
@@ -88,9 +90,9 @@
         <q_ddot>0.0 0.0 0.0</q_ddot>
       </point>
     </points>
-  </trajectory>
-  <!-- circle with constant speed -->
-  <trajectory id="O1003" time_step="0.010">
+  </quintic_spline_trajectory>
+  <quintic_spline_trajectory id="O1003" time_definition="absolute" time_step="0.010">
+    <description>Circle with constant speed</description>
    <points>
     <point>
       <q>1.5400 1.0000 0.0000 </q>
@@ -1098,9 +1100,9 @@
       <q_ddot>0 0 0.0000 </q_ddot>
     </point>
   </points>
- </trajectory>
- <!-- transition (arc) -->
- <trajectory id="O1004" time_step="0.05">
+ </quintic_spline_trajectory>
+ <quintic_spline_trajectory id="O1004" time_step="0.05">
+    <description>transition (arc)</description>
     <points>
       <point>
         <q>1.14 1.2 0.0 </q>
@@ -1113,9 +1115,9 @@
         <q_ddot>0.0 0.0 0.0 </q_ddot>
       </point>
      </points>
-   </trajectory>
-  <!-- Wall zig zag trajectory -->  
-  <trajectory id="O1005" time_step="0.05">
+   </quintic_spline_trajectory>
+  <quintic_spline_trajectory id="O1005" time_definition="absolute" time_step="0.05">
+    <description>Wall zig zag quintic_spline_trajectory</description>
     <points>
       <point>
         <q>1.14 1.0 0.0</q>
@@ -1188,5 +1190,5 @@
         <q_ddot>0.0 0.0 0.0 </q_ddot>
       </point>
     </points>
-  </trajectory>
+  </quintic_spline_trajectory>
 </trajectories>

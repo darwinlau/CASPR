@@ -20,9 +20,6 @@ classdef SpatialQuaternion < JointBase
     end
     
     properties (Dependent)
-        q_translation
-        q_orientation
-        
         x
         y
         z
@@ -53,6 +50,43 @@ classdef SpatialQuaternion < JointBase
             obj.translation.update(SpatialQuaternion.GetTranslationQ(q), SpatialQuaternion.GetTranslationQd(q_dot), SpatialQuaternion.GetTranslationQd(q_ddot));
             obj.orientation.update(SpatialQuaternion.GetOrientationQ(q), SpatialQuaternion.GetOrientationQd(q_dot), SpatialQuaternion.GetOrientationQd(q_ddot));
             update@JointBase(obj, q, q_dot, q_ddot);
+        end
+        
+        % Generate the trajectory functions
+        function [q, q_dot, q_ddot] = generateTrajectoryLinearSpline(obj, q_s, q_e, time_vector)
+            [q_trans, q_trans_dot, q_trans_ddot] = obj.translation.generateTrajectoryLinearSpline( ...
+                obj.GetTranslationQ(q_s), ...
+                obj.GetTranslationQ(q_e), time_vector);
+            [q_orient, q_orient_dot, q_orient_ddot] = obj.orientation.generateTrajectoryLinearSpline( ...
+                obj.GetOrientationQ(q_s), ...
+                obj.GetOrientationQ(q_e), time_vector);
+            q = [q_trans; q_orient];
+            q_dot = [q_trans_dot; q_orient_dot];
+            q_ddot = [q_trans_ddot; q_orient_ddot];
+        end
+        
+        function [q, q_dot, q_ddot] = generateTrajectoryCubicSpline(obj, q_s, q_s_d, q_e, q_e_d, time_vector)
+            [q_trans, q_trans_dot, q_trans_ddot] = obj.translation.generateTrajectoryCubicSpline( ...
+                obj.GetTranslationQ(q_s), obj.GetTranslationQd(q_s_d), ...
+                obj.GetTranslationQ(q_e), obj.GetTranslationQd(q_e_d), time_vector);
+            [q_orient, q_orient_dot, q_orient_ddot] = obj.orientation.generateTrajectoryCubicSpline( ...
+                obj.GetOrientationQ(q_s), obj.GetOrientationQd(q_s_d), ...
+                obj.GetOrientationQ(q_e), obj.GetOrientationQd(q_s_e), time_vector);
+            q = [q_trans; q_orient];
+            q_dot = [q_trans_dot; q_orient_dot];
+            q_ddot = [q_trans_ddot; q_orient_ddot];
+        end
+        
+        function [q, q_dot, q_ddot] = generateTrajectoryQuinticSpline(obj, q_s, q_s_d, q_s_dd, q_e, q_e_d, q_e_dd, time_vector)
+            [q_trans, q_trans_dot, q_trans_ddot] = obj.translation.generateTrajectoryQuinticSpline( ...
+                obj.GetTranslationQ(q_s), obj.GetTranslationQd(q_s_d), obj.GetTranslationQd(q_s_dd), ...
+                obj.GetTranslationQ(q_e), obj.GetTranslationQd(q_e_d), obj.GetTranslationQd(q_e_dd), time_vector);
+            [q_orient, q_orient_dot, q_orient_ddot] = obj.orientation.generateTrajectoryQuinticSpline( ...
+                obj.GetOrientationQ(q_s), obj.GetOrientationQd(q_s_d), obj.GetOrientationQd(q_s_dd), ...
+                obj.GetOrientationQ(q_e), obj.GetOrientationQd(q_e_d), obj.GetOrientationQd(q_e_dd), time_vector);
+            q = [q_trans; q_orient];
+            q_dot = [q_trans_dot; q_orient_dot];
+            q_ddot = [q_trans_ddot; q_orient_ddot];
         end
         
         % -------
@@ -154,19 +188,6 @@ classdef SpatialQuaternion < JointBase
         % Generate the derivative
         function q_deriv = QDeriv(q, q_d)
             q_deriv = [TranslationalXYZ.QDeriv(SpatialQuaternion.GetTranslationQ(q), SpatialQuaternion.GetTranslationQd(q_d)); SphericalQuaternion.QDeriv(SpatialQuaternion.GetOrientationQ(q), SpatialQuaternion.GetOrientationQd(q_d))];
-        end
-        
-        % Generate the trajectory
-        function [q, q_dot, q_ddot] = GenerateTrajectory(q_s, q_s_d, q_s_dd, q_e, q_e_d, q_e_dd, total_time, time_step)
-            [q_trans, q_trans_dot, q_trans_ddot] = TranslationalXYZ.GenerateTrajectory( ...
-                SpatialQuaternion.GetTranslationQ(q_s), SpatialQuaternion.GetTranslationQ(q_s_d), SpatialQuaternion.GetTranslationQ(q_s_dd), ...
-                SpatialQuaternion.GetTranslationQ(q_e), SpatialQuaternion.GetTranslationQ(q_e_d), SpatialQuaternion.GetTranslationQ(q_e_dd), total_time, time_step);
-            [q_orient, q_orient_dot, q_orient_ddot] = SphericalQuaternion.GenerateTrajectory( ...
-                SpatialQuaternion.GetOrientationQ(q_s), SpatialQuaternion.GetOrientationQd(q_s_d), SpatialQuaternion.GetOrientationQd(q_s_dd), ...
-                SpatialQuaternion.GetOrientationQ(q_e), SpatialQuaternion.GetOrientationQd(q_e_d), SpatialQuaternion.GetOrientationQd(q_e_dd), total_time, time_step);
-            q = [q_trans; q_orient];
-            q_dot = [q_trans_dot; q_orient_dot];
-            q_ddot = [q_trans_ddot; q_orient_ddot];
         end
     end
 end

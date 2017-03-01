@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE trajectories [
-  <!ATTLIST trajectory id ID #REQUIRED>
+  <!ATTLIST linear_spline_trajectory id ID #REQUIRED>
+  <!ATTLIST cubic_spline_trajectory id ID #REQUIRED>
+  <!ATTLIST quintic_spline_trajectory id ID #REQUIRED>
 ]>
 
 <trajectories>
