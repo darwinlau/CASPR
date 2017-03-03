@@ -128,7 +128,7 @@ classdef WorkspaceSimulator < Simulator
         
         % Plotting function to plot a two dimensional (subset of the) workspace plot
         function plotWorkspace2(obj,plot_axis,capability_measure,slices)
-            CASPR_log.Assert(numel(slices)==2,'Only 2 dimensional slices can be plotted in this function');
+            CASPR_log.Assert((isempty(slices)||(numel(slices)==2)),'Only 2 dimensional slices can be plotted in this function');
             if(isempty(plot_axis))
                 figure; plot_axis = axes; 
             end
@@ -146,7 +146,7 @@ classdef WorkspaceSimulator < Simulator
         % Plotting function to plot a three dimensional (subset of the)
         % workspace plot
         function plotWorkspace3(obj,plot_axis,capability_measure,slices)
-            CASPR_log.Assert(numel(slices)==3,'Only 3 dimensional slices can be plotted in this function');
+            CASPR_log.Assert((isempty(slices)||(numel(slices)==3)),'Only 3 dimensional slices can be plotted in this function');
             if(isempty(plot_axis))
                 figure; plot_axis = axes; 
             end
