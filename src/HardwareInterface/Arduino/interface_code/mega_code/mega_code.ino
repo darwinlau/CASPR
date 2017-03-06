@@ -146,16 +146,16 @@ void loop() {
             Serial1.println(NANO_FINISH_TRAJECTORY);
           }
           break;
-        case CASPR_HOLD:                       //h: tighten all cables  [TODO: implemnt later]
+        case CASPR_HOLD:                       //h: tighten all cables  !! this cannot handle crossing at the moment !!   //TODO: fix this, and make sure it won't mess other variables up.
           {
-//            unsigned int tightenedLengths[NUMBER_CONNECTED_NANOS];
-//            for (int n = 0; n < NUMBER_CONNECTED_NANOS; n++) {
-//              tightenedLengths[n] = lastLengthCommands[n] - 10; //1mm, TODO: remove magic number
-//            }
-//            int crossingCommands[NUMBER_CONNECTED_NANOS];
-//            unsigned int angleCommands[NUMBER_CONNECTED_NANOS];
-//            computeCrossingAndAngleCommands(tightenedLengths, crossingCommands, angleCommands);
-//            broadcastCommandsToNanos(crossingCommands, angleCommands);
+            int crossingCommands[NUMBER_CONNECTED_NANOS];
+            unsigned int angleCommands[NUMBER_CONNECTED_NANOS];
+            for (int n = 0; n < NUMBER_CONNECTED_NANOS; n++){
+              crossingCommands[n] = 0;
+              lastAngleFeedbacks[n] -= 25;
+              angleCommands[n] = lastAngleFeedbacks[n];
+            }
+            broadcastCommandsToNanos(crossingCommands, angleCommands);
           }
           break;
       }//switch
