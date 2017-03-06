@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE trajectories [
-  <!ATTLIST trajectory id ID #REQUIRED>
+  <!ATTLIST linear_spline_trajectory id ID #REQUIRED>
+  <!ATTLIST cubic_spline_trajectory id ID #REQUIRED>
+  <!ATTLIST quintic_spline_trajectory id ID #REQUIRED>
 ]>
 
 <trajectories>
-  <!-- Simple up and down trajectory -->  
-  <trajectory id="O0001" time_step="0.05">
+  <quintic_spline_trajectory id="O0001" time_definition="relative" time_step="0.05">
+	<description>Simple left and right trajectory</description>
     <points>
       <point>
         <q>1.140 1.140 1.0 0.0 0.0 0.0</q>
@@ -17,20 +19,20 @@
         <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
         <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
       </point>
-      <point time="15.0">
+      <point time="10.0">
         <q>1.64 1.14 1.0 0.0 0.0 0.0</q>
         <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
         <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
       </point>
-      <point time="20.0">
+      <point time="5.0">
         <q>1.14 1.14 1.0 0.0 0.0 0.0</q>
         <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
         <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
       </point>
     </points>
-  </trajectory>
-  <!-- XYZ principle directions -->
-  <trajectory id="O0002" time_step="0.05">
+  </quintic_spline_trajectory>
+  <quintic_spline_trajectory id="O0002" time_definition="relative" time_step="0.05">
+	<description>Principle directions of motion: spatial XYZ and rotation</description>
     <points>
       <point>
         <q>1.14 1.14 1.0 0.0 0.0 0.0</q>
@@ -42,110 +44,95 @@
         <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
         <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
       </point>
-      <point time="9.0">
+      <point time="6.0">
         <q>1.14 1.14 1.5 0.0 0.0 0.0</q>
         <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
         <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
       </point>
-      <point time="12.0">
+      <point time="3.0">
         <q>1.14 1.14 1.0 0.0 0.0 0.0</q>
         <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
         <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
       </point>
-      <point time="15.0">
+      <point time="3.0">
         <q>0.64 1.14 1.0 0.0 0.0 0.0</q>
         <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
         <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
       </point>
-      <point time="21.0">
+      <point time="6.0">
         <q>1.64 1.14 1.0 0.0 0.0 0.0</q>
         <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
         <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
       </point>
-      <point time="24.0">
+      <point time="3.0">
         <q>1.14 1.14 1.0 0.0 0.0 0.0</q>
         <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
         <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
       </point>
-      <point time="27.0">
+      <point time="3.0">
         <q>1.14 0.64 1.0 0.0 0.0 0.0</q>
         <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
         <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
       </point>
-      <point time="33.0">
+      <point time="6.0">
         <q>1.14 1.64 1.0 0.0 0.0 0.0</q>
         <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
         <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
       </point>
-      <point time="36.0">
+      <point time="3.0">
         <q>1.14 1.14 1.0 0.0 0.0 0.0</q>
         <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
         <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
       </point>
-    </points>
-  </trajectory>
-  <!-- XYZ principle at a low Z -->
-  <trajectory id="O0003" time_step="0.05">
-    <points>
-      <point>
+      <point time="4.0">
+        <q>1.14 1.14 1.0 0.25 0.0 0.0</q>
+        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+      </point>
+      <point time="5.0">
+        <q>1.14 1.14 1.0 -0.25 0.0 0.0</q>
+        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+      </point>
+      <point time="5.0">
         <q>1.14 1.14 1.0 0.0 0.0 0.0</q>
         <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
         <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
       </point>
       <point time="5.0">
-        <q>1.14 1.14 0.5 0.0 0.0 0.0</q>
+        <q>1.14 1.14 1.0 0.0 0.3 0.0</q>
         <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
         <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
       </point>
-      <point time="10.0">
-        <q>1.14 1.14 1.5 0.0 0.0 0.0</q>
+      <point time="5.0">
+        <q>1.14 1.14 1.0 0.0 -0.3 0.0</q>
         <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
         <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
       </point>
-      <point time="15.0">
-        <q>1.14 1.14 0.5 0.0 0.0 0.0</q>
+      <point time="5.0">
+        <q>1.14 1.14 1.0 0.0 0.0 0.0</q>
         <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
         <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
       </point>
-      <point time="20.0">
-        <q>0.64 1.14 0.5 0.0 0.0 0.0</q>
+      <point time="5.0">
+        <q>1.14 1.14 1.0 0.0 0.0 0.10</q>
         <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
         <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
       </point>
-      <point time="25.0">
-        <q>1.64 1.14 0.5 0.0 0.0 0.0</q>
+      <point time="5.0">
+        <q>1.14 1.14 1.0 0.0 0.0 -0.10</q>
         <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
         <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
       </point>
-      <point time="30.0">
-        <q>1.14 1.14 0.5 0.0 0.0 0.0</q>
-        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
-        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
-      </point>
-      <point time="35.0">
-        <q>1.14 0.64 0.5 0.0 0.0 0.0</q>
-        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
-        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
-      </point>
-      <point time="40.0">
-        <q>1.14 1.64 0.5 0.0 0.0 0.0</q>
-        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
-        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
-      </point>
-      <point time="45.0">
-        <q>1.14 1.14 0.5 0.0 0.0 0.0</q>
-        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
-        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
-      </point>
-      <point time="50.0">
+      <point time="5.0">
         <q>1.14 1.14 1.0 0.0 0.0 0.0</q>
         <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
         <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
       </point>
     </points>
-  </trajectory>
-  <!-- 3-D printing like trajectory -->  
-  <trajectory id="O0004" time_step="0.05">
+  </quintic_spline_trajectory>
+  <quintic_spline_trajectory id="O0003" time_definition="relative" time_step="0.05">
+	<description>3-D printing like trajectory</description>
     <points>
       <point>
         <q>1.140 1.140 1.0 0.0 0.0 0.0</q>
@@ -157,165 +144,65 @@
         <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
         <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
       </point>
-      <point time="15.0">
+      <point time="7.5">
         <q>1.640 0.64 0.5 0.0 0.0 0.0</q>
         <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
         <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
       </point>
-      <point time="22.5">
+      <point time="7.5">
         <q>1.640 1.640 0.5 0.0 0.0 0.0</q>
         <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
         <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
       </point>
-      <point time="30.0">
+      <point time="7.5">
         <q>0.64 1.640 0.5 0.0 0.0 0.0</q>
         <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
         <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
       </point>
-      <point time="37.5">
+      <point time="7.5">
         <q>0.64 0.64 0.5 0.0 0.0 0.0</q>
         <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
         <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
       </point>
-      <point time="40.0">
+      <point time="2.5">
         <q>0.64 0.64 0.6 0.0 0.0 0.0</q>
         <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
         <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
       </point>
-      <point time="47.5">
+      <point time="7.5">
         <q>1.640 0.64 0.6 0.0 0.0 0.0</q>
         <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
         <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
       </point>
-      <point time="55.0">
+      <point time="7.5">
         <q>1.640 1.640 0.6 0.0 0.0 0.0</q>
         <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
         <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
       </point>
-      <point time="62.5">
+      <point time="7.5">
         <q>0.64 1.640 0.6 0.0 0.0 0.0</q>
         <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
         <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
       </point>
-      <point time="70.0">
+      <point time="7.5">
         <q>0.64 0.64 0.6 0.0 0.0 0.0</q>
         <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
         <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
       </point>
-      <point time="72.5">
+      <point time="2.5">
         <q>0.64 0.64 0.7 0.0 0.0 0.0</q>
         <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
         <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
       </point>
-      <point time="80.0">
+      <point time="7.5">
         <q>1.140 1.140 1.0 0.0 0.0 0.0</q>
         <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
         <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
       </point>
     </points>
-  </trajectory>  
-  <!-- Spatial XYZ and rotation -->  
-  <trajectory id="O0005" time_step="0.05">
-    <points>
-      <point>
-        <q>1.14 1.14 1.0 0.0 0.0 0.0</q>
-        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
-        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
-      </point>
-      <point time="3.0">
-        <q>1.14 1.14 0.5 0.0 0.0 0.0</q>
-        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
-        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
-      </point>
-      <point time="9.0">
-        <q>1.14 1.14 1.5 0.0 0.0 0.0</q>
-        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
-        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
-      </point>
-      <point time="12.0">
-        <q>1.14 1.14 1.0 0.0 0.0 0.0</q>
-        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
-        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
-      </point>
-      <point time="15.0">
-        <q>0.64 1.14 1.0 0.0 0.0 0.0</q>
-        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
-        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
-      </point>
-      <point time="21.0">
-        <q>1.64 1.14 1.0 0.0 0.0 0.0</q>
-        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
-        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
-      </point>
-      <point time="24.0">
-        <q>1.14 1.14 1.0 0.0 0.0 0.0</q>
-        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
-        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
-      </point>
-      <point time="27.0">
-        <q>1.14 0.64 1.0 0.0 0.0 0.0</q>
-        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
-        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
-      </point>
-      <point time="33.0">
-        <q>1.14 1.64 1.0 0.0 0.0 0.0</q>
-        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
-        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
-      </point>
-      <point time="36.0">
-        <q>1.14 1.14 1.0 0.0 0.0 0.0</q>
-        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
-        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
-      </point>
-      <point time="40.0">
-        <q>1.14 1.14 1.0 0.25 0.0 0.0</q>
-        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
-        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
-      </point>
-      <point time="45.0">
-        <q>1.14 1.14 1.0 -0.25 0.0 0.0</q>
-        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
-        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
-      </point>
-      <point time="50.0">
-        <q>1.14 1.14 1.0 0.0 0.0 0.0</q>
-        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
-        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
-      </point>
-      <point time="55.0">
-        <q>1.14 1.14 1.0 0.0 0.3 0.0</q>
-        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
-        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
-      </point>
-      <point time="60.0">
-        <q>1.14 1.14 1.0 0.0 -0.3 0.0</q>
-        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
-        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
-      </point>
-      <point time="65.0">
-        <q>1.14 1.14 1.0 0.0 0.0 0.0</q>
-        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
-        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
-      </point>
-      <point time="70.0">
-        <q>1.14 1.14 1.0 0.0 0.0 0.10</q>
-        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
-        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
-      </point>
-      <point time="75.0">
-        <q>1.14 1.14 1.0 0.0 0.0 -0.10</q>
-        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
-        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
-      </point>
-      <point time="80.0">
-        <q>1.14 1.14 1.0 0.0 0.0 0.0</q>
-        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
-        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
-      </point>
-    </points>
-  </trajectory>
-  <!-- Wall zig zag trajectory -->  
-  <trajectory id="O0006" time_step="0.05">
+  </quintic_spline_trajectory>  
+  <quintic_spline_trajectory id="O0004" time_definition="absolute" time_step="0.05">
+	<description>Wall zig zag trajectory</description>
     <points>
       <point>
         <q>1.14 1.14 1.0 0.0 0.0 0.0</q>
@@ -388,5 +275,165 @@
         <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
       </point>
     </points>
-  </trajectory>
+  </quintic_spline_trajectory>
+  <quintic_spline_trajectory id="O0005" time_definition="absolute" time_step="0.05">
+	<description>4 point trajectory for drilling motion</description>
+    <points>
+      <point>
+        <q>1.14 1.14 1.0 0.0 0.0 0.0</q>
+        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+      </point>
+      <point time="5.0">
+        <q>0.840 0.700 1.300 0.0 0.0 0.0</q>
+        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+      </point>
+      <point time="26.4">
+        <q>0.840 0.700 1.300 0.0 0.0 0.0</q>
+        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+      </point>
+      <point time="29.4">
+        <q>1.440 0.700 1.300 0.0 0.0 0.0</q>
+        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+      </point>
+      <point time="51.8">
+        <q>1.440 0.700 1.300 0.0 0.0 0.0</q>
+        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+      </point>
+      <point time="54.8">
+        <q>1.440 0.700 1.000 0.0 0.0 0.0</q>
+        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+      </point>
+      <point time="77.2">
+        <q>1.440 0.700 1.000 0.0 0.0 0.0</q>
+        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+      </point>
+      <point time="80.2">
+        <q>0.840 0.700 1.000 0.0 0.0 0.0</q>
+        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+      </point>
+      <point time="101.6">
+        <q>0.840 0.700 1.000 0.0 0.0 0.0</q>
+        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+      </point>
+      <point time="106.6">
+        <q>1.140 1.140 1.000 0.0 0.0 0.0</q>
+        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+      </point>
+    </points>
+  </quintic_spline_trajectory>
+  <quintic_spline_trajectory id="O0006" time_definition="absolute" time_step="0.05">
+	<description>9 point trajectory for drilling motion</description>
+    <points>
+      <point>
+        <q>1.14 1.14 1.0 0.0 0.0 0.0</q>
+        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+      </point>
+      <point time="5.0">
+        <q>0.540 0.680 1.250 0.0 0.0 0.0</q>
+        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+      </point>
+      <point time="26.4">
+        <q>0.540 0.680 1.250 0.0 0.0 0.0</q>
+        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+      </point>
+      <point time="29.4">
+        <q>1.140 0.680 1.250 0.0 0.0 0.0</q>
+        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+      </point>
+      <point time="51.8">
+        <q>1.140 0.680 1.250 0.0 0.0 0.0</q>
+        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+      </point>
+      <point time="54.8">
+        <q>1.740 0.680 1.250 0.0 0.0 0.0</q>
+        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+      </point>
+      <point time="77.2">
+        <q>1.740 0.680 1.250 0.0 0.0 0.0</q>
+        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+      </point>
+      <point time="80.2">
+        <q>1.740 0.680 1.000 0.0 0.0 0.0</q>
+        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+      </point>
+      <point time="102.6">
+        <q>1.740 0.680 1.000 0.0 0.0 0.0</q>
+        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+      </point>
+      <point time="105.6">
+        <q>1.140 0.680 1.000 0.0 0.0 0.0</q>
+        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+      </point>
+      <point time="128.0">
+        <q>1.140 0.680 1.000 0.0 0.0 0.0</q>
+        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+      </point>
+      <point time="131.0">
+        <q>0.540 0.680 1.000 0.0 0.0 0.0</q>
+        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+      </point>
+      <point time="153.4">
+        <q>0.540 0.680 1.000 0.0 0.0 0.0</q>
+        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+      </point>
+      <point time="156.4">
+        <q>0.540 0.680 0.750 0.0 0.0 0.0</q>
+        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+      </point>
+      <point time="178.8">
+        <q>0.540 0.680 0.750 0.0 0.0 0.0</q>
+        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+      </point>
+      <point time="181.8">
+        <q>1.140 0.680 0.750 0.0 0.0 0.0</q>
+        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+      </point>
+      <point time="204.2">
+        <q>1.140 0.680 0.750 0.0 0.0 0.0</q>
+        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+      </point>
+      <point time="207.2">
+        <q>1.740 0.680 0.750 0.0 0.0 0.0</q>
+        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+      </point>
+      <point time="228.6">
+        <q>1.740 0.680 0.750 0.0 0.0 0.0</q>
+        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+      </point>
+      <point time="233.6">
+        <q>1.140 1.140 1.000 0.0 0.0 0.0</q>
+        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+      </point>
+    </points>
+  </quintic_spline_trajectory>
 </trajectories>

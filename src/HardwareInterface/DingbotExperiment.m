@@ -103,10 +103,9 @@ classdef DingbotExperiment < ExperimentBase
             clear;
             close all;
             trajectory_id = 'traj_1';
-%             trajectory_id = 'BackAndForth';
 %             trajectory_id = 'up';
 %             trajectory_id = 'down';
-%             trajectory_id = 'noMovement';
+%             trajectory_id = '3DPrinting';
             
             
             exp = DingbotExperiment();

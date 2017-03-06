@@ -42,7 +42,9 @@ classdef CableSegmentModel < handle
         
         % The vectors r_OA are all in base frame
         function value = get.segmentVector(obj)
-            value = obj.attachments{2}.r_OA - obj.attachments{1}.r_OA; 
+            l_segment = obj.attachments{2}.r_OA - obj.attachments{1}.r_OA;
+            CASPR_log.Assert(l_segment ~= zeros(3,1), 'Cable segment vector should never be a zero vector');
+            value = l_segment; 
         end
         
         function value = get.length(obj)

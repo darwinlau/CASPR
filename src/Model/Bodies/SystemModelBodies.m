@@ -104,6 +104,9 @@ classdef SystemModelBodies < handle
         q_ub
         % Generalised coordinates time derivative (for special cases q_dot does not equal q_deriv)
         q_deriv
+        % Get array of dofs for each joint
+        jointsNumDofVars
+        jointsNumDofs
     end
 
     properties
@@ -897,6 +900,20 @@ classdef SystemModelBodies < handle
                 obj.updateLinearisation();
             end
             G_grad = obj.G_grad;
+        end
+        
+        function jointsNumDofVars = get.jointsNumDofVars(obj)
+            jointsNumDofVars = zeros(obj.numLinks,1);
+            for k = 1:obj.numLinks
+                jointsNumDofVars(k) = obj.bodies{k}.numDofVars;
+            end
+        end
+        
+        function jointsNumDofs = get.jointsNumDofs(obj)
+            jointsNumDofs = zeros(obj.numLinks,1);
+            for k = 1:obj.numLinks
+                jointsNumDofs(k) = obj.bodies{k}.numDofs;
+            end
         end
     end
 

@@ -1,10 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE trajectories [
-<!ATTLIST trajectory id ID #REQUIRED>
+  <!ATTLIST linear_spline_trajectory id ID #REQUIRED>
+  <!ATTLIST cubic_spline_trajectory id ID #REQUIRED>
+  <!ATTLIST quintic_spline_trajectory id ID #REQUIRED>
 ]>
 
 <trajectories>
-    <trajectory id="traj_test" time_step="0.01">
+    <quintic_spline_trajectory id="traj_test" time_definition="absolute" time_step="0.01">
         <points>
             <point>
                 <q>0.0 0.0 0.0 0.0</q>
@@ -17,8 +19,8 @@
                 <q_ddot>0.0 0.0 0.0 0.0</q_ddot>
             </point>
         </points>
-    </trajectory>
-    <trajectory id="traj_test_multi" time_step="0.01">
+    </quintic_spline_trajectory>
+    <quintic_spline_trajectory id="traj_test_multi" time_definition="absolute" time_step="0.01">
         <points>
             <point>
                 <q>0.0 0.0 0.0 0.0</q>
@@ -46,8 +48,8 @@
                 <q_ddot>0.0 0.0 0.0 0.0</q_ddot>
             </point>
         </points>
-    </trajectory>
-    <trajectory id="traj_test_2_shrunk" time_step="0.00667">
+    </quintic_spline_trajectory>
+    <quintic_spline_trajectory id="traj_test_2_shrunk" time_definition="absolute" time_step="0.00667">
         <points>
             <point>
                 <q>0.0 0.0 0.0 0.0</q>
@@ -70,8 +72,8 @@
                 <q_ddot>0.0 0.0 0.0 0.0</q_ddot>
             </point>
         </points>
-    </trajectory>
-    <trajectory id="traj_test_2" time_step="0.00666666666666">
+    </quintic_spline_trajectory>
+    <quintic_spline_trajectory id="traj_test_2" time_definition="absolute" time_step="0.00666666666666">
         <points>
             <point>
                 <q>0.0 0.0 0.0 0.0</q>
@@ -154,8 +156,8 @@
                 <q_ddot>0.0 0.0 0.0 0.0</q_ddot>
             </point>
         </points>
-    </trajectory>
-    <trajectory id="traj_test_3" time_step="0.00667">
+    </quintic_spline_trajectory>
+    <quintic_spline_trajectory id="traj_test_3" time_definition="absolute" time_step="0.00667">
         <points>
             <point>
                 <q>0.0 0.0 0.0 0.0</q>
@@ -178,8 +180,8 @@
                 <q_ddot>0.0 0.0 0.0 0.0</q_ddot>
             </point>
         </points>
-    </trajectory>
-    <trajectory id="traj_test_4" time_step="0.00667">
+    </quintic_spline_trajectory>
+    <quintic_spline_trajectory id="traj_test_4" time_definition="absolute" time_step="0.00667">
         <points>
             <point>
                 <q>0.0 0.0 0.0 0.0</q>
@@ -232,5 +234,5 @@
                 <q_ddot>0.0 0.0 0.0 0.0</q_ddot>
             </point>
         </points>
-    </trajectory>
+    </quintic_spline_trajectory>
 </trajectories>
