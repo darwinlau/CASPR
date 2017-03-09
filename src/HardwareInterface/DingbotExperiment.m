@@ -13,14 +13,14 @@ classdef DingbotExperiment < ExperimentBase
     methods
         function eb = DingbotExperiment()
             % Create the config
-            model_config = DevModelConfig(DevModelConfigType.D_CUHK_DINGBOT);
+            model_config = DevModelConfig(DevModelConfigType.D_CUHK_FOLDABOT);
             cable_set_id = 'original';
 %             model_config = DevModelConfig(DevModelConfigType.D_CUHK_DINGBOT_PLANAR);
 %             cable_set_id = 'original';
             % Load the SystemKinematics object from the XML
             modelObj = model_config.getModel(cable_set_id);
             % Create the hardware interface
-            hw_interface = ArduinoCASPRInterface('COM6', 8);  %1
+            hw_interface = ArduinoCASPRInterface('COM7', 8);  %1
             eb@ExperimentBase(hw_interface, modelObj);
             eb.modelConfig = model_config;
             eb.forwardKin = FKDifferential(modelObj);
@@ -102,7 +102,7 @@ classdef DingbotExperiment < ExperimentBase
             clc;
             clear;
             close all;
-            trajectory_id = 'traj_1';
+            trajectory_id = 'traj_2';
 %             trajectory_id = 'up';
 %             trajectory_id = 'down';
 %             trajectory_id = '3DPrinting';
