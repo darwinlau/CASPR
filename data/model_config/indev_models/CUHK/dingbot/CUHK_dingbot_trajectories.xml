@@ -106,6 +106,7 @@
                 <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
                 <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
             </point>
+            </points>
     </quintic_spline_trajectory>
     <quintic_spline_trajectory id="up" time_definition="absolute" time_step="0.05">
         <points>
@@ -119,6 +120,7 @@
                 <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
                 <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
             </point>
+             </points>
     </quintic_spline_trajectory>
     <quintic_spline_trajectory id="down" time_definition="absolute" time_step="0.05">
         <points>
@@ -132,6 +134,7 @@
                 <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
                 <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
             </point>
+             </points>
     </quintic_spline_trajectory>
 	<quintic_spline_trajectory id="3DPrinting" time_definition="absolute" time_step="0.05">	
         <points>		
