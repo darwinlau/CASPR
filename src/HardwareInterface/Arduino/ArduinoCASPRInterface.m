@@ -11,6 +11,7 @@ classdef ArduinoCASPRInterface < HardwareInterfaceBase
         SEND_PREFIX_LENGTH_CMD = 'l';
         COMM_PREFIX_ACKNOWLEDGE = 'a';
         COMM_PREFIX_SETUP = 'k';
+        RECEIVE_HAND_GRIP = 'o';
         
         BAUD_RATE = 74880;     % Bits per second
     end
@@ -105,6 +106,15 @@ classdef ArduinoCASPRInterface < HardwareInterfaceBase
                 str_cmd = [str_cmd, obj.casprLengthToHW(l0(i))];
             end
             fprintf(obj.serial_port, '%s\n', str_cmd);
+        end
+        
+        function[handsoff] =  handGripfeedback(obj)    % get feedback from hand grip
+            cmd_str = fscanf(obj.serial_port, '%s\n');
+             if (isequal(cmd_str, obj.RECEIVE_HAND_GRIP))
+                handsoff = true;
+             else
+                 handsoff = flase;
+             end
         end
         
         function testingfeedback(obj) % only for testing, will delect later
