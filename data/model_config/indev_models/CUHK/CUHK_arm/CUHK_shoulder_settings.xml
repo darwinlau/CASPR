@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-
-<settings>
-  <cable_set>basic_cableset</cable_set>
-  <trajectory>traj_test_2</trajectory>
-  <ctc_parameter_set>CUHK_shoulder</ctc_parameter_set>
-  <ctci_parameter_set>CUHK_shoulder</ctci_parameter_set>
-  <lyapunov_parameter_set>CUHK_shoulder</lyapunov_parameter_set>
-</settings>
