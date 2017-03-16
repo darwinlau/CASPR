@@ -13,6 +13,7 @@ classdef ModelConfigType
         M_KNTU_PLANAR
         M_SIMPLE_PLANAR_XY
         M_PASSIVE_SPRINGS_PLANAR
+        M_POCABOT_PLANAR
         % Spatial manipulators
         M_ACROBOT
 		M_COGIRO
@@ -23,6 +24,7 @@ classdef ModelConfigType
         M_FAST
         M_CABLE_ROBOT_SIMULATOR
         M_SIMPLE_SPATIAL
+        M_POCABOT_SPATIAL
         % Spherical manipulators
         M_MYOROB_SHOULDER
         M_SIMPLE_SPHERICAL
@@ -31,5 +33,6 @@ classdef ModelConfigType
         M_NECK_8S
         M_CAREX
         M_4U_MODULAR_ARM
+        M_BM_ARM
     end
 end
