@@ -34,7 +34,7 @@ function varargout = CASPR_GUI(varargin)
 
     % Edit the above text to modify the response to help CASPR_GUI
 
-    % Last Modified by GUIDE v2.5 06-Oct-2016 14:39:27
+    % Last Modified by GUIDE v2.5 22-Mar-2017 19:54:35
 
     % Begin initialization code - DO NOT EDIT
     warning('off','MATLAB:uitabgroup:OldVersion')
@@ -269,6 +269,17 @@ function control_button_Callback(~, ~, handles) %#ok<DEFNU>
     % handles    structure with handles and user data (see GUIDATA)
     saveState(handles);
     control_GUI;
+end
+
+% --- Executes on button press in console_pushbutton.
+function console_pushbutton_Callback(~, ~, handles) %#ok<DEFNU>
+    % hObject    handle to console_pushbutton (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    structure with handles and user data (see GUIDATA)
+    % Load the model 
+    modObj = getappdata(handles.cable_popup,'modObj');
+    % Assign the model to the base workspace
+    assignin('base','model_object',modObj);
 end
 
 %--------------------------------------------------------------------------
