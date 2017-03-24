@@ -31,7 +31,7 @@ function varargout = dynamics_GUI(varargin)
 
     % Edit the above text to modify the response to help dynamics_GUI
 
-    % Last Modified by GUIDE v2.5 21-Oct-2016 09:49:15
+    % Last Modified by GUIDE v2.5 24-Mar-2017 12:13:33
 
     % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
@@ -617,6 +617,19 @@ function plot_button_Callback(~, ~, handles) %#ok<DEFNU>
         contents = cellstr(get(handles.plot_type_popup,'String'));
         plot_type = contents{get(handles.plot_type_popup,'Value')};
         GUIOperations.GUIPlot(plot_type,sim,handles,str2double(getappdata(handles.plot_type_popup,'num_plots')),get(handles.undock_box,'value'));
+    end
+end
+
+% --- Executes on button press in export_button.
+function export_button_Callback(~, ~, handles) %#ok<DEFNU>
+    % hObject    handle to export_button (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    structure with handles and user data (see GUIDATA)
+    sim = getappdata(handles.figure1,'sim');
+    if(isempty(sim))
+        warning('No simulator has been generated. Please press run first'); %#ok<WNTAG>
+    else
+        assignin('base','dynamics_simulator',sim);
     end
 end
 
