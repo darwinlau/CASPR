@@ -31,7 +31,7 @@ function varargout = control_GUI(varargin)
 
     % Edit the above text to modify the response to help control_GUI
 
-    % Last Modified by GUIDE v2.5 21-Oct-2016 09:56:42
+    % Last Modified by GUIDE v2.5 25-Mar-2017 20:31:22
 
     % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
@@ -653,6 +653,19 @@ function update_button_Callback(hObject, eventdata, handles) %#ok<DEFNU>
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
     trajectory_popup_Update(hObject, eventdata, handles);
+end
+
+% --- Executes on button press in export_button.
+function export_button_Callback(~, ~, handles) %#ok<DEFNU>
+    % hObject    handle to export_button (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    structure with handles and user data (see GUIDATA)
+    sim = getappdata(handles.figure1,'sim');
+    if(isempty(sim))
+        warning('No simulator has been generated. Please press run first'); %#ok<WNTAG>
+    else
+        assignin('base','control_simulator',sim);
+    end
 end
 
 %--------------------------------------------------------------------------

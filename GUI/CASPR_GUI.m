@@ -321,7 +321,7 @@ function generate_model_object(handles)
     setappdata(handles.cable_popup,'axis_range',display_range);
     setappdata(handles.cable_popup,'view_angle',view_angle);
     set(handles.model_label_text,'String',model_type);
-    format_q_table(modObj.numDofs,handles.qtable);
+    format_q_table(modObj.numDofs,handles.qtable,modObj.q');
 end
 
 function model_popup_update(handles)
@@ -397,8 +397,8 @@ function loadState(handles)
     end
 end
 
-function format_q_table(numDofs,qtable)
-    set(qtable,'Data',zeros(1,numDofs));
+function format_q_table(numDofs,qtable,q_data)
+    set(qtable,'Data',q_data);
     set(qtable,'ColumnWidth',{30});
     set(qtable,'ColumnEditable',true(1,numDofs));
     column_name = cell(1,numDofs);
