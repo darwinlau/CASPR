@@ -566,6 +566,7 @@ function run_button_Callback(~, ~, handles) %#ok<DEFNU>
     
     figure;
     control_sim.plotTrackingError();
+    assignin('base','control_simulator',control_sim);
     % To be uncommented after discussions with Darwin
 %     % Plot the data
 %     disp('Start Plotting Simulation');
@@ -653,19 +654,6 @@ function update_button_Callback(hObject, eventdata, handles) %#ok<DEFNU>
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
     trajectory_popup_Update(hObject, eventdata, handles);
-end
-
-% --- Executes on button press in export_button.
-function export_button_Callback(~, ~, handles) %#ok<DEFNU>
-    % hObject    handle to export_button (see GCBO)
-    % eventdata  reserved - to be defined in a future version of MATLAB
-    % handles    structure with handles and user data (see GUIDATA)
-    sim = getappdata(handles.figure1,'sim');
-    if(isempty(sim))
-        warning('No simulator has been generated. Please press run first'); %#ok<WNTAG>
-    else
-        assignin('base','control_simulator',sim);
-    end
 end
 
 %--------------------------------------------------------------------------

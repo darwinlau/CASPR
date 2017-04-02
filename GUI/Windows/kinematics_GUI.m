@@ -512,19 +512,6 @@ function update_button_Callback(hObject, ~, handles) %#ok<DEFNU>
     trajectory_popup_Update(hObject, handles);
 end
 
-% --- Executes on button press in export_button.
-function export_button_Callback(~, ~, handles) %#ok<DEFNU>
-    % hObject    handle to export_button (see GCBO)
-    % eventdata  reserved - to be defined in a future version of MATLAB
-    % handles    structure with handles and user data (see GUIDATA)
-    sim = getappdata(handles.figure1,'sim');
-    if(isempty(sim))
-        warning('No simulator has been generated. Please press run first'); %#ok<WNTAG>
-    else
-        assignin('base','kinematic_simulator',sim);
-    end
-end
-
 %--------------------------------------------------------------------------
 % Checkboxes
 %--------------------------------------------------------------------------
@@ -631,6 +618,7 @@ function run_inverse_kinematics(handles,modObj,trajectory_id)
     fprintf('End Plotting Simulation : %f seconds\n', time_elapsed);
     set(handles.status_text,'String','No simulation running');
     setappdata(handles.figure1,'sim',sim);
+    assignin('base','inverse_kinematic_simulator',sim);
 end
 
 function run_forward_kinematics(handles,modObj,trajectory_id)
@@ -693,6 +681,7 @@ function run_forward_kinematics(handles,modObj,trajectory_id)
     time_elapsed = toc(start_tic);
     fprintf('End Plotting Simulation : %f seconds\n', time_elapsed);
     set(handles.status_text,'String','No simulation running');
+    assignin('base','forward_kinematic_simulator',sim);
 end
 
 function loadState(handles)

@@ -31,7 +31,7 @@ function varargout = workspace_GUI(varargin)
 
     % Edit the above text to modify the response to help workspace_GUI
 
-    % Last Modified by GUIDE v2.5 25-Mar-2017 20:46:39
+    % Last Modified by GUIDE v2.5 02-Apr-2017 11:00:10
 
     % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
@@ -369,7 +369,7 @@ function generate_button_Callback(~, ~, handles) %#ok<DEFNU>
     fprintf('End Plotting Simulation : %f seconds\n', time_elapsed);
     set(handles.status_text,'String','No simulation running');
     setappdata(handles.figure1,'sim',wsim);
-%     assignin('base','wsim',wsim);
+    assignin('base','workspace_sim',wsim);
 end
 
 % --- Executes on button press in plot_button.
@@ -409,19 +409,6 @@ function plot_button_Callback(~, ~, handles) %#ok<DEFNU>
         end
 %         GUIOperations.GUIPlot(plot_type,sim,handles,str2double(getappdata(handles.plot_type_popup,'num_plots')),get(handles.undock_box,'Value'))
         
-    end
-end
-
-% --- Executes on button press in export_button.
-function export_button_Callback(~, ~, handles) %#ok<DEFNU>
-    % hObject    handle to export_button (see GCBO)
-    % eventdata  reserved - to be defined in a future version of MATLAB
-    % handles    structure with handles and user data (see GUIDATA)
-    sim = getappdata(handles.figure1,'sim');
-    if(isempty(sim))
-        warning('No simulator has been generated. Please press run first'); %#ok<WNTAG>
-    else
-        assignin('base','workspace_simulator',sim);
     end
 end
 
@@ -592,4 +579,3 @@ end
 % Generate Workspace Plotting Functions
 % Add new Methods for computing Wrench Closure
 % Determine where best to store settings
-

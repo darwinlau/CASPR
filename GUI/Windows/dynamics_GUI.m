@@ -620,19 +620,6 @@ function plot_button_Callback(~, ~, handles) %#ok<DEFNU>
     end
 end
 
-% --- Executes on button press in export_button.
-function export_button_Callback(~, ~, handles) %#ok<DEFNU>
-    % hObject    handle to export_button (see GCBO)
-    % eventdata  reserved - to be defined in a future version of MATLAB
-    % handles    structure with handles and user data (see GUIDATA)
-    sim = getappdata(handles.figure1,'sim');
-    if(isempty(sim))
-        warning('No simulator has been generated. Please press run first'); %#ok<WNTAG>
-    else
-        assignin('base','dynamics_simulator',sim);
-    end
-end
-
 % --- Executes on button press in update_button.
 function update_button_Callback(hObject, eventdata, handles) %#ok<DEFNU>
 % hObject    handle to update_button (see GCBO)
@@ -896,6 +883,7 @@ function run_inverse_dynamics(handles,modObj,trajectory_id)
     fprintf('End Plotting Simulation : %f seconds\n', time_elapsed);
     set(handles.status_text,'String','No simulation running');
     setappdata(handles.figure1,'sim',idsim);
+    assignin('base','inverse_dynamics_simulator',idsim);
 end
 
 function id_solver = load_idsolver(handles,modObj)
@@ -1085,6 +1073,7 @@ function run_forward_dynamics(handles,modObj,trajectory_id)
     GUIOperations.GUIPlot('plotJointSpace',idsim,handles,2,get(handles.undock_box,'Value'));
     GUIOperations.GUIPlot('plotJointSpace',fdsim,handles,2,get(handles.undock_box,'Value'));
     set(handles.status_text,'String','No simulation running');
+    assignin('base','forward_dynamics_simulator',fdsim);
 end
 
 function toggle_visibility(dynamics_method,handles)
