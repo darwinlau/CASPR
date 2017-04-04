@@ -17,7 +17,7 @@ classdef CableModelPassiveLinearSpringTest < CableModelTestBase
             disp('Testing CableModelPassiveLinearSpring update')
             c = CableModelPassiveLinearSpring('1',1);
             % Create the body model
-            model_config = TestModelConfig(TestModelConfigType.T_SCDM);
+            model_config = TestModelConfig('test_SCDM');
             modelObj = model_config.getModel(model_config.defaultCableSetId);
             c.update(modelObj.bodyModel)
         end

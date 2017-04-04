@@ -74,7 +74,7 @@ classdef (Abstract) JointBase < handle
         end
         
         % -------
-        % Getters
+        % Getters and setters
         % -------
         function value = get.q_deriv(obj)
             value = obj.QDeriv(obj.q, obj.q_dot);
@@ -94,6 +94,43 @@ classdef (Abstract) JointBase < handle
                 obj.tau = value;
             end
         end
+        
+        % These functions generate trajectory spline for a joint
+        % By default it assumes that the interpolation is done on all
+        % joints independently. If not, override it in your own joint
+        % implementation
+        function [q, q_dot, q_ddot] = generateTrajectoryLinearSpline(obj, q_s, q_e, time_vector)
+            n_dof = obj.numDofs;
+            CASPR_log.Assert(n_dof == length(q_s) && n_dof == length(q_e), 'Length of input states are different to the number of DoFs');
+            q = zeros(n_dof, length(time_vector)); 
+            q_dot = zeros(n_dof, length(time_vector));
+            q_ddot = zeros(n_dof, length(time_vector));
+            for i = 1:n_dof
+                [q(i,:), q_dot(i,:), q_ddot(i,:)] = Spline.LinearInterpolation(q_s(i), q_e(i), time_vector);
+            end
+        end
+        
+        function [q, q_dot, q_ddot] = generateTrajectoryCubicSpline(obj, q_s, q_s_d, q_e, q_e_d, time_vector)
+            n_dof = obj.numDofs;
+            CASPR_log.Assert(n_dof == length(q_s) && n_dof == length(q_e) && n_dof == length(q_s_d) && n_dof == length(q_e_d), 'Length of input states are different to the number of DoFs');
+            q = zeros(n_dof, length(time_vector)); 
+            q_dot = zeros(n_dof, length(time_vector));
+            q_ddot = zeros(n_dof, length(time_vector));
+            for i = 1:n_dof
+                [q(i,:), q_dot(i,:), q_ddot(i,:)] = Spline.CubicInterpolation(q_s(i), q_s_d(i), q_e(i), q_e_d(i), time_vector);
+            end
+        end
+        
+        function [q, q_dot, q_ddot] = generateTrajectoryQuinticSpline(obj, q_s, q_s_d, q_s_dd, q_e, q_e_d, q_e_dd, time_vector)
+            n_dof = obj.numDofs;
+            CASPR_log.Assert(n_dof == length(q_s) && n_dof == length(q_e) && n_dof == length(q_s_d) && n_dof == length(q_e_d) && n_dof == length(q_s_dd) && n_dof == length(q_e_dd), 'Length of input states are different to the number of DoFs');
+            q = zeros(n_dof, length(time_vector)); 
+            q_dot = zeros(n_dof, length(time_vector));
+            q_ddot = zeros(n_dof, length(time_vector));
+            for i = 1:n_dof
+                [q(i,:), q_dot(i,:), q_ddot(i,:)] = Spline.QuinticInterpolation(q_s(i), q_s_d(i), q_s_dd(i), q_e(i), q_e_d(i), q_e_dd(i), time_vector);
+            end
+        end
 	end
         
     methods (Static)
@@ -108,13 +145,15 @@ classdef (Abstract) JointBase < handle
                     j = RevoluteZ;
                 case JointType.U_XY
                     j = UniversalXY;
+                case JointType.U_YZ
+                    j = UniversalYZ;
                 case JointType.P_XY
                     j = PrismaticXY;
                 case JointType.PLANAR_XY
                     j = PlanarXY;
                 case JointType.PLANAR_YZ
                     j = PlanarYZ;
-                case JointType.PLANAR_XZ %%
+                case JointType.PLANAR_XZ
                     j = PlanarXZ;
                 case JointType.S_EULER_XYZ
                     j = SphericalEulerXYZ;
@@ -183,9 +222,6 @@ classdef (Abstract) JointBase < handle
         S = RelVelocityMatrix(q)
         S_grad = RelVelocityMatrixGradient(q)
         S_dot_grad = RelVelocityMatrixDerivGradient(q,q_dot)
-        
-        % Generates trajectory
-        [q, q_dot, q_ddot] = GenerateTrajectory(q_s, q_s_d, q_s_dd, q_e, q_e_d, q_e_dd, total_time, time_step)
     end
 end
 

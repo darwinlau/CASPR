@@ -31,7 +31,7 @@ function varargout = kinematics_GUI(varargin)
 
     % Edit the above text to modify the response to help kinematics_GUI
 
-    % Last Modified by GUIDE v2.5 21-Oct-2016 09:29:15
+    % Last Modified by GUIDE v2.5 25-Mar-2017 20:35:36
 
     % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
@@ -505,7 +505,7 @@ function plot_movie_button_Callback(hObject, eventdata, handles)
 end
 
 % --- Executes on button press in update_button.
-function update_button_Callback(hObject, eventdata, handles)
+function update_button_Callback(hObject, ~, handles) %#ok<DEFNU>
 % hObject    handle to update_button (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -618,6 +618,7 @@ function run_inverse_kinematics(handles,modObj,trajectory_id)
     fprintf('End Plotting Simulation : %f seconds\n', time_elapsed);
     set(handles.status_text,'String','No simulation running');
     setappdata(handles.figure1,'sim',sim);
+    assignin('base','inverse_kinematic_simulator',sim);
 end
 
 function run_forward_kinematics(handles,modObj,trajectory_id)
@@ -680,6 +681,7 @@ function run_forward_kinematics(handles,modObj,trajectory_id)
     time_elapsed = toc(start_tic);
     fprintf('End Plotting Simulation : %f seconds\n', time_elapsed);
     set(handles.status_text,'String','No simulation running');
+    assignin('base','forward_kinematic_simulator',sim);
 end
 
 function loadState(handles)

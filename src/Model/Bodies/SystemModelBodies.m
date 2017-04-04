@@ -106,10 +106,15 @@ classdef SystemModelBodies < handle
         q_ub
         % Generalised coordinates time derivative (for special cases q_dot does not equal q_deriv)
         q_deriv
+        
         tau                         % The joint actuator
         tauMin                      % The joint actuator minimum value
         tauMax                      % The joint actuator maximum value
         TAU_INVALID
+        
+        % Get array of dofs for each joint
+        jointsNumDofVars
+        jointsNumDofs
     end
 
     properties
@@ -970,6 +975,20 @@ classdef SystemModelBodies < handle
         
         function value = get.TAU_INVALID(obj)
             value = JointBase.INVALID_TAU * ones(obj.numDofsActuated, 1);
+        end
+        
+        function jointsNumDofVars = get.jointsNumDofVars(obj)
+            jointsNumDofVars = zeros(obj.numLinks,1);
+            for k = 1:obj.numLinks
+                jointsNumDofVars(k) = obj.bodies{k}.numDofVars;
+            end
+        end
+        
+        function jointsNumDofs = get.jointsNumDofs(obj)
+            jointsNumDofs = zeros(obj.numLinks,1);
+            for k = 1:obj.numLinks
+                jointsNumDofs(k) = obj.bodies{k}.numDofs;
+            end
         end
     end
 

@@ -13,7 +13,6 @@ classdef TestModelConfig < ModelConfigBase
         % Constructor for the ModelConfig class. This builds the xml
         % objects.
         function c = TestModelConfig(type)
-            CASPR_log.Assert(isa(type, 'TestModelConfigType'), 'The ''type'' for ModelConfig must be of the enum ''TestModelConfigType''');
             c@ModelConfigBase(type, TestModelConfig.MODEL_FOLDER_PATH, TestModelConfig.LIST_FILENAME);
         end
     end

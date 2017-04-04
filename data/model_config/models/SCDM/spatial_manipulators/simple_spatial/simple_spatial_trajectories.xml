@@ -1,7 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE trajectories [
-  <!ATTLIST trajectory id ID #REQUIRED>
-]>
-
-<trajectories>
-</trajectories>

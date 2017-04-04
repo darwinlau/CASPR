@@ -31,7 +31,7 @@ function varargout = workspace_GUI(varargin)
 
     % Edit the above text to modify the response to help workspace_GUI
 
-    % Last Modified by GUIDE v2.5 24-Feb-2016 19:07:40
+    % Last Modified by GUIDE v2.5 02-Apr-2017 11:00:10
 
     % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
@@ -369,7 +369,7 @@ function generate_button_Callback(~, ~, handles) %#ok<DEFNU>
     fprintf('End Plotting Simulation : %f seconds\n', time_elapsed);
     set(handles.status_text,'String','No simulation running');
     setappdata(handles.figure1,'sim',wsim);
-    assignin('base','wsim',wsim);
+    assignin('base','workspace_sim',wsim);
 end
 
 % --- Executes on button press in plot_button.
@@ -383,7 +383,32 @@ function plot_button_Callback(~, ~, handles) %#ok<DEFNU>
     else
         contents = cellstr(get(handles.plot_type_popup,'String'));
         plot_type = contents{get(handles.plot_type_popup,'Value')};
-        GUIOperations.GUIPlot(plot_type,sim,handles,str2double(getappdata(handles.plot_type_popup,'num_plots')),get(handles.undock_box,'Value'))
+        % AT THE MOMENT ONLY PLOT_WORKSPACE IS SUPPORTED.  FOR OTHER PLOTS
+        % MUST USE THE WORKSPACE SIMULATOR METHODS DIRECTLY
+        % Get the grid information
+        q_info = get(handles.qtable,'Data');
+        % Determine the number of dimensions (for the moment this doesn't
+        % determine if a single plane has been used).
+        dim = size(q_info,1);
+        wsim = getappdata(handles.figure1,'sim');
+        if(dim<=2)
+            if(isempy(wsim.metrics))
+               wsim.plotWorkspace2([],wsim.conditions{1},[1,2]);
+            else
+               wsim.plotWorkspace2([],wsim.metrics{1},[1,2]);
+            end
+        elseif(dim==3)
+            wsim.plotWorkspace3([],WorkspaceConditionType.WRENCH_CLOSURE,[1,2,3]);
+            if(isempy(wsim.metrics))
+               wsim.plotWorkspace3([],wsim.conditions{1},[1,2]);
+            else
+               wsim.plotWorkspace3([],wsim.metrics{1},[1,2]);
+            end
+        else
+            error('Plotting of workspaces of this dimensions are currently not supported. Please use the workspace simulator methods to extract a smaller data set');
+        end
+%         GUIOperations.GUIPlot(plot_type,sim,handles,str2double(getappdata(handles.plot_type_popup,'num_plots')),get(handles.undock_box,'Value'))
+        
     end
 end
 

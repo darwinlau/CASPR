@@ -31,7 +31,7 @@ function varargout = dynamics_GUI(varargin)
 
     % Edit the above text to modify the response to help dynamics_GUI
 
-    % Last Modified by GUIDE v2.5 21-Oct-2016 09:49:15
+    % Last Modified by GUIDE v2.5 25-Mar-2017 20:40:29
 
     % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
@@ -883,6 +883,7 @@ function run_inverse_dynamics(handles,modObj,trajectory_id)
     fprintf('End Plotting Simulation : %f seconds\n', time_elapsed);
     set(handles.status_text,'String','No simulation running');
     setappdata(handles.figure1,'sim',idsim);
+    assignin('base','inverse_dynamics_simulator',idsim);
 end
 
 function id_solver = load_idsolver(handles,modObj)
@@ -1072,6 +1073,7 @@ function run_forward_dynamics(handles,modObj,trajectory_id)
     GUIOperations.GUIPlot('plotJointSpace',idsim,handles,2,get(handles.undock_box,'Value'));
     GUIOperations.GUIPlot('plotJointSpace',fdsim,handles,2,get(handles.undock_box,'Value'));
     set(handles.status_text,'String','No simulation running');
+    assignin('base','forward_dynamics_simulator',fdsim);
 end
 
 function toggle_visibility(dynamics_method,handles)

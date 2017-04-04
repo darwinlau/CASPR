@@ -31,7 +31,7 @@ function varargout = control_GUI(varargin)
 
     % Edit the above text to modify the response to help control_GUI
 
-    % Last Modified by GUIDE v2.5 21-Oct-2016 09:56:42
+    % Last Modified by GUIDE v2.5 25-Mar-2017 20:31:22
 
     % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
@@ -566,6 +566,7 @@ function run_button_Callback(~, ~, handles) %#ok<DEFNU>
     
     figure;
     control_sim.plotTrackingError();
+    assignin('base','control_simulator',control_sim);
     % To be uncommented after discussions with Darwin
 %     % Plot the data
 %     disp('Start Plotting Simulation');

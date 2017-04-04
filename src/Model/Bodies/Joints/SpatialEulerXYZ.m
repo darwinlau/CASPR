@@ -19,10 +19,7 @@ classdef SpatialEulerXYZ < JointBase
         q_ub = [TranslationalXYZ.q_ub; SphericalEulerXYZ.q_ub];
     end
     
-    properties (Dependent)
-        q_translation
-        q_orientation
-        
+    properties (Dependent)        
         x
         y
         z
@@ -50,6 +47,43 @@ classdef SpatialEulerXYZ < JointBase
             obj.translation.update(SpatialEulerXYZ.GetTranslationQ(q), SpatialEulerXYZ.GetTranslationQd(q_dot), SpatialEulerXYZ.GetTranslationQd(q_ddot));
             obj.orientation.update(SpatialEulerXYZ.GetOrientationQ(q), SpatialEulerXYZ.GetOrientationQd(q_dot), SpatialEulerXYZ.GetOrientationQd(q_ddot));
             update@JointBase(obj, q, q_dot, q_ddot);
+        end
+        
+        % Generate the trajectory functions
+        function [q, q_dot, q_ddot] = generateTrajectoryLinearSpline(obj, q_s, q_e, time_vector)
+            [q_trans, q_trans_dot, q_trans_ddot] = obj.translation.generateTrajectoryLinearSpline( ...
+                obj.GetTranslationQ(q_s), ...
+                obj.GetTranslationQ(q_e), time_vector);
+            [q_orient, q_orient_dot, q_orient_ddot] = obj.orientation.generateTrajectoryLinearSpline( ...
+                obj.GetOrientationQ(q_s), ...
+                obj.GetOrientationQ(q_e), time_vector);
+            q = [q_trans; q_orient];
+            q_dot = [q_trans_dot; q_orient_dot];
+            q_ddot = [q_trans_ddot; q_orient_ddot];
+        end
+        
+        function [q, q_dot, q_ddot] = generateTrajectoryCubicSpline(obj, q_s, q_s_d, q_e, q_e_d, time_vector)
+            [q_trans, q_trans_dot, q_trans_ddot] = obj.translation.generateTrajectoryCubicSpline( ...
+                obj.GetTranslationQ(q_s), obj.GetTranslationQd(q_s_d), ...
+                obj.GetTranslationQ(q_e), obj.GetTranslationQd(q_e_d), time_vector);
+            [q_orient, q_orient_dot, q_orient_ddot] = obj.orientation.generateTrajectoryCubicSpline( ...
+                obj.GetOrientationQ(q_s), obj.GetOrientationQd(q_s_d), ...
+                obj.GetOrientationQ(q_e), obj.GetOrientationQd(q_s_e), time_vector);
+            q = [q_trans; q_orient];
+            q_dot = [q_trans_dot; q_orient_dot];
+            q_ddot = [q_trans_ddot; q_orient_ddot];
+        end
+        
+        function [q, q_dot, q_ddot] = generateTrajectoryQuinticSpline(obj, q_s, q_s_d, q_s_dd, q_e, q_e_d, q_e_dd, time_vector)
+            [q_trans, q_trans_dot, q_trans_ddot] = obj.translation.generateTrajectoryQuinticSpline( ...
+                obj.GetTranslationQ(q_s), obj.GetTranslationQd(q_s_d), obj.GetTranslationQd(q_s_dd), ...
+                obj.GetTranslationQ(q_e), obj.GetTranslationQd(q_e_d), obj.GetTranslationQd(q_e_dd), time_vector);
+            [q_orient, q_orient_dot, q_orient_ddot] = obj.orientation.generateTrajectoryQuinticSpline( ...
+                obj.GetOrientationQ(q_s), obj.GetOrientationQd(q_s_d), obj.GetOrientationQd(q_s_dd), ...
+                obj.GetOrientationQ(q_e), obj.GetOrientationQd(q_e_d), obj.GetOrientationQd(q_e_dd), time_vector);
+            q = [q_trans; q_orient];
+            q_dot = [q_trans_dot; q_orient_dot];
+            q_ddot = [q_trans_ddot; q_orient_ddot];
         end
         
         % -------
@@ -148,19 +182,6 @@ classdef SpatialEulerXYZ < JointBase
         function [N_j,A] = QuadMatrix(~)
             N_j = zeros(SpatialEulerXYZ.numDofs,SpatialEulerXYZ.numDofs^2);
             A = zeros(6,SpatialEulerXYZ.numDofs);
-        end
-        
-        % Generate the trajectory for this joint
-        function [q, q_dot, q_ddot] = GenerateTrajectory(q_s, q_s_d, q_s_dd, q_e, q_e_d, q_e_dd, total_time, time_step)
-            [q_trans, q_trans_dot, q_trans_ddot] = TranslationalXYZ.GenerateTrajectory( ...
-                SpatialEulerXYZ.GetTranslationQ(q_s), SpatialEulerXYZ.GetTranslationQ(q_s_d), SpatialEulerXYZ.GetTranslationQ(q_s_dd), ...
-                SpatialEulerXYZ.GetTranslationQ(q_e), SpatialEulerXYZ.GetTranslationQ(q_e_d), SpatialEulerXYZ.GetTranslationQ(q_e_dd), total_time, time_step);
-            [q_orient, q_orient_dot, q_orient_ddot] = SphericalEulerXYZ.GenerateTrajectory( ...
-                SpatialEulerXYZ.GetOrientationQ(q_s), SpatialEulerXYZ.GetOrientationQd(q_s_d), SpatialEulerXYZ.GetOrientationQd(q_s_dd), ...
-                SpatialEulerXYZ.GetOrientationQ(q_e), SpatialEulerXYZ.GetOrientationQd(q_e_d), SpatialEulerXYZ.GetOrientationQd(q_e_dd), total_time, time_step);
-            q = [q_trans; q_orient];
-            q_dot = [q_trans_dot; q_orient_dot];
-            q_ddot = [q_trans_ddot; q_orient_ddot];
         end
     end
 end

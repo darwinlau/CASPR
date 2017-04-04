@@ -9,7 +9,7 @@
 clc; clear; close all;
 warning off;
 % Set up the type of model, trajectory and the set of cables:
-model_config = ModelConfig(ModelConfigType.M_IPANEMA_2);
+model_config = ModelConfig('IPAnema 2');
 trajectory_id = 'traj_z_up';
 cable_set_id = 'original';
 

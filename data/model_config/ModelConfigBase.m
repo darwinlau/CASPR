@@ -9,8 +9,6 @@
 %    accessible.
 classdef (Abstract) ModelConfigBase < handle
     properties (SetAccess = private)
-        type                        % Type of model from ModelConfigType enum
-        
         bodyPropertiesFilename      % Filename for the body properties
         cablesPropertiesFilename    % Filename for the cable properties
         trajectoriesFilename        % Filename for the trajectories
@@ -34,8 +32,7 @@ classdef (Abstract) ModelConfigBase < handle
     methods
         % Constructor for the ModelConfig class. This builds the xml
         % objects.
-        function c = ModelConfigBase(type, folder, list_file)
-            c.type = type;
+        function c = ModelConfigBase(type_string, folder, list_file)
             c.root_folder = [fileparts(mfilename('fullpath')), folder];
             c.opFilename = '';
             c.opXmlObj = [];
@@ -45,8 +42,7 @@ classdef (Abstract) ModelConfigBase < handle
             
             % Determine the Filenames
             % Load the contents
-            cell_array = textscan(fid,'%s %s %s %s %s %s','delimiter',',');            
-            type_string = char(type);
+            cell_array = textscan(fid,'%s %s %s %s %s %s','delimiter',',');
             i_length = length(cell_array{1});
             status_flag = 1;
             % Loop through until the right line of the list is found
@@ -65,7 +61,7 @@ classdef (Abstract) ModelConfigBase < handle
                 end
             end
             if(status_flag)
-                error('ModelConfig type is not defined');
+                CASPR_log.Error(sprintf('Robot model ''%s'' is not defined', type_string));
             end
             
             % Make sure all the filenames that are required exist
@@ -105,6 +101,7 @@ classdef (Abstract) ModelConfigBase < handle
             end
         end
         
+        % Should change this to getJointTrajectory()
         function [traj] = getTrajectory(obj, trajectory_id)
             traj_xmlobj = obj.getTrajectoryXmlObj(trajectory_id);
             traj = JointTrajectory.LoadXmlObj(traj_xmlobj, obj.bodiesModel);
@@ -121,7 +118,7 @@ classdef (Abstract) ModelConfigBase < handle
         end
         
         function trajectories_str = getTrajectoriesList(obj)
-            trajectories_str = GUIOperations.XmlObj2StringCellArray(obj.trajectoriesXmlObj.getElementsByTagName('trajectories').item(0).getElementsByTagName('trajectory'),'id');
+            trajectories_str = GUIOperations.XmlObj2StringCellArray(obj.trajectoriesXmlObj.getElementsByTagName('trajectories').item(0).getChildNodes,'id');
         end
     end
     

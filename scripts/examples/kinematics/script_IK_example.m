@@ -8,7 +8,7 @@
 clear; clc; close all;
 
 % Set up the type of model
-model_config = ModelConfig(ModelConfigType.M_SIMPLE_PLANAR_XY);
+model_config = ModelConfig('Example planar XY');
 cable_set_id = 'basic';
 trajectory_id = 'x_simple';
 

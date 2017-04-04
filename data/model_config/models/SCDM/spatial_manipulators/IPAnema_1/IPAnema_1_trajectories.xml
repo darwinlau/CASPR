@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE trajectories [
+  <!ATTLIST linear_spline_trajectory id ID #REQUIRED>
+  <!ATTLIST cubic_spline_trajectory id ID #REQUIRED>
+  <!ATTLIST quintic_spline_trajectory id ID #REQUIRED>
+]>
+
+<trajectories>
+  <trajectory id="traj_1" time_definition="relative" time_step="0.01">
+    <points>
+      <point>
+        <q>-1 -0.5 1.5 0.2 -0.4 0.1</q>
+        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+      </point>
+      <point time="1.0">
+        <q>1 0.5 0.5 0.3 0.0 -0.2</q>
+        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+      </point>
+    </points>
+  </trajectory>
+  <trajectory id="traj_z_up" time_definition="relative" time_step="0.01">
+    <points>
+      <point>
+        <q>1.0 1.0 0.1 1.0 1.0 1.0</q>
+        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+      </point>
+      <point time="1.0">
+        <q>1.0 1.0 0.2 1.0 1.0 1.0</q>
+        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+      </point>
+    </points>
+  </trajectory>
+</trajectories>
