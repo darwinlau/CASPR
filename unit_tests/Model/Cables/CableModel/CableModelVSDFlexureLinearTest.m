@@ -17,7 +17,7 @@ classdef CableModelVSDFlexureLinearTest < CableModelTestBase
             disp('Testing CableModelVSDFlexureLinear update')
             c = CableModelVSDFlexureLinear('1',1,1,[4,1,2]);
             % Create the body model
-            model_config = TestModelConfig(TestModelConfigType.T_SCDM);
+            model_config = TestModelConfig('test_SCDM');
             modelObj = model_config.getModel(model_config.defaultCableSetId);
             c.update(modelObj.bodyModel)
         end

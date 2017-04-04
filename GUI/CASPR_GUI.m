@@ -302,11 +302,16 @@ end
 function generate_model_object(handles)
     % Generate the dynamics object
     contents = cellstr(get(handles.model_popup,'String'));
-    model_type = contents{get(handles.model_popup,'Value')};
+    try
+        model_type = contents{get(handles.model_popup,'Value')};
+    catch 
+        CASPR_log.Warn('Previous model state does not exist anymore. Default to first element.');
+        model_type = contents{1};
+    end
     if(get(handles.checkbox,'value'))
-        model_config = DevModelConfig(DevModelConfigType.(['D_',model_type]));
+        model_config = DevModelConfig(model_type);
     else
-    	model_config = ModelConfig(ModelConfigType.(['M_',model_type]));
+    	model_config = ModelConfig(model_type);
     end
     contents = cellstr(get(handles.cable_popup,'String'));
     cable_set_id = contents{get(handles.cable_popup,'Value')};
@@ -328,15 +333,9 @@ function model_popup_update(handles)
     % Determine the state of the toggle
     toggle_state = get(handles.checkbox,'Value');
     if(toggle_state)
-        e_list      =   enumeration('DevModelConfigType');
+        e_list_str      =   ModelConfigManager.GetDevModelConfigListNames();
     else
-    	e_list      =   enumeration('ModelConfigType');
-    end
-    e_n         =   length(e_list);
-    e_list_str  =   cell(1,e_n);
-    for i=1:e_n
-        temp_str = char(e_list(i));
-        e_list_str{i} = temp_str(3:length(temp_str));
+    	e_list_str      =   ModelConfigManager.GetModelConfigListNames();
     end
     set(handles.model_popup, 'Value', 1);
     set(handles.model_popup, 'String', e_list_str);
@@ -345,11 +344,17 @@ end
 function cable_popup_update(handles)
     % Generate the model_config object
     contents = cellstr(get(handles.model_popup,'String'));
-    model_type = contents{get(handles.model_popup,'Value')};
-    if(get(handles.checkbox,'value'))
-        model_config = DevModelConfig(DevModelConfigType.(['D_',model_type]));
+    get(handles.model_popup,'Value')
+    try
+        model_type = contents{get(handles.model_popup,'Value')};
+    catch 
+        CASPR_log.Warn('Previous model state does not exist anymore. Default to first element.');
+        model_type = contents{1};
+    end
+    if(get(handles.checkbox,'Value'))
+        model_config = DevModelConfig(model_type);
     else
-    	model_config = ModelConfig(ModelConfigType.(['M_',model_type]));
+    	model_config = ModelConfig(model_type);
     end
     cableset_str = model_config.getCableSetList();
     set(handles.cable_popup, 'Value', 1);

@@ -8,21 +8,10 @@
 clc; clear; close all;
 
 % Set up the type of model, trajectory and the set of cables to be used
-% Following are some examples (feel free to add more):
-% 1) Planar model
-model_type = ModelConfigType.M_SIMPLE_PLANAR_XY;
+model_config = ModelConfig('Example planar XY');
 cable_set_id = 'basic';
 trajectory_id = 'x_simple';
-% 2) Neck model
-% model_type = ModelConfigType.M_NECK_8S;
-% cable_set_id = 'opensim_vasavada';
-% trajectory_id = 'roll';
-% 3) IPAnema model
-% model_type = ModelConfigType.M_IPANEMA_2;
-% cable_set_id = 'original';
-% trajectory_id = 'traj_z_up';
 
-model_config = ModelConfig(model_type);
 modelObj = model_config.getModel(cable_set_id);
 
 id_objective = IDObjectiveMinQuadCableForce(ones(modelObj.numCables,1));
