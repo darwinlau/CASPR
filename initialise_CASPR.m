@@ -3,47 +3,44 @@
 % Created:      2016
 % Description:
 function initialise_CASPR()
-    clc;
-    
+    clc;    
+    scriptname = mfilename('fullpath');
+    [CASPR_homepath] = fileparts(scriptname);
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Confirm that initialise has been called from the right folder
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    home_path = cd;
-    try
-        cd('src/Analysis');
-    catch
-        error('Incorrect folder structure or you have not called the function from the CASPR root directory');
-    end
-    cd(home_path);
+    assert(exist([CASPR_homepath '/src'], 'dir') == 7 && exist([CASPR_homepath '/data'], 'dir') == 7, 'Incorrect CASPR folder structure');
+    
+    cd(CASPR_homepath);
     % Set the current version
     version = 20161019;
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Determine if setup needs to be executed
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    if(~exist([home_path,'/data/config'],'dir'))
-        mkdir([home_path,'/data/config'])
-        save([home_path,'/data/config/CASPR_environment.mat'],...
-                                    'home_path','version');
+    if(~exist([CASPR_homepath,'/data/config'],'dir'))
+        mkdir([CASPR_homepath,'/data/config'])
+        save([CASPR_homepath,'/data/config/CASPR_environment.mat'],...
+                                    'CASPR_homepath','version');
         setup_CASPR;
     else
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % Determine if CASPR needs to be updated
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % load the previous version information
-        if(~exist([home_path,'/data/config/CASPR_environment.mat'],'file'))
-            save([home_path,'/data/config/CASPR_environment.mat'],'home_path','version');
+        if(~exist([CASPR_homepath,'/data/config/CASPR_environment.mat'],'file'))
+            save([CASPR_homepath,'/data/config/CASPR_environment.mat'],'CASPR_homepath','version');
             update_CASPR;
         else
-            previous_version = load([home_path,'/data/config/CASPR_environment.mat'],'version');
+            previous_version = load([CASPR_homepath,'/data/config/CASPR_environment.mat'],'version');
             if(isempty(fieldnames(previous_version))||(version>previous_version.version))
-                save([home_path,'/data/config/CASPR_environment.mat'],'home_path','version');
+                save([CASPR_homepath,'/data/config/CASPR_environment.mat'],'CASPR_homepath','version');
                 update_CASPR;
             else
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 % Add the libraries
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                save([home_path,'/data/config/CASPR_environment.mat'],'home_path','version');
+                save([CASPR_homepath,'/data/config/CASPR_environment.mat'],'CASPR_homepath','version');
                 set_CASPR_environment;
                 fprintf('CASPR initialisation complete. Enjoy !\n')
             end
@@ -79,12 +76,12 @@ function update_CASPR()
     fprintf('----------------------------------------------------\n')
 
     % Check if the old logs folder is present and remove if so
-    home_path = cd;
-    if(exist([home_path,'/logs'],'dir'))
+    CASPR_homepath = cd;
+    if(exist([CASPR_homepath,'/logs'],'dir'))
         fprintf('\n----------------------------------------------------\n')
         fprintf('Removing outdated folder locations.\n')
         fprintf('----------------------------------------------------\n')
-        rmdir([home_path,'/logs']); 
+        rmdir([CASPR_homepath,'/logs']); 
     end
     
     failed_tests = setup_update_CASPR;
@@ -182,12 +179,12 @@ function set_CASPR_environment()
     end
     
     % Store the home directory
-    home_path = cd;
+    CASPR_homepath = cd;
     
     
     % Add the necessary paths
     fprintf('Adding CASPR to library path\n')
-    path_list = genpath(home_path);
+    path_list = genpath(CASPR_homepath);
     path_list = strsplit(path_list, path_delimiter);
     for i = 1:length(path_list)
         if(~isempty(strfind(path_list{i},'.git')))
