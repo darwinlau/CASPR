@@ -333,9 +333,9 @@ function model_popup_update(handles)
     % Determine the state of the toggle
     toggle_state = get(handles.checkbox,'Value');
     if(toggle_state)
-        e_list_str      =   ModelConfigManager.GetDevModelConfigListNames();
+        e_list_str      =   sort(ModelConfigManager.GetDevModelConfigListNames());
     else
-    	e_list_str      =   ModelConfigManager.GetModelConfigListNames();
+    	e_list_str      =   sort(ModelConfigManager.GetModelConfigListNames());
     end
     set(handles.model_popup, 'Value', 1);
     set(handles.model_popup, 'String', e_list_str);
@@ -344,7 +344,6 @@ end
 function cable_popup_update(handles)
     % Generate the model_config object
     contents = cellstr(get(handles.model_popup,'String'));
-    get(handles.model_popup,'Value')
     try
         model_type = contents{get(handles.model_popup,'Value')};
     catch 
