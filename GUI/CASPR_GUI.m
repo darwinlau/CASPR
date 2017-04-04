@@ -314,7 +314,12 @@ function generate_model_object(handles)
     	model_config = ModelConfig(model_type);
     end
     contents = cellstr(get(handles.cable_popup,'String'));
-    cable_set_id = contents{get(handles.cable_popup,'Value')};
+    try
+        cable_set_id = contents{get(handles.cable_popup,'Value')};
+    catch 
+        CASPR_log.Warn('Previous cable set state does not exist anymore. Default to first element.');
+        cable_set_id = contents{1};
+    end
     modObj = model_config.getModel(cable_set_id);
     modObj.bodyModel.occupied.reset();
     cla;
