@@ -436,4 +436,29 @@
       </point>
     </points>
   </quintic_spline_trajectory>
+  <quintic_spline_trajectory id="O0007" time_definition="relative" time_step="0.05">
+	<description>Test trajectory for tile laying</description>
+    <points>
+      <point>
+        <q>1.14 1.14 1.0 0.0 0.0 0.0</q>
+        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+      </point>
+      <point time="10.0">
+        <q>1.14 0.517 1.214 0.0 0.0 0.0</q>
+        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+      </point>
+      <point time="130.0">
+        <q>1.14 0.517 1.214 0.0 0.0 0.0</q>
+        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+      </point>
+      <point time="10.0">
+        <q>1.14 1.14 1.0 0.0 0.0 0.0</q>
+        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+      </point>
+    </points>
+  </quintic_spline_trajectory>
 </trajectories>

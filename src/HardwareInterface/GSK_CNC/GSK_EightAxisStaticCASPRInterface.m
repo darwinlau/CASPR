@@ -10,7 +10,7 @@ classdef GSK_EightAxisStaticCASPRInterface < HardwareInterfaceBase
         MIN_TO_S = 60;
         MM_DECIMAL_PLACE = -3;
                 
-        CABLE_LENGTH_OFFSET_MM = 10; % NOTE: UNITS IN MM
+        CABLE_LENGTH_OFFSET_MM = 15; % NOTE: UNITS IN MM
         
         MACHINE_LOW_F_SPEED = 5000;
     end

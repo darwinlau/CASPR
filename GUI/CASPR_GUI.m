@@ -34,7 +34,7 @@ function varargout = CASPR_GUI(varargin)
 
     % Edit the above text to modify the response to help CASPR_GUI
 
-    % Last Modified by GUIDE v2.5 06-Oct-2016 14:39:27
+    % Last Modified by GUIDE v2.5 22-Mar-2017 19:54:35
 
     % Begin initialization code - DO NOT EDIT
     warning('off','MATLAB:uitabgroup:OldVersion')
@@ -271,6 +271,17 @@ function control_button_Callback(~, ~, handles) %#ok<DEFNU>
     control_GUI;
 end
 
+% --- Executes on button press in console_pushbutton.
+function console_pushbutton_Callback(~, ~, handles) %#ok<DEFNU>
+    % hObject    handle to console_pushbutton (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    structure with handles and user data (see GUIDATA)
+    % Load the model 
+    modObj = getappdata(handles.cable_popup,'modObj');
+    % Assign the model to the base workspace
+    assignin('base','model_object',modObj);
+end
+
 %--------------------------------------------------------------------------
 %% Checkboxes
 %--------------------------------------------------------------------------
@@ -291,11 +302,16 @@ end
 function generate_model_object(handles)
     % Generate the dynamics object
     contents = cellstr(get(handles.model_popup,'String'));
-    model_type = contents{get(handles.model_popup,'Value')};
+    try
+        model_type = contents{get(handles.model_popup,'Value')};
+    catch 
+        CASPR_log.Warn('Previous model state does not exist anymore. Default to first element.');
+        model_type = contents{1};
+    end
     if(get(handles.checkbox,'value'))
-        model_config = DevModelConfig(DevModelConfigType.(['D_',model_type]));
+        model_config = DevModelConfig(model_type);
     else
-    	model_config = ModelConfig(ModelConfigType.(['M_',model_type]));
+    	model_config = ModelConfig(model_type);
     end
     contents = cellstr(get(handles.cable_popup,'String'));
     cable_set_id = contents{get(handles.cable_popup,'Value')};
@@ -310,22 +326,16 @@ function generate_model_object(handles)
     setappdata(handles.cable_popup,'axis_range',display_range);
     setappdata(handles.cable_popup,'view_angle',view_angle);
     set(handles.model_label_text,'String',model_type);
-    format_q_table(modObj.numDofs,handles.qtable);
+    format_q_table(modObj.numDofs,handles.qtable,modObj.q');
 end
 
 function model_popup_update(handles)
     % Determine the state of the toggle
     toggle_state = get(handles.checkbox,'Value');
     if(toggle_state)
-        e_list      =   enumeration('DevModelConfigType');
+        e_list_str      =   sort(ModelConfigManager.GetDevModelConfigListNames());
     else
-    	e_list      =   enumeration('ModelConfigType');
-    end
-    e_n         =   length(e_list);
-    e_list_str  =   cell(1,e_n);
-    for i=1:e_n
-        temp_str = char(e_list(i));
-        e_list_str{i} = temp_str(3:length(temp_str));
+    	e_list_str      =   sort(ModelConfigManager.GetModelConfigListNames());
     end
     set(handles.model_popup, 'Value', 1);
     set(handles.model_popup, 'String', e_list_str);
@@ -334,11 +344,16 @@ end
 function cable_popup_update(handles)
     % Generate the model_config object
     contents = cellstr(get(handles.model_popup,'String'));
-    model_type = contents{get(handles.model_popup,'Value')};
-    if(get(handles.checkbox,'value'))
-        model_config = DevModelConfig(DevModelConfigType.(['D_',model_type]));
+    try
+        model_type = contents{get(handles.model_popup,'Value')};
+    catch 
+        CASPR_log.Warn('Previous model state does not exist anymore. Default to first element.');
+        model_type = contents{1};
+    end
+    if(get(handles.checkbox,'Value'))
+        model_config = DevModelConfig(model_type);
     else
-    	model_config = ModelConfig(ModelConfigType.(['M_',model_type]));
+    	model_config = ModelConfig(model_type);
     end
     cableset_str = model_config.getCableSetList();
     set(handles.cable_popup, 'Value', 1);
@@ -386,8 +401,8 @@ function loadState(handles)
     end
 end
 
-function format_q_table(numDofs,qtable)
-    set(qtable,'Data',zeros(1,numDofs));
+function format_q_table(numDofs,qtable,q_data)
+    set(qtable,'Data',q_data);
     set(qtable,'ColumnWidth',{30});
     set(qtable,'ColumnEditable',true(1,numDofs));
     column_name = cell(1,numDofs);

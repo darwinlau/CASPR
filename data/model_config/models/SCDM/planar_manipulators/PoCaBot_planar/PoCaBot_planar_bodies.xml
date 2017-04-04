@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<links display_range="-0.5 0.5 -0.3 0.3 0.0 0.9" view_angle="-37 32">
-  <link_rigid num="1" name="CUHK">
-    <joint type="SPATIAL_EULER_XYZ"  q_initial="0.0 0.0 0.4 0 0 0"/>
+<links display_range="-0.5 0.5 -0.3 0.3 -0.035 0.9" view_angle="-32 21">
+  <link_rigid num="1" name="PoCaBot_planar">
+    <joint type="PLANAR_XZ"  q_initial="0.0 0.0 0.0"/>
     <physical>
-      <mass>1.0</mass>
+      <mass>0.02</mass>
       <com_location>0.0 0.0 0.0</com_location>
       <end_location>0.0 0.0 0.0</end_location>
       <inertia ref="com">
         <Ixx>1.0</Ixx>
         <Iyy>1.0</Iyy>
         <Izz>1.0</Izz>
-        <Ixy>0.0676</Ixy>
-        <Ixz>0.0786</Ixz>
-        <Iyz>0.0441</Iyz>
+        <Ixy>0</Ixy>
+        <Ixz>0</Ixz>
+        <Iyz>0</Iyz>
       </inertia>
     </physical>
     <parent>
       <num>0</num>
-      <location>0.0 0.0 0.0</location>
+      <location>0 0.207 0.0</location>
     </parent>
   </link_rigid>
 </links>

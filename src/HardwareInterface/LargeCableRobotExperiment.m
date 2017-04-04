@@ -71,12 +71,12 @@ classdef LargeCableRobotExperiment < ExperimentBase
 %             % Create the config properties
             model_config = DevModelConfig(DevModelConfigType.D_CUHK_CUCABLEROBOT);
             cable_set_id = 'H_frame';
-            trajectory_id = 'O0006';
+            trajectory_id = 'O0007';
             
             % Create the config properties
 %             model_config = DevModelConfig(DevModelConfigType.D_CUHK_CUCABLEROBOT_PLANAR);
 %             cable_set_id = 'vertical_XZ';
-%             trajectory_id = 'O1001';
+%             trajectory_id = 'O1005';
             
             
             % Load the SystemKinematics object from the XML
@@ -88,7 +88,8 @@ classdef LargeCableRobotExperiment < ExperimentBase
             
             % Setup the trajectory and run the experiment
             trajectory = model_config.getTrajectory(trajectory_id);
-            exp.hardwareInterface.timeStep = trajectory.timeStep;
+            exp.hardwareInterface.timeStep = trajectory.timeVector(2)-trajectory.timeVector(1);
+            trajectory.plotJointSpace();
             exp.runTrajectory(trajectory);
         end
     end

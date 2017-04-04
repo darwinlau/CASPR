@@ -9,8 +9,7 @@ clear; clc; close all;
 
 % Set up the type of model, trajectory and the set of cables to be used
 % Planar model
-model_type = ModelConfigType.M_SIMPLE_PLANAR_XY;
-model_config = ModelConfig(model_type);
+model_config = ModelConfig('Example planar XY');
 modelObj = model_config.getModel('basic');
 
 % Create an inverse dynamics solver
