@@ -13,7 +13,7 @@ classdef DingbotExperiment < ExperimentBase
     methods
         function eb = DingbotExperiment()
             % Create the config
-            model_config = DevModelConfig(DevModelConfigType.D_CUHK_FOLDABOT);
+            model_config = ModelConfig('PoCaBot spatial');
             cable_set_id = 'original';
 %             model_config = DevModelConfig(DevModelConfigType.D_CUHK_DINGBOT_PLANAR);
 %             cable_set_id = 'original';

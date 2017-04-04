@@ -69,7 +69,7 @@ classdef LargeCableRobotExperiment < ExperimentBase
             close all;
             
 %             % Create the config properties
-            model_config = DevModelConfig(DevModelConfigType.D_CUHK_CUCABLEROBOT);
+            model_config = DevModelConfig('CUCableRobot');
             cable_set_id = 'H_frame';
             trajectory_id = 'O0007';
             
