@@ -104,7 +104,7 @@ function figure1_CloseRequestFcn(hObject, ~, handles) %#ok<DEFNU>
 end
 
 % --- Executes when figure1 is resized.
-function figure1_ResizeFcn(hObject, eventdata, handles)
+function figure1_ResizeFcn(~, ~, ~)
     % hObject    handle to figure1 (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
@@ -286,7 +286,7 @@ end
 %% Checkboxes
 %--------------------------------------------------------------------------
 % --- Executes on button press in checkbox.
-function checkbox_Callback(hObject, eventdata, handles)
+function checkbox_Callback(~, ~, handles)
 % hObject    handle to checkbox (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -377,8 +377,7 @@ function saveState(handles)
     state.cable_text            =   contents{state.cable_popup_value};
     modObj                      =   getappdata(handles.cable_popup,'modObj');
     state.modObj                =   modObj;
-    path_string = fileparts(mfilename('fullpath'));
-    path_string = path_string(1:strfind(path_string, 'GUI')-2);
+    path_string = CASPR_configuration.LoadHomePath();
     % Check if the log folder exists
     if(exist([path_string,'/GUI/config'],'dir')~=7)
         mkdir([path_string,'/GUI/config']);        
@@ -388,9 +387,7 @@ end
 
 function loadState(handles)
     % load all of the settings and initialise the values to match
-    path_string = fileparts(mfilename('fullpath'));
-    path_string = path_string(1:strfind(path_string, 'GUI')-2);
-    file_name = [path_string,'/GUI/config/caspr_gui_state.mat'];
+    file_name = [CASPR_configuration.LoadHomePath(),'/GUI/config/caspr_gui_state.mat'];
     if(exist(file_name,'file'))
         load(file_name);
         set(handles.checkbox,'value',state.checkbox_value);
