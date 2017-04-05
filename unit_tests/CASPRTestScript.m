@@ -6,8 +6,8 @@
 %     'IDObjectiveLinearTest','IDObjectiveQuadraticTest'});
 
 load('CASPR_environment.mat', 'CASPR_homepath');
-CASPR_unit_test_model_config_results = matlab.unittest.TestSuite.fromFolder([CASPR_homepath '\unit_tests\ModelConfig'], 'IncludingSubfolders', true).run();
-CASPR_unit_test_model_model_results = matlab.unittest.TestSuite.fromFolder([CASPR_homepath '\unit_tests\Model'], 'IncludingSubfolders', true).run();
-CASPR_unit_test_model_analysis_results = matlab.unittest.TestSuite.fromFolder([CASPR_homepath '\unit_tests\Analysis'], 'IncludingSubfolders', true).run();
+CASPR_unit_test_model_config_results = matlab.unittest.TestSuite.fromFolder([CASPR_homepath '/unit_tests/ModelConfig'], 'IncludingSubfolders', true).run();
+CASPR_unit_test_model_model_results = matlab.unittest.TestSuite.fromFolder([CASPR_homepath '/unit_tests/Model'], 'IncludingSubfolders', true).run();
+CASPR_unit_test_model_analysis_results = matlab.unittest.TestSuite.fromFolder([CASPR_homepath '/unit_tests/Analysis'], 'IncludingSubfolders', true).run();
 
 %fprintf('Test complete: %d failed\n', nnz(CASPR_unit_test_results.Failed));
