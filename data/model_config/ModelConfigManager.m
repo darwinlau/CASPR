@@ -53,7 +53,7 @@ classdef ModelConfigManager
             end
             % Add line to the CSV file
             fid = fopen([root_folder, ModelConfig.LIST_FILENAME],'a');
-            fprintf(fid,[name,',',folder,',',bodies_xml_filename,',',cable_xml_filename,',',trajectory_xml_filename,',']);
+            fprintf(fid,[name,',',folder,',',bodies_xml_filename,',',cable_xml_filename,',',trajectory_xml_filename,',','','\n']);
             fclose(fid);
             % Create file structure: add folder, add bodies, cable and
             % trajectory XML files from template (copy from template)
