@@ -18,7 +18,7 @@ classdef CASPR_log
             else
                 log_path = [];
             end
-            load('CASPR_environment.mat', 'CASPR_homepath');
+            CASPR_homepath = CASPR_configuration.LoadHomePath();
             if(~exist([CASPR_homepath,'/data/config'],'dir'))
                 mkdir([CASPR_homepath,'/data/config'])
             end

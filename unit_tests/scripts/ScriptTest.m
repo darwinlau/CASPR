@@ -12,8 +12,7 @@ classdef ScriptTest < matlab.unittest.TestCase
             % cellfunc
             
             % First go through the directories to extract each script in the examples folder
-            load('CASPR_environment.mat', 'CASPR_homepath');
-            folder_location = [CASPR_homepath,'/scripts/examples/'];
+            folder_location = [CASPR_configuration.LoadHomePath(),'/scripts/examples/'];
             dir_list = dir(folder_location);
             % Remove the . and .. options
             s_l = size(dir_list,1);

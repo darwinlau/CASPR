@@ -5,7 +5,7 @@
 %     'ModelConfigTest','IDSolverTest','IDObjectiveInfNormTest',...
 %     'IDObjectiveLinearTest','IDObjectiveQuadraticTest'});
 
-load('CASPR_environment.mat', 'CASPR_homepath');
+CASPR_homepath = CASPR_configuration.LoadHomePath();
 CASPR_unit_test_model_config_results = matlab.unittest.TestSuite.fromFolder([CASPR_homepath '/unit_tests/ModelConfig'], 'IncludingSubfolders', true).run();
 CASPR_unit_test_model_model_results = matlab.unittest.TestSuite.fromFolder([CASPR_homepath '/unit_tests/Model'], 'IncludingSubfolders', true).run();
 CASPR_unit_test_model_analysis_results = matlab.unittest.TestSuite.fromFolder([CASPR_homepath '/unit_tests/Analysis'], 'IncludingSubfolders', true).run();

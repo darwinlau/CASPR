@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE cables [
+  <!ATTLIST cable_set id ID #REQUIRED>
+]>
+
+<cables default_cable_set="original">
+  <cable_set id="original">
+  </cable_set>
+</cables>
