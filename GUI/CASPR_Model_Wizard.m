@@ -22,7 +22,7 @@ function varargout = CASPR_Model_Wizard(varargin)
 
     % Edit the above text to modify the response to help CASPR_Model_Wizard
 
-    % Last Modified by GUIDE v2.5 05-Apr-2017 18:32:52
+    % Last Modified by GUIDE v2.5 05-Apr-2017 22:56:16
 
     % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
@@ -83,14 +83,28 @@ function add_button_Callback(~, ~, handles) %#ok<DEFNU>
     % handles    structure with handles and user data (see GUIDATA)
     
     % Read the elements from the table
-    table_data = get(handles.model_table,'Data');
-    name = table_data{1};
-    folder = table_data{2};
-    bodies = table_data{3};
-    cables = table_data{4};
-    trajectories = table_data{5};
+    name = get(handles.name_box,'String');
+    if(get(handles.dev_toggle,'Value'))
+        table_data = get(handles.model_table,'Data');
+        folder = table_data{2};
+        bodies = table_data{3};
+        cables = table_data{4};
+        trajectories = table_data{5};
+    else
+        % Add conversions
+        folder = ['/',name,'/'];
+        bodies = [name,'_bodies.xml'];
+        cables = [name,'_cables.xml'];
+        trajectories = [name,'_trajectories.xml'];
+    end
+       
     % Call the appropriate model config operations
-    ModelConfigManager.AddModelConfig(name,folder,bodies,cables,trajectories);
+    
+    if(get(handles.dev_toggle,'Value'))
+        ModelConfigManager.AddDevModelConfig(name,folder,bodies,cables,trajectories);
+    else
+        ModelConfigManager.AddModelConfig(name,folder,bodies,cables,trajectories);
+    end
 end
 
 
@@ -101,8 +115,7 @@ function remove_button_Callback(~, ~, handles) %#ok<DEFNU>
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
     % Read the elements from the table
-    table_data = get(handles.model_table,'Data');
-    name = table_data{1};
+    name = get(handles.name_box,'String');
     % Call the appropriate model config operations
     ModelConfigManager.RemoveModelConfig(name);
 end
@@ -113,5 +126,54 @@ function model_table_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
     % hObject    handle to model_table (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    empty - handles not created until after all CreateFcns called
-    set(hObject,'Data',cell(1,5),'ColumnName',{'Robot Name','Folder','Bodies XML Filename','Cables XML Filename','Trajectories XML Filename'})
+    set(hObject,'Data',cell(1,4),'ColumnName',{'Folder','Bodies XML Filename','Cables XML Filename','Trajectories XML Filename'})
+    set(hObject,'Visible','Off');
+end
+
+
+
+function name_box_Callback(hObject, eventdata, handles)
+    % hObject    handle to name_box (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    structure with handles and user data (see GUIDATA)
+
+    % Hints: get(hObject,'String') returns contents of name_box as text
+    %        str2double(get(hObject,'String')) returns contents of name_box as a double
+end
+
+% --- Executes during object creation, after setting all properties.
+function name_box_CreateFcn(hObject, eventdata, handles)
+    % hObject    handle to name_box (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    empty - handles not created until after all CreateFcns called
+
+    % Hint: edit controls usually have a white background on Windows.
+    %       See ISPC and COMPUTER.
+    if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+        set(hObject,'BackgroundColor','white');
+    end
+end
+
+% --- Executes on button press in advanced_toggle.
+function advanced_toggle_Callback(hObject, eventdata, handles)
+    % hObject    handle to advanced_toggle (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    structure with handles and user data (see GUIDATA)
+
+    % Hint: get(hObject,'Value') returns toggle state of advanced_toggle
+    if(get(hObject,'Value'))
+        set(handles.model_table,'Visible','On');
+    else
+        set(handles.model_table,'Visible','Off');
+    end
+end
+
+% --- Executes on button press in dev_toggle.
+function dev_toggle_Callback(hObject, eventdata, handles)
+    % hObject    handle to dev_toggle (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    structure with handles and user data (see GUIDATA)
+    
+    % Hint: get(hObject,'Value') returns toggle state of dev_toggle
+    
 end
