@@ -1,3 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Template generated XML file for rigid bodies in CASPR -->
 <links display_range="0 1 0 1 0 1" view_angle="-37 32">
+    <!-- For each rigid link add a link_rigid tag including a name and 
+    number. Further details are provided in CASPR documentation -->
 </links>

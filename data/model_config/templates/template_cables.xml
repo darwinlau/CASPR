@@ -2,8 +2,12 @@
 <!DOCTYPE cables [
   <!ATTLIST cable_set id ID #REQUIRED>
 ]>
-
+<!-- Template generated XML file for cables in CASPR -->
 <cables default_cable_set="original">
+  <!-- Use cable set tags for each possible set of cable attachments -->  
   <cable_set id="original">
+      <!-- For each cable add a tag. Refer to CASPR documentation for
+      detailed explanation of the different cable types and the required
+      fields for those types -->
   </cable_set>
 </cables>

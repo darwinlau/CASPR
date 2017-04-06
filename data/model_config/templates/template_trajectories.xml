@@ -4,6 +4,9 @@
   <!ATTLIST cubic_spline_trajectory id ID #REQUIRED>
   <!ATTLIST quintic_spline_trajectory id ID #REQUIRED>
 ]>
-
+<!-- Template generated file for XML trajectories in CASPR -->
 <trajectories>
+    <!-- Use linear/cubic/quintic_spline_trajectory tages for each of the
+    different trajectory types.  Further details on the information to
+    provide for these tags is located in the CASPR documentation. -->
 </trajectories>
