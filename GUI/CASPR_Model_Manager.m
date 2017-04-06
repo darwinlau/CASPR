@@ -1,35 +1,35 @@
-function varargout = CASPR_Model_Wizard(varargin)
-    % CASPR_MODEL_WIZARD MATLAB code for CASPR_Model_Wizard.fig
-    %      CASPR_MODEL_WIZARD, by itself, creates a new CASPR_MODEL_WIZARD or raises the existing
+function varargout = CASPR_Model_Manager(varargin)
+    % CASPR_MODEL_MANAGER MATLAB code for CASPR_Model_Manager.fig
+    %      CASPR_MODEL_MANAGER, by itself, creates a new CASPR_MODEL_MANAGER or raises the existing
     %      singleton*.
     %
-    %      H = CASPR_MODEL_WIZARD returns the handle to a new CASPR_MODEL_WIZARD or the handle to
+    %      H = CASPR_MODEL_MANAGER returns the handle to a new CASPR_MODEL_MANAGER or the handle to
     %      the existing singleton*.
     %
-    %      CASPR_MODEL_WIZARD('CALLBACK',hObject,eventData,handles,...) calls the local
-    %      function named CALLBACK in CASPR_MODEL_WIZARD.M with the given input arguments.
+    %      CASPR_MODEL_MANAGER('CALLBACK',hObject,eventData,handles,...) calls the local
+    %      function named CALLBACK in CASPR_MODEL_MANAGER.M with the given input arguments.
     %
-    %      CASPR_MODEL_WIZARD('Property','Value',...) creates a new CASPR_MODEL_WIZARD or raises the
+    %      CASPR_MODEL_MANAGER('Property','Value',...) creates a new CASPR_MODEL_MANAGER or raises the
     %      existing singleton*.  Starting from the left, property value pairs are
-    %      applied to the GUI before CASPR_Model_Wizard_OpeningFcn gets called.  An
+    %      applied to the GUI before CASPR_Model_Manager_OpeningFcn gets called.  An
     %      unrecognized property name or invalid value makes property application
-    %      stop.  All inputs are passed to CASPR_Model_Wizard_OpeningFcn via varargin.
+    %      stop.  All inputs are passed to CASPR_Model_Manager_OpeningFcn via varargin.
     %
     %      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
     %      instance to run (singleton)".
     %
     % See also: GUIDE, GUIDATA, GUIHANDLES
 
-    % Edit the above text to modify the response to help CASPR_Model_Wizard
+    % Edit the above text to modify the response to help CASPR_Model_Manager
 
-    % Last Modified by GUIDE v2.5 06-Apr-2017 11:41:30
+    % Last Modified by GUIDE v2.5 06-Apr-2017 14:00:44
 
     % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
     gui_State = struct('gui_Name',       mfilename, ...
                        'gui_Singleton',  gui_Singleton, ...
-                       'gui_OpeningFcn', @CASPR_Model_Wizard_OpeningFcn, ...
-                       'gui_OutputFcn',  @CASPR_Model_Wizard_OutputFcn, ...
+                       'gui_OpeningFcn', @CASPR_Model_Manager_OpeningFcn, ...
+                       'gui_OutputFcn',  @CASPR_Model_Manager_OutputFcn, ...
                        'gui_LayoutFcn',  [] , ...
                        'gui_Callback',   []);
     if nargin && ischar(varargin{1})
@@ -45,27 +45,27 @@ function varargout = CASPR_Model_Wizard(varargin)
 end
 
 
-% --- Executes just before CASPR_Model_Wizard is made visible.
-function CASPR_Model_Wizard_OpeningFcn(hObject, ~, handles, varargin)
+% --- Executes just before CASPR_Model_Manager is made visible.
+function CASPR_Model_Manager_OpeningFcn(hObject, ~, handles, varargin)
     % This function has no output args, see OutputFcn.
     % hObject    handle to figure
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
-    % varargin   command line arguments to CASPR_Model_Wizard (see VARARGIN)
+    % varargin   command line arguments to CASPR_Model_Manager (see VARARGIN)
 
-    % Choose default command line output for CASPR_Model_Wizard
+    % Choose default command line output for CASPR_Model_Manager
     handles.output = hObject;
 
     % Update handles structure
     guidata(hObject, handles);
 
-    % UIWAIT makes CASPR_Model_Wizard wait for user response (see UIRESUME)
+    % UIWAIT makes CASPR_Model_Manager wait for user response (see UIRESUME)
     % uiwait(handles.figure1);
 end
 
 
 % --- Outputs from this function are returned to the command line.
-function varargout = CASPR_Model_Wizard_OutputFcn(~, ~, handles) 
+function varargout = CASPR_Model_Manager_OutputFcn(~, ~, handles) 
     % varargout  cell array for returning output args (see VARARGOUT);
     % hObject    handle to figure
     % eventdata  reserved - to be defined in a future version of MATLAB
@@ -195,7 +195,7 @@ end
 
 
 % --- Executes on selection change in robotlist_menu.
-function robotlist_menu_Callback(hObject, eventdata, handles)
+function robotlist_menu_Callback(~, ~, ~) %#ok<DEFNU>
     % hObject    handle to robotlist_menu (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
@@ -232,7 +232,7 @@ function set_robotlist(handles)
 end
 
 
-function remove_box_Callback(hObject, eventdata, handles)
+function remove_box_Callback(~, ~, ~) %#ok<DEFNU>
     % hObject    handle to remove_box (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
@@ -243,7 +243,7 @@ end
 
 
 % --- Executes during object creation, after setting all properties.
-function remove_box_CreateFcn(hObject, eventdata, handles)
+function remove_box_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
     % hObject    handle to remove_box (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    empty - handles not created until after all CreateFcns called
