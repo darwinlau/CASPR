@@ -87,15 +87,20 @@ function add_button_Callback(~, ~, handles) %#ok<DEFNU>
     
     if(get(handles.dev_toggle,'Value'))
         folder_path = [uigetdir([CASPR_configuration.LoadModelConfigPath(), DevModelConfig.MODEL_FOLDER_PATH,'/']),'/'];
+        % Change slashes to make OS consistent
+        folder_path = strrep(folder_path,'\','/');
         ind = strfind(folder_path,DevModelConfig.MODEL_FOLDER_PATH);
         CASPR_log.Assert(~isempty(ind),'Folder must be a subfolder of the default choice');    
         folder_path = folder_path(ind+length(DevModelConfig.MODEL_FOLDER_PATH):length(folder_path));
     else
         folder_path = [uigetdir([CASPR_configuration.LoadModelConfigPath(), ModelConfig.MODEL_FOLDER_PATH]),'/'];
+        % Change slashes to make OS consistent
+        folder_path = strrep(folder_path,'\','/');
         ind = strfind(folder_path,ModelConfig.MODEL_FOLDER_PATH);
         CASPR_log.Assert(~isempty(ind),'Folder must be a subfolder of the default choice');    
         folder_path = folder_path(ind+length(ModelConfig.MODEL_FOLDER_PATH):length(folder_path));
     end
+    CASPR_log.Assert(sum(~(isstrprop(name,'alphanum')|(name==' ')|(name=='_')))==0,'Robot Name must contain only numbers and letters');
     if(get(handles.advanced_toggle,'Value'))
         table_data = get(handles.model_table,'Data');
         folder = [folder_path,table_data{1}];
@@ -191,6 +196,17 @@ function dev_toggle_Callback(~, ~, handles) %#ok<DEFNU>
     
     % Hint: get(hObject,'Value') returns toggle state of dev_toggle
     set_robotlist(handles);
+    text_string = cell(5,1);
+    text_string{1} = 'Instructions:';
+    text_string{2} = 'Step 1 - Enter the desired robot name (only use letters and numbers).'; 
+    text_string{3} = 'Step 2 - Click the add model button and select the base folder to save into';
+    if(get(handles.dev_toggle,'Value'))
+        text_string{4} = '(this must be a subfolder of /data/model_config/indev_models).' ;
+    else
+        text_string{4} = '(this must be a subfolder of /data/model_config/models).' ;
+    end
+    text_string{5} = 'Advanced options allows the folder and file names to be explicitly specified.';
+    set(handles.add_instructions_text,'String',text_string)
 end
 
 
