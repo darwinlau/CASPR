@@ -13,8 +13,8 @@ function initialise_CASPR()
     
     cd(CASPR_homepath);
     % Set the current version
-    version = 20161019;
-    model_config_path = [CASPR_homepath,'/data/model_config'];
+    CASPR_version = 20161019;
+    CASPR_model_config_path = [CASPR_homepath,'/data/model_config'];
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Determine if setup needs to be executed
@@ -22,7 +22,7 @@ function initialise_CASPR()
     if(~exist([CASPR_homepath,'/data/config'],'dir'))
         mkdir([CASPR_homepath,'/data/config'])
         save([CASPR_homepath,'/data/config/CASPR_environment.mat'],...
-                                    'CASPR_homepath','version','model_config_path');
+                                    'CASPR_homepath','CASPR_version','CASPR_model_config_path');
         setup_CASPR;
     else
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -30,18 +30,18 @@ function initialise_CASPR()
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % load the previous version information
         if(~exist([CASPR_homepath,'/data/config/CASPR_environment.mat'],'file'))
-            save([CASPR_homepath,'/data/config/CASPR_environment.mat'],'CASPR_homepath','version','model_config_path');
+            save([CASPR_homepath,'/data/config/CASPR_environment.mat'],'CASPR_homepath','CASPR_version','CASPR_model_config_path');
             update_CASPR;
         else
-            previous_version = load([CASPR_homepath,'/data/config/CASPR_environment.mat'],'version');
-            if(isempty(fieldnames(previous_version))||(version>previous_version.version))
-                save([CASPR_homepath,'/data/config/CASPR_environment.mat'],'CASPR_homepath','version','model_config_path');
+            previous_version = load([CASPR_homepath,'/data/config/CASPR_environment.mat'],'CASPR_version');
+            if(isempty(fieldnames(previous_version))||(CASPR_version>previous_version.CASPR_version))
+                save([CASPR_homepath,'/data/config/CASPR_environment.mat'],'CASPR_homepath','CASPR_version','CASPR_model_config_path');
                 update_CASPR;
             else
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 % Add the libraries
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                save([CASPR_homepath,'/data/config/CASPR_environment.mat'],'CASPR_homepath','version','model_config_path');
+                save([CASPR_homepath,'/data/config/CASPR_environment.mat'],'CASPR_homepath','CASPR_version','CASPR_model_config_path');
                 set_CASPR_environment;
                 fprintf('CASPR initialisation complete. Enjoy !\n')
             end

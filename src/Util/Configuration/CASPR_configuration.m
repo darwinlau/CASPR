@@ -12,8 +12,8 @@ classdef CASPR_configuration
         end
         % Load model config
         function model_config_str = LoadModelConfigPath()
-            model_config = load('CASPR_environment.mat', 'model_config_path');
-            model_config_str = model_config.model_config_path;            
+            model_config = load('CASPR_environment.mat', 'CASPR_model_config_path');
+            model_config_str = model_config.CASPR_model_config_path;            
         end
     end
 end
