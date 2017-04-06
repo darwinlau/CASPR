@@ -9,4 +9,20 @@
     <!-- Use linear/cubic/quintic_spline_trajectory tages for each of the
     different trajectory types.  Further details on the information to
     provide for these tags is located in the CASPR documentation. -->
+    <!--
+    <quintic_spline_trajectory id="traj_1" time_definition="relative" time_step="dt">
+        <points>
+          <point>
+            <q>-0.5 -0.5 0.5 0 0 0</q>
+            <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+            <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+          </point>
+          <point time="1.0">
+            <q>0.5 0.5 -0.5 0 0 0</q>
+            <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+            <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+          </point>
+        </points>
+    </quintic_spline_trajectory>
+    -->
 </trajectories>

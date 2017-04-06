@@ -9,5 +9,23 @@
       <!-- For each cable add a tag. Refer to CASPR documentation for
       detailed explanation of the different cable types and the required
       fields for those types -->
+      <!--
+      <cable_ideal name="#" attachment_reference="com">
+      <properties>
+        <force_min>f_min</force_min>
+        <force_max>f_max</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>x_A0 y_A0 z_A0</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>x_A1 y_A1 z_A1</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    -->
   </cable_set>
 </cables>
