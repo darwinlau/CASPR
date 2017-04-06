@@ -286,7 +286,7 @@ end
 %% Checkboxes
 %--------------------------------------------------------------------------
 % --- Executes on button press in checkbox.
-function checkbox_Callback(~, ~, handles)
+function checkbox_Callback(~, ~, handles) %#ok<DEFNU>
 % hObject    handle to checkbox (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)

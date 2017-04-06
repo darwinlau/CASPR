@@ -22,7 +22,7 @@ function varargout = CASPR_Model_Wizard(varargin)
 
     % Edit the above text to modify the response to help CASPR_Model_Wizard
 
-    % Last Modified by GUIDE v2.5 05-Apr-2017 22:56:16
+    % Last Modified by GUIDE v2.5 06-Apr-2017 09:45:33
 
     % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
@@ -84,18 +84,32 @@ function add_button_Callback(~, ~, handles) %#ok<DEFNU>
     
     % Read the elements from the table
     name = get(handles.name_box,'String');
+    
     if(get(handles.dev_toggle,'Value'))
+        folder_path = [uigetdir([CASPR_configuration.LoadModelConfigPath(), DevModelConfig.MODEL_FOLDER_PATH,'/']),'/'];
+        ind = strfind(folder_path,DevModelConfig.MODEL_FOLDER_PATH);
+        CASPR_log.Assert(~isempty(ind),'Folder must be a subfolder of the default choice');    
+        folder_path = folder_path(ind+length(DevModelConfig.MODEL_FOLDER_PATH):length(folder_path));
+    else
+        folder_path = [uigetdir([CASPR_configuration.LoadModelConfigPath(), ModelConfig.MODEL_FOLDER_PATH]),'/'];
+        ind = strfind(folder_path,ModelConfig.MODEL_FOLDER_PATH);
+        CASPR_log.Assert(~isempty(ind),'Folder must be a subfolder of the default choice');    
+        folder_path = folder_path(ind+length(ModelConfig.MODEL_FOLDER_PATH):length(folder_path));
+    end
+    if(get(handles.advanced_toggle,'Value'))
         table_data = get(handles.model_table,'Data');
-        folder = table_data{2};
-        bodies = table_data{3};
-        cables = table_data{4};
-        trajectories = table_data{5};
+        folder = [folder_path,table_data{1}];
+        bodies = table_data{2};
+        cables = table_data{3};
+        trajectories = table_data{4};
     else
         % Add conversions
-        folder = ['/',name,'/'];
-        bodies = [name,'_bodies.xml'];
-        cables = [name,'_cables.xml'];
-        trajectories = [name,'_trajectories.xml'];
+        name_for_files = strrep(name,' ','_');
+        name_for_files = strrep(name_for_files,'.','_');
+        folder = [folder_path,name_for_files,'/'];
+        bodies = [name_for_files,'_bodies.xml'];
+        cables = [name_for_files,'_cables.xml'];
+        trajectories = [name_for_files,'_trajectories.xml'];
     end
        
     % Call the appropriate model config operations
@@ -106,8 +120,6 @@ function add_button_Callback(~, ~, handles) %#ok<DEFNU>
         ModelConfigManager.AddModelConfig(name,folder,bodies,cables,trajectories);
     end
 end
-
-
 
 % --- Executes on button press in remove_button.
 function remove_button_Callback(~, ~, handles) %#ok<DEFNU>
@@ -120,7 +132,6 @@ function remove_button_Callback(~, ~, handles) %#ok<DEFNU>
     ModelConfigManager.RemoveModelConfig(name);
 end
 
-
 % --- Executes during object creation, after setting all properties.
 function model_table_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
     % hObject    handle to model_table (see GCBO)
@@ -130,9 +141,7 @@ function model_table_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
     set(hObject,'Visible','Off');
 end
 
-
-
-function name_box_Callback(hObject, eventdata, handles)
+function name_box_Callback(~, ~, ~) %#ok<DEFNU>
     % hObject    handle to name_box (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
@@ -142,7 +151,7 @@ function name_box_Callback(hObject, eventdata, handles)
 end
 
 % --- Executes during object creation, after setting all properties.
-function name_box_CreateFcn(hObject, eventdata, handles)
+function name_box_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
     % hObject    handle to name_box (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    empty - handles not created until after all CreateFcns called
@@ -155,7 +164,7 @@ function name_box_CreateFcn(hObject, eventdata, handles)
 end
 
 % --- Executes on button press in advanced_toggle.
-function advanced_toggle_Callback(hObject, eventdata, handles)
+function advanced_toggle_Callback(hObject, ~, handles) %#ok<DEFNU>
     % hObject    handle to advanced_toggle (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
@@ -169,7 +178,7 @@ function advanced_toggle_Callback(hObject, eventdata, handles)
 end
 
 % --- Executes on button press in dev_toggle.
-function dev_toggle_Callback(hObject, eventdata, handles)
+function dev_toggle_Callback(~, ~, ~) %#ok<DEFNU>
     % hObject    handle to dev_toggle (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
