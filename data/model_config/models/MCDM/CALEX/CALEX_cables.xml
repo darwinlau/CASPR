@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE cables [
+  <!ATTLIST cable_set id ID #REQUIRED>
+]>
+<!-- Template generated XML file for cables in CASPR -->
+<cables default_cable_set="original">
+  <cable_set id="original">
+      <cable_ideal name="cable 1" attachment_reference="com">
+      <properties>
+        <force_min>3.0</force_min>
+        <force_max>45</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.2985 0.2013 0.06</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0.1736 0.2068 -0.07</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 2" attachment_reference="com">
+      <properties>
+        <force_min>3.0</force_min>
+        <force_max>45</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.3521 0.0748 0.06</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>-0.2595 0.0744 -0.07</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 3" attachment_reference="com">
+      <properties>
+        <force_min>3.0</force_min>
+        <force_max>45</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.2837 -0.2216 0.06</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>-0.1771 0.2038 -0.07</location>
+        </attachment>
+		<attachment>
+          <link>2</link>
+          <location>-0.1812 0.1416 0.0940</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 4" attachment_reference="com">
+      <properties>
+        <force_min>3.0</force_min>
+        <force_max>45</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.3556 -0.0563 0.06</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0.27 0.0 -0.07</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>0.0862 0.2133 0.0940</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+  </cable_set>
+</cables>
