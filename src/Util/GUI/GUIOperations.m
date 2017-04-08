@@ -8,9 +8,7 @@ classdef GUIOperations
         % childNodes is a java type and hence is a handle class (no need to
         % return the childNodes again)
         function settings = GetSettings(str)
-            path_string = fileparts(mfilename('fullpath'));
-            path_string = path_string(1:strfind(path_string, 'src')-2);
-            settings =  XmlOperations.XmlReadRemoveIndents([path_string,str]);
+            settings =  XmlOperations.XmlReadRemoveIndents([CASPR_configuration.LoadHomePath(),str]);
         end
 
         % Converts and xmlobj into a cell array of strings.  This function

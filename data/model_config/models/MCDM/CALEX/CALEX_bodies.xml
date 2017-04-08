@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Template generated XML file for rigid bodies in CASPR -->
+<links display_range="-1 1 -1 1 -1 1" view_angle="-37 32">
+    <link_rigid num="1" name="Thigh">
+    <joint type="U_XY" q_initial="0 0"/>
+    <physical>
+      <mass>6.916</mass>
+      <com_location>0.0 0.0 -0.235</com_location>
+      <end_location>0.0 0.0 -0.47</end_location>
+      <inertia ref="com">
+        <Ixx>0.05</Ixx>
+        <Iyy>0.05</Iyy>
+        <Izz>0.0</Izz>
+        <Ixy>0.0</Ixy>
+        <Ixz>0.0</Ixz>
+        <Iyz>0.0</Iyz>
+      </inertia>
+    </physical>
+    <parent>
+      <num>0</num>
+      <location>0.0 0.0 0.0</location>
+    </parent>
+  </link_rigid>
+  <link_rigid num="2" name="Shank">
+    <joint type="R_Y" q_initial="0"/>
+    <physical>
+      <mass>3.255</mass>
+      <com_location>0.0 0.0 -0.221</com_location>
+      <end_location>0.0 0.0 -0.442</end_location>
+      <inertia ref="com">
+        <Ixx>0.02</Ixx>
+        <Iyy>0.02</Iyy>
+        <Izz>0.0</Izz>
+        <Ixy>0.0</Ixy>
+        <Ixz>0.0</Ixz>
+        <Iyz>0.0</Iyz>
+      </inertia>
+    </physical>
+    <parent>
+      <num>1</num>
+      <location>0.0 0.0 -0.47</location>
+    </parent>
+  </link_rigid>
+</links>

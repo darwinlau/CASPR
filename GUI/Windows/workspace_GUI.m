@@ -274,9 +274,7 @@ function save_button_Callback(~, ~, handles) %#ok<DEFNU>
     % hObject    handle to save_button (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
-    path_string = fileparts(mfilename('fullpath'));
-    path_string = path_string(1:strfind(path_string, 'GUI')-2);
-    file_name = [path_string,'/GUI/config/*.mat'];
+    file_name = [CASPR_configuration.LoadHomePath(),'/GUI/config/*.mat'];
     [file,path] = uiputfile(file_name,'Save file name');
     saveState(handles,[path,file]);
 end
@@ -286,8 +284,7 @@ function load_button_Callback(~, ~, handles) %#ok<DEFNU>
     % hObject    handle to load_button (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
-    path_string = fileparts(mfilename('fullpath'));
-    path_string = path_string(1:strfind(path_string, 'GUI')-2);
+    path_string = CASPR_configuration.LoadHomePath();
     file_name = [path_string,'/GUI/config/*.mat'];
     settings = uigetfile(file_name);
     load(settings)
@@ -524,16 +521,14 @@ function saveState(handles,file_path)
     if(nargin>1)
         save(file_path,'state');
     else
-        path_string                             =   fileparts(mfilename('fullpath'));
-        path_string                             =   path_string(1:strfind(path_string, 'GUI')-2);
+        path_string                             =   CASPR_configuration.LoadHomePath();
         save([path_string,'/GUI/config/workspace_gui_state.mat'],'state')
     end
 end
 
 function loadState(handles)
     % load all of the settings and initialise the values to match
-    path_string = fileparts(mfilename('fullpath'));
-    path_string = path_string(1:strfind(path_string, 'GUI')-2);
+    path_string = CASPR_configuration.LoadHomePath();
     file_name = [path_string,'/GUI/config/caspr_gui_state.mat'];
     if(exist(file_name,'file'))
         load(file_name)

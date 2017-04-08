@@ -9,9 +9,8 @@ classdef ModelConfigTest < matlab.unittest.TestCase
         % Test that the master_list is correctly setup
         function modelListValidTest(testCase)
             disp('Testing masterListValid');
-            load('CASPR_environment.mat', 'CASPR_homepath');
             % Open up and scan through the master list
-            fid = fopen([CASPR_homepath,'/data/model_config/models/models_list.csv']);
+            fid = fopen([CASPR_configuration.LoadHomePath(),'/data/model_config/models/models_list.csv']);
             cell_array = textscan(fid,'%s %s %s %s %s %s','delimiter',',');
             unique_cell_array = unique(cell_array{1});
             % Two tests are conducted firstly are there any repeated files
@@ -45,9 +44,8 @@ classdef ModelConfigTest < matlab.unittest.TestCase
         % Test that the test master_list is correctly setup
         function testModelListValidTest(testCase)
             disp('testModelListValid test');
-            load('CASPR_environment.mat', 'CASPR_homepath');
             % Open up and scan through the master list
-            fid = fopen([CASPR_homepath,'/data/model_config/test_models/test_models_list.csv']);
+            fid = fopen([CASPR_configuration.LoadHomePath(),'/data/model_config/test_models/test_models_list.csv']);
             cell_array = textscan(fid,'%s %s %s %s %s %s','delimiter',',');
             unique_cell_array = unique(cell_array{1});
             % Two tests are conducted firstly are there any repeated files
@@ -79,9 +77,8 @@ classdef ModelConfigTest < matlab.unittest.TestCase
 
         function devModelListValidTest(testCase)
             disp('devModelListValid test');
-            load('CASPR_environment.mat', 'CASPR_homepath');
             % Open up and scan through the master list
-            fid = fopen([CASPR_homepath,'/data/model_config/indev_models/indev_models_list.csv']);
+            fid = fopen([CASPR_configuration.LoadHomePath(),'/data/model_config/indev_models/indev_models_list.csv']);
             cell_array = textscan(fid,'%s %s %s %s %s %s','delimiter',',');
             unique_cell_array = unique(cell_array{1});
             % Two tests are conducted firstly are there any repeated files

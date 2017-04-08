@@ -33,7 +33,7 @@ classdef (Abstract) ModelConfigBase < handle
         % Constructor for the ModelConfig class. This builds the xml
         % objects.
         function c = ModelConfigBase(type_string, folder, list_file)
-            c.root_folder = [fileparts(mfilename('fullpath')), folder];
+            c.root_folder = [CASPR_configuration.LoadModelConfigPath(), folder];
             c.opFilename = '';
             c.opXmlObj = [];
             
