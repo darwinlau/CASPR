@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <links display_range="0.0 2.28 -0.3 2.28 0 2.0" view_angle="-37 32">
   <link_rigid num="1" name="UR3 base">
-    <joint type="SPATIAL_EULER_XYZ" q_initial="1.1 1.1 1.0 0.0 0.0 0.0" />
+    <joint type="SPATIAL_EULER_XYZ" q_initial="1.14 1.14 1.0 0.0 0.0 0.0" />
     <physical>
       <mass>2.0</mass> <!-- This is a guess still -->
       <com_location>0.0 0.0 0.07</com_location> <!-- This is a guess still -->

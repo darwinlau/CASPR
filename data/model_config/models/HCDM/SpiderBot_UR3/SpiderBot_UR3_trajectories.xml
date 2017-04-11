@@ -1,10 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE trajectories [
-  <!ATTLIST trajectory id ID #REQUIRED>
+  <!ATTLIST quintic_spline_trajectory id ID #REQUIRED>
 ]>
 
 <trajectories>
-  <trajectory id="x" time_step="0.05">
+  <quintic_spline_trajectory id="x" time_step="0.05" time_definition="absolute">
     <points>
       <point>
         <q>1.14 1.14 1.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0</q>
@@ -17,8 +17,8 @@
         <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
       </point>
     </points>
-  </trajectory>
-  <trajectory id="wall_motion_square_motion" time_step="0.05">
+  </quintic_spline_trajectory>
+  <quintic_spline_trajectory id="wall_motion_square_motion" time_step="0.05" time_definition="absolute">
     <points>
       <point>
         <q>1.14 1.14 1.0 0.0 0.0 0.0 -1.5708 0.0 0.0 0.0 0.0 0.0</q>
@@ -66,8 +66,8 @@
         <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
       </point>
     </points>
-  </trajectory>
-  <trajectory id="wall_motion" time_step="0.05">
+  </quintic_spline_trajectory>
+  <quintic_spline_trajectory id="wall_motion" time_step="0.05" time_definition="absolute">
     <points>
       <point>
         <q>1.14 1.14 1.0 0.0 0.0 0.0 -1.5708 0.0 0.0 0.0 0.0 0.0</q>
@@ -140,5 +140,5 @@
         <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
       </point>
     </points>
-  </trajectory>
+  </quintic_spline_trajectory>
 </trajectories>
