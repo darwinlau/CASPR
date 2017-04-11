@@ -1024,7 +1024,7 @@ end
 function run_forward_dynamics(handles,modObj,trajectory_id)
     % This will be added once script_FD has been fixed
     % First read the solver form from the GUI
-    id_objective = IDObjectiveMinQuadCableForce(ones(modObj.numCables,1));
+    id_objective = IDObjectiveMinQuadCableForce(ones(modObj.numActuatorsActive,1));
     id_solver = IDSolverQuadProg(modObj,id_objective, ID_QP_SolverType.MATLAB);
         
     % Setup the inverse dynamics simulator with the SystemModel
@@ -1126,5 +1126,5 @@ function weight_number = get_weight_number(xmlObj,modObj)
     weight_links = str2double(xmlObj.getElementsByTagName('weight_links_multiplier').item(0).getFirstChild.getData);
     weight_cables = str2double(xmlObj.getElementsByTagName('weight_cables_multiplier').item(0).getFirstChild.getData);
     weight_constants = str2num(xmlObj.getElementsByTagName('weight_constants').item(0).getFirstChild.getData); %#ok<ST2NM>
-    weight_number = weight_links*modObj.numLinks + weight_cables*modObj.numCables + sum(weight_constants);
+    weight_number = weight_links*modObj.numLinks + weight_cables*modObj.numActuatorsActive + sum(weight_constants);
 end
