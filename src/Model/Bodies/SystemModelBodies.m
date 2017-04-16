@@ -938,7 +938,7 @@ classdef SystemModelBodies < handle
         end
         
         function val = get.tau(obj)
-            val = zeros(obj.numDofsActuated, 1);
+            val = zeros(obj.numDofs, 1);
             count = 0;
             for k = 1:obj.numLinks
                 if (obj.bodies{k}.joint.isActuated)

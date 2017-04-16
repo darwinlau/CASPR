@@ -44,7 +44,6 @@ classdef ForwardDynamics < handle
                     solverFn = @(f,t,y0) ode23tb(f,t,y0);
             end
             [~, y_out] = solverFn(@(~,y) ForwardDynamics.eom(0, y, model, cable_forces_active, cable_indices_active, w_ext), [0 dt], y0);
-
             %[~, y_out] = ode113(@(~,y) ForwardDynamics.eom(0, y, model, cable_forces, w_ext), [0 dt], y0);
             % The output of the ODE is the solution and y0 for the next iteration
             s_end = size(y_out,1);
@@ -53,7 +52,7 @@ classdef ForwardDynamics < handle
             q_dot = y_out(s_end, n_vars+1:length(y0))';
             % Update the model with q, q_dot and f so that q_ddot can be determined
             model.update(q, q_dot, zeros(n_dofs, 1), w_ext);
-            model.cableForces = cable_forces_active;
+            model.cableModel.forces = cable_forces_active;
             % Determine this using the dynamics of the system and the
             % cable forces
             q_ddot = model.q_ddot_dynamics;
@@ -73,7 +72,7 @@ classdef ForwardDynamics < handle
 
             model.update(q, q_dot, zeros(n_dofs, 1), w_ext);
             assert(isequal(model.cableModel.cableIndicesActive, f_indices_active), 'The cable forces that should be active do not match that of the input');
-            model.cableForces = f_active;
+            model.cableModel.forces = f_active;
 
             y_dot(1:n_vars) = model.q_deriv;
             y_dot(n_vars+1:length(y)) = model.q_ddot_dynamics;
