@@ -8,8 +8,8 @@
       <end_location>0.496 0.0 0.0</end_location>
       <inertia ref="com">
         <Ixx>0.43334</Ixx>
-        <Iyy>0.43334</Iyy>
-        <Izz>0</Izz>
+        <Iyy>0.0</Iyy>
+        <Izz>0.43334</Izz>
         <Ixy>0.0</Ixy>
         <Ixz>0.0</Ixz>
         <Iyz>0.0</Iyz>
@@ -17,7 +17,7 @@
     </physical>
     <parent>
       <num>0</num>
-      <location>0.0 0.0 0.0</location>
+      <location>0.0 0.0 -1.155</location>
     </parent>
   </link_rigid>
   <link_rigid num="2" name="shank">
@@ -28,8 +28,8 @@
       <end_location>0.396 0.0 0.0</end_location>
       <inertia ref="com">
         <Ixx>0.06215</Ixx>
-        <Iyy>0.06215</Iyy>
-        <Izz>0</Izz>
+        <Iyy>0.0</Iyy>
+        <Izz>0.06215</Izz>
         <Ixy>0.0</Ixy>
         <Ixz>0.0</Ixz>
         <Iyz>0.0</Iyz>
@@ -48,8 +48,8 @@
       <end_location>0.28 0.0 0.0</end_location>
       <inertia ref="com">
         <Ixx>0.010208</Ixx>
-        <Iyy>0.010208</Iyy>
-        <Izz>0</Izz>
+        <Iyy>0.0</Iyy>
+        <Izz>0.010208</Izz>
         <Ixy>0.0</Ixy>
         <Ixz>0.0</Ixz>
         <Iyz>0.0</Iyz>

@@ -4,7 +4,7 @@
 ]>
 <cables default_cable_set="basic_4_cables">
   <cable_set id="basic_4_cables">
-    <cable_ideal name="cable 1" attachment_reference="joint">
+    <cable_ideal name="cable 1" attachment_reference="com">
       <properties>
         <force_min>0.01</force_min>
         <force_max>200</force_max>
@@ -12,15 +12,15 @@
       <attachments>
         <attachment>
           <link>0</link>
-          <location>1.025 0.0 -0.045</location>
+          <location>1.025 0.0 -1.2</location>
         </attachment>
         <attachment>
           <link>1</link>
-          <location>0.1 0.0 0.09</location>
+          <location>-0.07 0.0 0.09</location>
         </attachment>
       </attachments>
     </cable_ideal>
-    <cable_ideal name="cable 2" attachment_reference="joint">
+    <cable_ideal name="cable 2" attachment_reference="com">
       <properties>
         <force_min>0.01</force_min>
         <force_max>200</force_max>
@@ -28,15 +28,15 @@
       <attachments>
         <attachment>
           <link>0</link>
-          <location>-1.025 0.0 -0.005</location>
+          <location>-1.025 0.0 -1.16</location>
         </attachment>
         <attachment>
           <link>2</link>
-          <location>0.16 0.0 -0.07</location>
+          <location>0.0 0.0 -0.07</location>
         </attachment>
       </attachments>
     </cable_ideal>
-    <cable_ideal name="cable 3" attachment_reference="joint">
+    <cable_ideal name="cable 3" attachment_reference="com">
       <properties>
         <force_min>0.01</force_min>
         <force_max>200</force_max>
@@ -44,15 +44,15 @@
       <attachments>
         <attachment>
           <link>0</link>
-          <location>-1.025 0.0 -0.540</location>
+          <location>-1.025 0.0 -1.695</location>
         </attachment>
         <attachment>
           <link>3</link>
-          <location>0.15 0.0 -0.1</location>
+          <location>0.03 0.0 -0.1</location>
         </attachment>
 	    </attachments>
     </cable_ideal>
-    <cable_ideal name="cable 4" attachment_reference="joint">
+    <cable_ideal name="cable 4" attachment_reference="com">
       <properties>
         <force_min>0.01</force_min>
         <force_max>200</force_max>
@@ -60,11 +60,11 @@
         <attachments>
         <attachment>
           <link>0</link>
-          <location>1.025 0.0 -0.545</location>
+          <location>1.025 0.0 -1.7</location>
         </attachment>
         <attachment>
           <link>3</link>
-          <location>0.21 0 0.05</location>
+          <location>0.09 0 0.05</location>
         </attachment>
       </attachments>
       </cable_ideal>
