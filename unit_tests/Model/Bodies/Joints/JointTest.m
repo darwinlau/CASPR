@@ -25,9 +25,10 @@ classdef JointTest < matlab.unittest.TestCase
     methods (Test)
         % Test that the joint can be updated
         function testUpdate(testCase)
-            disp('Testing Joint Update')
+            CASPR_log.Debug('Running JointTest/testUpdate');
             testCase.jointObj.update(testCase.jointObj.q_initial, zeros(testCase.jointObj.numDofs,1), zeros(testCase.jointObj.numDofs,1));
-            testCase.assertJointPropertySize()
+            testCase.assertJointPropertySize();
+            CASPR_log.Debug('Done JointTest/testUpdate');
         end
 
         % ---------------------------------
@@ -35,23 +36,26 @@ classdef JointTest < matlab.unittest.TestCase
         % ---------------------------------
         % First q_deriv
         function testQDeriv(testCase)
-            disp('Testing q_deriv')
+            CASPR_log.Debug('Running JointTest/testQDeriv');
             testCase.jointObj.q_deriv;
             testCase.assertLength(testCase.jointObj.q_deriv,testCase.jointObj.numVars,'q_deriv of wrong dimension');
+            CASPR_log.Debug('Done JointTest/testQDeriv');
         end
         
         % First S_dot
         function testSDot(testCase)
-            disp('Testing S_dot')
+            CASPR_log.Debug('Running JointTest/testSDot');
             testCase.jointObj.S_dot;
             testCase.assertSize(testCase.jointObj.S_dot,[6,testCase.jointObj.numDofs],'S_dot of wrong dimension');
+            CASPR_log.Debug('Done JointTest/testSDot');
         end
         
         % First S
         function testS(testCase)
-            disp('Testing S')
+            CASPR_log.Debug('Running JointTest/testS');
             testCase.jointObj.S;
             testCase.assertSize(testCase.jointObj.S,[6,testCase.jointObj.numDofs],'S of wrong dimension');
+            CASPR_log.Debug('Done JointTest/testS');
         end
     end
     

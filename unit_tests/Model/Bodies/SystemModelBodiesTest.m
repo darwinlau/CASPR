@@ -27,9 +27,10 @@ classdef SystemModelBodiesTest < matlab.unittest.TestCase
     methods (Test)
         % Test that the update function works
         function testUpdate(testCase)
-            disp('Testing system body update function')
+            CASPR_log.Debug('Running SystemModelBodiesTest/testUpdate');
             testCase.modelObj.bodyModel.update(zeros(testCase.modelObj.bodyModel.numDofVars,1),zeros(testCase.modelObj.bodyModel.numDofs,1),zeros(testCase.modelObj.bodyModel.numDofs,1),zeros(testCase.modelObj.bodyModel.numDofs,1));
             testCase.assertSystemModelBodiesPropertySize();
+            CASPR_log.Debug('Done SystemModelBodiesTest/testUpdate');
         end
         
         % -----------------------------------
@@ -37,29 +38,32 @@ classdef SystemModelBodiesTest < matlab.unittest.TestCase
         % -----------------------------------
         % default values
         function testDefault(testCase)
-            disp('Testing default values')
+            CASPR_log.Debug('Running SystemModelBodiesTest/testDefault');
             testCase.modelObj.bodyModel.q_default;
             testCase.assertLength(testCase.modelObj.bodyModel.q_default,testCase.modelObj.bodyModel.numDofVars,'q_default of wrong dimension');
             testCase.modelObj.bodyModel.q_dot_default;
             testCase.assertLength(testCase.modelObj.bodyModel.q_dot_default,testCase.modelObj.bodyModel.numDofs,'q_dot_default of wrong dimension');
             testCase.modelObj.bodyModel.q_ddot_default;
             testCase.assertLength(testCase.modelObj.bodyModel.q_ddot_default,testCase.modelObj.bodyModel.numDofs,'q_ddot_default of wrong dimension');
+            CASPR_log.Debug('Done SystemModelBodiesTest/testDefault');
         end
         
         % bounds
         function testQBounds(testCase)
-            disp('Testing bound values')
+            CASPR_log.Debug('Running SystemModelBodiesTest/testQBounds');
             testCase.modelObj.bodyModel.q_lb;
             testCase.assertLength(testCase.modelObj.bodyModel.q_lb,testCase.modelObj.bodyModel.numDofVars,'q_lb of wrong dimension');
             testCase.modelObj.bodyModel.q_ub;
             testCase.assertLength(testCase.modelObj.bodyModel.q_ub,testCase.modelObj.bodyModel.numDofVars,'q_ub of wrong dimension');
+            CASPR_log.Debug('Done SystemModelBodiesTest/testQBounds');
         end
         
         % q_deriv
         function testQDeriv(testCase)
-            disp('Testing q_deriv')
+            CASPR_log.Debug('Running SystemModelBodiesTest/testQDeriv');
             testCase.modelObj.bodyModel.q_deriv;
             testCase.assertLength(testCase.modelObj.bodyModel.q_deriv,testCase.modelObj.bodyModel.numDofVars,'q_deriv of wrong dimension');
+            CASPR_log.Debug('Done SystemModelBodiesTest/testQDeriv');
         end
     end
     

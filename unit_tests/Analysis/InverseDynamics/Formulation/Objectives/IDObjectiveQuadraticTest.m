@@ -22,10 +22,11 @@ classdef IDObjectiveQuadraticTest < IDObjectiveTestBase
             
     methods (Test)
         function updateObjectiveTest(testCase)
-            disp('Testing quadratic objective update')
+            CASPR_log.Debug('Running IDObjectiveQuadraticTest/updateObjectiveTest');
             testCase.idObj.updateObjective(testCase.modelObj);
             testCase.assertSize(testCase.idObj.A, [testCase.modelObj.numActuatorsActive testCase.modelObj.numActuatorsActive], '''A'' matrix is of wrong dimension');
             testCase.assertLength(testCase.idObj.b, testCase.modelObj.numActuatorsActive, '''b'' vector is of wrong dimension');
+            CASPR_log.Debug('Done IDObjectiveQuadraticTest/updateObjectiveTest');
         end
     end
     

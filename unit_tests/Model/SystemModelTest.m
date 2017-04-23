@@ -26,10 +26,11 @@ classdef SystemModelTest < matlab.unittest.TestCase
     
     methods (Test)        
         % Test that L is of the correct size 
-        function testL(testCase)
-            disp('Testing the System Jacobian');
+        function testJacobianL(testCase)
+            CASPR_log.Debug('Running ModelConfigTest/testJacobianL');
             L = testCase.modelObj.L;
-            testCase.assertSize(L,[testCase.modelObj.numCables,testCase.modelObj.numDofVars],'L is not of the correct size');
+            testCase.assertSize(L,[testCase.modelObj.numCables,testCase.modelObj.numDofVars], 'L is not of the correct size');
+            CASPR_log.Debug('Done ModelConfigTest/testJacobianL');
         end
     end
 end

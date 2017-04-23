@@ -18,9 +18,10 @@ classdef IDObjectiveLinearTest < IDObjectiveTestBase
         
     methods (Test)
         function updateObjectiveTest(testCase)
-            disp('Testing linear objective update')
+            CASPR_log.Debug('Running IDObjectiveLinearTest/updateObjectiveTest');
             testCase.idObj.updateObjective(testCase.modelObj);
             testCase.assertLength(testCase.idObj.b, testCase.modelObj.numActuatorsActive, '''b'' vector is of wrong dimension');
+            CASPR_log.Debug('Done IDObjectiveLinearTest/updateObjectiveTest');
         end
     end
     
