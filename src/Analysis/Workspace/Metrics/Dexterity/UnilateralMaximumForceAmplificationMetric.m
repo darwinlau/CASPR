@@ -11,15 +11,15 @@
 % Author        : Jonathan EDEN
 % Created       : 2016
 % Description   : 
-classdef UnilateralDexterityMetric < WorkspaceMetricBase
+classdef UnilateralMaximumForceAmplificationMetric < WorkspaceMetricBase
     properties (SetAccess = protected, GetAccess = protected)
     end
     
     methods
         % Constructor
-        function m = UnilateralDexterityMetric()
+        function m = UnilateralMaximumForceAmplificationMetric()
             m.metricMin = 0;
-            m.metricMax = 1;
+            m.metricMax = Inf;
         end
         
         % Evaluate function implementation
@@ -29,7 +29,7 @@ classdef UnilateralDexterityMetric < WorkspaceMetricBase
             % Compute singular values of jacobian matrix
             Sigma = svd(-L');
             % Compute the condition number
-            k = max(Sigma)/min(Sigma);
+            k = 1/min(Sigma);
             % For the moment calculate the UMFA assuming that all cables are
             % used
             H = eye(dynamics.numCablesActive);
@@ -63,7 +63,7 @@ classdef UnilateralDexterityMetric < WorkspaceMetricBase
                     if((exit_flag==1) && (L_rank == dynamics.numDofs))
                         h = u/norm(u);
                         Sigma = svd(-L_m');
-                        k = max(Sigma)/min(Sigma);
+                        k = 1/min(Sigma);
                         h_min = min(h);
                         temp_v = sqrt(dynamics.numCablesActive)*(1/k)*(h_min/(sqrt(h_min^2+1)));
                         if(temp_v > v)
