@@ -26,11 +26,11 @@ classdef IDSolverTest < matlab.unittest.TestCase
         infp_solver_type = struct('MATLAB', ID_LP_SolverType.MATLAB, ...
             'OptiToolbox_OOQP', ID_LP_SolverType.OPTITOOLBOX_OOQP, ...
             'OptiToolbox_LP', ID_LP_SolverType.OPTITOOLBOX_LP_SOLVE);
-        os_solver_type = struct('LP', ID_OS_SolverType.LP, ...
-            'Efficient_LP', ID_OS_SolverType.EFFICIENT_LP);
-        fp_solver_type = struct('NORM_1', ID_FP_SolverType.NORM_1, ...
-            'NORM_2', ID_FP_SolverType.NORM_2, ...
-            'CENTROID', ID_FP_SolverType.CENTROID);
+%         os_solver_type = struct('LP', ID_OS_SolverType.LP, ...
+%             'Efficient_LP', ID_OS_SolverType.EFFICIENT_LP);
+%         fp_solver_type = struct('NORM_1', ID_FP_SolverType.NORM_1, ...
+%             'NORM_2', ID_FP_SolverType.NORM_2, ...
+%             'CENTROID', ID_FP_SolverType.CENTROID);
         cf_solver_type = struct('CLOSED_FORM', ID_CF_SolverType.CLOSED_FORM, ...
             'IMPROVED_CLOSED_FORM', ID_CF_SolverType.IMPROVED_CLOSED_FORM, ...
             'PUNCTURE_METHOD', ID_CF_SolverType.PUNCTURE_METHOD, ...
@@ -72,22 +72,22 @@ classdef IDSolverTest < matlab.unittest.TestCase
             CASPR_log.Debug('Done IDSolverTest/testInfPSolver');
         end
         
-        function testOptimallySafeSolver(testCase, os_solver_type)
-            CASPR_log.Debug('Running IDSolverTest/testOptimallySafeSolver');
-            id_solver = IDSolverOptimallySafe(testCase.modelObj, 1, os_solver_type);
-            [cable_f, Q_opt, id_exit_type] = id_solver.resolveFunction(testCase.modelObj);
-            testCase.assertIDSolverOutput(cable_f, Q_opt, id_exit_type);
-            CASPR_log.Debug('Done IDSolverTest/testOptimallySafeSolver');
-        end
-        
-        function testFeasiblePolygon(testCase, fp_solver_type)
-            CASPR_log.Debug('Running IDSolverTest/testFeasiblePolygon');
-            id_solver = IDSolverFeasiblePolygon(testCase.modelObj, fp_solver_type);
-            [cable_f, Q_opt, id_exit_type] = id_solver.resolveFunction(testCase.modelObj);
-            testCase.assertIDSolverOutput(cable_f, Q_opt, id_exit_type);
-            CASPR_log.Debug('Done IDSolverTest/testFeasiblePolygon');
-        end
-        
+%         function testOptimallySafeSolver(testCase, os_solver_type)
+%             CASPR_log.Debug('Running IDSolverTest/testOptimallySafeSolver');
+%             id_solver = IDSolverOptimallySafe(testCase.modelObj, 1, os_solver_type);
+%             [cable_f, Q_opt, id_exit_type] = id_solver.resolveFunction(testCase.modelObj);
+%             testCase.assertIDSolverOutput(cable_f, Q_opt, id_exit_type);
+%             CASPR_log.Debug('Done IDSolverTest/testOptimallySafeSolver');
+%         end
+%         
+%         function testFeasiblePolygon(testCase, fp_solver_type)
+%             CASPR_log.Debug('Running IDSolverTest/testFeasiblePolygon');
+%             id_solver = IDSolverFeasiblePolygon(testCase.modelObj, fp_solver_type);
+%             [cable_f, Q_opt, id_exit_type] = id_solver.resolveFunction(testCase.modelObj);
+%             testCase.assertIDSolverOutput(cable_f, Q_opt, id_exit_type);
+%             CASPR_log.Debug('Done IDSolverTest/testFeasiblePolygon');
+%         end
+%         
         function testClosedForm(testCase, cf_solver_type)
             CASPR_log.Debug('Running IDSolverTest/testClosedForm');
             id_solver = IDSolverClosedForm(testCase.modelObj, cf_solver_type);
