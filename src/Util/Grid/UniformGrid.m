@@ -25,12 +25,12 @@ classdef UniformGrid < Grid
             id.setNDimensions(size(q_begin,1));
             for i=1:id.n_dimensions
                 if(delta_q(i)~=0)
-                    id.q_length(i) = (id.q_end(i) - id.q_begin(i))/id.delta_q(i) + 1;
+                    id.q_length(i) = floor((id.q_end(i) - id.q_begin(i))/id.delta_q(i) + 1);
                 else
                     id.q_length(i) = 1;
                 end
             end
-            id.setNPoints(round(prod(id.q_length)))
+            id.setNPoints(round(prod(id.q_length)));
         end
 
         % Obtain the grid point from a given index
