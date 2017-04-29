@@ -390,5 +390,16 @@ classdef SystemModel < handle
         function value = get.ACTUATION_ACTIVE_INVALID(obj)
             value = [obj.cableModel.FORCES_ACTIVE_INVALID; obj.bodyModel.TAU_INVALID];
         end
+        
+        % Uncertainties
+        function addInertiaUncertainty(obj,m_bounds,I_bounds)
+            CASPR_log.Assert((size(m_bounds,1)==1)&&(length(m_bounds) == 2*obj.numLinks),'Mass uncertainty must be of size 2 * number of links');
+            if(nargin == 2)
+                obj.bodyModel.addInertiaUncertainty(m_bounds,[]);
+            else
+                CASPR_log.Assert(((size(I_bounds,1)==1)&&(length(I_bounds) == 12*obj.numLinks)),'Inertia must be of size 12 * number of lins');
+                obj.bodyModel.addInertiaUncertainty(m_bounds,I_bounds);
+            end
+        end
     end
 end

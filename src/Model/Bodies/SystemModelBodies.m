@@ -591,6 +591,12 @@ classdef SystemModelBodies < handle
                 obj.massInertiaMatrix(6*k-5:6*k, 6*k-5:6*k) = [obj.bodies{k}.m*eye(3) zeros(3,3); zeros(3,3) obj.bodies{k}.I_G];
             end
         end
+        
+        % Update the mass inertia matrix for the system from the joint mass
+        % inertia matrices.
+        function updateMassInertiaMatrix(obj,massInertiaMatrix)
+            obj.massInertiaMatrix = massInertiaMatrix;
+        end
                 
         % Calculate the internal matrices for the quadratic form of the
         % Coriolis/Centrifugal forces.

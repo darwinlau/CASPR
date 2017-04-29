@@ -13,15 +13,29 @@ classdef ControllerSimulator < DynamicsSimulator
         controller          % The controller for the system
         refTrajectory       % The reference trajectory
         stateError          % The state space error
+        uncertainties       % A list of uncertainties
+        true_model          % The true model for the system
     end
 
     methods
         % The control simulator constructor
-        function ctrl_sim = ControllerSimulator(model, controller, fd_solver)
+        function ctrl_sim = ControllerSimulator(model, controller, fd_solver, uncertainties, true_model)
             ctrl_sim@DynamicsSimulator(model);
             ctrl_sim.model = model;
             ctrl_sim.controller = controller;
             ctrl_sim.fdSolver = fd_solver;
+            if(nargin <=3)
+                ctrl_sim.uncertainties = [];
+                ctrl_sim.true_model = ctrl_sim.model;
+            else
+                ctrl_sim.uncertainties = uncertainties;
+                for i = 1:length(uncertainties)
+                    if(isa(uncertainties{i},'ConstructorUncertaintyBase'))
+                        uncertainties{i}.applyConstructorUncertainty(true_model);
+                    end
+                end
+                ctrl_sim.true_model = true_model;
+            end
         end
 
         % Implementation of the run function. Converts the dynamics
@@ -44,10 +58,11 @@ classdef ControllerSimulator < DynamicsSimulator
             
             for t = 1:length(obj.timeVector)
                 CASPR_log.Print(sprintf('Time : %f', obj.timeVector(t)),CASPRLogLevel.INFO);
+                fprintf('Completion Percentage: %3.2f%%\n',100*t/length(obj.timeVector));
                 [obj.cableForcesActive{t}, obj.cableIndicesActive{t}, obj.cableForces{t}] = obj.controller.execute(obj.trajectory.q{t},  obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t}, ref_trajectory.q{t}, ref_trajectory.q_dot{t}, ref_trajectory.q_ddot{t}, obj.timeVector(t));
                 obj.stateError{t} = ref_trajectory.q{t} - obj.trajectory.q{t};
                 if t < length(obj.timeVector)
-                    [obj.trajectory.q{t+1}, obj.trajectory.q_dot{t+1}, obj.trajectory.q_ddot{t+1}, obj.model] = obj.fdSolver.compute(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.cableForcesActive{t}, obj.cableIndicesActive{t}, zeros(obj.model.numDofs,1), obj.timeVector(t+1)-obj.timeVector(t), obj.model);
+                    [obj.trajectory.q{t+1}, obj.trajectory.q_dot{t+1}, obj.trajectory.q_ddot{t+1}, obj.model] = obj.fdSolver.compute(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.cableForcesActive{t}, obj.cableIndicesActive{t}, zeros(obj.model.numDofs,1), obj.timeVector(t+1)-obj.timeVector(t), obj.true_model);
                 end
             end
         end
