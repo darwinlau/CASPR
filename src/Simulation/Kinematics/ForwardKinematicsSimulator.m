@@ -27,7 +27,7 @@ classdef ForwardKinematicsSimulator < MotionSimulator
         
         % The run function performs the FK at each point in time using the
         % trajectory of cable lengths
-        function run(obj, lengths, lengths_dot, time_vector, q0_approx, q0_prev_approx, cable_indices)
+        function run(obj, lengths, lengths_dot, time_vector, q0_approx, q0_dot_approx, cable_indices)
             if (nargin <= 6 || isempty(cable_indices))
                 cable_indices = 1:obj.model.numCables;
             end
@@ -52,7 +52,7 @@ classdef ForwardKinematicsSimulator < MotionSimulator
             
             % Runs the simulation over the specified trajectory
             q_prev = q0_approx;
-            q_d_prev = q0_prev_approx;
+            q_d_prev = q0_dot_approx;
             lengths_prev = lengths{1};
             
             time_prev = 0;
