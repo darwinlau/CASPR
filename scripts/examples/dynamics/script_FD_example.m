@@ -17,7 +17,7 @@ trajectory_id = 'x_simple';
 modelObj = model_config.getModel(cable_set_id);
 
 % Setup an inverse dynamics solver of choice (any should do)
-id_objective = IDObjectiveMinQuadCableForce(ones(modelObj.numCables,1));
+id_objective = IDObjectiveMinQuadCableForce(ones(modelObj.numActuatorsActive,1));
 id_solver = IDSolverQuadProg(modelObj, id_objective, ID_QP_SolverType.MATLAB);
 
 % Setup the inverse dynamics and forward dynamics simulators

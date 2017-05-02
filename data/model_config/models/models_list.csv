@@ -20,3 +20,7 @@ Myorob shoulder,/SCDM/spherical_manipulators/Myorob_shoulder/,Myorob_shoulder_bo
 CAREX,/MCDM/CAREX/,CAREX_bodies.xml,CAREX_cables.xml,CAREX_trajectories.xml,
 4U modular units arm,/MCDM/4U_modular_units_arm/,4U_modular_units_arm_bodies.xml,4U_modular_units_arm_cables.xml,4U_modular_units_arm_trajectories.xml,
 BMArm,/MCDM/BMArm/,BMArm_bodies.xml,BMArm_cables.xml,BMArm_trajectories.xml,
+SpiderBot UR3,/HCDM/SpiderBot_UR3/,SpiderBot_UR3_bodies.xml,SpiderBot_UR3_cables.xml,SpiderBot_UR3_trajectories.xml,
+CALEX,/MCDM/CALEX/,CALEX_bodies.xml,CALEX_cables.xml,CALEX_trajectories.xml,
+MACARM,/SCDM/spatial_manipulators/MACARM/,MACARM_bodies.xml,MACARM_cables.xml,MACARM_trajectories.xml,
+C-Leg,/MCDM/C-Leg/,C-Leg_bodies.xml,C-Leg_cables.xml,C-Leg_trajectories.xml,

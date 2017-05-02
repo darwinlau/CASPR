@@ -8,9 +8,8 @@
 clc; clear; close all;
 
 % Set up the model 
-model_type = ModelConfigType.M_2DOF_VSD;
+model_config = ModelConfig('2 DoF VSD');
 cable_set_id = 'basic_vsd';
-model_config = ModelConfig(model_type);
 modelObj = model_config.getModel(cable_set_id);
 
 % Set up the workspace simulator

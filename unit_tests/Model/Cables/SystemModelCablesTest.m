@@ -8,7 +8,8 @@ classdef SystemModelCablesTest < matlab.unittest.TestCase
     properties (ClassSetupParameter)
         model_config_type = struct('SCDM', 'test_SCDM', ...
             'MCDM', 'test_MCDM', ...
-            'Active_passive_cables', 'test_active_passive_cables');
+            'Active_passive_cables', 'test_active_passive_cables', ...
+            'HCDM', 'test_HCDM');
     end
     
     properties
@@ -26,9 +27,10 @@ classdef SystemModelCablesTest < matlab.unittest.TestCase
     methods (Test)        
         % Confirm that the update function works
         function testUpdate(testCase)
-            disp('Testing the system Cables update function')
+            CASPR_log.Debug('Running SystemModelCablesTest/testUpdate');
             testCase.modelObj.cableModel.update(testCase.modelObj.bodyModel);
             testCase.assertSystemModelCablePropertySize();
+            CASPR_log.Debug('Done SystemModelCablesTest/testUpdate');
         end
         
         % ----------------------------------------
@@ -36,33 +38,37 @@ classdef SystemModelCablesTest < matlab.unittest.TestCase
         % ----------------------------------------
         % Test the number of maximum segments
         function testNumSegmentsMax(testCase)
-            disp('Testing the number of segments')
+            CASPR_log.Debug('Running SystemModelCablesTest/testNumSegmentsMax');
             testCase.modelObj.cableModel.numSegmentsMax;              % Maximum number of segments out of all of the cables
+            CASPR_log.Debug('Done SystemModelCablesTest/testNumSegmentsMax');
         end
         
         % Test the length related variables
         function testLengths(testCase)
-            disp('Testing the length variables')
+            CASPR_log.Debug('Running SystemModelCablesTest/testLengths');
             testCase.modelObj.cableModel.lengths;                     % Vector of lengths for all of the cables
             testCase.modelObj.cableModel.lengthsActive;               % Vector of lengths for active cables 
             testCase.modelObj.cableModel.lengthsPassive;              % Vector of lengths for passive cables
+            CASPR_log.Debug('Done SystemModelCablesTest/testLengths');
         end
         
         % Test the forces
         function testForces(testCase)
-            disp('Testing the force variables')
+            CASPR_log.Debug('Running SystemModelCablesTest/testForces');
             testCase.modelObj.cableModel.forces;                      % Vector of forces for all of the cables
             testCase.modelObj.cableModel.forcesActive;                % Vector of forces for active cables
             testCase.modelObj.cableModel.forcesActiveMin;             % Vector of min forces for active cables
             testCase.modelObj.cableModel.forcesActiveMax;             % Vector of max forces for passive cables
             testCase.modelObj.cableModel.forcesPassive;               % Vector of forces for passive cables
+            CASPR_log.Debug('Done SystemModelCablesTest/testForces');
         end
         
         % Test the V matrix
         function testVMatrices(testCase)
-            disp('Testing the V matrix')
+            CASPR_log.Debug('Running SystemModelCablesTest/testVMatrices');
             testCase.modelObj.cableModel.V_active;
             testCase.modelObj.cableModel.V_passive;
+            CASPR_log.Debug('Done SystemModelCablesTest/testVMatrices');
         end
     end
     

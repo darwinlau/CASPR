@@ -180,8 +180,13 @@ classdef SpatialEulerXYZ < JointBase
         
         % Generate the N matrix for the joint
         function [N_j,A] = QuadMatrix(~)
+            b = SphericalEulerXYZ.GetBeta(q);
+            g = SphericalEulerXYZ.GetGamma(q);
             N_j = zeros(SpatialEulerXYZ.numDofs,SpatialEulerXYZ.numDofs^2);
-            A = zeros(6,SpatialEulerXYZ.numDofs);
+            N_j(4:6,22:24) = [0,-0.5*sin(b)*cos(g),-0.5*cos(b)*sin(g);-0.5*sin(b)*cos(g),0,0.5*cos(g);-0.5*cos(b)*sin(g),0.5*cos(g),0];
+            N_j(4:6,28:30) = [0,0.5*sin(b)*sin(g),-0.5*cos(b)*cos(g);0.5*sin(b)*sin(g),0,-0.5*sin(g);-0.5*cos(b)*cos(g),-0.5*sin(g),0];
+            N_j(4:6,34:36) = [0,0.5*cos(b),0;0.5*cos(b),0,0;0,0,0];
+            A = eye(6);
         end
     end
 end

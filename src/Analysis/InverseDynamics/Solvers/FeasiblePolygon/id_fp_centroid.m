@@ -16,6 +16,7 @@ function [ x_opt, exit_type] = id_fp_centroid(A_eq, b_eq, xmin, xmax)
     delta = 1e-8;   % Use of delta to aviod numerical error
     m = size(A_eq,1);
     n = size(A_eq,2);
+    CASPR_log.Assert(rank(A_eq) == m,'Algorithm does not work for singular matrices');
     [Q,R] = qr(A_eq');
     R = R(1:m,1:m);
     M = Q(:,1:m);
@@ -44,8 +45,8 @@ function [ x_opt, exit_type] = id_fp_centroid(A_eq, b_eq, xmin, xmax)
     V_store = v_ij;
     v_f = v_ij;
     while 1
-        ni_prepend = cal_ni(N,i,j,bj);
-        [alpha,l,bl] = cal_alpha(N,ni_prepend,i,v_ij,xmin,xmax,x_p);
+        ni_prepend = Cal_ni(N,i,j,bj);
+        [alpha,l,bl] = Cal_alpha(N,ni_prepend,i,v_ij,xmin,xmax,x_p);
         v_li = v_ij + alpha * ni_prepend;        % The next point
         V_store = [V_store,v_li];
         if(Indexset(l)==0)

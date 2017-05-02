@@ -69,6 +69,8 @@ classdef (Abstract) WorkspaceMetricBase < handle
                     wm = UnilateralDexterityMetric;
                 case WorkspaceMetricType.MIN_CABLE_CABLE_DISTANCE
                     wm = MinCableCableDistanceMetric;
+                case WorkspaceMetricType.UNILATERAL_MAXIMUM_FORCE_AMPLIFICATION
+                    wm = UnilateralMaximumForceAmplificationMetric;
                 otherwise
                     CASPR_log.Print('Workspace metric type is not defined',CASPRLogLevel.ERROR);
             end

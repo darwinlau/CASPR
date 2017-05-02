@@ -21,6 +21,13 @@ classdef SystemModelBodies < handle
     properties (SetAccess = private)
         % Objects
         bodies                  % Cell array of BodyModel objects
+        
+        % Degrees of freedom
+        numDofs
+        numDofVars
+        numOPDofs
+        numLinks
+        numDofsActuated             % Number of actuated DoFs
 
         % Generalised coordinates of the system
         q                       % Joint space coordinates
@@ -63,12 +70,6 @@ classdef SystemModelBodies < handle
         x_ddot                  % Absolute accelerations (x_ddot = W(q)*q_ddot + C_a(q,q_dot))
         C_a                     % Relationship between body and joint accelerations \ddot{\mathbf{x}} = W \ddot{\mathbf{q}} + C_a
 
-        % Degrees of freedom
-        numDofs
-        numDofVars
-        numOPDofs
-        numLinks
-
         % Mass matrix
         massInertiaMatrix = [];       % Mass-inertia 6p x 6p matrix
 
@@ -87,6 +88,7 @@ classdef SystemModelBodies < handle
         C = [];
         G = [];
         W_e = [];
+        A = [];
 
         % Index for ease of computation
         index_k                      % A vector consisting of the first index to each joint
@@ -104,6 +106,12 @@ classdef SystemModelBodies < handle
         q_ub
         % Generalised coordinates time derivative (for special cases q_dot does not equal q_deriv)
         q_deriv
+        
+        tau                         % The joint actuator
+        tauMin                      % The joint actuator minimum value
+        tauMax                      % The joint actuator maximum value
+        TAU_INVALID
+        
         % Get array of dofs for each joint
         jointsNumDofVars
         jointsNumDofs
@@ -121,16 +129,21 @@ classdef SystemModelBodies < handle
             num_dofs = 0;
             num_dof_vars = 0;
             num_op_dofs = 0;
+            num_dof_actuated = 0;
             b.index_k = MatrixOperations.Initialise([1,b.numLinks],0);
             for k = 1:length(bodies)
                 b.index_k(k) = num_dofs + 1;
                 num_dofs = num_dofs + bodies{k}.numDofs;
                 num_dof_vars = num_dof_vars + bodies{k}.numDofVars;
+                if (bodies{k}.joint.isActuated)
+                    num_dof_actuated = num_dof_actuated + bodies{k}.joint.numDofs;
+                end
             end
             b.bodies = bodies;
             b.numDofs = num_dofs;
             b.numDofVars = num_dof_vars;
             b.numOPDofs = num_op_dofs;
+            b.numDofsActuated = num_dof_actuated;
             b.numLinks = length(b.bodies);
 
             b.connectivityGraph = MatrixOperations.Initialise([b.numLinks, b.numLinks],0);
@@ -140,6 +153,18 @@ classdef SystemModelBodies < handle
             b.W = MatrixOperations.Initialise([6*b.numLinks, b.numDofs],0);
             b.T = MatrixOperations.Initialise([0,6*b.numLinks],0);
 
+            % Construct joint actuation selection matrix
+            b.A = zeros(b.numDofs, b.numDofsActuated);
+            dof_ind = 0;
+            dof_tau = 0;
+            for k = 1:b.numLinks
+                if (b.bodies{k}.isJointActuated)
+                    b.A(dof_ind+1:dof_ind+b.bodies{k}.numDofs, dof_tau+1:dof_tau+b.bodies{k}.numDofs) = eye(b.bodies{k}.numDofs, b.bodies{k}.numDofs);
+                    dof_tau = dof_tau + b.bodies{k}.numDofs;
+                end
+                dof_ind = dof_ind + b.bodies{k}.numDofs;
+            end
+            
             % Connects the objects of the system and create the
             % connectivity and body path graphs
             b.formConnectiveMap();
@@ -342,9 +367,7 @@ classdef SystemModelBodies < handle
             obj.M =   obj.W.' * obj.M_b;
             obj.C =   obj.W.' * obj.C_b;
             obj.G = - obj.W.' * obj.G_b;
-%             end
             
-
             % Operational space equation of motion terms
             if(obj.occupied.op_space)
                 obj.M_y = inv(obj.J*inv(obj.M)*obj.J'); %#ok<MINV>
@@ -569,6 +592,12 @@ classdef SystemModelBodies < handle
             end
         end
         
+        % Update the mass inertia matrix for the system from the joint mass
+        % inertia matrices.
+        function updateMassInertiaMatrix(obj,massInertiaMatrix)
+            obj.massInertiaMatrix = massInertiaMatrix;
+        end
+                
         % Calculate the internal matrices for the quadratic form of the
         % Coriolis/Centrifugal forces.
         function N = calculateN(obj)
@@ -901,6 +930,58 @@ classdef SystemModelBodies < handle
             end
             G_grad = obj.G_grad;
         end
+                
+        function set.tau(obj, value)
+            assert(length(value) == obj.numDofsActuated, 'Cannot set tau since the value does not match the actuated DoFs');
+            count = 0;
+            for k = 1:obj.numLinks
+                if (obj.bodies{k}.joint.isActuated)
+                    num_dofs = obj.bodies{k}.joint.numDofs;
+                    obj.bodies{k}.joint.tau = value(count+1:count+num_dofs);
+                    count = count + num_dofs;
+                end
+            end
+        end
+        
+        function val = get.tau(obj)
+            val = zeros(obj.numDofs, 1);
+            count = 0;
+            for k = 1:obj.numLinks
+                if (obj.bodies{k}.joint.isActuated)
+                    num_dofs = obj.bodies{k}.joint.numDofs;
+                    val(count+1:count+num_dofs) = obj.bodies{k}.joint.tau;
+                    count = count + num_dofs;
+                end
+            end
+        end
+        
+        function val = get.tauMin(obj)
+            val = zeros(obj.numDofsActuated, 1);
+            count = 0;
+            for k = 1:obj.numLinks
+                if (obj.bodies{k}.joint.isActuated)
+                    num_dofs = obj.bodies{k}.joint.numDofs;
+                    val(count+1:count+num_dofs) = obj.bodies{k}.joint.tau_min;
+                    count = count + num_dofs;
+                end
+            end
+        end
+        
+        function val = get.tauMax(obj)
+            val = zeros(obj.numDofsActuated, 1);
+            count = 0;
+            for k = 1:obj.numLinks
+                if (obj.bodies{k}.joint.isActuated)
+                    num_dofs = obj.bodies{k}.joint.numDofs;
+                    val(count+1:count+num_dofs) = obj.bodies{k}.joint.tau_max;
+                    count = count + num_dofs;
+                end
+            end
+        end
+        
+        function value = get.TAU_INVALID(obj)
+            value = JointBase.INVALID_TAU * ones(obj.numDofsActuated, 1);
+        end
         
         function jointsNumDofVars = get.jointsNumDofVars(obj)
             jointsNumDofVars = zeros(obj.numLinks,1);
@@ -1088,7 +1169,6 @@ classdef SystemModelBodies < handle
             % Load the body
             CASPR_log.Assert(strcmp(body_prop_xmlobj.getNodeName, 'links'), 'Root element should be <links>');
 
-%             allLinkItems = body_prop_xmlobj.getChildNodes;
             allLinkItems = body_prop_xmlobj.getElementsByTagName('link_rigid');
 
             num_links = allLinkItems.getLength;

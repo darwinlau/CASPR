@@ -32,8 +32,8 @@ classdef IDSolverOptimallySafe < IDSolverBase
             % M\ddot{q} + C + G + w_{ext} = -L_active^T f_active - L_passive^T f_passive (constraint)
             [A_eq, b_eq] = IDSolverBase.GetEoMConstraints(dynamics);
             % Form the lower and upper bound force constraints
-            fmin = dynamics.cableForcesActiveMin;
-            fmax = dynamics.cableForcesActiveMax;
+            fmin = dynamics.actuationForcesMin;
+            fmax = dynamics.actuationForcesMax;
 
             % Ensure that the resolve function should be applied for this
             % class of problem
