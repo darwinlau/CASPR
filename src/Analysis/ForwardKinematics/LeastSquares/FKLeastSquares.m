@@ -54,7 +54,7 @@ classdef FKLeastSquares < FKAnalysisBase
 
             % Step 3: Call the least squares non-linear function to
             % determine q
-            [q, resnorm, ~, ~, output] = lsqnonlin(func, q_approx, [], [], options);
+            [q, resnorm, ~, ~, output] = lsqnonlin(func, q_approx, obj.model.bodyModel.q_lb, obj.model.bodyModel.q_ub, options);
 
             CASPR_log.Print(sprintf('Function lsqnonlin completed. Fitting error: %f. Number of function calls: %d', resnorm, output.funcCount),CASPRLogLevel.INFO);
 
