@@ -80,12 +80,26 @@ classdef ForwardKinematicsSimulator < MotionSimulator
                 figure;
                 plot(obj.timeVector, lengthError_array, 'Color', 'k', 'LineWidth', 1.5);
                 title('Cable Length Error');
-                
             else
                 plot(plot_axis, obj.timeVector, lengthError_array, 'Color', 'k', 'LineWidth', 1.5);
             end
             xlabel('Time (seconds)')
             ylabel('Error (m)');
+        end
+        
+        % Plots the error for each cable length by comparing the reference
+        % length with the length as a result of the solution generalised
+        % coordinates.
+        function plotCableLengthErrorNorm(obj, plot_axis)
+            if (nargin == 1 || isempty(plot_axis))
+                figure;
+                plot(obj.timeVector, obj.lengthErrorNorm, 'Color', 'k', 'LineWidth', 1.5);
+                title('Cable Length Error');
+            else
+                plot(plot_axis, obj.timeVector, obj.lengthErrorNorm, 'Color', 'k', 'LineWidth', 1.5);
+            end
+            xlabel('Time (seconds)')
+            ylabel('Error norm (m)');
         end
     end
 end
