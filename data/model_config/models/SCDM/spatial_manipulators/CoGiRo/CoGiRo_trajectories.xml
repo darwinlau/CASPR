@@ -6,4 +6,61 @@
 ]>
 
 <trajectories>
+  <quintic_spline_trajectory id="general_1" time_definition="relative" time_step="0.01">
+    <points>
+      <point>
+        <q>-3.0 -1.0 2.0 -0.5 0.2 0.3</q>
+        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+      </point>
+      <point time="2.0">
+        <q>2.0 -3.0 4.0 0.2 -0.1 0.1</q>
+        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+      </point>
+      <point time="2.0">
+        <q>4.0 2.0 3.0 0.5 0.2 -0.2</q>
+        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+      </point>
+    </points>
+  </quintic_spline_trajectory>
+  <quintic_spline_trajectory id="general_2" time_definition="relative" time_step="0.01">
+    <points>
+      <point>
+        <q>3.0 -2.0 4.0 -0.2 0.2 -0.3</q>
+        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+      </point>
+      <point time="2.0">
+        <q>2.0 -3.0 1.0 0.5 -0.1 -0.1</q>
+        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+      </point>
+      <point time="2.0">
+        <q>4.0 1.0 3.0 0.1 0.2 0.5</q>
+        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+      </point>
+    </points>
+  </quintic_spline_trajectory>
+  <quintic_spline_trajectory id="general_3" time_definition="relative" time_step="0.01">
+    <points>
+      <point>
+        <q>0.0 2.0 1.0 -0.2 0.2 -0.3</q>
+        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+      </point>
+      <point time="2.0">
+        <q>2.0 -3.0 3.0 0.5 -0.1 -0.1</q>
+        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+      </point>
+      <point time="2.0">
+        <q>-4.0 1.0 2.0 0.1 0.2 0.5</q>
+        <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+      </point>
+    </points>
+  </quintic_spline_trajectory>
 </trajectories>
