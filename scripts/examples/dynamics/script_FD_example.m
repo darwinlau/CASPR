@@ -10,15 +10,14 @@
 clc; clear; close all;
 
 % Set up the type of model, trajectory and the set of cables to be used
-% Following are some examples (feel free to add more):
-model_config = ModelConfig(ModelConfigType.M_SIMPLE_PLANAR_XY);
+model_config = ModelConfig('Example planar XY');
 cable_set_id = 'basic';
 trajectory_id = 'x_simple';
 
 modelObj = model_config.getModel(cable_set_id);
 
 % Setup an inverse dynamics solver of choice (any should do)
-id_objective = IDObjectiveMinQuadCableForce(ones(modelObj.numCables,1));
+id_objective = IDObjectiveMinQuadCableForce(ones(modelObj.numActuatorsActive,1));
 id_solver = IDSolverQuadProg(modelObj, id_objective, ID_QP_SolverType.MATLAB);
 
 % Setup the inverse dynamics and forward dynamics simulators

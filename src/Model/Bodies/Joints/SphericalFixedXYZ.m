@@ -40,7 +40,7 @@ classdef SphericalFixedXYZ < JointBase
             CASPR_log.Assert(n_dof == length(q_s) && n_dof == length(q_e) && n_dof == length(q_s_d) && n_dof == length(q_e_d), ...
                 'Length of input states are different to the number of DoFs');
             CASPR_log.Assert(isequal(q_s_d, zeros(n_dof, 1)) && isequal(q_e_d, zeros(n_dof, 1)), ...
-                'Non-zero joint velocity are currently not supported for quaternion splines');                 
+                'Non-zero joint velocity are currently not supported for spherical joint splines');                 
             R_0s = SphericalFixedXYZ.RelRotationMatrix(q_s);
             quat_s = Quaternion.FromRotationMatrix(SphericalFixedXYZ.RelRotationMatrix(q_s));
             quat_e = Quaternion.FromRotationMatrix(SphericalFixedXYZ.RelRotationMatrix(q_e));            
@@ -53,7 +53,7 @@ classdef SphericalFixedXYZ < JointBase
             CASPR_log.Assert(n_dof == length(q_s) && n_dof == length(q_e) && n_dof == length(q_s_d) && n_dof == length(q_e_d) && n_dof == length(q_s_dd) && n_dof == length(q_e_dd), ...
                 'Length of input states are different to the number of DoFs');
             CASPR_log.Assert(isequal(q_s_d, zeros(n_dof, 1)) && isequal(q_e_d, zeros(n_dof, 1)) && isequal(q_s_dd, zeros(n_dof, 1)) && isequal(q_e_dd, zeros(n_dof, 1)), ...
-                'Non-zero joint velocity and accelerations are currently not supported for quaternion splines');     
+                'Non-zero joint velocity and accelerations are currently not supported for spherical joint splines');     
             
             R_0s = SphericalFixedXYZ.RelRotationMatrix(q_s);
             quat_s = Quaternion.FromRotationMatrix(SphericalFixedXYZ.RelRotationMatrix(q_s));

@@ -9,8 +9,6 @@
 %    accessible.
 classdef (Abstract) ModelConfigBase < handle
     properties (SetAccess = private)
-        type                        % Type of model from ModelConfigType enum
-        
         bodyPropertiesFilename      % Filename for the body properties
         cablesPropertiesFilename    % Filename for the cable properties
         trajectoriesFilename        % Filename for the trajectories
@@ -34,9 +32,8 @@ classdef (Abstract) ModelConfigBase < handle
     methods
         % Constructor for the ModelConfig class. This builds the xml
         % objects.
-        function c = ModelConfigBase(type, folder, list_file)
-            c.type = type;
-            c.root_folder = [fileparts(mfilename('fullpath')), folder];
+        function c = ModelConfigBase(type_string, folder, list_file)
+            c.root_folder = [CASPR_configuration.LoadModelConfigPath(), folder];
             c.opFilename = '';
             c.opXmlObj = [];
             
@@ -45,8 +42,7 @@ classdef (Abstract) ModelConfigBase < handle
             
             % Determine the Filenames
             % Load the contents
-            cell_array = textscan(fid,'%s %s %s %s %s %s','delimiter',',');            
-            type_string = char(type);
+            cell_array = textscan(fid,'%s %s %s %s %s %s','delimiter',',');
             i_length = length(cell_array{1});
             status_flag = 1;
             % Loop through until the right line of the list is found
@@ -65,7 +61,7 @@ classdef (Abstract) ModelConfigBase < handle
                 end
             end
             if(status_flag)
-                error('ModelConfig type is not defined');
+                CASPR_log.Error(sprintf('Robot model ''%s'' is not defined', type_string));
             end
             
             % Make sure all the filenames that are required exist

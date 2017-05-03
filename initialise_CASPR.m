@@ -3,47 +3,45 @@
 % Created:      2016
 % Description:
 function initialise_CASPR()
-    clc;
-    
+    clc;    
+    scriptname = mfilename('fullpath');
+    [CASPR_homepath] = fileparts(scriptname);
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Confirm that initialise has been called from the right folder
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    home_path = cd;
-    try
-        cd('src/Analysis');
-    catch
-        error('Incorrect folder structure or you have not called the function from the CASPR root directory');
-    end
-    cd(home_path);
+    assert(exist([CASPR_homepath '/src'], 'dir') == 7 && exist([CASPR_homepath '/data'], 'dir') == 7, 'Incorrect CASPR folder structure');
+    
+    cd(CASPR_homepath);
     % Set the current version
-    version = 20161019;
+    CASPR_version = 20161019;
+    CASPR_model_config_path = [CASPR_homepath,'/data/model_config'];
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Determine if setup needs to be executed
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    if(~exist([home_path,'/data/config'],'dir'))
-        mkdir([home_path,'/data/config'])
-        save([home_path,'/data/config/CASPR_environment.mat'],...
-                                    'home_path','version');
+    if(~exist([CASPR_homepath,'/data/config'],'dir'))
+        mkdir([CASPR_homepath,'/data/config'])
+        save([CASPR_homepath,'/data/config/CASPR_environment.mat'],...
+                                    'CASPR_homepath','CASPR_version','CASPR_model_config_path');
         setup_CASPR;
     else
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % Determine if CASPR needs to be updated
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % load the previous version information
-        if(~exist([home_path,'/data/config/CASPR_environment.mat'],'file'))
-            save([home_path,'/data/config/CASPR_environment.mat'],'home_path','version');
+        if(~exist([CASPR_homepath,'/data/config/CASPR_environment.mat'],'file'))
+            save([CASPR_homepath,'/data/config/CASPR_environment.mat'],'CASPR_homepath','CASPR_version','CASPR_model_config_path');
             update_CASPR;
         else
-            previous_version = load([home_path,'/data/config/CASPR_environment.mat'],'version');
-            if(isempty(fieldnames(previous_version))||(version>previous_version.version))
-                save([home_path,'/data/config/CASPR_environment.mat'],'home_path','version');
+            previous_version = load([CASPR_homepath,'/data/config/CASPR_environment.mat'],'CASPR_version');
+            if(isempty(fieldnames(previous_version))||(CASPR_version>previous_version.CASPR_version))
+                save([CASPR_homepath,'/data/config/CASPR_environment.mat'],'CASPR_homepath','CASPR_version','CASPR_model_config_path');
                 update_CASPR;
             else
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 % Add the libraries
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                save([home_path,'/data/config/CASPR_environment.mat'],'home_path','version');
+                save([CASPR_homepath,'/data/config/CASPR_environment.mat'],'CASPR_homepath','CASPR_version','CASPR_model_config_path');
                 set_CASPR_environment;
                 fprintf('CASPR initialisation complete. Enjoy !\n')
             end
@@ -60,16 +58,13 @@ function setup_CASPR()
 
     % Run the rest of setup (setup environment and logging, then test the
     % system).
-    failed_tests = setup_update_CASPR();
-    if(sum(failed_tests)>0)
-        fprintf('\n----------------------------------------------------\n')
-        fprintf('CASPR Failed to Install. Please view the Unit Test Output\n')
-        fprintf('----------------------------------------------------\n\n')
-        return;
-    end
+    num_tests_failed = setup_update_CASPR();
     
     fprintf('\n----------------------------------------------------\n')
-    fprintf('CASPR Setup Complete. Enjoy!\n')
+    fprintf('CASPR Setup Complete. Enjoy!\n');
+    if num_tests_failed > 0
+        fprintf('NOTE: Some unit tests failed. Please contact the maintainers of CASPR with the test summary information\n');
+    end
     fprintf('----------------------------------------------------\n\n')
 end
 
@@ -79,24 +74,21 @@ function update_CASPR()
     fprintf('----------------------------------------------------\n')
 
     % Check if the old logs folder is present and remove if so
-    home_path = cd;
-    if(exist([home_path,'/logs'],'dir'))
+    CASPR_homepath = cd;
+    if(exist([CASPR_homepath,'/logs'],'dir'))
         fprintf('\n----------------------------------------------------\n')
         fprintf('Removing outdated folder locations.\n')
         fprintf('----------------------------------------------------\n')
-        rmdir([home_path,'/logs']); 
+        rmdir([CASPR_homepath,'/logs']); 
     end
     
-    failed_tests = setup_update_CASPR;
-    if(sum(failed_tests)>0)
-        fprintf('\n----------------------------------------------------\n')
-        fprintf('CASPR Failed to Update. Please view the Unit Test Output\n')
-        fprintf('----------------------------------------------------\n\n')
-        return;
-    end
+    num_tests_failed = setup_update_CASPR();
     
     fprintf('\n----------------------------------------------------\n')
     fprintf('CASPR Update Complete. Enjoy!\n')
+    if num_tests_failed > 0
+        fprintf('NOTE: Some unit tests failed. Please contact the maintainers of CASPR with the test summary information\n');
+    end
     fprintf('----------------------------------------------------\n\n')
 end
 
@@ -182,12 +174,12 @@ function set_CASPR_environment()
     end
     
     % Store the home directory
-    home_path = cd;
+    CASPR_homepath = cd;
     
     
     % Add the necessary paths
     fprintf('Adding CASPR to library path\n')
-    path_list = genpath(home_path);
+    path_list = genpath(CASPR_homepath);
     path_list = strsplit(path_list, path_delimiter);
     for i = 1:length(path_list)
         if(~isempty(strfind(path_list{i},'.git')))
@@ -199,7 +191,7 @@ function set_CASPR_environment()
     fprintf('CASPR paths have been successfully set up \n')
 end
 
-function failed_tests = setup_update_CASPR()
+function num_tests_failed = setup_update_CASPR()
     % Temporarily add the CASPR libraries to the path
     set_CASPR_environment;
     
@@ -212,10 +204,10 @@ function failed_tests = setup_update_CASPR()
     
     % Test that the models are correctly configured
     fprintf('\n----------------------------------------------------\n')
-    fprintf('Testing that the model has been correctly configured\n')
+    fprintf('Running CASPRTestScript to make sure everything is working\n')
     fprintf('----------------------------------------------------\n')
     % Run unit tests to confirm that the models are correctly setup
     %suite = matlab.unittest.TestSuite.fromFile('ModelConfigTest.m');
     %suite.run;
-    failed_tests = CASPRTestScript;
+    num_tests_failed = CASPRTestScript();    
 end

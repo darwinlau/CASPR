@@ -18,11 +18,11 @@ classdef CASPR_log
             else
                 log_path = [];
             end
-            home_path = cd;
-            if(~exist([home_path,'/data/config'],'dir'))
-                mkdir([home_path,'/data/config'])
+            CASPR_homepath = CASPR_configuration.LoadHomePath();
+            if(~exist([CASPR_homepath,'/data/config'],'dir'))
+                mkdir([CASPR_homepath,'/data/config'])
             end
-            save([home_path,'/data/config/log_level.mat'], 'log_level', 'log_path');
+            save([CASPR_homepath,'/data/config/log_level.mat'], 'log_level', 'log_path');
         end
         
         % Prints debug statement

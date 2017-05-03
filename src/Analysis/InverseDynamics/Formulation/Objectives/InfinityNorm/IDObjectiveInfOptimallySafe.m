@@ -19,9 +19,12 @@ classdef IDObjectiveInfOptimallySafe < IDObjectiveInfinity
 
         % The objective update implementation
         function updateObjective(obj, dynamics)
-            obj.A   = obj.A_full(dynamics.cableModel.cableIndicesActive, dynamics.cableModel.cableIndicesActive);
-            f_m     = 0.5*(dynamics.cableForcesActiveMin + dynamics.cableForcesActiveMax);
-            obj.b   = -diag(obj.weights(dynamics.cableModel.cableIndicesActive)) * f_m;
+            CASPR_log.Assert(length(obj.weights) == dynamics.numActuators, 'Dimensions of weight is not correct, it should be a vector of length numActuators');
+            indices_all = 1:dynamics.numActuators;
+            indices_active = indices_all(setdiff(1:length(indices_all), dynamics.cableModel.cableIndicesPassive));
+            obj.A   = obj.A_full(indices_active, indices_active);
+            f_m     = 0.5*(dynamics.actuationForcesMin + dynamics.actuationForcesMax);
+            obj.b   = -diag(obj.weights(indices_active)) * f_m;
         end
 
         % An update of the weights

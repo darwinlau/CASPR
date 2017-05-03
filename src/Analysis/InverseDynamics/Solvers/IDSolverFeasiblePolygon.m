@@ -33,8 +33,8 @@ classdef IDSolverFeasiblePolygon < IDSolverBase
             % M\ddot{q} + C + G + w_{ext} = -L_active^T f_active - L_passive^T f_passive (constraint)
             [A_eq, b_eq] = IDSolverBase.GetEoMConstraints(dynamics);
             % Form the lower and upper bound force constraints
-            fmin = dynamics.cableForcesActiveMin;
-            fmax = dynamics.cableForcesActiveMax;
+            fmin = dynamics.actuationForcesMin;
+            fmax = dynamics.actuationForcesMax;
 
             switch (obj.fp_solver_type)
                 case ID_FP_SolverType.NORM_1

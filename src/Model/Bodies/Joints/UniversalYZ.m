@@ -56,29 +56,33 @@ classdef UniversalYZ < JointBase
         
         % Generate the S matrix %% expressed in the {2}
         function S = RelVelocityMatrix(q)
-            c = UniversalYZ.GetGamma(q);
-            S = [zeros(3,2); sin(c) 0; cos(c) 0; 0 1];    
+            g = UniversalYZ.GetGamma(q);
+            S = [zeros(3,2); sin(g) 0; cos(g) 0; 0 1];    
         end
         
         % Generate the S gradient tensor
         function [S_grad] = RelVelocityMatrixGradient(q)
-            c = UniversalYZ.GetGamma(q);
+            g = UniversalYZ.GetGamma(q);
             S_grad          =   zeros(6,2,2);
-            S_grad(:,:,2)   =   [zeros(3,2); cos(c) 0; -sin(c) 0; 0 0];    
+            S_grad(:,:,2)   =   [zeros(3,2); cos(g) 0; -sin(g) 0; 0 0];    
         end
         
         % Generate the \dot{S} gradient tensor
         function [S_dot_grad] = RelVelocityMatrixDerivGradient(q,q_dot)
-            c = UniversalYZ.GetGamma(q);
+            g = UniversalYZ.GetGamma(q);
 %             c_d = SphericalEulerXYZ.GetGamma(q_dot); % since
 %             SphericalEulerXYZ.GetGamma(q) gets q(3)
-            c_d = UniversalYZ.GetGamma(q_dot);
+            g_d = UniversalYZ.GetGamma(q_dot);
             S_dot_grad          =   zeros(6,2,2);
-            S_dot_grad(:,:,2)   =   [zeros(3,2); -c_d*sin(c) 0; -c_d*cos(c) 0; 0 0];    
+            S_dot_grad(:,:,2)   =   [zeros(3,2); -g_d*sin(g) 0; -g_d*cos(g) 0; 0 0];    
         end   
         
-        %%%%%%%[No N_j and A matrixes]%%%%%%%%%%%%%%
-        
+        % Generate the N matrix for the joint
+        function [N_j,A] = QuadMatrix(q)
+            g = SphericalEulerXYZ.GetBeta(q);
+            N_j = [0,0.5*cos(g),0,-0.5*sin(g);0.5*cos(b),0,-0.5*sin(g),0];
+            A = [zeros(3,2);1,0;0,1;0,0];
+        end
         
         % Get variables from the gen coordinates
         function beta = GetBeta(q)

@@ -16,9 +16,8 @@ classdef ModelConfig < ModelConfigBase
     methods
         % Constructor for the ModelConfig class. This builds the xml
         % objects.
-        function c = ModelConfig(type)
-            CASPR_log.Assert(isa(type, 'ModelConfigType'), 'The ''type'' for ModelConfig must be of the enum ''ModelConfigType''');
-            c@ModelConfigBase(type, ModelConfig.MODEL_FOLDER_PATH, ModelConfig.LIST_FILENAME);
+        function c = ModelConfig(type_string)
+            c@ModelConfigBase(type_string, ModelConfig.MODEL_FOLDER_PATH, ModelConfig.LIST_FILENAME);
         end
     end
 end

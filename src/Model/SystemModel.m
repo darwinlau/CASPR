@@ -33,38 +33,60 @@ classdef SystemModel < handle
         numLinks                % Number of links
         numDofs                 % Number of degrees of freedom
         numDofVars              % Number of variables for the DoFs
+        numDofsJointActuated    % Number of DoFs that are actuated at the joint
         numOPDofs               % Number of operational space degrees of freedom
         numCables               % Number of cables
         numCablesActive         % Number of active cables
         numCablesPassive        % Number of active cables
+        numActuators            % Number of actuators for the entire system (both cables and joint DoFs)
+        numActuatorsActive      % Number of actuators for the entire system that are active
         
-        % Cable Lengths
+        % Generalised coordinates
+        q                       % Generalised coordinates state vector
+        q_deriv                 % Generalised coordinates time derivative (for special cases q_dot does not equal q_deriv)
+        q_dot                   % Generalised coordinates derivative
+        q_ddot                  % Generalised coordinates double derivative
+        jointTau                % The joint actuator forces for active joints
+        
+        % Actuator forces
+        actuationForces             % vector of actuation forces including both cable forces and actuator forces
+        actuationForcesMin          % vector of min active actuation forces
+        actuationForcesMax          % vector of max active actuation forces
+        ACTUATION_ACTIVE_INVALID    % vector of invalid actuator commands (from both cables and joint actuators)
+        
+        % Cable lengths and forces
         cableLengths            % Vector of cable lengths
         cableLengthsDot         % Vector of cable length derivatives
-
-        % Jacobians
+        cableForces             % Vector of all cable forces (active and passive)
+        cableForcesActive       % Vector of cable forces for active cables
+        cableForcesPassive      % Vector of cable forces for passive cables
+        
+        % Jacobian matrices
         L                       % cable to joint Jacobian matrix L = VW
         L_active                % active part of the Jacobian matrix
         L_passive               % passive part of the Jacobian matrix
         J                       % joint to operational space Jacobian matrix
         J_dot                   % derivative of J
         K                       % The stiffness matrix
+                
+        % Since S^T w_p = 0 and S^T P^T = W^T
+        % W^T ( M_b * q_ddot + C_b ) = W^T ( G_b - V^T f )
+        % The equations of motion can then be expressed in the form
+        % M * q_ddot + C + G + W_e = - L^T f + A tau
+        M
+        C
+        G
+        W_e
+        A
+        % Instead of q_ddot being passed as input to the system, it could
+        % also be determined from:
+        % M * q_ddot + C + G + W_e = - L^T f + tau
+        q_ddot_dynamics
         
         % Hessians
         L_grad                  % The gradient of the jacobian L
         L_grad_active           % active part of the Jacobian matrix gradient
         L_grad_passive          % active part of the Jacobian matrix gradient
-
-        % Generalised coordinates
-        q                       % Generalised coordinates state vector
-        q_deriv                 % Generalised coordinates time derivative (for special cases q_dot does not equal q_deriv)
-        q_dot                   % Generalised coordinates derivative
-        q_ddot                  % Generalised coordinates double derivative
-        
-        % Operational space coordinates
-        y                       % Operational space coordinate vector
-        y_dot                   % Operational space coordinate derivative
-        y_ddot                  % Operational space coordinate double derivative
         
         % Linearisation Matrices
         A_lin                   % The state matrix for the system linearisation
@@ -75,27 +97,11 @@ classdef SystemModel < handle
         interactionWrench               % Joint interaction wrenches (w_p)
         interactionForceMagnitudes      % Magnitudes of the interaction force at each joint
         interactionMomentMagnitudes     % Magnitudes of the interaction moments at each joint
-
-        % Since S^T w_p = 0 and S^T P^T = W^T
-        % W^T ( M_b * q_ddot + C_b ) = W^T ( G_b - V^T f )
-        % The equations of motion can then be expressed in the form
-        % M * q_ddot + C + G + W_e = - L^T f
-        M
-        C
-        G
-        W_e
-
-        % Instead of q_ddot being passed as input to the system, it could
-        % also be determined from:
-        % M * q_ddot + C + G + W_e = - L^T f
-        q_ddot_dynamics
-        
-        % The cable force information
-        cableForces                 % cable forces
-        cableForcesActive           % cable forces
-        cableForcesPassive          % cable forces
-        cableForcesActiveMin        % vector of min forces from cables
-        cableForcesActiveMax        % vector of max forces from cables
+                
+        % Operational space coordinates
+        y                       % Operational space coordinate vector
+        y_dot                   % Operational space coordinate derivative
+        y_ddot                  % Operational space coordinate double derivative
     end
 
     methods (Static)
@@ -178,11 +184,23 @@ classdef SystemModel < handle
         function value = get.numDofVars(obj)
             value = obj.bodyModel.numDofVars;
         end
+        
+        function value = get.numDofsJointActuated(obj)
+            value = obj.bodyModel.numDofsActuated;
+        end
 
         function value = get.numCables(obj)
             value = obj.cableModel.numCables;
         end
         
+        function value = get.numActuators(obj)
+            value = obj.numCables + obj.numDofsJointActuated;
+        end
+        
+        function value = get.numActuatorsActive(obj)
+            value = obj.numCablesActive + obj.numDofsJointActuated;
+        end
+            
         function value = get.numCablesActive(obj)
             value = obj.cableModel.numCablesActive;
         end
@@ -310,7 +328,7 @@ classdef SystemModel < handle
 %         end
 
         function value = get.q_ddot_dynamics(obj)
-            obj.bodyModel.q_ddot = obj.M\(-obj.L.'*obj.cableForces - obj.C - obj.G - obj.W_e);
+            obj.bodyModel.q_ddot = obj.M\(-obj.L.'*obj.cableForces + obj.jointTau - obj.C - obj.G - obj.W_e);
             value = obj.q_ddot;
         end
 
@@ -329,11 +347,22 @@ classdef SystemModel < handle
         function value = get.W_e(obj)
             value = obj.bodyModel.W_e;
         end
-
-        function set.cableForces(obj, f)
-            obj.cableModel.forces = f;
+        
+        function value = get.A(obj)
+            value = obj.bodyModel.A;
         end
-
+        
+        function set.actuationForces(obj, f)
+            obj.cableModel.forces = f(1:obj.numCablesActive);
+            if (obj.numDofsJointActuated > 0)
+                obj.bodyModel.tau = f(obj.numCablesActive+1:length(f));
+            end
+        end
+        
+        function value = get.actuationForces(obj)
+            value = [obj.cableForcesActive; obj.jointTau];
+        end
+                
         function value = get.cableForces(obj)
             value = obj.cableModel.forces;
         end
@@ -345,13 +374,32 @@ classdef SystemModel < handle
         function value = get.cableForcesPassive(obj)
             value = obj.cableModel.forcesPassive;
         end
-        
-        function value = get.cableForcesActiveMin(obj)
-           value = obj.cableModel.forcesActiveMin; 
+                
+        function value = get.jointTau(obj)
+            value = obj.bodyModel.tau;
         end
         
-        function value = get.cableForcesActiveMax(obj)
-            value = obj.cableModel.forcesActiveMax; 
-        end        
+        function value = get.actuationForcesMin(obj)
+            value = [obj.cableModel.forcesActiveMin; obj.bodyModel.tauMin];
+        end
+        
+        function value = get.actuationForcesMax(obj)
+            value = [obj.cableModel.forcesActiveMax; obj.bodyModel.tauMax];
+        end
+        
+        function value = get.ACTUATION_ACTIVE_INVALID(obj)
+            value = [obj.cableModel.FORCES_ACTIVE_INVALID; obj.bodyModel.TAU_INVALID];
+        end
+        
+        % Uncertainties
+        function addInertiaUncertainty(obj,m_bounds,I_bounds)
+            CASPR_log.Assert((size(m_bounds,1)==1)&&(length(m_bounds) == 2*obj.numLinks),'Mass uncertainty must be of size 2 * number of links');
+            if(nargin == 2)
+                obj.bodyModel.addInertiaUncertainty(m_bounds,[]);
+            else
+                CASPR_log.Assert(((size(I_bounds,1)==1)&&(length(I_bounds) == 12*obj.numLinks)),'Inertia must be of size 12 * number of lins');
+                obj.bodyModel.addInertiaUncertainty(m_bounds,I_bounds);
+            end
+        end
     end
 end

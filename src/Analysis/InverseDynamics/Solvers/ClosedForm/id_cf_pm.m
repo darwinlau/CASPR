@@ -13,7 +13,7 @@
 %                 method.
 function [ x_opt, exit_type ] = id_cf_pm(A_eq, b_eq, x_min, x_max)
     % This is the minimum norm solution if there are no constraints
-    x_unconstrained_opt = pinv(A_eq)*b_eq; m = length(b_eq);
+    x_unconstrained_opt = pinv(A_eq)*b_eq; m = size(A_eq,2);
     if((sum(x_unconstrained_opt - x_min < -1e-6)>0)||(sum(x_unconstrained_opt - x_max > 1e-6)>0))
         % Unconstrained minimum is not feasible
         [x_temp, exit_type] = id_cf_cfm(A_eq, b_eq, x_min, x_max);

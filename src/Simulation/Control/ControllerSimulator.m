@@ -13,15 +13,30 @@ classdef ControllerSimulator < DynamicsSimulator
         controller          % The controller for the system
         refTrajectory       % The reference trajectory
         stateError          % The state space error
+        uncertainties       % A list of uncertainties
+        true_model          % The true model for the system
+        sim_trajectory      % The simulated trajectory used by the controller
     end
 
     methods
         % The control simulator constructor
-        function ctrl_sim = ControllerSimulator(model, controller, fd_solver)
+        function ctrl_sim = ControllerSimulator(model, controller, fd_solver, uncertainties, true_model)
             ctrl_sim@DynamicsSimulator(model);
             ctrl_sim.model = model;
             ctrl_sim.controller = controller;
             ctrl_sim.fdSolver = fd_solver;
+            if(nargin <=3)
+                ctrl_sim.uncertainties = [];
+                ctrl_sim.true_model = ctrl_sim.model;
+            else
+                ctrl_sim.uncertainties = uncertainties;
+                for i = 1:length(uncertainties)
+                    if(isa(uncertainties{i},'ConstructorUncertaintyBase'))
+                        uncertainties{i}.applyConstructorUncertainty(true_model);
+                    end
+                end
+                ctrl_sim.true_model = true_model;
+            end
         end
 
         % Implementation of the run function. Converts the dynamics
@@ -37,19 +52,40 @@ classdef ControllerSimulator < DynamicsSimulator
             obj.trajectory.q = cell(1, length(obj.timeVector));
             obj.trajectory.q_dot = cell(1, length(obj.timeVector));
             obj.trajectory.q_ddot = cell(1, length(obj.timeVector));
+            obj.sim_trajectory = JointTrajectory;
+            obj.sim_trajectory.q = cell(1, length(obj.timeVector));
+            obj.sim_trajectory.q_dot = cell(1, length(obj.timeVector));
+            obj.sim_trajectory.q_ddot = cell(1, length(obj.timeVector));
             
             obj.trajectory.q{1} = q0;
             obj.trajectory.q_dot{1} = q0_dot;
             obj.trajectory.q_ddot{1} = q0_ddot;
+            for i = 1:length(obj.uncertainties)
+                if(isa(obj.uncertainties{i},'PreUpdateUncertaintyBase'))
+                    [obj.trajectory.q{1}, obj.trajectory.q_dot{1}] = obj.uncertainties{i}.applyInitialOffset(q0,q0_dot);
+                    obj.trajectory.q_ddot{1} = q0_ddot;
+                end
+            end
+            obj.sim_trajectory.q{1} = q0;
+            obj.sim_trajectory.q_dot{1} = q0_dot;
+            obj.sim_trajectory.q_ddot{1} = q0_ddot;
             
             for t = 1:length(obj.timeVector)
-                obj.timeVector(t)
                 CASPR_log.Print(sprintf('Time : %f', obj.timeVector(t)),CASPRLogLevel.INFO);
-                [obj.cableForcesActive{t}, obj.cableIndicesActive{t}, obj.cableForces{t}] = obj.controller.execute(obj.trajectory.q{t},  obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t}, ref_trajectory.q{t}, ref_trajectory.q_dot{t}, ref_trajectory.q_ddot{t}, obj.timeVector(t));
+                fprintf('Completion Percentage: %3.2f%%\n',100*t/length(obj.timeVector));
+                [obj.cableForcesActive{t}, obj.cableIndicesActive{t}, obj.cableForces{t}] = obj.controller.execute(obj.sim_trajectory.q{t},  obj.sim_trajectory.q_dot{t}, obj.sim_trajectory.q_ddot{t}, ref_trajectory.q{t}, ref_trajectory.q_dot{t}, ref_trajectory.q_ddot{t}, obj.timeVector(t));
                 obj.stateError{t} = ref_trajectory.q{t} - obj.trajectory.q{t};
                 if t < length(obj.timeVector)
-                    [obj.trajectory.q{t+1}, obj.trajectory.q_dot{t+1}, obj.trajectory.q_ddot{t+1}, obj.model] = obj.fdSolver.compute(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.cableForcesActive{t}, obj.cableIndicesActive{t}, zeros(obj.model.numDofs,1), obj.timeVector(t+1)-obj.timeVector(t), obj.model);
-                end
+                    [obj.trajectory.q{t+1}, obj.trajectory.q_dot{t+1}, obj.trajectory.q_ddot{t+1}, obj.model] = obj.fdSolver.compute(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.cableForcesActive{t}, obj.cableIndicesActive{t}, zeros(obj.model.numDofs,1), obj.timeVector(t+1)-obj.timeVector(t), obj.true_model);                    
+                    obj.sim_trajectory.q{t+1}         =   obj.trajectory.q{t+1};
+                    obj.sim_trajectory.q_dot{t+1}     =   obj.trajectory.q_dot{t+1};
+                    obj.sim_trajectory.q_ddot{t+1}    =   obj.trajectory.q_ddot{t+1};
+                    for i = 1:length(obj.uncertainties)
+                        if(isa(obj.uncertainties{i},'PreUpdateUncertaintyBase'))
+                            [obj.sim_trajectory.q{t+1}, obj.sim_trajectory.q_dot{t+1}, obj.sim_trajectory.q_ddot{t+1}] = obj.uncertainties{i}.applyPreUpdateUncertainty(obj.trajectory.q{t+1}, obj.trajectory.q_dot{t+1}, obj.trajectory.q_ddot{t+1},obj.timeVector(t+1)-obj.timeVector(t));
+                        end
+                    end
+                end     
             end
         end
         
@@ -76,6 +112,49 @@ classdef ControllerSimulator < DynamicsSimulator
 
             q_array = cell2mat(obj.trajectory.q);
             q_dot_array = cell2mat(obj.trajectory.q_dot);
+            q_ref_array = cell2mat(obj.refTrajectory.q);
+            q_ref_dot_array = cell2mat(obj.refTrajectory.q_dot);
+
+            if nargin <= 1 || isempty(plot_axis)
+                % Plots joint space variables q(t)
+                figure;
+                hold on;
+                plot(obj.timeVector, q_ref_array(states_to_plot, :), 'Color', 'r', 'LineStyle', '--', 'LineWidth', 1.5);
+                plot(obj.timeVector, q_array(states_to_plot, :), 'Color', 'k', 'LineWidth', 1.5);
+                hold off;
+                title('Joint space variables');
+
+                % Plots derivative joint space variables q_dot(t)
+                figure;
+                hold on;
+                plot(obj.timeVector, q_ref_dot_array(states_to_plot, :), 'Color', 'r', 'LineStyle', '--', 'LineWidth', 1.5);
+                plot(obj.timeVector, q_dot_array(states_to_plot, :), 'Color', 'k', 'LineWidth', 1.5);
+                hold off;
+                title('Joint space derivatives');
+            else
+                plot(plot_axis(1),obj.timeVector, q_ref_array(states_to_plot, :), 'LineWidth', 1.5, 'LineStyle', '--', 'Color', 'r'); 
+                hold on;
+                plot(plot_axis(1),obj.timeVector, q_array(states_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); 
+                hold off;
+                plot(plot_axis(2),obj.timeVector, q_ref_dot_array(states_to_plot, :), 'LineWidth', 'LineStyle', '--', 1.5, 'Color', 'r'); 
+                hold on;
+                plot(plot_axis(2),obj.timeVector, q_dot_array(states_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); 
+                hold off;                
+            end
+        end
+        
+        % Plots both the reference and computed trajectory.
+        function plotSimJointSpaceTracking(obj, plot_axis, states_to_plot)
+            CASPR_log.Assert(~isempty(obj.sim_trajectory), 'Cannot plot since trajectory is empty');
+
+            n_dof = obj.model.numDofs;
+
+            if nargin <= 2 || isempty(states_to_plot)
+                states_to_plot = 1:n_dof;
+            end
+
+            q_array = cell2mat(obj.sim_trajectory.q);
+            q_dot_array = cell2mat(obj.sim_trajectory.q_dot);
             q_ref_array = cell2mat(obj.refTrajectory.q);
             q_ref_dot_array = cell2mat(obj.refTrajectory.q_dot);
 

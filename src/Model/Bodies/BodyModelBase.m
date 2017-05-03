@@ -51,6 +51,7 @@ classdef (Abstract) BodyModelBase < handle
         numDofs         % The number of degrees of freedom
         numDofVars      % The number of degrees of freedom variables
         numOPDofs       % The number of operational space degrees of freedom
+        isJointActuated % Whether the body is joint actuated
     end
 
     methods
@@ -101,6 +102,10 @@ classdef (Abstract) BodyModelBase < handle
             else
                 dofs = 0;
             end
+        end
+        
+        function val = get.isJointActuated(obj)
+            val = obj.joint.isActuated;
         end
     end
 end

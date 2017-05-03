@@ -11,7 +11,6 @@ classdef DevModelConfig < ModelConfigBase
     
     methods
         function c = DevModelConfig(type)
-            CASPR_log.Assert(isa(type, 'DevModelConfigType'), 'The ''type'' for ModelConfig must be of the enum ''DevModelConfigType''');
             c@ModelConfigBase(type, DevModelConfig.MODEL_FOLDER_PATH, DevModelConfig.LIST_FILENAME);
         end
     end

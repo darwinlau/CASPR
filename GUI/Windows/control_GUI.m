@@ -31,7 +31,7 @@ function varargout = control_GUI(varargin)
 
     % Edit the above text to modify the response to help control_GUI
 
-    % Last Modified by GUIDE v2.5 21-Oct-2016 09:56:42
+    % Last Modified by GUIDE v2.5 25-Mar-2017 20:31:22
 
     % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
@@ -162,9 +162,9 @@ function trajectory_popup_Update(~, ~, handles)
     contents = cellstr(get(handles.model_text,'String'));
     model_type = contents{1};
     if(getappdata(handles.figure1,'toggle'))
-        model_config = DevModelConfig(DevModelConfigType.(['D_',model_type]));
+        model_config = DevModelConfig(model_type);
     else
-        model_config = ModelConfig(ModelConfigType.(['M_',model_type]));
+        model_config = ModelConfig(model_type);
     end
     setappdata(handles.trajectory_popup,'model_config',model_config);
     % Determine the trajectories
@@ -566,6 +566,7 @@ function run_button_Callback(~, ~, handles) %#ok<DEFNU>
     
     figure;
     control_sim.plotTrackingError();
+    assignin('base','control_simulator',control_sim);
     % To be uncommented after discussions with Darwin
 %     % Plot the data
 %     disp('Start Plotting Simulation');
@@ -584,9 +585,7 @@ function save_button_Callback(~, ~, handles) %#ok<DEFNU>
     % hObject    handle to save_button (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
-    path_string = fileparts(mfilename('fullpath'));
-    path_string = path_string(1:strfind(path_string, 'GUI')-2);
-    file_name = [path_string,'/GUI/config/*.mat'];
+    file_name = [CASPR_configuration.LoadHomePath(),'/GUI/config/*.mat'];
     [file,path] = uiputfile(file_name,'Save file name');
     saveState(handles,[path,file]);
 end
@@ -596,9 +595,7 @@ function load_button_Callback(~, ~, handles) %#ok<DEFNU>
     % hObject    handle to load_button (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
-    path_string = fileparts(mfilename('fullpath'));
-    path_string = path_string(1:strfind(path_string, 'GUI')-2);
-    file_name = [path_string,'/GUI/config/*.mat'];
+    file_name = [CASPR_configuration.LoadHomePath(),'/GUI/config/*.mat'];
     settings = uigetfile(file_name);
     load(settings);
     mp_text = get(handles.model_text,'String');
@@ -910,8 +907,7 @@ end
 
 function loadState(handles)
     % load all of the settings and initialise the values to match
-    path_string = fileparts(mfilename('fullpath'));
-    path_string = path_string(1:strfind(path_string, 'GUI')-2);
+    path_string = CASPR_configuration.LoadHomePath();
     file_name = [path_string,'/GUI/config/caspr_gui_state.mat'];
     set(handles.status_text,'String','No simulation running');
     if(exist(file_name,'file'))
@@ -981,9 +977,7 @@ function saveState(handles,file_path)
     if(nargin>1)
         save(file_path,'state');
     else
-        path_string                             =   fileparts(mfilename('fullpath'));
-        path_string                             = path_string(1:strfind(path_string, 'GUI')-2);
-        save([path_string,'/GUI/config/control_gui_state.mat'],'state')
+        save([CASPR_configuration.LoadHomePath(),'/GUI/config/control_gui_state.mat'],'state')
     end
 end
 

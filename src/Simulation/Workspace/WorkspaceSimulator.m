@@ -47,7 +47,6 @@ classdef WorkspaceSimulator < Simulator
             end
             % Store the previous workspace
             workspace_prev = obj.workspace;
-            
             % Test if the metrics have infinite limits
             for i = 1:size(w_metrics,2)
                 if((abs(w_metrics{i}.metricMax)==Inf)||(abs(w_metrics{i}.metricMin)==Inf))
@@ -56,7 +55,8 @@ classdef WorkspaceSimulator < Simulator
             end
             
             % Create a cell array for workspace
-            obj.workspace = cell(obj.grid.n_points,1);
+            n_grid_points = obj.grid.n_points;
+            obj.workspace = cell(n_grid_points,1);
             workspace_count = 0;
             n_metrics       = length(obj.metrics);
             n_conditions    = length(obj.conditions);
@@ -66,11 +66,12 @@ classdef WorkspaceSimulator < Simulator
             % Runs over the grid and evaluates the workspace condition at
             % each point
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%[27, 30/12]%%%%%%%%
-            obj.value_metric = cell(obj.grid.n_points, n_metrics); % set sapce 
-            obj.store_metric = cell(obj.grid.n_points, n_metrics);
+            obj.value_metric = cell(n_grid_points, n_metrics); % set sapce 
+            obj.store_metric = cell(n_grid_points, n_metrics);
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            for i = 1:obj.grid.n_points
+            for i = 1:n_grid_points
                 CASPR_log.Print(sprintf('Workspace point %d',i),CASPRLogLevel.INFO);
+                fprintf('Completion Percentage: %3.2f%%\n',100*i/n_grid_points);
                 % Get the grid point
                 q = obj.grid.getGridPoint(i);
                 % Construct the workspace point
@@ -86,7 +87,7 @@ classdef WorkspaceSimulator < Simulator
                         end
                     else
                         % New metric
-                        [metric_type,metric_value]          =   obj.metrics{j}.evaluate(obj.model,[]);
+                        [metric_type,metric_value]          =   obj.metrics{j}.evaluate(obj.model,obj.options.solver_options);
                         if strcmp(metric_type, 'MIN_CABLE_CABLE_DISTANCE') % especially for 'MIN_CABLE_CABLE_DISTANCE'
                             obj.value_metric{i, j} = [q; metric_value]; 
                             obj.store_metric{i, j} =  obj.metrics{j}.mindis_mn;
@@ -128,7 +129,7 @@ classdef WorkspaceSimulator < Simulator
         
         % Plotting function to plot a two dimensional (subset of the) workspace plot
         function plotWorkspace2(obj,plot_axis,capability_measure,slices)
-            CASPR_log.Assert(numel(slices)==2,'Only 2 dimensional slices can be plotted in this function');
+            CASPR_log.Assert((isempty(slices)||(numel(slices)==2)),'Only 2 dimensional slices can be plotted in this function');
             if(isempty(plot_axis))
                 figure; plot_axis = axes; 
             end
@@ -146,7 +147,7 @@ classdef WorkspaceSimulator < Simulator
         % Plotting function to plot a three dimensional (subset of the)
         % workspace plot
         function plotWorkspace3(obj,plot_axis,capability_measure,slices)
-            CASPR_log.Assert(numel(slices)==3,'Only 3 dimensional slices can be plotted in this function');
+            CASPR_log.Assert((isempty(slices)||(numel(slices)==3)),'Only 3 dimensional slices can be plotted in this function');
             if(isempty(plot_axis))
                 figure; plot_axis = axes; 
             end
@@ -189,6 +190,11 @@ classdef WorkspaceSimulator < Simulator
                 end
                 if(~isempty(point_list{c_i,1}))
                     index_vec = (obj.workspace{i}.pose - obj.grid.q_begin)./obj.grid.delta_q + [1;zeros(obj.grid.n_dimensions-1,1)];
+                    for j = 1:obj.grid.n_dimensions
+                        if(isnan(index_vec(j)))
+                            index_vec(j) = 0;
+                        end
+                    end
                     index_num = int32(index_vec.'*mapping_vector);
                     wsim_matrix(index_num) = point_list{c_i,2};
                 end
@@ -272,7 +278,7 @@ classdef WorkspaceSimulator < Simulator
             for i =1:size(plotting_workspace,1)
                 if(isempty(plotting_workspace{i})||isempty(plotting_workspace{i}.conditions{c_i,1}))
                     q = obj.grid.getGridPoint(i);
-                    plot_x_out = [plot_x_out,q(pose_index(1))];
+                    plot_x_out = [plot_x_out,q(pose_index(1))]; %#ok<*AGROW>
                     plot_y_out = [plot_y_out,q(pose_index(2))];
                 else
                     % The point is in the workspace
@@ -326,15 +332,26 @@ classdef WorkspaceSimulator < Simulator
             % 2. Assume that the metric min and max are finite. If there
             % are not give an error asking the user to change the value.
             % 3. Run two passes through of the data.
-            mw = obj.metrics{m_i}.metricMax - obj.metrics{m_i}.metricMin + 1;
+            % Go through the 
+            w_array = [obj.workspace{:}]; w_array_metrics = [w_array.metrics]; metric_array = [w_array_metrics{2:2:length(w_array_metrics)}];
+%             mw = obj.metrics{m_i}.metricMax - obj.metrics{m_i}.metricMin + 1;
+            mw = max(metric_array) - obj.metrics{m_i}.metricMin;
             scale_factor = 255/mw;
-            c_map = colormap(flipud(gray(floor(scale_factor*mw))));
+            c_map = colormap(flipud(gray(floor(scale_factor*mw)+1)));
             for i =1:size(plotting_workspace,1)
                 wp = plotting_workspace{i};
                 % Find which metric entry to use
-                c = c_map(floor(scale_factor*(wp.metrics{m_i,2} - obj.metrics{m_i}.metricMin))+1,:);
-                plot(plot_axis,wp.pose(pose_index(1)),wp.pose(pose_index(2)),'Color',c,'Marker','.')
+                if(wp.metrics{m_i,2} == obj.metrics{m_i}.metricMin)
+%                     plot(plot_axis,wp.pose(pose_index(1)),wp.pose(pose_index(2)),'r.')
+                elseif(wp.metrics{m_i,2} == obj.metrics{m_i}.metricMin)
+%                     plot(plot_axis,wp.pose(pose_index(1)),wp.pose(pose_index(2)),'r.')
+                else
+                    c = c_map(floor(scale_factor*(wp.metrics{m_i,2} - obj.metrics{m_i}.metricMin))+1,:);
+                    plot(plot_axis,wp.pose(pose_index(1)),wp.pose(pose_index(2)),'Color',c,'Marker','.')
+                end
+                
             end
+            axis([obj.grid.q_begin(pose_index(1)),obj.grid.q_end(pose_index(1)),obj.grid.q_begin(pose_index(2)),obj.grid.q_end(pose_index(2))]);
         end
         
         % Plot the workspace metric for 2 and 3 dimensional objects

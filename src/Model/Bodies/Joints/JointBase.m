@@ -13,12 +13,27 @@
 %   Any new types of joints need to be added to the JointType enum and also
 %   added to the CreateJoint method.
 classdef (Abstract) JointBase < handle
+    properties (Constant)
+        INVALID_TAU = -Inf
+    end
+    
+    properties
+        tau                 % Actuator effort for joint (if actuated)
+    end
+   
     properties (SetAccess = private)
         type                % Type of joint from JointType enum
         q                   % Joint variable q (generalised coordinates)
         q_dot               % Derivative of q
         q_ddot              % Double derivative of q
+        
+        q_min               % Minimum joint values of q
+        q_max               % Maximum joint values of q
         q_initial           % The initial value of q for plotting
+        
+        isActuated = 0      % Is this joint actuated, by default not actuated
+        tau_min             % Minimum actuation (if actuated)
+        tau_max             % Maximum actuation (if actuated)
         
         % Dependent but stored values (hence private set)
         R_pe                % The relative rotation
@@ -42,8 +57,8 @@ classdef (Abstract) JointBase < handle
         q_default           % The default q
         q_dot_default       % The default q_dot
         q_ddot_default      % The default q_ddot
-        q_lb                % The lower bound on joints
-        q_ub                % The upper bound on joints
+        q_lb                % The lower bound on joints that are physically meaningful
+        q_ub                % The upper bound on joints that are physically meaningful
     end
     
     methods
@@ -59,7 +74,7 @@ classdef (Abstract) JointBase < handle
         end
         
         % -------
-        % Getters
+        % Getters and setters
         % -------
         function value = get.q_deriv(obj)
             value = obj.QDeriv(obj.q, obj.q_dot);
@@ -67,11 +82,17 @@ classdef (Abstract) JointBase < handle
         
         function value = get.S_dot(obj)
             % Do we want this here or elsewhere
-            value = TensorOperations.VectorProduct(obj.S_grad,obj.q_dot,3,isa(obj.q,'sym'));
+            value = TensorOperations.VectorProduct(obj.S_grad, obj.q_dot, 3, isa(obj.q,'sym'));
         end
         
         function value = get.S(obj)
             value = obj.RelVelocityMatrix(obj.q);
+        end
+        
+        function set.tau(obj, value)
+            if (obj.isActuated)
+                obj.tau = value;
+            end
         end
         
         % These functions generate trajectory spline for a joint
@@ -150,13 +171,20 @@ classdef (Abstract) JointBase < handle
                     CASPR_log.Print('Joint type is not defined',CASPRLogLevel.ERROR);
             end
             j.type = jointType;
-            if(nargin == 2)
+            
+            
+            if (nargin == 2)
                 j.q_initial = q_initial;
-                j.update(j.q_initial, j.q_dot_default, j.q_ddot_default);
             else
                 j.q_initial = j.q_default;
-                j.update(j.q_initial, j.q_dot_default, j.q_ddot_default);
             end
+            j.update(j.q_initial, j.q_dot_default, j.q_ddot_default);
+            
+            j.q_min = j.q_lb;
+            j.q_max = j.q_ub;
+            j.tau = [];
+            j.tau_min = -Inf*ones(j.numDofs, 1);
+            j.tau_max = Inf*ones(j.numDofs, 1);
         end
         
         % Load new xml objects
@@ -165,6 +193,10 @@ classdef (Abstract) JointBase < handle
             q_initial = XmlOperations.StringToVector(char(xmlObj.getAttribute('q_initial')));
             assert(sum(isnan(q_initial))==0,'q_initial must be defined in the xml file');
             j = JointBase.CreateJoint(jointType, q_initial);
+            if (~isempty(xmlObj.getAttribute('actuated') == '') && strcmp(xmlObj.getAttribute('actuated'), 'true'))
+                j.isActuated = 1;
+                j.tau = zeros(j.numDofs, 1);
+            end
         end
         
         % Perform a simple first order integral

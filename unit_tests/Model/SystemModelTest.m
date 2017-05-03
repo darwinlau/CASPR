@@ -6,9 +6,10 @@
 classdef SystemModelTest < matlab.unittest.TestCase
     % Create the model objects for testing
     properties (ClassSetupParameter)
-        model_config_type = struct('SCDM', TestModelConfigType.T_SCDM, ...
-            'MCDM', TestModelConfigType.T_MCDM, ...
-            'Active_passive_cables', TestModelConfigType.T_ACTIVE_PASSIVE_CABLES);
+        model_config_type = struct('SCDM', 'test_SCDM', ...
+            'MCDM', 'test_MCDM', ...
+            'Active_passive_cables', 'test_active_passive_cables', ...
+            'HCDM', 'test_HCDM');
     end
     
     properties
@@ -25,10 +26,11 @@ classdef SystemModelTest < matlab.unittest.TestCase
     
     methods (Test)        
         % Test that L is of the correct size 
-        function testL(testCase)
-            disp('Testing the System Jacobian');
+        function testJacobianL(testCase)
+            CASPR_log.Debug('Running ModelConfigTest/testJacobianL');
             L = testCase.modelObj.L;
-            testCase.assertSize(L,[testCase.modelObj.numCables,testCase.modelObj.numDofVars],'L is not of the correct size');
+            testCase.assertSize(L,[testCase.modelObj.numCables,testCase.modelObj.numDofVars], 'L is not of the correct size');
+            CASPR_log.Debug('Done ModelConfigTest/testJacobianL');
         end
     end
 end
