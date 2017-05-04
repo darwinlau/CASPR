@@ -29,6 +29,7 @@ classdef FKAnalysisBase < handle
         function [q, q_dot, comp_time] = compute(obj, len, len_prev, cable_indices, q_prev, q_d_prev, delta_t)
             CASPR_log.Assert(length(cable_indices) >= obj.model.numDofs, 'For forward kinematics, the number of cables to be used to compute must be at least the number of DoFs');
             start_tic = tic;
+            obj.model.update(q_prev,zeros(obj.model.numDofs,1),zeros(obj.model.numDofs,1),zeros(obj.model.numDofs,1));
             [q, q_dot] = obj.computeFunction(len, len_prev, cable_indices, q_prev, q_d_prev, delta_t);
             comp_time = toc(start_tic);
         end
