@@ -7,7 +7,7 @@
 %   (currently only a grid of states is accepted). The workspace simulation
 %   performs essentially a numerical brute force approach over the set of
 %   poses for a given workspace condition and/or metric.
-classdef WorkspaceSimulator < Simulator
+classdef WorkspaceSimulator < SimulatorBase
     
     properties
         grid            % Grid object for brute force workspace (input)
@@ -22,7 +22,7 @@ classdef WorkspaceSimulator < Simulator
     methods
         % The constructor for the workspace simulator class.
         function w = WorkspaceSimulator(model,grid,options)
-            w@Simulator(model);
+            w@SimulatorBase(model);
             w.grid          = grid;
             w.options       = options;
         end
