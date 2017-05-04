@@ -10,7 +10,7 @@ classdef GSK_EightAxisStaticCASPRInterface < HardwareInterfaceBase
         MIN_TO_S = 60;
         MM_DECIMAL_PLACE = -3;
                 
-        CABLE_LENGTH_OFFSET_MM = 15; % NOTE: UNITS IN MM
+        CABLE_LENGTH_OFFSET_MM = [7; 6; 15; 12; 5; 7; 15; 5]; % NOTE: UNITS IN MM
         
         MACHINE_LOW_F_SPEED = 5000;
     end
@@ -133,7 +133,7 @@ classdef GSK_EightAxisStaticCASPRInterface < HardwareInterfaceBase
         end
         
         % Do nothing since there's no meaning for this interface (yet)
-        function feedbackRead(~, ~)
+        function lengthFeedbackRead(~, ~)
         end
         
         % Do nothing since there's no meaning for this interface
@@ -149,8 +149,9 @@ classdef GSK_EightAxisStaticCASPRInterface < HardwareInterfaceBase
         % Converts the length (absolute cable length) to the absolute
         % machine length (where zero is l_zero_mm)
         function rel_l_mm = toAbsoluteMachineLength(obj, abs_l_mm)
+            rel_l_mm = zeros(obj.modelObj.numCables, 1);
             for i = 1:obj.modelObj.numCables
-                rel_l_mm(i) = abs_l_mm(i) - obj.l_zero_mm(find([obj.CABLE_PREFIX_ID{:}] == obj.modelObj.cableModel.cables{i}.name));
+                rel_l_mm(i,1) = abs_l_mm(i) - obj.l_zero_mm(find([obj.CABLE_PREFIX_ID{:}] == obj.modelObj.cableModel.cables{i}.name));
             end
             %rel_l_mm = abs_l_mm - obj.l_zero_mm;
         end

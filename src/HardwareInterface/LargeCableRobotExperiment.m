@@ -1,7 +1,7 @@
 % Will make abstract later
 classdef LargeCableRobotExperiment < ExperimentBase
     properties (Constant)
-        ZERO_CABLE_LENGTHS = [1.533880; 1.533880; 1.533880; 1.533880; 1.533880; 1.533880; 1.533880; 1.533880];
+        ZERO_CABLE_LENGTHS = [1.80548719; 1.80548719; 1.533880; 1.80548719; 1.80548719; 1.80548719; 1.533880; 1.80548719];
     end
     
     properties (SetAccess = private)
