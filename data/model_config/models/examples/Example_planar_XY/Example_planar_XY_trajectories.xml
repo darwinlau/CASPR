@@ -20,15 +20,20 @@
       </point>
     </points>
   </quintic_spline_trajectory>
-  <quintic_spline_trajectory id="general_1" time_definition="absolute" time_step="0.01">
+  <quintic_spline_trajectory id="general_1" time_definition="relative" time_step="0.01">
     <points>
       <point>
-        <q>0.3 0.6 0.0</q>
+        <q>0.3 0.6 0.1</q>
         <q_dot>0.0 0.0 0.0</q_dot>
         <q_ddot>0.0 0.0 0.0</q_ddot>
       </point>
-      <point time="5.0">
-        <q>0.7 0.2 0.0</q>
+      <point time="2.0">
+        <q>0.7 0.2 -0.15</q>
+        <q_dot>0.0 0.0 0.0</q_dot>
+        <q_ddot>0.0 0.0 0.0</q_ddot>
+      </point>
+      <point time="2.0">
+        <q>0.2 0.3 0.2</q>
         <q_dot>0.0 0.0 0.0</q_dot>
         <q_ddot>0.0 0.0 0.0</q_ddot>
       </point>
