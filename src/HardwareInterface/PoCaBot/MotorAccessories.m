@@ -6,7 +6,7 @@ classdef MotorAccessories < handle
     properties (Access = private, Constant = true)
         % Spool
         % one way to initialize the spool model
-        cableLength_full_load = 2;
+        cableLength_full_load = 1.955;
         numCircles_full_load = 10;
         len_per_circle = MotorAccessories.cableLength_full_load/MotorAccessories.numCircles_full_load;
         width_per_circle = 0.002; % the width of one circular coil
@@ -17,7 +17,7 @@ classdef MotorAccessories < handle
         % len_per_circle = sqrt(MotorAccessories.width_per_circle^2 + (MotorAccessories.radius*2*pi)^2);
         
         % Dynamixel Holder
-        lenCoS2Outlet = 0.04; % distance from cetre of the spool to the cable outlet
+        lenCoS2Outlet = 0.095; % distance from cetre of the spool to the cable outlet
     end
     
     properties
@@ -44,12 +44,14 @@ classdef MotorAccessories < handle
         % deltaAngle UNIT: RADIAN
         % deltaLength is relative to the initial cable length when the
         % coil_position = coil_position_init;
+        % deltaLength has the same sign with the deltaAngle. deltaLength
+        % with a positive sign means that the cable need to be loosened.
         function [deltaAngle] = getDeltaAngle(obj, deltaLength)
             % set
             b = obj.len_per_circle/2/pi;
             e = obj.coil_position_init;
             a = obj.width_per_circle/2/pi;
-            d = sqrt(obj.lenCoS2Outlet^2+obj.radius^2);
+            d = sqrt(obj.lenCoS2Outlet^2-obj.radius^2);
             y = deltaLength;
             
             % next solve the equations:
@@ -59,8 +61,10 @@ classdef MotorAccessories < handle
             CASPR_log.Assert(deltaAngle < obj.relTheta_init,'Cable has reached its limit! No loosing!');
         end
         
+        % Relevant variables have the same sign as in the function
+        % 'getDeltaAngle'.
         function [deltaLength] = getDeltaLength(obj, delta_angle)
-            deltaLength = obj.len_per_circle*delta_angle/2/pi- (sqrt(obj.lenCoS2Outlet^2+obj.radius^2 + (obj.coil_position_init + delta_angle * obj.width_per_circle/2/pi)^2) - sqrt(obj.lenCoS2Outlet^2+obj.radius^2 + obj.coil_position_init^2));
+            deltaLength = obj.len_per_circle*delta_angle/2/pi- (sqrt(obj.lenCoS2Outlet^2-obj.radius^2 + (obj.coil_position_init + delta_angle * obj.width_per_circle/2/pi)^2) - sqrt(obj.lenCoS2Outlet^2-obj.radius^2 + obj.coil_position_init^2));
         end
         
         function setInitState(obj, len_in_accessories)
@@ -68,7 +72,7 @@ classdef MotorAccessories < handle
             b = obj.len_per_circle/2/pi;
             m = obj.numCircles_full_load*obj.width_per_circle/2;
             a = obj.width_per_circle/2/pi;
-            d = sqrt(obj.lenCoS2Outlet^2+obj.radius^2);
+            d = sqrt(obj.lenCoS2Outlet^2-obj.radius^2);
             y = len_in_accessories;
             
             CASPR_log.Assert(len_in_accessories>=sqrt(d^2+m^2),'Input Argument len_in_accessories should be non-negative');

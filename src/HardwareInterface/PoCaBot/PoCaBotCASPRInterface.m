@@ -3,13 +3,6 @@ classdef PoCaBotCASPRInterface < HardwareInterfaceBase
     properties (Access = private)
         numCmd              % Number of actuator command values to send and feedback
         comPort             % Serial COM port connected to USB2Dynamixel
-        % Length multiplier refers to value to keep the data as an integer.
-        % For example if multiplier = 10, then 4.8 (mm) becomes 48 to be
-        % sent to the hardware, and the vice versa, 48 received refers to
-        % 4.8 mm to increase the resolution of the data
-        lengthMult = 10;
-        feedback
-        serial_port
         
         
         lib_name
@@ -21,6 +14,8 @@ classdef PoCaBotCASPRInterface < HardwareInterfaceBase
         cableLengths_initial       % size: DXL_NUM X 1
         cableLengths_full          % size: DXL_NUM X 1
         dynamixel_position_initial % size: DXL_NUM X 1
+        
+        dynamixel_direction_factor
     end
     
     properties (Access = public)
@@ -59,7 +54,7 @@ classdef PoCaBotCASPRInterface < HardwareInterfaceBase
         % Protocol version
         PROTOCOL_VERSION            = 2.0;          % See which protocol version is used in the Dynamixel
         BAUDRATE                    = 1000000;
-        DEVICENAME                  = 'COM3';       % Check which port is being used on your controller
+%         DEVICENAME                  = 'COM3';       % Check which port is being used on your controller
         % ex) Windows: "COM1"   Linux: "/dev/ttyUSB0"
         
         TORQUE_ENABLE               = 1;            % Value for enabling the torque
@@ -80,11 +75,16 @@ classdef PoCaBotCASPRInterface < HardwareInterfaceBase
     methods (Access = public)
         % e.g. comPort = 'COM3'
         % cableLengths_full: SIZE: numCmd x 1
-        function interface = PoCaBotCASPRInterface(comPort, numCmd, cableLengths_full)
+        function interface = PoCaBotCASPRInterface(comPort, numCmd, cableLengths_full,dynamixel_direction_reversed)
             interface@HardwareInterfaceBase();
             interface.comPort = comPort;
             interface.numCmd = numCmd;
             interface.cableLengths_full = cableLengths_full;
+            if(dynamixel_direction_reversed)
+                interface.dynamixel_direction_factor = -1;
+            else
+                interface.dynamixel_direction_factor = 1;
+            end
             
             for i = 1: numCmd
                 accessories_temp(i) = MotorAccessories;
@@ -244,7 +244,7 @@ classdef PoCaBotCASPRInterface < HardwareInterfaceBase
             deltaAngle = (ret - obj.dynamixel_position_initial)/4096*2*pi;
             deltalength = zeros(size(deltaAngle));
             for i = 1:obj.DXL_NUM
-                deltalength(i) = obj.accessories(i).getDeltaLength(deltaAngle);
+                deltalength(i) = obj.dynamixel_direction_factor * obj.accessories(i).getDeltaLength(deltaAngle);
             end
             length = obj.cableLengths_initial + deltalength;
         end
@@ -275,7 +275,7 @@ classdef PoCaBotCASPRInterface < HardwareInterfaceBase
             for i = 1:obj.DXL_NUM
                 angle_delta(i) = obj.accessories(i).getDeltaAngle(delta_lengths(i));
             end
-            dynamixel_position_delta = angle_delta/2/pi*4096;
+            dynamixel_position_delta = obj.dynamixel_direction_factor * angle_delta/2/pi*4096;
             dynamixel_position_cmd = obj.dynamixel_position_initial + dynamixel_position_delta;
         end
         

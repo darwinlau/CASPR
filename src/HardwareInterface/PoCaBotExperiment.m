@@ -25,8 +25,8 @@ classdef PoCaBotExperiment < ExperimentBase
             else
                 numMotor = numMotor_for_test;
             end
-            cableLengths_full = ones(numMotor,1)*2;
-            hw_interface = PoCaBotCASPRInterface('COM3', numMotor, cableLengths_full);  %1
+            cableLengths_full = ones(numMotor,1)*2.075;
+            hw_interface = PoCaBotCASPRInterface('COM3', numMotor, cableLengths_full,true);  %1
             modelObj = 1;
             eb@ExperimentBase(hw_interface, modelObj);
 %             eb.modelConfig = model_config;
@@ -43,32 +43,73 @@ classdef PoCaBotExperiment < ExperimentBase
            obj.hardwareInterface.detectDevice();
            
            % Send the initial lengths to the hardware
-           obj.hardwareInterface.lengthInitialSend(0); %(1)
+           segments = [0.11;0.5;0.75;1.00;1.25;1.5;1.75];
+           start_index = length(segments)-2;
+           end_index = start_index - 1;
+           dir = -1;
+           
+           obj.hardwareInterface.lengthInitialSend(segments(start_index)); %(1)
            obj.hardwareInterface.systemOnSend();
-           len = 0:0.006:1.8;
-           for t = 1:length(len)
-               tic;
-               %send command length to Arduino Mega
-               obj.hardwareInterface.lengthCommandSend(len(t)); %(1)
-               obj.l_feedback_traj(:, t) = obj.hardwareInterface.lengthFeedbackRead;
-               
-               elapsed = toc * 1000;
-               if(elapsed < 50)
-                   java.lang.Thread.sleep(50 - elapsed);
+           input('Ready to go? [Y]:','s');
+           
+           while(true)
+               if(start_index ~= end_index)
+                   len = segments(start_index):dir*0.007:segments(end_index);
+                   len = [len,segments(end_index)];
+                   obj.l_feedback_traj = [];
+                   for t = 1:length(len)
+                       tic;
+                       %send command length to Arduino Mega
+                       obj.hardwareInterface.lengthCommandSend(len(t)); %(1)
+                       obj.l_feedback_traj(:, t) = obj.hardwareInterface.lengthFeedbackRead;
+                       
+                       elapsed = toc * 1000;
+                       if(elapsed < 50)
+                           java.lang.Thread.sleep(50 - elapsed);
+                       else
+                           toc
+                       end
+                   end
+                   figure;
+                   
+                   % Pause some time here to make sure the dynamixel reach the last
+                   % command position.
+                   pause(2);
+                   obj.l_feedback_traj(:, t+1) = obj.hardwareInterface.lengthFeedbackRead;
+                   len = [len, len(end)];
+                   
+                   plot(len,'b');
+                   hold on;
+                   plot(obj.l_feedback_traj,'r');
+                   legend('Length CMD','Length Feedback','Location','NorthEastOutside');
+                   title(sprintf('from %.3f to %.3f',len(1),len(end)));
+                   hold off;
+                   start_index = end_index;
                else
-                   toc
+                   disp('Cannot move due to inappropriate set! Please try another direction!');
+               end
+               reply = input('Do you want to Draw or Loose? D/L [L]:','s');
+               if isempty(reply)
+                   reply = 'L';
+               end
+               if(reply == 'E' || reply == 'e')
+                   break;
+               elseif(reply == 'D' || reply == 'd')
+                   end_index = end_index - 1;
+                   dir = -1;
+               else
+                   end_index = end_index + 1;
+                   dir = 1;
+               end
+               if(end_index<1 || end_index>length(segments))
+                   end_index = start_index;
                end
            end
-           figure;
-           plot(len,'b');
-           hold on;
-           plot(obj.l_feedback_traj,'r');
-           legend('Length CMD','Length Feedback','Location','NorthEastOutside')
-           hold off;
            % Stop the feedback
            obj.hardwareInterface.systemOffSend();
            % Close the hardware interface
            obj.closeHardwareInterface();
+           disp('Application terminated correctly!');
         end
         
         function runTrajectory(obj, trajectory)
