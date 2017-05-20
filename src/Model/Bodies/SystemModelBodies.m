@@ -578,7 +578,7 @@ classdef SystemModelBodies < handle
             index_vars = 1;
             q = zeros(size(q0));
             for k = 1:obj.numLinks
-                q(index_vars:index_vars+obj.bodies{k}.joint.numVars-1) = obj.bodies{k}.joint.QIntegrate(q0, q_dot, dt);
+                q(index_vars:index_vars+obj.bodies{k}.joint.numVars-1) = obj.bodies{k}.joint.QIntegrate(q0(index_vars:index_vars+obj.bodies{k}.joint.numVars-1), q_dot(index_vars:index_vars+obj.bodies{k}.joint.numVars-1), dt);
                 index_vars = index_vars + obj.bodies{k}.joint.numVars;
             end
         end

@@ -54,7 +54,7 @@ classdef FKLeastSquares < FKAnalysisBase
 
             % Step 3: Call the least squares non-linear function to
             % determine q
-            [q, resnorm, ~, ~, output] = lsqnonlin(func, q_approx, [], [], options);
+            [q, resnorm, ~, ~, output] = lsqnonlin(func, q_approx, obj.model.bodyModel.q_lb, obj.model.bodyModel.q_ub, options);
 
             CASPR_log.Print(sprintf('Function lsqnonlin completed. Fitting error: %f. Number of function calls: %d', resnorm, output.funcCount),CASPRLogLevel.INFO);
 
@@ -94,7 +94,7 @@ classdef FKLeastSquares < FKAnalysisBase
         %   - l0_approx: the approximate l0 vector to help the search
         %   - q_approx: cell array of approximate q, where q_appox{k} is
         %   the approximate q vector at time sample k
-        function [l0] = ComputeInitialLengths(model, l_r, l0_approx, cable_indices, q_approx)
+        function [l0, q] = ComputeInitialLengths(model, l_r, l0_approx, cable_indices, q_approx)
             numCables = length(l0_approx);
             numSamples = length(l_r);
             numDofs = length(q_approx{1});
@@ -124,6 +124,7 @@ classdef FKLeastSquares < FKAnalysisBase
 
             % Extract the resulting l0 from X
             l0 = X(1:numCables);
+            q = vec2mat(X(numCables+1:length(X)), numDofs)';
         end
 
         % Responsible for computing the error vector for the nonlinear

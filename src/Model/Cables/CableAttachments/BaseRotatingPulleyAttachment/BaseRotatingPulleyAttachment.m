@@ -22,16 +22,20 @@ classdef BaseRotatingPulleyAttachment < CableAttachmentBase
             ca.nextAttachment = next_attachment;
             ca.pulley_radius = pulley_radius;
             ca.cable_entry_vector = cable_entry_vector;
-            ca.r_PA = [0;0;0];
             ca.r_GA = [0;0;0];
         end
         
         function update(obj, bodyKinematics)
             obj.nextAttachment.update(bodyKinematics);
-            [obj.r_PA, obj.length_offset, obj.pulleyCentrePoint] = obj.ComputePulleyLeavingLocation(obj.constantPulleyPoint, obj.cable_entry_vector, obj.nextAttachment.r_OA, obj.pulley_radius);
-            obj.r_GA = obj.r_PA;
+            [obj.r_GA, obj.length_offset, obj.pulleyCentrePoint] = obj.ComputePulleyLeavingLocation(obj.constantPulleyPoint, obj.cable_entry_vector, obj.nextAttachment.r_OA, obj.pulley_radius);
             
             update@CableAttachmentBase(obj, bodyKinematics);
+        end
+        
+        function updateAttachmentLocation(obj, r_A, ~)
+            CASPR_log.Error('updateAttachmentLocation function not implemented for BaseRotatingPulleyAttachment yet');
+            % Re-look at whether this should be the implementation
+            obj.constantPulleyPoint = r_A;
         end
     end
     

@@ -18,7 +18,8 @@ classdef (Abstract) AttachmentPointParamBase < handle
     end
 
     properties (SetAccess = private)
-        attachmentRefType % What is this typically
+        attachmentRefType   % CableAttachmentReferenceType (CoM or joint)
+        cableAttachment     % CableAttachmentBase object (inherited)
     end
 
     properties (Abstract, Dependent)
@@ -27,8 +28,9 @@ classdef (Abstract) AttachmentPointParamBase < handle
     end
 
     methods
-        function ap = AttachmentPointParamBase(attachmentRefType)
+        function ap = AttachmentPointParamBase(attachment, attachmentRefType)
             ap.attachmentRefType = attachmentRefType;
+            ap.cableAttachment = attachment;
             ap.x = zeros(ap.numVars, 1);
         end
     end
@@ -43,6 +45,8 @@ classdef (Abstract) AttachmentPointParamBase < handle
             CASPR_log.Assert(all(size(x) == [obj.numVars 1]), sprintf('x must be a vector of length %d\n', obj.numVars));
             obj.x = x;
             obj.r_a = obj.paramToAttachments(x);
+            % Just assume the attachments are all PointAttachment for now
+            obj.cableAttachment.updateAttachmentLocation(obj.r_a, obj.attachmentRefType);
         end
     end
 

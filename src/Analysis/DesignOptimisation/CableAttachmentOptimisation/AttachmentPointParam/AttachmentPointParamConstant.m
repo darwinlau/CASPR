@@ -17,10 +17,9 @@ classdef AttachmentPointParamConstant < AttachmentPointParamBase
     end
         
     methods
-        function ap = AttachmentPointParamConstant(r, attachmentRefType)
-            ap@AttachmentPointParamBase(attachmentRefType);
+        function ap = AttachmentPointParamConstant(attachment)
+            ap@AttachmentPointParamBase(attachment, CableAttachmentReferenceType.JOINT);
             ap.x = [];
-            ap.r_a = r;
         end
         
         function value = get.x_min(~)
@@ -32,9 +31,14 @@ classdef AttachmentPointParamConstant < AttachmentPointParamBase
         end
     end
     
+    methods 
+        function update(~, ~)
+        end
+    end
+    
     methods (Access = protected)
         function r_a = paramToAttachments(obj, ~)
-            r_a = obj.r_a;
+            r_a = obj.attachment.r_GA;
         end
     end
 end

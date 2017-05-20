@@ -6,7 +6,7 @@
 %   Different types of simulators should inherit from the base class so
 %   common functionality can be achieved. The child classes should
 %   implement the "run" function.
-classdef (Abstract) Simulator < handle
+classdef (Abstract) SimulatorBase < handle
     
     properties (SetAccess = protected)    
         model          % base SystemModel object 
@@ -14,7 +14,7 @@ classdef (Abstract) Simulator < handle
     
     methods 
         % Constructor
-        function s = Simulator(model)
+        function s = SimulatorBase(model)
             CASPR_log.Assert(isa(model,'SystemModel'));
             s.model = model;
         end
