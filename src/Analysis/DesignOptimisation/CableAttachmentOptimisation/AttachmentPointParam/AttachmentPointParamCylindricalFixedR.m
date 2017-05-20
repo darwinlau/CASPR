@@ -27,9 +27,9 @@ classdef AttachmentPointParamCylindricalFixedR < AttachmentPointParamBase
     end
     
     methods
-        function ap = AttachmentPointParamCylindricalFixedR(r, t_range, z_range, centre, normal_axis, attachmentRefType)
-            ap@AttachmentPointParamBase(attachmentRefType);
-            ap.radius = r;
+        function ap = AttachmentPointParamCylindricalFixedR(attachment, attachmentRefType, r_const, t_range, z_range, centre, normal_axis)
+            ap@AttachmentPointParamBase(attachment, attachmentRefType);
+            ap.radius = r_const;
             ap.t_range = t_range;
             ap.z_range = z_range;
             ap.centre = centre;
