@@ -275,6 +275,85 @@ classdef JointTrajectory < handle
             trajectory.q_ddot = mat2cell(q_dd_trajectory, size(q_dd_trajectory,1), ones(size(q_dd_trajectory,2),1));
         end        
         
+        function [trajectory] = CubicTrajectoryAverageVelocityLoadXmlObj(xmlObj, bodiesObj)
+            CASPR_log.Assert(strcmp(xmlObj.getNodeName, 'cubic_spline_average_velocity_trajectory'), 'Element should be <cubic_spline_average_velocity_trajectory>');
+            trajectory = JointTrajectory;
+            points_node = xmlObj.getElementsByTagName('points').item(0);
+            point_nodes = points_node.getChildNodes;
+            num_points = point_nodes.getLength;
+            time_step = str2double(xmlObj.getAttribute('time_step'));
+            
+            time_abs = JointTrajectory.get_xml_absolute_tag(xmlObj);
+                  
+            % Cell of points of joints coordinates
+            q_pj = cell(num_points,1); 
+            q_d_pj = cell(num_points,1);
+            time_points_abs = zeros(1, num_points);
+            
+            q_trajectory = [];
+            q_d_trajectory = [];
+            q_dd_trajectory = [];
+            
+            % First process the data and save it to variables
+            for p = 1:num_points
+                point_node = point_nodes.item(p-1);
+                q = XmlOperations.StringToVector(char(point_node.getElementsByTagName('q').item(0).getFirstChild.getData));
+                % Error checking on whether the XML file is valid
+                CASPR_log.Assert(length(q) == bodiesObj.numDofVars, sprintf('Trajectory config point does not contain correct number of variables, desired : %d, specified : %d', bodiesObj.numDofVars, length(q)));
+                               
+                q_pj{p} = mat2cell(q, bodiesObj.jointsNumDofVars);
+                
+                if (p == 1)
+                    time_points_abs(p) = 0.0;
+                elseif (time_abs)
+                    time_points_abs(p) = str2double(point_node.getAttribute('time'));
+                else
+                    time_points_abs(p) = time_points_abs(p-1) + str2double(point_node.getAttribute('time'));
+                end
+            end
+            
+            % Determine the average velocities
+            for p = 1:num_points
+                if p > 1 && p < num_points
+                    vel1 = (q_pj{p}-q_pj{p-1})/(time_points_abs(p)-time_points_abs(p-1));
+                    vel2 = (q_pj{p+1}-q_pj{p})/(time_points_abs(p+1)-time_points_abs(p));
+                    q_d = (vel1+vel2)/2;
+                else
+                    q_d = zeros(bodiesObj.numDofs,1);
+                end        
+                q_d_pj{p} = mat2cell(q_d, bodiesObj.jointsNumDofs);       
+            end
+                                   
+            % Generate the trajectory between the points
+            for p = 1:num_points-1
+                q_section = [];
+                q_d_section = [];
+                q_dd_section = [];
+                time_section = time_points_abs(p):time_step:time_points_abs(p+1);
+                for j = 1:bodiesObj.numLinks
+                    [q_body, q_d_body, q_dd_body] = bodiesObj.bodies{j}.joint.generateTrajectoryCubicSpline(q_pj{p}{j}, q_d_pj{p}{j}, ...
+                        q_pj{p+1}{j}, q_d_pj{p+1}{j}, time_section);
+                    q_section = [q_section; q_body];
+                    q_d_section = [q_d_section; q_d_body];
+                    q_dd_section = [q_dd_section; q_dd_body];
+                end
+                if (p > 1)
+                    q_section(:,1) = [];
+                    q_d_section(:,1) = [];
+                    q_dd_section(:,1) = [];
+                    time_section(:,1) = [];
+                end
+                
+                q_trajectory = [q_trajectory q_section];
+                q_d_trajectory = [q_d_trajectory q_d_section];
+                q_dd_trajectory = [q_dd_trajectory q_dd_section];
+                trajectory.timeVector = [trajectory.timeVector time_section];
+            end            
+            trajectory.q = mat2cell(q_trajectory, size(q_trajectory,1), ones(size(q_trajectory,2),1));
+            trajectory.q_dot = mat2cell(q_d_trajectory, size(q_d_trajectory,1), ones(size(q_d_trajectory,2),1));
+            trajectory.q_ddot = mat2cell(q_dd_trajectory, size(q_dd_trajectory,1), ones(size(q_dd_trajectory,2),1));
+        end       
+        
         % Loads a complete trajectory by reading a .traj file
         function [trajectory_all, force_trajectory] = LoadCompleteTrajectory(traj_file,model)
             % Initialise a new trajectry

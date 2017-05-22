@@ -29,19 +29,23 @@ classdef AttachmentPointParamCable < handle
         
         % Function responsible for updating the individual state variables
         % of each attachment point
-        function updateCableAttachments(obj, x, cableKin, bodiesKin)
-            cableKin.clear();
+        function updateCableAttachments(obj, x) %, cableKin, bodiesKin) % Maybe bodiesKin can be used later for updating 
             counter = 0;
             for k = 1:length(obj.attachments)
                 xk = x(counter+1:counter+obj.attachments{k}.numVars);
                 counter = counter + obj.attachments{k}.numVars;
                 obj.attachments{k}.update(xk);
             end
-            % This is temporary and assumes that the attachments are from
-            % base to end-effector link by link
-            for k = 1:cableKin.numLinks
-                cableKin.addSegment(k-1, obj.attachments{k}.r_a, k, obj.attachments{k+1}.r_a, bodiesKin, obj.attachments{k}.attachmentRefType)
-            end
+            
+            
+%             % This is temporary and assumes that the attachments are from
+%             % base to end-effector link by link
+%             for k = 1:cableKin.numLinks
+%                 attachment_s = CableAttachmentPoint(k-1, obj.attachments{k}.r_a, obj.attachments{k}.attachmentRefType, bodiesKin);
+%                 attachment_e = CableAttachmentPoint(k, obj.attachments{k+1}.r_a, obj.attachments{k+1}.attachmentRefType, bodiesKin);
+%                 segment = CableSegmentModel(attachment_s, attachment_e, cableKin.numLinks);
+%                 cableKin.addSegment(segment);
+%             end
         end
         
         function value = get.numVars(obj)

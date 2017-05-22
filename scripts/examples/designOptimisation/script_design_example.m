@@ -1,6 +1,6 @@
 clc; clear; close all;
 
-model_config = ModelConfig(ModelConfigType.M_IPANEMA_2);
+model_config = ModelConfig('IPAnema 2');
 trajectory_id = 'traj_z_up';
 cable_set_id = 'original';
 
@@ -10,12 +10,13 @@ idsolver = IDSolverQuadProg(modelObj, id_objective, ID_QP_SolverType.MATLAB);
 trajectory = model_config.getTrajectory(trajectory_id);
 
 numCables = 8;
+
 ap_cables = cell(numCables, 1);
 
 for i = 1:numCables
-    ap_const = AttachmentPointParamConstant(modelObj.cableModel.cables{i}.segments{1}.r_PA{2}, CableAttachmentReferenceType.JOINT);
-    ap_rad = AttachmentPointParamCylindricalFixedR(4, [0 2*pi], [0 5], [0;0;0], [0;0;1], CableAttachmentReferenceType.JOINT);
-    ap_cables{i} = AttachmentPointParamCable({ap_rad, ap_const});
+    ap_rad = AttachmentPointParamCylindricalFixedR(modelObj.cableModel.cables{i}.attachments{1}, CableAttachmentReferenceType.JOINT, 4, [0 2*pi], [0 5], [0;0;0], [0;0;1]);    
+    %ap_const = AttachmentPointParamConstant(modelObj.cableModel.cables{i}.attachments{2});
+    ap_cables{i} = AttachmentPointParamCable({ap_rad});
 end
 
 ap_system = AttachmentPointParamSystem(ap_cables);
@@ -26,7 +27,7 @@ optimiser = PSOOptimiser(ap_system.x_min, ap_system.x_max, @(x) cableAttachmentO
 
 ap_system.updateCableAttachments(x_opt, modelObj.cableModel, modelObj.bodyModel);
 modelObj.update(zeros(modelObj.numDofs,1), zeros(modelObj.numDofs,1), zeros(modelObj.numDofs,1), zeros(modelObj.numDofs,1));
-MotionSimulator.PlotFrame(modelObj, [-3 3 -3 3 0 5], [-37, 32]);
+MotionSimulatorBase.PlotFrame(modelObj, [-3 3 -3 3 0 5], [-37, 32]);
 
 
 % Setup the inverse dynamics simulator with the SystemKinematicsDynamics

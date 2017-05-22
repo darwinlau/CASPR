@@ -6,4 +6,4 @@ cdpr = model_config.getModel(model_config.defaultCableSetId);
 % 3) Update the pose of the robot
 cdpr.update([0; 0; 0.5; 0; 0; 0], zeros(6,1), zeros(6,1), zeros(6,1));
 % 4) Plot to see the robot
-MotionSimulator.PlotFrame(cdpr, model_config.displayRange, model_config.viewAngle);
+MotionSimulatorBase.PlotFrame(cdpr, model_config.displayRange, model_config.viewAngle);

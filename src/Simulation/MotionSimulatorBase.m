@@ -16,7 +16,7 @@
 %       - plotAngularAcceleration: plot the angular acceleration in {0}
 %       - plotFrame: plots a single frame of the CDPR, can be used to plot
 %       a particular pose or used within the plotMovie
-classdef (Abstract) MotionSimulator < Simulator
+classdef (Abstract) MotionSimulatorBase < SimulatorBase
 
     properties
         timeVector          % time vector
@@ -27,8 +27,8 @@ classdef (Abstract) MotionSimulator < Simulator
 
     methods
         % The motion simulator constructor
-        function ms = MotionSimulator(model)
-            ms@Simulator(model);
+        function ms = MotionSimulatorBase(model)
+            ms@SimulatorBase(model);
         end
 
         % Plots an avi movie file of the trajector motion of the robot. The
@@ -50,7 +50,7 @@ classdef (Abstract) MotionSimulator < Simulator
                     t = 1;
                 end
                 obj.model.update(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t}, zeros(size(obj.trajectory.q_dot{t})));
-                MotionSimulator.PlotFrame(obj.model, plot_axis, view_angle, plot_handle)
+                MotionSimulatorBase.PlotFrame(obj.model, plot_axis, view_angle, plot_handle)
                 frame = getframe(plot_handle);
                 writerObj.writeVideo(frame);
                 clf(plot_handle);

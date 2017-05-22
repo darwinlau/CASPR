@@ -25,8 +25,8 @@ classdef AttachmentPointParamCartesian < AttachmentPointParamBase
     end
     
     methods
-        function ap = AttachmentPointParamCartesian(x_range, y_range, z_range, attachmentRefType)
-            ap@AttachmentPointParamBase(attachmentRefType);
+        function ap = AttachmentPointParamCartesian(attachment, attachmentRefType, x_range, y_range, z_range)
+            ap@AttachmentPointParamBase(attachment, attachmentRefType);
             ap.x_range = x_range;
             ap.y_range = y_range;
             ap.z_range = z_range;

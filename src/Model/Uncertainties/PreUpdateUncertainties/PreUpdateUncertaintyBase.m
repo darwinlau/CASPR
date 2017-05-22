@@ -9,7 +9,9 @@
 classdef (Abstract) PreUpdateUncertaintyBase < handle
     methods(Abstract)
         % Apply uncertainty after the update
-        [update_q,update_q_dot,update_q_ddot,update_w_ext] = applyPreUpdateUncertainty(obj,q,q_dot,q_ddot,w_ext);        
+        [update_q,update_q_dot,update_q_ddot] = applyPreUpdateUncertainty(obj,q,q_dot,q_ddot,dt);        
+        % Apply uncertainty after the update
+        [update_q,update_q_dot] = applyInitialOffset(obj,q,q_dot);
     end
 end
 

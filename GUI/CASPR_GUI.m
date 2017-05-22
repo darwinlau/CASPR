@@ -259,7 +259,7 @@ function update_button_Callback(~, ~, handles) %#ok<DEFNU>
     cla;
     axis_range = getappdata(handles.cable_popup,'axis_range');
     view_angle = getappdata(handles.cable_popup,'view_angle');
-    MotionSimulator.PlotFrame(modObj, axis_range, view_angle, handles.figure1);
+    MotionSimulatorBase.PlotFrame(modObj, axis_range, view_angle, handles.figure1);
 end
 
 % --- Executes on button press in control_button.
@@ -325,7 +325,7 @@ function generate_model_object(handles)
     cla;
     display_range = model_config.displayRange;
     view_angle = model_config.viewAngle;
-    MotionSimulator.PlotFrame(modObj, display_range, view_angle, handles.figure1);
+    MotionSimulatorBase.PlotFrame(modObj, display_range, view_angle, handles.figure1);
     % Store the dynamics object
     setappdata(handles.cable_popup,'modObj',modObj);
     setappdata(handles.cable_popup,'axis_range',display_range);

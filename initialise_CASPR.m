@@ -13,7 +13,7 @@ function initialise_CASPR()
     
     cd(CASPR_homepath);
     % Set the current version
-    CASPR_version = 20161019;
+    CASPR_version = 20170515;
     CASPR_model_config_path = [CASPR_homepath,'/data/model_config'];
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -79,7 +79,7 @@ function update_CASPR()
         fprintf('\n----------------------------------------------------\n')
         fprintf('Removing outdated folder locations.\n')
         fprintf('----------------------------------------------------\n')
-        rmdir([CASPR_homepath,'/logs']); 
+        rmdir([CASPR_homepath,'/logs'],'s'); 
     end
     
     num_tests_failed = setup_update_CASPR();

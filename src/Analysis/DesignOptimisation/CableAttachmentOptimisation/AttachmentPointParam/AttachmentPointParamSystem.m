@@ -26,11 +26,11 @@ classdef AttachmentPointParamSystem < handle
         end
         
         % Updates the state for each cable
-        function updateCableAttachments(obj, x, cablesKin, bodiesKin)
+        function updateCableAttachments(obj, x) %, cablesKin, bodiesKin) % Not sure if it would be used in the future
             counter = 0;
             for i = 1:obj.numCables
                 xi = x(counter+1:counter+obj.cables{i}.numVars);
-                obj.cables{i}.updateCableAttachments(xi, cablesKin.cables{i}, bodiesKin);
+                obj.cables{i}.updateCableAttachments(xi);
                 counter = counter + obj.cables{i}.numVars;
             end
         end
