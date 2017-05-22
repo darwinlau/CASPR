@@ -1,6 +1,6 @@
 clc;clear;
-exp = PoCaBotExperiment(1);
-exp.motorSpoolTest();
+exp = PoCaBotExperiment(8);
+exp.motorTest();
 
 % acc = MotorAccessories;
 % acc.setInitState(0.2);

@@ -6,10 +6,10 @@ classdef MotorAccessories < handle
     properties (Access = private, Constant = true)
         % Spool
         % one way to initialize the spool model
-        cableLength_full_load = 1.955;
-        numCircles_full_load = 10;
+        cableLength_full_load = 2.11;
+        numCircles_full_load = 11;
         len_per_circle = MotorAccessories.cableLength_full_load/MotorAccessories.numCircles_full_load;
-        width_per_circle = 0.002; % the width of one circular coil
+        width_per_circle = 0.024/MotorAccessories.numCircles_full_load; % the width of one circular coil
         radius = sqrt(MotorAccessories.len_per_circle^2-MotorAccessories.width_per_circle^2)/2/pi;
         % another way to initialize the spool model
         % width_per_circle = 0.002;
@@ -17,7 +17,7 @@ classdef MotorAccessories < handle
         % len_per_circle = sqrt(MotorAccessories.width_per_circle^2 + (MotorAccessories.radius*2*pi)^2);
         
         % Dynamixel Holder
-        lenCoS2Outlet = 0.095; % distance from cetre of the spool to the cable outlet
+        lenCoS2Outlet = 0.107; % distance from cetre of the spool to the cable outlet
     end
     
     properties

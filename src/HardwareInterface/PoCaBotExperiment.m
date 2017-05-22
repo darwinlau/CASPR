@@ -10,6 +10,7 @@ classdef PoCaBotExperiment < ExperimentBase
         q_d_feedback       % Temporary variable to store things for now
         modelConfig
         forwardKin
+        numMotor
     end
     
     methods
@@ -20,15 +21,16 @@ classdef PoCaBotExperiment < ExperimentBase
 %             % Load the SystemKinematics object from the XML
 %             modelObj = model_config.getModel(cable_set_id);
             % Create the hardware interface
-            if(isempty(numMotor_for_test))
+            if(nargin == 0)
                 numMotor = 8;
             else
                 numMotor = numMotor_for_test;
             end
-            cableLengths_full = ones(numMotor,1)*2.075;
-            hw_interface = PoCaBotCASPRInterface('COM3', numMotor, cableLengths_full,true);  %1
+            cableLengths_full = ones(numMotor,1)*2.5;
+            hw_interface = PoCaBotCASPRInterface('COM3', numMotor, cableLengths_full,false);  %1
             modelObj = 1;
             eb@ExperimentBase(hw_interface, modelObj);
+            eb.numMotor = numMotor;
 %             eb.modelConfig = model_config;
 %             eb.forwardKin = FKDifferential(modelObj);
             %eb.forwardKin = FKLeastSquares(modelObj, FK_LS_ApproxOptionType.FIRST_ORDER_INTEGRATE_QDOT, FK_LS_QdotOptionType.FIRST_ORDER_DERIV);
@@ -43,10 +45,10 @@ classdef PoCaBotExperiment < ExperimentBase
            obj.hardwareInterface.detectDevice();
            
            % Send the initial lengths to the hardware
-           segments = [0.11;0.5;0.75;1.00;1.25;1.5;1.75];
-           start_index = length(segments)-2;
-           end_index = start_index - 1;
-           dir = -1;
+           segments = [0.25;0.5;0.75;1.00;1.25;1.5;1.75;2;2.25];
+           start_index = 1;
+           end_index = start_index + 1;
+           dir = sign(end_index - start_index);
            
            obj.hardwareInterface.lengthInitialSend(segments(start_index)); %(1)
            obj.hardwareInterface.systemOnSend();
@@ -103,6 +105,40 @@ classdef PoCaBotExperiment < ExperimentBase
                end
                if(end_index<1 || end_index>length(segments))
                    end_index = start_index;
+               end
+           end
+           % Stop the feedback
+           obj.hardwareInterface.systemOffSend();
+           % Close the hardware interface
+           obj.closeHardwareInterface();
+           disp('Application terminated correctly!');
+        end
+        
+        function motorTest(obj)
+            % Open the hardware interface
+           obj.openHardwareInterface();
+           
+           % Just detect the device to see if it is correct (should change
+           % it later to exit cleanly and throw an error in the future
+           obj.hardwareInterface.detectDevice();
+           obj.hardwareInterface.switchOperatingMode2CURRENT();
+           pause(0.5);
+           current = ones(obj.numMotor,1)*20;           
+           obj.hardwareInterface.systemOnSend();
+           input('Ready to go? [Y]:','s');
+           index = 1;
+           while(index < 500)
+               tic;
+               current = current*(1);
+               obj.hardwareInterface.currentCommandSend(current);
+               obj.hardwareInterface.currentFeedbackRead()
+               toc
+               index = index + 1;
+               elapsed = toc * 1000;
+               if(elapsed < 50)
+                   java.lang.Thread.sleep(50 - elapsed);
+               else
+                   toc * 1000
                end
            end
            % Stop the feedback

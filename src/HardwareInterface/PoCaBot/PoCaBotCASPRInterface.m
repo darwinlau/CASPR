@@ -48,8 +48,13 @@ classdef PoCaBotCASPRInterface < HardwareInterfaceBase
         LEN_XH_GOAL_POSITION       = 4;
         LEN_XH_PRESENT_POSITION    = 4;
         
+        % Beware of that when trying to modify the operatiing mode, the
+        % motors must be turned off.
         ADDR_XH_OPERATING_MODE         = 11;
         LEN_XH_OPERATING_MODE          = 1;
+        
+        OPERATING_MODE_CURRENT_MODE   = 0;
+        OPERATING_MODE_POSITION_LIMITEDCURRENT = 5;
         
         % Protocol version
         PROTOCOL_VERSION            = 2.0;          % See which protocol version is used in the Dynamixel
@@ -258,6 +263,41 @@ classdef PoCaBotCASPRInterface < HardwareInterfaceBase
         % Method to send some "off" state to the hardware (optional)
         function systemOffSend(obj)
             obj.toggleEnableAllDynamixel(obj.TORQUE_DISABLE);
+        end
+        
+%         % Beware of that when trying to modify the operatiing mode, the
+%         % motors must be turned off.
+%         ADDR_XH_OPERATING_MODE         = 11;
+%         LEN_XH_OPERATING_MODE          = 1;
+%         
+%         OPERATING_MODE_CURRENT_MODE   = 0;
+%         OPERATING_MODE_POSITION_LIMITEDCURRENT = 5;
+%         Argument operating_mode is OPERATING_MODE_CURRENT_MODE or
+%         OPERATING_MODE_POSITION_LIMITEDCURRENT.
+        function switchOperatingMode2CURRENT(obj)
+            obj.toggleEnableAllDynamixel(obj.TORQUE_DISABLE);
+            obj.sync_write(obj.ADDR_XH_OPERATING_MODE, obj.LEN_XH_OPERATING_MODE, ones(obj.DXL_NUM,1)*obj.OPERATING_MODE_CURRENT_MODE);
+        end
+        
+        function switchOperatingMode2POSITION_LIMITEDCURRENT(obj)
+            obj.toggleEnableAllDynamixel(obj.TORQUE_DISABLE);
+            obj.sync_write(obj.ADDR_XH_OPERATING_MODE, obj.LEN_XH_OPERATING_MODE, ones(obj.DXL_NUM,1)*obj.OPERATING_MODE_POSITION_LIMITEDCURRENT);
+        end
+        
+        % Method to send the vector of current (c_cmd) to hardware
+        %
+        % Argument c_cmd is a column vector with size (DXL_NUM x 1)
+        function currentCommandSend(obj, c_cmd)
+            if(length(c_cmd) ~= obj.DXL_NUM)
+                obj.close();
+                CASPR_log.Error('Input argument error, please check the size of the argument c_cmd and try again');
+            end
+            obj.sync_write(obj.ADDR_XH_GOAL_CURRENT, obj.LEN_XH_GOAL_CURRENT, c_cmd);
+        end
+        
+        % Method to read the current from the hardware (if available)
+        function [current] = currentFeedbackRead(obj)
+            [~, current] = obj.sync_read(obj.ADDR_XH_PRESENT_CURRENT, obj.LEN_XH_PRESENT_CURRENT);
         end
     end
     
