@@ -21,7 +21,7 @@ id_solver = IDSolverQuadProg(modelObj, id_objective, ID_QP_SolverType.MATLAB);
 % object and the inverse dynamics solver
 disp('Start Setup Simulation');
 idsim = InverseDynamicsSimulator(modelObj, id_solver);
-trajectory = model_config.getTrajectory(trajectory_id);
+trajectory = model_config.getJointTrajectory(trajectory_id);
 
 % Run the solver on the desired trajectory
 disp('Start Running Simulation');

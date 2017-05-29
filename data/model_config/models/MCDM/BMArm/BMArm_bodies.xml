@@ -24,13 +24,13 @@
   <link_rigid num="2" name="Lower Arm">
     <joint type="R_X" q_initial="0"/>
     <physical>
-      <mass>0.5366</mass>
-      <com_location>0.0 0.0725 0.0</com_location>
+      <mass>0.3334</mass>
+      <com_location>0.0 0.1185 0.0</com_location>
       <end_location>0.0 0.2610 0.0</end_location>
       <inertia ref="com">
-        <Ixx>0.0038</Ixx>
-        <Iyy>0.00015</Iyy>
-        <Izz>0.0037</Izz>
+        <Ixx>0.002</Ixx>
+        <Iyy>0.000046579</Iyy>
+        <Izz>0.0018</Izz>
         <Ixy>0.0</Ixy>
         <Ixz>0.0</Ixz>
         <Iyz>0.0</Iyz>

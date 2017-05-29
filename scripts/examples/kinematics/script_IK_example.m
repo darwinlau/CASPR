@@ -18,7 +18,7 @@ modelObj = model_config.getModel(cable_set_id);
 % Setup the inverse kinematics simulator with the SystemKinematics object
 disp('Start Setup Simulation');
 sim = InverseKinematicsSimulator(modelObj);
-trajectory = model_config.getTrajectory(trajectory_id);
+trajectory = model_config.getJointTrajectory(trajectory_id);
 
 % Run the kinematics on the desired trajectory
 disp('Start Running Simulation');

@@ -25,7 +25,7 @@ disp('Start Setup Simulation');
 start_tic = tic;
 idsim = InverseDynamicsSimulator(modelObj, id_solver);
 fdsim = ForwardDynamicsSimulator(modelObj, FDSolverType.ODE113);
-trajectory = model_config.getTrajectory(trajectory_id);
+trajectory = model_config.getJointTrajectory(trajectory_id);
 time_elapsed = toc(start_tic);
 fprintf('End Setup Simulation : %f seconds\n', time_elapsed);
 
