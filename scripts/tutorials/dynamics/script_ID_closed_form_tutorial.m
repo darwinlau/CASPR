@@ -19,7 +19,7 @@ id_solver = IDSolverClosedForm(modelObj, id_type);
 % Setup the inverse dynamics simulator with the SystemModel
 % object and the inverse dynamics solver
 idsim = InverseDynamicsSimulator(modelObj, id_solver);
-trajectory = model_config.getJointTrajectory('x_simple');
+trajectory = model_config.getJointTrajectory('example_quintic');
 
 % Run the solver on the desired trajectory
 idsim.run(trajectory);

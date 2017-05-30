@@ -1,16 +1,16 @@
-% Script for inverse kinematics (IK) 
+% Script file to show how to use the inverse kinematics simulator
 %
 % Author        : Darwin LAU
-% Created       : 2017
+% Created       : 2012
 % Description    :
+
+% Clear the variables, command window, and all windows
+clear; clc; close all;
 
 % Set up the type of model
 model_config = ModelConfig('Example planar XY');
 cable_set_id = 'basic';
-trajectory_id = 'example_linear';
-
-% Clear the variables, command window, and all windows
-clear; clc; close all;
+trajectory_id = 'example_quintic';
 
 % Load the SystemKinematics object from the XML
 modelObj = model_config.getModel(cable_set_id);
@@ -29,3 +29,5 @@ sim.run(trajectory);
 disp('Start Plotting Simulation');
 sim.plotJointSpace();
 sim.plotCableLengths();
+sim.plotBodyCOG();
+% sim.plotMovie(model_config.displayRange, [fileparts(mfilename('fullpath')), '\CDPR_movie.avi'], 2, 500, 640);
