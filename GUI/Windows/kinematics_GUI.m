@@ -31,7 +31,7 @@ function varargout = kinematics_GUI(varargin)
 
     % Edit the above text to modify the response to help kinematics_GUI
 
-    % Last Modified by GUIDE v2.5 25-Mar-2017 20:35:36
+    % Last Modified by GUIDE v2.5 30-May-2017 22:42:29
 
     % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
@@ -773,4 +773,45 @@ function initialise_popups(handles)
     q_dot_popup_Update(handles.q_dot_popup,handles);
     % Needed callbacks
     plot_type_popup_Callback(handles.plot_type_popup,[],handles);
+end
+
+
+% --- Executes on button press in script_button.
+function script_button_Callback(hObject, eventdata, handles)
+    % hObject    handle to script_button (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    structure with handles and user data (see GUIDATA)
+    
+    % Determine if forward or inverse kinematics
+    contents = cellstr(get(handles.kinematics_popup,'String'));
+    kinematics_id = contents{get(handles.kinematics_popup,'Value')};
+    if(strcmp(kinematics_id,'Inverse Kinematics'))
+        base_folder = CASPR_configuration.LoadHomePath();
+        % Edit for the model
+        model_str = cellstr(get(handles.model_text,'String'));  
+        cable_str = cellstr(get(handles.cable_text,'String'));
+        contents = cellstr(get(handles.trajectory_popup,'String'));
+        trajectory_str = contents{get(handles.trajectory_popup,'Value')};
+        r_fid = fopen([base_folder,'/scripts/examples/kinematics/script_IK_example.m'],'r');
+        w_fid = fopen([base_folder,'/scripts/local/temp_GUI_script.m'],'w');
+        while(~feof(r_fid))
+            s = fgetl(r_fid);
+            % Determine if comment
+            if((length(s)>1)&&(s(1) == '%'))
+                new_s = ['%',s];
+            else
+                new_s = s;
+            end
+            % Identify author
+            new_s = regexprep(new_s,'Author        : Darwin LAU','Author        : Autogenerate');
+            % Replace all references to the model
+            new_s = regexprep(new_s,'Example planar XY',model_str);
+            new_s = regexprep(new_s,'basic',cable_str);
+            new_s = regexprep(new_s,'example_linear',trajectory_str);
+            fprintf(w_fid,[new_s,'\n']);
+        end
+        fclose(r_fid);
+        fclose(w_fid);
+        edit([base_folder,'/scripts/local/temp_GUI_script.m'])
+    end
 end
