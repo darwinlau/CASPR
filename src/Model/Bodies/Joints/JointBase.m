@@ -170,16 +170,16 @@ classdef (Abstract) JointBase < handle
                     j = SphericalEulerXYZ;
                 case JointType.S_FIXED_XYZ
                     j = SphericalFixedXYZ;
-                case JointType.S_QUATERNION
-                    j = SphericalQuaternion;
+%                 case JointType.S_QUATERNION
+%                     j = SphericalQuaternion;
                 case JointType.T_XYZ
                     j = TranslationalXYZ;
-                case JointType.SPATIAL_QUATERNION
-                    j = SpatialQuaternion;
+%                 case JointType.SPATIAL_QUATERNION
+%                     j = SpatialQuaternion;
                 case JointType.SPATIAL_EULER_XYZ
                     j = SpatialEulerXYZ;
                 otherwise
-                    CASPR_log.Print('Joint type is not defined',CASPRLogLevel.ERROR);
+                    CASPR_log.Print('Joint type is not defined', CASPRLogLevel.ERROR);
             end
             j.type = jointType;
             
