@@ -34,7 +34,7 @@ function varargout = CASPR_GUI(varargin)
 
     % Edit the above text to modify the response to help CASPR_GUI
 
-    % Last Modified by GUIDE v2.5 21-May-2017 21:46:22
+    % Last Modified by GUIDE v2.5 30-May-2017 01:26:05
 
     % Begin initialization code - DO NOT EDIT
     warning('off','MATLAB:uitabgroup:OldVersion')
@@ -282,6 +282,40 @@ function console_pushbutton_Callback(~, ~, handles) %#ok<DEFNU>
     modObj = getappdata(handles.cable_popup,'modObj');
     % Assign the model to the base workspace
     assignin('base','model_object',modObj);
+end
+
+% Model update button
+% --- Executes on button press in model_update_button.
+function model_update_button_Callback(~, ~, handles) %#ok<DEFNU>
+    % hObject    handle to model_update_button (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    structure with handles and user data (see GUIDATA)
+    
+    % Update the cable set list
+    % Generate the model_config object
+    contents = cellstr(get(handles.model_popup,'String'));
+    try
+        model_type = contents{get(handles.model_popup,'Value')};
+    catch 
+        CASPR_log.Warn('Previous model state does not exist anymore. Default to first element.');
+        model_type = contents{1};
+    end
+    if(CASPR_configuration.LoadDevModelConfig())
+        model_config = DevModelConfig(model_type);
+    else
+    	model_config = ModelConfig(model_type);
+    end
+    contents = cellstr(get(handles.cable_popup,'String'));
+    try
+        cable_type = contents{get(handles.cable_popup,'Value')};
+    catch 
+        CASPR_log.Warn('Previous cable does not exist anymore. Default to first element.');
+        cable_type = contents{1};
+    end
+    cableset_str = model_config.getCableSetList();
+    set(handles.cable_popup, 'String', cableset_str);
+    % Generate the new model
+    generate_model_object(handles);
 end
 
 %--------------------------------------------------------------------------
