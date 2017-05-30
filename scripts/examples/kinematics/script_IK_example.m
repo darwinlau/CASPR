@@ -19,13 +19,16 @@ modelObj = model_config.getModel(cable_set_id);
 disp('Start Setup Simulation');
 sim = InverseKinematicsSimulator(modelObj);
 trajectory = model_config.getJointTrajectory(trajectory_id);
+disp('Finished Setup Simulation');
 
 % Run the kinematics on the desired trajectory
 disp('Start Running Simulation');
 sim.run(trajectory);
+disp('Finished Running Simulation');
 
 % After running the simulator the data can be plotted
 % Refer to the simulator classes to see what can be plotted.
 disp('Start Plotting Simulation');
 sim.plotJointSpace();
 sim.plotCableLengths();
+disp('Finished Plotting Simulation');
