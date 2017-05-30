@@ -342,13 +342,19 @@ classdef (Abstract) MotionSimulatorBase < SimulatorBase
         % Users can specify the plotting axis and also which figure handle
         % to plot too. If no or empty figure handle is specified then a new
         % figure plot will be created.
-        function PlotFrame(kinematics, plot_axis, view_angle, fig_handle)
+        function PlotFrame(kinematics, plot_axis, view_angle, fig_handle, axis_handle)
             if nargin < 4 || isempty(fig_handle)
                 figure;
             else
                 figure(fig_handle);
             end
             
+            if nargin < 5 || isempty(axis_handle)
+                ax = gca;
+            else
+                ax = axis_handle;
+            end
+            axes(axis_handle)
             axis(plot_axis);
             view(view_angle); 
             hold on;
@@ -362,9 +368,9 @@ classdef (Abstract) MotionSimulatorBase < SimulatorBase
                 r_OP0 = body_model.bodies{k}.R_0k*body_model.bodies{k}.r_OP;
                 r_OG0 = body_model.bodies{k}.R_0k*body_model.bodies{k}.r_OG;
                 r_OPe0 = body_model.bodies{k}.R_0k*body_model.bodies{k}.r_OPe;
-                plot3(r_OP0(1), r_OP0(2), r_OP0(3), 'Color', 'k', 'Marker', 'o', 'LineWidth', 2);
-                plot3(r_OG0(1), r_OG0(2), r_OG0(3), 'Color', 'b', 'Marker', 'o', 'LineWidth', 2);
-                line([r_OP0(1) r_OPe0(1)], [r_OP0(2) r_OPe0(2)], [r_OP0(3) r_OPe0(3)], 'Color', 'k', 'LineWidth', 3);
+                plot3(ax,r_OP0(1), r_OP0(2), r_OP0(3), 'Color', 'k', 'Marker', 'o', 'LineWidth', 2);
+                plot3(ax,r_OG0(1), r_OG0(2), r_OG0(3), 'Color', 'b', 'Marker', 'o', 'LineWidth', 2);
+                line(ax,[r_OP0(1) r_OPe0(1)], [r_OP0(2) r_OPe0(2)], [r_OP0(3) r_OPe0(3)], 'Color', 'k', 'LineWidth', 3);
             end
 
             cable_model = kinematics.cableModel;
@@ -378,9 +384,9 @@ classdef (Abstract) MotionSimulatorBase < SimulatorBase
                         end
                     end
                     if (cable_model.cables{i}.isActive)
-                        line([r_OAa0(1) r_OAb0(1)], [r_OAa0(2) r_OAb0(2)], [r_OAa0(3) r_OAb0(3)], 'Color', 'r', 'LineWidth', 1);
+                        line(ax,[r_OAa0(1) r_OAb0(1)], [r_OAa0(2) r_OAb0(2)], [r_OAa0(3) r_OAb0(3)], 'Color', 'r', 'LineWidth', 1);
                     else
-                        line([r_OAa0(1) r_OAb0(1)], [r_OAa0(2) r_OAb0(2)], [r_OAa0(3) r_OAb0(3)], 'Color', [0.7, 0.7, 0.7], 'LineWidth', 1);
+                        line(ax,[r_OAa0(1) r_OAb0(1)], [r_OAa0(2) r_OAb0(2)], [r_OAa0(3) r_OAb0(3)], 'Color', [0.7, 0.7, 0.7], 'LineWidth', 1);
                     end
                 end
             end

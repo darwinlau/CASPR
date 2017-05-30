@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE trajectories [
+<!DOCTYPE joint_trajectories [
   <!ATTLIST linear_spline_trajectory id ID #REQUIRED>
   <!ATTLIST cubic_spline_trajectory id ID #REQUIRED>
   <!ATTLIST quintic_spline_trajectory id ID #REQUIRED>
 ]>
-<!-- Template generated file for XML trajectories in CASPR -->
-<trajectories>
+<!-- Template generated file for XML joint_trajectories in CASPR -->
+<joint_trajectories>
     <!-- Use linear/cubic/quintic_spline_trajectory tages for each of the
     different trajectory types.  Further details on the information to
     provide for these tags is located in the CASPR documentation. -->
@@ -25,4 +25,4 @@
         </points>
     </quintic_spline_trajectory>
     -->
-</trajectories>
+</joint_trajectories>

@@ -27,7 +27,7 @@ controller = VaryingGainCTCLsqnonneg(modelObj, kp_min, kd_min);
 disp('Start Setup Simulation');
 fdSolver = ForwardDynamics(FDSolverType.ODE113);
 control_sim = ControllerSimulator(modelObj, controller, fdSolver);
-trajectory_ref = model_config.getTrajectory(trajectory_id);
+trajectory_ref = model_config.getJointTrajectory(trajectory_id);
 
 % Run the solver on the desired trajectory
 disp('Start Running Simulation');

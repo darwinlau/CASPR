@@ -102,8 +102,8 @@ classdef (Abstract) ModelConfigBase < handle
         end
         
         % Should change this to getJointTrajectory()
-        function [traj] = getTrajectory(obj, trajectory_id)
-            traj_xmlobj = obj.getTrajectoryXmlObj(trajectory_id);
+        function [traj] = getJointTrajectory(obj, trajectory_id)
+            traj_xmlobj = obj.getJointTrajectoryXmlObj(trajectory_id);
             traj = JointTrajectory.LoadXmlObj(traj_xmlobj, obj.bodiesModel);
         end
         
@@ -117,8 +117,8 @@ classdef (Abstract) ModelConfigBase < handle
             end
         end
         
-        function trajectories_str = getTrajectoriesList(obj)
-            trajectories_str = GUIOperations.XmlObj2StringCellArray(obj.trajectoriesXmlObj.getElementsByTagName('trajectories').item(0).getChildNodes,'id');
+        function trajectories_str = getJointTrajectoriesList(obj)
+            trajectories_str = GUIOperations.XmlObj2StringCellArray(obj.trajectoriesXmlObj.getElementsByTagName('joint_trajectories').item(0).getChildNodes,'id');
         end
     end
     
@@ -135,7 +135,7 @@ classdef (Abstract) ModelConfigBase < handle
         end
         
         % Get the trajectory xml object
-        function v = getTrajectoryXmlObj(obj, id)
+        function v = getJointTrajectoryXmlObj(obj, id)
             v = obj.trajectoriesXmlObj.getElementById(id);
             assert(~isempty(v), sprintf('Id ''%s'' does not exist in the trajectories XML file', id));
         end

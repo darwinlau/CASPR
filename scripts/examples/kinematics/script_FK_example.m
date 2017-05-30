@@ -23,7 +23,7 @@ fksolver = FKLeastSquares(modelObj, FK_LS_ApproxOptionType.FIRST_ORDER_INTEGRATE
 % Initialise the inverse/forward kinematics solvers
 iksim = InverseKinematicsSimulator(modelObj);
 fksim = ForwardKinematicsSimulator(modelObj, fksolver);
-trajectory = model_config.getTrajectory(trajectory_id);
+trajectory = model_config.getJointTrajectory(trajectory_id);
 
 % Run inverse kinematics
 disp('Start Running Inverse Kinematics Simulation');

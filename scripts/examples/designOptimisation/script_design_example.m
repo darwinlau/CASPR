@@ -7,7 +7,7 @@ cable_set_id = 'original';
 modelObj = model_config.getModel(cable_set_id);
 id_objective = IDObjectiveMinQuadCableForce(ones(modelObj.numCables,1));
 idsolver = IDSolverQuadProg(modelObj, id_objective, ID_QP_SolverType.MATLAB);
-trajectory = model_config.getTrajectory(trajectory_id);
+trajectory = model_config.getJointTrajectory(trajectory_id);
 
 numCables = 8;
 

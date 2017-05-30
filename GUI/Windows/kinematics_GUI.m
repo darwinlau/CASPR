@@ -199,7 +199,7 @@ function trajectory_popup_Update(~, handles)
     end
     setappdata(handles.trajectory_popup,'model_config',model_config);
     % Determine the trajectories
-    trajectories_str = model_config.getTrajectoriesList();    
+    trajectories_str = model_config.getJointTrajectoriesList();    
     if(~isempty(trajectories_str))
         set(handles.trajectory_popup, 'Value', 1);   set(handles.trajectory_popup, 'String', trajectories_str);
     else
@@ -590,7 +590,7 @@ function run_inverse_kinematics(handles,modObj,trajectory_id)
     start_tic = tic;
     sim = InverseKinematicsSimulator(modObj);
     model_config = getappdata(handles.trajectory_popup,'model_config');
-    trajectory = model_config.getTrajectory(trajectory_id);
+    trajectory = model_config.getJointTrajectory(trajectory_id);
     time_elapsed = toc(start_tic);
     fprintf('End Setup Simulation : %f seconds\n', time_elapsed);
 
@@ -643,7 +643,7 @@ function run_forward_kinematics(handles,modObj,trajectory_id)
     iksim = InverseKinematicsSimulator(modObj);
     fksim = ForwardKinematicsSimulator(modObj, fksolver);
     model_config = getappdata(handles.trajectory_popup,'model_config');
-    trajectory = model_config.getTrajectory(trajectory_id);
+    trajectory = model_config.getJointTrajectory(trajectory_id);
     time_elapsed = toc(start_tic);
     fprintf('End Setup Simulation : %f seconds\n', time_elapsed);
 
@@ -691,7 +691,7 @@ function loadState(handles)
         load(file_name);
         set(handles.model_text,'String',state.model_text);
         set(handles.cable_text,'String',state.cable_text);
-        setappdata(handles.figure1,'toggle',state.checkbox_value);
+        setappdata(handles.figure1,'toggle',CASPR_configuration.LoadDevModelConfig());
         state.modObj.bodyModel.occupied.reset();
         setappdata(handles.cable_text,'modObj',state.modObj);
         trajectory_popup_Update([], handles);
