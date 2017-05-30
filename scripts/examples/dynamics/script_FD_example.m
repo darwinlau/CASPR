@@ -12,7 +12,7 @@ clc; clear; close all;
 % Set up the type of model, trajectory and the set of cables to be used
 model_config = ModelConfig('Example planar XY');
 cable_set_id = 'basic';
-trajectory_id = 'x_simple';
+trajectory_id = 'example_quintic';
 
 modelObj = model_config.getModel(cable_set_id);
 

@@ -131,6 +131,17 @@ classdef (Abstract) JointBase < handle
                 [q(i,:), q_dot(i,:), q_ddot(i,:)] = Spline.QuinticInterpolation(q_s(i), q_s_d(i), q_s_dd(i), q_e(i), q_e_d(i), q_e_dd(i), time_vector);
             end
         end
+        
+        function [q, q_dot, q_ddot] = generateTrajectoryParabolicBlend(obj, q_s, q_e, time_vector, time_blend)
+            n_dof = obj.numDofs;
+            CASPR_log.Assert(n_dof == length(q_s) && n_dof == length(q_e), 'Length of input states are different to the number of DoFs');
+            q = zeros(n_dof, length(time_vector)); 
+            q_dot = zeros(n_dof, length(time_vector));
+            q_ddot = zeros(n_dof, length(time_vector));
+            for i = 1:n_dof
+                [q(i,:), q_dot(i,:), q_ddot(i,:)] = Spline.ParabolicBlend(q_s(i), q_e(i), time_vector, time_blend);
+            end
+        end
 	end
         
     methods (Static)

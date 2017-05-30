@@ -10,7 +10,7 @@ clc; clear; close all;
 % Set up the type of model
 model_config = ModelConfig('Example planar XY');
 cable_set_id = 'basic';
-trajectory_id = 'x_simple';
+trajectory_id = 'example_quintic';
 
 % Load the SystemKinematics object from the XML
 modelObj = model_config.getModel(cable_set_id);

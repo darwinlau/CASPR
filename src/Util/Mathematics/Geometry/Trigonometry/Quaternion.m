@@ -253,6 +253,21 @@ classdef Quaternion
             % Step 3 Convert back to quaternion trajectory
             [q, q_d, q_dd] = Quaternion.from_axis_angle_traj_to_quaternion_traj(axis_angle_se, th, th_dot, th_ddot, time_vector);
         end
+        
+        % Interpolation for a quaternion using linear spline
+        function [q, q_d, q_dd] = ParabolicBlend(q_s, q_e, time_vector, blend_time)
+            % Step 1 Quaternion axis and rotation (possibly to optimise in
+            % the future)
+            R_0s = Quaternion.ToRotationMatrix(q_s);
+            R_0e = Quaternion.ToRotationMatrix(q_e);
+            R_se = R_0s'*R_0e;
+            q_se = Quaternion.FromRotationMatrix(R_se);
+            axis_angle_se = AxisAngle.FromQuaternion(q_se);
+            % Step 2 Interpolate quaternion angle
+            [th, th_dot, th_ddot] = Spline.ParabolicBlend(0, axis_angle_se.th, time_vector, blend_time);
+            % Step 3 Convert back to quaternion trajectory
+            [q, q_d, q_dd] = Quaternion.from_axis_angle_traj_to_quaternion_traj(axis_angle_se, th, th_dot, th_ddot, time_vector);
+        end
     end
     
     methods (Static, Access = private)
