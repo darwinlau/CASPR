@@ -16,8 +16,8 @@ classdef SEACM < WorkspaceMetricBase
         % Evaluate Functions implementation
         function v = evaluateFunction(~,dynamics,~)
             L   =   transpose(dynamics.M\dynamics.L_active');
-            f_u =   dynamics.cableForcesActiveMax;
-            f_l =   dynamics.cableForcesActiveMin;
+            f_u =   dynamics.actuationForcesMax;
+            f_l =   dynamics.actuationForcesMin;
             w   =   WrenchSet(L,f_u,f_l,dynamics.M\dynamics.G);
             if(w.n_faces > 0)
                 q   =   length(w.b);

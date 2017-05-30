@@ -19,7 +19,7 @@ uGrid           =   UniformGrid(0.05*ones(n_dim,1),0.45*ones(n_dim,1),q_step*one
 % Define the workspace condition and metrics
 w_condition  =   {WorkspaceConditionBase.CreateWorkspaceCondition(WorkspaceConditionType.WRENCH_CLOSURE,[],[])};
 w_metric = {WorkspaceMetricBase.CreateWorkspaceMetric(WorkspaceMetricType.SEACM,[])};
-opt = WorkspaceSimulatorOptions(true);
+opt = WorkspaceSimulatorOptions(true,optimset('Display','off'));
 
 % Start the simulation
 disp('Start Setup Simulation');
