@@ -2,7 +2,7 @@
 %
 % Author        : Autogenerate
 % Created       : 20XX
-% Description    :
+% Description   :
 
 % Set up the type of model
 model_config = ModelConfig('Example planar XY');

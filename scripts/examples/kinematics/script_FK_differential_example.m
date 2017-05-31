@@ -2,7 +2,7 @@
 %
 % Author        : Autogenerate
 % Created       : 20XX
-% Description    :
+% Description   :
 
 % Clear the variables, command window, and all windows
 clc; clear; close all;
