@@ -1,23 +1,19 @@
-% UNITS:
-% LEN: METER
-% ANGLE: RADIAN
-classdef MotorAccessories < handle
-    % Parameterize the spool used with Dynamixel
-    properties (Access = private, Constant = true)
+classdef MotorAccessoriesBase < handle
+    properties(Abstract, Constant = true)
         % Spool
         % one way to initialize the spool model
-        cableLength_full_load = 2.11;
-        numCircles_full_load = 11;
-        len_per_circle = MotorAccessories.cableLength_full_load/MotorAccessories.numCircles_full_load;
-        width_per_circle = 0.024/MotorAccessories.numCircles_full_load; % the width of one circular coil
-        radius = sqrt(MotorAccessories.len_per_circle^2-MotorAccessories.width_per_circle^2)/2/pi;
+        cableLength_full_load
+        numCircles_full_load
+        len_per_circle
+        width_per_circle
+        radius
         % another way to initialize the spool model
         % width_per_circle = 0.002;
         % radius = 0.03;
         % len_per_circle = sqrt(MotorAccessories.width_per_circle^2 + (MotorAccessories.radius*2*pi)^2);
         
         % Dynamixel Holder
-        lenCoS2Outlet = 0.107; % distance from cetre of the spool to the cable outlet
+        lenCoS2Outlet % distance from cetre of the spool to the cable outlet
     end
     
     properties
@@ -32,15 +28,11 @@ classdef MotorAccessories < handle
     end
     
     methods
-%         function accessories = MotorAccessories(radius, width_per_circle, lenCoS2Outlet)
-%             accessories.radius = radius;
-%             accessories.width_per_circle = width_per_circle;
-%             accessories.lenCoS2Outlet = lenCoS2Outlet;
-%             accessories.len_per_circle  = sqrt(width_per_circle^2 + (radius*2*pi)^2);
-%         end
-        function accessories = MotorAccessories()
+        function accessories = MotorAccessoriesBase()
         end
-        
+    end
+    
+    methods
         % deltaAngle UNIT: RADIAN
         % deltaLength is relative to the initial cable length when the
         % coil_position = coil_position_init;
@@ -86,4 +78,3 @@ classdef MotorAccessories < handle
         end
     end
 end
-

@@ -15,7 +15,8 @@ classdef PoCaBotCASPRInterface < HardwareInterfaceBase
         cableLengths_full          % size: DXL_NUM X 1
         dynamixel_position_initial % size: DXL_NUM X 1
         
-        dynamixel_direction_factor
+        dynamixel_direction_factor_position
+        dynamixel_direction_factor_current
     end
     
     properties (Access = public)
@@ -47,6 +48,16 @@ classdef PoCaBotCASPRInterface < HardwareInterfaceBase
         ADDR_XH_PRESENT_POSITION       = 132;
         LEN_XH_GOAL_POSITION       = 4;
         LEN_XH_PRESENT_POSITION    = 4;
+        
+        % The profile acceleration of the dynamixel;
+        % This value could be set to 100;
+        ADDR_XH_PROFILE_ACCELERATION = 108;
+        LEN_XH_PROFILE_ACCELERATION = 4;
+        
+        % The profile velocity of the dynamixel
+        % This value could be set to 112;
+        ADDR_XH_PROFILE_VELOCITY = 112;
+        LEN_XH_PROFILE_VELOCITY = 4;
         
         % Beware of that when trying to modify the operatiing mode, the
         % motors must be turned off.
@@ -86,13 +97,15 @@ classdef PoCaBotCASPRInterface < HardwareInterfaceBase
             interface.numCmd = numCmd;
             interface.cableLengths_full = cableLengths_full;
             if(dynamixel_direction_reversed)
-                interface.dynamixel_direction_factor = -1;
+                interface.dynamixel_direction_factor_position = -1;
+                interface.dynamixel_direction_factor_current  = 1;
             else
-                interface.dynamixel_direction_factor = 1;
+                interface.dynamixel_direction_factor_position = 1;
+                interface.dynamixel_direction_factor_current  =-1;
             end
             
             for i = 1: numCmd
-                accessories_temp(i) = MotorAccessories;
+                accessories_temp(i) = SmallMotorAccessories;
             end
             interface.accessories = accessories_temp;
             interface.initialise;
@@ -249,7 +262,7 @@ classdef PoCaBotCASPRInterface < HardwareInterfaceBase
             deltaAngle = (ret - obj.dynamixel_position_initial)/4096*2*pi;
             deltalength = zeros(size(deltaAngle));
             for i = 1:obj.DXL_NUM
-                deltalength(i) = obj.dynamixel_direction_factor * obj.accessories(i).getDeltaLength(deltaAngle);
+                deltalength(i) = obj.dynamixel_direction_factor_position * obj.accessories(i).getDeltaLength(deltaAngle(i));
             end
             length = obj.cableLengths_initial + deltalength;
         end
@@ -292,12 +305,21 @@ classdef PoCaBotCASPRInterface < HardwareInterfaceBase
                 obj.close();
                 CASPR_log.Error('Input argument error, please check the size of the argument c_cmd and try again');
             end
-            obj.sync_write(obj.ADDR_XH_GOAL_CURRENT, obj.LEN_XH_GOAL_CURRENT, c_cmd);
+            obj.sync_write(obj.ADDR_XH_GOAL_CURRENT, obj.LEN_XH_GOAL_CURRENT, c_cmd*obj.dynamixel_direction_factor_current);
         end
         
         % Method to read the current from the hardware (if available)
         function [current] = currentFeedbackRead(obj)
             [~, current] = obj.sync_read(obj.ADDR_XH_PRESENT_CURRENT, obj.LEN_XH_PRESENT_CURRENT);
+            current = current*obj.dynamixel_direction_factor_current;
+        end
+        
+        function setProfileAcceleration(obj,profile)
+            obj.sync_write(obj.ADDR_XH_PROFILE_ACCELERATION, obj.LEN_XH_PROFILE_ACCELERATION, profile);
+        end
+        
+        function setProfileVelocity(obj,profile)
+            obj.sync_write(obj.ADDR_XH_PROFILE_VELOCITY, obj.LEN_XH_PROFILE_VELOCITY, profile);
         end
     end
     
@@ -315,8 +337,8 @@ classdef PoCaBotCASPRInterface < HardwareInterfaceBase
             for i = 1:obj.DXL_NUM
                 angle_delta(i) = obj.accessories(i).getDeltaAngle(delta_lengths(i));
             end
-            dynamixel_position_delta = obj.dynamixel_direction_factor * angle_delta/2/pi*4096;
-            dynamixel_position_cmd = obj.dynamixel_position_initial + dynamixel_position_delta;
+            dynamixel_position_delta = obj.dynamixel_direction_factor_position * angle_delta/2/pi*4096;
+            dynamixel_position_cmd = obj.dynamixel_position_initial + dynamixel_position_delta';
         end
         
         function [pos] = radian2dynamixelposition(obj, angle)
