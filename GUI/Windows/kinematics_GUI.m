@@ -220,110 +220,6 @@ function trajectory_popup_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
     end
 end
 
-
-% --- Executes on selection change in approximation_type_popup.
-function approximation_type_popup_Callback(~, ~, ~) %#ok<DEFNU>
-    % hObject    handle to approximation_type_popup (see GCBO)
-    % eventdata  reserved - to be defined in a future version of MATLAB
-    % handles    structure with handles and user data (see GUIDATA)
-
-    % Hints: contents = cellstr(get(hObject,'String')) returns approximation_type_popup contents as cell array
-    %        contents{get(hObject,'Value')} returns selected item from approximation_type_popup
-end
-
-function approximation_type_popup_Update(hObject,handles)
-    contents = cellstr(get(handles.kinematics_popup,'String'));
-    kinematics_id = contents{get(handles.kinematics_popup,'Value')};
-    if(strcmp(kinematics_id,'Inverse Kinematics'))
-        set(hObject,'value',1);
-        set(hObject, 'String', {' '});
-        set(hObject,'Visible','off');
-        set(handles.approximation_text,'Visible','off');
-    else
-        set(hObject,'Visible','on');
-        set(handles.approximation_text,'Visible','on');
-        contents = cellstr(get(handles.solver_class_popup,'String'));
-        solver_class_id = contents{get(handles.solver_class_popup,'Value')};
-        settings = getappdata(handles.figure1,'settings');
-        solverObj = settings.getElementById(solver_class_id);
-        enum_file = solverObj.getElementsByTagName('approximation_type_enum').item(0).getFirstChild.getData;
-        e_list = enumeration(char(enum_file));
-        e_n         =   length(e_list);
-        e_list_str  =   cell(1,e_n);
-        for i=1:e_n
-            temp_str = char(e_list(i));
-            e_list_str{i} = temp_str(1:length(temp_str));
-        end
-        set(hObject,'value',1);
-        set(hObject, 'String', e_list_str);
-    end
-end
-
-% --- Executes during object creation, after setting all properties.
-function approximation_type_popup_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
-    % hObject    handle to approximation_type_popup (see GCBO)
-    % eventdata  reserved - to be defined in a future version of MATLAB
-    % handles    empty - handles not created until after all CreateFcns called
-
-    % Hint: popupmenu controls usually have a white background on Windows.
-    %       See ISPC and COMPUTER.
-    if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-        set(hObject,'BackgroundColor','white');
-    end
-end
-
-% --- Executes on selection change in q_dot_popup.
-function q_dot_popup_Callback(~, ~, ~) %#ok<DEFNU>
-    % hObject    handle to q_dot_popup (see GCBO)
-    % eventdata  reserved - to be defined in a future version of MATLAB
-    % handles    structure with handles and user data (see GUIDATA)
-
-    % Hints: contents = cellstr(get(hObject,'String')) returns q_dot_popup contents as cell array
-    %        contents{get(hObject,'Value')} returns selected item from q_dot_popup
-end
-
-function q_dot_popup_Update(hObject,handles)
-    contents = cellstr(get(handles.kinematics_popup,'String'));
-    kinematics_id = contents{get(handles.kinematics_popup,'Value')};
-    if(strcmp(kinematics_id,'Inverse Kinematics'))
-        set(hObject,'value',1);
-        set(hObject, 'String', {' '});
-        set(hObject,'Visible','off');
-        set(handles.q_dot_text,'Visible','off');
-    else
-        set(hObject,'Visible','on');
-        set(handles.q_dot_text,'Visible','on');
-        contents = cellstr(get(handles.solver_class_popup,'String'));
-        solver_class_id = contents{get(handles.solver_class_popup,'Value')};
-        settings = getappdata(handles.figure1,'settings');
-        solverObj = settings.getElementById(solver_class_id);
-        enum_file = solverObj.getElementsByTagName('q_dot_type_enum').item(0).getFirstChild.getData;
-        e_list = enumeration(char(enum_file));
-        e_n         =   length(e_list);
-        e_list_str  =   cell(1,e_n);
-        for i=1:e_n
-            temp_str = char(e_list(i));
-            e_list_str{i} = temp_str(1:length(temp_str));
-        end
-        set(hObject,'value',1);
-        set(hObject, 'String', e_list_str);
-    end
-end
-
-% --- Executes during object creation, after setting all properties.
-function q_dot_popup_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
-    % hObject    handle to q_dot_popup (see GCBO)
-    % eventdata  reserved - to be defined in a future version of MATLAB
-    % handles    empty - handles not created until after all CreateFcns called
-
-    % Hint: popupmenu controls usually have a white background on Windows.
-    %       See ISPC and COMPUTER.
-    if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-        set(hObject,'BackgroundColor','white');
-    end
-end
-
-
 % --- Executes on selection change in solver_class_popup.
 function solver_class_popup_Callback(~, ~, handles) %#ok<DEFNU>
     % hObject    handle to solver_class_popup (see GCBO)
@@ -332,8 +228,7 @@ function solver_class_popup_Callback(~, ~, handles) %#ok<DEFNU>
 
     % Hints: contents = cellstr(get(hObject,'String')) returns solver_class_popup contents as cell array
     %        contents{get(hObject,'Value')} returns selected item from solver_class_popup
-    approximation_type_popup_Update(handles.approximation_type_popup,handles);
-    q_dot_popup_Update(handles.q_dot_popup,handles);
+    
 end
 
 function solver_class_popup_Update(hObject,handles)
@@ -424,10 +319,6 @@ function load_button_Callback(~, ~, handles) %#ok<DEFNU>
             set(handles.kinematics_popup,'value',state.kinematics_popup_vale);
             solver_class_popup_Update(handles.solver_class_popup,handles);
             set(handles.solver_class_popup,'value',state.solver_class_popup);
-            approximation_type_popup_Update(handles.approximation_type_popup,handles);
-            q_dot_popup_Update(handles.q_dot_popup,handles);
-            set(handles.approximation_type_popup,'value',state.approximation_type_popup);
-            set(handles.q_dot_popup,'value',state.q_dot_popup);
             set(handles.plot_type_popup,'value',state.plot_type_popup);
             plot_type_popup_Callback(handles.plot_type_popup,[],handles);
         else
@@ -621,15 +512,6 @@ function run_forward_kinematics(handles,modObj,trajectory_id)
     % First load all the necessary informatino
     contents = cellstr(get(handles.solver_class_popup,'String'));
     solver_class = contents{get(handles.solver_class_popup,'Value')};
-    contents = cellstr(get(handles.approximation_type_popup,'String'));
-    approximation_type = contents{get(handles.approximation_type_popup,'Value')};
-    contents = cellstr(get(handles.q_dot_popup,'String'));
-    q_dot_approximation = contents{get(handles.q_dot_popup,'Value')};
-    solver_function = str2func(solver_class);
-    settings = getappdata(handles.figure1,'settings');
-    solverObj = settings.getElementById(solver_class);
-    approx_enum_file = solverObj.getElementsByTagName('approximation_type_enum').item(0).getFirstChild.getData;
-    q_dot_enum_file = solverObj.getElementsByTagName('q_dot_type_enum').item(0).getFirstChild.getData;
     
     % An inverse kinematics and forward kinematics simulator will be run to
     % show that the results are consistent.
@@ -638,7 +520,17 @@ function run_forward_kinematics(handles,modObj,trajectory_id)
     drawnow;
     start_tic = tic;
     % Initialise the least squares solver for the forward kinematics
-    fksolver = solver_function(modObj,eval([char(approx_enum_file),'.',char(approximation_type)]),eval([char(q_dot_enum_file),'.',char(q_dot_approximation)]));
+    if(strcmp(solver_class,'FKLeastSquares'))
+        fksolver = FKLeastSquares(modObj, FK_LS_ApproxOptionType.FIRST_ORDER_INTEGRATE_PSEUDOINV, FK_LS_QdotOptionType.FIRST_ORDER_DERIV);
+    elseif(strcmp(solver_class,'FKDifferential'))
+        fksolver = FKDifferential(modObj);
+    elseif(strcmp(solver_class,'FKHybridLeastSquaresDifferential'))
+        fksolver = FKHybridLeastSquaresDifferential(modObj, FK_LS_ApproxOptionType.FIRST_ORDER_INTEGRATE_PSEUDOINV, FK_LS_QdotOptionType.FIRST_ORDER_DERIV, 10);
+    else
+        CASPR_log.Print(CASPR_log.Error,'Unknown forward kinematic solver used');
+    end
+      
+    
     % Initialise the three inverse/forward kinematics solvers
     iksim = InverseKinematicsSimulator(modObj);
     fksim = ForwardKinematicsSimulator(modObj, fksolver);
@@ -671,13 +563,13 @@ function run_forward_kinematics(handles,modObj,trajectory_id)
     set(handles.status_text,'String','Simulation plotting');
     drawnow;
     start_tic = tic;
-    GUIOperations.GUIPlot('plotJointSpace',iksim,handles,2,get(handles.undock_box,'Value'));
-    GUIOperations.GUIPlot('plotJointSpace',fksim,handles,2,get(handles.undock_box,'Value'));
+    GUIOperations.GUIPlot('plotJointSpace',iksim,handles,1,get(handles.undock_box,'Value'));
+    GUIOperations.GUIPlot('plotJointSpace',fksim,handles,1,get(handles.undock_box,'Value'));
     GUIOperations.GUIPlot('plotCableLengthError',fksim,handles,1,get(handles.undock_box,'Value'));
     time_elapsed = toc(start_tic);
     fprintf('End Plotting Simulation : %f seconds\n', time_elapsed);
     set(handles.status_text,'String','No simulation running');
-    assignin('base','forward_kinematic_simulator',sim);
+    assignin('base','forward_kinematic_simulator',fksim);
 end
 
 function loadState(handles)
@@ -705,10 +597,6 @@ function loadState(handles)
                 set(handles.kinematics_popup,'value',state.kinematics_popup_vale);
                 solver_class_popup_Update(handles.solver_class_popup,handles);
                 set(handles.solver_class_popup,'value',state.solver_class_popup);
-                approximation_type_popup_Update(handles.approximation_type_popup,handles);
-                q_dot_popup_Update(handles.q_dot_popup,handles);
-                set(handles.approximation_type_popup,'value',state.approximation_type_popup);
-                set(handles.q_dot_popup,'value',state.q_dot_popup);
                 set(handles.plot_type_popup,'value',state.plot_type_popup);
                 plot_type_popup_Callback(handles.plot_type_popup,[],handles);
             else
@@ -728,8 +616,6 @@ function saveState(handles,file_path)
     state.trajectory_popup_vale             =   get(handles.trajectory_popup,'value');
     state.kinematics_popup_vale             =   get(handles.kinematics_popup,'value');
     state.solver_class_popup                =   get(handles.solver_class_popup,'value');
-    state.approximation_type_popup          =   get(handles.approximation_type_popup,'value');
-    state.q_dot_popup                       =   get(handles.q_dot_popup,'value');
     state.plot_type_popup                   =   get(handles.plot_type_popup,'value');
     if(nargin>1)
         save(file_path,'state');
@@ -744,33 +630,21 @@ function toggle_visibility(dynamics_method,handles)
         % Forward kinematics so hide all of the options
         set(handles.solver_class_text,'Visible','off');
         set(handles.solver_class_popup,'Visible','off');
-        set(handles.approximation_text,'Visible','off');
-        set(handles.approximation_type_popup,'Visible','off');
-        set(handles.q_dot_text,'Visible','off');
-        set(handles.q_dot_popup,'Visible','off');
         set(handles.plot_type_text,'Visible','on');
         set(handles.plot_type_popup,'Visible','on');
     else
         % Inverse kinematics so let all of the options be viewed
         set(handles.solver_class_text,'Visible','on');
         set(handles.solver_class_popup,'Visible','on');
-        set(handles.approximation_text,'Visible','on');
-        set(handles.approximation_type_popup,'Visible','on');
-        set(handles.q_dot_text,'Visible','on');
-        set(handles.q_dot_popup,'Visible','on');
         set(handles.plot_type_text,'Visible','off');
         set(handles.plot_type_popup,'Visible','off');
         solver_class_popup_Update(handles.solver_class_popup,handles);
-        approximation_type_popup_Update(handles.approximation_type_popup,handles);
-        q_dot_popup_Update(handles.q_dot_popup,handles);
     end
 end
 
 function initialise_popups(handles)
     % Updates
     solver_class_popup_Update(handles.solver_class_popup,handles);
-    approximation_type_popup_Update(handles.approximation_type_popup,handles);
-    q_dot_popup_Update(handles.q_dot_popup,handles);
     % Needed callbacks
     plot_type_popup_Callback(handles.plot_type_popup,[],handles);
 end
@@ -785,33 +659,45 @@ function script_button_Callback(hObject, eventdata, handles)
     % Determine if forward or inverse kinematics
     contents = cellstr(get(handles.kinematics_popup,'String'));
     kinematics_id = contents{get(handles.kinematics_popup,'Value')};
+    % Strings for model editing
+    model_str = cellstr(get(handles.model_text,'String'));
+    cable_str = cellstr(get(handles.cable_text,'String'));
+    contents = cellstr(get(handles.trajectory_popup,'String'));
+    trajectory_str = contents{get(handles.trajectory_popup,'Value')};
     if(strcmp(kinematics_id,'Inverse Kinematics'))
         base_folder = CASPR_configuration.LoadHomePath();
         r_string = [base_folder,'/scripts/examples/kinematics/script_IK_example.m'];
-        w_string = [base_folder,'/scripts/local/GUI_script_autogenerated.m'];
-        % Edit for the model
-        model_str = cellstr(get(handles.model_text,'String'));  
-        cable_str = cellstr(get(handles.cable_text,'String'));
-        contents = cellstr(get(handles.trajectory_popup,'String'));
-        trajectory_str = contents{get(handles.trajectory_popup,'Value')};
-        r_fid = fopen(r_string,'r');
-        w_fid = fopen(w_string,'w');
-        while(~feof(r_fid))
-            s = fgetl(r_fid);
-            % Determine if comment
-            if((length(s)>1)&&(s(1) == '%'))
-                new_s = ['%',s];
-            else
-                new_s = s;
-            end
-            % Replace all references to the model
-            new_s = regexprep(new_s,'Example planar XY',model_str);
-            new_s = regexprep(new_s,'basic',cable_str);
-            new_s = regexprep(new_s,'example_linear',trajectory_str);
-            fprintf(w_fid,[new_s,'\n']);
+    else
+        contents = cellstr(get(handles.solver_class_popup,'String'));
+        solver_class_id = contents{get(handles.solver_class_popup,'Value')};
+        base_folder = CASPR_configuration.LoadHomePath();
+        if(strcmp(solver_class_id,'FKLeastSquares'))
+            r_string = [base_folder,'/scripts/examples/kinematics/script_FK_least_squares_example.m'];
+        elseif(strcmp(solver_class_id,'FKDifferential'))
+            r_string = [base_folder,'/scripts/examples/kinematics/script_FK_differential_example.m'];
+        elseif(strcmp(solver_class_id,'FKHybridLeastSquaresDifferential'))
+            r_string = [base_folder,'/scripts/examples/kinematics/script_FK_hybrid_leastsquares_differential_example.m'];
         end
-        fclose(r_fid);
-        fclose(w_fid);
-        edit(w_string)
+        
     end
+    w_string = [base_folder,'/scripts/local/GUI_script_autogenerated.m'];
+    r_fid = fopen(r_string,'r');
+    w_fid = fopen(w_string,'w');
+    while(~feof(r_fid))
+        s = fgetl(r_fid);
+        % Determine if comment
+        if((length(s)>1)&&(s(1) == '%'))
+            new_s = ['%',s];
+        else
+            new_s = s;
+        end
+        % Replace all references to the model
+        new_s = regexprep(new_s,'Example planar XY',model_str);
+        new_s = regexprep(new_s,'basic',cable_str);
+        new_s = regexprep(new_s,'example_linear',trajectory_str);
+        fprintf(w_fid,[new_s,'\n']);
+    end
+    fclose(r_fid);
+    fclose(w_fid);
+    edit(w_string)
 end
