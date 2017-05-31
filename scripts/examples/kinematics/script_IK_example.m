@@ -1,7 +1,7 @@
 % Script for inverse kinematics (IK) 
 %
-% Author        : Darwin LAU
-% Created       : 2017
+% Author        : Autogenerate
+% Created       : 20XX
 % Description    :
 
 % Set up the type of model
