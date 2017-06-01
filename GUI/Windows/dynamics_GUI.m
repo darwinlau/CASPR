@@ -220,7 +220,7 @@ function dynamics_popup_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
 end
 
 % --- Executes on selection change in solver_class_popup.
-function solver_class_popup_Callback(~, ~, handles) %#ok<DEFNU>
+function solver_class_popup_Callback(~, ~, ~) %#ok<DEFNU>
     % hObject    handle to solver_class_popup (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
@@ -427,7 +427,6 @@ function run_inverse_dynamics(handles,modObj,trajectory_id)
     % Read the type of plot
     contents = cellstr(get(handles.plot_type_popup,'String'));
     plot_type = contents{get(handles.plot_type_popup,'Value')};
-    id_solver
     
     % Setup the inverse dynamics simulator with the SystemModel
     % object and the inverse dynamics solver
@@ -611,14 +610,6 @@ function initialise_popups(handles)
     % Needed callbacks
     plot_type_popup_Callback(handles.plot_type_popup,[],handles);
 end
-
-function weight_number = get_weight_number(xmlObj,modObj)
-    weight_links = str2double(xmlObj.getElementsByTagName('weight_links_multiplier').item(0).getFirstChild.getData);
-    weight_cables = str2double(xmlObj.getElementsByTagName('weight_cables_multiplier').item(0).getFirstChild.getData);
-    weight_constants = str2num(xmlObj.getElementsByTagName('weight_constants').item(0).getFirstChild.getData); %#ok<ST2NM>
-    weight_number = weight_links*modObj.numLinks + weight_cables*modObj.numActuatorsActive + sum(weight_constants);
-end
-
 
 % --- Executes on button press in script_button.
 function script_button_Callback(~, ~, handles) %#ok<DEFNU>
