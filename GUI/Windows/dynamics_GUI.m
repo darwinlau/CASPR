@@ -606,6 +606,7 @@ end
 
 function initialise_popups(handles)
     % Updates
+    solver_type_popup_update(handles.solver_type_popup,handles);
     dynamics_popup_Callback(handles.dynamics_popup, [], handles);
     % Needed callbacks
     plot_type_popup_Callback(handles.plot_type_popup,[],handles);

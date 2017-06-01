@@ -61,6 +61,7 @@ classdef GUIOperations
                     set(ax(i),'Parent',tab(i),'OuterPosition',[0,0,1,1])
                 end
                 plot_function(sim,ax);
+                tabgp.SelectedTab = tab(i);
             end
         end
     end
