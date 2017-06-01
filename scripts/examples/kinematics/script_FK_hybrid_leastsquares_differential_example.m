@@ -18,8 +18,17 @@ modelObj = model_config.getModel(cable_set_id);
 % An inverse kinematics and forward kinematics simulator will be run to
 % show that the results are consistent.
 disp('Start Setup Simulation');
-% Initialise the least squares solver for the forward kinematics
-fksolver = FKHybridLeastSquaresDifferential(modelObj, FK_LS_ApproxOptionType.FIRST_ORDER_INTEGRATE_PSEUDOINV, FK_LS_QdotOptionType.FIRST_ORDER_DERIV, 10);
+
+% 1) Setup the options
+% How the initial guess for the FK is made (FK_LS_ApproxOptionType enum)
+FK_q_estimation_method = FK_LS_ApproxOptionType.FIRST_ORDER_INTEGRATE_PSEUDOINV; 
+% How to q_dot is estimated (FK_LS_QdotOptionType enum)
+FK_q_dot_estimation_method = FK_LS_QdotOptionType.FIRST_ORDER_DERIV; 
+% This is the frequency the least squares is used: for example, 1 out of 10 times
+FK_hybrid_frequency = 10;
+
+% 2) Initialise the FK solver
+fksolver = FKHybridLeastSquaresDifferential(modelObj, FK_q_estimation_method, FK_q_dot_estimation_method, hybridFK_frequency);
 % Initialise the inverse/forward kinematics solvers
 iksim = InverseKinematicsSimulator(modelObj);
 fksim = ForwardKinematicsSimulator(modelObj, fksolver);
