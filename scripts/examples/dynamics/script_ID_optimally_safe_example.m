@@ -28,7 +28,7 @@ idsim.run(trajectory);
 disp('Finished Running Simulation');
 
 % Display information from the inverse dynamics simulator
-fprintf('Optimisation computational time, mean : %f seconds, std dev : %f seconds, total: %f seconds\n', mean(idsim.compTime), std(idsim.compTime), sum(idsim.compTime));
+disp(sprintf('Optimisation computational time, mean : %f seconds, std dev : %f seconds, total: %f seconds', mean(idsim.compTime), std(idsim.compTime), sum(idsim.compTime)));
 
 % Plotting simulation graphs
 disp('Start Plotting Simulation');

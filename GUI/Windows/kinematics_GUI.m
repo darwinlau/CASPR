@@ -651,7 +651,7 @@ end
 
 
 % --- Executes on button press in script_button.
-function script_button_Callback(hObject, eventdata, handles)
+function script_button_Callback(~, ~, handles) %#ok<DEFNU>
     % hObject    handle to script_button (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
@@ -686,11 +686,7 @@ function script_button_Callback(hObject, eventdata, handles)
     while(~feof(r_fid))
         s = fgetl(r_fid);
         % Determine if comment
-        if((length(s)>1)&&(s(1) == '%'))
-            new_s = ['%',s];
-        else
-            new_s = s;
-        end
+        new_s = regexprep(new_s,'%','%%');
         % Replace all references to the model
         new_s = regexprep(new_s,'Example planar XY',model_str);
         new_s = regexprep(new_s,'basic',cable_str);
