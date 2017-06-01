@@ -3,6 +3,8 @@
   <!ATTLIST linear_spline_trajectory id ID #REQUIRED>
   <!ATTLIST cubic_spline_trajectory id ID #REQUIRED>
   <!ATTLIST quintic_spline_trajectory id ID #REQUIRED>
+  <!ATTLIST cubic_spline_average_velocity_trajectory id ID #REQUIRED>
+  <!ATTLIST parabolic_blend_trajectory id ID #REQUIRED>
 ]>
 <joint_trajectories>
   <quintic_spline_trajectory id="traj_1" time_definition="relative" time_step="0.01">
