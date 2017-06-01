@@ -109,7 +109,7 @@ classdef DingbotExperiment < ExperimentBase
             
             
             exp = DingbotExperiment();
-            trajectory = exp.modelConfig.getTrajectory(trajectory_id);
+            trajectory = exp.modelConfig.getJointTrajectory(trajectory_id);
             exp.runTrajectory(trajectory); 
             
             figure;
