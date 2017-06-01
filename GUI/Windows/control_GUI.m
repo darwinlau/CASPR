@@ -168,7 +168,7 @@ function trajectory_popup_Update(~, ~, handles)
     end
     setappdata(handles.trajectory_popup,'model_config',model_config);
     % Determine the trajectories
-    trajectories_str = model_config.getTrajectoriesList();    
+    trajectories_str = model_config.getJointTrajectoriesList();    
     set(handles.trajectory_popup, 'Value', 1);
     if(~isempty(trajectories_str))
         set(handles.trajectory_popup, 'Value', 1);   set(handles.trajectory_popup, 'String', trajectories_str);
@@ -550,7 +550,7 @@ function run_button_Callback(~, ~, handles) %#ok<DEFNU>
     start_tic = tic;
     fdSolver = ForwardDynamics(FDSolverType.ODE113);
     control_sim = ControllerSimulator(modObj, controller,fdSolver);
-    trajectory_ref = model_config.getTrajectory(trajectory_id);
+    trajectory_ref = model_config.getJointTrajectory(trajectory_id);
     time_elapsed = toc(start_tic);
     fprintf('End Setup Simulation : %f seconds\n', time_elapsed);
 
@@ -914,7 +914,7 @@ function loadState(handles)
         load(file_name);
         set(handles.model_text,'String',state.model_text);
         set(handles.cable_text,'String',state.cable_text);
-        setappdata(handles.figure1,'toggle',state.checkbox_value);
+        setappdata(handles.figure1,'toggle',CASPR_configuration.LoadDevModelConfig());
         % This is to ensure that we are starting fresh
         state.modObj.bodyModel.occupied.reset();
         setappdata(handles.cable_text,'modObj',state.modObj);

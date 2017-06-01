@@ -15,5 +15,10 @@ classdef CASPR_configuration
             model_config = load('CASPR_environment.mat', 'CASPR_model_config_path');
             model_config_str = model_config.CASPR_model_config_path;            
         end
+        % Load GUI_dev_model_config
+        function GUI_dev_model_config = LoadDevModelConfig()
+            model_config = load('CASPR_environment.mat', 'CASPR_GUI_dev_model_config');
+            GUI_dev_model_config = model_config.CASPR_GUI_dev_model_config;            
+        end        
     end
 end

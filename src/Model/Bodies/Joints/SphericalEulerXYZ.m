@@ -64,6 +64,17 @@ classdef SphericalEulerXYZ < JointBase
             [q, q_dot, q_ddot] = SphericalEulerXYZ.quaternion_traj_to_q_traj(quat, quat_dot, quat_ddot, R_0s, time_vector);
         end
         
+        function [q, q_dot, q_ddot] = generateTrajectoryParabolicBlend(obj, q_s, q_e, time_vector, blend_time)
+            n_dof = obj.numDofs;
+            CASPR_log.Assert(n_dof == length(q_s) && n_dof == length(q_e), ...
+                'Length of input states are different to the number of DoFs');            
+            R_0s = SphericalEulerXYZ.RelRotationMatrix(q_s);
+            quat_s = Quaternion.FromRotationMatrix(SphericalEulerXYZ.RelRotationMatrix(q_s));
+            quat_e = Quaternion.FromRotationMatrix(SphericalEulerXYZ.RelRotationMatrix(q_e));            
+            [quat, quat_dot, quat_ddot] = Quaternion.ParabolicBlend(quat_s, quat_e, time_vector, blend_time);            
+            [q, q_dot, q_ddot] = SphericalEulerXYZ.quaternion_traj_to_q_traj(quat, quat_dot, quat_ddot, R_0s, time_vector);
+        end
+        
         % -------
         % Getters
         % -------

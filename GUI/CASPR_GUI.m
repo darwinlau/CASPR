@@ -34,7 +34,7 @@ function varargout = CASPR_GUI(varargin)
 
     % Edit the above text to modify the response to help CASPR_GUI
 
-    % Last Modified by GUIDE v2.5 22-Mar-2017 19:54:35
+    % Last Modified by GUIDE v2.5 30-May-2017 01:26:05
 
     % Begin initialization code - DO NOT EDIT
     warning('off','MATLAB:uitabgroup:OldVersion')
@@ -75,8 +75,10 @@ function CASPR_GUI_OpeningFcn(hObject, ~, handles, varargin)
     guidata(hObject, handles);
     
 %     Load previous information
+    axes(handles.plot_axis)
     plot(rand(5)); % Hack to fix size.  Ideally removed at some point.
     loadState(handles);
+    
     % UIWAIT makes CASPR_GUI wait for user response (see UIRESUME)
     % uiwait(handles.figure1);
 end
@@ -282,18 +284,38 @@ function console_pushbutton_Callback(~, ~, handles) %#ok<DEFNU>
     assignin('base','model_object',modObj);
 end
 
-%--------------------------------------------------------------------------
-%% Checkboxes
-%--------------------------------------------------------------------------
-% --- Executes on button press in checkbox.
-function checkbox_Callback(~, ~, handles) %#ok<DEFNU>
-% hObject    handle to checkbox (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of checkbox
-    model_popup_update(handles);
-    cable_popup_update(handles);
+% Model update button
+% --- Executes on button press in model_update_button.
+function model_update_button_Callback(~, ~, handles) %#ok<DEFNU>
+    % hObject    handle to model_update_button (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    structure with handles and user data (see GUIDATA)
+    
+    % Update the cable set list
+    % Generate the model_config object
+    contents = cellstr(get(handles.model_popup,'String'));
+    try
+        model_type = contents{get(handles.model_popup,'Value')};
+    catch 
+        CASPR_log.Warn('Previous model state does not exist anymore. Default to first element.');
+        model_type = contents{1};
+    end
+    if(CASPR_configuration.LoadDevModelConfig())
+        model_config = DevModelConfig(model_type);
+    else
+    	model_config = ModelConfig(model_type);
+    end
+    contents = cellstr(get(handles.cable_popup,'String'));
+    try
+        cable_type = contents{get(handles.cable_popup,'Value')};
+    catch 
+        CASPR_log.Warn('Previous cable does not exist anymore. Default to first element.');
+        cable_type = contents{1};
+    end
+    cableset_str = model_config.getCableSetList();
+    set(handles.cable_popup, 'String', cableset_str);
+    % Generate the new model
+    generate_model_object(handles);
 end
 
 %--------------------------------------------------------------------------
@@ -308,7 +330,7 @@ function generate_model_object(handles)
         CASPR_log.Warn('Previous model state does not exist anymore. Default to first element.');
         model_type = contents{1};
     end
-    if(get(handles.checkbox,'value'))
+    if(CASPR_configuration.LoadDevModelConfig())
         model_config = DevModelConfig(model_type);
     else
     	model_config = ModelConfig(model_type);
@@ -325,7 +347,7 @@ function generate_model_object(handles)
     cla;
     display_range = model_config.displayRange;
     view_angle = model_config.viewAngle;
-    MotionSimulatorBase.PlotFrame(modObj, display_range, view_angle, handles.figure1);
+    MotionSimulatorBase.PlotFrame(modObj, display_range, view_angle, handles.figure1, handles.plot_axis);
     % Store the dynamics object
     setappdata(handles.cable_popup,'modObj',modObj);
     setappdata(handles.cable_popup,'axis_range',display_range);
@@ -336,8 +358,7 @@ end
 
 function model_popup_update(handles)
     % Determine the state of the toggle
-    toggle_state = get(handles.checkbox,'Value');
-    if(toggle_state)
+    if(CASPR_configuration.LoadDevModelConfig())
         e_list_str      =   sort(ModelConfigManager.GetDevModelConfigListNames());
     else
     	e_list_str      =   sort(ModelConfigManager.GetModelConfigListNames());
@@ -355,7 +376,7 @@ function cable_popup_update(handles)
         CASPR_log.Warn('Previous model state does not exist anymore. Default to first element.');
         model_type = contents{1};
     end
-    if(get(handles.checkbox,'Value'))
+    if(CASPR_configuration.LoadDevModelConfig())
         model_config = DevModelConfig(model_type);
     else
     	model_config = ModelConfig(model_type);
@@ -370,7 +391,6 @@ function saveState(handles)
     % Save all of the settings
     state.model_popup_value     =   get(handles.model_popup,'value');
     state.cable_popup_value     =   get(handles.cable_popup,'value');
-    state.checkbox_value        =   get(handles.checkbox,'value');
     contents                    =   get(handles.model_popup,'String');
     state.model_text            =   contents{state.model_popup_value};
     contents                    =   get(handles.cable_popup,'String');
@@ -390,7 +410,6 @@ function loadState(handles)
     file_name = [CASPR_configuration.LoadHomePath(),'/GUI/config/caspr_gui_state.mat'];
     if(exist(file_name,'file'))
         load(file_name);
-        set(handles.checkbox,'value',state.checkbox_value);
         model_popup_update(handles);
         set(handles.model_popup,'value',state.model_popup_value);
         cable_popup_update(handles);
@@ -412,4 +431,26 @@ function format_q_table(numDofs,qtable,q_data)
         column_name{i} = ['q',num2str(i)];
     end
     set(qtable,'ColumnName',column_name);
+end
+
+
+% --- Executes during object creation, after setting all properties.
+function logo_axis_CreateFcn(hObject, ~, ~)
+    % hObject    handle to logo_axis (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    empty - handles not created until after all CreateFcns called
+
+    % Hint: place code in OpeningFcn to populate logo_axis
+    
+    
+    ig = imread('/home/jpeden/Dropbox/CASPR_private/GUI/config/CASPR_LOGO_FINAL.png','png');
+    image(hObject,ig);
+    
+    set(hObject,'XTickLabel','');
+    set(hObject,'YTickLabel','');
+    set(hObject,'XTick','');
+    set(hObject,'YTick','');
+    box off
+    set(gca,'Visible','off')
+    axis image
 end

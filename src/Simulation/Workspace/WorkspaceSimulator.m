@@ -333,7 +333,9 @@ classdef WorkspaceSimulator < SimulatorBase
             % are not give an error asking the user to change the value.
             % 3. Run two passes through of the data.
             % Go through the 
-            w_array = [obj.workspace{:}]; w_array_metrics = [w_array.metrics]; metric_array = [w_array_metrics{2:2:length(w_array_metrics)}];
+            w_array = [obj.workspace{:}];
+            w_array_metrics = [w_array.metrics]; 
+            metric_array = [w_array_metrics{m_i,2:2:length(w_array_metrics)}];
 %             mw = obj.metrics{m_i}.metricMax - obj.metrics{m_i}.metricMin + 1;
             mw = max(metric_array) - obj.metrics{m_i}.metricMin;
             scale_factor = 255/mw;
@@ -342,14 +344,13 @@ classdef WorkspaceSimulator < SimulatorBase
                 wp = plotting_workspace{i};
                 % Find which metric entry to use
                 if(wp.metrics{m_i,2} == obj.metrics{m_i}.metricMin)
-%                     plot(plot_axis,wp.pose(pose_index(1)),wp.pose(pose_index(2)),'r.')
+                    plot(plot_axis,wp.pose(pose_index(1)),wp.pose(pose_index(2)),'r.')
                 elseif(wp.metrics{m_i,2} == obj.metrics{m_i}.metricMin)
-%                     plot(plot_axis,wp.pose(pose_index(1)),wp.pose(pose_index(2)),'r.')
+                    plot(plot_axis,wp.pose(pose_index(1)),wp.pose(pose_index(2)),'r.')
                 else
                     c = c_map(floor(scale_factor*(wp.metrics{m_i,2} - obj.metrics{m_i}.metricMin))+1,:);
                     plot(plot_axis,wp.pose(pose_index(1)),wp.pose(pose_index(2)),'Color',c,'Marker','.')
                 end
-                
             end
             axis([obj.grid.q_begin(pose_index(1)),obj.grid.q_end(pose_index(1)),obj.grid.q_begin(pose_index(2)),obj.grid.q_end(pose_index(2))]);
         end
