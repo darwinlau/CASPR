@@ -31,7 +31,7 @@ function varargout = dynamics_GUI(varargin)
 
     % Edit the above text to modify the response to help dynamics_GUI
 
-    % Last Modified by GUIDE v2.5 01-Jun-2017 11:09:51
+    % Last Modified by GUIDE v2.5 01-Jun-2017 13:29:27
 
     % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
@@ -302,45 +302,6 @@ function run_button_Callback(~, ~, handles) %#ok<DEFNU>
         run_forward_dynamics(handles,modObj,trajectory_id);
     end
 end
-
-% --- Executes on button press in save_button.
-function save_button_Callback(~, ~, handles) %#ok<DEFNU>
-    % hObject    handle to save_button (see GCBO)
-    % eventdata  reserved - to be defined in a future version of MATLAB
-    % handles    structure with handles and user data (see GUIDATA)
-    file_name = [CASPR_configuration.LoadHomePath(),'/GUI/config/*.mat'];
-    [file,path] = uiputfile(file_name,'Save file name');
-    saveState(handles,[path,file]);
-end
-
-% --- Executes on button press in load_button.
-function load_button_Callback(~, ~, handles) %#ok<DEFNU>
-    % hObject    handle to load_button (see GCBO)
-    % eventdata  reserved - to be defined in a future version of MATLAB
-    % handles    structure with handles and user data (see GUIDATA)
-    path_string = CASPR_configuration.LoadHomePath();
-    file_name = [path_string,'/GUI/config/*.mat'];
-    settings = uigetfile(file_name);
-    load(settings);
-    mp_text = get(handles.model_text,'String');
-    cs_text = get(handles.cable_text,'String');
-    if(strcmp(state.simulator,'dynamics'))
-        if(strcmp(mp_text,state.model_text)&&strcmp(cs_text,state.cable_text))
-            set(handles.trajectory_popup,'value',state.trajectory_popup);
-            set(handles.dynamics_popup,'value',state.dynamics_popup);
-            set(handles.solver_class_popup,'value',state.solver_class_popup);
-            dynamics_popup_Callback(handles.dynamics_popup, [], handles);
-            set(handles.plot_type_popup,'value',state.plot_type_popup);
-            % Callback
-            plot_type_popup_Callback(handles.plot_type_popup,[],handles);
-        else
-            warning('Incorrect Model Type'); %#ok<WNTAG>
-        end
-    else
-        warning('File is not the correct file type'); %#ok<WNTAG>
-    end
-end
-
 
 % --- Executes on button press in plot_button.
 function plot_button_Callback(~, ~, handles) %#ok<DEFNU>
