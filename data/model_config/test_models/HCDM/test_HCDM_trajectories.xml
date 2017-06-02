@@ -1,6 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE joint_trajectories [
-  <!ATTLIST trajectory id ID #REQUIRED>
+  <!ATTLIST linear_spline_trajectory id ID #REQUIRED>
+  <!ATTLIST cubic_spline_trajectory id ID #REQUIRED>
+  <!ATTLIST quintic_spline_trajectory id ID #REQUIRED>
+  <!ATTLIST cubic_spline_average_velocity_trajectory id ID #REQUIRED>
+  <!ATTLIST parabolic_blend_trajectory id ID #REQUIRED>
 ]>
 
 <joint_trajectories>
