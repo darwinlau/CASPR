@@ -390,7 +390,7 @@ function script_button_Callback(~, ~, handles) %#ok<DEFNU>
     while(~feof(r_fid))
         s = fgetl(r_fid);
         % Determine if comment
-        new_s = regexprep(new_s,'%','%%');
+        new_s = regexprep(s,'%','%%');
         % Replace all references to the model
         new_s = regexprep(new_s,'Example planar XY',model_str);
         new_s = regexprep(new_s,'basic',cable_str);
