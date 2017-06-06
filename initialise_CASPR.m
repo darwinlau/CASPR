@@ -13,7 +13,7 @@ function initialise_CASPR()
     
     cd(CASPR_homepath);
     % Set the current version
-    CASPR_version = 20170528;
+    CASPR_version = 20170606;
     CASPR_model_config_path = [CASPR_homepath,'/data/model_config'];
     CASPR_GUI_dev_model_config = 0; % Developmental models are not shown
     
