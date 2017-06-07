@@ -13,7 +13,7 @@ function initialise_CASPR()
     
     cd(CASPR_homepath);
     % Set the current version
-    CASPR_version = 20170606;
+    CASPR_version = 20170706;
     CASPR_model_config_path = [CASPR_homepath,'/data/model_config'];
     CASPR_GUI_dev_model_config = 0; % Developmental models are not shown
     
@@ -89,6 +89,12 @@ function update_CASPR()
     fprintf('CASPR Update Complete. Enjoy!\n')
     if num_tests_failed > 0
         fprintf('NOTE: Some unit tests failed. Please contact the maintainers of CASPR with the test summary information\n');
+    else
+        fprintf('----------------------------------------------------\n\n')
+        fprintf(' - Logging was successfully setup.\n')
+        fprintf(' - All items in model config successfully build.\n')
+        fprintf(' - All tests of model elements pass.\n')
+        fprintf(' - All tests of analysis tools pass.\n')
     end
     fprintf('----------------------------------------------------\n\n')
 end
@@ -200,7 +206,7 @@ function num_tests_failed = setup_update_CASPR()
     fprintf('Set up Logging\n')
     fprintf('----------------------------------------------------\n')
     CASPR_log.SetLoggingDetails(CASPRLogLevel.INFO);
-    fprintf('Logging sucessively setup\n');
+    fprintf('Logging successfully setup\n');
     
     % Test that the models are correctly configured
     fprintf('\n----------------------------------------------------\n')
