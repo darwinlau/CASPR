@@ -3,12 +3,12 @@
 % Author        : Jonathan EDEN
 % Created       : 2016
 % Description   :
-classdef (Abstract) OpSpace < handle
+classdef (Abstract) OperationalSpace < handle
    
     properties
         link                % The link that the coordinate system is attached to
         selection_matrix    % A matrix which projects body velocities into the OPSpace terms
-        numOPDofs           % The number of output degrees of freedom
+        numOperationalDofs           % The number of output degrees of freedom
         offset              % The offset of the op_space coordinate in the link frame
     end
     
@@ -19,7 +19,7 @@ classdef (Abstract) OpSpace < handle
     
     methods (Abstract)
         % Extraction of the output y given a pose description.
-        y = extractOpSpace(obj,x,R)
+        y = extractOperationalSpace(obj,x,R)
     end
     
     methods (Abstract,Static)

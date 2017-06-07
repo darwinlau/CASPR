@@ -3,28 +3,25 @@
 % Author        : Jonathan EDEN
 % Created       : 2016
 % Description   :
-classdef OpOrientationEulerXYZ < OpSpace
+classdef OperationalOrientationEulerXYZ < OperationalSpace
     methods
         % Constructor
-        function o = OpOrientationEulerXYZ(id,name,link,selection_matrix)
+        function o = OperationalOrientationEulerXYZ(id,name,link,selection_matrix)
             o.id                =   id;
             o.name              =   name;
             o.link              =   link;
             o.offset            =   zeros(3,1);
-            o.numOPDofs         =   sum(diag(selection_matrix));
+            o.numOperationalDofs         =   sum(diag(selection_matrix));
             % Determine the selection matrix assuming 6 DoF
             temp_selection_matrix = [zeros(3),eye(3)];
             o.selection_matrix  =   temp_selection_matrix(logical(diag(selection_matrix)),:);
         end
         
         % Implementation of the abstract function
-        function y = extractOpSpace(obj,~,R)
+        function y = extractOperationalSpace(obj,~,R)
             b = asin(R(1,3));
             g = -atan2(R(1,2), R(1,1));
             a = -atan2(R(2,3), R(3,3));
-%             a = roundn(a, -10);
-%             b = roundn(b, -10);
-%             g = roundn(g, -10);
             y = obj.selection_matrix(:,4:6)*[a;b;g];
         end
     end
@@ -41,7 +38,7 @@ classdef OpOrientationEulerXYZ < OpSpace
             s_g = str2double(selectionObj.getElementsByTagName('sg').item(0).getFirstChild.getData);
             selection_matrix = diag([s_a,s_b,s_g]);
             % obtain selection matrix
-            o = OpOrientationEulerXYZ(id,name,link,selection_matrix);
+            o = OperationalOrientationEulerXYZ(id,name,link,selection_matrix);
         end
     end
 end
