@@ -173,27 +173,27 @@ classdef SphericalEulerXYZ < JointBase
             b = asin(R_0p(1,3));
             g = -atan2(R_0p(1,2), R_0p(1,1));
             a = -atan2(R_0p(2,3), R_0p(3,3));
-            a = roundn(a, -10);
-            b = roundn(b, -10);
-            g = roundn(g, -10);
+            a = round(a, 10);
+            b = round(b, 10);
+            g = round(g, 10);
         end
         
         function [a_d, b_d, g_d] = rotation_matrix_to_angles_deriv(a, b, g, R_0p_dot)
             b_d = R_0p_dot(1,3)/cos(b);
             g_d = (-b_d*sin(b)*cos(g)-R_0p_dot(1,1))/(cos(b)*sin(g));
             a_d = (-b_d*cos(a)*sin(b)-R_0p_dot(3,3))/(sin(a)*cos(b));
-            a_d = roundn(a_d, -10);
-            b_d = roundn(b_d, -10);
-            g_d = roundn(g_d, -10);
+            a_d = round(a_d, 10);
+            b_d = round(b_d, 10);
+            g_d = round(g_d, 10);
         end
         
         function [a_dd, b_dd, g_dd] = rotation_matrix_to_angles_deriv_d(a, b, g, a_d, b_d, g_d, R_0p_ddot)
             b_dd = (R_0p_ddot(1,3)+b_d^2*sin(b))/cos(b);
             g_dd = (-b_dd*sin(b)*cos(g)-b_d*(b_d*cos(b)*cos(g)-g_d*sin(b)*sin(g))-g_d*(-b_d*sin(b)*sin(g)+g_d*cos(b)*cos(g))-R_0p_ddot(1,1))/(cos(b)*sin(g));
             a_dd = (-a_d*(a_d*cos(a)*cos(b)-b_d*sin(a)*sin(b))-b_dd*cos(a)*sin(b)-b_d*(-a_d*sin(a)*sin(b)+b_d*cos(a)*cos(b))-R_0p_ddot(3,3))/(sin(a)*cos(b));
-            a_dd = roundn(a_dd, -10);
-            b_dd = roundn(b_dd, -10);
-            g_dd = roundn(g_dd, -10);
+            a_dd = round(a_dd, 10);
+            b_dd = round(b_dd, 10);
+            g_dd = round(g_dd, 10);
         end
         
         function [q, q_dot, q_ddot] = quaternion_traj_to_q_traj(quat, quat_dot, quat_ddot, R_0s, time_vector)

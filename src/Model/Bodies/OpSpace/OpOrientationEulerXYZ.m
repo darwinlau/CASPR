@@ -22,9 +22,9 @@ classdef OpOrientationEulerXYZ < OpSpace
             b = asin(R(1,3));
             g = -atan2(R(1,2), R(1,1));
             a = -atan2(R(2,3), R(3,3));
-%             a = roundn(a, -10);
-%             b = roundn(b, -10);
-%             g = roundn(g, -10);
+%             a = round(a, 10);
+%             b = round(b, 10);
+%             g = round(g, 10);
             y = obj.selection_matrix(:,4:6)*[a;b;g];
         end
     end
