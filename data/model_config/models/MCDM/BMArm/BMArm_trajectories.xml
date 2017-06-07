@@ -16,17 +16,7 @@
                 <q_ddot>0.0 0.0 0.0 0.0</q_ddot>
             </point>
             <point time="4">
-                <q>0.3 0.0 0.0 0.0</q>
-                <q_dot>0.0 0.0 0.0 0.0</q_dot>
-                <q_ddot>0.0 0.0 0.0 0.0</q_ddot>
-            </point>
-            <point time="12">
-                <q>-0.3 0.0 0.0 0.0</q>
-                <q_dot>0.0 0.0 0.0 0.0</q_dot>
-                <q_ddot>0.0 0.0 0.0 0.0</q_ddot>
-            </point>
-            <point time="16">
-                <q>0.0 0.0 0.0 0.0</q>
+                <q>-0.17453 0.0 0.0 0.17453</q>
                 <q_dot>0.0 0.0 0.0 0.0</q_dot>
                 <q_ddot>0.0 0.0 0.0 0.0</q_ddot>
             </point>
