@@ -125,7 +125,9 @@ classdef (Abstract) ModelConfigBase < handle
     methods (Access = private)
         % Gets the body properties xml object
         function v = getBodiesPropertiesXmlObj(obj)
-            v = obj.bodiesXmlObj.getDocumentElement;
+            v_temp = obj.bodiesXmlObj.getElementsByTagName('links');
+            CASPR_log.Assert(v_temp.getLength == 1,'Only 1 links tag should be specified');
+            v = v_temp.item(0);
         end
         
         % Gets the cable set properties xml object
