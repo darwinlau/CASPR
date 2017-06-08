@@ -78,16 +78,14 @@ classdef (Abstract) ModelConfigBase < handle
                 XmlOperations.XmlReadRemoveIndents(c.opFilename);
             end
             
-            % Read the model config related properties from the bodies and
-            % cables XML
-            c.defaultCableSetId = char(c.cablesXmlObj.getDocumentElement.getAttribute('default_cable_set'));
-            c.displayRange = XmlOperations.StringToVector(char(c.bodiesXmlObj.getDocumentElement.getAttribute('display_range')));
-            c.viewAngle = XmlOperations.StringToVector(char(c.bodiesXmlObj.getDocumentElement.getAttribute('view_angle')))';
-            % Loads the bodiesModel to be used for the trajectory loading
+            % Loads the bodiesModel and cable set to be used for the trajectory loading
             bodies_xmlobj = c.getBodiesPropertiesXmlObj();
+            c.defaultCableSetId = char(c.cablesXmlObj.getDocumentElement.getAttribute('default_cable_set'));
             cableset_xmlobj = c.getCableSetXmlObj(c.defaultCableSetId);
             sysModel = SystemModel.LoadXmlObj(bodies_xmlobj, cableset_xmlobj);
             c.bodiesModel = sysModel.bodyModel;
+            c.displayRange = XmlOperations.StringToVector(char(bodies_xmlobj.getAttribute('display_range')));
+            c.viewAngle = XmlOperations.StringToVector(char(bodies_xmlobj.getAttribute('view_angle')))';
         end
                 
         function [sysModel] = getModel(obj, cable_set_id, operational_space_id)
