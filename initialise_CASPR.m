@@ -13,7 +13,7 @@ function initialise_CASPR()
     
     cd(CASPR_homepath);
     % Set the current version
-    CASPR_version = 20170528;
+    CASPR_version = 20170706;
     CASPR_model_config_path = [CASPR_homepath,'/data/model_config'];
     CASPR_GUI_dev_model_config = 0; % Developmental models are not shown
     
@@ -64,7 +64,7 @@ function setup_CASPR()
     fprintf('\n----------------------------------------------------\n')
     fprintf('CASPR Setup Complete. Enjoy!\n');
     if num_tests_failed > 0
-        fprintf('NOTE: Some unit tests failed. Please contact the maintainers of CASPR with the test summary information\n');
+        fprintf('WARNING: Some unit tests failed. Please contact the maintainers of CASPR with the test summary information\n');
     end
     fprintf('----------------------------------------------------\n\n')
 end
@@ -89,6 +89,12 @@ function update_CASPR()
     fprintf('CASPR Update Complete. Enjoy!\n')
     if num_tests_failed > 0
         fprintf('NOTE: Some unit tests failed. Please contact the maintainers of CASPR with the test summary information\n');
+    else
+        fprintf('----------------------------------------------------\n\n')
+        fprintf(' - Logging was successfully setup.\n')
+        fprintf(' - All items in model config successfully build.\n')
+        fprintf(' - All tests of model elements pass.\n')
+        fprintf(' - All tests of analysis tools pass.\n')
     end
     fprintf('----------------------------------------------------\n\n')
 end
@@ -102,13 +108,12 @@ function old_matlab_version = check_system_environment()
     % Code to test the matlab version
     mver = ver('MATLAB');
     fprintf('- Checking MATLAB version... \n\r');
-    vv = regexp(mver.Version,'\.','split');
 	fprintf('MATLAB version: %s\n\r',mver.Release);
-    if(str2double(vv{1}) < 9)
-        if(str2double(vv{2}) < 3)
-            old_matlab_version = 1; 
-            fprintf('WARNING: CASPR is designed for MATLAB versions from 2014a onwards. Certain functionality may not work on this version\n\r');
-        end
+    
+    % Version 8.6 is 2015b
+    if (verLessThan('matlab', '8.6'))
+        old_matlab_version = 1; 
+        fprintf('WARNING: CASPR is designed for MATLAB versions from 2015b onwards. Certain functionality may not work on this version\n\r');
     end
     
     % Optitoolbox
@@ -201,7 +206,7 @@ function num_tests_failed = setup_update_CASPR()
     fprintf('Set up Logging\n')
     fprintf('----------------------------------------------------\n')
     CASPR_log.SetLoggingDetails(CASPRLogLevel.INFO);
-    fprintf('Logging sucessively setup\n');
+    fprintf('Logging successfully setup\n');
     
     % Test that the models are correctly configured
     fprintf('\n----------------------------------------------------\n')

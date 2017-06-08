@@ -3,23 +3,23 @@
 % Author        : Jonathan EDEN
 % Created       : 2016
 % Description   :
-classdef OpPosition < OpSpace   
+classdef OperationalPosition < OperationalSpace   
     
     methods
         % Constructor for the class
-        function o = OpPosition(id,name,link,offset,selection_matrix)
+        function o = OperationalPosition(id,name,link,offset,selection_matrix)
             o.id                =   id;
             o.name              =   name;
             o.link              =   link;
             o.offset            =   offset;
-            o.numOPDofs     =   sum(diag(selection_matrix));
+            o.numOperationalDofs     =   sum(diag(selection_matrix));
             % Determine the selection matrix assuming 6 DoF
             temp_selection_matrix = [eye(3),zeros(3)];
             o.selection_matrix  =   temp_selection_matrix(logical(diag(selection_matrix)),:);
         end
         
         % Implementation of the abstract function
-        function y = extractOpSpace(obj,x,R)
+        function y = extractOperationalSpace(obj,x,R)
             y = obj.selection_matrix(:,1:3)*R*x;
         end
     end
@@ -37,7 +37,7 @@ classdef OpPosition < OpSpace
             s_z = str2double(selectionObj.getElementsByTagName('sz').item(0).getFirstChild.getData);
             selection_matrix = diag([s_x,s_y,s_z]);
             % obtain selection matrix
-            o = OpPosition(id,name,link,link_offset,selection_matrix);
+            o = OperationalPosition(id,name,link,link_offset,selection_matrix);
         end
     end
 end

@@ -355,12 +355,11 @@ classdef SystemModelBodies < handle
             % Body equation of motion terms
             obj.M_b = obj.massInertiaMatrix*obj.W;
             obj.C_b = obj.massInertiaMatrix*obj.C_a;
-            for k = 1:obj.numLinks
-                obj.C_b(6*k-2:6*k) = obj.C_b(6*k-2:6*k) + cross(obj.bodies{k}.w, obj.bodies{k}.I_G*obj.bodies{k}.w);
-            end
             obj.G_b = MatrixOperations.Initialise([6*obj.numLinks,1],obj.is_symbolic);
             for k = 1:obj.numLinks
-                obj.G_b(6*k-5:6*k-3) = obj.bodies{k}.R_0k.'*[0; 0; -obj.bodies{k}.m*SystemModel.GRAVITY_CONSTANT];
+                body_k = obj.bodies{k};
+                obj.C_b(6*k-2:6*k) = obj.C_b(6*k-2:6*k) + cross(body_k.w, body_k.I_G*body_k.w);
+                obj.G_b(6*k-5:6*k-3) = body_k.R_0k.'*[0; 0; -body_k.m*SystemModel.GRAVITY_CONSTANT];
             end
 
             % Joint space equation of motion terms
