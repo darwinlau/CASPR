@@ -24,7 +24,7 @@ classdef PoCaBotExperiment < ExperimentBase
         function eb = PoCaBotExperiment(numMotor_for_test)
             % Create the config
             model_config = ModelConfig('PoCaBot spatial');
-            cable_set_id = 'dualcables_simple_gripper_demo';
+            cable_set_id = 'dualcables_simple_gripper_demo_on_larger_scale_frame';
             % Load the SystemKinematics object from the XML
             modelObj = model_config.getModel(cable_set_id);
             % Create the hardware interface

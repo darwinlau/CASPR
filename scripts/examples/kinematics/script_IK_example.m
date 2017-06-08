@@ -4,13 +4,15 @@
 % Created       : 20XX
 % Description   :
 
+% Clear the variables, command window, and all windows
+clear; clc; close all;
+
 % Set up the type of model
 model_config = ModelConfig('Example planar XY');
 cable_set_id = 'basic';
-trajectory_id = 'example_linear';
+trajectory_id = 'example_parabolic_blend';
 
-% Clear the variables, command window, and all windows
-clear; clc; close all;
+
 
 % Load the SystemKinematics object from the XML
 modelObj = model_config.getModel(cable_set_id);
