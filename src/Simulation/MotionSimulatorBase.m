@@ -354,7 +354,7 @@ classdef (Abstract) MotionSimulatorBase < SimulatorBase
             else
                 ax = axis_handle;
             end
-            axes(axis_handle)
+            axes(ax);
             axis(plot_axis);
             view(view_angle); 
             hold on;
