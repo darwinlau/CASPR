@@ -7,7 +7,7 @@ classdef (Abstract) OperationalSpace < handle
    
     properties
         link                % The link that the coordinate system is attached to
-        selection_matrix    % A matrix which projects body velocities into the OPSpace terms
+        selection_matrix    % A matrix which projects body velocities into the Operational Space terms
         numOperationalDofs           % The number of output degrees of freedom
         offset              % The offset of the op_space coordinate in the link frame
     end

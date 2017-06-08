@@ -25,7 +25,7 @@ classdef SystemModelBodies < handle
         % Degrees of freedom
         numDofs
         numDofVars
-        numOPDofs
+        numOperationalDofs
         numLinks
         numDofsActuated             % Number of actuated DoFs
 
@@ -128,7 +128,7 @@ classdef SystemModelBodies < handle
         function b = SystemModelBodies(bodies)
             num_dofs = 0;
             num_dof_vars = 0;
-            num_op_dofs = 0;
+            num_operational_dofs = 0;
             num_dof_actuated = 0;
             b.index_k = MatrixOperations.Initialise([1,b.numLinks],0);
             for k = 1:length(bodies)
@@ -142,7 +142,7 @@ classdef SystemModelBodies < handle
             b.bodies = bodies;
             b.numDofs = num_dofs;
             b.numDofVars = num_dof_vars;
-            b.numOPDofs = num_op_dofs;
+            b.numOperationalDofs = num_operational_dofs;
             b.numDofsActuated = num_dof_actuated;
             b.numLinks = length(b.bodies);
 
@@ -216,7 +216,7 @@ classdef SystemModelBodies < handle
                 % Determine absolute position of link's ending position
                 obj.bodies{k}.r_OPe = obj.bodies{k}.r_OP + obj.bodies{k}.r_Pe;
                 % Determine absolute position of the operational space
-                if(~isempty(obj.bodies{k}.op_space))
+                if(~isempty(obj.bodies{k}.operational_space))
                     obj.bodies{k}.r_Oy  = obj.bodies{k}.r_OP + obj.bodies{k}.r_y;
                 end
             end
@@ -287,13 +287,13 @@ classdef SystemModelBodies < handle
             end
 
             % The operational space variables
-            if(obj.occupied.op_space)
+            if(obj.occupied.operational_space)
                 % Now determine the operational space vector y
-                obj.y = MatrixOperations.Initialise([obj.numOPDofs,1],obj.is_symbolic); l = 1;
+                obj.y = MatrixOperations.Initialise([obj.numOperationalDofs,1],obj.is_symbolic); l = 1;
                 for k = 1:obj.numLinks
-                    if(~isempty(obj.bodies{k}.op_space))
-                        n_y = obj.bodies{k}.numOPDofs;
-                        obj.y(l:l+n_y-1) = obj.bodies{k}.op_space.extractOpSpace(obj.bodies{k}.r_Oy,obj.bodies{k}.R_0k);
+                    if(~isempty(obj.bodies{k}.operational_space))
+                        n_y = obj.bodies{k}.numOperationalDofs;
+                        obj.y(l:l+n_y-1) = obj.bodies{k}.operational_space.extractOperationalSpace(obj.bodies{k}.r_Oy,obj.bodies{k}.R_0k);
                         l = l + n_y;
                     end
                 end
@@ -368,7 +368,7 @@ classdef SystemModelBodies < handle
             obj.G = - obj.W.' * obj.G_b;
             
             % Operational space equation of motion terms
-            if(obj.occupied.op_space)
+            if(obj.occupied.operational_space)
                 obj.M_y = inv(obj.J*inv(obj.M)*obj.J'); %#ok<MINV>
                 Jpinv   = obj.J'/(obj.J*obj.J');
                 obj.C_y = Jpinv'*obj.C - obj.M_y*obj.J_dot*obj.q_dot;
@@ -683,46 +683,46 @@ classdef SystemModelBodies < handle
         end
 
         % Load the operational space xml object
-        function loadOpXmlObj(obj,op_space_xmlobj)
-            obj.occupied.op_space = true;
+        function loadOperationalXmlObj(obj,operational_space_xmlobj)
+            obj.occupied.operational_space = true;
             % Load the op space
-            CASPR_log.Assert(strcmp(op_space_xmlobj.getNodeName, 'op_set'), 'Root element should be <op_set>');
-            % Go into the cable set
-            allOPItems = op_space_xmlobj.getChildNodes;
+            CASPR_log.Assert(strcmp(operational_space_xmlobj.getNodeName, 'operational_set'), 'Root element should be <operational_set>');
+            % Go into the operational space set
+            allOperationalItems = operational_space_xmlobj.getChildNodes;
 
-            num_ops = allOPItems.getLength;
+            num_operationals = allOperationalItems.getLength;
             % Creates all of the operational spaces first first
-            for k = 1:num_ops
+            for k = 1:num_operationals
                 % Java uses 0 indexing
-                currentOPItem = allOPItems.item(k-1);
+                currentOperationalItem = allOperationalItems.item(k-1);
 
-                type = char(currentOPItem.getNodeName);
+                type = char(currentOperationalItem.getNodeName);
                 if (strcmp(type, 'position'))
-                    op_space = OpPosition.LoadXmlObj(currentOPItem);
+                    operational_space = OperationalPosition.LoadXmlObj(currentOperationalItem);
                 elseif(strcmp(type, 'orientation_euler_xyz'))
-                    op_space = OpOrientationEulerXYZ.LoadXmlObj(currentOPItem);
+                    operational_space = OperationalOrientationEulerXYZ.LoadXmlObj(currentOperationalItem);
                 elseif(strcmp(type, 'pose_euler_xyz'))
-                    op_space = OpPoseEulerXYZ.LoadXmlObj(currentOPItem);
+                    operational_space = OperationalPoseEulerXYZ.LoadXmlObj(currentOperationalItem);
                 else
                     CASPR_log.Printf(sprintf('Unknown link type: %s', type),CASPRLogLevel.ERROR);
                 end
-                parent_link = op_space.link;
-                obj.bodies{parent_link}.attachOPSpace(op_space);
-                % Should add some protection to ensure that one OP_Space
+                parent_link = operational_space.link;
+                obj.bodies{parent_link}.attachOperationalSpace(operational_space);
+                % Should add some protection to ensure that one Operational_Space
                 % per link
             end
-            num_op_dofs = 0;
+            num_operational_dofs = 0;
             for k = 1:length(obj.bodies)
-                num_op_dofs = num_op_dofs + obj.bodies{k}.numOPDofs;
+                num_operational_dofs = num_operational_dofs + obj.bodies{k}.numOperationalDofs;
             end
-            obj.numOPDofs = num_op_dofs;
+            obj.numOperationalDofs = num_operational_dofs;
 
-            obj.T = MatrixOperations.Initialise([obj.numOPDofs,6*obj.numLinks],0);
+            obj.T = MatrixOperations.Initialise([obj.numOperationalDofs,6*obj.numLinks],0);
             l = 1;
             for k = 1:length(obj.bodies)
-                if(~isempty(obj.bodies{k}.op_space))
-                    n_y = obj.bodies{k}.numOPDofs;
-                    obj.T(l:l+n_y-1,6*k-5:6*k) = obj.bodies{k}.op_space.getSelectionMatrix();
+                if(~isempty(obj.bodies{k}.operational_space))
+                    n_y = obj.bodies{k}.numOperationalDofs;
+                    obj.T(l:l+n_y-1,6*k-5:6*k) = obj.bodies{k}.operational_space.getSelectionMatrix();
                     l = l + n_y;
                 end
             end
@@ -796,7 +796,7 @@ classdef SystemModelBodies < handle
 
         function M_y = get.M_y(obj)
             if(~obj.occupied.dynamics)
-                if(~obj.occupied.op_space)
+                if(~obj.occupied.operational_space)
                     M_y = [];
                     return;
                 else
@@ -810,7 +810,7 @@ classdef SystemModelBodies < handle
 
         function C_y = get.C_y(obj)
             if(~obj.occupied.dynamics)
-                if(~obj.occupied.op_space)
+                if(~obj.occupied.operational_space)
                     C_y = [];
                     return;
                 else
@@ -824,7 +824,7 @@ classdef SystemModelBodies < handle
 
         function G_y = get.G_y(obj)
             if(~obj.occupied.dynamics)
-                if(~obj.occupied.op_space)
+                if(~obj.occupied.operational_space)
                     G_y = [];
                     return;
                 else

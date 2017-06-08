@@ -3,7 +3,7 @@
 % Author        : Jonathan EDEN
 % Created       : 2016
 % Description   :
-classdef OpTrajectory < handle
+classdef OperationalTrajectory < handle
     properties
         y           % The op coordinate
         y_dot       % The op coordinate derivative
@@ -15,7 +15,7 @@ classdef OpTrajectory < handle
     
     methods
         % Constructor 
-        function op = OpTrajectory(y_begin,yd_begin,ydd_begin,y_end,yd_end,ydd_end, total_time, time_step)
+        function op = OperationalTrajectory(y_begin,yd_begin,ydd_begin,y_end,yd_end,ydd_end, total_time, time_step)
             % Save the time information
             op.time_step         =   time_step;
             op.total_time        =   total_time;
@@ -25,11 +25,11 @@ classdef OpTrajectory < handle
         end
         
         % Plots the operational space
-        function plotOpSpace(obj, states_to_plot)
-            n_op_dof = length(obj.y{1});
+        function plotOperationalSpace(obj, states_to_plot)
+            n_operational_dof = length(obj.y{1});
             
             if nargin == 1 || isempty(states_to_plot)
-                states_to_plot = 1:n_op_dof;
+                states_to_plot = 1:n_operational_dof;
             end
             
             y_vector = cell2mat(obj.q);

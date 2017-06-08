@@ -162,8 +162,8 @@ classdef SystemModel < handle
         end
         
         % Load the operational space xml object
-        function loadOpXmlObj(obj,op_space_xmlobj)
-            obj.bodyModel.loadOpXmlObj(op_space_xmlobj);
+        function loadOperationalXmlObj(obj,operational_space_xmlobj)
+            obj.bodyModel.loadOperationalXmlObj(operational_space_xmlobj);
         end
         
         % -------
