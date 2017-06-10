@@ -69,7 +69,7 @@ classdef PoCaBotCASPRInterface < HardwareInterfaceBase
         
         % Protocol version
         PROTOCOL_VERSION            = 2.0;          % See which protocol version is used in the Dynamixel
-        BAUDRATE                    = 1000000;
+        BAUDRATE                    = 115200;
 %         DEVICENAME                  = 'COM3';       % Check which port is being used on your controller
         % ex) Windows: "COM1"   Linux: "/dev/ttyUSB0"
         
@@ -105,7 +105,7 @@ classdef PoCaBotCASPRInterface < HardwareInterfaceBase
             end
             
             for i = 1: numCmd
-                accessories_temp(i) = SmallMotorAccessories;
+                accessories_temp(i) = LargeMotorAccessories;
             end
             interface.accessories = accessories_temp;
             interface.initialise;
@@ -254,6 +254,14 @@ classdef PoCaBotCASPRInterface < HardwareInterfaceBase
             end
             [~, ret] = obj.sync_read(obj.ADDR_XH_PRESENT_POSITION, obj.LEN_XH_PRESENT_POSITION);
             obj.dynamixel_position_initial = ret;
+        end
+        
+        function motorPositionCommandSend(obj, p_cmd)
+            obj.sync_write(obj.ADDR_XH_GOAL_POSITION, obj.LEN_XH_GOAL_POSITION, p_cmd);
+        end
+        
+        function [position] = motorPositionFeedbackRead(obj)
+            [~, position] = obj.sync_read(obj.ADDR_XH_PRESENT_POSITION, obj.LEN_XH_PRESENT_POSITION);
         end
         
         % Method to read the cable lengths from the hardware (if available)

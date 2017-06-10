@@ -33,7 +33,7 @@ classdef PoCaBotExperiment < ExperimentBase
             else
                 numMotor = numMotor_for_test;
             end
-            cableLengths_full = ones(numMotor,1)*2.05;
+            cableLengths_full = ones(numMotor,1)*4.05;
             hw_interface = PoCaBotCASPRInterface('COM3', numMotor, cableLengths_full,false);  %1
             eb@ExperimentBase(hw_interface, modelObj);
             eb.modelConfig = model_config;
@@ -43,7 +43,7 @@ classdef PoCaBotExperiment < ExperimentBase
             eb.gripper = Gripper('COM6');
             eb.gripper.initialize();
             eb.gripper.setHandAngle( eb.BEST_HAND_ANGLE +50);
-            eb.gripper.setArmAngle( eb.MIN_ARM_ANGLE);
+            eb.gripper.setArmAngle( eb.MIN_ARM_ANGLE + 90);
         end
         
         function motorSpoolTest(obj)
@@ -206,7 +206,46 @@ classdef PoCaBotExperiment < ExperimentBase
             current = ones(obj.numMotor,1)*20;
             obj.hardwareInterface.currentCommandSend(current);
             
-            input('Regulate the pose of the end effector, press any key to continue!');
+%             input('Regulate the pose of the end effector, press any key to continue!');
+%             
+            str = input('Read the initial position from the file? [Y]:','s');
+            if isempty(str)
+                str = 'Y';
+            else
+                str = 'N';
+            end
+            if(str == 'Y')
+                fileID = fopen('C:\Users\Tristan\Desktop\initstate.ini','r');
+                formatSpec = '%f';
+                position_cmd = fscanf(fileID,formatSpec);
+                fclose(fileID);
+                
+                obj.hardwareInterface.switchOperatingMode2POSITION_LIMITEDCURRENT();
+                % Start the system to get feedback
+                obj.hardwareInterface.systemOnSend();
+                current = ones(obj.numMotor,1)*300;
+                obj.hardwareInterface.currentCommandSend(current);
+                
+                profileAcc = ones(obj.numMotor,1)*100;
+                obj.hardwareInterface.setProfileAcceleration(profileAcc);
+                profileVel = ones(obj.numMotor,1)*100;
+                obj.hardwareInterface.setProfileVelocity(profileVel);
+                
+                obj.hardwareInterface.motorPositionCommandSend(position_cmd);
+                present_position = obj.hardwareInterface.motorPositionFeedbackRead();
+                error_position = sum(abs(present_position - position_cmd));
+                while (error_position>30)
+                    pause(1);
+                    present_position = obj.hardwareInterface.motorPositionFeedbackRead();
+                    error_position = sum(abs(present_position - position_cmd));
+                end
+            else
+                fileID = fopen('C:\Users\Tristan\Desktop\initstate.ini','w');
+                present_position = obj.hardwareInterface.motorPositionFeedbackRead();
+                fprintf(fileID,'%d \n',present_position);
+                fclose(fileID);
+            end
+            
             % Update the model with the initial point so that the obj.model.cableLength has the initial lengths
             obj.model.update(trajectory.q{1}, trajectory.q_dot{1}, trajectory.q_ddot{1},zeros(size(trajectory.q_dot{1})));
             % Send the initial lengths to the hardware
@@ -216,7 +255,7 @@ classdef PoCaBotExperiment < ExperimentBase
             
             % Start the system to get feedback
             obj.hardwareInterface.systemOnSend();
-            current = ones(obj.numMotor,1)*300;
+            current = ones(obj.numMotor,1)*350;
             obj.hardwareInterface.currentCommandSend(current);
             
             profileAcc = ones(obj.numMotor,1)*150;
@@ -232,34 +271,23 @@ classdef PoCaBotExperiment < ExperimentBase
             t= 1;
             while t <= length(trajectory.timeVector)
                 time = trajectory.timeVector(t)
-                
+                timing = mod(time,27);
+                switch timing
+                    case 0
+                        obj.gripper.setHandAngle( obj.MAX_HAND_ANGLE);
+                    case 13.0
+                        obj.gripper.setHandAngle( obj.BEST_HAND_ANGLE);
+                    otherwise
+                end
                 switch time
-                    case 4.0
+                    case 134.0
                         obj.gripper.setArmAngle(0);
-                    case 6.0
-                        obj.gripper.setHandAngle( obj.BEST_HAND_ANGLE);
-                    case 10.0
+                    case 139.0
                         obj.gripper.setArmAngle(90);
-                    case 12.0
-                        obj.gripper.setHandAngle( obj.BEST_HAND_ANGLE+50);
-                    case 16.0
+                    case 161.0
                         obj.gripper.setArmAngle(0);
-                    case 18.0
-                        obj.gripper.setHandAngle( obj.BEST_HAND_ANGLE);
-                    case 22.0
+                    case 166.0
                         obj.gripper.setArmAngle(90);
-                    case 24.0
-                        obj.gripper.setHandAngle( obj.BEST_HAND_ANGLE+50);
-                    case 28.0
-                        obj.gripper.setArmAngle(0);
-                    case 30.0
-                        obj.gripper.setHandAngle( obj.BEST_HAND_ANGLE);
-                    case 34.0
-                        obj.gripper.setArmAngle(90);
-                    case 36.0
-                        obj.gripper.setHandAngle( obj.BEST_HAND_ANGLE+50);
-                    case 40.0
-                        obj.gripper.setArmAngle(0);
                     otherwise
                 end
                 
@@ -269,7 +297,7 @@ classdef PoCaBotExperiment < ExperimentBase
                 if (t < length(trajectory.timeVector - 2))
                     %tighten cables while running trajectory
                     %obj.hardwareInterface.lengthCommandSend(obj.model.cableLengths - [0.005;0.002;0.005;0.002;0.005;0.002;0.005;0.002]);   %(1)
-                    obj.hardwareInterface.lengthCommandSend(obj.model.cableLengths - 0.002);   %(1)
+                    obj.hardwareInterface.lengthCommandSend(obj.model.cableLengths *(1-0.004));   %(1)
                     %no tightening
                     % obj.hardwareInterface.lengthCommandSend(obj.model.cableLengths); %(1)
                 else
