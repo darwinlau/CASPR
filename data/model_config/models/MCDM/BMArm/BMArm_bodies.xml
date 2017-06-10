@@ -50,11 +50,7 @@
             <position marker_id="1" name="ee_pose">
                 <link>2</link>
                 <offset>0.0 0.327 0.0</offset>
-                <selection_matrix>
-                    <sx>1</sx>
-                    <sy>1</sy>
-                    <sz>1</sz>
-                </selection_matrix>
+                <axes active_axes="xyz"/>
             </position>
         </operational_set>    
     </operational_spaces>

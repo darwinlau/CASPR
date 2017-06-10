@@ -50,11 +50,7 @@
             <position marker_id="1" name="test1">
                 <link>2</link>
                 <offset>0.0 0.0 1.0</offset>
-                <selection_matrix>
-                    <sx>1</sx>
-                    <sy>0</sy>
-                    <sz>0</sz>
-                </selection_matrix>
+                <axes active_axes="x"/>
             </position>
         </operational_set>    
     </operational_spaces>
