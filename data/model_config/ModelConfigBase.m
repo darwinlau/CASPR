@@ -93,7 +93,7 @@ classdef (Abstract) ModelConfigBase < handle
             sysModel = SystemModel.LoadXmlObj(bodies_xmlobj, cableset_xmlobj);
             
             if (nargin >= 3 && ~isempty(operational_space_id))
-                operationalset_xmlobj = c.getOperationalSetXmlObj(c.defaultOperationalSetId);
+                operationalset_xmlobj = obj.getOperationalSetXmlObj(obj.defaultOperationalSetId);
                 sysModel.loadOperationalXmlObj(operationalset_xmlobj);
             end
         end

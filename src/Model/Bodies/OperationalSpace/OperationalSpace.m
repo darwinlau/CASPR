@@ -30,7 +30,7 @@ classdef (Abstract) OperationalSpace < handle
     methods 
         % TODO: Remove this
         function T = getSelectionMatrix(obj)
-            T = obj.selection_matrix();
+            T = obj.selection_matrix;
         end
     end
     
