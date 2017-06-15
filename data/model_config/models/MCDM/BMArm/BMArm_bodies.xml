@@ -7,13 +7,13 @@
       <link_rigid num="1" name="Upper Arm">
         <joint type="S_EULER_XYZ" q_initial="0 0 0"/>
         <physical>
-          <mass>0.9758</mass>
-          <com_location>0.0 0.0770 0.0</com_location>
+          <mass>0.871</mass>
+          <com_location>0.0 0.1025 0.0</com_location>
           <end_location>0.0 0.3270 0.0</end_location>
           <inertia ref="com">
-            <Ixx>0.0110</Ixx>
-            <Iyy>0.0002</Iyy>
-            <Izz>0.0110</Izz>
+            <Ixx>0.0154</Ixx>
+            <Iyy>0.000234</Iyy>
+            <Izz>0.0155</Izz>
             <Ixy>0.0</Ixy>
             <Ixz>0.0</Ixz>
             <Iyz>0.0</Iyz>
