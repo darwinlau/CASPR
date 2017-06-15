@@ -41,17 +41,17 @@ classdef (Abstract) BodyModelBase < handle
     properties (SetAccess = private)
         % Objects
         joint                   % Joint object
-        op_space                % Operation Space object
+        operational_space       % Operation Space object
         % Identification
         id                      % Body ID
         name
     end
 
     properties (Dependent)
-        numDofs         % The number of degrees of freedom
-        numDofVars      % The number of degrees of freedom variables
-        numOPDofs       % The number of operational space degrees of freedom
-        isJointActuated % Whether the body is joint actuated
+        numDofs             % The number of degrees of freedom
+        numDofVars          % The number of degrees of freedom variables
+        numOperationalDofs  % The number of operational space degrees of freedom
+        isJointActuated     % Whether the body is joint actuated
     end
 
     methods
@@ -66,7 +66,7 @@ classdef (Abstract) BodyModelBase < handle
             bk.name = name;
             bk.joint = joint;
             % Operation Space creation
-            bk.op_space = [];
+            bk.operational_space = [];
         end
 
         % Add the parent for the body
@@ -80,9 +80,9 @@ classdef (Abstract) BodyModelBase < handle
         end
         
         % Attach the operational space rigid body
-        function attachOPSpace(obj,op_space)
-            obj.op_space = op_space;
-            obj.r_y = op_space.offset;
+        function attachOperationalSpace(obj,operational_space)
+            obj.operational_space = operational_space;
+            obj.r_y = operational_space.offset;
         end
 
         % -------
@@ -96,9 +96,9 @@ classdef (Abstract) BodyModelBase < handle
             dofs = obj.joint.numVars;
         end
         
-        function dofs = get.numOPDofs(obj)
-            if(~isempty(obj.op_space))
-                dofs = obj.op_space.numOPDofs;
+        function dofs = get.numOperationalDofs(obj)
+            if(~isempty(obj.operational_space))
+                dofs = obj.operational_space.numOperationalDofs;
             else
                 dofs = 0;
             end

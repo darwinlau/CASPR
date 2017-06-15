@@ -1,7 +1,7 @@
 Example planar XY,/examples/Example_planar_XY/,Example_planar_XY_bodies.xml,Example_planar_XY_cables.xml,Example_planar_XY_trajectories.xml,
 Example spatial,/examples/Example_spatial/,Example_spatial_bodies.xml,Example_spatial_cables.xml,Example_spatial_trajectories.xml,
 Example spherical,/examples/Example_spherical/,Example_spherical_bodies.xml,Example_spherical_cables.xml,Example_spherical_trajectories.xml,
-Example 2R planar XZ,/examples/Example_2R_planar_XZ/,Example_2R_planar_XZ_bodies.xml,Example_2R_planar_XZ_cables.xml,Example_2R_planar_XZ_trajectories.xml,Example_2R_planar_XZ_op.xml
+Example 2R planar XZ,/examples/Example_2R_planar_XZ/,Example_2R_planar_XZ_bodies.xml,Example_2R_planar_XZ_cables.xml,Example_2R_planar_XZ_trajectories.xml,
 2 DoF VSD,/SCDM/planar_manipulators/2_DoF_VSD/,2_DoF_VSD_bodies.xml,2_DoF_VSD_cables.xml,2_DoF_VSD_trajectories.xml,
 KNTU planar,/SCDM/planar_manipulators/KNTU_planar/,KNTU_planar_bodies.xml,KNTU_planar_cables.xml,KNTU_planar_trajectories.xml,
 Passive springs planar,/SCDM/planar_manipulators/Passive_springs_planar/,Passive_springs_planar_bodies.xml,Passive_springs_planar_cables.xml,Passive_springs_planar_trajectories.xml,
