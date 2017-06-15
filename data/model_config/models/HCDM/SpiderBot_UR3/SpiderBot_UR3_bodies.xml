@@ -1,4 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE bodies_system [
+<!ATTLIST operational_set id ID #REQUIRED>
+]>
 <bodies_system>
     <links display_range="0.0 2.28 -0.3 2.28 0 2.0" view_angle="-37 32">
       <link_rigid num="1" name="UR3 base">
@@ -142,4 +145,13 @@
         </parent>
       </link_rigid>
     </links>
+    <operational_spaces default_operational_set="ee_position">
+	  <operational_set id="ee_position">
+        <position marker_id="1" name="ee_pos">
+          <link>7</link>
+          <offset>0.0 0.0819 0.0</offset>
+          <axes active_axes="xyz"/>
+        </position>
+	  </operational_set>    
+    </operational_spaces>
 </bodies_system>
