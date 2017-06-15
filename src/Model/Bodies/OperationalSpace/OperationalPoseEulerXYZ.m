@@ -3,7 +3,7 @@
 % Author        : Jonathan EDEN
 % Created       : 2016
 % Description   :
-classdef OperationalPoseEulerXYZ < OperationalSpace
+classdef OperationalPoseEulerXYZ < OperationalSpaceBase
     methods
         % Constructor
         function o = OperationalPoseEulerXYZ(id,name,link,offset,selection_matrix)

@@ -3,7 +3,7 @@
 % Author        : Jonathan EDEN
 % Created       : 2016
 % Description   :
-classdef OperationalPosition < OperationalSpace   
+classdef OperationalPosition < OperationalSpaceBase
     
     methods
         % Constructor for the class

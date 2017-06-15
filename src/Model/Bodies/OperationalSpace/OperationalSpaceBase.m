@@ -3,7 +3,7 @@
 % Author        : Jonathan EDEN
 % Created       : 2016
 % Description   :
-classdef (Abstract) OperationalSpace < handle
+classdef (Abstract) OperationalSpaceBase < handle
    
     properties
         link                % The link that the coordinate system is attached to
