@@ -11,7 +11,7 @@ classdef OperationalPoseEulerXYZ < OperationalSpaceBase
             o.name              =   name;
             o.link              =   link;
             o.offset            =   offset;
-            o.numOperationalDofs         =   sum(diag(selection_matrix));
+            o.numOperationalDofs         =   size(selection_matrix,1);
             % Determine the selection matrix assuming 6 DoF
             temp_selection_matrix = eye(6);
             o.selection_matrix  =   temp_selection_matrix(logical(diag(selection_matrix)),:);
