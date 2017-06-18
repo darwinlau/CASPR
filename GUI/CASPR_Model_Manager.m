@@ -100,7 +100,7 @@ function add_button_Callback(~, ~, handles) %#ok<DEFNU>
         CASPR_log.Assert(~isempty(ind),'Folder must be a subfolder of the default choice');    
         folder_path = folder_path(ind+length(ModelConfig.MODEL_FOLDER_PATH):length(folder_path));
     end
-    CASPR_log.Assert(sum(~(isstrprop(name,'alphanum')|(name==' ')|(name=='_')))==0,'Robot Name must contain only numbers and letters');
+    CASPR_log.Assert(sum(~(isstrprop(name,'alphanum')|(name==' ')|(name=='_')|(name=='-')))==0,'Robot Name must contain only numbers and letters');
     if(get(handles.advanced_toggle,'Value'))
         table_data = get(handles.model_table,'Data');
         folder = [folder_path,table_data{1}];
@@ -110,6 +110,7 @@ function add_button_Callback(~, ~, handles) %#ok<DEFNU>
     else
         % Add conversions
         name_for_files = strrep(name,' ','_');
+        name_for_files = strrep(name_for_files,'-','_');
         name_for_files = strrep(name_for_files,'.','_');
         folder = [folder_path,name_for_files,'/'];
         bodies = [name_for_files,'_bodies.xml'];
