@@ -12,7 +12,7 @@ classdef OperationalPosition < OperationalSpaceBase
             o.name              =   name;
             o.link              =   link;
             o.offset            =   offset;
-            o.numOperationalDofs     =   sum(diag(selection_matrix));
+            o.numOperationalDofs     =   size(selection_matrix,1);
             % Determine the selection matrix assuming 6 DoF            
             o.selection_matrix  =   selection_matrix;
         end

@@ -34,7 +34,7 @@ classdef SystemModel < handle
         numDofs                 % Number of degrees of freedom
         numDofVars              % Number of variables for the DoFs
         numDofsJointActuated    % Number of DoFs that are actuated at the joint
-        numOPDofs               % Number of operational space degrees of freedom
+        numOperationalDofs      % Number of operational space degrees of freedom
         numCables               % Number of cables
         numCablesActive         % Number of active cables
         numCablesPassive        % Number of active cables
@@ -177,8 +177,8 @@ classdef SystemModel < handle
             value = obj.bodyModel.numDofs;
         end
         
-        function value = get.numOPDofs(obj)
-            value = obj.bodyModel.numOPDofs;
+        function value = get.numOperationalDofs(obj)
+            value = obj.bodyModel.numOperationalDofs;
         end
 
         function value = get.numDofVars(obj)
