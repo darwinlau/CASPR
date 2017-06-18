@@ -17,6 +17,7 @@ classdef Gripper < handle
         MAX_HAND_ANGLE = 180;
         MIN_HAND_ANGLE = 70;
         INI_HAND_ANGLE = 180;
+        BEST_HAND_ANGLE = 90;
         
         MAX_ARM_ANGLE  = 180;
         MIN_ARM_ANGLE  = 0;
@@ -185,7 +186,7 @@ if strcmpi(EventType, 'BytesAvailable')
 end
 
 if strcmpi(EventType, 'Timer')
-%     gripper.trigger_us();
+    %     gripper.trigger_us();
     gripper.timer_callback();
 end
 

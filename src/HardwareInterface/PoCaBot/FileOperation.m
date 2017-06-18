@@ -106,17 +106,19 @@ classdef FileOperation < handle
     
     methods (Access = private)
         function readCoFile(obj)
-            fileID = fopen(obj.filepath_pickup_co,'r');
-            formatSpec = '%f %f %f %f';
-            size_pickup_list = [4 Inf];
-            obj.pickup_list = fscanf(fileID, formatSpec, size_pickup_list);
-            fclose(fileID);
-            
-            fileID = fopen(obj.filepath_place_co,'r');
-            formatSpec = '%f %f %f %f';
-            size_place_list = [4 Inf];
-            obj.place_list = fscanf(fileID, formatSpec, size_place_list);
-            fclose(fileID);
+            %             fileID = fopen(obj.filepath_pickup_co,'r');
+            %             formatSpec = '%f %f %f %f';
+            %             size_pickup_list = [4 Inf];
+            %             obj.pickup_list = fscanf(fileID, formatSpec, size_pickup_list);
+            %             fclose(fileID);
+            obj.pickup_list = load(obj.filepath_pickup_co);
+            %
+            %             fileID = fopen(obj.filepath_place_co,'r');
+            %             formatSpec = '%f %f %f %f';
+            %             size_place_list = [4 Inf];
+            %             obj.place_list = fscanf(fileID, formatSpec, size_place_list);
+            %             fclose(fileID);
+            obj.place_list = load(obj.filepath_place_co);
             
             CASPR_log.Assert(size(obj.pickup_list) == size(obj.place_list), ...
                 'The coordinate files of the picking up and placing do not match each other!');

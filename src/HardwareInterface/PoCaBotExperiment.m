@@ -382,7 +382,7 @@ classdef PoCaBotExperiment < ExperimentBase
             
             % Start the system to get feedback
             obj.hardwareInterface.systemOnSend();
-            current = ones(obj.numMotor,1)*350;
+            current = ones(obj.numMotor,1)*600;
             obj.hardwareInterface.currentCommandSend(current);
             
             profileAcc = ones(obj.numMotor,1)*150;
@@ -404,11 +404,11 @@ classdef PoCaBotExperiment < ExperimentBase
                 % update cable lengths for next command from trajectory
                 obj.model.update(trajectory.q(:,t), trajectory.q_dot(:,t), trajectory.q_ddot(:,t),zeros(size(trajectory.q_dot(:,t))));
                 
-                obj.hardwareInterface.lengthCommandSend(obj.model.cableLengths *(1-0.004));
+                obj.hardwareInterface.lengthCommandSend(obj.model.cableLengths *(1-0.002));
                 
                 
-                obj.l_cmd_traj(:, t) = obj.model.cableLengths; %(1)
-                obj.l_feedback_traj(:, t) = obj.hardwareInterface.lengthFeedbackRead;
+%                 obj.l_cmd_traj(:, t) = obj.model.cableLengths; %(1)
+%                 obj.l_feedback_traj(:, t) = obj.hardwareInterface.lengthFeedbackRead;
                 
                 elapsed = toc * 1000;
                 if(elapsed < 50)
@@ -482,7 +482,7 @@ classdef PoCaBotExperiment < ExperimentBase
             trajectory.q = q;
             trajectory.q_dot = q_dot;
             trajectory.q_ddot = q_ddot;
-            trajectory.time_vector = time_vector;
+            trajectory.timeVector = time_vector;
         end
     end
     

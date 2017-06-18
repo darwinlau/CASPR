@@ -1,7 +1,7 @@
 clc;clear;
 
 %% sample codes for the application of the Gripper class
-% gripper = Gripper('COM6');
+% gripper = Gripper('COM7');
 % gripper.initialize();
 % MAX_HAND_ANGLE = 180;
 % MIN_HAND_ANGLE = 70;
@@ -77,8 +77,8 @@ clc;clear;
 
 gripper = Gripper('COM6');
 gripper.initialize();
-gripper.setHandAngle( eb.BEST_HAND_ANGLE +50);
-gripper.setArmAngle( eb.MIN_ARM_ANGLE + 90);
+gripper.setHandAngle( gripper.BEST_HAND_ANGLE +50);
+gripper.setArmAngle( gripper.MIN_ARM_ANGLE + 90);
 
 fo = FileOperation(...
     'C:\Users\Tristan\Desktop\initstate.ini', ...
@@ -91,10 +91,10 @@ time_step = 0.05;
 
 q0 = [0.892 0.903 0.2615 0 0 0]';
 distance_safe = 0.1;
-v_max = 0.167; % unit: m/s
+v_max = 0.145; % unit: m/s For maximum: 200*0.229/60Rev/s<=>0.763Rev/s*0.1903m/Rev = 0.145m/s
 blend_time_default = 0.5; %used to decide the acceleration
 blend_time_placing = 1.5; %used to decide the deceleration
-present_num = fo.readBrickNum(); % or num = 1 if at the beginning of the constructing.
+
 
 exp = PoCaBotExperiment();
 exp.application_preparation(fo,q0);
@@ -105,12 +105,14 @@ coordinate1(3) = q0(3)+distance_safe;
 trajectory = PoCaBotExperiment.generateTrajectoryParabolicBlend(q0, coordinate1, time_step, blend_time_default, blend_time_default, v_max);
 exp.runTrajectoryDirectly(trajectory);
 
-for brick_index = present_num:brick_count
+present_num = 1; % or num = 1 if at the beginning of the constructing.
+while ( present_num <= brick_count)
     % read and write file
-    [pickup_co, place_co]= fo.getCoordinate(brick_index);
-    [arm_angle_pickup, arm_angle_place] = getArmAngle(obj,present_num);
-    fo.writeBrickNum(brick_index);
-    fprintf('Now working on the %dst brick\n',brick_index);
+    present_num = fo.readBrickNum();
+    [pickup_co, place_co]= fo.getCoordinate(present_num);
+    [arm_angle_pickup, arm_angle_place] = fo.getArmAngle(present_num);
+    fo.writeBrickNum(present_num+1);
+    fprintf('Now working on the %dst brick\n',present_num);
     
     % load coordinate 2 bar
     coordinate2_pickup = [pickup_co;zeros(3,1)];
@@ -136,7 +138,7 @@ for brick_index = present_num:brick_count
     trajectory = PoCaBotExperiment.generateTrajectoryParabolicBlend(coordinate2, coordinate2_pickup, time_step, blend_time_default, blend_time_default, v_max);
     exp.runTrajectoryDirectly(trajectory);
     % lift the brick
-    gripper.setHandAngle( obj.BEST_HAND_ANGLE);
+    gripper.setHandAngle( gripper.BEST_HAND_ANGLE);
     trajectory = PoCaBotExperiment.generateTrajectoryParabolicBlend(coordinate2_pickup, coordinate2, time_step, blend_time_default, blend_time_default, v_max);
     exp.runTrajectoryDirectly(trajectory);
     % move to the central point
@@ -150,7 +152,7 @@ for brick_index = present_num:brick_count
     trajectory = PoCaBotExperiment.generateTrajectoryParabolicBlend(coordinate4, coordinate4_placing, time_step, blend_time_default, blend_time_placing, v_max);
     exp.runTrajectoryDirectly(trajectory);
     % move up
-    gripper.setHandAngle( obj.MAX_HAND_ANGLE);
+    gripper.setHandAngle( gripper.MAX_HAND_ANGLE);
     trajectory = PoCaBotExperiment.generateTrajectoryParabolicBlend(coordinate4_placing, coordinate4, time_step, blend_time_default, blend_time_default, v_max);
     exp.runTrajectoryDirectly(trajectory);
     % move to the central point
@@ -159,11 +161,15 @@ for brick_index = present_num:brick_count
     
     coordinate1 = coordinate3;
     
+    
     % figure;
     % plot(trajectory.timeVector, exp.l_feedback_traj,'*'); hold on;
     % legend('1','2','3','4','5','6','7','8','Location','NorthEast');
     % plot(trajectory.timeVector, exp.l_cmd_traj);
 end
+
+trajectory = PoCaBotExperiment.generateTrajectoryParabolicBlend(coordinate3, q0, time_step, blend_time_default, blend_time_default, v_max);
+exp.runTrajectoryDirectly(trajectory);
 
 % Close the hardware interface
 gripper.disconnect();
