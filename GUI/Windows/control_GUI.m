@@ -539,9 +539,6 @@ function plot_movie_button_Callback(~, ~, handles) %#ok<DEFNU>
     if(isempty(sim))
         warning('No simulator has been generated. Please press run first'); %#ok<WNTAG>
     else
-        % h = axes();
-        plot3(0,0,0);
-        h = gca;
         path_string = CASPR_configuration.LoadHomePath();
         % Check if the log folder exists
         if((exist([path_string,'/data'],'dir')~=7)||(exist([path_string,'/data/videos'],'dir')~=7))

@@ -8,7 +8,7 @@
 ]>
 
 <joint_trajectories>
-  <trajectory id="traj_1" time_definition="relative" time_step="0.01">
+  <quintic_spline_trajectory id="traj_1" time_definition="relative" time_step="0.01">
     <points>
       <point>
         <q>-1 -0.5 1.5 0.2 -0.4 0.1</q>
@@ -21,8 +21,8 @@
         <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
       </point>
     </points>
-  </trajectory>
-  <trajectory id="traj_z_up" time_definition="relative" time_step="0.01">
+  </quintic_spline_trajectory>
+  <quintic_spline_trajectory id="traj_z_up" time_definition="relative" time_step="0.01">
     <points>
       <point>
         <q>1.0 1.0 0.1 1.0 1.0 1.0</q>
@@ -35,5 +35,5 @@
         <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
       </point>
     </points>
-  </trajectory>
+  </quintic_spline_trajectory>
 </joint_trajectories>

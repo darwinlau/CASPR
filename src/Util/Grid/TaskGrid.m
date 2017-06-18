@@ -15,7 +15,7 @@ classdef TaskGrid < Grid
         x_end               % The ending of the task coordinates
         x_length            % The length of the task space coordinates
         q_length            % The length of the joint space coordinates
-        n_task_dimensions   % The dimension of the task/opspace
+        n_task_dimensions   % The dimension of the task/operational space
     end
     
     methods

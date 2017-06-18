@@ -3,16 +3,11 @@
 % Author        : Darwin LAU
 % Created       : 2014
 % Description   :
-classdef JointTrajectory < handle
+classdef JointTrajectory < TrajectoryBase
     properties
         q           % The joint space coordinate as a cell array
         q_dot       % The joint space coordinate derivative as a cell array
         q_ddot      % The joint space coordinate double derivative as a cell array
-        timeVector  % The time vector
-    end
-    
-    properties (Dependent)
-        totalTime 
     end
     
     methods
@@ -39,10 +34,6 @@ classdef JointTrajectory < handle
             figure;
             title('Trajectory acceleration');
             plot(obj.timeVector, qdd_vector(states_to_plot, :), 'Color', 'k', 'LineWidth', 1.5);
-        end
-        
-        function value = get.totalTime(obj)
-            value = obj.timeVector(length(obj.timeVector)) - obj.timeVector(1);
         end
     end
     
@@ -498,21 +489,6 @@ classdef JointTrajectory < handle
             trajectory_all.totalTime = (num_points-2)*trajectory_all.timeStep;
             trajectory_all.timeVector = [0:trajectory_all.timeStep:trajectory_all.totalTime];            
             fclose(fid);
-        end
-    end
-    
-    methods (Static, Access=private)
-        function time_abs = get_xml_absolute_tag(xmlobj)
-            time_def_str = xmlobj.getAttribute('time_definition');
-            time_abs = 0;
-            
-            if (strcmp(time_def_str, 'relative'))
-                time_abs = 0;
-            elseif (strcmp(time_def_str, 'absolute'))
-                time_abs = 1;
-            else
-                CASPR_log.Error('Value of attribute ''time_definition'' must either be ''relative'' or ''absolute''');
-            end
         end
     end
 end

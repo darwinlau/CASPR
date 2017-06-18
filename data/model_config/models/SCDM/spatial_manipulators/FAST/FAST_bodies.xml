@@ -1,23 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<links display_range="-350 350 -350 350 0 300" view_angle="-37 32">
-  <link_rigid num="1" name="FAST">
-    <joint type="SPATIAL_EULER_XYZ" q_initial="0 0 100 0 0 0"/>
-    <physical>
-      <mass>30091.8</mass>
-      <com_location>0 0 0</com_location>
-      <end_location>0.0 0.0 0.0</end_location>
-      <inertia ref="com">
-        <Ixx>10000.0</Ixx>
-        <Iyy>10000.0</Iyy>
-        <Izz>10000.0</Izz>
-        <Ixy>0.0</Ixy>
-        <Ixz>0.0</Ixz>
-        <Iyz>0.0</Iyz>
-      </inertia>
-    </physical>
-    <parent>
-      <num>0</num>
-      <location>0.0 0.0 0.0</location>
-    </parent>
-  </link_rigid>
-</links>
+<bodies_system>
+    <links display_range="-350 350 -350 350 0 300" view_angle="-37 32">
+      <link_rigid num="1" name="FAST">
+        <joint type="SPATIAL_EULER_XYZ" q_initial="0 0 100 0 0 0"/>
+        <physical>
+          <mass>30091.8</mass>
+          <com_location>0 0 0</com_location>
+          <end_location>0.0 0.0 0.0</end_location>
+          <inertia ref="com">
+            <Ixx>10000.0</Ixx>
+            <Iyy>10000.0</Iyy>
+            <Izz>10000.0</Izz>
+            <Ixy>0.0</Ixy>
+            <Ixz>0.0</Ixz>
+            <Iyz>0.0</Iyz>
+          </inertia>
+        </physical>
+        <parent>
+          <num>0</num>
+          <location>0.0 0.0 0.0</location>
+        </parent>
+      </link_rigid>
+    </links>
+</bodies_system>

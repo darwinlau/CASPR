@@ -3,12 +3,12 @@
 % Author        : Jonathan EDEN
 % Created       : 2016
 % Description   :
-classdef (Abstract) OperationalSpace < handle
+classdef (Abstract) OperationalSpaceBase < handle
    
     properties
         link                % The link that the coordinate system is attached to
-        selection_matrix    % A matrix which projects body velocities into the OPSpace terms
-        numOperationalDofs           % The number of output degrees of freedom
+        selection_matrix    % A matrix which projects body velocities into the Operational Space terms
+        numOperationalDofs  % The number of output degrees of freedom
         offset              % The offset of the op_space coordinate in the link frame
     end
     
@@ -30,7 +30,7 @@ classdef (Abstract) OperationalSpace < handle
     methods 
         % TODO: Remove this
         function T = getSelectionMatrix(obj)
-            T = obj.selection_matrix();
+            T = obj.selection_matrix;
         end
     end
     
