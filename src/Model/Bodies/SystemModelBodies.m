@@ -305,7 +305,6 @@ classdef SystemModelBodies < handle
                 for k = 1:obj.numLinks
                     body_k = obj.bodies{k};
                     for a = 1:k
-                        body_k.r_Oy
                         body_a = obj.bodies{a};
                         R_ka = body_k.R_0k.'*body_a.R_0k;
                         Qak = [body_k.R_0k,zeros(3);zeros(3),body_k.R_0k]*(obj.bodiesPathGraph(a,k)*[R_ka*body_a.joint.R_pe.' -R_ka*MatrixOperations.SkewSymmetric(-body_a.r_OP + R_ka.'*body_k.r_Oy); ...
@@ -725,9 +724,9 @@ classdef SystemModelBodies < handle
             obj.T = MatrixOperations.Initialise([obj.numOperationalDofs,6*obj.numLinks],0);
             l = 1;
             for k = 1:length(obj.operationalSpaceList)
-                index_k = obj.operationalSpaceList(k);
-                n_y = obj.bodies{index_k}.numOperationalDofs;
-                obj.T(l:l+n_y-1,6*index_k-5:6*index_k) = obj.bodies{index_k}.operational_space.getSelectionMatrix();
+                index = obj.operationalSpaceList(k);
+                n_y = obj.bodies{index}.numOperationalDofs;
+                obj.T(l:l+n_y-1,6*index-5:6*index) = obj.bodies{index}.operational_space.getSelectionMatrix();
                 l = l + n_y;
             end
         end
