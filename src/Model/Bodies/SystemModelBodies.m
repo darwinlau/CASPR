@@ -36,6 +36,9 @@ classdef SystemModelBodies < handle
         % Graphs
         connectivityGraph       % p x p connectivity matrix, if (i,j) = 1 means link i-1 is the parent of link j
         bodiesPathGraph         % p x p matrix that governs how to track to particular bodies, (i,j) = 1 means that to get to link j we must pass through link i
+        
+        % Lists
+        operationalSpaceList = []; % A list of attached operational space entries
 
         % Operational Space coordinates of the system
         y       = [];           % Operational space coordinates
@@ -290,12 +293,11 @@ classdef SystemModelBodies < handle
             if(obj.occupied.operational_space)
                 % Now determine the operational space vector y
                 obj.y = MatrixOperations.Initialise([obj.numOperationalDofs,1],obj.is_symbolic); l = 1;
-                for k = 1:obj.numLinks
-                    if(~isempty(obj.bodies{k}.operational_space))
-                        n_y = obj.bodies{k}.numOperationalDofs;
-                        obj.y(l:l+n_y-1) = obj.bodies{k}.operational_space.extractOperationalSpace(obj.bodies{k}.r_Oy,obj.bodies{k}.R_0k);
-                        l = l + n_y;
-                    end
+                for k = 1:length(obj.operationalSpaceList)
+                    body_index = obj.operationalSpaceList(k);
+                    n_y = obj.bodies{body_index}.numOperationalDofs;
+                    obj.y(l:l+n_y-1) = obj.bodies{body_index}.operational_space.extractOperationalSpace(obj.bodies{body_index}.r_Oy,obj.bodies{body_index}.R_0k);
+                    l = l + n_y;
                 end
 
                 % Set Q (relationship with joint propagation for operational space)
@@ -691,11 +693,12 @@ classdef SystemModelBodies < handle
             allOperationalItems = operational_space_xmlobj.getChildNodes;
 
             num_operationals = allOperationalItems.getLength;
+            obj.operationalSpaceList = zeros(num_operationals,1);
             % Creates all of the operational spaces first first
             for k = 1:num_operationals
                 % Java uses 0 indexing
                 currentOperationalItem = allOperationalItems.item(k-1);
-
+                
                 type = char(currentOperationalItem.getNodeName);
                 if (strcmp(type, 'position'))
                     operational_space = OperationalPosition.LoadXmlObj(currentOperationalItem);
@@ -707,6 +710,7 @@ classdef SystemModelBodies < handle
                     CASPR_log.Printf(sprintf('Unknown link type: %s', type),CASPRLogLevel.ERROR);
                 end
                 parent_link = operational_space.link;
+                obj.operationalSpaceList(k) = parent_link;
                 obj.bodies{parent_link}.attachOperationalSpace(operational_space);
                 % Should add some protection to ensure that one Operational_Space
                 % per link
@@ -719,12 +723,11 @@ classdef SystemModelBodies < handle
 
             obj.T = MatrixOperations.Initialise([obj.numOperationalDofs,6*obj.numLinks],0);
             l = 1;
-            for k = 1:length(obj.bodies)
-                if(~isempty(obj.bodies{k}.operational_space))
-                    n_y = obj.bodies{k}.numOperationalDofs;
-                    obj.T(l:l+n_y-1,6*k-5:6*k) = obj.bodies{k}.operational_space.getSelectionMatrix();
-                    l = l + n_y;
-                end
+            for k = 1:length(obj.operationalSpaceList)
+                index = obj.operationalSpaceList(k);
+                n_y = obj.bodies{index}.numOperationalDofs;
+                obj.T(l:l+n_y-1,6*index-5:6*index) = obj.bodies{index}.operational_space.getSelectionMatrix();
+                l = l + n_y;
             end
         end
 

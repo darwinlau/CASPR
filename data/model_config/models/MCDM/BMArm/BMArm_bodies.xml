@@ -49,7 +49,7 @@
         <operational_set id="ee_pose">
             <position marker_id="1" name="ee_pose">
                 <link>2</link>
-                <offset>0.0 0.327 0.0</offset>
+                <offset>0.0 0.2610 0.0</offset>
                 <axes active_axes="xyz"/>
             </position>
         </operational_set>    

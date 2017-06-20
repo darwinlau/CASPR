@@ -81,6 +81,7 @@ classdef (Abstract) BodyModelBase < handle
         
         % Attach the operational space rigid body
         function attachOperationalSpace(obj,operational_space)
+            CASPR_log.Assert(isempty(obj.operational_space),'Cannot have two operational spaces attached to the same link');
             obj.operational_space = operational_space;
             obj.r_y = operational_space.offset;
         end
