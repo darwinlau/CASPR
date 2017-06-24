@@ -11,19 +11,17 @@ classdef PoCaBotExperiment < ExperimentBase
         modelConfig
         forwardKin
         numMotor
-
-        MAX_HAND_ANGLE = 180;
-        MIN_HAND_ANGLE = 70;
-        BEST_HAND_ANGLE = 94;
-        MAX_ARM_ANGLE  = 180;
-        MIN_ARM_ANGLE  = 0;
+    end
+    
+    properties
+        q_present
     end
     
     methods
         function eb = PoCaBotExperiment(numMotor_for_test)
             % Create the config
             model_config = ModelConfig('PoCaBot spatial');
-            cable_set_id = 'dualcables_simple_gripper_demo_on_larger_scale_frame';
+            cable_set_id = 'dualcables_simple_gripper_demo_on_larger_scale_frame_large_endeffector_UPDOWN_switched';
             % Load the SystemKinematics object from the XML
             modelObj = model_config.getModel(cable_set_id);
             % Create the hardware interface
@@ -38,6 +36,7 @@ classdef PoCaBotExperiment < ExperimentBase
             eb.modelConfig = model_config;
             eb.numMotor = numMotor;
             %            eb.forwardKin = FKDifferential(modelObj);
+            eb.q_present = NaN;
         end
         
         function motorSpoolTest(obj)
@@ -355,9 +354,9 @@ classdef PoCaBotExperiment < ExperimentBase
                 current = ones(obj.numMotor,1)*200;
                 obj.hardwareInterface.currentCommandSend(current);
                 
-                profileAcc = ones(obj.numMotor,1)*100;
+                profileAcc = ones(obj.numMotor,1)*50;
                 obj.hardwareInterface.setProfileAcceleration(profileAcc);
-                profileVel = ones(obj.numMotor,1)*100;
+                profileVel = ones(obj.numMotor,1)*50;
                 obj.hardwareInterface.setProfileVelocity(profileVel);
                 
                 obj.hardwareInterface.motorPositionCommandSend(init_pos);
@@ -382,7 +381,7 @@ classdef PoCaBotExperiment < ExperimentBase
             
             % Start the system to get feedback
             obj.hardwareInterface.systemOnSend();
-            current = ones(obj.numMotor,1)*600;
+            current = ones(obj.numMotor,1)*400;
             obj.hardwareInterface.currentCommandSend(current);
             
             profileAcc = ones(obj.numMotor,1)*150;
@@ -399,12 +398,17 @@ classdef PoCaBotExperiment < ExperimentBase
             for t = 1:1:length(trajectory.timeVector)
                 % Print time for debugging
                 time = trajectory.timeVector(t);
-                
+                obj.q_present = trajectory.q(:,t);
                 tic;
                 % update cable lengths for next command from trajectory
                 obj.model.update(trajectory.q(:,t), trajectory.q_dot(:,t), trajectory.q_ddot(:,t),zeros(size(trajectory.q_dot(:,t))));
                 
-                obj.hardwareInterface.lengthCommandSend(obj.model.cableLengths *(1-0.002));
+                % The offset of the first demo when the middle 8 bricks
+                % were not picked up.
+                % factor_offset = [1;0;1;0;1;0;1;0]*0.004 + [0;1;0;1;0;1;0;1]*0.004;
+                factor_offset = [1;0;1;0;1;0;1;0]*0.004 + [0;1;0;1;0;1;0;1]*0.004;
+                
+                obj.hardwareInterface.lengthCommandSend(obj.model.cableLengths .*(1-factor_offset));
                 
                 
 %                 obj.l_cmd_traj(:, t) = obj.model.cableLengths; %(1)

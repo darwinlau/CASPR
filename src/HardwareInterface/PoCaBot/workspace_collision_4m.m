@@ -1,7 +1,7 @@
 % This source is for calculating the collision relationship between the 
 % anything involved and the cables
 
-clear;
+% clear;
 % The size of the outer frame
 length_frame = 3.939-0.061;
 width_frame = 3.934-0.066;
@@ -24,7 +24,7 @@ height_brick = 0.05;
 
 % The distance between upper side of the brick being held by the gripper 
 % and the bottom of the end effector
-length_hand = 0.30;
+length_hand = 0.36;
 
 % When we think about one side of the cube, the other side should be one
 % brick higher than the working side.
@@ -105,18 +105,29 @@ frame_vertice_7 = [-length_frame/2; -width_frame/2; height_frame/2];
 frame_vertice_8  = [-length_frame/2; width_frame/2;-height_frame/2];
 
 height_attach = 0.3575;
-ratio_safe_distance = 0.15;
+ratio_safe_distance = 0.30;
+length_in_holder = 0.21;
+length_full_spool = 4.5;
 % The distance above what the gripper is moving
-height_safe = 0.2;
+height_safe = 0.1;
 % For the upper two cables of the construction side 
 pivot_shortest_1 = [(-length_frame/2 + d1 - length_end/2); (width_bld/2 + width_end/2); (-height_frame/2 + height_bld +length_hand + height_end + height_safe)];
 pivot_longest_1 = [length_frame/2*(1-ratio_safe_distance);-width_frame/2*(1-ratio_safe_distance);-height_frame/2-height_attach+length_hand+ height_end];
 delta_cable1 = norm(frame_vertice_1 - pivot_longest_1) - norm(frame_vertice_1 - pivot_shortest_1);
+length_cable1 = (length_full_spool-delta_cable1)/2+norm(frame_vertice_1 - pivot_longest_1)+length_in_holder;
 
 % For the upper two cables of the brick side
-pivot_shortest_5 = [length_frame/2*(1-ratio_safe_distance)+length_end/2; -width_frame/2*(1-ratio_safe_distance)-width_end/2;-height_frame/2-height_attach+length_hand+ height_end+height_safe];
-pivot_longest_5 = [(-length_frame/2 + d1 + length_end/2); (width_bld/2 - width_end/2); (-height_frame/2 - height_attach +length_hand+height_end)];
+pivot_shortest_5 = [length_frame/2*(1-ratio_safe_distance)+length_end/2; -width_frame/2*(1-ratio_safe_distance)-width_end/2; -height_frame/2-height_attach+length_hand+ height_end+height_safe];
+pivot_longest_5_1 = [(-length_frame/2 + d1 + length_end/2); (width_bld/2 - width_end/2); (-height_frame/2 - height_attach +length_hand+height_end)];
+pivot_longest_5_2 = [length_frame/2*(1-ratio_safe_distance)+length_end/2; width_frame/2*(1-ratio_safe_distance)-width_end/2; -height_frame/2-height_attach+length_hand+ height_end+height_safe];
+[~, index] = max([norm(frame_vertice_5 - pivot_longest_5_1),norm(frame_vertice_5 - pivot_longest_5_2)]);
+if(index == 1)
+    pivot_longest_5 = pivot_longest_5_1;
+else
+    pivot_longest_5 = pivot_longest_5_2;
+end
 delta_cable5 = norm(frame_vertice_5 - pivot_longest_5) - norm(frame_vertice_5 - pivot_shortest_5);
+length_cable5 = (length_full_spool-delta_cable5)/2+norm(frame_vertice_5 - pivot_longest_5)+length_in_holder;
 
 % For the lower two cables of the construction side
 pivot_shortest_8 = pivot_shortest_1;
@@ -124,14 +135,62 @@ pivot_shortest_8(3) = -length_frame/2;
 pivot_longest_8 = pivot_longest_1;
 pivot_longest_8(3) = pivot_longest_1(3)-height_end;
 delta_cable8 = norm(frame_vertice_8 - pivot_longest_8) - norm(frame_vertice_8 - pivot_shortest_8);
+length_cable8 = (length_full_spool-delta_cable8)/2+norm(frame_vertice_8 - pivot_longest_8)+length_in_holder;
 
 % For the lower two cables of the brick side
 pivot_shortest_4 = pivot_shortest_5;
-pivot_shortest_4(3) = -length_frame/2;
-pivot_longest_4_1 = pivot_longest_5;
-pivot_longest_4_1(3) = pivot_longest_5(3)-height_end;
-pivot_longest_4_2 = pivot_longest_5;
+pivot_shortest_4(3) = -height_frame/2;
+pivot_longest_4_1 = pivot_longest_5_1;
+pivot_longest_4_1(3) = pivot_longest_5_1(3)-height_end;
+pivot_longest_4_2 = pivot_longest_5_1;
 pivot_longest_4_2(3) = -height_frame/2 + height_bld + length_hand;
-delta_cable4_1 = norm(frame_vertice_4 - pivot_longest_4_1) - norm(frame_vertice_4 - pivot_shortest_4);
-delta_cable4_2 = norm(frame_vertice_4 - pivot_longest_4_2) - norm(frame_vertice_4 - pivot_shortest_4);
-delta_cable4 = max(delta_cable4_1,delta_cable4_2);
+pivot_longest_4_3 = pivot_longest_5_2;
+pivot_longest_4_3(3) = -height_frame/2-height_attach+length_hand + height_safe;
+pivot_longest_4_4 = pivot_longest_5_2;
+pivot_longest_4_4(3) = -height_frame/2-height_attach+length_hand;
+[~, index] = max([...
+    norm(frame_vertice_4 - pivot_longest_4_1),...
+    norm(frame_vertice_4 - pivot_longest_4_2),...
+    norm(frame_vertice_4 - pivot_longest_4_3),...
+    norm(frame_vertice_4 - pivot_longest_4_4)]);
+switch index
+    case 1
+        pivot_longest_4 = pivot_longest_4_1;
+    case 2
+        pivot_longest_4 = pivot_longest_4_1;
+    case 3
+        pivot_longest_4 = pivot_longest_4_1;
+    case 4
+        pivot_longest_4 = pivot_longest_4_1;
+end
+delta_cable4 = norm(frame_vertice_4 - pivot_longest_4) - norm(frame_vertice_4 - pivot_shortest_4);
+length_cable4 = (length_full_spool-delta_cable4)/2+norm(frame_vertice_4 - pivot_longest_4)+length_in_holder;
+
+%% DRAWING
+axis([-2,2,-2,2,-2,2]);hold on;
+cube_ver1 = [-length_bld/2; width_bld/2; height_bld/2];
+cube_ver2 = [ length_bld/2; width_bld/2;-height_bld/2];
+cube_ver3 = [ length_bld/2; width_bld/2; height_bld/2];
+cube_ver4 = [ length_bld/2;-width_bld/2;-height_bld/2];
+cube_ver5 = [ length_bld/2;-width_bld/2; height_bld/2];
+cube_ver6 = [-length_bld/2;-width_bld/2;-height_bld/2];
+cube_ver7 = [-length_bld/2;-width_bld/2; height_bld/2];
+cube_ver8 = [-length_bld/2; width_bld/2;-height_bld/2];
+vert = [cube_ver1,cube_ver2,cube_ver3,cube_ver4,cube_ver5,cube_ver6,cube_ver7,cube_ver8]';
+patch_move = [-length_frame/2 + d1 + length_bld/2;0;-height_frame/2 + height_bld/2];
+vert = vert + ones(8,1)*patch_move';
+fac = [8 1 3 2;2 3 5 4;4 5 7 6;6 7 1 8;1 7 5 3;6 8 2 4];
+patch('Vertices',vert,'Faces',fac,'FaceVertexCData',hsv(8),'FaceColor','interp');
+
+coordinate1 = [pivot_shortest_1,frame_vertice_1,pivot_longest_1]';
+coordinate4 = [pivot_shortest_4,frame_vertice_4,pivot_longest_4]';
+coordinate5 = [pivot_shortest_5,frame_vertice_5,pivot_longest_5]';
+coordinate8 = [pivot_shortest_8,frame_vertice_8,pivot_longest_8]';
+plot3(coordinate1(:,1),coordinate1(:,2),coordinate1(:,3));
+plot3(coordinate4(:,1),coordinate4(:,2),coordinate4(:,3));
+plot3(coordinate5(:,1),coordinate5(:,2),coordinate5(:,3));
+plot3(coordinate8(:,1),coordinate8(:,2),coordinate8(:,3));
+plot3(coordinate1(:,1),coordinate1(:,2),coordinate1(:,3), '*');
+plot3(coordinate4(:,1),coordinate4(:,2),coordinate4(:,3), '*');
+plot3(coordinate5(:,1),coordinate5(:,2),coordinate5(:,3), '*');
+plot3(coordinate8(:,1),coordinate8(:,2),coordinate8(:,3), '*');

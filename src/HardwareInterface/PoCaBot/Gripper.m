@@ -17,7 +17,11 @@ classdef Gripper < handle
         MAX_HAND_ANGLE = 180;
         MIN_HAND_ANGLE = 70;
         INI_HAND_ANGLE = 180;
-        BEST_HAND_ANGLE = 90;
+        BEST_HAND_ANGLE = 43;
+        % 85:8cm
+        % 97:9cm
+        LOOSE_HAND_ANGLE = 97;
+        
         
         MAX_ARM_ANGLE  = 180;
         MIN_ARM_ANGLE  = 0;
@@ -50,9 +54,9 @@ classdef Gripper < handle
             obj.comPort.ReadAsyncMode = 'continuous';
             
             % async read settings
-            obj.comPort.BytesAvailableFcnCount = obj.US_BYTES_NUM;
-            obj.comPort.BytesAvailableFcnMode = 'byte';
-            obj.comPort.BytesAvailableFcn = {@serial_callback,obj};
+%             obj.comPort.BytesAvailableFcnCount = obj.US_BYTES_NUM;
+%             obj.comPort.BytesAvailableFcnMode = 'byte';
+%             obj.comPort.BytesAvailableFcn = {@serial_callback,obj};
             
             obj.comPort.TimerPeriod = obj.TIMERPERIOD; % s
             obj.comPort.TimerFcn = {@serial_callback,obj};
@@ -67,33 +71,43 @@ classdef Gripper < handle
         end
         
         function setHandAngle(obj,hand_angle)
-            CASPR_log.Assert(hand_angle<= obj.MAX_HAND_ANGLE && hand_angle>=obj.MIN_HAND_ANGLE,'The argument is out of range!');
+%             CASPR_log.Assert(hand_angle<= obj.MAX_HAND_ANGLE && hand_angle>=obj.MIN_HAND_ANGLE,'The argument is out of range!');
             obj.hand_angle = hand_angle;
             cmd = [obj.CMD_MOTION_WRITE_HEADER obj.hand_angle obj.arm_angle];
-            obj.send_list.add(cmd);
             obj.send_list.add(cmd);
             obj.send_list.add(cmd);
         end
         
         function setArmAngle(obj,arm_angle)
             CASPR_log.Assert(arm_angle<= obj.MAX_ARM_ANGLE && arm_angle>=obj.MIN_ARM_ANGLE,'The argument is out of range!');
-            obj.arm_angle = arm_angle;
+            % calibration variables
+            angle0 = 185;%193;
+            angle180 = -8;%8;
+            k = (angle180-angle0)/180;
+            % model easily: equation of one unknow, one order
+            temp = (arm_angle-angle0)/k;
+            if temp<0
+                temp = temp + 180;
+            elseif temp>180
+                temp = temp - 180;
+            end
+            
+            obj.arm_angle = temp;
             cmd = [obj.CMD_MOTION_WRITE_HEADER obj.hand_angle obj.arm_angle];
-            obj.send_list.add(cmd);
             obj.send_list.add(cmd);
             obj.send_list.add(cmd);
         end
         
-        function setHandArm_Angle(obj,hand_angle,arm_angle)
-            CASPR_log.Assert(arm_angle<= obj.MAX_ARM_ANGLE && arm_angle>=obj.MIN_ARM_ANGLE,'The argument is out of range!');
-            CASPR_log.Assert(hand_angle<= obj.MAX_HAND_ANGLE && hand_angle>=obj.MIN_HAND_ANGLE,'The argument is out of range');
-            obj.hand_angle = hand_angle;
-            obj.arm_angle = arm_angle;
-            cmd = [obj.CMD_MOTION_WRITE_HEADER obj.hand_angle obj.arm_angle];
-            obj.send_list.add(cmd);
-            obj.send_list.add(cmd);
-            obj.send_list.add(cmd);
-        end
+%         function setHandArm_Angle(obj,hand_angle,arm_angle)
+%             CASPR_log.Assert(arm_angle<= obj.MAX_ARM_ANGLE && arm_angle>=obj.MIN_ARM_ANGLE,'The argument is out of range!');
+%             CASPR_log.Assert(hand_angle<= obj.MAX_HAND_ANGLE && hand_angle>=obj.MIN_HAND_ANGLE,'The argument is out of range');
+%             obj.hand_angle = hand_angle;
+%             obj.arm_angle = arm_angle;
+%             cmd = [obj.CMD_MOTION_WRITE_HEADER obj.hand_angle obj.arm_angle];
+%             obj.send_list.add(cmd);
+%             obj.send_list.add(cmd);
+%             obj.send_list.add(cmd);
+%         end
 
         function us_distance = getUltraSonic(obj)
             us_distance = obj.us_distance;
@@ -107,18 +121,18 @@ classdef Gripper < handle
 %         % The default value is 1 second. The minimum value is 0.01 second.
 %         TIMERPERIOD = 0.05;%s
         function timer_callback(obj)
-            if(obj.us_enable)
-                if(obj.us_timer == 0)
-                    % upload the us cmd
-                    obj.send_list.add(double(obj.CMD_ULTRASONIC_READ));
-                end
-                obj.us_timer = obj.us_timer + 1;
-                if(obj.us_timer >= obj.US_READ_PERIOD/obj.TIMERPERIOD)
-                    obj.us_timer = 0;
-                end
-            else
-                obj.us_timer = 0;
-            end
+%             if(obj.us_enable)
+%                 if(obj.us_timer == 0)
+%                     % upload the us cmd
+%                     obj.send_list.add(double(obj.CMD_ULTRASONIC_READ));
+%                 end
+%                 obj.us_timer = obj.us_timer + 1;
+%                 if(obj.us_timer >= obj.US_READ_PERIOD/obj.TIMERPERIOD)
+%                     obj.us_timer = 0;
+%                 end
+%             else
+%                 obj.us_timer = 0;
+%             end
             
             if(obj.send_list.size() > 0 && ...
                 (strcmpi(obj.comPort.TransferStatus,'read') || strcmpi(obj.comPort.TransferStatus,'idle')))
@@ -158,7 +172,7 @@ classdef Gripper < handle
         
         function closeserial(obj)
             stopasync(obj.comPort);
-            pause(0.5);
+            pause(1);
             fclose(obj.comPort);
             delete(obj.comPort);
             clear obj.comPort;
@@ -181,17 +195,17 @@ function serial_callback(obj, event, gripper)
 % Determine the type of event.
 EventType = event.Type;
 
-if strcmpi(EventType, 'BytesAvailable')
-    gripper.update_us_state();
-end
+% if strcmpi(EventType, 'BytesAvailable')
+%     gripper.update_us_state();
+% end
 
 if strcmpi(EventType, 'Timer')
     %     gripper.trigger_us();
     gripper.timer_callback();
 end
 
-if strcmpi(EventType, 'OutputEmpty')
-    gripper.update_write_state();
-end
+% if strcmpi(EventType, 'OutputEmpty')
+%     gripper.update_write_state();
+% end
 end
 

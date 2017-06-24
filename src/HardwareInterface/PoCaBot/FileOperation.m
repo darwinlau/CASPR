@@ -31,6 +31,14 @@ classdef FileOperation < handle
         place_list
     end
     
+    properties (Access = private, Constant = true)
+        length_hand = 0.246; % length of the hand
+        length_end  = 0.180; % length of the other part of the hand
+        length_offset = 0.022; % half of the height of the end effector
+        length_insert = 0.030;
+        vertical_offset = FileOperation.length_hand + FileOperation.length_end - FileOperation.length_offset - FileOperation.length_insert;
+    end
+    
     methods
         function fo = FileOperation(filepath_record, filepath_pickup_co, filepath_place_co)
             fo.filepath_record = filepath_record;
@@ -41,13 +49,18 @@ classdef FileOperation < handle
         end
         
         function [pickup_co, place_co]= getCoordinate(obj, num)
-            pickup_co = obj.pickup_list(1:3,num);
-            place_co = obj.place_list(1:3,num);
+            pickup_co = obj.pickup_list(num,1:3)'/1000;
+%              pickup_co(1) = pickup_co(1) - 0.013;
+%              pickup_co(2) = pickup_co(2) + 0.013;
+            pickup_co(3) = pickup_co(3) + obj.vertical_offset;
+            
+            place_co = obj.place_list(num,1:3)'/1000;
+            place_co(3) = place_co(3) + obj.vertical_offset+0.002;
         end
         
         function [arm_angle_pickup, arm_angle_place] = getArmAngle(obj,num)
-            arm_angle_pickup = obj.pickup_list(4,num);
-            arm_angle_place = obj.place_list(4,num);
+            arm_angle_pickup = obj.pickup_list(num,4);
+            arm_angle_place = obj.place_list(num,4);
         end
         
         function [init_pos] = readInitPos_Motors(obj)
@@ -100,7 +113,7 @@ classdef FileOperation < handle
         
         % Get the number of the brick involed for the present construction.
         function [num] = getAllBrickCount(obj)
-            num = size(obj.pickup_list,2);
+            num = min(size(obj.place_list,1),size(obj.pickup_list,1));
         end
     end
     
@@ -112,6 +125,7 @@ classdef FileOperation < handle
             %             obj.pickup_list = fscanf(fileID, formatSpec, size_pickup_list);
             %             fclose(fileID);
             obj.pickup_list = load(obj.filepath_pickup_co);
+            obj.pickup_list = flip(obj.pickup_list);
             %
             %             fileID = fopen(obj.filepath_place_co,'r');
             %             formatSpec = '%f %f %f %f';
@@ -119,9 +133,9 @@ classdef FileOperation < handle
             %             obj.place_list = fscanf(fileID, formatSpec, size_place_list);
             %             fclose(fileID);
             obj.place_list = load(obj.filepath_place_co);
-            
-            CASPR_log.Assert(size(obj.pickup_list) == size(obj.place_list), ...
-                'The coordinate files of the picking up and placing do not match each other!');
+            obj.place_list = flip(obj.place_list);
+%             CASPR_log.Assert(size(obj.pickup_list) == size(obj.place_list), ...
+%                 'The coordinate files of the picking up and placing do not match each other!');
         end
     end
 end
