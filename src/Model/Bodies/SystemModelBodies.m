@@ -25,6 +25,7 @@ classdef SystemModelBodies < handle
         % Degrees of freedom
         numDofs
         numDofVars
+        numOperationalSpaces
         numOperationalDofs
         numLinks
         numDofsActuated             % Number of actuated DoFs
@@ -117,6 +118,8 @@ classdef SystemModelBodies < handle
         % Get array of dofs for each joint
         jointsNumDofVars
         jointsNumDofs
+        % and for each operational space
+        operationalSpaceNumDofs
     end
 
     properties
@@ -218,7 +221,7 @@ classdef SystemModelBodies < handle
                 % Determine absolute position of link's ending position
                 obj.bodies{k}.r_OPe = obj.bodies{k}.r_OP + obj.bodies{k}.r_Pe;
                 % Determine absolute position of the operational space
-                if(~isempty(obj.bodies{k}.operational_space))
+                if(~isempty(obj.bodies{k}.operationalSpace))
                     obj.bodies{k}.r_Oy  = obj.bodies{k}.r_OP + obj.bodies{k}.r_y;
                 end
             end
@@ -295,7 +298,7 @@ classdef SystemModelBodies < handle
                 for k = 1:length(obj.operationalSpaceBodyIndices)
                     body_index = obj.operationalSpaceBodyIndices(k);
                     n_y = obj.bodies{body_index}.numOperationalDofs;
-                    obj.y(l:l+n_y-1) = obj.bodies{body_index}.operational_space.extractOperationalSpace(obj.bodies{body_index}.r_Oy,obj.bodies{body_index}.R_0k);
+                    obj.y(l:l+n_y-1) = obj.bodies{body_index}.operationalSpace.extractOperationalSpace(obj.bodies{body_index}.r_Oy,obj.bodies{body_index}.R_0k);
                     l = l + n_y;
                 end
 
@@ -721,13 +724,14 @@ classdef SystemModelBodies < handle
                 num_operational_dofs = num_operational_dofs + operational_space.numOperationalDofs;
             end            
             obj.numOperationalDofs = num_operational_dofs;
+            obj.numOperationalSpaces = num_operationals;
 
             obj.T = MatrixOperations.Initialise([obj.numOperationalDofs,6*obj.numLinks],0);
             l = 1;
             for k = 1:length(obj.operationalSpaceBodyIndices)
                 index = obj.operationalSpaceBodyIndices(k);
                 n_y = obj.bodies{index}.numOperationalDofs;
-                obj.T(l:l+n_y-1,6*index-5:6*index) = obj.bodies{index}.operational_space.getSelectionMatrix();
+                obj.T(l:l+n_y-1,6*index-5:6*index) = obj.bodies{index}.operationalSpace.getSelectionMatrix();
                 l = l + n_y;
             end
         end
@@ -997,6 +1001,13 @@ classdef SystemModelBodies < handle
             jointsNumDofs = zeros(obj.numLinks,1);
             for k = 1:obj.numLinks
                 jointsNumDofs(k) = obj.bodies{k}.numDofs;
+            end
+        end
+               
+        function operationalNumDofs = get.operationalSpaceNumDofs(obj)
+            operationalNumDofs = zeros(obj.numOperationalSpaces,1);
+            for k = 1:obj.numOperationalSpaces
+                operationalNumDofs(k) = obj.bodies{obj.operationalSpaceBodyIndices(k)}.operationalSpace.numOperationalDofs;
             end
         end
     end
