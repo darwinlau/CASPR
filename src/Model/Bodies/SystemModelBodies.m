@@ -592,10 +592,24 @@ classdef SystemModelBodies < handle
             end
         end
         
-        % Update the mass inertia matrix for the system from the joint mass
-        % inertia matrices.
-        function updateMassInertiaMatrix(obj,massInertiaMatrix)
-            obj.massInertiaMatrix = massInertiaMatrix;
+        % Updates the inertia properties and the mass inertia matrix
+        function updateInertiaProperties(obj,m,r_G,I_G)
+            CASPR_log.Assert((isempty(m)||(length(m)==obj.numLinks))&&(isempty(r_G)||(length(r_G)==obj.numLinks))&&(isempty(I_G)||(length(I_G)==obj.numLinks)),'Inertia terms must be empty or a cell array of size equal to the number of links');
+            % Go through the cell array of each element
+            for i = 1:length(m)
+                obj.bodies{i}.m = m{i};
+            end
+            for i = 1:length(r_G)
+                obj.bodies{i}.r_G = r_G{i};
+            end
+            for i = 1:length(I_G)
+                obj.bodies{i}.I_G = I_G{i};
+            end
+            % Update the mass inertia matrix to reflect the new values
+            obj.massInertiaMatrix = zeros(6*obj.numLinks, 6*obj.numLinks);
+            for k = 1:obj.numLinks
+                obj.massInertiaMatrix(6*k-5:6*k, 6*k-5:6*k) = [obj.bodies{k}.m*eye(3) zeros(3,3); zeros(3,3) obj.bodies{k}.I_G];
+            end
         end
                 
         % Calculate the internal matrices for the quadratic form of the

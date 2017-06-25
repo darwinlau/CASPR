@@ -129,6 +129,14 @@ classdef SystemModel < handle
             obj.cableModel.update(obj.bodyModel);
         end
         
+        % Function that updates the inertia parameters
+        function updateInertiaParameters(obj,m,r_G,I_G,update_flag)
+            obj.bodyModel.updateInertiaParameters(m,r_G,I_G);
+            if(update_flag)
+                obj.update(obj.q,obj.q_dot,obj.q_ddot,obj.W_e);
+            end
+        end
+        
         % Get the linearisation terms for the system.
         function [A,B] = getLinearisedModel(obj)
             % This function assumes that the state input pair for

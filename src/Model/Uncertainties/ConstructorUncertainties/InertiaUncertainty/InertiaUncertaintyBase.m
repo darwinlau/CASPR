@@ -17,7 +17,7 @@ classdef (Abstract) InertiaUncertaintyBase < ConstructorUncertaintyBase
                 sm.bodyModel.updateDynamics();
             end
             im = obj.applyInertiaUncertainty(sm);
-            sm.bodyModel.updateMassInertiaMatrix(im);
+            sm.updateInertiaProperties(im.m,im.r_G,im.I_G,1);
         end
     end
     methods(Abstract,Access=protected)
