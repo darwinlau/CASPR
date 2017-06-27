@@ -3,9 +3,9 @@
   <!ATTLIST solver_class id ID #REQUIRED>
 ]>
 <simulator>
-	<solver_class id="FKLeastSquares"></solver_class>
-    <solver_class id="FKDifferential"></solver_class>
-    <solver_class id="FKHybridLeastSquaresDifferential"></solver_class>
+	<solver_class id="FKLeastSquares"/>
+    <solver_class id="FKDifferential"/>
+    <solver_class id="FKHybridLeastSquaresDifferential"/>
     <plot_functions>
 		<plot_function type="plotAngularVelocity">
             <figure_quantity>1</figure_quantity>

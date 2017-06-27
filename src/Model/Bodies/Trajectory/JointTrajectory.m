@@ -67,7 +67,7 @@ classdef JointTrajectory < TrajectoryBase
             num_points = point_nodes.getLength;
             time_step = str2double(xmlObj.getAttribute('time_step'));
             
-            time_abs = JointTrajectory.get_xml_absolute_tag(xmlObj);
+            time_abs = TrajectoryBase.get_xml_absolute_tag(xmlObj);
                   
             % Cell of points of joints coordinates
             q_pj = cell(num_points,1); 
@@ -133,7 +133,7 @@ classdef JointTrajectory < TrajectoryBase
             num_points = point_nodes.getLength;
             time_step = str2double(xmlObj.getAttribute('time_step'));
             
-            time_abs = JointTrajectory.get_xml_absolute_tag(xmlObj);
+            time_abs = TrajectoryBase.get_xml_absolute_tag(xmlObj);
                   
             % Cell of points of joints coordinates
             q_pj = cell(num_points,1); 
@@ -204,7 +204,7 @@ classdef JointTrajectory < TrajectoryBase
             num_points = point_nodes.getLength;
             time_step = str2double(xmlObj.getAttribute('time_step'));
             
-            time_abs = JointTrajectory.get_xml_absolute_tag(xmlObj);
+            time_abs = TrajectoryBase.get_xml_absolute_tag(xmlObj);
                   
             % Cell of points of joints coordinates
             q_pj = cell(num_points,1); 
@@ -278,7 +278,7 @@ classdef JointTrajectory < TrajectoryBase
             num_points = point_nodes.getLength;
             time_step = str2double(xmlObj.getAttribute('time_step'));
             
-            time_abs = JointTrajectory.get_xml_absolute_tag(xmlObj);
+            time_abs = TrajectoryBase.get_xml_absolute_tag(xmlObj);
                   
             % Cell of points of joints coordinates
             q_pj = cell(num_points,1); 
@@ -362,7 +362,7 @@ classdef JointTrajectory < TrajectoryBase
             time_step = str2double(xmlObj.getAttribute('time_step'));
             time_blend_default = str2double(xmlObj.getAttribute('blend_time_default'));
             
-            time_abs = JointTrajectory.get_xml_absolute_tag(xmlObj);
+            time_abs = TrajectoryBase.get_xml_absolute_tag(xmlObj);
                   
             % Cell of points of joints coordinates
             q_pj = cell(num_points,1); 

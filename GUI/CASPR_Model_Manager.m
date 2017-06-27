@@ -22,7 +22,7 @@ function varargout = CASPR_Model_Manager(varargin)
 
     % Edit the above text to modify the response to help CASPR_Model_Manager
 
-    % Last Modified by GUIDE v2.5 06-Apr-2017 14:00:44
+    % Last Modified by GUIDE v2.5 22-Jun-2017 18:18:19
 
     % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
@@ -58,7 +58,7 @@ function CASPR_Model_Manager_OpeningFcn(hObject, ~, handles, varargin)
 
     % Update handles structure
     guidata(hObject, handles);
-
+    set_robotlist(handles)
     % UIWAIT makes CASPR_Model_Manager wait for user response (see UIRESUME)
     % uiwait(handles.figure1);
 end
@@ -84,23 +84,24 @@ function add_button_Callback(~, ~, handles) %#ok<DEFNU>
     
     % Read the elements from the table
     name = get(handles.name_box,'String');
-    
-    if(get(handles.dev_toggle,'Value'))
-        folder_path = [uigetdir([CASPR_configuration.LoadModelConfigPath(), DevModelConfig.MODEL_FOLDER_PATH,'/']),'/'];
+    if(CASPR_configuration.LoadDevModelConfig())
+        model_path = DevModelConfig.MODEL_FOLDER_PATH;
+        folder_path = [uigetdir([CASPR_configuration.LoadModelConfigPath(), model_path,'/']),'/'];
         % Change slashes to make OS consistent
         folder_path = strrep(folder_path,'\','/');
-        ind = strfind(folder_path,DevModelConfig.MODEL_FOLDER_PATH);
+        ind = strfind(folder_path,model_path);
         CASPR_log.Assert(~isempty(ind),'Folder must be a subfolder of the default choice');    
-        folder_path = folder_path(ind+length(DevModelConfig.MODEL_FOLDER_PATH):length(folder_path));
+        folder_path = folder_path(ind+length(model_path):length(folder_path));
     else
-        folder_path = [uigetdir([CASPR_configuration.LoadModelConfigPath(), ModelConfig.MODEL_FOLDER_PATH]),'/'];
+    	model_path = ModelConfig.MODEL_FOLDER_PATH;
+        folder_path = [uigetdir([CASPR_configuration.LoadModelConfigPath(), model_path]),'/'];
         % Change slashes to make OS consistent
         folder_path = strrep(folder_path,'\','/');
-        ind = strfind(folder_path,ModelConfig.MODEL_FOLDER_PATH);
+        ind = strfind(folder_path,model_path);
         CASPR_log.Assert(~isempty(ind),'Folder must be a subfolder of the default choice');    
-        folder_path = folder_path(ind+length(ModelConfig.MODEL_FOLDER_PATH):length(folder_path));
+        folder_path = folder_path(ind+length(model_path):length(folder_path));
     end
-    CASPR_log.Assert(sum(~(isstrprop(name,'alphanum')|(name==' ')|(name=='_')))==0,'Robot Name must contain only numbers and letters');
+    CASPR_log.Assert(sum(~(isstrprop(name,'alphanum')|(name==' ')|(name=='_')|(name=='-')))==0,'Robot Name must contain only numbers and letters');
     if(get(handles.advanced_toggle,'Value'))
         table_data = get(handles.model_table,'Data');
         folder = [folder_path,table_data{1}];
@@ -110,6 +111,7 @@ function add_button_Callback(~, ~, handles) %#ok<DEFNU>
     else
         % Add conversions
         name_for_files = strrep(name,' ','_');
+        name_for_files = strrep(name_for_files,'-','_');
         name_for_files = strrep(name_for_files,'.','_');
         folder = [folder_path,name_for_files,'/'];
         bodies = [name_for_files,'_bodies.xml'];
@@ -118,8 +120,7 @@ function add_button_Callback(~, ~, handles) %#ok<DEFNU>
     end
        
     % Call the appropriate model config operations
-    
-    if(get(handles.dev_toggle,'Value'))
+    if(CASPR_configuration.LoadDevModelConfig())
         ModelConfigManager.AddDevModelConfig(name,folder,bodies,cables,trajectories);
     else
         ModelConfigManager.AddModelConfig(name,folder,bodies,cables,trajectories);
@@ -135,7 +136,7 @@ function remove_button_Callback(~, ~, handles) %#ok<DEFNU>
     % Read the elements from the table
     name = get(handles.remove_box,'String');
     % Call the appropriate model config operations
-    if(get(handles.dev_toggle,'Value'))
+    if(CASPR_configuration.LoadDevModelConfig())
         ModelConfigManager.RemoveDevModelConfig(name);
     else
         ModelConfigManager.RemoveModelConfig(name);
@@ -188,27 +189,6 @@ function advanced_toggle_Callback(hObject, ~, handles) %#ok<DEFNU>
     end
 end
 
-% --- Executes on button press in dev_toggle.
-function dev_toggle_Callback(~, ~, handles) %#ok<DEFNU>
-    % hObject    handle to dev_toggle (see GCBO)
-    % eventdata  reserved - to be defined in a future version of MATLAB
-    % handles    structure with handles and user data (see GUIDATA)
-    
-    % Hint: get(hObject,'Value') returns toggle state of dev_toggle
-    set_robotlist(handles);
-    text_string = cell(5,1);
-    text_string{1} = 'Instructions:';
-    text_string{2} = 'Step 1 - Enter the desired robot name (only use letters and numbers).'; 
-    text_string{3} = 'Step 2 - Click the add model button and select the base folder to save into';
-    if(get(handles.dev_toggle,'Value'))
-        text_string{4} = '(this must be a subfolder of /data/model_config/indev_models).' ;
-    else
-        text_string{4} = '(this must be a subfolder of /data/model_config/models).' ;
-    end
-    text_string{5} = 'Advanced options allows the folder and file names to be explicitly specified.';
-    set(handles.add_instructions_text,'String',text_string)
-end
-
 
 % --- Executes on selection change in robotlist_menu.
 function robotlist_menu_Callback(~, ~, ~) %#ok<DEFNU>
@@ -238,7 +218,7 @@ function robotlist_menu_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
 end
 
 function set_robotlist(handles)
-    if(get(handles.dev_toggle,'Value'))
+    if(CASPR_configuration.LoadDevModelConfig())
         robotlist_str = ModelConfigManager.GetDevModelConfigListNames();
     else
         robotlist_str = ModelConfigManager.GetModelConfigListNames();
@@ -269,4 +249,23 @@ function remove_box_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
     if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
         set(hObject,'BackgroundColor','white');
     end
+end
+
+
+% --- Executes during object creation, after setting all properties.
+function add_instructions_text_CreateFcn(hobject, ~, ~) %#ok<DEFNU>
+% hObject    handle to add_instructions_text (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+    text_string = cell(5,1);
+    text_string{1} = 'Instructions:';
+    text_string{2} = 'Step 1 - Enter the desired robot name (only use letters and numbers).'; 
+    text_string{3} = 'Step 2 - Click the add model button and select the base folder to save into';
+    if(CASPR_configuration.LoadDevModelConfig())
+        text_string{4} = '(this must be a subfolder of /data/model_config/indev_models).' ;
+    else
+        text_string{4} = '(this must be a subfolder of /data/model_config/models).' ;
+    end
+    text_string{5} = 'Advanced options allows the folder and file names to be explicitly specified.';
+    set(hobject,'String',text_string)
 end

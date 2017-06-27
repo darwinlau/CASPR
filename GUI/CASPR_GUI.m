@@ -106,7 +106,7 @@ function figure1_CloseRequestFcn(hObject, ~, handles) %#ok<DEFNU>
 end
 
 % --- Executes when figure1 is resized.
-function figure1_ResizeFcn(~, ~, ~)
+function figure1_ResizeFcn(~, ~, ~) %#ok<DEFNU>
     % hObject    handle to figure1 (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
@@ -196,7 +196,6 @@ function cable_popup_Callback(~, ~, handles) %#ok<DEFNU>
     % Hints: contents = cellstr(get(hObject,'String')) returns cable_popup contents as cell array
     %        contents{get(hObject,'Value')} returns selected item from cable_popup
     generate_model_object(handles);
-    % ADD PLOTTING OF THE OBJECT
 end
 
 % --- Executes during object creation, after setting all properties.
@@ -307,10 +306,10 @@ function model_update_button_Callback(~, ~, handles) %#ok<DEFNU>
     end
     contents = cellstr(get(handles.cable_popup,'String'));
     try
-        cable_type = contents{get(handles.cable_popup,'Value')};
+        cable_type = contents{get(handles.cable_popup,'Value')}; %#ok<NASGU>
     catch 
         CASPR_log.Warn('Previous cable does not exist anymore. Default to first element.');
-        cable_type = contents{1};
+        cable_type = contents{1}; %#ok<NASGU>
     end
     cableset_str = model_config.getCableSetList();
     set(handles.cable_popup, 'String', cableset_str);
@@ -431,26 +430,4 @@ function format_q_table(numDofs,qtable,q_data)
         column_name{i} = ['q',num2str(i)];
     end
     set(qtable,'ColumnName',column_name);
-end
-
-
-% --- Executes during object creation, after setting all properties.
-function logo_axis_CreateFcn(hObject, ~, ~)
-    % hObject    handle to logo_axis (see GCBO)
-    % eventdata  reserved - to be defined in a future version of MATLAB
-    % handles    empty - handles not created until after all CreateFcns called
-
-    % Hint: place code in OpeningFcn to populate logo_axis
-    
-    
-    ig = imread('/home/jpeden/Dropbox/CASPR_private/GUI/config/CASPR_LOGO_FINAL.png','png');
-    image(hObject,ig);
-    
-    set(hObject,'XTickLabel','');
-    set(hObject,'YTickLabel','');
-    set(hObject,'XTick','');
-    set(hObject,'YTick','');
-    box off
-    set(gca,'Visible','off')
-    axis image
 end
