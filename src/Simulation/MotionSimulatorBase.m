@@ -375,20 +375,7 @@ classdef (Abstract) MotionSimulatorBase < SimulatorBase
 
             cable_model = kinematics.cableModel;
             for i = 1:cable_model.numCables
-                for j = 1:cable_model.cables{i}.numSegments
-                    for k = 1:cable_model.numLinks+1
-                        if cable_model.getCRMTerm(i,j,k) == -1
-                            r_OAa0 = cable_model.cables{i}.segments{j}.attachments{1}.r_OA;
-                        elseif cable_model.getCRMTerm(i,j,k) == 1
-                            r_OAb0 = cable_model.cables{i}.segments{j}.attachments{2}.r_OA;
-                        end
-                    end
-                    if (cable_model.cables{i}.isActive)
-                        plot3(ax,[r_OAa0(1) r_OAb0(1)], [r_OAa0(2) r_OAb0(2)], [r_OAa0(3) r_OAb0(3)], 'Color', 'r', 'LineWidth', 1);
-                    else
-                        plot3(ax,[r_OAa0(1) r_OAb0(1)], [r_OAa0(2) r_OAb0(2)], [r_OAa0(3) r_OAb0(3)], 'Color', [0.7, 0.7, 0.7], 'LineWidth', 1);
-                    end
-                end
+                cable_model.cables{i}.plotCable(ax);
             end
             hold off;
         end
