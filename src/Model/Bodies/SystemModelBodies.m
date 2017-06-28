@@ -597,7 +597,11 @@ classdef SystemModelBodies < handle
         
         % Updates the inertia properties and the mass inertia matrix
         function updateInertiaProperties(obj,m,r_G,I_G)
+            % Ensure that the inputs are cell arrays when necessary
+            CASPR_log.Assert((isempty(m)||(obj.numLinks==1)||iscell(m))&&(isempty(r_G)||(obj.numLinks==1)||iscell(r_G))&&(isempty(I_G)||(obj.numLinks==1)||iscell(I_G)),'Input must be a cell if the number of links is greater than 1');
+            % Ensure that the non empty cell array is of the correct length
             CASPR_log.Assert((isempty(m)||(length(m)==obj.numLinks))&&(isempty(r_G)||(length(r_G)==obj.numLinks))&&(isempty(I_G)||(length(I_G)==obj.numLinks)),'Inertia terms must be empty or a cell array of size equal to the number of links');
+            
             % Go through the cell array of each element
             for i = 1:length(m)
                 obj.bodies{i}.m = m{i};

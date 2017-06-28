@@ -26,3 +26,5 @@ MACARM,/SCDM/spatial_manipulators/MACARM/,MACARM_bodies.xml,MACARM_cables.xml,MA
 C-Leg,/MCDM/C-Leg/,C-Leg_bodies.xml,C-Leg_cables.xml,C-Leg_trajectories.xml,
 BioBiped one-leg,/MCDM/BioBiped_one_leg/,BioBiped_one_leg_bodies.xml,BioBiped_one_leg_cables.xml,BioBiped_one_leg_trajectories.xml,
 BioBiped,/MCDM/BioBiped/,BioBiped_bodies.xml,BioBiped_cables.xml,BioBiped_trajectories.xml,
+CAROCA,/SCDM/spatial_manipulators/CAROCA/,CAROCA_bodies.xml,CAROCA_cables.xml,CAROCA_trajectories.xml,
+FASTKIT Planar,/HCDM/FASTKIT_Planar/,FASTKIT_Planar_bodies.xml,FASTKIT_Planar_cables.xml,FASTKIT_Planar_trajectories.xml,
