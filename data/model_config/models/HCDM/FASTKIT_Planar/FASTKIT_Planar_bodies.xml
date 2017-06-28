@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Template generated XML file for rigid bodies in CASPR -->
+<bodies_system>
+    <links display_range="-1 4 -1 4 0 3.2" view_angle="0 0">
+        <!-- For each rigid link add a link_rigid tag (like the one below). 
+            Further details are provided in CASPR documentation -->
+            
+        <link_rigid num="1" name="Mobile_bot_1">
+            <joint type="PLANAR_XY" actuated="true" q_initial="0 0 0"/>
+            <physical>
+                <mass>10</mass>
+                <com_location>0 0 0.35</com_location>
+                <end_location>0 0 3</end_location>
+                <inertia ref="com">
+                    <Ixx>1.0</Ixx>
+                    <Iyy>1.0</Iyy>
+                    <Izz>1.0</Izz>
+                    <Ixy>0.0</Ixy>
+                    <Ixz>0.0</Ixz>
+                    <Iyz>0.0</Iyz>
+                </inertia>
+            </physical>
+            <parent>
+                <num>0</num>
+                <location>0 0 0</location>
+            </parent>
+        </link_rigid>
+
+            <link_rigid num="2" name="Mobile_bot_2">
+            <joint type="PLANAR_XY" actuated="true" q_initial="3 0 0"/>
+            <physical>
+                <mass>10</mass>
+                <com_location>0 0 0.35</com_location>
+                <end_location>0 0 3</end_location>
+                <inertia ref="com">
+                    <Ixx>1.0</Ixx>
+                    <Iyy>1.0</Iyy>
+                    <Izz>1.0</Izz>
+                    <Ixy>0.0</Ixy>
+                    <Ixz>0.0</Ixz>
+                    <Iyz>0.0</Iyz>
+                </inertia>
+            </physical>
+            <parent>
+                <num>1</num>
+                <location>0 0 0</location>
+            </parent>
+        </link_rigid>
+        
+           <link_rigid num="3" name="Platform">
+            <joint type="PLANAR_XZ" q_initial="1.5 1 0"/> <!-- Platform itself is not actuated-->  
+            <physical>
+                <mass>10</mass>
+                <com_location>0 0 0</com_location>
+                <end_location>0 0 0</end_location>
+                <inertia ref="com">
+                    <Ixx>1.0</Ixx>
+                    <Iyy>1.0</Iyy>
+                    <Izz>1.0</Izz>
+                    <Ixy>0.0</Ixy>
+                    <Ixz>0.0</Ixz>
+                    <Iyz>0.0</Iyz>
+                </inertia>
+            </physical>
+            <parent>
+                <num>1</num>
+                <location>0 0 0</location>
+            </parent>
+        </link_rigid>
+        
+    </links>
+</bodies_system>
