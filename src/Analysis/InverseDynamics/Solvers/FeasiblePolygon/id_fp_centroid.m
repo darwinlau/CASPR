@@ -86,7 +86,7 @@ function [ x_opt, exit_type] = id_fp_centroid(A_eq, b_eq, xmin, xmax)
             end
         end
     end
-    [c1,c2] = centroid(Vertices);
+    [c1,c2] = Centroid(Vertices);
     x_opt = x_p + N*[c1;c2];
     exit_type = IDSolverExitType.NO_ERROR;
 end
