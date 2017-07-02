@@ -355,6 +355,14 @@ classdef (Abstract) MotionSimulatorBase < SimulatorBase
                 plot3(ax,r_OG0(1), r_OG0(2), r_OG0(3), 'Color', 'b', 'Marker', 'o', 'LineWidth', 2);
                 plot3(ax,[r_OP0(1) r_OPe0(1)], [r_OP0(2) r_OPe0(2)], [r_OP0(3) r_OPe0(3)], 'Color', 'k', 'LineWidth', 3);
             end
+            
+            for k = 1:body_model.numOperationalSpaces
+                % TODO: check types of operational spaces and perform accordingly, let's just
+                % assume now it is only cartesian
+                %if (body_model.bodies{operationalSpaceBodyIndices(k)}
+                r_OY0 = body_model.bodies{body_model.operationalSpaceBodyIndices(k)}.R_0k*body_model.bodies{body_model.operationalSpaceBodyIndices(k)}.r_OY;
+                plot3(ax, r_OY0(1), r_OY0(2), r_OY0(3), 'Color', 'g', 'Marker', 'o', 'LineWidth', 2);
+            end
 
             cable_model = kinematics.cableModel;
             for i = 1:cable_model.numCables
@@ -377,8 +385,8 @@ classdef (Abstract) MotionSimulatorBase < SimulatorBase
                 time = trajectory.totalTime;
             end
             if (nargin < 7)
-                width = MotionSimulationBase.MOVIE_DEFAULT_WIDTH;
-                height = MotionSimulationBase.MOVIE_DEFAULT_HEIGHT;
+                width = MotionSimulatorBase.MOVIE_DEFAULT_WIDTH;
+                height = MotionSimulatorBase.MOVIE_DEFAULT_HEIGHT;
             end
             fps = 30;
             writerObj = VideoWriter(filename);
