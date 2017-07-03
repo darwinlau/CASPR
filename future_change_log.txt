@@ -15,5 +15,7 @@ Change Log
         Fix how metrics and conditions are handled. Particularly ensure that computation is only
         performed once.
 
+        Fix forward kinematics with HCDMs
+
 
 

@@ -124,7 +124,11 @@ classdef (Abstract) ModelConfigBase < handle
         end
         
         function trajectories_str = getOperationalTrajectoriesList(obj)
-            trajectories_str = GUIOperations.XmlObj2StringCellArray(obj.trajectoriesXmlObj.getElementsByTagName('operational_trajectories').item(0).getChildNodes,'id');
+            if (~isempty(obj.trajectoriesXmlObj.getElementsByTagName('operational_trajectories').item(0)))
+                trajectories_str = GUIOperations.XmlObj2StringCellArray(obj.trajectoriesXmlObj.getElementsByTagName('operational_trajectories').item(0).getChildNodes,'id');
+            else
+                trajectories_str = {};
+            end
         end
     end
     
