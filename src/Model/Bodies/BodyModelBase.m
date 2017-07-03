@@ -10,7 +10,7 @@ classdef (Abstract) BodyModelBase < handle
         r_OG = zeros(3,1);      % Absolute position vector to centre of gravity in {k}
         r_OP = zeros(3,1);      % Absolute position vector to joint location in (k)
         r_OPe = zeros(3,1);     % Absolute position vector to end of link in {k}
-        r_Oy = zeros(3,1);      % Absolute position vector to the OP space reference point in {k}
+        r_OY = zeros(3,1);      % Absolute position vector to the OP space reference point in {k}
 
         % Absolute velocities
         v_OG = zeros(3,1);      % Absolute velocity vector to centre of gravity in {k}
