@@ -1,0 +1,3 @@
+<!-- Rules for cables files-->
+
+<!ATTLIST cable_set id ID #REQUIRED>

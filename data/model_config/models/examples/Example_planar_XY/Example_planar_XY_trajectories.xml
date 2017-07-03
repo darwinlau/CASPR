@@ -1,75 +1,70 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE joint_trajectories [
-  <!ATTLIST linear_spline_trajectory id ID #REQUIRED>
-  <!ATTLIST cubic_spline_trajectory id ID #REQUIRED>
-  <!ATTLIST quintic_spline_trajectory id ID #REQUIRED>
-  <!ATTLIST cubic_spline_average_velocity_trajectory id ID #REQUIRED>
-  <!ATTLIST parabolic_blend_trajectory id ID #REQUIRED>
-]>
-
-<joint_trajectories>
-  <linear_spline_trajectory id="example_linear" time_definition="absolute" time_step="0.01">
-    <points>
-      <point>
-        <q>0.3 0.5 0.0</q>
-      </point>
-      <point time="5.0">
-        <q>0.7 0.5 0.0</q>
-      </point>
-    </points>
-  </linear_spline_trajectory>
-  <cubic_spline_trajectory id="example_cubic" time_definition="absolute" time_step="0.01">
-    <points>
-      <point>
-        <q>0.3 0.5 0.0</q>
-        <q_dot>0.0 0.0 0.0</q_dot>
-      </point>
-      <point time="5.0">
-        <q>0.7 0.5 0.0</q>
-        <q_dot>0.0 0.0 0.0</q_dot>
-      </point>
-    </points>
-  </cubic_spline_trajectory>
-  <quintic_spline_trajectory id="example_quintic" time_definition="absolute" time_step="0.01">
-    <points>
-      <point>
-        <q>0.3 0.5 0.0</q>
-        <q_dot>0.0 0.0 0.0</q_dot>
-        <q_ddot>0.0 0.0 0.0</q_ddot>
-      </point>
-      <point time="5.0">
-        <q>0.7 0.5 0.0</q>
-        <q_dot>0.0 0.0 0.0</q_dot>
-        <q_ddot>0.0 0.0 0.0</q_ddot>
-      </point>
-    </points>
-  </quintic_spline_trajectory>
-  <cubic_spline_average_velocity_trajectory id="example_cubic_average_velocity" time_definition="absolute" time_step="0.01">
-    <points>
-      <point>
-        <q>0.3 0.5 0.0</q>
-        <q_dot>0.0 0.0 0.0</q_dot>
-      </point>
-      <point time="2.0">
-        <q>0.4 0.3 0.0</q>
-      </point>
-      <point time="5.0">
-        <q>0.7 0.5 0.0</q>
-        <q_dot>0.0 0.0 0.0</q_dot>
-      </point>
-    </points>
-  </cubic_spline_average_velocity_trajectory>
-  <parabolic_blend_trajectory id="example_parabolic_blend" time_definition="absolute" time_step="0.01" blend_time_default="0.5">
-    <points>
-      <point>
-        <q>0.3 0.5 0.0</q>
-      </point>
-      <point time="5.0">
-        <q>0.7 0.5 0.0</q>
-      </point>
-      <point time="10.0" blend_time="1.5">
-        <q>0.4 0.3 0.1</q>
-      </point>
-    </points>
-  </parabolic_blend_trajectory>
-</joint_trajectories>
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE trajectories SYSTEM "../../../templates/trajectories.dtd">
+<trajectories>
+    <joint_trajectories>
+        <linear_spline_trajectory id="example_linear" time_definition="absolute" time_step="0.01">
+            <points>
+                <point>
+                    <q>0.3 0.5 0.0</q>
+                </point>
+                <point time="5.0">
+                    <q>0.7 0.5 0.0</q>
+                </point>
+            </points>
+        </linear_spline_trajectory>
+        <cubic_spline_trajectory id="example_cubic" time_definition="absolute" time_step="0.01">
+            <points>
+                <point>
+                    <q>0.3 0.5 0.0</q>
+                    <q_dot>0.0 0.0 0.0</q_dot>
+                </point>
+                <point time="5.0">
+                    <q>0.7 0.5 0.0</q>
+                    <q_dot>0.0 0.0 0.0</q_dot>
+                </point>
+            </points>
+        </cubic_spline_trajectory>
+        <quintic_spline_trajectory id="example_quintic" time_definition="absolute" time_step="0.01">
+            <points>
+                <point>
+                    <q>0.3 0.5 0.0</q>
+                    <q_dot>0.0 0.0 0.0</q_dot>
+                    <q_ddot>0.0 0.0 0.0</q_ddot>
+                </point>
+                <point time="5.0">
+                    <q>0.7 0.5 0.0</q>
+                    <q_dot>0.0 0.0 0.0</q_dot>
+                    <q_ddot>0.0 0.0 0.0</q_ddot>
+                </point>
+            </points>
+        </quintic_spline_trajectory>
+        <cubic_spline_average_velocity_trajectory id="example_cubic_average_velocity" time_definition="absolute" time_step="0.01">
+            <points>
+                <point>
+                    <q>0.3 0.5 0.0</q>
+                    <q_dot>0.0 0.0 0.0</q_dot>
+                </point>
+                <point time="2.0">
+                    <q>0.4 0.3 0.0</q>
+                </point>
+                <point time="5.0">
+                    <q>0.7 0.5 0.0</q>
+                    <q_dot>0.0 0.0 0.0</q_dot>
+                </point>
+            </points>
+        </cubic_spline_average_velocity_trajectory>
+        <parabolic_blend_trajectory id="example_parabolic_blend" time_definition="absolute" time_step="0.01" blend_time_default="0.5">
+            <points>
+                <point>
+                    <q>0.3 0.5 0.0</q>
+                </point>
+                <point time="5.0">
+                    <q>0.7 0.5 0.0</q>
+                </point>
+                <point time="10.0" blend_time="1.5">
+                    <q>0.4 0.3 0.1</q>
+                </point>
+            </points>
+        </parabolic_blend_trajectory>
+    </joint_trajectories>
+</trajectories>

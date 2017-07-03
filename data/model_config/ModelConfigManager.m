@@ -59,11 +59,44 @@ classdef ModelConfigManager
             % Add the folder
             status = mkdir(dir_folder);
             CASPR_log.Assert(status,'Invalid folder name');
+            % Alter single line of the file (corresponding to the path the
+            % document type file)
+            rel_count = length(strfind(folder,'/'));
+            replacement_str = [];
+            for i =1:rel_count
+                replacement_str = [replacement_str,'../'];
+            end
             % Copy template files
-            copyfile([base_folder,'/templates/template_bodies.xml'],[dir_folder,bodies_xml_filename])
-            copyfile([base_folder,'/templates/template_cables.xml'],[dir_folder,cable_xml_filename])
-            copyfile([base_folder,'/templates/template_trajectories.xml'],[dir_folder,trajectory_xml_filename])
-            
+            % Bodies file
+            r_fid = fopen([base_folder,'/templates/template_bodies.xml']);
+            w_fid = fopen([dir_folder,bodies_xml_filename],'w');
+            while(~feof(r_fid))
+                r_str = fgets(r_fid);
+                w_str = strrep(r_str,'templates',[replacement_str,'templates']);
+                fprintf(w_fid,w_str);
+            end
+            fclose(r_fid);
+            fclose(w_fid);
+            % Cables file
+            r_fid = fopen([base_folder,'/templates/template_cables.xml']);
+            w_fid = fopen([dir_folder,cable_xml_filename],'w');
+            while(~feof(r_fid))
+                r_str = fgets(r_fid);
+                w_str = strrep(r_str,'templates',[replacement_str,'templates']);
+                fprintf(w_fid,w_str);
+            end
+            fclose(r_fid);
+            fclose(w_fid);
+            % Trajectories file
+            r_fid = fopen([base_folder,'/templates/template_trajectories.xml']);
+            w_fid = fopen([dir_folder,trajectory_xml_filename],'w');
+            while(~feof(r_fid))
+                r_str = fgets(r_fid);
+                w_str = strrep(r_str,'templates',[replacement_str,'templates']);
+                fprintf(w_fid,w_str);
+            end
+            fclose(r_fid);
+            fclose(w_fid);
             % Add line to the CSV file
             fid = fopen([root_folder, ModelConfig.LIST_FILENAME],'a');
             fprintf(fid,[name,',',folder,',',bodies_xml_filename,',',cable_xml_filename,',',trajectory_xml_filename,',','','\n']);
@@ -125,11 +158,44 @@ classdef ModelConfigManager
             % Add the folder
             status = mkdir(dir_folder);
             CASPR_log.Assert(status,'Invalid folder name');
+            % Alter single line of the file (corresponding to the path the
+            % document type file)
+            rel_count = length(strfind(folder,'/'));
+            replacement_str = [];
+            for i =1:rel_count
+                replacement_str = [replacement_str,'../'];
+            end
             % Copy template files
-            copyfile([base_folder,'/templates/template_bodies.xml'],[dir_folder,bodies_xml_filename])
-            copyfile([base_folder,'/templates/template_cables.xml'],[dir_folder,cable_xml_filename])
-            copyfile([base_folder,'/templates/template_trajectories.xml'],[dir_folder,trajectory_xml_filename])
-            
+            % Bodies file
+            r_fid = fopen([base_folder,'/templates/template_bodies.xml']);
+            w_fid = fopen([dir_folder,bodies_xml_filename],'w');
+            while(~feof(r_fid))
+                r_str = fgets(r_fid);
+                w_str = strrep(r_str,'templates',[replacement_str,'templates']);
+                fprintf(w_fid,w_str);
+            end
+            fclose(r_fid);
+            fclose(w_fid);
+            % Cables file
+            r_fid = fopen([base_folder,'/templates/template_cables.xml']);
+            w_fid = fopen([dir_folder,cable_xml_filename],'w');
+            while(~feof(r_fid))
+                r_str = fgets(r_fid);
+                w_str = strrep(r_str,'templates',[replacement_str,'templates']);
+                fprintf(w_fid,w_str);
+            end
+            fclose(r_fid);
+            fclose(w_fid);
+            % Trajectories file
+            r_fid = fopen([base_folder,'/templates/template_trajectories.xml']);
+            w_fid = fopen([dir_folder,trajectory_xml_filename],'w');
+            while(~feof(r_fid))
+                r_str = fgets(r_fid);
+                w_str = strrep(r_str,'templates',[replacement_str,'templates']);
+                fprintf(w_fid,w_str);
+            end
+            fclose(r_fid);
+            fclose(w_fid);
             % Add line to the CSV file
             fid = fopen([root_folder, DevModelConfig.LIST_FILENAME],'a');
             fprintf(fid,[name,',',folder,',',bodies_xml_filename,',',cable_xml_filename,',',trajectory_xml_filename,',']);

@@ -1,0 +1,4 @@
+<!-- Rules for bodies files-->
+
+<!ATTLIST operational_set id ID #REQUIRED>
+
