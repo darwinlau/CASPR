@@ -222,7 +222,7 @@ classdef SystemModelBodies < handle
                 obj.bodies{k}.r_OPe = obj.bodies{k}.r_OP + obj.bodies{k}.r_Pe;
                 % Determine absolute position of the operational space
                 if(~isempty(obj.bodies{k}.operationalSpace))
-                    obj.bodies{k}.r_Oy  = obj.bodies{k}.r_OP + obj.bodies{k}.r_y;
+                    obj.bodies{k}.r_OY  = obj.bodies{k}.r_OP + obj.bodies{k}.r_y;
                 end
             end
 
@@ -298,7 +298,7 @@ classdef SystemModelBodies < handle
                 for k = 1:length(obj.operationalSpaceBodyIndices)
                     body_index = obj.operationalSpaceBodyIndices(k);
                     n_y = obj.bodies{body_index}.numOperationalDofs;
-                    obj.y(l:l+n_y-1) = obj.bodies{body_index}.operationalSpace.extractOperationalSpace(obj.bodies{body_index}.r_Oy,obj.bodies{body_index}.R_0k);
+                    obj.y(l:l+n_y-1) = obj.bodies{body_index}.operationalSpace.extractOperationalSpace(obj.bodies{body_index}.r_OY,obj.bodies{body_index}.R_0k);
                     l = l + n_y;
                 end
 
@@ -309,7 +309,7 @@ classdef SystemModelBodies < handle
                     for a = 1:k
                         body_a = obj.bodies{a};
                         R_ka = body_k.R_0k.'*body_a.R_0k;
-                        Qak = [body_k.R_0k,zeros(3);zeros(3),body_k.R_0k]*(obj.bodiesPathGraph(a,k)*[R_ka*body_a.joint.R_pe.' -R_ka*MatrixOperations.SkewSymmetric(-body_a.r_OP + R_ka.'*body_k.r_Oy); ...
+                        Qak = [body_k.R_0k,zeros(3);zeros(3),body_k.R_0k]*(obj.bodiesPathGraph(a,k)*[R_ka*body_a.joint.R_pe.' -R_ka*MatrixOperations.SkewSymmetric(-body_a.r_OP + R_ka.'*body_k.r_OY); ...
                             zeros(3,3) R_ka]);
                         Q(6*k-5:6*k, 6*a-5:6*a) = Qak;
                     end
