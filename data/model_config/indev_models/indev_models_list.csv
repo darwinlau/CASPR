@@ -1,4 +1,3 @@
 CUHK_arm,/CUHK/CUHK_arm/,CUHK_arm_bodies.xml,CUHK_arm_cables.xml,CUHK_arm_trajectories.xml
 CUCableRobot,/CUHK/CUCableRobot/,CUHK_CUCableRobot_bodies.xml,CUHK_CUCableRobot_cables.xml,CUHK_CUCableRobot_trajectories.xml
 CUCableRobot_planar,/CUHK/CUCableRobot_planar/,CUHK_CUCableRobot_planar_bodies.xml,CUHK_CUCableRobot_planar_cables.xml,CUHK_CUCableRobot_planar_trajectories.xml
-CUHK_foldabot,/CUHK/CUHK_foldabot/,CUHK_foldabot_bodies.xml,CUHK_foldabot_cables.xml,CUHK_foldabot_trajectories.xml
