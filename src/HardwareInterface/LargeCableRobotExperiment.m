@@ -1,7 +1,7 @@
 % Will make abstract later
 classdef LargeCableRobotExperiment < ExperimentBase
     properties (Constant)
-        ZERO_CABLE_LENGTHS = [1.80548719; 1.80548719; 1.533880; 1.80548719; 1.80548719; 1.80548719; 1.533880; 1.80548719];
+        ZERO_CABLE_LENGTHS = [1.80548719; 1.80548719; 1.80548719; 1.80548719; 1.80548719; 1.80548719; 1.80548719; 1.80548719];
     end
     
     properties (SetAccess = private)
@@ -71,7 +71,7 @@ classdef LargeCableRobotExperiment < ExperimentBase
 %             % Create the config properties
             model_config = DevModelConfig('CUCableRobot');
             cable_set_id = 'H_frame';
-            trajectory_id = 'O0007';
+            trajectory_id = 'O0008';
             
             % Create the config properties
 %             model_config = DevModelConfig(DevModelConfigType.D_CUHK_CUCABLEROBOT_PLANAR);
