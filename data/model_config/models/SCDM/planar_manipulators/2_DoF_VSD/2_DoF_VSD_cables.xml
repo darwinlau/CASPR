@@ -1,7 +1,5 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE cables [
-<!ATTLIST cable_set id ID #REQUIRED>
-]>
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE cables SYSTEM "../../../../templates/cables.dtd">
 <cables default_cable_set="basic_vsd">
   <cable_set id="basic_vsd">
     <cable_vsd_torsion_spring name="cable 1" attachment_reference="com">

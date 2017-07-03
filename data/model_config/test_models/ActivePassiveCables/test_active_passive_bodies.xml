@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE bodies_system SYSTEM "../../templates/bodies.dtd">
 <bodies_system>
     <links display_range="-0.5 0.5 -5.0 5.0 -5.0 5.0" view_angle="-37 32">
       <link_rigid num="1" name="Link 1">
