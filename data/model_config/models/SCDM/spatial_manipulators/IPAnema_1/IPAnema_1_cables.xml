@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE cables [
-  <!ATTLIST cable_set id ID #REQUIRED>
-]>
+<!DOCTYPE cables SYSTEM "../../../../templates/cables.dtd">
 
 <cables default_cable_set="original">
   <cable_set id="original">

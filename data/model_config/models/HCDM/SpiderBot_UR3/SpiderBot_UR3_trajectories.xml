@@ -1,11 +1,5 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE trajectories [
-  <!ATTLIST linear_spline_trajectory id ID #REQUIRED>
-  <!ATTLIST cubic_spline_trajectory id ID #REQUIRED>
-  <!ATTLIST quintic_spline_trajectory id ID #REQUIRED>
-  <!ATTLIST cubic_spline_average_velocity_trajectory id ID #REQUIRED>
-  <!ATTLIST parabolic_blend_trajectory id ID #REQUIRED>
-]>
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE trajectories SYSTEM "../../../templates/trajectories.dtd">
 
 <trajectories>
     <joint_trajectories>
@@ -147,7 +141,6 @@
         </points>
       </quintic_spline_trajectory>
     </joint_trajectories>
-
     <operational_trajectories>
       <quintic_spline_trajectory id="simple_motion" time_step="0.005" time_definition="relative">
         <points>
