@@ -19,10 +19,15 @@
 classdef (Abstract) MotionSimulatorBase < SimulatorBase
 
     properties
-        timeVector          % time vector
+        timeVector          % time vector (needed for forward problems since there is no trajectory)
         trajectory          % Trajectory object for inverse problems only
         cableLengths        % cell array of cable lengths
         cableLengthsDot     % cell array of cable lengths dot
+    end
+    
+    properties (Constant)
+        MOVIE_DEFAULT_WIDTH = 700;
+        MOVIE_DEFAULT_HEIGHT = 700;
     end
 
     methods
@@ -31,32 +36,10 @@ classdef (Abstract) MotionSimulatorBase < SimulatorBase
             ms@SimulatorBase(model);
         end
 
-        % Plots an avi movie file of the trajector motion of the robot. The
-        % plot axis, filename, width and height of the movie file must be
-        % provided. The "time" variable specifies the total time of the
-        % video. The video will be recorded at 30 fps so the number of
-        % frames will be computed to confirm to the total time of the
-        % video.
+        % Plots an avi movie file of the trajector motion of the robot.
+        % Uses the static function implementation
         function plotMovie(obj, plot_axis, view_angle, filename, time, width, height)
-            CASPR_log.Assert(~isempty(obj.trajectory), 'Cannot plot since trajectory is empty');
-            fps = 30;
-            writerObj = VideoWriter(filename);
-            %writerObj.Quality = 100;
-            writerObj.open();
-            plot_handle = figure('Position', [10, 10, width, height]);
-            for i = 1:round(fps*time)
-                t = round(length(obj.timeVector)/round(fps*time)*i);
-                if t == 0
-                    t = 1;
-                end
-                obj.model.update(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t}, zeros(size(obj.trajectory.q_dot{t})));
-                MotionSimulatorBase.PlotFrame(obj.model, plot_axis, view_angle, plot_handle)
-                frame = getframe(plot_handle);
-                writerObj.writeVideo(frame);
-                clf(plot_handle);
-            end
-            writerObj.close();
-            close(plot_handle);
+            MotionSimulatorBase.PlotMovie(obj.model, obj.trajectory, plot_axis, view_angle, filename, time, width, height);
         end
 
         % Plots the cable lengths of the CDPR over the trajectory. Users
@@ -372,12 +355,57 @@ classdef (Abstract) MotionSimulatorBase < SimulatorBase
                 plot3(ax,r_OG0(1), r_OG0(2), r_OG0(3), 'Color', 'b', 'Marker', 'o', 'LineWidth', 2);
                 plot3(ax,[r_OP0(1) r_OPe0(1)], [r_OP0(2) r_OPe0(2)], [r_OP0(3) r_OPe0(3)], 'Color', 'k', 'LineWidth', 3);
             end
+            
+            for k = 1:body_model.numOperationalSpaces
+                % TODO: check types of operational spaces and perform accordingly, let's just
+                % assume now it is only cartesian
+                %if (body_model.bodies{operationalSpaceBodyIndices(k)}
+                r_OY0 = body_model.bodies{body_model.operationalSpaceBodyIndices(k)}.R_0k*body_model.bodies{body_model.operationalSpaceBodyIndices(k)}.r_OY;
+                plot3(ax, r_OY0(1), r_OY0(2), r_OY0(3), 'Color', 'g', 'Marker', 'o', 'LineWidth', 2);
+            end
 
             cable_model = kinematics.cableModel;
             for i = 1:cable_model.numCables
                 cable_model.cables{i}.plotCable(ax);
             end
             hold off;
+        end
+        
+        % Plots a avi movie for the CDPR joint space trajectory specified. 
+        % The plot axis, filename, width and height of the movie file must be
+        % provided. The "time" variable specifies the total time of the
+        % video. The video will be recorded at 30 fps so the number of
+        % frames will be computed to confirm to the total time of the
+        % video.
+        function PlotMovie(modelObj, trajectory, plot_axis, view_angle, filename, time, width, height)
+            CASPR_log.Assert(~isempty(trajectory), 'Cannot plot since trajectory is empty');
+            if (nargin < 6)
+                % Default time to be time of trajectory (no speed up or
+                % slow down)
+                time = trajectory.totalTime;
+            end
+            if (nargin < 7)
+                width = MotionSimulatorBase.MOVIE_DEFAULT_WIDTH;
+                height = MotionSimulatorBase.MOVIE_DEFAULT_HEIGHT;
+            end
+            fps = 30;
+            writerObj = VideoWriter(filename);
+            %writerObj.Quality = 100;
+            writerObj.open();
+            plot_handle = figure('Position', [10, 10, width, height]);
+            for i = 1:round(fps*time)
+                t = round(length(trajectory.timeVector)/round(fps*time)*i);
+                if t == 0
+                    t = 1;
+                end
+                modelObj.update(trajectory.q{t}, trajectory.q_dot{t}, trajectory.q_ddot{t}, zeros(size(trajectory.q_dot{t})));
+                MotionSimulatorBase.PlotFrame(modelObj, plot_axis, view_angle, plot_handle)
+                frame = getframe(plot_handle);
+                writerObj.writeVideo(frame);
+                clf(plot_handle);
+            end
+            writerObj.close();
+            close(plot_handle);
         end
     end
 end

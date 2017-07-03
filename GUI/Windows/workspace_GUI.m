@@ -342,7 +342,7 @@ function generate_button_Callback(~, ~, handles) %#ok<DEFNU>
     uGrid           =   UniformGrid(q_info(:,1),q_info(:,2),q_info(:,3));
     contents = cellstr(get(handles.plot_type_popup,'String'));
     plot_type = contents{get(handles.plot_type_popup,'Value')};
-    opt = WorkspaceSimulatorOptions(true); % This should be made into an object
+    opt = WorkspaceSimulatorOptions(true,optimset('Display','off')); % This should be made into an object
     wsim            =   WorkspaceSimulator(modObj,uGrid,opt);
     %% Now set up the grid information
     time_elapsed    =   toc(start_tic);

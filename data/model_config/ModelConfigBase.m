@@ -98,10 +98,15 @@ classdef (Abstract) ModelConfigBase < handle
             end
         end
         
-        % Should change this to getJointTrajectory()
+        % Getting the joint and operational space trajectories
         function [traj] = getJointTrajectory(obj, trajectory_id)
             traj_xmlobj = obj.getJointTrajectoryXmlObj(trajectory_id);
             traj = JointTrajectory.LoadXmlObj(traj_xmlobj, obj.bodiesModel);
+        end
+        
+        function [traj] = getOperationalTrajectory(obj, trajectory_id)
+            traj_xmlobj = obj.getOperationalTrajectoryXmlObj(trajectory_id);
+            traj = OperationalTrajectory.LoadXmlObj(traj_xmlobj, obj.bodiesModel);
         end
         
         function cableset_str = getCableSetList(obj)
@@ -135,6 +140,11 @@ classdef (Abstract) ModelConfigBase < handle
         
         % Get the trajectory xml object
         function v = getJointTrajectoryXmlObj(obj, id)
+            v = obj.trajectoriesXmlObj.getElementById(id);
+            CASPR_log.Assert(~isempty(v), sprintf('Id ''%s'' does not exist in the trajectories XML file', id));
+        end
+        
+        function v = getOperationalTrajectoryXmlObj(obj, id)
             v = obj.trajectoriesXmlObj.getElementById(id);
             CASPR_log.Assert(~isempty(v), sprintf('Id ''%s'' does not exist in the trajectories XML file', id));
         end
