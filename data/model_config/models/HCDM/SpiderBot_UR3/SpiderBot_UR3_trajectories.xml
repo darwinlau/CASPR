@@ -141,7 +141,6 @@
         </points>
       </quintic_spline_trajectory>
     </joint_trajectories>
-
     <operational_trajectories>
       <quintic_spline_trajectory id="simple_motion" time_step="0.005" time_definition="relative">
         <points>
