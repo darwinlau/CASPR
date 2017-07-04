@@ -4,7 +4,7 @@
 <bodies_system>
     <links display_range="-1 1 -1 1 -1 1" view_angle="-37 32">
         <link_rigid num="1" name="Thigh">
-        <joint type="U_XY" q_initial="0 0"/>
+        <joint type="U_XY" q_initial="0 0" q_min="-3.1416 -3.1416" q_max="3.1416 3.1416"/>
         <physical>
           <mass>6.916</mass>
           <com_location>0.0 0.0 -0.235</com_location>
@@ -24,7 +24,7 @@
         </parent>
       </link_rigid>
       <link_rigid num="2" name="Shank">
-        <joint type="R_Y" q_initial="0"/>
+        <joint type="R_Y" q_initial="0" q_min="-3.1416" q_max="3.1416"/>
         <physical>
           <mass>3.255</mass>
           <com_location>0.0 0.0 -0.221</com_location>

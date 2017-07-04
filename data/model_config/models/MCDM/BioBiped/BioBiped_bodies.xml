@@ -4,7 +4,7 @@
 <bodies_system>
     <links display_range="-1.0 1.0 -1.0 1.0 0.0 2.0" view_angle="145 10">
         <link_rigid num="1" name="Torso">
-            <joint type="PLANAR_YZ" q_initial="0.0 1.2 -0.3"/>
+            <joint type="PLANAR_YZ" q_initial="0.0 1.2 -0.3" q_min="-1.0 0.0 -3.1416" q_max="1.0 2.0 3.1416"/>
             <physical>
                 <mass>23.8</mass>
                 <com_location>0.0 0.0 0.20</com_location>
@@ -24,7 +24,7 @@
             </parent>
         </link_rigid>
         <link_rigid num="2" name="Thigh (right)">
-            <joint type="R_X" q_initial="0.6"/>
+            <joint type="R_X" q_initial="0.6" q_min="-3.1416" q_max="3.1416"/>
             <physical>
                 <mass>8.16</mass>
                 <com_location>0.0 0.0 -0.29</com_location>
@@ -44,7 +44,7 @@
             </parent>
         </link_rigid>
         <link_rigid num="3" name="Lower leg (right)">
-            <joint type="R_X" q_initial="-0.6"/>
+            <joint type="R_X" q_initial="-0.6" q_min="-3.1416" q_max="3.1416"/>
             <physical>
                 <mass>2.33</mass>
                 <com_location>0.0 0.0 -0.2</com_location>
@@ -64,7 +64,7 @@
             </parent>
         </link_rigid>
         <link_rigid num="4" name="Foot (right)">
-            <joint type="R_X" q_initial="-0.3"/>
+            <joint type="R_X" q_initial="-0.3" q_min="-3.1416" q_max="3.1416"/>
             <physical>
                 <mass>0.87</mass>
                 <com_location>0.0 0.125 0.0</com_location>
@@ -84,7 +84,7 @@
             </parent>
         </link_rigid>
         <link_rigid num="5" name="Thigh (left)">
-            <joint type="R_X" q_initial="0.6"/>
+            <joint type="R_X" q_initial="0.6" q_min="-3.1416" q_max="3.1416"/>
             <physical>
                 <mass>8.16</mass>
                 <com_location>0.0 0.0 -0.29</com_location>
@@ -104,7 +104,7 @@
             </parent>
         </link_rigid>
         <link_rigid num="6" name="Lower leg (left)">
-            <joint type="R_X" q_initial="-0.6"/>
+            <joint type="R_X" q_initial="-0.6" q_min="-3.1416" q_max="3.1416"/>
             <physical>
                 <mass>2.33</mass>
                 <com_location>0.0 0.0 -0.2</com_location>
@@ -124,7 +124,7 @@
             </parent>
         </link_rigid>
         <link_rigid num="7" name="Foot (left)">
-            <joint type="R_X" q_initial="-0.3"/>
+            <joint type="R_X" q_initial="-0.3" q_min="-3.1416" q_max="3.1416"/>
             <physical>
                 <mass>0.87</mass>
                 <com_location>0.0 0.125 0.0</com_location>

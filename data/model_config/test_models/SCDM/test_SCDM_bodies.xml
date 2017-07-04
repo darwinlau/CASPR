@@ -3,7 +3,7 @@
 <bodies_system>
     <links display_range="-1.5 1.5 -1.5 1.5 -0.25 2.25" view_angle="-37 32">
       <link_rigid num="1" name="Spatial Manipulator">
-        <joint type="SPATIAL_EULER_XYZ" q_initial="0 0 1.0 0 0 0"/>
+        <joint type="SPATIAL_EULER_XYZ" q_initial="0 0 1.0 0 0 0" q_min="-1.0 -1.0 0.0 -3.1416 -3.1416 -3.1416" q_max="1.0 1.0 2.0 3.1416 3.1416 3.1416"/>
         <physical>
           <mass>1</mass>
           <com_location>0.0 0.0 0.0</com_location>
