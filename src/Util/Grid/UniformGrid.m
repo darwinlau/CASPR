@@ -10,11 +10,12 @@ classdef UniformGrid < Grid
         q_end       % The upper bound on grid generalised coordinates
         delta_q     % The step size in generalised coordinates
         q_length    % The length of each index
+        q_wrap      % A boolean vector to indicate if the coordinate wraps around at its limits
     end
 
     methods
         % The constructor for the grid.
-        function id = UniformGrid(q_begin,q_end,delta_q)
+        function id = UniformGrid(q_begin,q_end,delta_q,q_wrap)
             CASPR_log.Assert((size(q_begin,2)==1)&&(size(q_end,2)==1)&&(size(delta_q,2)==1),'Input to UniformGrid must be a column vector');
             CASPR_log.Assert((size(q_begin,1)==size(q_end,1))&&(size(q_begin,1)==size(delta_q,1)),'Inputs must be of the same dimension');
             CASPR_log.Assert((sum(delta_q > q_end - q_begin)==0)||(sum(delta_q == 0) ~= 0),'Invalid Input Range');
@@ -31,6 +32,11 @@ classdef UniformGrid < Grid
                 end
             end
             id.setNPoints(round(prod(id.q_length)));
+            if(nargin == 3)
+                id.q_wrap = zeros(size(q_begin));
+            else
+                id.q_wrap = q_wrap;
+            end
         end
 
         % Obtain the grid point from a given index
