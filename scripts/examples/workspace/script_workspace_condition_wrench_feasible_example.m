@@ -20,6 +20,8 @@ uGrid           =   UniformGrid(q_begin,q_end,q_step);
 % Define the workspace condition and metrics
 w_set           =   [-1,-1,1,1;-1,1,-1,1];
 w_condition     =   {WorkspaceConditionBase.CreateWorkspaceCondition(WorkspaceConditionType.WRENCH_FEASIBLE,[],w_set)};
+w_metrics       =   {WorkspaceMetricBase.CreateWorkspaceMetric(WorkspaceMetricType.CONDITION_NUMBER,[])};
+w_connectivity  =   WorkspaceConnectivityBase.CreateWorkspaceConnectivityCondition(WorkspaceConnectivityType.GRID,uGrid);
 opt             =   WorkspaceSimulatorOptions(false,optimset('Display','off'));
 
 % Start the simulation
@@ -28,8 +30,8 @@ wsim            =   WorkspaceSimulator(modelObj,uGrid,opt);
 
 % Run the simulation
 disp('Start Running Simulation');
-wsim.run(w_condition,[]);
+wsim.run(w_condition,[],w_connectivity);
 
 % Plot the simulation
 disp('Start Plotting Simulation');
-wsim.plotWorkspace2([],WorkspaceConditionType.WRENCH_FEASIBLE,[1,2]);
+wsim.plotWorkspaceGraph();
