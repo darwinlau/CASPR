@@ -33,7 +33,7 @@ classdef UniformGrid < Grid
             end
             id.setNPoints(round(prod(id.q_length)));
             if(nargin == 3)
-                id.q_wrap = zeros(size(q_begin));
+                id.q_wrap = false(size(q_begin));
             else
                 id.q_wrap = q_wrap;
             end

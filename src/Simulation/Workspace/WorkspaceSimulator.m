@@ -17,6 +17,7 @@ classdef WorkspaceSimulator < SimulatorBase
         options         % The workspace simulator options
         value_metric    % A cell stores the point positions in workspace and metric values from specific metric [27/12]
         store_metric    % A cell saves the whole metric value at each workspace point [30/12]
+        edge_matrix = []% The graph representation for the workspace
     end
     
     methods
@@ -28,7 +29,7 @@ classdef WorkspaceSimulator < SimulatorBase
         end
         
         % Implementation of the run function
-        function run(obj, w_conditions, w_metrics)
+        function run(obj, w_conditions, w_metrics, w_connectivity)
             % First determine how big the metrics previously were
             if(isempty(obj.metrics))
                 n_metrics_prev  = 0; 
@@ -125,6 +126,10 @@ classdef WorkspaceSimulator < SimulatorBase
                     workspace_count = workspace_count + 1;
                 end
             end
+            % If graph generation is set generate the graph
+            if(nargin == 4)
+                obj.generateWorkspaceGraph(w_connectivity);
+            end
         end
         
         % Plotting function to plot a two dimensional (subset of the) workspace plot
@@ -160,6 +165,14 @@ classdef WorkspaceSimulator < SimulatorBase
                 CASPR_log.Print('The capability measure must either be a workspace metric or a workspace condition',CASPRLogLevel.ERROR);
             end
             hold(plot_axis,'off');
+        end
+        
+        function plotWorkspaceGraph(obj,plot_axis,~,~)
+            CASPR_log.Assert(~isempty(obj.edge_matrix),'Cannot plot without a valid graph object');
+            if(nargin == 1 || isempty(plot_axis))
+                figure; plot_axis = axes; 
+            end
+            imagesc(plot_axis,obj.edge_matrix);            
         end
         
         % Converts the workspace structure into an array
@@ -230,6 +243,34 @@ classdef WorkspaceSimulator < SimulatorBase
                 end
             end
         end
+        
+        function generateWorkspaceGraph(obj,w_connectivity)
+            % Determine the number of nodes
+            number_nodes = length(obj.workspace) - sum(cellfun(@isempty,obj.workspace));
+            % Initialise a matrix based graph representation (THIS CAN BE
+            % CHANGED IF DESIRED)
+            obj.edge_matrix = eye(number_nodes); % Node a node is always connected to itself
+            i_counter = 1;
+            for i = 1:number_nodes
+                % Skip over the empty cell entries
+                while(isempty(obj.workspace{i_counter}))
+                    i_counter = i_counter + 1;
+                end
+                j_counter = i_counter+1;
+                for j= i+1:number_nodes
+                    % Skip over the empty cell entries
+                    while(isempty(obj.workspace{j_counter}))
+                        j_counter = j_counter + 1;
+                    end
+                    % Evaluate the connectivity between the two objects
+                    [~,obj.edge_matrix(i,j),~] = w_connectivity.evaluate(obj.model,obj.workspace{i_counter},obj.workspace{j_counter});
+                    obj.edge_matrix(j,i) = obj.edge_matrix(i,j); % Due to bi-directional edges being assumed for the moment
+                    j_counter = j_counter+1;
+                end
+                i_counter = i_counter + 1;
+            end
+        end
+        
         
         % Filters the workspace metric to set new limits.
         function filterWorkspaceMetric(obj,w_metric,metric_min,metric_max)

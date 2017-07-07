@@ -35,8 +35,8 @@ classdef WorkspaceConnectivityBase < handle
         % Creates a new condition
         function wcc = CreateWorkspaceConnectivityCondition(connection_type,grid)
             switch connection_type
-                case WorkspaceConnectionType.GRID
-                    wcc = GridNeighbour(grid);
+                case WorkspaceConnectivityType.GRID
+                    wcc = UniformGridNeighbour(grid);
                 otherwise
                     CASPR_log.Print('Workspace connectivity type is not defined',CASPRLogLevel.ERROR);
             end

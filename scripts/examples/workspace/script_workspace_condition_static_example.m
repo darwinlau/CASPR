@@ -13,12 +13,14 @@ cable_set_id    =   'basic_vsd';
 modelObj        =   model_config.getModel(cable_set_id);
 
 q_begin         =   modelObj.bodyModel.q_min; q_end = modelObj.bodyModel.q_max;
-q_step          =   (modelObj.bodyModel.q_max - modelObj.bodyModel.q_min)/10;
+q_step          =   (modelObj.bodyModel.q_max - modelObj.bodyModel.q_min)/20;
 % Set up the workspace simulator
 % First the grid
 uGrid           =   UniformGrid(q_begin,q_end,q_step);
-% Define the workspace condition and metrics
+% Define the workspace conditions, metrics and connectivity condition
 w_condition     =   {WorkspaceConditionBase.CreateWorkspaceCondition(WorkspaceConditionType.STATIC,[],[])};
+w_metrics       =   {WorkspaceConditionBase.CreateWorkspaceCondition(WorkspaceConditionType.STATIC,[],[])};
+w_connectivity  =   WorkspaceConnectivityBase.CreateWorkspaceConnectivityCondition(WorkspaceConnectivityType.GRID,uGrid);
 opt             =   WorkspaceSimulatorOptions(false,optimset('Display','off'));
 
 % Start the simulation
@@ -27,8 +29,8 @@ wsim            =   WorkspaceSimulator(modelObj,uGrid,opt);
 
 % Run the simulation
 disp('Start Running Simulation');
-wsim.run(w_condition,[]);
+wsim.run(w_condition,[],w_connectivity);
 
 % Plot the simulation
 disp('Start Plotting Simulation');
-wsim.plotWorkspace2([],WorkspaceConditionType.STATIC,[1,2]);
+wsim.plotWorkspaceGraph();
