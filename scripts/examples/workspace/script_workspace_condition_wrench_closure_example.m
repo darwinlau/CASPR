@@ -1,7 +1,7 @@
-% Script file to show how to use the inverse dynamics simulator
+% Script file for wrench closure workspace
 %
-% Author        : Jonathan EDEN
-% Created       : 2015
+% Author        : Autogenerate
+% Created       : 20XX
 % Description    :
 
 % Load configs
@@ -9,7 +9,7 @@ clc; clear; warning off; close all;
 
 % Set up the model 
 model_config    =   ModelConfig('2 DoF VSD');
-cable_set_id    =   'basic_vsd';
+cable_set_id    =   'basic';
 modelObj        =   model_config.getModel(cable_set_id);
 
 q_begin         =   modelObj.bodyModel.q_min; q_end = modelObj.bodyModel.q_max;
