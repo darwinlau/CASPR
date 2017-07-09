@@ -13,7 +13,7 @@ cable_set_id    =   'basic';
 modelObj        =   model_config.getModel(cable_set_id);
 
 q_begin         =   modelObj.bodyModel.q_min; q_end = modelObj.bodyModel.q_max;
-q_step          =   (modelObj.bodyModel.q_max - modelObj.bodyModel.q_min)/20;
+q_step          =   (modelObj.bodyModel.q_max - modelObj.bodyModel.q_min)/10;
 % Set up the workspace simulator
 % First the grid
 uGrid           =   UniformGrid(q_begin,q_end,q_step);

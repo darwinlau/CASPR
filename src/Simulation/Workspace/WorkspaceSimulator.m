@@ -71,8 +71,7 @@ classdef WorkspaceSimulator < SimulatorBase
             obj.store_metric = cell(n_grid_points, n_metrics);
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             for i = 1:n_grid_points
-                CASPR_log.Print(sprintf('Workspace point %d',i),CASPRLogLevel.INFO);
-                fprintf('Completion Percentage: %3.2f%%\n',100*i/n_grid_points);
+                CASPR_log.Print([sprintf('Workspace point %d. ',i),sprintf('Completion Percentage: %3.2f',100*i/n_grid_points)],CASPRLogLevel.INFO);
                 % Get the grid point
                 q = obj.grid.getGridPoint(i);
                 % Construct the workspace point
