@@ -131,34 +131,34 @@ function workspace_condition_popup_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
     set(hObject, 'String', workspace_str);
 end
 
-% Workspace Metric
-% --- Executes on selection change in workspace_metric_popup.
-function workspace_metric_popup_Callback(~, ~, ~) %#ok<DEFNU>
-    % hObject    handle to workspace_metric_popup (see GCBO)
-    % eventdata  reserved - to be defined in a future version of MATLAB
-    % handles    structure with handles and user data (see GUIDATA)
-
-    % Hints: contents = cellstr(get(hObject,'String')) returns workspace_metric_popup contents as cell array
-    %        contents{get(hObject,'Value')} returns selected item from workspace_metric_popup
-end
-
-% --- Executes during object creation, after setting all properties.
-function workspace_metric_popup_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
-    % hObject    handle to workspace_metric_popup (see GCBO)
-    % eventdata  reserved - to be defined in a future version of MATLAB
-    % handles    empty - handles not created until after all CreateFcns called
-
-    % Hint: popupmenu controls usually have a white background on Windows.
-    %       See ISPC and COMPUTER.
-    if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-        set(hObject,'BackgroundColor','white');
-    end
-    settingsXMLObj = GUIOperations.GetSettings('/GUI/XML/workspaceXML.xml');
-    workspace_str = GUIOperations.XmlObj2StringCellArray(settingsXMLObj.getElementsByTagName('simulator').item(0).getElementsByTagName('workspace_metrics').item(0).getElementsByTagName('workspace_metric')...
-        ,[]);
-    workspace_str = [{' '},workspace_str];
-    set(hObject, 'String', workspace_str);
-end
+% % Workspace Metric
+% % --- Executes on selection change in workspace_metric_popup.
+% function workspace_metric_popup_Callback(~, ~, ~) %#ok<DEFNU>
+%     % hObject    handle to workspace_metric_popup (see GCBO)
+%     % eventdata  reserved - to be defined in a future version of MATLAB
+%     % handles    structure with handles and user data (see GUIDATA)
+% 
+%     % Hints: contents = cellstr(get(hObject,'String')) returns workspace_metric_popup contents as cell array
+%     %        contents{get(hObject,'Value')} returns selected item from workspace_metric_popup
+% end
+% 
+% % --- Executes during object creation, after setting all properties.
+% function workspace_metric_popup_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
+%     % hObject    handle to workspace_metric_popup (see GCBO)
+%     % eventdata  reserved - to be defined in a future version of MATLAB
+%     % handles    empty - handles not created until after all CreateFcns called
+% 
+%     % Hint: popupmenu controls usually have a white background on Windows.
+%     %       See ISPC and COMPUTER.
+%     if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+%         set(hObject,'BackgroundColor','white');
+%     end
+%     settingsXMLObj = GUIOperations.GetSettings('/GUI/XML/workspaceXML.xml');
+%     workspace_str = GUIOperations.XmlObj2StringCellArray(settingsXMLObj.getElementsByTagName('simulator').item(0).getElementsByTagName('workspace_metrics').item(0).getElementsByTagName('workspace_metric')...
+%         ,[]);
+%     workspace_str = [{' '},workspace_str];
+%     set(hObject, 'String', workspace_str);
+% end
 
 % --- Executes on selection change in plot_type_popup.
 function plot_type_popup_Callback(hObject, ~, handles) %#ok<DEFNU>
@@ -224,7 +224,7 @@ function generate_button_Callback(~, ~, handles) %#ok<DEFNU>
     if(~strcmp(wc_string,'wrench feasible'))
         wc_string = upper(wc_string);
         wc_string = strrep(wc_string,' ','_');
-        wcondition = {WorkspaceConditionBase.CreateWorkspaceCondition(eval(['WorkspaceConditionType.',wc_string]),[],[])};
+        w_condition = {WorkspaceConditionBase.CreateWorkspaceCondition(eval(['WorkspaceConditionType.',wc_string]),[],[])};
     else
         wc_string = 'WRENCH_FEASIBLE';
         i_max     = 2^(modObj.numDofs)-1;
@@ -237,16 +237,17 @@ function generate_button_Callback(~, ~, handles) %#ok<DEFNU>
             flag_vec(:) = str2num(flag_set(:)); %#ok<ST2NM>
             w_set(:,k+1) = min_vec.*(~flag_vec) + max_vec.*flag_vec;
         end 
-        wcondition = {WorkspaceConditionBase.CreateWorkspaceCondition(eval(['WorkspaceConditionType.',wc_string]),[],w_set)};
+        w_condition = {WorkspaceConditionBase.CreateWorkspaceCondition(eval(['WorkspaceConditionType.',wc_string]),[],w_set)};
     end
     % Then the metric
-    contents = cellstr(get(handles.workspace_metric_popup,'String'));
-    if(strcmp(contents{get(handles.workspace_metric_popup,'Value')},' '))
-        metric = {};
-    else
-        wmetric = contents{get(handles.workspace_metric_popup,'Value')};
-        metric = {WorkspaceMetricBase.CreateWorkspaceMetric(eval(['WorkspaceMetricType.',wmetric]),[])};
-    end
+%     contents = cellstr(get(handles.workspace_metric_popup,'String'));
+%     if(strcmp(contents{get(handles.workspace_metric_popup,'Value')},' '))
+%         metric = {};
+%     else
+%         wmetric = contents{get(handles.workspace_metric_popup,'Value')};
+%         metric = {WorkspaceMetricBase.CreateWorkspaceMetric(eval(['WorkspaceMetricType.',wmetric]),[])};
+%     end
+    w_metric = {WorkspaceMetricBase.CreateWorkspaceMetric(WorkspaceMetricType.CONDITION_NUMBER,[])};
     % FOR THE MOMENT NO OPTIONS ON CONNECTIVITY
     w_connectivity  =   WorkspaceConnectivityBase.CreateWorkspaceConnectivityCondition(WorkspaceConnectivityType.GRID,uGrid);
     %% Now initialise the simulation
@@ -264,7 +265,7 @@ function generate_button_Callback(~, ~, handles) %#ok<DEFNU>
     set(handles.status_text,'String','Simulation running');
     drawnow;
     start_tic       =   tic;
-    wsim.run(wcondition,metric,w_connectivity); 
+    wsim.run(w_condition,w_metric,w_connectivity); 
     time_elapsed    =   toc(start_tic);
     fprintf('End Running Simulation : %f seconds\n', time_elapsed);
     
@@ -428,7 +429,7 @@ function saveState(handles,file_path)
     state.model_text                        =   get(handles.model_text,'String');
     state.cable_text                        =   get(handles.cable_text,'String');
     state.workspace_condition_popup_value   =   get(handles.workspace_condition_popup,'value');
-    state.workspace_metric_popup_value      =   get(handles.workspace_metric_popup,'value');
+%     state.workspace_metric_popup_value      =   get(handles.workspace_metric_popup,'value');
     state.plot_type_popup                   =   get(handles.plot_type_popup,'value');
     if(nargin>1)
         save(file_path,'state');
@@ -456,7 +457,7 @@ function loadState(handles)
             cs_text = get(handles.cable_text,'String');
             if(strcmp(mp_text,state.model_text)&&strcmp(cs_text,state.cable_text))
                 set(handles.workspace_condition_popup,'value',state.workspace_condition_popup_value);
-                set(handles.workspace_metric_popup,'value',state.workspace_metric_popup_value);
+%                 set(handles.workspace_metric_popup,'value',state.workspace_metric_popup_value);
                 set(handles.plot_type_popup,'value',state.plot_type_popup);
                 plot_type_popup_Callback(handles.plot_type_popup,[],handles);
             else
