@@ -41,6 +41,8 @@ classdef WorkspaceConditionBase < handle
                     wc = WrenchFeasible(method,desired_set);
                 case WorkspaceConditionType.STATIC
                     wc = WorkspaceStatic(method);
+                case WorkspaceConditionType.INTERFERENCE
+                    wc = InterferenceFree(method);
                 otherwise
                     CASPR_log.Print('Workspace condition type is not defined',CASPRLogLevel.ERROR);
             end
