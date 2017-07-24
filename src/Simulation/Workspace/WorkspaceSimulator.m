@@ -15,8 +15,6 @@ classdef WorkspaceSimulator < SimulatorBase
         conditions = [] % A list of conditions to be evaluated for
         metrics = []    % A list of metrics to be evaluated for
         options         % The workspace simulator options
-        value_metric    % A cell stores the point positions in workspace and metric values from specific metric [27/12]
-        store_metric    % A cell saves the whole metric value at each workspace point [30/12]
         edge_matrix = []% The graph representation for the workspace
     end
     
@@ -66,10 +64,6 @@ classdef WorkspaceSimulator < SimulatorBase
             
             % Runs over the grid and evaluates the workspace condition at
             % each point
-            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%[27, 30/12]%%%%%%%%
-            obj.value_metric = cell(n_grid_points, n_metrics); % set sapce 
-            obj.store_metric = cell(n_grid_points, n_metrics);
-            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             for i = 1:n_grid_points
                 CASPR_log.Print([sprintf('Workspace point %d. ',i),sprintf('Completion Percentage: %3.2f',100*i/n_grid_points)],CASPRLogLevel.INFO);
                 % Get the grid point
@@ -88,10 +82,6 @@ classdef WorkspaceSimulator < SimulatorBase
                     else
                         % New metric
                         [metric_type,metric_value]          =   obj.metrics{j}.evaluate(obj.model,obj.options.solver_options);
-                        if strcmp(metric_type, 'MIN_CABLE_CABLE_DISTANCE') % especially for 'MIN_CABLE_CABLE_DISTANCE'
-                            obj.value_metric{i, j} = [q; metric_value]; 
-                            obj.store_metric{i, j} =  obj.metrics{j}.mindis_mn;
-                        end
                         % The metric is at valid value
                         wp.addMetric(metric_type,metric_value,j);
                     end
