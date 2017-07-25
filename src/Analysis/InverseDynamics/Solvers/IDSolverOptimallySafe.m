@@ -15,6 +15,7 @@ classdef IDSolverOptimallySafe < IDSolverBase
         os_solver_type
         x_prev
         alpha
+        options
     end
     methods
         % The constructor for this class.
@@ -22,6 +23,7 @@ classdef IDSolverOptimallySafe < IDSolverBase
             id@IDSolverBase(model);
             id.os_solver_type = os_solver_type;
             id.x_prev = [];
+            id.options = [];
             id.alpha = alpha;
             CASPR_log.Assert((length(alpha) == 1) && (alpha >= 0),'alpha must be positive ');
         end
@@ -42,7 +44,10 @@ classdef IDSolverOptimallySafe < IDSolverBase
 
             switch (obj.os_solver_type)
                 case ID_OS_SolverType.LP
-                    [cable_forces, id_exit_type] = id_os_matlab(A_eq, b_eq, fmin, fmax, obj.alpha);
+                    if(isempty(obj.options))
+                        obj.options = optimoptions('linprog', 'Display', 'off', 'MaxIter', 100);
+                    end
+                    [cable_forces, id_exit_type] = id_os_matlab(A_eq, b_eq, fmin, fmax, obj.alpha,obj.options);
                     Q_opt = norm(cable_forces,1);
                 case ID_OS_SolverType.EFFICIENT_LP
                     [cable_forces, id_exit_type,obj.x_prev,obj.active_set] = id_os_efficient(A_eq, b_eq, fmin, fmax, obj.alpha, obj.x_prev, obj.active_set);

@@ -443,6 +443,7 @@ function loadState(handles)
     % load all of the settings and initialise the values to match
     path_string = CASPR_configuration.LoadHomePath();
     file_name = [path_string,'/GUI/config/caspr_gui_state.mat'];
+    set(handles.status_text,'String','No simulation running');
     if(exist(file_name,'file'))
         load(file_name)
         set(handles.model_text,'String',state.model_text);

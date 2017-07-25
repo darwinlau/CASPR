@@ -48,7 +48,7 @@ classdef WorkspaceSimulator < SimulatorBase
             workspace_prev = obj.workspace;
             % Test if the metrics have infinite limits
             for i = 1:size(w_metrics,2)
-                if((abs(w_metrics{i}.metricMax)==Inf)||(abs(w_metrics{i}.metricMin)==Inf))
+                if((~isempty(w_metrics{i}.metricMax))&&((abs(w_metrics{i}.metricMax)==Inf)||(abs(w_metrics{i}.metricMin)==Inf)))
                     CASPR_log.Print('A metric with infinite limit values cannot be plotted.  To plot please set the metric limit to be finite or filter the workspace after plotting',CASPRLogLevel.WARNING);
                 end
             end
