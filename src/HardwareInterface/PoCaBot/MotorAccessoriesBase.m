@@ -14,6 +14,7 @@ classdef MotorAccessoriesBase < handle
         
         % Dynamixel Holder
         lenCoS2Outlet % distance from cetre of the spool to the cable outlet
+        cableLengths_full
     end
     
     properties

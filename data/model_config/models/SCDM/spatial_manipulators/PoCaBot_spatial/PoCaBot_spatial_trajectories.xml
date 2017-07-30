@@ -176,25 +176,20 @@
             </point>
         </points>
     </quintic_spline_trajectory>
-    <parabolic_blend_trajectory id="workspace_test" time_definition="relative" time_step="0.05" blend_time_default="0.5">
+    <quintic_spline_trajectory id="workspace_test" time_definition="relative" time_step="0.05">
         <points>
             <point>
                 <q>1.492 1.140 0.510 0.0 0.0 0.0</q>
                 <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
                 <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
             </point>
-            <point time="6.0" blend_time="1.5">
+            <point time="0.05">
                 <q>1.807 1.140 0.510 0.0 0.0 0.0</q>
                 <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
                 <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
             </point>
-            <point time="6.0" blend_time="1.5">
-                <q>1.807 1.140 0.410 0.0 0.0 0.0</q>
-                <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
-                <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
-            </point>
         </points>
-    </parabolic_blend_trajectory>
+    </quintic_spline_trajectory>
     <parabolic_blend_trajectory id="simple_move_brick_on_larger_scale_frame" time_definition="relative" time_step="0.05" blend_time_default="0.5">
         <points>
             <point>

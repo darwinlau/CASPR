@@ -18,6 +18,7 @@ classdef SmallMotorAccessories < MotorAccessoriesBase
         
         % Dynamixel Holder
         lenCoS2Outlet = 0.110; % distance from cetre of the spool to the cable outlet
+        cableLengths_full = [2;2;2;2;2;2;2;2];
     end
     
     

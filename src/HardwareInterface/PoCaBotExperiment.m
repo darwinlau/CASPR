@@ -9,34 +9,39 @@ classdef PoCaBotExperiment < ExperimentBase
         q_feedback         % Temporary variable to store things for now
         q_d_feedback       % Temporary variable to store things for now
         modelConfig
+        idsim              % Inverse dynamics simulator
         forwardKin
         numMotor
     end
     
     properties
         q_present
+        factor_offset_per_Newton_Meter = 0.0014;
     end
     
     methods
-        function eb = PoCaBotExperiment(numMotor_for_test)
+        function eb = PoCaBotExperiment(numMotor,strCableID)
             % Create the config
             model_config = ModelConfig('PoCaBot spatial');
-            cable_set_id = 'dualcables_simple_gripper_demo_on_larger_scale_frame_large_endeffector_UPDOWN_switched';
             % Load the SystemKinematics object from the XML
-            modelObj = model_config.getModel(cable_set_id);
+            modelObj = model_config.getModel(strCableID);
             % Create the hardware interface
-            if(nargin == 0)
-                numMotor = 8;
-            else
-                numMotor = numMotor_for_test;
-            end
-            cableLengths_full = ones(numMotor,1)*4.05;
+            %cableLengths_full = ones(numMotor,1)*4.05;
+            cableLengths_full = [6.618; 4.800; 6.632;4.800;6.632;5.545;6.618;5.545];
             hw_interface = PoCaBotCASPRInterface('COM3', numMotor, cableLengths_full,false);  %1
             eb@ExperimentBase(hw_interface, modelObj);
             eb.modelConfig = model_config;
             eb.numMotor = numMotor;
             %            eb.forwardKin = FKDifferential(modelObj);
             eb.q_present = NaN;
+            
+%             id_objective = IDObjectiveMinLinCableForce(ones(modelObj.numActuatorsActive,1));
+%             id_solver = IDSolverLinProg(modelObj, id_objective, ID_LP_SolverType.MATLAB);
+            
+            id_objective = IDObjectiveMinQuadCableForce(ones(modelObj.numActuatorsActive,1));
+            id_solver = IDSolverQuadProg(modelObj, id_objective, ID_QP_SolverType.MATLAB);
+            
+            eb.idsim = InverseDynamicsSimulator(modelObj, id_solver);
         end
         
         function motorSpoolTest(obj)
@@ -335,13 +340,12 @@ classdef PoCaBotExperiment < ExperimentBase
             % this procedure is to regulate the pose of the endeffector and
             % make sure that the cable is under the tension.
             obj.hardwareInterface.switchOperatingMode2CURRENT();
-            % pause(0.5);
             obj.hardwareInterface.systemOnSend();
             current = ones(obj.numMotor,1)*20;
-            obj.hardwareInterface.currentCommandSend(current);
+            obj.hardwareInterface.currentCommandSend(current);            
             
             str = input('Read the initial position from the file? [Y]:','s');
-            if isempty(str)
+            if isempty(str) || str == 'Y' || str == 'y'
                 str = 'Y';
             else
                 str = 'N';
@@ -351,8 +355,6 @@ classdef PoCaBotExperiment < ExperimentBase
                 obj.hardwareInterface.switchOperatingMode2POSITION_LIMITEDCURRENT();
                 % Start the system to get feedback
                 obj.hardwareInterface.systemOnSend();
-                current = ones(obj.numMotor,1)*200;
-                obj.hardwareInterface.currentCommandSend(current);
                 
                 profileAcc = ones(obj.numMotor,1)*50;
                 obj.hardwareInterface.setProfileAcceleration(profileAcc);
@@ -360,6 +362,9 @@ classdef PoCaBotExperiment < ExperimentBase
                 obj.hardwareInterface.setProfileVelocity(profileVel);
                 
                 obj.hardwareInterface.motorPositionCommandSend(init_pos);
+                current = ones(obj.numMotor,1)*200;%200
+                
+                obj.hardwareInterface.currentCommandSend(current);
                 
                 error_position = 100;
                 while (error_position>30)
@@ -381,7 +386,7 @@ classdef PoCaBotExperiment < ExperimentBase
             
             % Start the system to get feedback
             obj.hardwareInterface.systemOnSend();
-            current = ones(obj.numMotor,1)*400;
+            current = ones(obj.numMotor,1)*400;%400
             obj.hardwareInterface.currentCommandSend(current);
             
             profileAcc = ones(obj.numMotor,1)*150;
@@ -401,15 +406,18 @@ classdef PoCaBotExperiment < ExperimentBase
                 obj.q_present = trajectory.q(:,t);
                 tic;
                 % update cable lengths for next command from trajectory
-                obj.model.update(trajectory.q(:,t), trajectory.q_dot(:,t), trajectory.q_ddot(:,t),zeros(size(trajectory.q_dot(:,t))));
+                % obj.model.update(trajectory.q(:,t), trajectory.q_dot(:,t), trajectory.q_ddot(:,t),zeros(size(trajectory.q_dot(:,t))));
                 
                 % The offset of the first demo when the middle 8 bricks
                 % were not picked up.
                 % factor_offset = [1;0;1;0;1;0;1;0]*0.004 + [0;1;0;1;0;1;0;1]*0.004;
-                factor_offset = [1;0;1;0;1;0;1;0]*0.004 + [0;1;0;1;0;1;0;1]*0.004;
+%                 factor_offset = [1;0;1;0;1;0;1;0]*0.004 + [0;1;0;1;0;1;0;1]*(0.004);
+%                 
+%                 obj.hardwareInterface.lengthCommandSend(obj.model.cableLengths .*(1-factor_offset));
                 
-                obj.hardwareInterface.lengthCommandSend(obj.model.cableLengths .*(1-factor_offset));
-                
+                [~, model_temp, ~, ~, ~] = obj.idsim.IDSolver.resolve(trajectory.q(:,t), trajectory.q_dot(:,t), trajectory.q_ddot(:,t), zeros(obj.idsim.model.numDofs,1));
+                %factor_offset_per_Newton_Meter = 0.0008;
+                obj.hardwareInterface.lengthCommandSend(model_temp.cableLengths .*(1-obj.factor_offset_per_Newton_Meter*model_temp.cableForces));
                 
 %                 obj.l_cmd_traj(:, t) = obj.model.cableLengths; %(1)
 %                 obj.l_feedback_traj(:, t) = obj.hardwareInterface.lengthFeedbackRead;

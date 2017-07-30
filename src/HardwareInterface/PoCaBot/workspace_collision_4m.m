@@ -108,13 +108,14 @@ height_attach = 0.3575;
 ratio_safe_distance = 0.30;
 length_in_holder = 0.21;
 length_full_spool = 4.5;
+length_knot = 0;%0.07*2;
 % The distance above what the gripper is moving
 height_safe = 0.1;
 % For the upper two cables of the construction side 
 pivot_shortest_1 = [(-length_frame/2 + d1 - length_end/2); (width_bld/2 + width_end/2); (-height_frame/2 + height_bld +length_hand + height_end + height_safe)];
 pivot_longest_1 = [length_frame/2*(1-ratio_safe_distance);-width_frame/2*(1-ratio_safe_distance);-height_frame/2-height_attach+length_hand+ height_end];
 delta_cable1 = norm(frame_vertice_1 - pivot_longest_1) - norm(frame_vertice_1 - pivot_shortest_1);
-length_cable1 = (length_full_spool-delta_cable1)/2+norm(frame_vertice_1 - pivot_longest_1)+length_in_holder;
+length_cable1 = (length_full_spool-delta_cable1)/2+norm(frame_vertice_1 - pivot_longest_1)+length_in_holder+length_knot;
 
 % For the upper two cables of the brick side
 pivot_shortest_5 = [length_frame/2*(1-ratio_safe_distance)+length_end/2; -width_frame/2*(1-ratio_safe_distance)-width_end/2; -height_frame/2-height_attach+length_hand+ height_end+height_safe];
@@ -127,7 +128,7 @@ else
     pivot_longest_5 = pivot_longest_5_2;
 end
 delta_cable5 = norm(frame_vertice_5 - pivot_longest_5) - norm(frame_vertice_5 - pivot_shortest_5);
-length_cable5 = (length_full_spool-delta_cable5)/2+norm(frame_vertice_5 - pivot_longest_5)+length_in_holder;
+length_cable5 = (length_full_spool-delta_cable5)/2+norm(frame_vertice_5 - pivot_longest_5)+length_in_holder+length_knot;
 
 % For the lower two cables of the construction side
 pivot_shortest_8 = pivot_shortest_1;
@@ -135,7 +136,7 @@ pivot_shortest_8(3) = -length_frame/2;
 pivot_longest_8 = pivot_longest_1;
 pivot_longest_8(3) = pivot_longest_1(3)-height_end;
 delta_cable8 = norm(frame_vertice_8 - pivot_longest_8) - norm(frame_vertice_8 - pivot_shortest_8);
-length_cable8 = (length_full_spool-delta_cable8)/2+norm(frame_vertice_8 - pivot_longest_8)+length_in_holder;
+length_cable8 = (length_full_spool-delta_cable8)/2+norm(frame_vertice_8 - pivot_longest_8)+length_in_holder+length_knot;
 
 % For the lower two cables of the brick side
 pivot_shortest_4 = pivot_shortest_5;
@@ -164,7 +165,7 @@ switch index
         pivot_longest_4 = pivot_longest_4_1;
 end
 delta_cable4 = norm(frame_vertice_4 - pivot_longest_4) - norm(frame_vertice_4 - pivot_shortest_4);
-length_cable4 = (length_full_spool-delta_cable4)/2+norm(frame_vertice_4 - pivot_longest_4)+length_in_holder;
+length_cable4 = (length_full_spool-delta_cable4)/2+norm(frame_vertice_4 - pivot_longest_4)+length_in_holder+length_knot;
 
 %% DRAWING
 axis([-2,2,-2,2,-2,2]);hold on;

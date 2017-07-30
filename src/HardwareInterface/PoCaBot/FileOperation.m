@@ -34,9 +34,9 @@ classdef FileOperation < handle
     properties (Access = private, Constant = true)
         length_hand = 0.246; % length of the hand
         length_end  = 0.180; % length of the other part of the hand
-        length_offset = 0.022; % half of the height of the end effector
+        length_offset = -0.010; % half of the height of the end effector
         length_insert = 0.030;
-        vertical_offset = FileOperation.length_hand + FileOperation.length_end - FileOperation.length_offset - FileOperation.length_insert;
+        vertical_offset = FileOperation.length_hand + FileOperation.length_end + FileOperation.length_offset - FileOperation.length_insert;
     end
     
     methods
@@ -50,12 +50,12 @@ classdef FileOperation < handle
         
         function [pickup_co, place_co]= getCoordinate(obj, num)
             pickup_co = obj.pickup_list(num,1:3)'/1000;
-%              pickup_co(1) = pickup_co(1) - 0.013;
-%              pickup_co(2) = pickup_co(2) + 0.013;
-            pickup_co(3) = pickup_co(3) + obj.vertical_offset;
+            pickup_co(1) = pickup_co(1)+0.01;
+            pickup_co(2) = pickup_co(2)+0.01;
+            pickup_co(3) = pickup_co(3)/0.051*0.051375 + obj.vertical_offset;
             
             place_co = obj.place_list(num,1:3)'/1000;
-            place_co(3) = place_co(3) + obj.vertical_offset+0.002;
+            place_co(3) = place_co(3)/0.051*0.051375 + obj.vertical_offset; %+0.002+0.005;
         end
         
         function [arm_angle_pickup, arm_angle_place] = getArmAngle(obj,num)
@@ -125,7 +125,7 @@ classdef FileOperation < handle
             %             obj.pickup_list = fscanf(fileID, formatSpec, size_pickup_list);
             %             fclose(fileID);
             obj.pickup_list = load(obj.filepath_pickup_co);
-            obj.pickup_list = flip(obj.pickup_list);
+            %obj.pickup_list = flip(obj.pickup_list);
             %
             %             fileID = fopen(obj.filepath_place_co,'r');
             %             formatSpec = '%f %f %f %f';
@@ -133,7 +133,7 @@ classdef FileOperation < handle
             %             obj.place_list = fscanf(fileID, formatSpec, size_place_list);
             %             fclose(fileID);
             obj.place_list = load(obj.filepath_place_co);
-            obj.place_list = flip(obj.place_list);
+            %obj.place_list = flip(obj.place_list);
 %             CASPR_log.Assert(size(obj.pickup_list) == size(obj.place_list), ...
 %                 'The coordinate files of the picking up and placing do not match each other!');
         end

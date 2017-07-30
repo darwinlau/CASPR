@@ -17,6 +17,7 @@ classdef PoCaBotCASPRInterface < HardwareInterfaceBase
         
         dynamixel_direction_factor_position
         dynamixel_direction_factor_current
+        dynamixel_direction_reversed
     end
     
     properties (Access = public)
@@ -91,11 +92,12 @@ classdef PoCaBotCASPRInterface < HardwareInterfaceBase
     methods (Access = public)
         % e.g. comPort = 'COM3'
         % cableLengths_full: SIZE: numCmd x 1
-        function interface = PoCaBotCASPRInterface(comPort, numCmd, cableLengths_full,dynamixel_direction_reversed)
+        function interface = PoCaBotCASPRInterface(comPort, numCmd, ~,dynamixel_direction_reversed)
             interface@HardwareInterfaceBase();
             interface.comPort = comPort;
             interface.numCmd = numCmd;
-            interface.cableLengths_full = cableLengths_full;
+            %interface.cableLengths_full = cableLengths_full;
+            interface.dynamixel_direction_reversed = dynamixel_direction_reversed;
             if(dynamixel_direction_reversed)
                 interface.dynamixel_direction_factor_position = -1;
                 interface.dynamixel_direction_factor_current  = 1;
@@ -108,6 +110,7 @@ classdef PoCaBotCASPRInterface < HardwareInterfaceBase
                 accessories_temp(i) = LargeMotorAccessories;
             end
             interface.accessories = accessories_temp;
+            interface.cableLengths_full = accessories_temp(1).cableLengths_full;
             interface.initialise;
         end
     end
@@ -328,6 +331,14 @@ classdef PoCaBotCASPRInterface < HardwareInterfaceBase
         
         function setProfileVelocity(obj,profile)
             obj.sync_write(obj.ADDR_XH_PROFILE_VELOCITY, obj.LEN_XH_PROFILE_VELOCITY, profile);
+        end
+        
+        % Tighten the cables without chaning the mode into CURRENT mode.
+        % The precondition is that the motors are working under Extended
+        % Position Mode, no matter with or without current constrained.
+        function tightenCablesWithinPositionMode(obj)
+            cmd = -1*obj.dynamixel_direction_reversed*1048574*ones(obj.DXL_NUM,1);
+            obj.motorPositionCommandSend(cmd);
         end
     end
     
