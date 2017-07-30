@@ -19,7 +19,10 @@ classdef (Abstract) OperationalSpaceBase < handle
     
     methods (Abstract)
         % Extraction of the output y given a pose description.
-        y = extractOperationalSpace(obj,x,R)
+        y = extractOperationalSpace(obj, x, R)
+        [y, y_dot, y_ddot] = generateTrajectoryLinearSpline(obj, y_s, y_e, time_vector)
+        [y, y_dot, y_ddot] = generateTrajectoryCubicSpline(obj, y_s, y_s_d, y_e, y_e_d, time_vector)
+        [y, y_dot, y_ddot] = generateTrajectoryQuinticSpline(obj, y_s, y_s_d, y_s_dd, y_e, y_e_d, y_e_dd, time_vector)
     end
     
     methods (Abstract,Static)

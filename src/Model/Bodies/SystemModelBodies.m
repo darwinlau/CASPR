@@ -25,6 +25,7 @@ classdef SystemModelBodies < handle
         % Degrees of freedom
         numDofs
         numDofVars
+        numOperationalSpaces
         numOperationalDofs
         numLinks
         numDofsActuated             % Number of actuated DoFs
@@ -36,7 +37,7 @@ classdef SystemModelBodies < handle
         % Graphs
         connectivityGraph       % p x p connectivity matrix, if (i,j) = 1 means link i-1 is the parent of link j
         bodiesPathGraph         % p x p matrix that governs how to track to particular bodies, (i,j) = 1 means that to get to link j we must pass through link i
-
+            
         % Operational Space coordinates of the system
         y       = [];           % Operational space coordinates
         y_dot   = [];           % Operational space velocity
@@ -90,8 +91,10 @@ classdef SystemModelBodies < handle
         W_e = [];
         A = [];
 
-        % Index for ease of computation
-        index_k                      % A vector consisting of the first index to each joint
+        % Indices for ease of computation
+        qIndexInit                          % A vector consisting of the first index in q to each joint
+        operationalSpaceBodyIndices = [];   % A vector containing the list of bodies that operational spaces are attached to
+        yIndexInit                          % A vector consisting of the first index in y to each operational space
 
         % Flags
         is_symbolic                  % A flag to indicate whether the current pose is symbolic or a double
@@ -115,6 +118,8 @@ classdef SystemModelBodies < handle
         % Get array of dofs for each joint
         jointsNumDofVars
         jointsNumDofs
+        % and for each operational space
+        operationalSpaceNumDofs
     end
 
     properties
@@ -130,9 +135,9 @@ classdef SystemModelBodies < handle
             num_dof_vars = 0;
             num_operational_dofs = 0;
             num_dof_actuated = 0;
-            b.index_k = MatrixOperations.Initialise([1,b.numLinks],0);
+            b.qIndexInit = zeros(1, b.numLinks);
             for k = 1:length(bodies)
-                b.index_k(k) = num_dofs + 1;
+                b.qIndexInit(k) = num_dofs + 1;
                 num_dofs = num_dofs + bodies{k}.numDofs;
                 num_dof_vars = num_dof_vars + bodies{k}.numDofVars;
                 if (bodies{k}.joint.isActuated)
@@ -216,8 +221,8 @@ classdef SystemModelBodies < handle
                 % Determine absolute position of link's ending position
                 obj.bodies{k}.r_OPe = obj.bodies{k}.r_OP + obj.bodies{k}.r_Pe;
                 % Determine absolute position of the operational space
-                if(~isempty(obj.bodies{k}.operational_space))
-                    obj.bodies{k}.r_Oy  = obj.bodies{k}.r_OP + obj.bodies{k}.r_y;
+                if(~isempty(obj.bodies{k}.operationalSpace))
+                    obj.bodies{k}.r_OY  = obj.bodies{k}.r_OP + obj.bodies{k}.r_y;
                 end
             end
 
@@ -290,12 +295,11 @@ classdef SystemModelBodies < handle
             if(obj.occupied.operational_space)
                 % Now determine the operational space vector y
                 obj.y = MatrixOperations.Initialise([obj.numOperationalDofs,1],obj.is_symbolic); l = 1;
-                for k = 1:obj.numLinks
-                    if(~isempty(obj.bodies{k}.operational_space))
-                        n_y = obj.bodies{k}.numOperationalDofs;
-                        obj.y(l:l+n_y-1) = obj.bodies{k}.operational_space.extractOperationalSpace(obj.bodies{k}.r_Oy,obj.bodies{k}.R_0k);
-                        l = l + n_y;
-                    end
+                for k = 1:length(obj.operationalSpaceBodyIndices)
+                    body_index = obj.operationalSpaceBodyIndices(k);
+                    n_y = obj.bodies{body_index}.numOperationalDofs;
+                    obj.y(l:l+n_y-1) = obj.bodies{body_index}.operationalSpace.extractOperationalSpace(obj.bodies{body_index}.r_OY,obj.bodies{body_index}.R_0k);
+                    l = l + n_y;
                 end
 
                 % Set Q (relationship with joint propagation for operational space)
@@ -305,7 +309,7 @@ classdef SystemModelBodies < handle
                     for a = 1:k
                         body_a = obj.bodies{a};
                         R_ka = body_k.R_0k.'*body_a.R_0k;
-                        Qak = [body_k.R_0k,zeros(3);zeros(3),body_k.R_0k]*(obj.bodiesPathGraph(a,k)*[R_ka*body_a.joint.R_pe.' -R_ka*MatrixOperations.SkewSymmetric(-body_a.r_OP + R_ka.'*body_k.r_Oy); ...
+                        Qak = [body_k.R_0k,zeros(3);zeros(3),body_k.R_0k]*(obj.bodiesPathGraph(a,k)*[R_ka*body_a.joint.R_pe.' -R_ka*MatrixOperations.SkewSymmetric(-body_a.r_OP + R_ka.'*body_k.r_OY); ...
                             zeros(3,3) R_ka]);
                         Q(6*k-5:6*k, 6*a-5:6*a) = Qak;
                     end
@@ -591,10 +595,28 @@ classdef SystemModelBodies < handle
             end
         end
         
-        % Update the mass inertia matrix for the system from the joint mass
-        % inertia matrices.
-        function updateMassInertiaMatrix(obj,massInertiaMatrix)
-            obj.massInertiaMatrix = massInertiaMatrix;
+        % Updates the inertia properties and the mass inertia matrix
+        function updateInertiaProperties(obj,m,r_G,I_G)
+            % Ensure that the inputs are cell arrays when necessary
+            CASPR_log.Assert((isempty(m)||(obj.numLinks==1)||iscell(m))&&(isempty(r_G)||(obj.numLinks==1)||iscell(r_G))&&(isempty(I_G)||(obj.numLinks==1)||iscell(I_G)),'Input must be a cell if the number of links is greater than 1');
+            % Ensure that the non empty cell array is of the correct length
+            CASPR_log.Assert((isempty(m)||(length(m)==obj.numLinks))&&(isempty(r_G)||(length(r_G)==obj.numLinks))&&(isempty(I_G)||(length(I_G)==obj.numLinks)),'Inertia terms must be empty or a cell array of size equal to the number of links');
+            
+            % Go through the cell array of each element
+            for i = 1:length(m)
+                obj.bodies{i}.m = m{i};
+            end
+            for i = 1:length(r_G)
+                obj.bodies{i}.r_G = r_G{i};
+            end
+            for i = 1:length(I_G)
+                obj.bodies{i}.I_G = I_G{i};
+            end
+            % Update the mass inertia matrix to reflect the new values
+            obj.massInertiaMatrix = zeros(6*obj.numLinks, 6*obj.numLinks);
+            for k = 1:obj.numLinks
+                obj.massInertiaMatrix(6*k-5:6*k, 6*k-5:6*k) = [obj.bodies{k}.m*eye(3) zeros(3,3); zeros(3,3) obj.bodies{k}.I_G];
+            end
         end
                 
         % Calculate the internal matrices for the quadratic form of the
@@ -691,11 +713,17 @@ classdef SystemModelBodies < handle
             allOperationalItems = operational_space_xmlobj.getChildNodes;
 
             num_operationals = allOperationalItems.getLength;
+            obj.operationalSpaceBodyIndices = zeros(1, num_operationals);
+            obj.yIndexInit = zeros(1, num_operationals);
+            
+            
+            num_operational_dofs = 0;
+            
             % Creates all of the operational spaces first first
             for k = 1:num_operationals
                 % Java uses 0 indexing
                 currentOperationalItem = allOperationalItems.item(k-1);
-
+                
                 type = char(currentOperationalItem.getNodeName);
                 if (strcmp(type, 'position'))
                     operational_space = OperationalPosition.LoadXmlObj(currentOperationalItem);
@@ -704,27 +732,25 @@ classdef SystemModelBodies < handle
                 elseif(strcmp(type, 'pose_euler_xyz'))
                     operational_space = OperationalPoseEulerXYZ.LoadXmlObj(currentOperationalItem);
                 else
-                    CASPR_log.Printf(sprintf('Unknown link type: %s', type),CASPRLogLevel.ERROR);
+                    CASPR_log.Printf(sprintf('Unknown operational space type: %s', type),CASPRLogLevel.ERROR);
                 end
                 parent_link = operational_space.link;
+                obj.operationalSpaceBodyIndices(k) = parent_link;
                 obj.bodies{parent_link}.attachOperationalSpace(operational_space);
-                % Should add some protection to ensure that one Operational_Space
-                % per link
-            end
-            num_operational_dofs = 0;
-            for k = 1:length(obj.bodies)
-                num_operational_dofs = num_operational_dofs + obj.bodies{k}.numOperationalDofs;
-            end
+                
+                obj.yIndexInit = num_operational_dofs + 1;
+                num_operational_dofs = num_operational_dofs + operational_space.numOperationalDofs;
+            end            
             obj.numOperationalDofs = num_operational_dofs;
+            obj.numOperationalSpaces = num_operationals;
 
             obj.T = MatrixOperations.Initialise([obj.numOperationalDofs,6*obj.numLinks],0);
             l = 1;
-            for k = 1:length(obj.bodies)
-                if(~isempty(obj.bodies{k}.operational_space))
-                    n_y = obj.bodies{k}.numOperationalDofs;
-                    obj.T(l:l+n_y-1,6*k-5:6*k) = obj.bodies{k}.operational_space.getSelectionMatrix();
-                    l = l + n_y;
-                end
+            for k = 1:length(obj.operationalSpaceBodyIndices)
+                index = obj.operationalSpaceBodyIndices(k);
+                n_y = obj.bodies{index}.numOperationalDofs;
+                obj.T(l:l+n_y-1,6*index-5:6*index) = obj.bodies{index}.operationalSpace.getSelectionMatrix();
+                l = l + n_y;
             end
         end
 
@@ -943,7 +969,7 @@ classdef SystemModelBodies < handle
         end
         
         function val = get.tau(obj)
-            val = zeros(obj.numDofs, 1);
+            val = zeros(obj.numDofsActuated, 1);
             count = 0;
             for k = 1:obj.numLinks
                 if (obj.bodies{k}.joint.isActuated)
@@ -995,6 +1021,13 @@ classdef SystemModelBodies < handle
                 jointsNumDofs(k) = obj.bodies{k}.numDofs;
             end
         end
+               
+        function operationalNumDofs = get.operationalSpaceNumDofs(obj)
+            operationalNumDofs = zeros(obj.numOperationalSpaces,1);
+            for k = 1:obj.numOperationalSpaces
+                operationalNumDofs(k) = obj.bodies{obj.operationalSpaceBodyIndices(k)}.operationalSpace.numOperationalDofs;
+            end
+        end
     end
 
     methods (Access = private)
@@ -1006,21 +1039,21 @@ classdef SystemModelBodies < handle
             else
                 R_a0 = obj.bodies{a}.R_0k.';
             end
-            S_KA = MatrixOperations.Initialise([3,obj.index_k(k)+obj.bodies{k}.numDofs-1],obj.is_symbolic);
+            S_KA = MatrixOperations.Initialise([3,obj.qIndexInit(k)+obj.bodies{k}.numDofs-1],obj.is_symbolic);
             if((k==0)||(a==0)||obj.bodiesPathGraph(a,k)||obj.bodiesPathGraph(k,a))
                 % The bodies are connected
                 if(a<=k)
                     for i =a+1:k
                         if(obj.bodiesPathGraph(i,k))
                             body_i = obj.bodies{i};
-                            S_KA(:,obj.index_k(i):obj.index_k(i)+body_i.numDofs-1) = -R_a0*body_i.R_0k*obj.S(6*i-2:6*i,obj.index_k(i):obj.index_k(i)+body_i.numDofs-1);
+                            S_KA(:,obj.qIndexInit(i):obj.qIndexInit(i)+body_i.numDofs-1) = -R_a0*body_i.R_0k*obj.S(6*i-2:6*i,obj.qIndexInit(i):obj.qIndexInit(i)+body_i.numDofs-1);
                         end
                     end
                 else
                     for i =k+1:a
                         if(obj.bodiesPathGraph(i,a))
                             body_i = obj.bodies{i};
-                            S_KA(:,obj.index_k(i):obj.index_k(i)+body_i.numDofs-1) = R_a0*body_i.R_0k*obj.S(6*i-2:6*i,obj.index_k(i):obj.index_k(i)+body_i.numDofs-1);
+                            S_KA(:,obj.qIndexInit(i):obj.qIndexInit(i)+body_i.numDofs-1) = R_a0*body_i.R_0k*obj.S(6*i-2:6*i,obj.qIndexInit(i):obj.qIndexInit(i)+body_i.numDofs-1);
                         end
                     end
                 end
@@ -1034,13 +1067,13 @@ classdef SystemModelBodies < handle
             body_k = obj.bodies{k};
             R_a0 = body_a.R_0k.';
             R_k0 = body_k.R_0k.';
-            S_K = MatrixOperations.Initialise([3,obj.index_k(k)+obj.bodies{k}.numDofs-1],obj.is_symbolic);
+            S_K = MatrixOperations.Initialise([3,obj.qIndexInit(k)+obj.bodies{k}.numDofs-1],obj.is_symbolic);
             if(obj.bodiesPathGraph(a,k)||obj.bodiesPathGraph(k,a))
                 for i = a+1:k
                     if((obj.bodiesPathGraph(i,a))||(obj.bodiesPathGraph(a,i)))
                         body_i = obj.bodies{i};
                         R_0i = body_i.R_0k;
-                        S_K(:,obj.index_k(i):obj.index_k(i)+body_i.numDofs-1) = -R_a0*R_0i*MatrixOperations.SkewSymmetric(-body_i.r_OP + (R_k0*R_0i).'*body_k.r_OG)*obj.S(6*i-2:6*i,obj.index_k(i):obj.index_k(i)+body_i.numDofs-1);
+                        S_K(:,obj.qIndexInit(i):obj.qIndexInit(i)+body_i.numDofs-1) = -R_a0*R_0i*MatrixOperations.SkewSymmetric(-body_i.r_OP + (R_k0*R_0i).'*body_k.r_OG)*obj.S(6*i-2:6*i,obj.qIndexInit(i):obj.qIndexInit(i)+body_i.numDofs-1);
                     end
                 end
             end
@@ -1051,13 +1084,13 @@ classdef SystemModelBodies < handle
         function S_KA = generateSKATrans(obj,k,a)
             CASPR_log.Assert(k>=a,'Invalid input to generateSKATrans')
             R_a0 = obj.bodies{a}.R_0k.';
-            S_KA = MatrixOperations.Initialise([3,obj.index_k(k)+obj.bodies{k}.numDofs-1],obj.is_symbolic);
+            S_KA = MatrixOperations.Initialise([3,obj.qIndexInit(k)+obj.bodies{k}.numDofs-1],obj.is_symbolic);
             if(obj.bodiesPathGraph(a,k)||obj.bodiesPathGraph(k,a))
                 for i =a+1:k
                     if(obj.bodiesPathGraph(i,a)||(obj.bodiesPathGraph(a,i)))
                         body_ip = obj.bodies{obj.bodies{i}.parentLinkId};
                         body_i = obj.bodies{i};
-                        S_KA(:,obj.index_k(i):obj.index_k(i)+body_i.numDofs-1) = R_a0*body_ip.R_0k*obj.S(6*i-5:6*i-3,obj.index_k(i):obj.index_k(i)+body_i.numDofs-1);
+                        S_KA(:,obj.qIndexInit(i):obj.qIndexInit(i)+body_i.numDofs-1) = R_a0*body_ip.R_0k*obj.S(6*i-5:6*i-3,obj.qIndexInit(i):obj.qIndexInit(i)+body_i.numDofs-1);
                     end
                 end
             end
@@ -1080,10 +1113,10 @@ classdef SystemModelBodies < handle
                         % Grad(R)S
                         R_ka_grad = MatrixOperations.Initialise([3,3,obj.numDofs],obj.is_symbolic);
                         R_ka_grad(:,:,:) = obj.compute_Rka_grad(k,a);
-                        temp_tensor(:,obj.index_k(a):obj.index_k(a)+obj.bodies{a}.numDofs-1,:) = temp_tensor(:,obj.index_k(a):obj.index_k(a)+obj.bodies{a}.numDofs-1,:) + ...
+                        temp_tensor(:,obj.qIndexInit(a):obj.qIndexInit(a)+obj.bodies{a}.numDofs-1,:) = temp_tensor(:,obj.qIndexInit(a):obj.qIndexInit(a)+obj.bodies{a}.numDofs-1,:) + ...
                             TensorOperations.RightMatrixProduct(R_ka_grad,body_a.joint.S(4:6,:),obj.is_symbolic);
                         % Grad(R)S
-                        temp_tensor(:,obj.index_k(a):obj.index_k(a)+obj.bodies{a}.numDofs-1,obj.index_k(a):obj.index_k(a)+obj.bodies{a}.numDofs-1) = temp_tensor(:,obj.index_k(a):obj.index_k(a)+obj.bodies{a}.numDofs-1,obj.index_k(a):obj.index_k(a)+obj.bodies{a}.numDofs-1) + ...
+                        temp_tensor(:,obj.qIndexInit(a):obj.qIndexInit(a)+obj.bodies{a}.numDofs-1,obj.qIndexInit(a):obj.qIndexInit(a)+obj.bodies{a}.numDofs-1) = temp_tensor(:,obj.qIndexInit(a):obj.qIndexInit(a)+obj.bodies{a}.numDofs-1,obj.qIndexInit(a):obj.qIndexInit(a)+obj.bodies{a}.numDofs-1) + ...
                             TensorOperations.LeftMatrixProduct(R_ka,body_a.joint.S_grad(4:6,:,:),obj.is_symbolic);
                     end
                 end
@@ -1094,7 +1127,7 @@ classdef SystemModelBodies < handle
                 for i = 1:k
                     if(obj.bodiesPathGraph(i,k)||obj.bodiesPathGraph(k,i))
                         R_ki = obj.bodies{k}.R_0k.'*obj.bodies{i}.R_0k;
-                        omega_grad_q_dot(:,obj.index_k(i):obj.index_k(i)+obj.bodies{i}.numDofs-1) = R_ki*obj.S(6*i-2:6*i,obj.index_k(i):obj.index_k(i)+obj.bodies{i}.numDofs-1);
+                        omega_grad_q_dot(:,obj.qIndexInit(i):obj.qIndexInit(i)+obj.bodies{i}.numDofs-1) = R_ki*obj.S(6*i-2:6*i,obj.qIndexInit(i):obj.qIndexInit(i)+obj.bodies{i}.numDofs-1);
                     end
                 end
             else

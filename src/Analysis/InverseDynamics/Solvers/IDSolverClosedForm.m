@@ -6,7 +6,7 @@
 % Workshop on Computational Kinematics (CK2013), pp. 139-146, 2014.
 %
 % If the puncture method is also utilised please cite:
-% K. M�ller and C. Reichert and T. Bruckmann.
+% K. Muller and C. Reichert and T. Bruckmann.
 % "Analysis of a real-time capable cable force computation method."
 % In Cable-Driven Parallel Robots, pp. 227-238. Springer International
 % Publishing, 2015.

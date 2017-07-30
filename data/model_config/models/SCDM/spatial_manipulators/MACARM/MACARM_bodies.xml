@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE bodies_system SYSTEM "../../../../templates/bodies.dtd">
 <!-- Template generated XML file for rigid bodies in CASPR -->
 <!-- Mass information currently unspecified -->
 <bodies_system>

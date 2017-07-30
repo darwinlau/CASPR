@@ -166,7 +166,7 @@ classdef SphericalEulerXYZ < JointBase
         end
     end
     
-    methods (Static, Access = private)
+    methods (Static)
         % Conversions between representation
         function [a, b, g] = rotation_matrix_to_angles(R_0p)
             % Extract the angles from the rotation matrix

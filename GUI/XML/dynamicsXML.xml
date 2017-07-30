@@ -3,88 +3,12 @@
   <!ATTLIST solver_class id ID #REQUIRED>
 ]>
 <simulator>
-	<solver_class id="IDSolverLinProg">
-		<solver_type_enum>ID_LP_SolverType</solver_type_enum>
-		<objectives>
-			<objective type="IDObjectiveMinLinCableForce">
-                <weight_links_multiplier>0</weight_links_multiplier>
-                <weight_cables_multiplier>1</weight_cables_multiplier>
-                <weight_constants>0</weight_constants>
-            </objective>			
-		</objectives>
-		<constraints>
-			<constraint type="IDConstraintInteractionForceAngleCone">
-                <weight_links_multiplier>0</weight_links_multiplier>
-                <weight_cables_multiplier>0</weight_cables_multiplier>
-                <weight_constants>3 1 1</weight_constants>
-            </constraint>
-		</constraints>
-	</solver_class>
-	<solver_class id="IDSolverQuadProg">
-		<solver_type_enum>ID_QP_SolverType</solver_type_enum>
-		<objectives>
-			<objective type="IDObjectiveMinInteractions">
-                <weight_links_multiplier>6</weight_links_multiplier>
-                <weight_cables_multiplier>0</weight_cables_multiplier>
-                <weight_constants>0</weight_constants>
-            </objective>
-            <objective type="IDObjectiveQuadOptimallySafe">
-                <weight_links_multiplier>0</weight_links_multiplier>
-                <weight_cables_multiplier>1</weight_cables_multiplier>
-                <weight_constants>0</weight_constants>
-            </objective>			
-			<objective type="IDObjectiveMinQuadCableForce">
-                <weight_links_multiplier>0</weight_links_multiplier>
-                <weight_cables_multiplier>1</weight_cables_multiplier>
-                <weight_constants>0</weight_constants>
-            </objective>			
-		</objectives>
-		<constraints>
-			<constraint type="IDConstraintInteractionForceAngleCone">
-                <weight_links_multiplier>0</weight_links_multiplier>
-                <weight_cables_multiplier>0</weight_cables_multiplier>
-                <weight_constants>3 1 1</weight_constants>
-            </constraint>
-		</constraints>
-	</solver_class>
-	<solver_class id="IDSolverFeasiblePolygon">
-		<solver_type_enum>ID_FP_SolverType</solver_type_enum>
-	</solver_class>
-    <solver_class id="IDSolverOptimallySafe">
-		<solver_type_enum>ID_OS_SolverType</solver_type_enum>
-        <tuning_parameters>
-            <tuning_parameter type="alpha">
-                <weight_links_multiplier>0</weight_links_multiplier>
-                <weight_cables_multiplier>0</weight_cables_multiplier>
-                <weight_constants>1</weight_constants>
-            </tuning_parameter>
-        </tuning_parameters>
-	</solver_class>
-    <solver_class id="IDSolverClosedForm">
-		<solver_type_enum>ID_CF_SolverType</solver_type_enum>
-	</solver_class>
-    <solver_class id="IDSolverMinInfNorm">
-		<solver_type_enum>ID_LP_SolverType</solver_type_enum>
-		<objectives>
-			<objective type="IDObjectiveMinInfCableForce">
-                <weight_links_multiplier>0</weight_links_multiplier>
-                <weight_cables_multiplier>1</weight_cables_multiplier>
-                <weight_constants>0</weight_constants>
-            </objective>
-            <objective type="IDObjectiveInfOptimallySafe">
-                <weight_links_multiplier>0</weight_links_multiplier>
-                <weight_cables_multiplier>1</weight_cables_multiplier>
-                <weight_constants>0</weight_constants>
-            </objective>
-		</objectives>
-		<constraints>
-			<constraint type="IDConstraintInteractionForceAngleCone">
-                <weight_links_multiplier>0</weight_links_multiplier>
-                <weight_cables_multiplier>0</weight_cables_multiplier>
-                <weight_constants>3 1 1</weight_constants>
-            </constraint>
-		</constraints>
-	</solver_class>
+	<solver_class id="IDSolverLinProg"/>
+	<solver_class id="IDSolverQuadProg"/>
+	<solver_class id="IDSolverFeasiblePolygon"/>
+    <solver_class id="IDSolverOptimallySafe"/>
+    <solver_class id="IDSolverClosedForm"/>
+    <solver_class id="IDSolverMinInfNorm"/>
 	<plot_functions>
         <plot_function type="plotCableForces">
             <figure_quantity>1</figure_quantity>

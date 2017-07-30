@@ -10,7 +10,7 @@ classdef (Abstract) BodyModelBase < handle
         r_OG = zeros(3,1);      % Absolute position vector to centre of gravity in {k}
         r_OP = zeros(3,1);      % Absolute position vector to joint location in (k)
         r_OPe = zeros(3,1);     % Absolute position vector to end of link in {k}
-        r_Oy = zeros(3,1);      % Absolute position vector to the OP space reference point in {k}
+        r_OY = zeros(3,1);      % Absolute position vector to the OP space reference point in {k}
 
         % Absolute velocities
         v_OG = zeros(3,1);      % Absolute velocity vector to centre of gravity in {k}
@@ -41,7 +41,7 @@ classdef (Abstract) BodyModelBase < handle
     properties (SetAccess = private)
         % Objects
         joint                   % Joint object
-        operational_space       % Operation Space object
+        operationalSpace       % Operation Space object
         % Identification
         id                      % Body ID
         name
@@ -66,7 +66,7 @@ classdef (Abstract) BodyModelBase < handle
             bk.name = name;
             bk.joint = joint;
             % Operation Space creation
-            bk.operational_space = [];
+            bk.operationalSpace = [];
         end
 
         % Add the parent for the body
@@ -81,7 +81,8 @@ classdef (Abstract) BodyModelBase < handle
         
         % Attach the operational space rigid body
         function attachOperationalSpace(obj,operational_space)
-            obj.operational_space = operational_space;
+            CASPR_log.Assert(isempty(obj.operationalSpace),'Cannot have two operational spaces attached to the same link');
+            obj.operationalSpace = operational_space;
             obj.r_y = operational_space.offset;
         end
 
@@ -97,8 +98,8 @@ classdef (Abstract) BodyModelBase < handle
         end
         
         function dofs = get.numOperationalDofs(obj)
-            if(~isempty(obj.operational_space))
-                dofs = obj.operational_space.numOperationalDofs;
+            if(~isempty(obj.operationalSpace))
+                dofs = obj.operationalSpace.numOperationalDofs;
             else
                 dofs = 0;
             end

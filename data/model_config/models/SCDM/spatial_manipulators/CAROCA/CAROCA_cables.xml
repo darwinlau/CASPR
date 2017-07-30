@@ -1,0 +1,433 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE cables SYSTEM "../../../../templates/cables.dtd">
+<!-- Template generated XML file for cables in CASPR -->
+<cables default_cable_set="original">
+  <!-- Use cable set tags for each possible set of cable attachments -->  
+  <cable_set id="original">
+
+      <cable_ideal name="1" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>1000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>1.659 -2.850 3.221</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0.16 0.14 0.105</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    
+       <cable_ideal name="2" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>1000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>1.350 -3.159 3.221</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>-0.13 -0.21 -0.105</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    
+          <cable_ideal name="3" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>1000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-1.350 -3.159 3.221</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0.13 -0.21 0.105</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    
+          <cable_ideal name="4" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>1000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-1.659 -2.850 3.221</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>-0.16 0.14 -0.105</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    
+          <cable_ideal name="5" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>1000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-1.659 2.850 3.221</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>-0.16 -0.14 0.105</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    
+          <cable_ideal name="6" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>1000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-1.350 3.159 3.221</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0.13 0.21 -0.105</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    
+          <cable_ideal name="7" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>1000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>1.359 3.159 3.221</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>-0.13 0.21 0.105</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    
+          <cable_ideal name="8" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>1000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>1.659 2.850 3.221</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0.16 -0.14 -0.105</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    
+  </cable_set>
+  
+  <cable_set id="with_rotating_pulleys">
+
+      <cable_ideal name="1" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>1000</force_max>
+      </properties>
+      <attachments>
+            <base_rotating_pulley>
+          <fixed_location>1.659 -2.850 3.221</fixed_location>
+          <pulley_radius>0.045</pulley_radius>
+          <cable_entry_vector>0 0 1</cable_entry_vector>
+        </base_rotating_pulley>
+        <attachment>
+          <link>1</link>
+          <location>0.16 0.14 0.105</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    
+       <cable_ideal name="2" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>1000</force_max>
+      </properties>
+      <attachments>
+        <base_rotating_pulley>
+          <fixed_location>1.350 -3.159 3.221</fixed_location>
+          <pulley_radius>0.045</pulley_radius>
+          <cable_entry_vector>0 0 1</cable_entry_vector>
+        </base_rotating_pulley>
+        <attachment>
+          <link>1</link>
+          <location>-0.13 -0.21 -0.105</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    
+          <cable_ideal name="3" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>1000</force_max>
+      </properties>
+      <attachments>
+        <base_rotating_pulley>
+          <fixed_location>-1.350 -3.159 3.221</fixed_location>
+          <pulley_radius>0.045</pulley_radius>
+          <cable_entry_vector>0 0 1</cable_entry_vector>
+        </base_rotating_pulley>
+        <attachment>
+          <link>1</link>
+          <location>0.13 -0.21 0.105</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    
+          <cable_ideal name="4" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>1000</force_max>
+      </properties>
+      <attachments>
+        <base_rotating_pulley>
+          <fixed_location>-1.659 -2.850 3.221</fixed_location>
+          <pulley_radius>0.045</pulley_radius>
+          <cable_entry_vector>0 0 1</cable_entry_vector>
+        </base_rotating_pulley>
+        <attachment>
+          <link>1</link>
+          <location>-0.16 0.14 -0.105</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    
+          <cable_ideal name="5" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>1000</force_max>
+      </properties>
+      <attachments>
+        <base_rotating_pulley>
+          <fixed_location>-1.659 2.850 3.221</fixed_location>
+          <pulley_radius>0.045</pulley_radius>
+          <cable_entry_vector>0 0 1</cable_entry_vector>
+        </base_rotating_pulley>
+        <attachment>
+          <link>1</link>
+          <location>-0.16 -0.14 0.105</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    
+          <cable_ideal name="6" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>1000</force_max>
+      </properties>
+      <attachments>
+        <base_rotating_pulley>
+          <fixed_location>-1.350 3.159 3.221</fixed_location>
+          <pulley_radius>0.045</pulley_radius>
+          <cable_entry_vector>0 0 1</cable_entry_vector>
+        </base_rotating_pulley>
+        <attachment>
+          <link>1</link>
+          <location>0.13 0.21 -0.105</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    
+          <cable_ideal name="7" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>1000</force_max>
+      </properties>
+      <attachments>
+        <base_rotating_pulley>
+          <fixed_location>1.359 3.159 3.221</fixed_location>
+          <pulley_radius>0.045</pulley_radius>
+          <cable_entry_vector>0 0 1</cable_entry_vector>
+        </base_rotating_pulley>
+        <attachment>
+          <link>1</link>
+          <location>-0.13 0.21 0.105</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    
+          <cable_ideal name="8" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>1000</force_max>
+      </properties>
+      <attachments>
+        <base_rotating_pulley>
+          <fixed_location>1.659 2.850 3.221</fixed_location>
+          <pulley_radius>0.045</pulley_radius>
+          <cable_entry_vector>0 0 1</cable_entry_vector>
+        </base_rotating_pulley>
+        <attachment>
+          <link>1</link>
+          <location>0.16 -0.14 -0.105</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    
+  </cable_set>
+  
+  <cable_set id="gazebo_sim">
+
+      <cable_ideal name="1" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>1000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-3.5 -2.0 3.5</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0.6 -0.3 -0.2</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    
+       <cable_ideal name="2" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>1000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-3.5 -2.0 3.5</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>-0.6 0.3 0.2</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    
+          <cable_ideal name="3" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>1000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>3.5 -2.0 3.5</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>-0.6 -0.3 0.2</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    
+          <cable_ideal name="4" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>1000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>3.5 -2.0 3.5</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0.6 0.3 -0.2</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    
+          <cable_ideal name="5" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>1000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-3.5 2.0 3.5</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>-0.6 -0.3 -0.2</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    
+          <cable_ideal name="6" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>1000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-3.5 2.0 3.5</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0.6 0.3 0.2</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    
+          <cable_ideal name="7" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>1000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>3.5 2.0 3.5</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0.6 -0.3 0.2</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    
+          <cable_ideal name="8" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>1000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>3.5 2.0 3.5</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>-0.6 0.3 -0.2</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    
+  </cable_set>
+</cables>
