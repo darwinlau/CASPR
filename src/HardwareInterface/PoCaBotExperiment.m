@@ -332,7 +332,7 @@ classdef PoCaBotExperiment < ExperimentBase
             gripper.disconnect();
             disp('Application terminated normally!');
         end
-        %% BELOW METHODS ARE FOR THE LONG TIME CONSTRUCTING TASK
+       %% BELOW METHODS ARE FOR THE LONG TIME CONSTRUCTING TASK
         % init_pos is a vector with a size of 8 by 1 which is the initial
         % position of the motors. q0 is also a vetor with the same size but
         % it is the initial state of the end effector.

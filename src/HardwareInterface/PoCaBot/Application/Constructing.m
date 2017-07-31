@@ -8,7 +8,7 @@ pause(0.5);
 gripper.setHandAngle( gripper.LOOSE_HAND_ANGLE);
 
 fo = FileOperation(...
-    'C:\Users\Tristan\Desktop\Constructing Demo\initstate.ini', ...
+    which('initstate.ini'), ...
     'C:\Users\Tristan\Desktop\Constructing Demo\DATA FILES\Wall4_BrickArea0731.csv', ...
     'C:\Users\Tristan\Desktop\Constructing Demo\DATA FILES\Wall4_Design0731.csv');
 brick_count = fo.getAllBrickCount();
@@ -46,16 +46,16 @@ end
 % The below program is just for debugging. When working for the task, please
 % comment these expressions.
 
-% while(1)
-%     factor = input('The offset constant factor[Nothing means no changing!]:');
-%     if ~isempty(factor)
-%         exp.factor_offset_per_Newton_Meter = factor;
-%     end
-%     fprintf('The factor is %0.5f from now on!\n',exp.factor_offset_per_Newton_Meter);
-%     q_next = (input('The next q:'))';
-%     trajectory = PoCaBotExperiment.generateTrajectoryParabolicBlend(exp.q_present, q_next, time_step, blend_time_placing, blend_time_placing, v_max);
-%     exp.runTrajectoryDirectly(trajectory);
-% end
+while(1)
+    factor = input('The offset constant factor[Nothing means no changing!]:');
+    if ~isempty(factor)
+        exp.factor_offset_per_Newton_Meter = factor;
+    end
+    fprintf('The factor is %0.5f from now on!\n',exp.factor_offset_per_Newton_Meter);
+    q_next = (input('The next q:'))';
+    trajectory = PoCaBotExperiment.generateTrajectoryParabolicBlend(exp.q_present, q_next, time_step, blend_time_placing, blend_time_placing, v_max);
+    exp.runTrajectoryDirectly(trajectory);
+end
 
 coordinate1 = q_transit_point;
 coordinate1(3) = q_temp(3);

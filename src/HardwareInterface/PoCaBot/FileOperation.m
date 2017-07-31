@@ -42,10 +42,11 @@ classdef FileOperation < handle
     methods
         function fo = FileOperation(filepath_record, filepath_pickup_co, filepath_place_co)
             fo.filepath_record = filepath_record;
-            fo.filepath_pickup_co = filepath_pickup_co;
-            fo.filepath_place_co = filepath_place_co;
-            
-            fo.readCoFile();
+            if(nargin>1 && exist('filepath_pickup_co','var') && exist('filepath_place_co','var'))
+                fo.filepath_pickup_co = filepath_pickup_co;
+                fo.filepath_place_co = filepath_place_co;
+                fo.readCoFile();
+            end
         end
         
         function [pickup_co, place_co]= getCoordinate(obj, num)

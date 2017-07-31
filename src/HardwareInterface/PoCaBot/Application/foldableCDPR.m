@@ -1,4 +1,4 @@
-%% Application for writing
+%% Application for Foldable CDPR
 fo = FileOperation(which('initstate.ini'));
 
 time_step = 0.05;
@@ -13,7 +13,7 @@ v_max = 0.120; % unit: m/s For maximum: 200*0.229/60Rev/s<=>0.763Rev/s*0.1903m/R
 blend_time_default = 0.5; %used to decide the acceleration
 blend_time_placing = 1.5; %used to decide the deceleration
 
-exp = PoCaBotExperiment(8,'dualcables_writing_UPDOWNSwitched');
+exp = PoCaBotExperiment(8,'dualcables_foldable_writing_UPDOWNSwitched');
 exp.application_preparation(fo,q0);
 q_temp = q0;
 % lift the gripper from the ground
