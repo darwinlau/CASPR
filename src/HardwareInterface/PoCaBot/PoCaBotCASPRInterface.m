@@ -25,6 +25,11 @@ classdef PoCaBotCASPRInterface < HardwareInterfaceBase
         DXL_ID;
         % The number of the motors found
         DXL_NUM;
+        
+        % The default KpD, KpI and KpP
+        KpD = 0;% KPD = KPD(TBL) / 16
+        KpI = 0;% KPI = KPI(TBL) / 65536
+        KpP = 900;% KPP = KPP(TBL) / 128
     end
     
     properties (Access = private, Constant = true)
@@ -64,6 +69,19 @@ classdef PoCaBotCASPRInterface < HardwareInterfaceBase
         % motors must be turned off.
         ADDR_XH_OPERATING_MODE         = 11;
         LEN_XH_OPERATING_MODE          = 1;
+        
+        % The PID parameters of Position Control Loop
+        % Range: 0~16383 for all three paras
+        % 
+        ADDR_XH_KpD = 80;% KPD = KPD(TBL) / 16
+        ADDR_XH_KpI = 82;% KPI = KPI(TBL) / 65536
+        ADDR_XH_KpP = 84;% KPP = KPP(TBL) / 128
+        
+        LEN_XH_KpD = 2;
+        LEN_XH_KpI = 2;
+        LEN_XH_KpP = 2;
+        
+        
         
         OPERATING_MODE_CURRENT_MODE   = 0;
         OPERATING_MODE_POSITION_LIMITEDCURRENT = 5;
@@ -339,6 +357,47 @@ classdef PoCaBotCASPRInterface < HardwareInterfaceBase
         function tightenCablesWithinPositionMode(obj)
             cmd = -1*obj.dynamixel_direction_reversed*1048574*ones(obj.DXL_NUM,1);
             obj.motorPositionCommandSend(cmd);
+        end
+        
+        % Set the PID paras of the Position loop
+        function setKpD(obj,KpD)
+            obj.KpD = KpD;
+            obj.sync_write(obj.ADDR_XH_KpD, obj.LEN_XH_KpD, KpD);
+        end
+        function setKpI(obj,KpI)
+            obj.KpI = KpI;
+            obj.sync_write(obj.ADDR_XH_KpI, obj.LEN_XH_KpI, KpI);
+        end
+        function setKpP(obj,KpP)
+            obj.KpP = KpP;
+            obj.sync_write(obj.ADDR_XH_KpP, obj.LEN_XH_KpP, KpP);
+        end
+        % Get the PID parameters of the Position control loop
+        function [KpD] = getKpD(obj)
+            [~, KpD] = obj.sync_read(obj.ADDR_XH_KpD, obj.LEN_XH_KpD);
+            obj.KpD = KpD;
+        end
+        function [KpI] = getKpI(obj)
+            [~, KpI] = obj.sync_read(obj.ADDR_XH_KpI, obj.LEN_XH_KpI);
+            obj.KpI = KpI;
+        end
+        function [KpP] = getKpP(obj)
+            [~, KpP] = obj.sync_read(obj.ADDR_XH_KpP, obj.LEN_XH_KpP);
+            obj.KpP = KpP;
+        end
+        
+        % This function is used when the motor is working in position mode
+        % with the KpI set to zero.
+        % offset: the offset length of the cable caused by KpP.
+        function [offset] = getCableOffsetByTensionByMotorAngleError(obj, tension)
+            % when the supplied voltage is 12V, the stall torque from the
+            % manual is 2.5N.m
+            maxLoad = 2.5;%UNIT:N.m; This value of 1.5 N.m was obtained by our experiment.
+            maxTension = maxLoad/obj.accessories(1).radius;
+            current = tension/maxTension*648;
+            Kp = obj.KpP/128;% KPP = KPP(TBL) / 128
+            errAngle = current./Kp;
+            offset = -1 * errAngle/4096*obj.accessories(1).len_per_circle;
         end
     end
     

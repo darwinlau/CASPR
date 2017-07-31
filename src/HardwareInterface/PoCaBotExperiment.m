@@ -12,15 +12,16 @@ classdef PoCaBotExperiment < ExperimentBase
         idsim              % Inverse dynamics simulator
         forwardKin
         numMotor
+        timestep
     end
     
     properties
         q_present
-        factor_offset_per_Newton_Meter = 0.0014;
+        factor_offset_per_Newton_Meter = 0.001;
     end
     
     methods
-        function eb = PoCaBotExperiment(numMotor,strCableID)
+        function eb = PoCaBotExperiment(numMotor,strCableID,timestep)
             % Create the config
             model_config = ModelConfig('PoCaBot spatial');
             % Load the SystemKinematics object from the XML
@@ -42,6 +43,12 @@ classdef PoCaBotExperiment < ExperimentBase
             id_solver = IDSolverQuadProg(modelObj, id_objective, ID_QP_SolverType.MATLAB);
             
             eb.idsim = InverseDynamicsSimulator(modelObj, id_solver);
+            
+            if(nargin >=3 && exist('timestep','var'))
+                eb.timestep = timestep;
+            else
+                eb.timestep = 0.05;
+            end
         end
         
         function motorSpoolTest(obj)
@@ -390,9 +397,16 @@ classdef PoCaBotExperiment < ExperimentBase
             obj.hardwareInterface.currentCommandSend(current);
             
             profileAcc = ones(obj.numMotor,1)*150;
+            profileAcc = profileAcc/(obj.timestep/0.05);
             obj.hardwareInterface.setProfileAcceleration(profileAcc);
             profileVel = ones(obj.numMotor,1)*360;
             obj.hardwareInterface.setProfileVelocity(profileVel);
+            
+            % PID Check;
+            fprintf('Check the PID parameters!\n');
+            [KpD] = obj.hardwareInterface.getKpD()
+            [KpI] = obj.hardwareInterface.getKpI()
+            [KpP] = obj.hardwareInterface.getKpP()
         end
         
         % run the trajectory directly no need to inilize the hardware which
@@ -416,17 +430,17 @@ classdef PoCaBotExperiment < ExperimentBase
 %                 obj.hardwareInterface.lengthCommandSend(obj.model.cableLengths .*(1-factor_offset));
                 
                 [~, model_temp, ~, ~, ~] = obj.idsim.IDSolver.resolve(trajectory.q(:,t), trajectory.q_dot(:,t), trajectory.q_ddot(:,t), zeros(obj.idsim.model.numDofs,1));
-                %factor_offset_per_Newton_Meter = 0.0008;
-                obj.hardwareInterface.lengthCommandSend(model_temp.cableLengths .*(1-obj.factor_offset_per_Newton_Meter*model_temp.cableForces));
+                [offset] = obj.hardwareInterface.getCableOffsetByTensionByMotorAngleError(model_temp.cableForces);
+                obj.hardwareInterface.lengthCommandSend(model_temp.cableLengths .*(1-obj.factor_offset_per_Newton_Meter*model_temp.cableForces) + offset);
                 
 %                 obj.l_cmd_traj(:, t) = obj.model.cableLengths; %(1)
 %                 obj.l_feedback_traj(:, t) = obj.hardwareInterface.lengthFeedbackRead;
                 
-                elapsed = toc * 1000;
-                if(elapsed < 50)
-                    java.lang.Thread.sleep(50 - elapsed);
+                elapsed = toc;
+                if(elapsed < obj.timestep)
+                    java.lang.Thread.sleep((obj.timestep - elapsed)*1000);
                 else
-                    toc * 1000
+                    toc
                 end
             end
         end
@@ -444,6 +458,13 @@ classdef PoCaBotExperiment < ExperimentBase
         % decide the acceleration of the triangular/trapezoidal profile.
         function [trajectory] = generateTrajectoryParabolicBlend(q_s, q_e, time_step, time_blend_s, time_blend_e, v_max)
             CASPR_log.Assert(length(q_s) == length(q_e), 'Length of input states are inconsistent!');
+            if(q_s == q_e)
+                trajectory.q = q_s;
+                trajectory.q_dot = q_s*0;
+                trajectory.q_ddot = q_s*0;
+                trajectory.timeVector = 0;
+                return;
+            end
             n_dof = length(q_s);
             vmax = abs(v_max);
             delta_q = q_e-q_s;

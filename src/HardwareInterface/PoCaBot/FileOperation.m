@@ -50,8 +50,8 @@ classdef FileOperation < handle
         
         function [pickup_co, place_co]= getCoordinate(obj, num)
             pickup_co = obj.pickup_list(num,1:3)'/1000;
-            pickup_co(1) = pickup_co(1)+0.01;
-            pickup_co(2) = pickup_co(2)+0.01;
+            pickup_co(1) = pickup_co(1)-0.005;
+            pickup_co(2) = pickup_co(2)+0.0;
             pickup_co(3) = pickup_co(3)/0.051*0.051375 + obj.vertical_offset;
             
             place_co = obj.place_list(num,1:3)'/1000;
