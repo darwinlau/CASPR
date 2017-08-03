@@ -8,7 +8,7 @@ pause(0.5);
 gripper.setHandAngle( gripper.LOOSE_HAND_ANGLE);
 
 fo = FileOperation(...
-    which('initstate.ini'), ...
+    'C:\Users\Tristan\Desktop\Constructing Demo\initstate.ini', ...
     'C:\Users\Tristan\Desktop\Constructing Demo\DATA FILES\Wall4_BrickArea0731.csv', ...
     'C:\Users\Tristan\Desktop\Constructing Demo\DATA FILES\Wall4_Design0731.csv');
 brick_count = fo.getAllBrickCount();
@@ -17,14 +17,16 @@ fprintf('There are %d bricks in all.\n',brick_count);
 time_step = 0.05;
 
 % where the position of the EE before and after the mission
-% 0.420 
-q0 = [2.0 2.0 0.440 0 0 0]';
+% 0.404
+% Once the working tension is on the cables, the end effector would be lift
+% up by 0.02m.
+q0 = [2.0 2.0 0.424 0 0 0]';
 q_transit_point = [1.98 2.0 0 0 0 0]';
 
 distance_safe = 0.1;
 v_max = 0.120; % unit: m/s For maximum: 200*0.229/60Rev/s<=>0.763Rev/s*0.1903m/Rev = 0.145m/s
 blend_time_default = 0.5; %used to decide the acceleration
-blend_time_placing = 2; %used to decide the deceleration
+blend_time_placing = 1.5; %used to decide the deceleration
 
 [pickup_co, place_co]= fo.getCoordinate(fo.readBrickNum());
 if ~exist('exp','var')
@@ -45,7 +47,6 @@ end
 
 % The below program is just for debugging. When working for the task, please
 % comment these expressions.
-
 while(1)
     factor = input('The offset constant factor[Nothing means no changing!]:');
     if ~isempty(factor)

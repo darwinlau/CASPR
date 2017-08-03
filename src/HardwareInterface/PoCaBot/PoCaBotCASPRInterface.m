@@ -39,7 +39,7 @@ classdef PoCaBotCASPRInterface < HardwareInterfaceBase
         % To use another Dynamixel model, such as PRO series, see their details in E-Manual(support.robotis.com) and edit below variables yourself.
         % Control table address
         ADDR_XH_TORQUE_ENABLE          = 64;                 % Control table address is different in Dynamixel model
-        
+        LEN_XH_TORQUE_ENABLE           = 1;
         % info. related to CURRENT
         % -648 ~ 648 * 2.69[mA]
         ADDR_XH_GOAL_CURRENT           = 102;
@@ -359,6 +359,11 @@ classdef PoCaBotCASPRInterface < HardwareInterfaceBase
             obj.motorPositionCommandSend(cmd);
         end
         
+        % Enable or Disable the motors
+        function switchEnable(obj, cmd)
+            obj.sync_write(obj.ADDR_XH_TORQUE_ENABLE, obj.LEN_XH_TORQUE_ENABLE, cmd);
+        end
+        
         % Set the PID paras of the Position loop
         function setKpD(obj,KpD)
             obj.KpD = KpD;
@@ -399,6 +404,8 @@ classdef PoCaBotCASPRInterface < HardwareInterfaceBase
             errAngle = current./Kp;
             offset = -1 * errAngle/4096*obj.accessories(1).len_per_circle;
         end
+        
+        
     end
     
     methods (Access = private)

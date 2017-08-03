@@ -32,9 +32,9 @@ classdef FileOperation < handle
     end
     
     properties (Access = private, Constant = true)
-        length_hand = 0.246; % length of the hand
+        length_hand = 0.224; % length of the hand
         length_end  = 0.180; % length of the other part of the hand
-        length_offset = -0.010; % half of the height of the end effector
+        length_offset = -0.00; % half of the height of the end effector
         length_insert = 0.030;
         vertical_offset = FileOperation.length_hand + FileOperation.length_end + FileOperation.length_offset - FileOperation.length_insert;
     end
@@ -51,12 +51,13 @@ classdef FileOperation < handle
         
         function [pickup_co, place_co]= getCoordinate(obj, num)
             pickup_co = obj.pickup_list(num,1:3)'/1000;
-            pickup_co(1) = pickup_co(1)-0.005;
+            pickup_co(1) = pickup_co(1)-0.02;
             pickup_co(2) = pickup_co(2)+0.0;
             pickup_co(3) = pickup_co(3)/0.051*0.051375 + obj.vertical_offset;
             
             place_co = obj.place_list(num,1:3)'/1000;
-            place_co(3) = place_co(3)/0.051*0.051375 + obj.vertical_offset; %+0.002+0.005;
+            place_co(1) = place_co(1)+0.015;
+            place_co(3) = place_co(3)/0.051*0.051375 + obj.vertical_offset+0.005; %+0.002+0.005;
         end
         
         function [arm_angle_pickup, arm_angle_place] = getArmAngle(obj,num)

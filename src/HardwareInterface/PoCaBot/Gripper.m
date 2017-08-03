@@ -18,9 +18,9 @@ classdef Gripper < handle
         MIN_HAND_ANGLE = 70;
         INI_HAND_ANGLE = 180;
         
-        BEST_HAND_ANGLE = 60;% For gripping
-        RELEASE_HAND_ANGLE = 104; % For releasing the brick
-        LOOSE_HAND_ANGLE = 133;
+        BEST_HAND_ANGLE = 48;% For gripping
+        RELEASE_HAND_ANGLE = 85; % For releasing the brick
+        LOOSE_HAND_ANGLE = 109;
         
         
         MAX_ARM_ANGLE  = 180;
@@ -81,21 +81,24 @@ classdef Gripper < handle
         function setArmAngle(obj,arm_angle)
             CASPR_log.Assert(arm_angle<= obj.MAX_ARM_ANGLE && arm_angle>=obj.MIN_ARM_ANGLE,'The argument is out of range!');
             % calibration variables
-            angle176 = 90;%DEGREE;
-            angle5 = 270;%DEGREE
-            k = (angle176-angle5)/(176-5);
-            if(arm_angle>=90)
-                temp = (arm_angle-270)/k+5;
-            else
-                temp = (arm_angle-90)/k+5;
-            end
-            % model easily: equation of one unknow, one order
-%             temp = (arm_angle-angle0)/k;
-%             if temp<0
-%                 temp = temp + 180;
-%             elseif temp>180
-%                 temp = temp - 180;
+%             angle176 = 90;%DEGREE;
+%             angle5 = 270;%DEGREE
+%             k = (angle176-angle5)/(176-5);
+%             if(arm_angle>=90)
+%                 temp = (arm_angle-270)/k+5;
+%             else
+%                 temp = (arm_angle-90)/k+5;
 %             end
+            % model easily: equation of one unknow, one order
+            angle0 = 187;
+            angle180 = -3;
+            k = (angle180-angle0)/(180-0);
+            temp = (arm_angle-angle0)/k;
+            if temp<0
+                temp = temp + 180;
+            elseif temp>180
+                temp = temp - 180;
+            end
             
             obj.arm_angle = temp;
             cmd = [obj.CMD_MOTION_WRITE_HEADER obj.hand_angle obj.arm_angle];

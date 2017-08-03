@@ -592,7 +592,7 @@
         <cable_ideal name="cable 1" attachment_reference="joint">
             <properties>
                 <force_min>0.0</force_min>
-                <force_max>20</force_max>
+                <force_max>30</force_max>
             </properties>
             <attachments>
                 <attachment>
@@ -608,7 +608,7 @@
         <cable_ideal name="cable 2" attachment_reference="joint">
             <properties>
                 <force_min>0.0</force_min>
-                <force_max>20</force_max>
+                <force_max>30</force_max>
             </properties>
             <attachments>
                 <attachment>
@@ -624,7 +624,7 @@
         <cable_ideal name="cable 3" attachment_reference="joint">
             <properties>
                 <force_min>0.0</force_min>
-                <force_max>20</force_max>
+                <force_max>30</force_max>
             </properties>
             <attachments>
                 <attachment>
@@ -640,7 +640,7 @@
         <cable_ideal name="cable 4" attachment_reference="joint">
             <properties>
                 <force_min>0.0</force_min>
-                <force_max>20</force_max>
+                <force_max>30</force_max>
             </properties>
             <attachments>
                 <attachment>
@@ -656,7 +656,7 @@
         <cable_ideal name="cable 5" attachment_reference="joint">
             <properties>
                 <force_min>0.0</force_min>
-                <force_max>20</force_max>
+                <force_max>30</force_max>
             </properties>
             <attachments>
                 <attachment>
@@ -672,7 +672,7 @@
         <cable_ideal name="cable 6" attachment_reference="joint">
             <properties>
                 <force_min>0.0</force_min>
-                <force_max>20</force_max>
+                <force_max>30</force_max>
             </properties>
             <attachments>
                 <attachment>
@@ -688,7 +688,7 @@
         <cable_ideal name="cable 7" attachment_reference="joint">
             <properties>
                 <force_min>0.0</force_min>
-                <force_max>20</force_max>
+                <force_max>30</force_max>
             </properties>
             <attachments>
                 <attachment>
@@ -704,7 +704,7 @@
         <cable_ideal name="cable 8" attachment_reference="joint">
             <properties>
                 <force_min>0.0</force_min>
-                <force_max>20</force_max>
+                <force_max>30</force_max>
             </properties>
             <attachments>
                 <attachment>
