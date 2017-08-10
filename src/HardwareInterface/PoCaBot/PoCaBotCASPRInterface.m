@@ -88,7 +88,7 @@ classdef PoCaBotCASPRInterface < HardwareInterfaceBase
         
         % Protocol version
         PROTOCOL_VERSION            = 2.0;          % See which protocol version is used in the Dynamixel
-        BAUDRATE                    = 1000000;
+        BAUDRATE                    = 115200;
 %         DEVICENAME                  = 'COM3';       % Check which port is being used on your controller
         % ex) Windows: "COM1"   Linux: "/dev/ttyUSB0"
         

@@ -29,7 +29,7 @@ classdef PoCaBotExperiment < ExperimentBase
             % Create the hardware interface
             %cableLengths_full = ones(numMotor,1)*4.05;
             cableLengths_full = [6.618; 4.800; 6.632;4.800;6.632;5.545;6.618;5.545];
-            hw_interface = PoCaBotCASPRInterface('COM5', numMotor, cableLengths_full,false);  %1
+            hw_interface = PoCaBotCASPRInterface('COM4', numMotor, cableLengths_full,false);  %1
             eb@ExperimentBase(hw_interface, modelObj);
             eb.modelConfig = model_config;
             eb.numMotor = numMotor;
