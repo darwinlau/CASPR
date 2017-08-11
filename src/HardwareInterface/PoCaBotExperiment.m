@@ -49,7 +49,7 @@ classdef PoCaBotExperiment < ExperimentBase
             %cableLengths_full = ones(numMotor,1)*4.05;
             cableLengths_full = [6.618; 4.800; 6.632;4.800;6.632;5.545;6.618;5.545];
             
-            hw_interface = PoCaBotCASPRInterface('COM5', numMotor, cableLengths_full,false);  %1
+            hw_interface = PoCaBotCASPRInterface('COM4', numMotor, cableLengths_full,false);  %1
             exp@ExperimentBase(hw_interface, modelObj);
             exp.modelConfig = model_config;
             exp.numMotor = numMotor;
@@ -581,7 +581,7 @@ classdef PoCaBotExperiment < ExperimentBase
             obj.hardwareInterface.setProfileVelocity(profileVel);
             
             % PID Check;
-            fprintf('Check the PID parameters!\n');
+            %fprintf('Check the PID parameters!\n');
             [KpD] = obj.hardwareInterface.getKpD();
             [KpI] = obj.hardwareInterface.getKpI();
             [KpP] = obj.hardwareInterface.getKpP();
@@ -613,14 +613,14 @@ classdef PoCaBotExperiment < ExperimentBase
                 obj.hardwareInterface.lengthCommandSend(model_temp.cableLengths ./(1+obj.factor_offset_per_Newton_Meter*model_temp.cableForces) + offset);
                 
                 % Record the relevant states for problem-solving purpose
-                obj.time_vector_real_traj(t) = now;
+                obj.time_abs_traj(t) = now;
                 obj.l_cmd_traj(t, :) = model_temp.cableLengths'; %(1)
                 % For recording the length of feedback, first assume the
                 % elasticity factor is appropriate. So for get the true
                 % length, we calculate back the extended length.
-                l_feedback = obj.hardwareInterface.lengthFeedbackRead';
+                l_feedback = obj.hardwareInterface.lengthFeedbackRead;
                 while(~any(l_feedback+1))
-                    l_feedback = obj.hardwareInterface.lengthFeedbackRead';
+                    l_feedback = obj.hardwareInterface.lengthFeedbackRead;
                 end
                 obj.l_feedback_traj(t, :) = ((1+obj.factor_offset_per_Newton_Meter*model_temp.cableForces).*l_feedback)';
                 % And then, we use the feedbacked length to get the true q.
@@ -644,6 +644,7 @@ classdef PoCaBotExperiment < ExperimentBase
                     obj.ee_ideal.animate(q0);
                     obj.ee_real.animate(q1);
                     set(obj.hText,'String',descr);
+                    drawnow;
                 end
                 
                 elapsed = toc;
