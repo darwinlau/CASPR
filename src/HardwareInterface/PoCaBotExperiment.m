@@ -3,25 +3,44 @@ classdef PoCaBotExperiment < ExperimentBase
     %   Detailed explanation goes here
     
     properties (SetAccess = private)
-        l_feedback_traj    % Temporary variable to store things for now
-        l_cmd_traj         % Temporary variable to store things for now
-        
-        q_feedback         % Temporary variable to store things for now
-        q_d_feedback       % Temporary variable to store things for now
         modelConfig
         idsim              % Inverse dynamics simulator
+        fksolver           % Forward kinematics solver
         forwardKin
         numMotor
         timestep
+        
+        % variables for plotting
+        isPlot = true;
+        ee_ideal
+        ee_real
+        hText
+        ax_plot
     end
     
     properties
         q_present
+        
+        % The extention part of the cable with original length of 1 meter 
+        % under a tension of 1 Newton. Here we assume that the extension of
+        % the cable is linear to the tension.
+        % l_original*factor_offset_per_Newton_Meter*force = l_delta
+        % l_all = l_original+l_delta = (1+factor_offset_per_Newton_Meter*force)*l_original
+        % Given commanded length l_cmd, a length of l_cmd/(1+factor_offset_per_Newton_Meter*force)
+        % should be set when under tension force.
         factor_offset_per_Newton_Meter = 0.001;
+        
+        l_feedback_traj    % Temporary variable to store things for now
+        l_cmd_traj         % Temporary variable to store things for now
+        time_abs_traj
+        time_rel_traj
+        q_feedback_traj         % Temporary variable to store things for now
+        q_d_feedback_traj       % Temporary variable to store things for now
+        q_cmd_traj
     end
     
     methods
-        function eb = PoCaBotExperiment(numMotor,strCableID,timestep)
+        function exp = PoCaBotExperiment(numMotor,strCableID,timestep)
             % Create the config
             model_config = ModelConfig('PoCaBot spatial');
             % Load the SystemKinematics object from the XML
@@ -30,11 +49,11 @@ classdef PoCaBotExperiment < ExperimentBase
             %cableLengths_full = ones(numMotor,1)*4.05;
             cableLengths_full = [6.618; 4.800; 6.632;4.800;6.632;5.545;6.618;5.545];
             hw_interface = PoCaBotCASPRInterface('COM5', numMotor, cableLengths_full,false);  %1
-            eb@ExperimentBase(hw_interface, modelObj);
-            eb.modelConfig = model_config;
-            eb.numMotor = numMotor;
+            exp@ExperimentBase(hw_interface, modelObj);
+            exp.modelConfig = model_config;
+            exp.numMotor = numMotor;
             %            eb.forwardKin = FKDifferential(modelObj);
-            eb.q_present = NaN;
+            exp.q_present = NaN;
             
             %             id_objective = IDObjectiveMinLinCableForce(ones(modelObj.numActuatorsActive,1));
             %             id_solver = IDSolverLinProg(modelObj, id_objective, ID_LP_SolverType.MATLAB);
@@ -42,12 +61,38 @@ classdef PoCaBotExperiment < ExperimentBase
             id_objective = IDObjectiveMinQuadCableForce(ones(modelObj.numActuatorsActive,1));
             id_solver = IDSolverQuadProg(modelObj, id_objective, ID_QP_SolverType.MATLAB);
             
-            eb.idsim = InverseDynamicsSimulator(modelObj, id_solver);
+            exp.idsim = InverseDynamicsSimulator(modelObj, id_solver);
+            
+            % Initialise the least squares solver for the forward kinematics
+            exp.fksolver = FKLeastSquares(exp.model, FK_LS_ApproxOptionType.FIRST_ORDER_INTEGRATE_PSEUDOINV, FK_LS_QdotOptionType.PSEUDO_INV);
             
             if(nargin >=3 && exist('timestep','var'))
-                eb.timestep = timestep;
+                exp.timestep = timestep;
             else
-                eb.timestep = 0.05;
+                exp.timestep = 0.05;
+            end
+            
+            if(exp.isPlot)
+                figure(100);
+                clf;
+                ax_bg = axes('Position',[0 0 1 1],'Visible','off');
+                
+                exp.ax_plot = axes('Position',[.1 .1 .7 .8]);
+                title('Comparison between ideal pose and actual pose of the end effector');
+                exp.ee_ideal = EndEffector();
+                exp.ee_real = EndEffector();
+                exp.ee_ideal.plot(1);
+                hold on;
+                exp.ee_real.plot(0);
+                hold off;
+                axis equal;
+                xlabel('x');ylabel('y');zlabel('z');
+                
+                axes(ax_bg);
+                descr = {'{\delta{\itq}}:'};
+                exp.hText = text(0.77,0.65,descr);
+                
+                axes(exp.ax_plot);
             end
         end
         
@@ -429,14 +474,12 @@ classdef PoCaBotExperiment < ExperimentBase
             
             disp('Start Running FK Solver for Present Q:');
             % Get the present q_present by Foward Kinematics
-            % Initialise the least squares solver for the forward kinematics
-            fksolver = FKLeastSquares(obj.model, FK_LS_ApproxOptionType.FIRST_ORDER_INTEGRATE_PSEUDOINV, FK_LS_QdotOptionType.PSEUDO_INV);
             %             % Initialise the three inverse/forward kinematics solvers
             %             iksim_actual = InverseKinematicsSimulator(obj.model);
             %             fksim_guess = ForwardKinematicsSimulator(obj.model, fksolver);
             %             fksim_corrected = ForwardKinematicsSimulator(obj.model, fksolver);
             q_guess = ones(obj.model.numDofs,1)*0.2;
-            [q_present_solved, q_dot_present, compTime] = fksolver.compute(length_present_solved, length_present_solved, 1:obj.model.numCables, q_guess, zeros(size(q_guess)), 1);
+            [q_present_solved, q_dot_present, compTime] = obj.fksolver.compute(length_present_solved, length_present_solved, 1:obj.model.numCables, q_guess, zeros(size(q_guess)), 1);
             fprintf('FK has been done which cost %.3f seconds.\n',compTime);
             fprintf('The present q is solved which is [');
             fprintf('%.3f  ',q_present_solved);
@@ -465,9 +508,6 @@ classdef PoCaBotExperiment < ExperimentBase
             %             q_solved(:,1)
         end
         
-        function [samples_r] = initialLenCali_sample(obj,duration,l0)
-            
-        end
         %% BELOW METHODS ARE FOR THE LONG TIME CONSTRUCTING TASK
         % init_pos is a vector with a size of 8 by 1 which is the initial
         % position of the motors. q0 is also a vetor with the same size but
@@ -548,29 +588,61 @@ classdef PoCaBotExperiment < ExperimentBase
         % run the trajectory directly no need to inilize the hardware which
         % has been done beforehand.
         function runTrajectoryDirectly(obj, trajectory)
-            obj.l_cmd_traj = zeros(obj.numMotor,length(trajectory.timeVector));
-            obj.l_feedback_traj = zeros(obj.numMotor,length(trajectory.timeVector));
+            obj.l_cmd_traj = zeros(length(trajectory.timeVector),obj.numMotor);
+            obj.l_feedback_traj = zeros(length(trajectory.timeVector),obj.numMotor);
+            obj.time_abs_traj = zeros(length(trajectory.timeVector),1);
+            obj.q_feedback_traj = zeros(length(trajectory.timeVector),obj.model.numDofs);
+            obj.time_rel_traj = trajectory.timeVector';
+            obj.q_cmd_traj = trajectory.q';
+            if(isrow(obj.time_rel_traj))
+                obj.time_rel_traj = trajectory.timeVector;
+            end
+            
             for t = 1:1:length(trajectory.timeVector)
                 % Print time for debugging
-                time = trajectory.timeVector(t);
+                % time = trajectory.timeVector(t);
                 obj.q_present = trajectory.q(:,t);
                 tic;
                 % update cable lengths for next command from trajectory
                 % obj.model.update(trajectory.q(:,t), trajectory.q_dot(:,t), trajectory.q_ddot(:,t),zeros(size(trajectory.q_dot(:,t))));
                 
-                % The offset of the first demo when the middle 8 bricks
-                % were not picked up.
-                % factor_offset = [1;0;1;0;1;0;1;0]*0.004 + [0;1;0;1;0;1;0;1]*0.004;
-                %                 factor_offset = [1;0;1;0;1;0;1;0]*0.004 + [0;1;0;1;0;1;0;1]*(0.004);
-                %
-                %                 obj.hardwareInterface.lengthCommandSend(obj.model.cableLengths .*(1-factor_offset));
-                
                 [~, model_temp, ~, ~, ~] = obj.idsim.IDSolver.resolve(trajectory.q(:,t), trajectory.q_dot(:,t), trajectory.q_ddot(:,t), zeros(obj.idsim.model.numDofs,1));
                 [offset] = obj.hardwareInterface.getCableOffsetByTensionByMotorAngleError(model_temp.cableForces);
-                obj.hardwareInterface.lengthCommandSend(model_temp.cableLengths .*(1-obj.factor_offset_per_Newton_Meter*model_temp.cableForces) + offset);
+                obj.hardwareInterface.lengthCommandSend(model_temp.cableLengths ./(1+obj.factor_offset_per_Newton_Meter*model_temp.cableForces) + offset);
                 
-                %                 obj.l_cmd_traj(:, t) = obj.model.cableLengths; %(1)
-                %                 obj.l_feedback_traj(:, t) = obj.hardwareInterface.lengthFeedbackRead;
+                % Record the relevant states for problem-solving purpose
+                obj.time_vector_real_traj(t) = now;
+                obj.l_cmd_traj(t, :) = model_temp.cableLengths'; %(1)
+                % For recording the length of feedback, first assume the
+                % elasticity factor is appropriate. So for get the true
+                % length, we calculate back the extended length.
+                l_feedback = obj.hardwareInterface.lengthFeedbackRead';
+                while(~any(l_feedback+1))
+                    l_feedback = obj.hardwareInterface.lengthFeedbackRead';
+                end
+                obj.l_feedback_traj(t, :) = ((1+obj.factor_offset_per_Newton_Meter*model_temp.cableForces).*l_feedback)';
+                % And then, we use the feedbacked length to get the true q.
+                [q_solved, ~, ~] = obj.fksolver.compute(obj.l_feedback_traj(t, :)', model_temp.cableLengths, 1:obj.model.numCables, trajectory.q(:,t), zeros(size(trajectory.q(:,t))), 1);
+                obj.q_feedback_traj(t,:) = q_solved'; 
+                
+                ratio = 1;
+                if(t/ratio==floor(t/ratio) && obj.isPlot)
+                    %                     axes(obj.ax_plot);
+                    q0 = trajectory.q(:,t);
+                    q1 = q_solved;
+                    q_delta = q1-q0;
+                    axis([q0(1)-0.2 q0(1)+0.2 q0(2)-0.2 q0(2)+0.2 q0(3)-0.2 q0(3)+0.2]);
+                    descr = {'{\delta{\itq}}:';...
+                        sprintf('%.5f',q_delta(1));...
+                        sprintf('%.5f',q_delta(2));...
+                        sprintf('%.5f',q_delta(3));...
+                        sprintf('%.5f',q_delta(4));...
+                        sprintf('%.5f',q_delta(5));...
+                        sprintf('%.5f',q_delta(6))};
+                    obj.ee_ideal.animate(q0);
+                    obj.ee_real.animate(q1);
+                    set(obj.hText,'String',descr);
+                end
                 
                 elapsed = toc;
                 if(elapsed < obj.timestep)
@@ -579,6 +651,8 @@ classdef PoCaBotExperiment < ExperimentBase
                     toc
                 end
             end
+            data = [obj.time_abs_traj obj.time_rel_traj obj.q_cmd_traj obj.q_feedback_traj obj.l_cmd_traj obj.l_feedback_traj];
+            FileOperation.recordData(data);
         end
         
         function application_termination(obj)

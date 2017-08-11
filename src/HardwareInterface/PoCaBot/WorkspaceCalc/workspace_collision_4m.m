@@ -181,7 +181,7 @@ vert = [cube_ver1,cube_ver2,cube_ver3,cube_ver4,cube_ver5,cube_ver6,cube_ver7,cu
 patch_move = [-length_frame/2 + d1 + length_bld/2;0;-height_frame/2 + height_bld/2];
 vert = vert + ones(8,1)*patch_move';
 fac = [8 1 3 2;2 3 5 4;4 5 7 6;6 7 1 8;1 7 5 3;6 8 2 4];
-patch('Vertices',vert,'Faces',fac,'FaceVertexCData',hsv(8),'FaceColor','interp');
+hPatch = patch('Vertices',vert,'Faces',fac,'FaceVertexCData',hsv(8),'FaceColor','interp');
 
 coordinate1 = [pivot_shortest_1,frame_vertice_1,pivot_longest_1]';
 coordinate4 = [pivot_shortest_4,frame_vertice_4,pivot_longest_4]';
