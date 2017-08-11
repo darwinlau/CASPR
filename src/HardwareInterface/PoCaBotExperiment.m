@@ -540,9 +540,9 @@ classdef PoCaBotExperiment < ExperimentBase
             
             % PID Check;
             fprintf('Check the PID parameters!\n');
-            [KpD] = obj.hardwareInterface.getKpD()
-            [KpI] = obj.hardwareInterface.getKpI()
-            [KpP] = obj.hardwareInterface.getKpP()
+            [KpD] = obj.hardwareInterface.getKpD();
+            [KpI] = obj.hardwareInterface.getKpI();
+            [KpP] = obj.hardwareInterface.getKpP();
         end
         
         % run the trajectory directly no need to inilize the hardware which

@@ -20,7 +20,7 @@ time_step = 0.05;
 % 0.417
 % Once the working tension is on the cables, the end effector would be lift
 % up by 0.02m.
-q0 = [2.0 2.0 0.437 0 0 0]';
+q0 = [2.0 2.0 0.427 0 0 0]';
 q_transit_point = [1.98 2.0 0 0 0 0]';
 
 distance_safe = 0.1;
@@ -46,8 +46,8 @@ else
 end
 
 % The below program is just for debugging. When working for the task, please
-% comment these expressions.
-% while(1)
+% % comment these expressions.
+% while(1)  
 %     factor = input('The offset constant factor[Nothing means no changing!]:');
 %     if ~isempty(factor)
 %         exp.factor_offset_per_Newton_Meter = factor;

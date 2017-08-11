@@ -51,18 +51,18 @@ classdef FileOperation < handle
         
         function [pickup_co, place_co]= getCoordinate(obj, num)
             pickup_co = obj.pickup_list(num,1:3)'/1000;
-            pickup_co(1) = pickup_co(1)-0.02;
-            pickup_co(2) = pickup_co(2)+0.0;
-            pickup_co(3) = pickup_co(3)/0.051*0.051375 + obj.vertical_offset;
+            pickup_co(1) = 4-pickup_co(1)-0.015;
+            pickup_co(2) = pickup_co(2)+0.006;
+            pickup_co(3) = pickup_co(3)/0.051*0.051375 + obj.vertical_offset-0.0;
             
             place_co = obj.place_list(num,1:3)'/1000;
-            place_co(1) = place_co(1)+0.015;
-            place_co(3) = place_co(3)/0.051*0.051375 + obj.vertical_offset+0.005; %+0.002+0.005;
+            place_co(1) = 4-place_co(1)+0.0;
+            place_co(3) = place_co(3)/0.051*0.051375 + obj.vertical_offset+0.010; %+0.002+0.005;
         end
         
         function [arm_angle_pickup, arm_angle_place] = getArmAngle(obj,num)
             arm_angle_pickup = obj.pickup_list(num,4);
-            arm_angle_place = obj.place_list(num,4);
+            arm_angle_place = 180-obj.place_list(num,4);
         end
         
         function [init_pos] = readInitPos_Motors(obj)
