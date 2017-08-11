@@ -1,4 +1,56 @@
-% clc;% clear;
+%% End Effector plotting test
+figure(100);
+ax_bg = axes('Position',[0 0 1 1],'Visible','off');
+
+
+ax_plot = axes('Position',[.1 .1 .7 .8]);
+title('Comparison between ideal pose and actual pose of the end effector');
+ee_ideal = EndEffector();
+ee_real = EndEffector();
+ee_ideal.plot(1);
+hold on;
+ee_real.plot(0);
+hold off;
+q0 = [2 2 2 0 0 0]';
+q1 = [2 2 2 0.3 0.3 0]';
+axis equal;
+axis([q0(1)-0.2 q0(1)+0.2 q0(2)-0.2 q0(2)+0.2 q0(3)-0.2 q0(3)+0.2]);
+xlabel('x');ylabel('y');zlabel('z');
+% legend('Ideal','Actual');
+% set(gca,'View',[0 0]);% roll--x, pitch--y
+ee_ideal.animate(q0);
+ee_real.animate(q1);
+
+q_delta = q1-q0;
+axes(ax_bg);
+descr = {'{\delta{\itq}}:';...
+    sprintf('%.5f',q_delta(1));...
+    sprintf('%.5f',q_delta(2));...
+    sprintf('%.5f',q_delta(3));...
+    sprintf('%.5f',q_delta(4));...
+    sprintf('%.5f',q_delta(5));...
+    sprintf('%.5f',q_delta(6))};
+hText = text(0.77,0.65,descr);
+set(hText,'String',descr);
+
+axes(ax_plot)
+pause(0.1);
+
+%% File writer test for time record
+% M = [];
+% filename = ['record' datestr(now,'yyyymmdd') '.csv'];
+% [pathstr,~,~] = fileparts(mfilename('fullpath'));
+% fullname = [pathstr '\Application\' filename];
+% for i=1:100
+%     item = [now i];
+%     M = [M;item];
+%     pause(0.01);
+% end
+% FileOperation.recordData(M);
+% dlmwrite('myFile.csv',M,'-append','precision',14); %In this test, the file will be created automatically if it doesn't exist.
+% M_r = load('myFile.csv');
+% datetime_w = datestr(M,'dd-mm-yyyy HH:MM:SS FFF');
+% datetime_r = datestr(M_r,'dd-mm-yyyy HH:MM:SS FFF');
 
 %% sample codes for the application of the Gripper class
 % gripper = Gripper('COM6');
@@ -54,24 +106,24 @@
 
 
 %% sample codes for the file operation
-% fo = FileOperation(...
-%     'C:\Users\Tristan\Desktop\Constructing Demo\initstate.ini', ...
-%     'C:\Users\Tristan\Desktop\Constructing Demo\DATA FILES\brickLayout.csv', ...
-%     'C:\Users\Tristan\Desktop\Constructing Demo\DATA FILES\wallDesign.csv');
-% brick_count = fo.getAllBrickCount();
-% fo.readInitPos_Motors()
-% fo.readBrickNum()
-% fo.writeInitPos_Motors([8:-1:1]');
-% fo.readInitPos_Motors()
-% fo.readBrickNum()
-% 
-% num = fo.readBrickNum();% or num = 1 if at the beginning of the constructing.
-% for index = num:brick_count
-%     
-%     [pickup_co, place_co]= fo.getCoordinate(index);
-%     fo.writeBrickNum(index);
-%     fo.readBrickNum()
-% end
+fo = FileOperation(...
+    'C:\Users\Tristan\Desktop\Constructing Demo\initstate.ini', ...
+    'C:\Users\Tristan\Desktop\Constructing Demo\DATA FILES\brickLayout.csv', ...
+    'C:\Users\Tristan\Desktop\Constructing Demo\DATA FILES\wallDesign.csv');
+brick_count = fo.getAllBrickCount();
+fo.readInitPos_Motors()
+fo.readBrickNum()
+fo.writeInitPos_Motors([8:-1:1]');
+fo.readInitPos_Motors()
+fo.readBrickNum()
+
+num = fo.readBrickNum();% or num = 1 if at the beginning of the constructing.
+for index = num:brick_count
+    
+    [pickup_co, place_co]= fo.getCoordinate(index);
+    fo.writeBrickNum(index);
+    fo.readBrickNum()
+end
 
 %% simple trajectory
 % trajectory_id = 'simple_move_brick_on_larger_scale_frame';

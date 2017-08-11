@@ -287,13 +287,17 @@ classdef PoCaBotCASPRInterface < HardwareInterfaceBase
         
         % Method to read the cable lengths from the hardware (if available)
         function [length] = lengthFeedbackRead(obj)
-            [~, ret] = obj.sync_read(obj.ADDR_XH_PRESENT_POSITION, obj.LEN_XH_PRESENT_POSITION);
-            deltaAngle = (ret - obj.dynamixel_position_initial)/4096*2*pi;
-            deltalength = zeros(size(deltaAngle));
-            for i = 1:obj.DXL_NUM
-                deltalength(i) = obj.dynamixel_direction_factor_position * obj.accessories(i).getDeltaLength(deltaAngle(i));
-            end
-            length = obj.cableLengths_initial + deltalength;
+            [bState, ret] = obj.sync_read(obj.ADDR_XH_PRESENT_POSITION, obj.LEN_XH_PRESENT_POSITION);
+            if(bState)
+                deltaAngle = (ret - obj.dynamixel_position_initial)/4096*2*pi;
+                deltalength = zeros(size(deltaAngle));
+                for i = 1:obj.DXL_NUM
+                    deltalength(i) = obj.dynamixel_direction_factor_position * obj.accessories(i).getDeltaLength(deltaAngle(i));
+                end
+                length = obj.cableLengths_initial + deltalength;
+            else
+                length = ones(size(ret))*(-1);
+            end            
         end
         % Method to send some "on" state to the hardware (optional)
         % Here used to enable the torque of the dynamixel to make it
@@ -404,8 +408,6 @@ classdef PoCaBotCASPRInterface < HardwareInterfaceBase
             errAngle = current./Kp;
             offset = -1 * errAngle/4096*obj.accessories(1).len_per_circle;
         end
-        
-        
     end
     
     methods (Access = private)

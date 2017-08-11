@@ -140,4 +140,14 @@ classdef FileOperation < handle
 %                 'The coordinate files of the picking up and placing do not match each other!');
         end
     end
+    
+    methods(Static)
+        function recordData(data)
+            filename = ['record' datestr(now,'yyyymmdd') '.csv'];
+            [pathstr,~,~] = fileparts(mfilename('fullpath'));
+            fullname = [pathstr '\Application\Record\' filename];
+            
+            dlmwrite(fullname,data,'-append','precision',14); %In this test, the file will be created automatically if it doesn't exist.
+        end
+    end
 end
