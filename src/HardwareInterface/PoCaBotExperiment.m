@@ -613,7 +613,7 @@ classdef PoCaBotExperiment < ExperimentBase
                 obj.hardwareInterface.lengthCommandSend(model_temp.cableLengths ./(1+obj.factor_offset_per_Newton_Meter*model_temp.cableForces) + offset);
                 
                 % Record the relevant states for problem-solving purpose
-                obj.time_abs_traj(t) = now;
+                obj.time_abs_traj(t) = rem(now,1);
                 obj.l_cmd_traj(t, :) = model_temp.cableLengths'; %(1)
                 % For recording the length of feedback, first assume the
                 % elasticity factor is appropriate. So for get the true

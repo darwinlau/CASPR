@@ -147,7 +147,7 @@ classdef FileOperation < handle
             [pathstr,~,~] = fileparts(mfilename('fullpath'));
             fullname = [pathstr '\Application\Record\' filename];
             
-            dlmwrite(fullname,data,'-append','precision',14); %In this test, the file will be created automatically if it doesn't exist.
+            dlmwrite(fullname,data,'-append','precision',8); %With this statement, the record file will be created automatically if it doesn't exist.
         end
     end
 end
