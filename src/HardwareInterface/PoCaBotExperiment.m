@@ -28,7 +28,7 @@ classdef PoCaBotExperiment < ExperimentBase
         % l_all = l_original+l_delta = (1+factor_offset_per_Newton_Meter*force)*l_original
         % Given commanded length l_cmd, a length of l_cmd/(1+factor_offset_per_Newton_Meter*force)
         % should be set when under tension force.
-        factor_offset_per_Newton_Meter = 0.001;
+        factor_offset_per_Newton_Meter = 0.0006;
         
         l_feedback_traj    % Temporary variable to store things for now
         l_cmd_traj         % Temporary variable to store things for now
@@ -49,7 +49,7 @@ classdef PoCaBotExperiment < ExperimentBase
             %cableLengths_full = ones(numMotor,1)*4.05;
             cableLengths_full = [6.618; 4.800; 6.632;4.800;6.632;5.545;6.618;5.545];
             
-            hw_interface = PoCaBotCASPRInterface('COM4', numMotor, cableLengths_full,false);  %1
+            hw_interface = PoCaBotCASPRInterface('COM11', numMotor, cableLengths_full,false);  %1
             exp@ExperimentBase(hw_interface, modelObj);
             exp.modelConfig = model_config;
             exp.numMotor = numMotor;

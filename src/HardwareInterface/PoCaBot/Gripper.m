@@ -18,9 +18,9 @@ classdef Gripper < handle
         MIN_HAND_ANGLE = 70;
         INI_HAND_ANGLE = 180;
         
-        BEST_HAND_ANGLE = 101;% For gripping
-        RELEASE_HAND_ANGLE = 127; % For releasing the brick
-        LOOSE_HAND_ANGLE = 141;
+        BEST_HAND_ANGLE = 103;% For gripping
+        RELEASE_HAND_ANGLE = 125; % For releasing the brick
+        LOOSE_HAND_ANGLE = 146;
         
         
         MAX_ARM_ANGLE  = 180;
