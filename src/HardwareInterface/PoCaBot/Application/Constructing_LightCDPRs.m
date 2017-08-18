@@ -1,6 +1,6 @@
 %% Application for many bricks
 if ~exist('gripper','var')
-    gripper = Gripper('COM5');
+    gripper = Gripper('COM12');
     gripper.initialize();
 end
 gripper.setArmAngle(0);
@@ -8,9 +8,9 @@ pause(0.5);
 gripper.setHandAngle( gripper.LOOSE_HAND_ANGLE);
 
 fo = FileOperation(...
-    'C:\Users\think\Documents\GitHub\CASPR_private\src\HardwareInterface\PoCaBot\Application\initstate.ini', ...
-    'C:\B_Data\Project\08-2017_CU-brickes_BeijingWRC\DATA FILES\BrickArea_Jason2.csv', ...
-    'C:\B_Data\Project\08-2017_CU-brickes_BeijingWRC\DATA FILES\WallDesign_Jason2.csv');
+    'C:\Users\user\Documents\GitHub\CASPR_private\src\HardwareInterface\PoCaBot\Application\initstate.ini', ...
+    'C:\Users\user\Desktop\project\WorldRoboticsConf_Beijing\DATA FILES\BrickArea_Jason2.csv', ...
+    'C:\Users\user\Desktop\project\WorldRoboticsConf_Beijing\DATA FILES\WallDesign_Jason2.csv');
 brick_count = fo.getAllBrickCount();
 fprintf('There are %d bricks in all.\n',brick_count);
 
@@ -20,7 +20,7 @@ time_step = 0.05;
 % 0.417
 % Once the working tension is on the cables, the end effector would be lift
 % up by 0.02m.
-q0 = [2.0 2.0 0.427 0 0 0]';
+q0 = [2.0 2.0 0.430 0 0 0]';
 q_transit_point = [1.98 2.0 0 0 0 0]';
 
 distance_safe = 0.1;

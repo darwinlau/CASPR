@@ -2,6 +2,7 @@ classdef Gripper < handle
     properties (Access = public)
         hand_angle
         arm_angle
+        laser %for laser project
         strComPort
         comPort
         send_list
@@ -78,17 +79,35 @@ classdef Gripper < handle
             obj.send_list.add(cmd);
         end
         
+        %for laser project
+        function setLaser(obj,laser)
+%             CASPR_log.Assert(hand_angle<= obj.MAX_HAND_ANGLE && hand_angle>=obj.MIN_HAND_ANGLE,'The argument is out of range!');
+            obj.laser = laser;
+            cmd = [obj.laser];
+            obj.send_list.add(cmd);
+            obj.send_list.add(cmd);
+        end
+        
         function setArmAngle(obj,arm_angle)
             CASPR_log.Assert(arm_angle<= obj.MAX_ARM_ANGLE && arm_angle>=obj.MIN_ARM_ANGLE,'The argument is out of range!');
-            % calibration variables
-            angle180 = 90;% 90 DEGREE real;
-            angle0 = 274;%DEGREE
-            k = (angle180-angle0)/(180-0);
-            if(arm_angle>=90)
-                temp = (arm_angle-angle0)/k;
+            % calibration of gripper B
+            b_ang = 9; c_ang = 99; d_ang = 180;
+            a_ang = c_ang - (92/90)*(c_ang-b_ang);
+            
+            if (arm_angle < 92)
+                temp = (1/92)*(c_ang-a_ang)*(92-arm_angle)+a_ang;                
             else
-                temp = (arm_angle-angle180)/k;
+                temp = ((180-arm_angle)*(d_ang-c_ang))/(180-92)+c_ang;                
             end
+%             % calibration variables
+%             angle180 = 90;% 90 DEGREE real;
+%             angle0 = 274;%DEGREE
+%             k = (angle180-angle0)/(180-0);
+%             if(arm_angle>=90)
+%                 temp = (arm_angle-angle0)/k;
+%             else
+%                 temp = (arm_angle-angle180)/k;
+%             end
             % model easily: equation of one unknow, one order
 %             angle0 = 187; % decimalism
 %             angle180 = -3;
