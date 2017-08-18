@@ -658,6 +658,10 @@ classdef PoCaBotExperiment < ExperimentBase
             FileOperation.recordData(data);
         end
         
+        function runTrajPeriodicHook(obj)
+            
+        end
+        
         function application_termination(obj)
             obj.hardwareInterface.systemOffSend();
             % Close the hardware interface
@@ -744,12 +748,21 @@ classdef PoCaBotExperiment < ExperimentBase
             vmax = abs(v_max);
             delta_q = q_e-q_s;
             distance = norm(delta_q);
-            acc_s = vmax/time_blend_s;
-            acc_e = vmax/time_blend_e;
+            
             if(1/2*vmax*(time_blend_s+time_blend_e)>=distance)
                 % Triangular Profile
-                time_acc_s = ceil(sqrt(2*acc_e*distance/acc_s/(acc_s+acc_e))/time_step)*time_step;
-                time_acc_e = ceil(sqrt(2*acc_s*distance/acc_e/(acc_s+acc_e))/time_step)*time_step;
+                acc_s = vmax/time_blend_s;
+                acc_e = vmax/time_blend_e;
+                if(time_blend_s == 0)
+                    time_acc_s = 0;
+                    time_acc_e = ceil(sqrt(2*distance/acc_e)/time_step)*time_step;
+                elseif(time_blend_e == 0)
+                    time_acc_s = ceil(sqrt(2*distance/acc_s)/time_step)*time_step;
+                    time_acc_e = 0;
+                else
+                    time_acc_s = ceil(sqrt(2*acc_e*distance/acc_s/(acc_s+acc_e))/time_step)*time_step;
+                    time_acc_e = ceil(sqrt(2*acc_s*distance/acc_e/(acc_s+acc_e))/time_step)*time_step;
+                end
                 time_const_speed = 0;
             else
                 % Trapezoidal Profile
@@ -762,7 +775,7 @@ classdef PoCaBotExperiment < ExperimentBase
                     time_const_speed = ceil(distance_const_speed/vmax/time_step)*time_step;
                 end
             end
-            time_vector = 0 : time_step : time_acc_s+time_acc_e+time_const_speed;
+            time_vector = time_step : time_step : time_acc_s+time_acc_e+time_const_speed;
             
             q = zeros(n_dof, length(time_vector));
             q_dot = zeros(n_dof, length(time_vector));
