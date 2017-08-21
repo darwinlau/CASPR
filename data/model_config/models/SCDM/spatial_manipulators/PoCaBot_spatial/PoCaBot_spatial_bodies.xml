@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE bodies_system SYSTEM "../../../../templates/bodies.dtd">
 <bodies_system>
-  <links display_range="0 0.5 0 0.5 0 0.5" view_angle="-37 32">
+  <links display_range="0 4.0 0 4.0 0 4.0" view_angle="-37 32">
     <link_rigid num="1" name="PoCaBot_spatial">
-      <joint type="SPATIAL_EULER_XYZ"  q_initial="0.2 0.2 0.2 0 0 0"/>
+      <joint type="SPATIAL_EULER_XYZ"  q_initial="2.0 2.0 2.0 0 0 0" q_min="0.0 0.0 0.0 -3.1416 -3.1416 -3.1416" q_max="4.0 4.0 4.0 3.1416 3.1416 3.1416" />
       <physical>
         <mass>1.3535</mass>
         <com_location>0.0 0.0 0.0</com_location>

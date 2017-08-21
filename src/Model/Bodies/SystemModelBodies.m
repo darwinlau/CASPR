@@ -107,6 +107,8 @@ classdef SystemModelBodies < handle
         q_ddot_default
         q_lb
         q_ub
+        q_min
+        q_max
         % Generalised coordinates time derivative (for special cases q_dot does not equal q_deriv)
         q_deriv
         
@@ -811,6 +813,24 @@ classdef SystemModelBodies < handle
             end
         end
 
+        function q_min = get.q_min(obj)
+            q_min = zeros(obj.numDofVars, 1);
+            index_vars = 1;
+            for k = 1:obj.numLinks
+                q_min(index_vars:index_vars+obj.bodies{k}.joint.numVars-1) = obj.bodies{k}.joint.q_min;
+                index_vars = index_vars + obj.bodies{k}.joint.numVars;
+            end
+        end
+
+        function q_max = get.q_max(obj)
+            q_max = zeros(obj.numDofVars, 1);
+            index_vars = 1;
+            for k = 1:obj.numLinks
+                q_max(index_vars:index_vars+obj.bodies{k}.joint.numVars-1) = obj.bodies{k}.joint.q_max;
+                index_vars = index_vars + obj.bodies{k}.joint.numVars;
+            end
+        end
+        
         function q_deriv = get.q_deriv(obj)
             q_deriv = zeros(obj.numDofVars, 1);
             index_vars = 1;

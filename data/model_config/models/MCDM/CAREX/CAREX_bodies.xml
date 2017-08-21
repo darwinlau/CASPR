@@ -3,7 +3,7 @@
 <bodies_system>
     <links display_range="-0.5 0.5 -0.2 0.2 -0.75 0.25" view_angle="-37 32">
       <link_rigid num="1" name="Upper Arm">
-        <joint type="S_EULER_XYZ" q_initial="0 0 0"/>
+        <joint type="S_EULER_XYZ" q_initial="0 0 0" q_min="-3.1416 -3.1416 -3.416" q_max="3.1416 3.1416 3.1416"/>
         <physical>
           <mass>3.0</mass>
           <com_location>0.0 0.0 -0.13</com_location>
@@ -23,7 +23,7 @@
         </parent>
       </link_rigid>
       <link_rigid num="2" name="Forearm">
-        <joint type="R_Y" q_initial="0"/>
+        <joint type="R_Y" q_initial="0" q_min="-3.1416" q_max="3.1416"/>
         <physical>
           <mass>2.0</mass>
           <com_location>0.0 0.0 -0.12</com_location>
