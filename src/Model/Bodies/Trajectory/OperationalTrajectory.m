@@ -102,7 +102,6 @@ classdef OperationalTrajectory < TrajectoryBase
                 y_dd_section = [];
                 time_section = time_points_abs(p):time_step:time_points_abs(p+1);
                 for j = 1:bodiesObj.numOperationalSpaces
-                    % NEED TO UPDATE THIS
                     [y_op, y_d_op, y_dd_op] = bodiesObj.bodies{bodiesObj.operationalSpaceBodyIndices(j)}.operationalSpace.generateTrajectoryLinearSpline(y_pj{p}{j}, y_pj{p+1}{j}, time_section);
                     y_section = [y_section; y_op];
                     y_d_section = [y_d_section; y_d_op];

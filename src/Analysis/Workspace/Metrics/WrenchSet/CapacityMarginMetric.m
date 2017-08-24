@@ -23,13 +23,15 @@ classdef CapacityMarginMetric < WorkspaceMetricBase
         % Constructor
         function m = CapacityMarginMetric(desired_wrench_set)
             m.desired_wrench_set = desired_wrench_set;
+            m.metricMin = -Inf;
+            m.metricMax = Inf;
         end
         
         % Evaluate Function implementation
         function v = evaluateFunction(obj,dynamics,~)
             L   =   dynamics.L_active;
-            f_u =   dynamics.cableForcesActiveMax;
-            f_l =   dynamics.cableForcesActiveMin;
+            f_u =   dynamics.actuationForcesMax;
+            f_l =   dynamics.actuationForcesMin;
             w   =   WrenchSet(L,f_u,f_l);
             q   =   length(w.b);
             p   =   size(obj.desired_wrench_set,2);

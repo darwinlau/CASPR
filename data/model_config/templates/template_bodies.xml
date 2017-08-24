@@ -7,7 +7,7 @@
             Further details are provided in CASPR documentation -->
         <!--
         <link_rigid num="#" name="NAME">
-            <joint type="SPATIAL_EULER_XYZ" q_initial="x_init y_init z_init a_init b_init g_init"/>
+            <joint type="SPATIAL_EULER_XYZ" q_initial="x_init y_init z_init a_init b_init g_init" q_min="x_min y_min z_min a_min b_min g_min" q_max="x_max y_max z_max a_max b_max g_max"/>
             <physical>
                 <mass>1</mass>
                 <com_location>x_com y_com z_com</com_location>

@@ -3,7 +3,7 @@
 <bodies_system>
     <links display_range="-0.1 0.85 -0.2 0.2 -0.2 0.2" view_angle="19 29">
       <link_rigid num="1" name="M1">
-        <joint type="U_YZ" q_initial="0 0"/>
+        <joint type="U_YZ" q_initial="0 0" q_min="-3.1416 -3.1416" q_max="3.1416 3.1416"/>
         <physical>
           <mass>0.1</mass>
           <com_location>0.099 0.0 0.0</com_location>
@@ -23,7 +23,7 @@
         </parent>
       </link_rigid>
       <link_rigid num="2" name="M2">
-        <joint type="U_YZ" q_initial="0 0"/>
+        <joint type="U_YZ" q_initial="0 0" q_min="-3.1416 -3.1416" q_max="3.1416 3.1416"/>
         <physical>
           <mass>0.1</mass>
           <com_location>0.099 0.0 0.0</com_location>
@@ -43,7 +43,7 @@
         </parent>
       </link_rigid>
       <link_rigid num="3" name="M3">
-          <joint type="U_YZ" q_initial="0 0"/>
+          <joint type="U_YZ" q_initial="0 0" q_min="-3.1416 -3.1416" q_max="3.1416 3.1416"/>
           <physical>
           <mass>0.1</mass>
           <com_location>0.099 0.0 0.0</com_location>
@@ -63,7 +63,7 @@
         </parent>
       </link_rigid>
       <link_rigid num="4" name="M4">
-        <joint type="U_YZ" q_initial="0 0"/>
+        <joint type="U_YZ" q_initial="0 0" q_min="-3.1416 -3.1416" q_max="3.1416 3.1416"/>
         <physical>
           <mass>0.1</mass>
           <com_location>0.027 0.0 0.0</com_location>

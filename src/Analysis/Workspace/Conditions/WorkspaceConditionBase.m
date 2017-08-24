@@ -3,11 +3,10 @@
 % Author        : Jonathan EDEN
 % Created       : 2015
 % Description:
-%   All user-defined metrics should implement this base class and
+%   All user-defined conditions should implement this base class and
 %   define the following:
-%       - The method to evaluate the metric
-%       - The method to determine if neighbouring points are connected
-%   Any new types of metrics need to be added to the WorkspaceConditionType 
+%       - The method to evaluate the workspace condition
+%   Any new types of conditions need to be added to the WorkspaceConditionType 
 %   enum and also added to the CreateWorkspaceCondition method.
 classdef WorkspaceConditionBase < handle
     properties 
@@ -42,8 +41,10 @@ classdef WorkspaceConditionBase < handle
                     wc = WrenchFeasible(method,desired_set);
                 case WorkspaceConditionType.STATIC
                     wc = WorkspaceStatic(method);
+                case WorkspaceConditionType.INTERFERENCE
+                    wc = InterferenceFree(method);
                 otherwise
-                    CASPR_log.Print('Workspace metric type is not defined',CASPRLogLevel.ERROR);
+                    CASPR_log.Print('Workspace condition type is not defined',CASPRLogLevel.ERROR);
             end
             wc.type = conditionType;
         end

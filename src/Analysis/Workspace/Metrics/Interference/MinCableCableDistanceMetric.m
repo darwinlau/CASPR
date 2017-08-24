@@ -11,7 +11,7 @@ classdef MinCableCableDistanceMetric < WorkspaceMetricBase
         % Constructor
         function m = MinCableCableDistanceMetric()
             m.metricMin = 0;
-            m.metricMax = 1; %unit is m
+            m.metricMax = 0.12; %unit is m
         end
         
         % Evaluate function implementation
@@ -45,32 +45,6 @@ classdef MinCableCableDistanceMetric < WorkspaceMetricBase
                                        %by Geometric Method
                                         v1 = s1_p2 - s1_p1;
                                         v2 = s2_p2 - s2_p1;
-                                        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                                        % warning in case of 0 cable/seg. length [30/12]
-%                                         if all(v1 == 0)
-%                                             str_a = num2str(s1_p1');
-%                                             str = strcat('The length of cable/segment starting from', ' [', str_a, ']', ' is zero!');
-%                                             CASPR_log.Warn(str);                                    
-%                                         elseif all(v2 == 0)
-%                                             str_a = num2str(s2_p1');
-%                                             str = strcat('The length of cable/segment starting from', ' [', str_a, ']', ' is zero!');
-%                                             % str = strcat('The length of cable/segment:', ' [', str_a, ';', str_b, ']', ' is zero!');
-%                                             CASPR_log.Warn(str);   
-%                                         end
-%                                         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                                         % start to calculate
-%                                         v1a = s2_p1 - s1_p1;
-%                                         s1_vec = [s1_p1, s1_p2];  % s1_vec is a 3X2 vector
-%                                         s2_vec = [s2_p1, s2_p2];  % s2_vec is a 3X2 vector
-%                                         g = dot(v1a,cross(v1,v2)); % judge whether 2 segs are coplanar or not
-%                                         g = round(g, 6); % round off the error to make sure g is integer 1/11
-%                                                          % add 6 to round off the real numerical error 30/12
-%                                         if g == 0
-%                                             d = obj.d_uni(s1_vec, s2_vec); % or d_uni(obj, s1_vec, s2_vec)
-%                                         else
-%                                             d = obj.d_non_F2(s1_vec, s2_vec); % with judging % or d_non_F2(obj, s1_vec, s2_vec)
-%                                         end
-                                        % warning in case of 0 cable/seg. length [30/12]
                                         if all(v1 == 0)
                                             str_a = num2str(s1_p1');
                                             str = strcat('The length of segment starting from', ' [', str_a, ']', ' is zero!');

@@ -3,7 +3,7 @@
 <bodies_system>
     <links display_range="-1.25 1.25 -1 1 -2.5 0" view_angle="0 0">
       <link_rigid num="1" name="thigh">
-        <joint type="R_Y" q_initial="1.0127"/>
+        <joint type="R_Y" q_initial="1.0127" q_min="-3.1416" q_max="3.1416"/>
         <physical>
           <mass>8.16</mass>
           <com_location>0.170 0.0 0.0</com_location>
@@ -23,7 +23,7 @@
         </parent>
       </link_rigid>
       <link_rigid num="2" name="shank">
-        <joint type="R_Y" q_initial="0.1008"/>
+        <joint type="R_Y" q_initial="0.1008" q_min="-3.1416" q_max="3.1416"/>
         <physical>
           <mass>2.33</mass>
           <com_location>0.160 0.0 0.0</com_location>
@@ -43,7 +43,7 @@
         </parent>
       </link_rigid>
      <link_rigid num="3" name="foot">
-        <joint type="R_Y" q_initial="4.6730"/>
+        <joint type="R_Y" q_initial="4.6730" q_min="0" q_max="6.2832"/>
         <physical>
           <mass>0.87</mass>
           <com_location>0.120 0.0 0.0</com_location>
