@@ -10,8 +10,8 @@
           <end_location>0.0 0.0 1.0</end_location>
           <inertia ref="com">
             <Ixx>0.083333</Ixx>
-            <Iyy>0.083333</Iyy>
-            <Izz>0.0</Izz>
+            <Iyy>0.0</Iyy>
+            <Izz>0.083333</Izz>
             <Ixy>0.0</Ixy>
             <Ixz>0.0</Ixz>
             <Iyz>0.0</Iyz>
@@ -30,8 +30,8 @@
           <end_location>0.0 0.0 1.0</end_location>
           <inertia ref="com">
             <Ixx>0.083333</Ixx>
-            <Iyy>0.083333</Iyy>
-            <Izz>0.0</Izz>
+            <Iyy>0.0</Iyy>
+            <Izz>0.083333</Izz>
             <Ixy>0.0</Ixy>
             <Ixz>0.0</Ixz>
             <Iyz>0.0</Iyz>
