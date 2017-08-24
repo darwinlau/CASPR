@@ -49,7 +49,7 @@ classdef PoCaBotExperiment < ExperimentBase
             %cableLengths_full = ones(numMotor,1)*4.05;
             cableLengths_full = [6.618; 4.800; 6.632;4.800;6.632;5.545;6.618;5.545];
             
-            hw_interface = PoCaBotCASPRInterface('COM11', numMotor, cableLengths_full,false);  %1
+            hw_interface = PoCaBotCASPRInterface('COM8', numMotor, cableLengths_full,false);  %1
             exp@ExperimentBase(hw_interface, modelObj);
             exp.modelConfig = model_config;
             exp.numMotor = numMotor;
@@ -508,6 +508,56 @@ classdef PoCaBotExperiment < ExperimentBase
             %             norm(l0_solved(1:4) - obj.model.cableLengths(1:4))
             %             q0_capture
             %             q_solved(:,1)
+        end
+        
+        function rehabilitation_preparation(obj)
+            % Open the hardware interface
+            obj.openHardwareInterface();
+            
+            % Just detect the device to see if it is correct (should change
+            % it later to exit cleanly and throw an error in the future
+            obj.hardwareInterface.detectDevice();
+            
+            % this procedure is to regulate the pose of the endeffector and
+            % make sure that the cable is under the tension.
+            obj.hardwareInterface.switchOperatingMode2CURRENT();
+            obj.hardwareInterface.systemOnSend();
+            current = ones(obj.numMotor,1)*20;
+            obj.hardwareInterface.currentCommandSend(current);
+        end
+        
+        function rehabilitation_run(obj, duration)
+            fac = [8 1 3 2;4 5 7 6;2 3 5 4;6 7 1 8;1 7 5 3;6 8 2 4];
+            maxCurrent = 20;
+            omega = pi*4;%ran/s
+            tstart = tic;
+            current = ones(8,1);
+            while(1)
+                timestamp = toc(tstart);
+                if(timestamp>=duration)
+                    break;
+                end
+                tloop = tic;
+                
+                direction = 1;%random('unid',6);
+                if(floor(direction/2) == direction/2)
+                    direction_counterpart = direction - 1;
+                else
+                    direction_counterpart = direction + 1;
+                end
+                
+%                 current(fac(direction,:))             = (maxCurrent-20)*(sin(omega*timestamp)>0)+20;
+%                 current(fac(direction_counterpart,:)) = (maxCurrent-20)*(sin(omega*timestamp)<=0)+20;
+                current = ones(8,1)*15;
+                obj.hardwareInterface.currentCommandSend(current);
+                
+                elapsed = toc(tloop);
+                if(elapsed < 0.05)
+                    java.lang.Thread.sleep((0.05 - elapsed)*1000);
+                else
+                    toc
+                end
+            end
         end
         
         %% BELOW METHODS ARE FOR THE LONG TIME CONSTRUCTING TASK

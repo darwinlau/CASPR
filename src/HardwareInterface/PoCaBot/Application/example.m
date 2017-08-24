@@ -1,40 +1,40 @@
 %% End Effector plotting test
-figure(100);
-ax_bg = axes('Position',[0 0 1 1],'Visible','off');
-
-
-ax_plot = axes('Position',[.1 .1 .7 .8]);
-title('Comparison between ideal pose and actual pose of the end effector');
-ee_ideal = EndEffector();
-ee_real = EndEffector();
-ee_ideal.plot(1);
-hold on;
-ee_real.plot(0);
-hold off;
-q0 = [2 2 2 0 0 0]';
-q1 = [2 2 2 0.3 0.3 0]';
-axis equal;
-axis([q0(1)-0.2 q0(1)+0.2 q0(2)-0.2 q0(2)+0.2 q0(3)-0.2 q0(3)+0.2]);
-xlabel('x');ylabel('y');zlabel('z');
-% legend('Ideal','Actual');
-% set(gca,'View',[0 0]);% roll--x, pitch--y
-ee_ideal.animate(q0);
-ee_real.animate(q1);
-
-q_delta = q1-q0;
-axes(ax_bg);
-descr = {'{\delta{\itq}}:';...
-    sprintf('%.5f',q_delta(1));...
-    sprintf('%.5f',q_delta(2));...
-    sprintf('%.5f',q_delta(3));...
-    sprintf('%.5f',q_delta(4));...
-    sprintf('%.5f',q_delta(5));...
-    sprintf('%.5f',q_delta(6))};
-hText = text(0.77,0.65,descr);
-set(hText,'String',descr);
-
-axes(ax_plot)
-pause(0.1);
+% figure(100);
+% ax_bg = axes('Position',[0 0 1 1],'Visible','off');
+% 
+% 
+% ax_plot = axes('Position',[.1 .1 .7 .8]);
+% title('Comparison between ideal pose and actual pose of the end effector');
+% ee_ideal = EndEffector();
+% ee_real = EndEffector();
+% ee_ideal.plot(1);
+% hold on;
+% ee_real.plot(0);
+% hold off;
+% q0 = [2 2 2 0 0 0]';
+% q1 = [2 2 2 0.3 0.3 0]';
+% axis equal;
+% axis([q0(1)-0.2 q0(1)+0.2 q0(2)-0.2 q0(2)+0.2 q0(3)-0.2 q0(3)+0.2]);
+% xlabel('x');ylabel('y');zlabel('z');
+% % legend('Ideal','Actual');
+% % set(gca,'View',[0 0]);% roll--x, pitch--y
+% ee_ideal.animate(q0);
+% ee_real.animate(q1);
+% 
+% q_delta = q1-q0;
+% axes(ax_bg);
+% descr = {'{\delta{\itq}}:';...
+%     sprintf('%.5f',q_delta(1));...
+%     sprintf('%.5f',q_delta(2));...
+%     sprintf('%.5f',q_delta(3));...
+%     sprintf('%.5f',q_delta(4));...
+%     sprintf('%.5f',q_delta(5));...
+%     sprintf('%.5f',q_delta(6))};
+% hText = text(0.77,0.65,descr);
+% set(hText,'String',descr);
+% 
+% axes(ax_plot)
+% pause(0.1);
 
 %% File writer test for time record
 % M = [];
@@ -106,24 +106,24 @@ pause(0.1);
 
 
 %% sample codes for the file operation
-fo = FileOperation(...
-    'C:\Users\Tristan\Desktop\Constructing Demo\initstate.ini', ...
-    'C:\Users\Tristan\Desktop\Constructing Demo\DATA FILES\brickLayout.csv', ...
-    'C:\Users\Tristan\Desktop\Constructing Demo\DATA FILES\wallDesign.csv');
-brick_count = fo.getAllBrickCount();
-fo.readInitPos_Motors()
-fo.readBrickNum()
-fo.writeInitPos_Motors([8:-1:1]');
-fo.readInitPos_Motors()
-fo.readBrickNum()
-
-num = fo.readBrickNum();% or num = 1 if at the beginning of the constructing.
-for index = num:brick_count
-    
-    [pickup_co, place_co]= fo.getCoordinate(index);
-    fo.writeBrickNum(index);
-    fo.readBrickNum()
-end
+% fo = FileOperation(...
+%     'C:\Users\Tristan\Desktop\Constructing Demo\initstate.ini', ...
+%     'C:\Users\Tristan\Desktop\Constructing Demo\DATA FILES\brickLayout.csv', ...
+%     'C:\Users\Tristan\Desktop\Constructing Demo\DATA FILES\wallDesign.csv');
+% brick_count = fo.getAllBrickCount();
+% fo.readInitPos_Motors()
+% fo.readBrickNum()
+% fo.writeInitPos_Motors([8:-1:1]');
+% fo.readInitPos_Motors()
+% fo.readBrickNum()
+% 
+% num = fo.readBrickNum();% or num = 1 if at the beginning of the constructing.
+% for index = num:brick_count
+%     
+%     [pickup_co, place_co]= fo.getCoordinate(index);
+%     fo.writeBrickNum(index);
+%     fo.readBrickNum()
+% end
 
 %% simple trajectory
 % trajectory_id = 'simple_move_brick_on_larger_scale_frame';
@@ -148,15 +148,15 @@ end
 
 %% Test the method 'generateTrajectoryParabolicBlend' of Class PoCaBotExperiment
 % q_s = zeros(3,1);
-% q_e = [0.0;0.0;0.0];
+% q_e = [0.1;0.0;0.0];
 % time_step = 0.05;
 % time_blend_s = 0;
-% time_blend_e = 0;
+% time_blend_e = 1;
 % v_max = 0.167;
 % [trajectory] = PoCaBotExperiment.generateTrajectoryParabolicBlend(q_s, q_e, time_step, time_blend_s, time_blend_e, v_max);
 % plot(trajectory.timeVector,trajectory.q,'*');
-% plot(trajectory.timeVector,trajectory.q_dot);
-% plot(trajectory.timeVector,trajectory.q_ddot);
+% plot(trajectory.timeVector,trajectory.q_dot,'-');
+% plot(trajectory.timeVector,trajectory.q_ddot,':');
 
 %% Test the ID effect
 % % Create the config

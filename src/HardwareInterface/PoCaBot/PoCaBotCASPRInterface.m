@@ -88,7 +88,7 @@ classdef PoCaBotCASPRInterface < HardwareInterfaceBase
         
         % Protocol version
         PROTOCOL_VERSION            = 2.0;          % See which protocol version is used in the Dynamixel
-        BAUDRATE                    = 115200;
+        BAUDRATE                    = 1000000;
 %         DEVICENAME                  = 'COM3';       % Check which port is being used on your controller
         % ex) Windows: "COM1"   Linux: "/dev/ttyUSB0"
         
@@ -321,13 +321,23 @@ classdef PoCaBotCASPRInterface < HardwareInterfaceBase
 %         Argument operating_mode is OPERATING_MODE_CURRENT_MODE or
 %         OPERATING_MODE_POSITION_LIMITEDCURRENT.
         function switchOperatingMode2CURRENT(obj)
-            obj.toggleEnableAllDynamixel(obj.TORQUE_DISABLE);
-            obj.sync_write(obj.ADDR_XH_OPERATING_MODE, obj.LEN_XH_OPERATING_MODE, ones(obj.DXL_NUM,1)*obj.OPERATING_MODE_CURRENT_MODE);
+            [~, mode] = obj.sync_read(obj.ADDR_XH_OPERATING_MODE, obj.LEN_XH_OPERATING_MODE);
+            if(~all(mode == obj.OPERATING_MODE_CURRENT_MODE))
+                obj.toggleEnableAllDynamixel(obj.TORQUE_DISABLE);
+                obj.sync_write(obj.ADDR_XH_OPERATING_MODE, obj.LEN_XH_OPERATING_MODE, ones(obj.DXL_NUM,1)*obj.OPERATING_MODE_CURRENT_MODE);
+            end
         end
         
         function switchOperatingMode2POSITION_LIMITEDCURRENT(obj)
-            obj.toggleEnableAllDynamixel(obj.TORQUE_DISABLE);
-            obj.sync_write(obj.ADDR_XH_OPERATING_MODE, obj.LEN_XH_OPERATING_MODE, ones(obj.DXL_NUM,1)*obj.OPERATING_MODE_POSITION_LIMITEDCURRENT);
+            [~, mode] = obj.sync_read(obj.ADDR_XH_OPERATING_MODE, obj.LEN_XH_OPERATING_MODE);
+            if(~all(mode == obj.OPERATING_MODE_POSITION_LIMITEDCURRENT))
+                obj.toggleEnableAllDynamixel(obj.TORQUE_DISABLE);
+                obj.sync_write(obj.ADDR_XH_OPERATING_MODE, obj.LEN_XH_OPERATING_MODE, ones(obj.DXL_NUM,1)*obj.OPERATING_MODE_POSITION_LIMITEDCURRENT);
+            end
+        end
+        
+        function [mode] = getOperatingMode(obj)
+            [~, mode] = obj.sync_read(obj.ADDR_XH_OPERATING_MODE, obj.LEN_XH_OPERATING_MODE);
         end
         
         % Method to send the vector of current (c_cmd) to hardware
