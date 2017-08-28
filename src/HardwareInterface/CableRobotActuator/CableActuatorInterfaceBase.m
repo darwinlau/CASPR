@@ -4,9 +4,9 @@
 % Created       : 2017
 % Description   : The base class has a set of methods that must be 
 % implemented by different interfaces on how to execute the functionality 
-classdef (Abstract) HardwareInterfaceBase < handle            
+classdef (Abstract) CableActuatorInterfaceBase < handle            
     methods
-        function interface = HardwareInterfaceBase()
+        function interface = CableActuatorInterfaceBase()
         end
     end
     

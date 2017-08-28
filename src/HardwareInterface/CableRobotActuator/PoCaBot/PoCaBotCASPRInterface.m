@@ -1,5 +1,5 @@
 % All length variables in this class use metric unit.
-classdef PoCaBotCASPRInterface < HardwareInterfaceBase
+classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
     properties (Access = private)
         numCmd              % Number of actuator command values to send and feedback
         comPort             % Serial COM port connected to USB2Dynamixel
@@ -111,7 +111,7 @@ classdef PoCaBotCASPRInterface < HardwareInterfaceBase
         % e.g. comPort = 'COM3'
         % cableLengths_full: SIZE: numCmd x 1
         function interface = PoCaBotCASPRInterface(comPort, numCmd, ~,dynamixel_direction_reversed)
-            interface@HardwareInterfaceBase();
+            interface@CableActuatorInterfaceBase();
             interface.comPort = comPort;
             interface.numCmd = numCmd;
             %interface.cableLengths_full = cableLengths_full;

@@ -1,4 +1,4 @@
-classdef GSK_EightAxisStaticCASPRInterface < HardwareInterfaceBase
+classdef GSK_EightAxisStaticCASPRInterface < CableActuatorInterfaceBase
     properties (Constant)
         CABLE_PREFIX_ID = {'X', 'Y', 'Z', 'A', 'B', 'C', 'U', 'V'};
         CABLE_SPEED_PREFIX = 'F';
@@ -33,7 +33,7 @@ classdef GSK_EightAxisStaticCASPRInterface < HardwareInterfaceBase
         % Note: l_init from CASPR will be in the units [m]
         function interface = GSK_EightAxisStaticCASPRInterface(modelObj, filefolder, filename, zero_cable_lengths_m)
             CASPR_log.Assert(modelObj.numCables <= GSK_EightAxisStaticCASPRInterface.MAX_CABLE_NUM, sprintf('Number of cables must less than or equal to %d', GSK_EightAxisStaticCASPRInterface.MAX_CABLE_NUM));
-            interface@HardwareInterfaceBase();
+            interface@CableActuatorInterfaceBase();
             interface.modelObj = modelObj;
             interface.filefolder = filefolder;
             interface.filename = filename;
