@@ -12,6 +12,7 @@ classdef UniversalYZ < JointBase
         q_ddot_default = [0; 0];
         q_lb = [-pi; -pi];
         q_ub = [pi; pi];
+        q_dofType = [DoFType.ROTATION; DoFType.ROTATION];
     end
     
     properties (Dependent)

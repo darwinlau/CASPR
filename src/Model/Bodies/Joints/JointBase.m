@@ -27,8 +27,8 @@ classdef (Abstract) JointBase < handle
         q_dot               % Derivative of q
         q_ddot              % Double derivative of q
         
-        q_min               % Minimum joint values of q
-        q_max               % Maximum joint values of q
+        q_min               % Minimum joint values of q (set by user)
+        q_max               % Maximum joint values of q (set by user)
         q_initial           % The initial value of q for plotting
         
         isActuated = 0      % Is this joint actuated, by default not actuated
@@ -54,11 +54,12 @@ classdef (Abstract) JointBase < handle
         numDofs             % The number of degrees of freedom
         numVars             % The number of variables to describe the degrees of freedom
         
+        q_dofType           % The type of DoF (translation or rotation) for each q value
         q_default           % The default q
         q_dot_default       % The default q_dot
         q_ddot_default      % The default q_ddot
-        q_lb                % The lower bound on joints that are physically meaningful
-        q_ub                % The upper bound on joints that are physically meaningful
+        q_lb                % The lower bound on joints that are physically meaningful (by definition)
+        q_ub                % The upper bound on joints that are physically meaningful (by definition)
     end
     
     methods
