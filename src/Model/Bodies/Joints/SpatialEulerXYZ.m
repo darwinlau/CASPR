@@ -17,6 +17,7 @@ classdef SpatialEulerXYZ < JointBase
         q_ddot_default = [TranslationalXYZ.q_ddot_default; SphericalEulerXYZ.q_ddot_default];
         q_lb = [TranslationalXYZ.q_lb; SphericalEulerXYZ.q_lb];
         q_ub = [TranslationalXYZ.q_ub; SphericalEulerXYZ.q_ub];
+        q_dofType = [DoFType.TRANSLATION; DoFType.TRANSLATION; DoFType.TRANSLATION; DoFType.ROTATION; DoFType.ROTATION; DoFType.ROTATION];
     end
     
     properties (Dependent)        

@@ -12,6 +12,7 @@ classdef RevoluteX < JointBase
         q_ddot_default = [0];
         q_lb = [-pi];
         q_ub = [pi];
+        q_dofType = [DoFType.ROTATION];
     end
     
     properties (Dependent)
