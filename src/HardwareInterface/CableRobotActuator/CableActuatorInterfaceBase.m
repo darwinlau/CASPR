@@ -29,6 +29,16 @@ classdef (Abstract) CableActuatorInterfaceBase < handle
         systemOnSend(obj)        
         % Method to send some "off" state to the hardware (optional)
         systemOffSend(obj)
+        % Method to initialise both the hardware and the software
+        initialise(obj)
+        % Method to switch the operating mode of all actuators
+        % The mode should be specified by the enumeration class
+        % 'ActuatorOperatingModeType'
+        switchOperatingMode(obj,mode)
+        % Method to send the vector of actuator force (f_cmd) to hardware
+        forceCommandSend(obj, f_cmd)
+        % Method to read the forces from the hardware (if available)
+        forceFeedbackRead(obj)
     end
 end
 

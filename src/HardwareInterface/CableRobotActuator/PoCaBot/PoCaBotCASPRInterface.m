@@ -311,6 +311,20 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
             obj.toggleEnableAllDynamixel(obj.TORQUE_DISABLE);
         end
         
+        function switchOperatingMode(obj,om)
+            switch om
+                case ActuatorOperatingModeType.CURRENT_MODE
+                    obj.switchOperatingMode2CURRENT();
+                case ActuatorOperatingModeType.VELOCITY_MODE
+                    
+                case ActuatorOperatingModeType.POSITION_MODE %Single circle
+                case ActuatorOperatingModeType.EXTENDED_POSITION_MODE %Multiple circles
+                case ActuatorOperatingModeType.CURRENT_BASED_POSITION_MODE %Multiple circles with constrained current
+                    obj.switchOperatingMode2POSITION_LIMITEDCURRENT();
+                case ActuatorOperatingModeType.PWM_MODE
+                otherwise
+            end
+        end
 %         % Beware of that when trying to modify the operatiing mode, the
 %         % motors must be turned off.
 %         ADDR_XH_OPERATING_MODE         = 11;
@@ -343,16 +357,16 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
         % Method to send the vector of current (c_cmd) to hardware
         %
         % Argument c_cmd is a column vector with size (DXL_NUM x 1)
-        function currentCommandSend(obj, c_cmd)
-            if(length(c_cmd) ~= obj.DXL_NUM)
+        function forceCommandSend(obj, f_cmd)
+            if(length(f_cmd) ~= obj.DXL_NUM)
                 obj.close();
                 CASPR_log.Error('Input argument error, please check the size of the argument c_cmd and try again');
             end
-            obj.sync_write(obj.ADDR_XH_GOAL_CURRENT, obj.LEN_XH_GOAL_CURRENT, c_cmd*obj.dynamixel_direction_factor_current);
+            obj.sync_write(obj.ADDR_XH_GOAL_CURRENT, obj.LEN_XH_GOAL_CURRENT, f_cmd*obj.dynamixel_direction_factor_current);
         end
         
         % Method to read the current from the hardware (if available)
-        function [current] = currentFeedbackRead(obj)
+        function [current] = forceFeedbackRead(obj)
             [~, current] = obj.sync_read(obj.ADDR_XH_PRESENT_CURRENT, obj.LEN_XH_PRESENT_CURRENT);
             current = current*obj.dynamixel_direction_factor_current;
         end
