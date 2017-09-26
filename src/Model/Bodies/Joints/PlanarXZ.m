@@ -12,6 +12,7 @@ classdef PlanarXZ < JointBase
         q_ddot_default = [0; 0; 0];
         q_lb = [-Inf; -Inf; -pi];
         q_ub = [Inf; Inf; pi];
+        q_dofType = [DoFType.TRANSLATION; DoFType.TRANSLATION; DoFType.ROTATION];
     end    
     
     properties (Dependent)
