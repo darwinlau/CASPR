@@ -21,6 +21,7 @@ function [ x_opt, exit_type] = id_cf_ipm(A_eq, b_eq, x_min, x_max)
         x_temp = x_m + Ap*(b_eq - x_shift);
         index = true(m,1); 
         x_fixed = x_m;
+        b_eq_active = b_eq;
         while((sum(x_temp - x_min < -1e-6)>0)||(sum(x_temp - x_max > 1e-6)>0))
             % Find the most violated constraint
             [min_violation,min_i] = max(x_min - x_temp);
