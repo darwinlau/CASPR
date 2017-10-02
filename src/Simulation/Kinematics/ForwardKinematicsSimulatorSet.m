@@ -29,7 +29,6 @@ classdef ForwardKinematicsSimulatorSet < handle
         % trajectory of cable lengths
         function run(obj, lengths, lengths_dot, time_vector, q0_approx, q0_prev_approx)
             for i = 1:obj.numSims
-                i
                 obj.simulators{i}.run(lengths, lengths_dot, time_vector, q0_approx, q0_prev_approx);
             end
         end
