@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE bodies_system SYSTEM "../../../../templates/bodies.dtd">
+<!-- Template generated XML file for rigid bodies in CASPR -->
+<bodies_system>
+    <links display_range="-4 4 -4 4 0 3.5" view_angle="-37 32">
+        <!-- For each rigid link add a link_rigid tag (like the one below). 
+            Further details are provided in CASPR documentation -->
+        <!-- <link_rigid num="1" name="Small Platform">
+            <joint type="SPATIAL_EULER_XYZ" q_initial="0 0 1 0 0 0"/>
+            <physical>
+                <mass>30</mass>
+                <com_location>0 0 -0.0738</com_location>
+                <end_location>0 0 -0.02</end_location>
+                <inertia ref="com">
+                    <Ixx>1.078</Ixx>
+                    <Iyy>0.82</Iyy>
+                    <Izz>1.341</Izz>
+                    <Ixy>0.0</Ixy>
+                    <Ixz>0.0</Ixz>
+                    <Iyz>0.0</Iyz>
+                </inertia>
+            </physical>
+            <parent>
+                <num>0</num>
+                <location>0 0 0</location>
+            </parent>
+        </link_rigid> -->        
+        <link_rigid num="1" name="Large Platform (Gazebo sim)">
+            <joint type="SPATIAL_EULER_XYZ" q_initial="0 0 1 0 0 0" q_min="-3.5 -3.5 0 -3.1416 -3.1416 -3.1416" q_max="3.5 3.5 3.5 3.1416 3.1416 3.1416"/>
+            <physical>
+                <mass>150</mass>
+                <com_location>0 0 0</com_location>
+                <end_location>0 0 0</end_location>
+                <inertia ref="com">
+                    <Ixx>6.5</Ixx>
+                    <Iyy>20</Iyy>
+                    <Izz>22.5</Izz>
+                    <Ixy>0.0</Ixy>
+                    <Ixz>0.0</Ixz>
+                    <Iyz>0.0</Iyz>
+                </inertia>
+            </physical>
+            <parent>
+                <num>0</num>
+                <location>0 0 0</location>
+            </parent>
+        </link_rigid>
+    </links>
+</bodies_system>

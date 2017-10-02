@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE trajectories SYSTEM "../../../../templates/trajectories.dtd">
+<!-- Template generated file for XML joint_trajectories in CASPR -->
+<trajectories>
+    <joint_trajectories>
+      <quintic_spline_trajectory id="traj_1" time_definition="relative" time_step="0.1">
+        <points>
+          <point>
+            <q>0 0 0.2 0 0 0</q>
+            <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+            <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+          </point>
+          <point time="10.0">
+            <q>0 0 1.2 0 0 0</q>
+            <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+            <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+          </point>
+          <point time="10.0">
+            <q>0.9 0.9 1.2 0 0 0</q>
+            <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+            <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+          </point>
+        </points>
+      </quintic_spline_trajectory>
+    </joint_trajectories>
+</trajectories>

@@ -1,28 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE bodies_system SYSTEM "templates/bodies.dtd">
 <!-- Template generated XML file for rigid bodies in CASPR -->
-<links display_range="x_min x_max y_min y_max z_min z_max" view_angle="-37 32">
-    <!-- For each rigid link add a link_rigid tag (like the one below). 
-        Further details are provided in CASPR documentation -->
-    <!--
-    <link_rigid num="#" name="NAME">
-        <joint type="SPATIAL_EULER_XYZ" q_initial="x_init y_init z_init a_init b_init g_init"/>
-        <physical>
-            <mass>1</mass>
-            <com_location>x_com y_com z_com</com_location>
-            <end_location>x_end y_end z_end</end_location>
-            <inertia ref="com">
-                <Ixx>1.0</Ixx>
-                <Iyy>1.0</Iyy>
-                <Izz>1.0</Izz>
-                <Ixy>0.0</Ixy>
-                <Ixz>0.0</Ixz>
-                <Iyz>0.0</Iyz>
-            </inertia>
-        </physical>
-        <parent>
-            <num>0</num>
-            <location>x y z</location>
-        </parent>
-    </link_rigid>
-    -->
-</links>
+<bodies_system>
+    <links display_range="x_min x_max y_min y_max z_min z_max" view_angle="-37 32">
+        <!-- For each rigid link add a link_rigid tag (like the one below). 
+            Further details are provided in CASPR documentation -->
+        <!--
+        <link_rigid num="#" name="NAME">
+            <joint type="SPATIAL_EULER_XYZ" q_initial="x_init y_init z_init a_init b_init g_init" q_min="x_min y_min z_min a_min b_min g_min" q_max="x_max y_max z_max a_max b_max g_max"/>
+            <physical>
+                <mass>1</mass>
+                <com_location>x_com y_com z_com</com_location>
+                <end_location>x_end y_end z_end</end_location>
+                <inertia ref="com">
+                    <Ixx>1.0</Ixx>
+                    <Iyy>1.0</Iyy>
+                    <Izz>1.0</Izz>
+                    <Ixy>0.0</Ixy>
+                    <Ixz>0.0</Ixz>
+                    <Iyz>0.0</Iyz>
+                </inertia>
+            </physical>
+            <parent>
+                <num>0</num>
+                <location>x y z</location>
+            </parent>
+        </link_rigid>
+        -->
+    </links>
+</bodies_system>

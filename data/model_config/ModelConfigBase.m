@@ -12,12 +12,12 @@ classdef (Abstract) ModelConfigBase < handle
         bodyPropertiesFilename      % Filename for the body properties
         cablesPropertiesFilename    % Filename for the cable properties
         trajectoriesFilename        % Filename for the trajectories
-        opFilename                  % Filename for the operational space
         
         bodiesModel                 % Stores the SystemModelBodies object for the robot model
         displayRange                % The axis range to display the robot
         viewAngle                   % The angle for which the model should be viewed at
         defaultCableSetId           % ID for the default cable set to display first
+        defaultOperationalSetId     % ID for the default operational set to display first
     end
     
     properties (Access = private)
@@ -26,7 +26,6 @@ classdef (Abstract) ModelConfigBase < handle
         bodiesXmlObj                % The DOMNode object for body props
         cablesXmlObj                % The DOMNode object for cable props
         trajectoriesXmlObj          % The DOMNode for trajectory props
-        opXmlObj                    % The DOMNode for operational space
     end
     
     methods
@@ -34,8 +33,6 @@ classdef (Abstract) ModelConfigBase < handle
         % objects.
         function c = ModelConfigBase(type_string, folder, list_file)
             c.root_folder = [CASPR_configuration.LoadModelConfigPath(), folder];
-            c.opFilename = '';
-            c.opXmlObj = [];
             
             % Check the type of enum and open the master list
             fid = fopen([c.root_folder, list_file]);
@@ -52,9 +49,6 @@ classdef (Abstract) ModelConfigBase < handle
                     c.bodyPropertiesFilename    = [c.root_folder, cdpr_folder,char(cell_array{3}{i})];
                     c.cablesPropertiesFilename  = [c.root_folder, cdpr_folder,char(cell_array{4}{i})];
                     c.trajectoriesFilename      = [c.root_folder, cdpr_folder,char(cell_array{5}{i})];
-                    if(~isempty(cell_array{6}{i}))
-                        c.opFilename = [c.root_folder, cdpr_folder,char(cell_array{6}{i})];
-                    end
                     fclose(fid);
                     status_flag = 0;
                     break;
@@ -73,21 +67,24 @@ classdef (Abstract) ModelConfigBase < handle
             c.cablesXmlObj =  XmlOperations.XmlReadRemoveIndents(c.cablesPropertiesFilename);
             c.trajectoriesXmlObj =  XmlOperations.XmlReadRemoveIndents(c.trajectoriesFilename);
             % If the operational space filename is specified then check and load it
-            if (~isempty(c.opFilename))
-                assert(exist(c.opFilename, 'file') == 2, 'Operational space properties file does not exist.');
-                XmlOperations.XmlReadRemoveIndents(c.opFilename);
-            end
+%             if (~isempty(c.opFilename))
+%                 assert(exist(c.opFilename, 'file') == 2, 'Operational space properties file does not exist.');
+%                 XmlOperations.XmlReadRemoveIndents(c.opFilename);
+%             end
             
-            % Read the model config related properties from the bodies and
-            % cables XML
-            c.defaultCableSetId = char(c.cablesXmlObj.getDocumentElement.getAttribute('default_cable_set'));
-            c.displayRange = XmlOperations.StringToVector(char(c.bodiesXmlObj.getDocumentElement.getAttribute('display_range')));
-            c.viewAngle = XmlOperations.StringToVector(char(c.bodiesXmlObj.getDocumentElement.getAttribute('view_angle')))';
-            % Loads the bodiesModel to be used for the trajectory loading
+            % Loads the bodiesModel and cable set to be used for the trajectory loading
             bodies_xmlobj = c.getBodiesPropertiesXmlObj();
+            c.defaultCableSetId = char(c.cablesXmlObj.getDocumentElement.getAttribute('default_cable_set'));
             cableset_xmlobj = c.getCableSetXmlObj(c.defaultCableSetId);
             sysModel = SystemModel.LoadXmlObj(bodies_xmlobj, cableset_xmlobj);
+            if(c.bodiesXmlObj.getElementsByTagName('operational_spaces').getLength~=0)
+                c.defaultOperationalSetId = char(c.bodiesXmlObj.getElementsByTagName('operational_spaces').item(0).getAttribute('default_operational_set'));
+                operationalset_xmlobj = c.getOperationalSetXmlObj(c.defaultOperationalSetId);
+                sysModel.loadOperationalXmlObj(operationalset_xmlobj);
+            end    
             c.bodiesModel = sysModel.bodyModel;
+            c.displayRange = XmlOperations.StringToVector(char(bodies_xmlobj.getAttribute('display_range')));
+            c.viewAngle = XmlOperations.StringToVector(char(bodies_xmlobj.getAttribute('view_angle')))';
         end
                 
         function [sysModel] = getModel(obj, cable_set_id, operational_space_id)
@@ -96,15 +93,20 @@ classdef (Abstract) ModelConfigBase < handle
             sysModel = SystemModel.LoadXmlObj(bodies_xmlobj, cableset_xmlobj);
             
             if (nargin >= 3 && ~isempty(operational_space_id))
-                op_xmlobj = obj.getOPXmlObj(op_set_id);
-                sysModel.loadOpXmlObj(op_xmlobj);
+                operationalset_xmlobj = obj.getOperationalSetXmlObj(obj.defaultOperationalSetId);
+                sysModel.loadOperationalXmlObj(operationalset_xmlobj);
             end
         end
         
-        % Should change this to getJointTrajectory()
-        function [traj] = getTrajectory(obj, trajectory_id)
-            traj_xmlobj = obj.getTrajectoryXmlObj(trajectory_id);
+        % Getting the joint and operational space trajectories
+        function [traj] = getJointTrajectory(obj, trajectory_id)
+            traj_xmlobj = obj.getJointTrajectoryXmlObj(trajectory_id);
             traj = JointTrajectory.LoadXmlObj(traj_xmlobj, obj.bodiesModel);
+        end
+        
+        function [traj] = getOperationalTrajectory(obj, trajectory_id)
+            traj_xmlobj = obj.getOperationalTrajectoryXmlObj(trajectory_id);
+            traj = OperationalTrajectory.LoadXmlObj(traj_xmlobj, obj.bodiesModel);
         end
         
         function cableset_str = getCableSetList(obj)
@@ -117,34 +119,50 @@ classdef (Abstract) ModelConfigBase < handle
             end
         end
         
-        function trajectories_str = getTrajectoriesList(obj)
-            trajectories_str = GUIOperations.XmlObj2StringCellArray(obj.trajectoriesXmlObj.getElementsByTagName('trajectories').item(0).getChildNodes,'id');
+        function trajectories_str = getJointTrajectoriesList(obj)
+            trajectories_str = GUIOperations.XmlObj2StringCellArray(obj.trajectoriesXmlObj.getElementsByTagName('joint_trajectories').item(0).getChildNodes,'id');
+        end
+        
+        function trajectories_str = getOperationalTrajectoriesList(obj)
+            if (~isempty(obj.trajectoriesXmlObj.getElementsByTagName('operational_trajectories').item(0)))
+                trajectories_str = GUIOperations.XmlObj2StringCellArray(obj.trajectoriesXmlObj.getElementsByTagName('operational_trajectories').item(0).getChildNodes,'id');
+            else
+                trajectories_str = {};
+            end
         end
     end
     
     methods (Access = private)
         % Gets the body properties xml object
         function v = getBodiesPropertiesXmlObj(obj)
-            v = obj.bodiesXmlObj.getDocumentElement;
+            v_temp = obj.bodiesXmlObj.getElementsByTagName('links');
+            CASPR_log.Assert(v_temp.getLength == 1,'1 links tag should be specified');
+            v = v_temp.item(0);
         end
         
         % Gets the cable set properties xml object
         function v = getCableSetXmlObj(obj, id)
             v = obj.cablesXmlObj.getElementById(id);
-            assert(~isempty(v), sprintf('Id ''%s'' does not exist in the cables XML file', id));
+            CASPR_log.Assert(~isempty(v), sprintf('Id ''%s'' does not exist in the cables XML file', id));
         end
         
         % Get the trajectory xml object
-        function v = getTrajectoryXmlObj(obj, id)
+        function v = getJointTrajectoryXmlObj(obj, id)
             v = obj.trajectoriesXmlObj.getElementById(id);
-            assert(~isempty(v), sprintf('Id ''%s'' does not exist in the trajectories XML file', id));
+            CASPR_log.Assert(~isempty(v), sprintf('Id ''%s'' does not exist in the trajectories XML file', id));
+        end
+        
+        function v = getOperationalTrajectoryXmlObj(obj, id)
+            v = obj.trajectoriesXmlObj.getElementById(id);
+            CASPR_log.Assert(~isempty(v), sprintf('Id ''%s'' does not exist in the trajectories XML file', id));
         end
         
         % Get the operational space xml object
-        function v = getOPXmlObj(obj, id)
-            v = obj.opXmlObj.getElementById(id);
-            assert(~isempty(v), sprintf('Id ''%s'' does not exist in the operation XML file', id));
+        function v = getOperationalSetXmlObj(obj, id)
+            v_temp = obj.bodiesXmlObj.getElementsByTagName('operational_spaces');
+            CASPR_log.Assert(v_temp.getLength == 1,'1 operational space tag should be specified');
+            v = obj.bodiesXmlObj.getElementById(id);
+            CASPR_log.Assert(~isempty(v), sprintf('Id ''%s'' does not exist in the bodies XML file', id));
         end
     end
 end
-

@@ -31,7 +31,7 @@ function varargout = control_GUI(varargin)
 
     % Edit the above text to modify the response to help control_GUI
 
-    % Last Modified by GUIDE v2.5 25-Mar-2017 20:31:22
+    % Last Modified by GUIDE v2.5 24-Jul-2017 17:10:04
 
     % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
@@ -168,7 +168,7 @@ function trajectory_popup_Update(~, ~, handles)
     end
     setappdata(handles.trajectory_popup,'model_config',model_config);
     % Determine the trajectories
-    trajectories_str = model_config.getTrajectoriesList();    
+    trajectories_str = model_config.getJointTrajectoriesList();    
     set(handles.trajectory_popup, 'Value', 1);
     if(~isempty(trajectories_str))
         set(handles.trajectory_popup, 'Value', 1);   set(handles.trajectory_popup, 'String', trajectories_str);
@@ -220,7 +220,7 @@ function control_class_popup_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
 end
 
 % --- Executes on selection change in solver_class_popup.
-function solver_class_popup_Callback(~, ~, handles) %#ok<DEFNU>
+function solver_class_popup_Callback(~, ~, ~) 
     % hObject    handle to solver_class_popup (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
@@ -229,14 +229,6 @@ function solver_class_popup_Callback(~, ~, handles) %#ok<DEFNU>
     %        contents{get(hObject,'Value')} returns selected item from solver_class_popup
     % First update then apply callback
     % Updates
-    solver_type_popup_update(handles.solver_type_popup,handles);
-    objective_popup_Update(handles.objective_popup,handles);
-    constraint_popup_Update(handles.constraint_popup,handles);
-    tuning_parameter_popup_Update(handles.tuning_parameter_popup,handles);
-    % Callbacks
-    objective_popup_Callback(handles.objective_popup,[],handles);
-    constraint_popup_Callback(handles.constraint_popup,[],handles);
-    tuning_parameter_popup_Callback(handles.tuning_parameter_popup,[],handles);
 end
 
 % --- Executes during object creation, after setting all properties.
@@ -254,106 +246,6 @@ function solver_class_popup_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
     setappdata(hObject,'settings',settingsXMLObj);
     solver_str = GUIOperations.XmlObj2StringCellArray(settingsXMLObj.getElementsByTagName('simulator').item(0).getElementsByTagName('solver_class'),'id');
     set(hObject, 'String', solver_str);
-end
-
-% --- Executes on selection change in objective_popup.
-function objective_popup_Callback(hObject, ~, handles) 
-    % hObject    handle to objective_popup (see GCBO)
-    % eventdata  reserved - to be defined in a future version of MATLAB
-    % handles    structure with handles and user data (see GUIDATA)
-
-    % Hints: contents = cellstr(get(hObject,'String')) returns objective_popup contents as cell array
-    %        contents{get(hObject,'Value')} returns selected item from objective_popup
-    contents = cellstr(get(handles.solver_class_popup,'String'));
-    solver_class_id = contents{get(handles.solver_class_popup,'Value')};
-    settings = getappdata(handles.solver_class_popup,'settings');
-    solverObj = settings.getElementById(solver_class_id);
-    objectivesUnfiltered = solverObj.getElementsByTagName('objectives').item(0);
-    if(~isempty(objectivesUnfiltered))
-        objectivesObj = objectivesUnfiltered.getElementsByTagName('objective');
-        objectiveNumber = get(hObject,'Value');
-        objective = objectivesObj.item(objectiveNumber-1);
-        modObj = getappdata(handles.cable_text,'modObj');
-        weight_number = get_weight_number(objective,modObj);
-        objective_table_Update(weight_number,handles.objective_table);
-    end
-end
-
-function objective_popup_Update(hObject,handles)
-    contents = cellstr(get(handles.solver_class_popup,'String'));
-    solver_class_id = contents{get(handles.solver_class_popup,'Value')};
-    settings = getappdata(handles.solver_class_popup,'settings');
-    solverObj = settings.getElementById(solver_class_id);
-    objectivesUnfiltered = solverObj.getElementsByTagName('objectives').item(0);
-    if(isempty(objectivesUnfiltered))
-        set(hObject,'Value',1);
-        set(hObject,'String',{' '});
-        set(hObject,'Visible','off');
-        set(handles.objective_text,'Visible','off');
-        set(handles.objective_radio,'Visible','off');
-        set(handles.objective_table,'Visible','off');
-    else
-        set(hObject,'Visible','on');
-        set(handles.objective_text,'Visible','on');
-        set(handles.objective_radio,'Visible','on');
-        set(handles.objective_table,'Visible','on');
-        objective_str = GUIOperations.XmlObj2StringCellArray(objectivesUnfiltered.getElementsByTagName('objective'),'type');
-        set(hObject,'Value',1);
-        set(hObject, 'String', objective_str);
-    end
-end
-
-% --- Executes during object creation, after setting all properties.
-function objective_popup_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
-    % hObject    handle to objective_popup (see GCBO)
-    % eventdata  reserved - to be defined in a future version of MATLAB
-    % handles    empty - handles not created until after all CreateFcns called
-
-    % Hint: popupmenu controls usually have a white background on Windows.
-    %       See ISPC and COMPUTER.
-    if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-        set(hObject,'BackgroundColor','white');
-    end
-end
-
-% --- Executes on selection change in solver_type_popup.
-function solver_type_popup_Callback(~, ~, ~) %#ok<DEFNU>
-    % hObject    handle to solver_type_popup (see GCBO)
-    % eventdata  reserved - to be defined in a future version of MATLAB
-    % handles    structure with handles and user data (see GUIDATA)
-
-    % Hints: contents = cellstr(get(hObject,'String')) returns solver_type_popup contents as cell array
-    %        contents{get(hObject,'Value')} returns selected item from solver_type_popup
-end
-
-function solver_type_popup_update(hObject,handles)
-    contents = cellstr(get(handles.solver_class_popup,'String'));
-    solver_class_id = contents{get(handles.solver_class_popup,'Value')};
-    settings = getappdata(handles.solver_class_popup,'settings');
-    solverObj = settings.getElementById(solver_class_id);
-    enum_file = solverObj.getElementsByTagName('solver_type_enum').item(0).getFirstChild.getData;
-    e_list = enumeration(char(enum_file));
-    e_n         =   length(e_list);
-    e_list_str  =   cell(1,e_n);
-    for i=1:e_n
-        temp_str = char(e_list(i));
-        e_list_str{i} = temp_str(1:length(temp_str));
-    end
-    set(hObject,'Value',1);
-    set(hObject, 'String', e_list_str);
-end
-
-% --- Executes during object creation, after setting all properties.
-function solver_type_popup_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
-    % hObject    handle to solver_type_popup (see GCBO)
-    % eventdata  reserved - to be defined in a future version of MATLAB
-    % handles    empty - handles not created until after all CreateFcns called
-
-    % Hint: popupmenu controls usually have a white background on Windows.
-    %       See ISPC and COMPUTER.
-    if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-        set(hObject,'BackgroundColor','white');
-    end
 end
 
 % --- Executes on selection change in plot_type_popup.
@@ -389,133 +281,6 @@ function plot_type_popup_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
     setappdata(hObject,'num_plots',1);
 end
 
-% --- Executes on selection change in constraint_popup.
-function constraint_popup_Callback(hObject, ~, handles) 
-    % hObject    handle to constraint_popup (see GCBO)
-    % eventdata  reserved - to be defined in a future version of MATLAB
-    % handles    structure with handles and user data (see GUIDATA)
-
-    % Hints: contents = cellstr(get(hObject,'String')) returns constraint_popup contents as cell array
-    %        contents{get(hObject,'Value')} returns selected item from constraint_popup
-    if(get(hObject,'Value') ~= 1)
-        contents = cellstr(get(handles.solver_class_popup,'String'));
-        solver_class_id = contents{get(handles.solver_class_popup,'Value')};
-        settings = getappdata(handles.solver_class_popup,'settings');
-        solverObj = settings.getElementById(solver_class_id);
-        constraintsUnfiltered = solverObj.getElementsByTagName('constraints').item(0);
-        if(~isempty(constraintsUnfiltered))
-            constraintsObj = constraintsUnfiltered.getElementsByTagName('constraint');
-            constraintNumber = get(hObject,'Value');
-            constraint = constraintsObj.item(constraintNumber-2);
-            modObj = getappdata(handles.cable_text,'modObj');
-            weight_number = get_weight_number(constraint,modObj);
-            num_constraints = str2double(get(handles.constraint_number_edit,'String'));
-            if(isnan(num_constraints))
-                num_constraints = 1;
-            end
-            constraint_table_Update([num_constraints,weight_number],handles.constraint_table);
-        end
-    end
-end
-
-function constraint_popup_Update(hObject,handles)
-    contents = cellstr(get(handles.solver_class_popup,'String'));
-    solver_class_id = contents{get(handles.solver_class_popup,'Value')};
-    settings = getappdata(handles.solver_class_popup,'settings');
-    solverObj = settings.getElementById(solver_class_id);
-    constraintsUnfiltered = solverObj.getElementsByTagName('constraints').item(0);
-    if(isempty(constraintsUnfiltered))
-        set(hObject,'Value',1);
-        set(hObject,'String',{' '});
-        set(hObject,'Visible','off');
-        set(handles.constraint_text,'Visible','off');
-        set(handles.constraint_table,'Visible','off');
-        set(handles.constraint_number_edit,'Visible','off');
-    else
-        set(hObject,'Visible','on');
-        set(handles.constraint_text,'Visible','on');
-        set(handles.constraint_table,'Visible','on');
-        set(handles.constraint_number_edit,'Visible','on');
-        constraint_str = GUIOperations.XmlObj2StringCellArray(constraintsUnfiltered.getElementsByTagName('constraint'),'type');
-        constraint_str = [{' '},constraint_str];
-        set(hObject,'Value',1);
-        set(hObject, 'String', constraint_str);
-    end
-end
-
-% --- Executes during object creation, after setting all properties.
-function constraint_popup_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
-    % hObject    handle to constraint_popup (see GCBO)
-    % eventdata  reserved - to be defined in a future version of MATLAB
-    % handles    empty - handles not created until after all CreateFcns called
-
-    % Hint: popupmenu controls usually have a white background on Windows.
-    %       See ISPC and COMPUTER.
-    if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-        set(hObject,'BackgroundColor','white');
-    end
-end 
-
-% --- Executes on selection change in tuning_parameter_popup.
-function tuning_parameter_popup_Callback(hObject, ~, handles) 
-    % hObject    handle to objective_popup (see GCBO)
-    % eventdata  reserved - to be defined in a future version of MATLAB
-    % handles    structure with handles and user data (see GUIDATA)
-
-    % Hints: contents = cellstr(get(hObject,'String')) returns objective_popup contents as cell array
-    %        contents{get(hObject,'Value')} returns selected item from objective_popup
-    contents = cellstr(get(handles.solver_class_popup,'String'));
-    solver_class_id = contents{get(handles.solver_class_popup,'Value')};
-    settings = getappdata(handles.solver_class_popup,'settings');
-    solverObj = settings.getElementById(solver_class_id);
-    tuningUnfiltered = solverObj.getElementsByTagName('tuning_parameters').item(0);
-    if(~isempty(tuningUnfiltered))
-        tuningObj = tuningUnfiltered.getElementsByTagName('tuning_parameter');
-        tuningNumber = get(hObject,'Value');
-        tuning = tuningObj.item(tuningNumber-1);
-        modObj = getappdata(handles.cable_text,'modObj');
-        weight_number = get_weight_number(tuning,modObj);
-        tuning_parameter_table_Update(weight_number,handles.tuning_parameter_table);
-    end
-end
-
-function tuning_parameter_popup_Update(hObject,handles)
-    contents = cellstr(get(handles.solver_class_popup,'String'));
-    solver_class_id = contents{get(handles.solver_class_popup,'Value')};
-    settings = getappdata(handles.solver_class_popup,'settings');
-    solverObj = settings.getElementById(solver_class_id);
-    tuningUnfiltered = solverObj.getElementsByTagName('tuning_parameters').item(0);
-    if(isempty(tuningUnfiltered))
-        set(hObject,'Value',1);
-        set(hObject,'String',{' '});
-        set(hObject,'Visible','off');
-        set(handles.tuning_parameter_text,'Visible','off');
-        set(handles.tuning_parameter_radio,'Visible','off');
-        set(handles.tuning_parameter_table,'Visible','off');
-    else
-        set(hObject,'Visible','on');
-        set(handles.tuning_parameter_text,'Visible','on');
-        set(handles.tuning_parameter_radio,'Visible','on');
-        set(handles.tuning_parameter_table,'Visible','on');
-        objective_str = GUIOperations.XmlObj2StringCellArray(tuningUnfiltered.getElementsByTagName('tuning_parameter'),'type');
-        set(hObject,'Value',1);
-        set(hObject, 'String', objective_str);
-    end
-end
-
-% --- Executes during object creation, after setting all properties.
-function tuning_parameter_popup_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
-    % hObject    handle to tuning_parameter_popup (see GCBO)
-    % eventdata  reserved - to be defined in a future version of MATLAB
-    % handles    empty - handles not created until after all CreateFcns called
-
-    % Hint: popupmenu controls usually have a white background on Windows.
-    %       See ISPC and COMPUTER.
-    if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-        set(hObject,'BackgroundColor','white');
-    end
-end
-
 %--------------------------------------------------------------------------
 %% Push Buttons
 %--------------------------------------------------------------------------
@@ -524,10 +289,10 @@ function run_button_Callback(~, ~, handles) %#ok<DEFNU>
     % hObject    handle to run_button (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
-    % First read the trajecory information
     clc; 
     contents = cellstr(get(handles.trajectory_popup,'String'));
     trajectory_id = contents{get(handles.trajectory_popup,'Value')};
+    
     model_config = getappdata(handles.trajectory_popup,'model_config');
     % Then read the form of dynamics
     modObj = getappdata(handles.cable_text,'modObj');
@@ -536,12 +301,19 @@ function run_button_Callback(~, ~, handles) %#ok<DEFNU>
     
     % Get the controller
     control_class_contents = cellstr(get(handles.control_class_popup,'String'));
-    control_class = control_class_contents{get(handles.control_class_popup,'Value')};
-    ctrl_func = str2func(control_class);
-    Kp = diag(get(handles.kp_table,'Data'));
-    Kd = diag(get(handles.kd_table,'Data'));
-    controller = ctrl_func(modObj, id_solver, Kp, Kd);
-
+    control_class_id = control_class_contents{get(handles.control_class_popup,'Value')};
+    if(strcmp(control_class_id,'ComputedTorqueController'))
+        Kp_computedtorque = 50*eye(modObj.numDofs);
+        Kd_computedtorque = 15*eye(modObj.numDofs);
+        controller = ComputedTorqueController(modObj, id_solver, Kp_computedtorque, Kd_computedtorque);
+    elseif(strcmp(control_class_id,'LyapunovStaticCompensation'))
+        Kp_computedtorque = 50*eye(modObj.numDofs);
+        Kd_computedtorque = 15*eye(modObj.numDofs);
+        controller = LyapunovStaticCompensation(modObj, id_solver, Kp_computedtorque, Kd_computedtorque);
+    else
+        CASPR_log.Print(CASPR_log.Error,'Unknown control solver used');
+    end
+    
     % Setup the inverse dynamics simulator with the SystemKinematicsDynamics
     % object and the inverse dynamics solver
     disp('Start Setup Simulation');
@@ -550,7 +322,7 @@ function run_button_Callback(~, ~, handles) %#ok<DEFNU>
     start_tic = tic;
     fdSolver = ForwardDynamics(FDSolverType.ODE113);
     control_sim = ControllerSimulator(modObj, controller,fdSolver);
-    trajectory_ref = model_config.getTrajectory(trajectory_id);
+    trajectory_ref = model_config.getJointTrajectory(trajectory_id);
     time_elapsed = toc(start_tic);
     fprintf('End Setup Simulation : %f seconds\n', time_elapsed);
 
@@ -560,15 +332,17 @@ function run_button_Callback(~, ~, handles) %#ok<DEFNU>
     drawnow;
     start_tic = tic;
     % THIS WILL BE CHANGED AT A LATER TIME
-    control_sim.run(trajectory_ref, trajectory_ref.q{1} + 0.01*ones(modObj.numDofs,1), trajectory_ref.q_dot{1}, trajectory_ref.q_ddot{1});
+    n_q     =   modObj.numDofs;
+    initial_pose_error = 0.2*rand(n_q,1) - 0.1*ones(n_q,1);
+    control_sim.run(trajectory_ref, trajectory_ref.q{1} + initial_pose_error, trajectory_ref.q_dot{1}, trajectory_ref.q_ddot{1});
     time_elapsed = toc(start_tic);
     fprintf('End Running Simulation : %f seconds\n', time_elapsed);
     
     figure;
-    control_sim.plotTrackingError();
+%     control_sim.plotTrackingError();
     assignin('base','control_simulator',control_sim);
     % To be uncommented after discussions with Darwin
-%     % Plot the data
+    % Plot the data
 %     disp('Start Plotting Simulation');
 %     set(handles.status_text,'String','Simulation plotting');
 %     drawnow;
@@ -578,55 +352,6 @@ function run_button_Callback(~, ~, handles) %#ok<DEFNU>
 %     fprintf('End Plotting Simulation : %f seconds\n', time_elapsed);
 %     set(handles.status_text,'String','No simulation running');
 %     setappdata(handles.figure1,'sim',idsim);
-end
-
-% --- Executes on button press in save_button.
-function save_button_Callback(~, ~, handles) %#ok<DEFNU>
-    % hObject    handle to save_button (see GCBO)
-    % eventdata  reserved - to be defined in a future version of MATLAB
-    % handles    structure with handles and user data (see GUIDATA)
-    file_name = [CASPR_configuration.LoadHomePath(),'/GUI/config/*.mat'];
-    [file,path] = uiputfile(file_name,'Save file name');
-    saveState(handles,[path,file]);
-end
-
-% --- Executes on button press in load_button.
-function load_button_Callback(~, ~, handles) %#ok<DEFNU>
-    % hObject    handle to load_button (see GCBO)
-    % eventdata  reserved - to be defined in a future version of MATLAB
-    % handles    structure with handles and user data (see GUIDATA)
-    file_name = [CASPR_configuration.LoadHomePath(),'/GUI/config/*.mat'];
-    settings = uigetfile(file_name);
-    load(settings);
-    mp_text = get(handles.model_text,'String');
-    cs_text = get(handles.cable_text,'String');
-    if(strcmp(state.simulator,'control'))
-        if(strcmp(mp_text,state.model_text)&&strcmp(cs_text,state.cable_text))
-            set(handles.trajectory_popup,'value',state.trajectory_popup);
-                set(handles.control_class_popup,'value',state.control_class_popup);
-                set(handles.solver_class_popup,'value',state.solver_class_popup);
-                solver_type_popup_update(handles.solver_type_popup,handles);
-                set(handles.solver_type_popup,'value',state.solver_type_popup);
-                set(handles.objective_popup,'value',state.objective_popup);
-                set(handles.constraint_popup,'value',state.constraint_popup);
-                set(handles.tuning_parameter_popup,'value',state.tuning_parameter_popup);
-                set(handles.plot_type_popup,'value',state.plot_type_popup);
-                set(handles.objective_table,'Data',state.objective_table);
-                set(handles.constraint_table,'Data',state.constraint_table);
-                set(handles.tuning_parameter_table,'Data',state.tuning_parameter_table);
-                set(handles.kp_table,'Data',state.kp_table);
-                set(handles.kd_table,'Data',state.kd_table);
-                % Callback
-                plot_type_popup_Callback(handles.plot_type_popup,[],handles);
-                objective_popup_Callback(handles.objective_popup,[],handles);
-                constraint_popup_Callback(handles.constraint_popup,[],handles);
-                tuning_parameter_popup_Callback(handles.tuning_parameter_popup, [], handles);
-        else
-            warning('Incorrect Model Type'); %#ok<WNTAG>
-        end
-    else
-        warning('File is not the correct file type'); %#ok<WNTAG>
-    end
 end
 
 % --- Executes on button press in plot_button.
@@ -708,46 +433,6 @@ function delete_figure_tool_ClickedCallback(~, ~, handles) %#ok<DEFNU>
 end
 
 %--------------------------------------------------------------------------
-%% Radio Buttons
-%--------------------------------------------------------------------------
-% --- Executes on button press in objective_radio.
-function objective_radio_Callback(hObject, ~, handles) %#ok<DEFNU>
-    % hObject    handle to objective_radio (see GCBO)
-    % eventdata  reserved - to be defined in a future version of MATLAB
-    % handles    structure with handles and user data (see GUIDATA)
-
-    % Hint: get(hObject,'Value') returns toggle state of objective_radio
-    r_value = get(hObject,'Value');
-    Q_editable = get(handles.objective_table,'ColumnEditable');
-    Q_n = size(Q_editable,2);
-    if(r_value)
-        set(handles.objective_table,'Data',ones(1,Q_n));
-        set(handles.objective_table,'ColumnEditable',false(1,Q_n));
-    else
-        
-        set(handles.objective_table,'ColumnEditable',true(1,Q_n));
-    end
-end
-
-% --- Executes on button press in tuning_parameter_radio.
-function tuning_parameter_radio_Callback(hObject,~, handles) %#ok<DEFNU>
-    % hObject    handle to tuning_parameter_radio (see GCBO)
-    % eventdata  reserved - to be defined in a future version of MATLAB
-    % handles    structure with handles and user data (see GUIDATA)
-
-    % Hint: get(hObject,'Value') returns toggle state of tuning_parameter_radio
-    r_value = get(hObject,'Value');
-    Q_editable = get(handles.tuning_parameter_table,'ColumnEditable');
-    Q_n = size(Q_editable,2);
-    if(r_value)
-        set(handles.tuning_parameter_table,'Data',ones(1,Q_n));
-        set(handles.tuning_parameter_table,'ColumnEditable',false(1,Q_n));
-    else
-        set(handles.tuning_parameter_table,'ColumnEditable',true(1,Q_n));
-    end
-end
-
-%--------------------------------------------------------------------------
 %% Toggle Buttons
 %--------------------------------------------------------------------------
 % --- Executes on button press in undock_box.
@@ -760,148 +445,26 @@ function undock_box_Callback(~, ~, ~) %#ok<DEFNU>
 end
 
 %--------------------------------------------------------------------------
-%% Textboxes
-%--------------------------------------------------------------------------
-function constraint_number_edit_Callback(~, ~, handles) %#ok<DEFNU>
-    % hObject    handle to constraint_number_edit (see GCBO)
-    % eventdata  reserved - to be defined in a future version of MATLAB
-    % handles    structure with handles and user data (see GUIDATA)
-
-    % Hints: get(hObject,'String') returns contents of constraint_number_edit as text
-    %        str2double(get(hObject,'String')) returns contents of constraint_number_edit as a double
-    constraint_popup_Callback(handles.constraint_popup,[],handles);
-end
-
-% --- Executes during object creation, after setting all properties.
-function constraint_number_edit_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
-    % hObject    handle to constraint_number_edit (see GCBO)
-    % eventdata  reserved - to be defined in a future version of MATLAB
-    % handles    empty - handles not created until after all CreateFcns called
-
-    % Hint: edit controls usually have a white background on Windows.
-    %       See ISPC and COMPUTER.
-    if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-        set(hObject,'BackgroundColor','white');
-    end
-end
-
-%--------------------------------------------------------------------------
-%% Tables
-%--------------------------------------------------------------------------
-function objective_table_Update(dimension,hObject)
-    set(hObject,'Data',ones(1,dimension));
-    set(hObject,'ColumnWidth',{30});
-    set(hObject,'ColumnEditable',true(1,dimension));
-    q_position = get(hObject,'Position');
-    if(dimension>4)
-        q_position(2) = 0.36;
-        q_position(4) = 0.19;
-        set(hObject,'Position',q_position);
-    else
-        q_position(2) = 0.36;
-        q_position(4) = 0.15;
-        set(hObject,'Position',q_position);
-    end
-end
-
-function constraint_table_Update(dimension,hObject)
-    set(hObject,'Data',ones(dimension));
-    set(hObject,'ColumnWidth',{30});
-    set(hObject,'ColumnEditable',true(1,dimension(2)));
-    q_position = get(hObject,'Position');
-    if(dimension(2)>4)
-        q_position(2) = 0.04;
-        q_position(4) = 0.19;
-        set(hObject,'Position',q_position);
-    else
-        q_position(2) = 0.04;
-        q_position(4) = 0.15;
-        set(hObject,'Position',q_position);
-    end
-end
-
-function tuning_parameter_table_Update(dimension,hObject)
-    set(hObject,'Data',ones(1,dimension));
-    set(hObject,'ColumnWidth',{30});
-    set(hObject,'ColumnEditable',true(1,dimension));
-    q_position = get(hObject,'Position');
-    if(dimension>4)
-        q_position(2) = 0.36;
-        q_position(4) = 0.19;
-        set(hObject,'Position',q_position);
-    else
-        q_position(2) = 0.38;
-        q_position(4) = 0.15;
-        set(hObject,'Position',q_position);
-    end
-end
-
-%--------------------------------------------------------------------------
 % Additional Functions
 %--------------------------------------------------------------------------
-function id_solver = load_idsolver(handles,modObj)
+function id_solver = load_idsolver(handles,modelObj)
     solver_class_contents = cellstr(get(handles.solver_class_popup,'String'));
-    solver_class = solver_class_contents{get(handles.solver_class_popup,'Value')};
-    solver_type_contents = cellstr(get(handles.solver_type_popup,'String'));
-    solver_type = solver_type_contents{get(handles.solver_type_popup,'Value')};
-    objective_contents = cellstr(get(handles.objective_popup,'String'));
-    objective = objective_contents{get(handles.objective_popup,'Value')};
-    empty_objective = strcmp(objective,' ');
-    constraint_contents = cellstr(get(handles.constraint_popup,'String'));
-    constraint = constraint_contents{get(handles.constraint_popup,'Value')};
-    empty_constraint = strcmp(constraint,' ');
-    tuning_parameter_contents = cellstr(get(handles.tuning_parameter_popup,'String'));
-    tuning_parameter = tuning_parameter_contents{get(handles.tuning_parameter_popup,'Value')};
-    empty_tuning_parameter = strcmp(tuning_parameter,' ');
-    settings = getappdata(handles.solver_class_popup,'settings');
-    if(empty_objective&&empty_constraint&&empty_tuning_parameter)
-        % No inputs
-        solver_function = str2func(solver_class);
-        solverObj = settings.getElementById(solver_class);
-        enum_file = solverObj.getElementsByTagName('solver_type_enum').item(0).getFirstChild.getData;
-        id_solver = solver_function(modObj,eval([char(enum_file),'.',char(solver_type)]));
-    elseif(empty_constraint&&empty_objective)
-        % Only have tuning parameters
-        solver_function = str2func(solver_class);
-        solverObj = settings.getElementById(solver_class);
-        enum_file = solverObj.getElementsByTagName('solver_type_enum').item(0).getFirstChild.getData;
-        q_data = get(handles.tuning_parameter_table,'Data');
-        id_solver = solver_function(modObj,q_data,eval([char(enum_file),'.',char(solver_type)]));
-    elseif(empty_constraint)
-        % Optimisation without constraints
-        objective_function = str2func(objective);
-        q_data = get(handles.objective_table,'Data');
-        id_objective = objective_function(q_data');
-        solver_function = str2func(solver_class);
-        solverObj = settings.getElementById(solver_class);
-        enum_file = solverObj.getElementsByTagName('solver_type_enum').item(0).getFirstChild.getData;
-        id_solver = solver_function(modObj,id_objective,eval([char(enum_file),'.',char(solver_type)]));
-    else
-        % There are both constraints and objectives
-        objective_function = str2func(objective);
-        q_data = get(handles.objective_table,'Data');
-        id_objective = objective_function(q_data');
-        solver_function = str2func(solver_class);
-        solverObj = settings.getElementById(solver_class);
-        enum_file = solverObj.getElementsByTagName('solver_type_enum').item(0).getFirstChild.getData;
-        id_solver = solver_function(modObj,id_objective,eval([char(enum_file),'.',char(solver_type)]));
-        % Obtain the constaints
-        constraint_function = str2func(constraint);
-        q_data = get(handles.constraint_table,'Data');
-        contents = cellstr(get(handles.solver_class_popup,'String'));
-        solver_class_id = contents{get(handles.solver_class_popup,'Value')};
-        settings = getappdata(handles.solver_class_popup,'settings');
-        solverObj = settings.getElementById(solver_class_id);
-        constraintUnfiltered = solverObj.getElementsByTagName('constraints').item(0);
-        constraintObj = constraintUnfiltered.getElementsByTagName('constraint');
-        constraintNumber = get(handles.constraint_popup,'Value');
-        constraint = constraintObj.item(constraintNumber-2);
-        weight_constants = str2num(constraint.getElementsByTagName('weight_constants').item(0).getFirstChild.getData); %#ok<ST2NM>
-        for i = 1:size(q_data,1)
-            id_solver.addConstraint(constraint_function(i, q_data(i,1:weight_constants(1))',...
-                q_data(i,weight_constants(1)+1:weight_constants(1)+weight_constants(2)), ...
-                q_data(i,weight_constants(1)+weight_constants(2)+1:weight_constants(1)+weight_constants(2)+weight_constants(3))));
-        end
+    solver_class_id = solver_class_contents{get(handles.solver_class_popup,'Value')};
+    if(strcmp(solver_class_id,'IDSolverLinProg'))
+        id_objective = IDObjectiveMinLinCableForce(ones(modelObj.numActuatorsActive,1));
+        id_solver = IDSolverLinProg(modelObj, id_objective, ID_LP_SolverType.MATLAB);
+    elseif(strcmp(solver_class_id,'IDSolverQuadProg'))
+        id_objective = IDObjectiveMinQuadCableForce(ones(modelObj.numActuatorsActive,1));
+        id_solver = IDSolverQuadProg(modelObj, id_objective, ID_QP_SolverType.MATLAB);
+    elseif(strcmp(solver_class_id,'IDSolverFeasiblePolygon'))
+        id_solver = IDSolverFeasiblePolygon(modelObj, ID_FP_SolverType.NORM_2);
+    elseif(strcmp(solver_class_id,'IDSolverOptimallySafe'))
+        id_solver = IDSolverOptimallySafe(modelObj, 1.0, ID_OS_SolverType.LP);
+    elseif(strcmp(solver_class_id,'IDSolverClosedForm'))
+        id_solver = IDSolverClosedForm(modelObj, ID_CF_SolverType.IMPROVED_CLOSED_FORM);
+    elseif(strcmp(solver_class_id,'IDSolverMinInfNorm'))
+        id_objective = IDObjectiveMinInfCableForce(ones(modelObj.numActuatorsActive,1));
+        id_solver = IDSolverMinInfNorm(modelObj, id_objective, ID_LP_SolverType.MATLAB);
     end
 end
 
@@ -914,7 +477,7 @@ function loadState(handles)
         load(file_name);
         set(handles.model_text,'String',state.model_text);
         set(handles.cable_text,'String',state.cable_text);
-        setappdata(handles.figure1,'toggle',state.checkbox_value);
+        setappdata(handles.figure1,'toggle',CASPR_configuration.LoadDevModelConfig());
         % This is to ensure that we are starting fresh
         state.modObj.bodyModel.occupied.reset();
         setappdata(handles.cable_text,'modObj',state.modObj);
@@ -929,21 +492,9 @@ function loadState(handles)
                 set(handles.control_class_popup,'value',state.control_class_popup);
                 set(handles.solver_class_popup,'value',state.solver_class_popup);
                 solver_class_popup_Callback(handles.solver_class_popup,[],handles);
-                set(handles.solver_type_popup,'value',state.solver_type_popup);
-                set(handles.objective_popup,'value',state.objective_popup);
-                set(handles.constraint_popup,'value',state.constraint_popup);
-                set(handles.tuning_parameter_popup,'value',state.tuning_parameter_popup);
                 set(handles.plot_type_popup,'value',state.plot_type_popup);
-                set(handles.objective_table,'Data',state.objective_table);
-                set(handles.constraint_table,'Data',state.constraint_table);
-                set(handles.tuning_parameter_table,'Data',state.tuning_parameter_table);
-                set(handles.kp_table,'Data',state.kp_table);
-                set(handles.kd_table,'Data',state.kd_table);
                 % Callback
                 plot_type_popup_Callback(handles.plot_type_popup,[],handles);
-                objective_popup_Callback(handles.objective_popup,[],handles);
-                constraint_popup_Callback(handles.constraint_popup,[],handles);
-                tuning_parameter_popup_Callback(handles.tuning_parameter_popup, [], handles);
             else
                 initialise_popups(handles);
             end
@@ -963,17 +514,8 @@ function saveState(handles,file_path)
     state.control_class_popup               =   get(handles.control_class_popup,'value');
     state.trajectory_popup                  =   get(handles.trajectory_popup,'value');
     state.solver_class_popup                =   get(handles.solver_class_popup,'value');
-    state.solver_type_popup                 =   get(handles.solver_type_popup,'value');
-    state.objective_popup                   =   get(handles.objective_popup,'value');
-    state.constraint_popup                  =   get(handles.constraint_popup,'value');
     state.plot_type_popup                   =   get(handles.plot_type_popup,'value');
-    state.tuning_parameter_popup            =   get(handles.tuning_parameter_popup,'value');
-    % Tables
-    state.objective_table                   =   get(handles.objective_table,'Data');
-    state.constraint_table                  =   get(handles.constraint_table,'Data');
-    state.tuning_parameter_table            =   get(handles.tuning_parameter_table,'Data');
-    state.kp_table                          =   get(handles.kp_table,'Data');
-    state.kd_table                          =   get(handles.kd_table,'Data');
+    % Arguments
     if(nargin>1)
         save(file_path,'state');
     else
@@ -981,36 +523,107 @@ function saveState(handles,file_path)
     end
 end
 
-function initialise_gain_table(hObject,handles)
-    modObj = getappdata(handles.cable_text,'modObj');
-    n = modObj.numDofs;
-    set(hObject,'Data',zeros(1,n));
-    set(hObject,'ColumnEditable',true(1,n));
-    set(hObject,'ColumnWidth',num2cell(35*ones(1,n)));
-%     set(hObject,'ColumnWidth',35*ones(1,n));
-end
-
 function initialise_popups(handles)
     % Updates
-    solver_type_popup_update(handles.solver_type_popup,handles);
-    objective_popup_Update(handles.objective_popup,handles);
-    constraint_popup_Update(handles.constraint_popup,handles);
-    tuning_parameter_popup_Update(handles.tuning_parameter_popup,handles);
-    % Set up gain tables
-    initialise_gain_table(handles.kp_table,handles);
-    initialise_gain_table(handles.kd_table,handles);
-    % Needed callbacks
     plot_type_popup_Callback(handles.plot_type_popup,[],handles);
-    objective_popup_Callback(handles.objective_popup,[],handles);
-    constraint_popup_Callback(handles.constraint_popup,[],handles);
-    tuning_parameter_popup_Callback(handles.tuning_parameter_popup, [], handles);
 end
 
-function weight_number = get_weight_number(xmlObj,modObj)
-    weight_links = str2double(xmlObj.getElementsByTagName('weight_links_multiplier').item(0).getFirstChild.getData);
-    weight_cables = str2double(xmlObj.getElementsByTagName('weight_cables_multiplier').item(0).getFirstChild.getData);
-    weight_constants = str2num(xmlObj.getElementsByTagName('weight_constants').item(0).getFirstChild.getData);
-    weight_number = weight_links*modObj.numLinks + weight_cables*modObj.numCables + sum(weight_constants);
+
+% --- Executes on button press in plot_movie_button.
+function plot_movie_button_Callback(~, ~, handles) %#ok<DEFNU>
+    % hObject    handle to plot_movie_button (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    structure with handles and user data (see GUIDATA)
+    % Things that this should do
+    sim = getappdata(handles.figure1,'sim');
+    if(isempty(sim))
+        warning('No simulator has been generated. Please press run first'); %#ok<WNTAG>
+    else
+        path_string = CASPR_configuration.LoadHomePath();
+        % Check if the log folder exists
+        if((exist([path_string,'/data'],'dir')~=7)||(exist([path_string,'/data/videos'],'dir')~=7))
+            if((exist([path_string,'/data'],'dir')~=7))
+                mkdir([path_string,'/data']);
+            end
+            mkdir([path_string,'/data/videos']);
+        end      
+        model_config = getappdata(handles.trajectory_popup,'model_config');
+        file_name = [path_string,'/data/videos/control_gui_output.avi'];
+        [file,path] = uiputfile(file_name,'Save file name');
+        sim.plotMovie(model_config.displayRange, model_config.viewAngle, [path,file], sim.timeVector(length(sim.timeVector)), 700, 700);
+    end
 end
-%% TO BE DONE
-% Modify the constraints and objectives
+
+% --- Executes on button press in script_button.
+function script_button_Callback(~, ~, handles)
+    % hObject    handle to script_button (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    structure with handles and user data (see GUIDATA)
+    
+    % Strings for model editing
+    model_str = cellstr(get(handles.model_text,'String'));
+    cable_str = cellstr(get(handles.cable_text,'String'));
+    contents = cellstr(get(handles.trajectory_popup,'String'));
+    trajectory_str = contents{get(handles.trajectory_popup,'Value')};
+    % Control
+    contents = cellstr(get(handles.control_class_popup,'String'));
+    control_class_id = contents{get(handles.control_class_popup,'Value')};
+    base_folder = CASPR_configuration.LoadHomePath();
+    if(strcmp(control_class_id,'ComputedTorqueController'))
+        r_string = [base_folder,'/scripts/examples/control/script_control_CTC_example.m'];
+    elseif(strcmp(control_class_id,'LyapunovStaticCompensation'))
+        r_string = [base_folder,'/scripts/examples/control/script_control_Lyapunov_example.m'];
+    end
+    contents = cellstr(get(handles.solver_class_popup,'String'));
+    solver_class_id = contents{get(handles.solver_class_popup,'Value')};
+    if(strcmp(solver_class_id,'IDSolverLinProg'))
+        r_id_string = [base_folder,'/scripts/examples/dynamics/script_ID_linprog_example.m'];
+    elseif(strcmp(solver_class_id,'IDSolverQuadProg'))
+        r_id_string = [base_folder,'/scripts/examples/dynamics/script_ID_quadprog_example.m'];
+    elseif(strcmp(solver_class_id,'IDSolverFeasiblePolygon'))
+        r_id_string = [base_folder,'/scripts/examples/dynamics/script_ID_feasible_polygon_example.m'];
+    elseif(strcmp(solver_class_id,'IDSolverOptimallySafe'))
+        r_id_string = [base_folder,'/scripts/examples/dynamics/script_ID_optimally_safe_example.m'];
+    elseif(strcmp(solver_class_id,'IDSolverClosedForm'))
+        r_id_string = [base_folder,'/scripts/examples/dynamics/script_ID_closed_form_example.m'];
+    elseif(strcmp(solver_class_id,'IDSolverMinInfNorm'))
+        r_id_string = [base_folder,'/scripts/examples/dynamics/script_ID_min_inf_norm_example.m'];
+    end
+    w_string = [base_folder,'/scripts/local/GUI_script_autogenerated.m'];
+    r_fid = fopen(r_string,'r');
+    w_fid = fopen(w_string,'w');
+    while(~feof(r_fid))
+        s = fgetl(r_fid);
+        % Determine if comment
+        new_s = regexprep(s,'%','%%');
+        % Replace all references to the model
+        new_s = regexprep(new_s,'Example planar XY',model_str);
+        new_s = regexprep(new_s,'basic',cable_str);
+        new_s = regexprep(new_s,'example_quintic',trajectory_str);
+        if(~isempty(strfind(new_s,'id_objective')))
+            new_s = extractDynamics(r_id_string);
+            % Remove the second line
+            fgetl(r_fid);
+        end
+        fprintf(w_fid,[new_s,'\n']);
+    end
+    fclose(r_fid);
+    fclose(w_fid);
+    edit(w_string)
+end
+
+function new_s = extractDynamics(r_id_string)
+    r_fid = fopen(r_id_string,'r');
+    new_s = [];
+    while(~feof(r_fid))
+        s = fgetl(r_fid);
+        id_o_index = strfind(s,'id_objective');
+        id_s_index = strfind(s,'id_solver');
+        if(~isempty(id_o_index)&&(id_o_index == 1))
+            new_s = [new_s,s,'\n'];
+        elseif(~isempty(id_s_index)&&(id_s_index == 1))
+            new_s = [new_s,s];
+        end
+    end
+    fclose(r_fid);
+end

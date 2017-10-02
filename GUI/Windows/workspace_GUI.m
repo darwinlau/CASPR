@@ -31,7 +31,7 @@ function varargout = workspace_GUI(varargin)
 
     % Edit the above text to modify the response to help workspace_GUI
 
-    % Last Modified by GUIDE v2.5 02-Apr-2017 11:00:10
+    % Last Modified by GUIDE v2.5 07-Jul-2017 17:37:00
 
     % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
@@ -102,14 +102,13 @@ end
 %--------------------------------------------------------------------------
 % Workspace Condition
 % --- Executes on selection change in workspace_condition_popup.
-function workspace_condition_popup_Callback(~, ~, handles) %#ok<DEFNU>
+function workspace_condition_popup_Callback(~, ~, ~) %#ok<DEFNU>
     % hObject    handle to workspace_condition_popup (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
 
     % Hints: contents = cellstr(get(hObject,'String')) returns workspace_condition_popup contents as cell array
     %        contents{get(hObject,'Value')} returns selected item from workspace_condition_popup
-    workspace_generation_popup_Update(handles.workspace_generation_popup,handles);
 end
 
 % --- Executes during object creation, after setting all properties.
@@ -127,105 +126,39 @@ function workspace_condition_popup_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
     setappdata(hObject,'settings',settingsXMLObj);
     workspace_str = GUIOperations.XmlObj2StringCellArray(settingsXMLObj.getElementsByTagName('simulator').item(0).getElementsByTagName('workspace_condition')...
                     ,'id');
+    workspace_str = lower(workspace_str);
+    workspace_str = strrep(workspace_str,'_',' ');
     set(hObject, 'String', workspace_str);
 end
 
-% Workspace Generation
-% --- Executes on selection change in workspace_generation_popup.
-function workspace_generation_popup_Callback(~, ~, ~) %#ok<DEFNU>
-    % hObject    handle to workspace_generation_popup (see GCBO)
-    % eventdata  reserved - to be defined in a future version of MATLAB
-    % handles    structure with handles and user data (see GUIDATA)
-
-    % Hints: contents = cellstr(get(hObject,'String')) returns workspace_generation_popup contents as cell array
-    %        contents{get(hObject,'Value')} returns selected item from workspace_generation_popup
-end
-
-function workspace_generation_popup_Update(hObject,handles)
-    contents = cellstr(get(handles.workspace_condition_popup,'String'));
-    workspace_condition_id = contents{get(handles.workspace_condition_popup,'Value')};
-    settings = getappdata(handles.workspace_condition_popup,'settings');
-    workspaceObj = settings.getElementById(workspace_condition_id);
-    enum_file = workspaceObj.getElementsByTagName('generation_method_enum').item(0).getFirstChild.getData;
-    e_list      =   enumeration(char(enum_file));
-    e_n         =   length(e_list);
-    e_list_str  =   cell(1,e_n);
-    for i=1:e_n
-        temp_str = char(e_list(i));
-        e_list_str{i} = temp_str(3:length(temp_str));
-    end
-    set(hObject,'Value',1);
-    set(hObject, 'String', e_list_str);
-end
-
-% --- Executes during object creation, after setting all properties.
-function workspace_generation_popup_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
-    % hObject    handle to workspace_generation_popup (see GCBO)
-    % eventdata  reserved - to be defined in a future version of MATLAB
-    % handles    empty - handles not created until after all CreateFcns called
-
-    % Hint: popupmenu controls usually have a white background on Windows.
-    %       See ISPC and COMPUTER.
-    if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-        set(hObject,'BackgroundColor','white');
-    end
-end
-
-% Workspace Metric
-% --- Executes on selection change in workspace_metric_popup.
-function workspace_metric_popup_Callback(~, ~, ~) %#ok<DEFNU>
-    % hObject    handle to workspace_metric_popup (see GCBO)
-    % eventdata  reserved - to be defined in a future version of MATLAB
-    % handles    structure with handles and user data (see GUIDATA)
-
-    % Hints: contents = cellstr(get(hObject,'String')) returns workspace_metric_popup contents as cell array
-    %        contents{get(hObject,'Value')} returns selected item from workspace_metric_popup
-end
-
-% --- Executes during object creation, after setting all properties.
-function workspace_metric_popup_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
-    % hObject    handle to workspace_metric_popup (see GCBO)
-    % eventdata  reserved - to be defined in a future version of MATLAB
-    % handles    empty - handles not created until after all CreateFcns called
-
-    % Hint: popupmenu controls usually have a white background on Windows.
-    %       See ISPC and COMPUTER.
-    if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-        set(hObject,'BackgroundColor','white');
-    end
-    settingsXMLObj = GUIOperations.GetSettings('/GUI/XML/workspaceXML.xml');
-    workspace_str = GUIOperations.XmlObj2StringCellArray(settingsXMLObj.getElementsByTagName('simulator').item(0).getElementsByTagName('workspace_metrics').item(0).getElementsByTagName('workspace_metric')...
-        ,[]);
-    workspace_str = [{' '},workspace_str];
-    set(hObject, 'String', workspace_str);
-end
-
-% --- Executes on selection change in grid_popup.
-function grid_popup_Callback(hObject, ~, handles) %#ok<INUSD,DEFNU>
-    % hObject    handle to grid_popup (see GCBO)
-    % eventdata  reserved - to be defined in a future version of MATLAB
-    % handles    structure with handles and user data (see GUIDATA)
-
-    % Hints: contents = cellstr(get(hObject,'String')) returns grid_popup contents as cell array
-    %        contents{get(hObject,'Value')} returns selected item from grid_popup
-end
-
-% --- Executes during object creation, after setting all properties.
-function grid_popup_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
-    % hObject    handle to grid_popup (see GCBO)
-    % eventdata  reserved - to be defined in a future version of MATLAB
-    % handles    empty - handles not created until after all CreateFcns called
-
-    % Hint: popupmenu controls usually have a white background on Windows.
-    %       See ISPC and COMPUTER.
-    if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-        set(hObject,'BackgroundColor','white');
-    end
-    settingsXMLObj = GUIOperations.GetSettings('/GUI/XML/workspaceXML.xml');
-    workspace_str = GUIOperations.XmlObj2StringCellArray(settingsXMLObj.getElementsByTagName('simulator').item(0).getElementsByTagName('grid_types').item(0).getElementsByTagName('grid_type')...
-        ,[]);
-    set(hObject, 'String', workspace_str);
-end
+% % Workspace Metric
+% % --- Executes on selection change in workspace_metric_popup.
+% function workspace_metric_popup_Callback(~, ~, ~) %#ok<DEFNU>
+%     % hObject    handle to workspace_metric_popup (see GCBO)
+%     % eventdata  reserved - to be defined in a future version of MATLAB
+%     % handles    structure with handles and user data (see GUIDATA)
+% 
+%     % Hints: contents = cellstr(get(hObject,'String')) returns workspace_metric_popup contents as cell array
+%     %        contents{get(hObject,'Value')} returns selected item from workspace_metric_popup
+% end
+% 
+% % --- Executes during object creation, after setting all properties.
+% function workspace_metric_popup_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
+%     % hObject    handle to workspace_metric_popup (see GCBO)
+%     % eventdata  reserved - to be defined in a future version of MATLAB
+%     % handles    empty - handles not created until after all CreateFcns called
+% 
+%     % Hint: popupmenu controls usually have a white background on Windows.
+%     %       See ISPC and COMPUTER.
+%     if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+%         set(hObject,'BackgroundColor','white');
+%     end
+%     settingsXMLObj = GUIOperations.GetSettings('/GUI/XML/workspaceXML.xml');
+%     workspace_str = GUIOperations.XmlObj2StringCellArray(settingsXMLObj.getElementsByTagName('simulator').item(0).getElementsByTagName('workspace_metrics').item(0).getElementsByTagName('workspace_metric')...
+%         ,[]);
+%     workspace_str = [{' '},workspace_str];
+%     set(hObject, 'String', workspace_str);
+% end
 
 % --- Executes on selection change in plot_type_popup.
 function plot_type_popup_Callback(hObject, ~, handles) %#ok<DEFNU>
@@ -270,41 +203,6 @@ end
 %% Push Buttons
 %--------------------------------------------------------------------------
 % --- Executes on button press in save_button.
-function save_button_Callback(~, ~, handles) %#ok<DEFNU>
-    % hObject    handle to save_button (see GCBO)
-    % eventdata  reserved - to be defined in a future version of MATLAB
-    % handles    structure with handles and user data (see GUIDATA)
-    file_name = [CASPR_configuration.LoadHomePath(),'/GUI/config/*.mat'];
-    [file,path] = uiputfile(file_name,'Save file name');
-    saveState(handles,[path,file]);
-end
-
-% --- Executes on button press in load_button.
-function load_button_Callback(~, ~, handles) %#ok<DEFNU>
-    % hObject    handle to load_button (see GCBO)
-    % eventdata  reserved - to be defined in a future version of MATLAB
-    % handles    structure with handles and user data (see GUIDATA)
-    path_string = CASPR_configuration.LoadHomePath();
-    file_name = [path_string,'/GUI/config/*.mat'];
-    settings = uigetfile(file_name);
-    load(settings)
-    mp_text = get(handles.model_text,'String');
-    cs_text = get(handles.cable_text,'String');
-    if(strcmp(state.simulator,'workspace'))
-        if(strcmp(mp_text,state.model_text)&&strcmp(cs_text,state.cable_text))
-            set(handles.workspace_condition_popup,'value',state.workspace_condition_popup_value);
-            workspace_generation_popup_Update(handles.workspace_generation_popup,handles);
-            set(handles.workspace_generation_popup,'value',state.workspace_generation_popup_value);
-            set(handles.workspace_metric_popup,'value',state.workspace_metric_popup_value);
-            set(handles.qtable,'Data',state.workspace_table);
-        else
-            warning('Incorrect Model Type');
-        end
-    else
-        warning('File is not the correct file type'); %#ok<WNTAG>
-    end
-end
-
 % --- Executes on button press in generate_button.
 function generate_button_Callback(~, ~, handles) %#ok<DEFNU>
     % hObject    handle to generate_button (see GCBO)
@@ -314,37 +212,52 @@ function generate_button_Callback(~, ~, handles) %#ok<DEFNU>
     clc; warning off; %#ok<WNOFF> %close all;
     %% Model setup
     modObj = getappdata(handles.cable_text,'modObj');
-    %% Workspace Setup
+    % Set up the workspace simulator
+    % First the grid
+    q_begin         =   modObj.bodyModel.q_min; q_end = modObj.bodyModel.q_max;
+    q_step          =   (modObj.bodyModel.q_max - modObj.bodyModel.q_min)/10;
+    uGrid           =   UniformGrid(q_begin,q_end,q_step);
     % First the condition
     contents = cellstr(get(handles.workspace_condition_popup,'String'));
     wc_string = contents{get(handles.workspace_condition_popup,'Value')};
-    contents = cellstr(get(handles.workspace_generation_popup,'String'));
-    wcm_string = contents{get(handles.workspace_generation_popup,'Value')};    
     settings = getappdata(handles.workspace_condition_popup,'settings');
-    workspaceObj = settings.getElementById(wc_string);
-    enum_file = workspaceObj.getElementsByTagName('generation_method_enum').item(0).getFirstChild.getData;
-    wcondition = {WorkspaceConditionBase.CreateWorkspaceCondition(eval(['WorkspaceConditionType.',wc_string]),eval([char(enum_file),'.M_',wcm_string]),[])};
-%     wcondition  = cfh(contents{get(handles.workspace_generation_popup,'Value')},[-1,1,0,0;0,0,-1,1]);
-    % Then the metric
-    contents = cellstr(get(handles.workspace_metric_popup,'String'));
-    if(strcmp(contents{get(handles.workspace_metric_popup,'Value')},' '))
-        metric = {};
+    if(~strcmp(wc_string,'wrench feasible'))
+        wc_string = upper(wc_string);
+        wc_string = strrep(wc_string,' ','_');
+        w_condition = {WorkspaceConditionBase.CreateWorkspaceCondition(eval(['WorkspaceConditionType.',wc_string]),[],[])};
     else
-        wmetric = contents{get(handles.workspace_metric_popup,'Value')};
-        metric = {WorkspaceMetricBase.CreateWorkspaceMetric(eval(['WorkspaceMetricType.',wmetric]),[])};
+        wc_string = 'WRENCH_FEASIBLE';
+        i_max     = 2^(modObj.numDofs)-1;
+        w_set     = zeros(modObj.numDofs,i_max+1);
+        flag_vec  = zeros(modObj.numDofs,1);
+        min_vec     = -ones(modObj.numDofs,1);
+        max_vec     = ones(modObj.numDofs,1);
+        for k = 0:i_max
+            flag_set = dec2bin(k,modObj.numDofs);
+            flag_vec(:) = str2num(flag_set(:)); %#ok<ST2NM>
+            w_set(:,k+1) = min_vec.*(~flag_vec) + max_vec.*flag_vec;
+        end 
+        w_condition = {WorkspaceConditionBase.CreateWorkspaceCondition(eval(['WorkspaceConditionType.',wc_string]),[],w_set)};
     end
+    % Then the metric
+%     contents = cellstr(get(handles.workspace_metric_popup,'String'));
+%     if(strcmp(contents{get(handles.workspace_metric_popup,'Value')},' '))
+%         metric = {};
+%     else
+%         wmetric = contents{get(handles.workspace_metric_popup,'Value')};
+%         metric = {WorkspaceMetricBase.CreateWorkspaceMetric(eval(['WorkspaceMetricType.',wmetric]),[])};
+%     end
+    w_metric = {WorkspaceMetricBase.CreateWorkspaceMetric(WorkspaceMetricType.CONDITION_NUMBER,[])};
+    % FOR THE MOMENT NO OPTIONS ON CONNECTIVITY
+    w_connectivity  =   WorkspaceConnectivityBase.CreateWorkspaceConnectivityCondition(WorkspaceConnectivityType.GRID,uGrid);
     %% Now initialise the simulation
     disp('Start Setup Simulation');
     set(handles.status_text,'String','Setting up simulation');
     drawnow;
     start_tic       =   tic;
-    q_info = get(handles.qtable,'Data');
-    uGrid           =   UniformGrid(q_info(:,1),q_info(:,2),q_info(:,3));
-    contents = cellstr(get(handles.plot_type_popup,'String'));
-    plot_type = contents{get(handles.plot_type_popup,'Value')};
-    opt = WorkspaceSimulatorOptions(true); % This should be made into an object
+    
+    opt = WorkspaceSimulatorOptions(true,optimset('Display','off')); % This should be made into an object
     wsim            =   WorkspaceSimulator(modObj,uGrid,opt);
-    %% Now set up the grid information
     time_elapsed    =   toc(start_tic);
     fprintf('End Setup Simulation : %f seconds\n', time_elapsed);
     
@@ -352,21 +265,16 @@ function generate_button_Callback(~, ~, handles) %#ok<DEFNU>
     set(handles.status_text,'String','Simulation running');
     drawnow;
     start_tic       =   tic;
-    wsim.run(wcondition,metric); 
+    wsim.run(w_condition,w_metric,w_connectivity); 
     time_elapsed    =   toc(start_tic);
     fprintf('End Running Simulation : %f seconds\n', time_elapsed);
     
     disp('Start Plotting Simulation');
-%     set(handles.status_text,'String','Simulation plotting');
-%     drawnow;
-%     start_tic = tic;
-%     GUIOperations.GUIPlot(plot_type,wsim,handles,str2double(getappdata(handles.plot_type_popup,'num_plots')),get(handles.undock_box,'Value'));
-%     time_elapsed = toc(start_tic);
-    disp('Workspace plotting is not currently supported in the GUI.  Please use the plotting functions for the Simulator Classes')
+    wsim.plotWorkspaceGraph();
     fprintf('End Plotting Simulation : %f seconds\n', time_elapsed);
     set(handles.status_text,'String','No simulation running');
     setappdata(handles.figure1,'sim',wsim);
-    assignin('base','workspace_sim',wsim);
+    assignin('base','workspace_sim',wsim); 
 end
 
 % --- Executes on button press in plot_button.
@@ -378,35 +286,42 @@ function plot_button_Callback(~, ~, handles) %#ok<DEFNU>
     if(isempty(sim))
         warning('No simulator has been generated. Please press run first'); %#ok<WNTAG>
     else
-        contents = cellstr(get(handles.plot_type_popup,'String'));
-        plot_type = contents{get(handles.plot_type_popup,'Value')};
-        % AT THE MOMENT ONLY PLOT_WORKSPACE IS SUPPORTED.  FOR OTHER PLOTS
-        % MUST USE THE WORKSPACE SIMULATOR METHODS DIRECTLY
-        % Get the grid information
-        q_info = get(handles.qtable,'Data');
-        % Determine the number of dimensions (for the moment this doesn't
-        % determine if a single plane has been used).
-        dim = size(q_info,1);
-        wsim = getappdata(handles.figure1,'sim');
-        if(dim<=2)
-            if(isempy(wsim.metrics))
-               wsim.plotWorkspace2([],wsim.conditions{1},[1,2]);
-            else
-               wsim.plotWorkspace2([],wsim.metrics{1},[1,2]);
-            end
-        elseif(dim==3)
-            wsim.plotWorkspace3([],WorkspaceConditionType.WRENCH_CLOSURE,[1,2,3]);
-            if(isempy(wsim.metrics))
-               wsim.plotWorkspace3([],wsim.conditions{1},[1,2]);
-            else
-               wsim.plotWorkspace3([],wsim.metrics{1},[1,2]);
-            end
-        else
-            error('Plotting of workspaces of this dimensions are currently not supported. Please use the workspace simulator methods to extract a smaller data set');
-        end
-%         GUIOperations.GUIPlot(plot_type,sim,handles,str2double(getappdata(handles.plot_type_popup,'num_plots')),get(handles.undock_box,'Value'))
         
     end
+end
+
+% --- Executes on button press in generate_script_button.
+function generate_script_button_Callback(~, ~, handles) %#ok<DEFNU>
+% hObject    handle to generate_script_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    base_folder = CASPR_configuration.LoadHomePath();
+    contents = cellstr(get(handles.workspace_condition_popup,'String'));
+    model_str = cellstr(get(handles.model_text,'String'));
+    cable_str = cellstr(get(handles.cable_text,'String'));
+    wc_string = contents{get(handles.workspace_condition_popup,'Value')};
+    if(strcmp(wc_string,'wrench closure'))
+        r_string = [base_folder,'/scripts/examples/workspace/script_workspace_condition_wrench_closure_example.m'];
+    elseif(strcmp(wc_string,'wrench feasible'))
+        r_string = [base_folder,'/scripts/examples/workspace/script_workspace_condition_wrench_feasible_example.m'];
+    elseif(strcmp(wc_string,'static'))
+        r_string = [base_folder,'/scripts/examples/workspace/script_workspace_condition_static_example.m'];
+    end
+    w_string = [base_folder,'/scripts/local/GUI_script_autogenerated.m'];
+    r_fid = fopen(r_string,'r');
+    w_fid = fopen(w_string,'w');
+    while(~feof(r_fid))
+        s = fgetl(r_fid);
+        % Determine if comment
+        new_s = regexprep(s,'%','%%');
+        % Replace all references to the model
+        new_s = regexprep(new_s,'2 DoF VSD',model_str);
+        new_s = regexprep(new_s,'basic',cable_str);
+        fprintf(w_fid,[new_s,'\n']);
+    end
+    fclose(r_fid);
+    fclose(w_fid);
+    edit(w_string)
 end
 
 %--------------------------------------------------------------------------
@@ -514,9 +429,7 @@ function saveState(handles,file_path)
     state.model_text                        =   get(handles.model_text,'String');
     state.cable_text                        =   get(handles.cable_text,'String');
     state.workspace_condition_popup_value   =   get(handles.workspace_condition_popup,'value');
-    state.workspace_generation_popup_value  =   get(handles.workspace_generation_popup,'value');
-    state.workspace_metric_popup_value      =   get(handles.workspace_metric_popup,'value');
-    state.workspace_table                   =   get(handles.qtable,'Data');
+%     state.workspace_metric_popup_value      =   get(handles.workspace_metric_popup,'value');
     state.plot_type_popup                   =   get(handles.plot_type_popup,'value');
     if(nargin>1)
         save(file_path,'state');
@@ -530,6 +443,7 @@ function loadState(handles)
     % load all of the settings and initialise the values to match
     path_string = CASPR_configuration.LoadHomePath();
     file_name = [path_string,'/GUI/config/caspr_gui_state.mat'];
+    set(handles.status_text,'String','No simulation running');
     if(exist(file_name,'file'))
         load(file_name)
         set(handles.model_text,'String',state.model_text);
@@ -538,39 +452,18 @@ function loadState(handles)
         state.modObj.bodyModel.occupied.reset();
         setappdata(handles.cable_text,'modObj',state.modObj);
         file_name = [path_string,'/GUI/config/workspace_gui_state.mat'];
-        format_q_table(state.modObj.numDofs,handles.qtable)
         if(exist(file_name,'file'))
             load(file_name)
             mp_text = get(handles.model_text,'String');
             cs_text = get(handles.cable_text,'String');
             if(strcmp(mp_text,state.model_text)&&strcmp(cs_text,state.cable_text))
                 set(handles.workspace_condition_popup,'value',state.workspace_condition_popup_value);
-                workspace_generation_popup_Update(handles.workspace_generation_popup,handles);
-                set(handles.workspace_generation_popup,'value',state.workspace_generation_popup_value);
-                set(handles.workspace_metric_popup,'value',state.workspace_metric_popup_value);
-                set(handles.qtable,'Data',state.workspace_table);
+%                 set(handles.workspace_metric_popup,'value',state.workspace_metric_popup_value);
                 set(handles.plot_type_popup,'value',state.plot_type_popup);
                 plot_type_popup_Callback(handles.plot_type_popup,[],handles);
             else
-                workspace_generation_popup_Update(handles.workspace_generation_popup,handles);
                 plot_type_popup_Callback(handles.plot_type_popup,[],handles);
             end
         end
     end
 end
-
-function format_q_table(numDofs,qtable)
-    set(qtable,'Data',zeros(numDofs,3));
-    set(qtable,'ColumnWidth',{50});
-    set(qtable,'ColumnEditable',true(1,3));
-    set(qtable,'ColumnName',{'q_start','q_end','q_step'});
-    q_position = get(qtable,'Position');
-    q_position(1) = 0.713;
-    q_position(3) = 0.235;
-    set(qtable,'Position',q_position);
-end
-
-%% TO BE DONE
-% Generate Workspace Plotting Functions
-% Add new Methods for computing Wrench Closure
-% Determine where best to store settings

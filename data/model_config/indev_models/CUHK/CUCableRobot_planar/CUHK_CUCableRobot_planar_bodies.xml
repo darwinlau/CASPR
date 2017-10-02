@@ -1,23 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
-<links display_range="0.0 2.28 0.0 2.28 0.0 2.0" view_angle="0 0">
-  <link_rigid num="1" name="CUHK_planar">
-    <joint type="PLANAR_XZ" q_initial="1.14 1.0 0.0"/> 
-    <physical>
-      <mass>2.945</mass>
-      <com_location>0.0 0.0 0.0</com_location>
-      <end_location>0.0 0.0 0.0</end_location>
-      <inertia ref="com">
-        <Ixx>0.02537</Ixx>
-        <Iyy>0.10052</Iyy>
-        <Izz>0.07516</Izz>
-        <Ixy>0.0</Ixy>
-        <Ixz>0.0</Ixz>
-        <Iyz>0.0</Iyz>
-      </inertia>
-    </physical>
-    <parent>
-      <num>0</num>
-      <location>0.0 0.083 0.0</location>
-    </parent>
-  </link_rigid>
-</links>
+<!DOCTYPE bodies_system SYSTEM "../../../templates/bodies.dtd">
+<bodies_system>
+    <links display_range="0.0 2.28 0.0 2.28 0.0 2.0" view_angle="0 0">
+      <link_rigid num="1" name="CUHK_planar">
+        <joint type="PLANAR_XZ" q_initial="1.14 1.0 0.0" q_min="0.0 0.0 -3.1416" q_max="2.28 2.28 3.1416"/> 
+        <physical>
+          <mass>2.945</mass>
+          <com_location>0.0 0.0 0.0</com_location>
+          <end_location>0.0 0.0 0.0</end_location>
+          <inertia ref="com">
+            <Ixx>0.02537</Ixx>
+            <Iyy>0.10052</Iyy>
+            <Izz>0.07516</Izz>
+            <Ixy>0.0</Ixy>
+            <Ixz>0.0</Ixz>
+            <Iyz>0.0</Iyz>
+          </inertia>
+        </physical>
+        <parent>
+          <num>0</num>
+          <location>0.0 0.083 0.0</location>
+        </parent>
+      </link_rigid>
+    </links>
+</bodies_system>
