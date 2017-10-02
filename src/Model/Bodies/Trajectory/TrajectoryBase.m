@@ -3,7 +3,7 @@
 % Author        : Darwin LAU
 % Created       : 2017
 % Description   :
-classdef TrajectoryBase < handle
+classdef (Abstract) TrajectoryBase < handle
     properties
         timeVector      % The time vector for the trajectory
     end
