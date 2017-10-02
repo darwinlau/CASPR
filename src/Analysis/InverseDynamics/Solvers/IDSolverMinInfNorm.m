@@ -67,7 +67,7 @@ classdef IDSolverMinInfNorm < IDSolverBase
             switch (obj.lp_solver_type)
                 case ID_LP_SolverType.MATLAB
                     if(isempty(obj.options))
-                        obj.options = optimoptions('linprog', 'Display', 'off', 'Algorithm', 'interior-point');
+                        obj.options = optimoptions('linprog', 'Display', 'off', 'Algorithm', 'dual-simplex');
                     end
                     [temp_cable_forces, id_exit_type] = id_lp_matlab(f, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, f0,obj.options);
                     actuation_forces = temp_cable_forces(1:m);
