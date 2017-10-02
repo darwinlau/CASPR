@@ -33,17 +33,18 @@ classdef ForwardKinematicsSimulatorSet < handle
             end
         end
         
-        % Plots the error for each cable length by comparing the reference
-        % length with the length as a result of the solution generalised
-        % coordinates.
-        function plotCableLengthError(obj,~,plot_axis)
-            lengthError_array = cell2mat(obj.lengthError);
-            if(~isempty(plot_axis))
-                plot(plot_axis,obj.timeVector, lengthError_array, 'Color', 'k', 'LineWidth', 1.5);
+        % Plots the computational cost for the solver
+        function plotCompCost(obj,plot_axis)
+            if(nargin == 1 || isempty(plot_axis))
+                figure; hold on;
+                for i = 1:obj.numSims
+                    plot(obj.simulators{i}.timeVector, obj.simulators{i}.compTime);
+                end
+                title('FK computational time');
             else
-                figure;
-                plot(obj.timeVector, lengthError_array, 'Color', 'k', 'LineWidth', 1.5);
-                title('Cable Length Error');
+                for i = 1:obj.numSims
+                    plot(plot_axis,obj.timeVector, obj.simulators{i}.compTime);
+                end
             end
         end
     end
