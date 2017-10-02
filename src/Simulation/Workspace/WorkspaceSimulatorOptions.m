@@ -7,8 +7,8 @@
 
 classdef WorkspaceSimulatorOptions
     properties
-        union       % Determines if the workspace should take a union of the conditions or the intersection
-        solver_options % An options object for different solvers
+        union           % Determines if the workspace should take a union of the conditions or the intersection
+        solver_options  % An options object for different solvers
     end
     
     methods

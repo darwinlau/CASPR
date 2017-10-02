@@ -3,6 +3,7 @@
 % Author        : Darwin LAU
 % Created       : 2015
 % Description   :
+% THIS IS CURRENTLY NOT SUPPORTED IN CASPR
 classdef SpatialQuaternion < JointBase
     properties
         translation

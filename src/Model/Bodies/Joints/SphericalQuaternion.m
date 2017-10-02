@@ -3,6 +3,7 @@
 % Author        : Darwin LAU
 % Created       : 2015
 % Description   :
+% THIS IS CURRENTLY NOT SUPPORTED IN CASPR
 classdef SphericalQuaternion < JointBase
     
     properties (Constant = true)
@@ -33,7 +34,7 @@ classdef SphericalQuaternion < JointBase
         function update(obj, q, q_dot, q_ddot)
             if(isa(q, 'double') && norm(q) ~= 1)
                 q_quat_norm = Quaternion(q(1), q(2), q(3), q(4)).normalise();
-                assert(roundn(norm(q_quat_norm),-5) == 1, 'Invalid q, norm of quaternion orientation must equal to one.');
+                assert(round(norm(q_quat_norm),5) == 1, 'Invalid q, norm of quaternion orientation must equal to one.');
             else
                 q_quat_norm = Quaternion(q(1), q(2), q(3), q(4));
             end

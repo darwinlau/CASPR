@@ -17,6 +17,7 @@ classdef SpatialEulerXYZ < JointBase
         q_ddot_default = [TranslationalXYZ.q_ddot_default; SphericalEulerXYZ.q_ddot_default];
         q_lb = [TranslationalXYZ.q_lb; SphericalEulerXYZ.q_lb];
         q_ub = [TranslationalXYZ.q_ub; SphericalEulerXYZ.q_ub];
+        q_dofType = [DoFType.TRANSLATION; DoFType.TRANSLATION; DoFType.TRANSLATION; DoFType.ROTATION; DoFType.ROTATION; DoFType.ROTATION];
     end
     
     properties (Dependent)        
@@ -81,6 +82,18 @@ classdef SpatialEulerXYZ < JointBase
             [q_orient, q_orient_dot, q_orient_ddot] = obj.orientation.generateTrajectoryQuinticSpline( ...
                 obj.GetOrientationQ(q_s), obj.GetOrientationQd(q_s_d), obj.GetOrientationQd(q_s_dd), ...
                 obj.GetOrientationQ(q_e), obj.GetOrientationQd(q_e_d), obj.GetOrientationQd(q_e_dd), time_vector);
+            q = [q_trans; q_orient];
+            q_dot = [q_trans_dot; q_orient_dot];
+            q_ddot = [q_trans_ddot; q_orient_ddot];
+        end
+        
+        function [q, q_dot, q_ddot] = generateTrajectoryParabolicBlend(obj, q_s, q_e, time_vector, time_blend)
+            [q_trans, q_trans_dot, q_trans_ddot] = obj.translation.generateTrajectoryParabolicBlend( ...
+                obj.GetTranslationQ(q_s), obj.GetTranslationQd(q_s_d), obj.GetTranslationQd(q_s_dd), ...
+                obj.GetTranslationQ(q_e), obj.GetTranslationQd(q_e_d), obj.GetTranslationQd(q_e_dd), time_vector, time_blend);
+            [q_orient, q_orient_dot, q_orient_ddot] = obj.orientation.generateTrajectoryParabolicBlend( ...
+                obj.GetOrientationQ(q_s), obj.GetOrientationQd(q_s_d), obj.GetOrientationQd(q_s_dd), ...
+                obj.GetOrientationQ(q_e), obj.GetOrientationQd(q_e_d), obj.GetOrientationQd(q_e_dd), time_vector, time_blend);
             q = [q_trans; q_orient];
             q_dot = [q_trans_dot; q_orient_dot];
             q_ddot = [q_trans_ddot; q_orient_ddot];

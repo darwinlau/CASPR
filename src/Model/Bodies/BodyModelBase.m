@@ -10,7 +10,7 @@ classdef (Abstract) BodyModelBase < handle
         r_OG = zeros(3,1);      % Absolute position vector to centre of gravity in {k}
         r_OP = zeros(3,1);      % Absolute position vector to joint location in (k)
         r_OPe = zeros(3,1);     % Absolute position vector to end of link in {k}
-        r_Oy = zeros(3,1);      % Absolute position vector to the OP space reference point in {k}
+        r_OY = zeros(3,1);      % Absolute position vector to the OP space reference point in {k}
 
         % Absolute velocities
         v_OG = zeros(3,1);      % Absolute velocity vector to centre of gravity in {k}
@@ -41,17 +41,17 @@ classdef (Abstract) BodyModelBase < handle
     properties (SetAccess = private)
         % Objects
         joint                   % Joint object
-        op_space                % Operation Space object
+        operationalSpace       % Operation Space object
         % Identification
         id                      % Body ID
         name
     end
 
     properties (Dependent)
-        numDofs         % The number of degrees of freedom
-        numDofVars      % The number of degrees of freedom variables
-        numOPDofs       % The number of operational space degrees of freedom
-        isJointActuated % Whether the body is joint actuated
+        numDofs             % The number of degrees of freedom
+        numDofVars          % The number of degrees of freedom variables
+        numOperationalDofs  % The number of operational space degrees of freedom
+        isJointActuated     % Whether the body is joint actuated
     end
 
     methods
@@ -66,7 +66,7 @@ classdef (Abstract) BodyModelBase < handle
             bk.name = name;
             bk.joint = joint;
             % Operation Space creation
-            bk.op_space = [];
+            bk.operationalSpace = [];
         end
 
         % Add the parent for the body
@@ -80,9 +80,10 @@ classdef (Abstract) BodyModelBase < handle
         end
         
         % Attach the operational space rigid body
-        function attachOPSpace(obj,op_space)
-            obj.op_space = op_space;
-            obj.r_y = op_space.offset;
+        function attachOperationalSpace(obj,operational_space)
+            CASPR_log.Assert(isempty(obj.operationalSpace),'Cannot have two operational spaces attached to the same link');
+            obj.operationalSpace = operational_space;
+            obj.r_y = operational_space.offset;
         end
 
         % -------
@@ -96,9 +97,9 @@ classdef (Abstract) BodyModelBase < handle
             dofs = obj.joint.numVars;
         end
         
-        function dofs = get.numOPDofs(obj)
-            if(~isempty(obj.op_space))
-                dofs = obj.op_space.numOPDofs;
+        function dofs = get.numOperationalDofs(obj)
+            if(~isempty(obj.operationalSpace))
+                dofs = obj.operationalSpace.numOperationalDofs;
             else
                 dofs = 0;
             end

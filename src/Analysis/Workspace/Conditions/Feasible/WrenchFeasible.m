@@ -13,7 +13,7 @@ classdef WrenchFeasible < WorkspaceConditionBase
         % Constructor for wrench closure workspace
         function w = WrenchFeasible(method,desired_wrench_set)
             if(isempty(method))
-                w.method = [];
+                w.method = WrenchFeasibleMethods.M_CAPACITY_MARGIN;
             else
                 w.method = method; 
             end 
@@ -22,7 +22,7 @@ classdef WrenchFeasible < WorkspaceConditionBase
         
         % Evaluate the wrench closure condition return true if satisfied 
         function inWorkspace = evaluateFunction(obj,dynamics,~)
-            switch(method)
+            switch(obj.method)
                 case WrenchFeasibleMethods.M_CAPACITY_MARGIN
                     inWorkspace = wrench_feasible_capacity_margin(obj.desired_wrench_set,dynamics);
                 otherwise

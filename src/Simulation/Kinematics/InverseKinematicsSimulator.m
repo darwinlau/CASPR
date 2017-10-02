@@ -7,11 +7,11 @@
 %   specified joint space trajectory. This is trivial for CDPRs (as a type
 %   of parallel robots) and only requires the "update" function of the
 %   SystemModel to be called.
-classdef InverseKinematicsSimulator < MotionSimulator
+classdef InverseKinematicsSimulator < MotionSimulatorBase
     methods
         % Constructors
         function ik = InverseKinematicsSimulator(model)
-            ik@MotionSimulator(model);
+            ik@MotionSimulatorBase(model);
         end
         
         % Implementation of the run function.

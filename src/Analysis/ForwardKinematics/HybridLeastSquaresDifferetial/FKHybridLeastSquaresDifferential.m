@@ -29,12 +29,12 @@ classdef FKHybridLeastSquaresDifferential < FKAnalysisBase
             fkhybrid.interval = interval;
         end
         
-        function [q, q_dot] = computeFunction(obj, len, len_prev_2, q_prev, q_d_prev, delta_t)            
+        function [q, q_dot] = computeFunction(obj, len, len_prev_2, cable_indices, q_prev, q_d_prev, delta_t)            
             if (obj.counter < obj.interval)
-                [q, q_dot] = obj.fkDifferential.compute(len, len_prev_2, q_prev, q_d_prev, delta_t);
+                [q, q_dot] = obj.fkDifferential.compute(len, len_prev_2, cable_indices, q_prev, q_d_prev, delta_t);
                 obj.counter = obj.counter + 1;
             else
-                [q, q_dot] = obj.fkLeastSquares.compute(len, len_prev_2, q_prev, q_d_prev, delta_t);
+                [q, q_dot] = obj.fkLeastSquares.compute(len, len_prev_2, cable_indices, q_prev, q_d_prev, delta_t);
                 obj.counter = 1;
             end
         end     

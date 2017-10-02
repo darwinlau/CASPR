@@ -34,7 +34,7 @@ classdef SystemModel < handle
         numDofs                 % Number of degrees of freedom
         numDofVars              % Number of variables for the DoFs
         numDofsJointActuated    % Number of DoFs that are actuated at the joint
-        numOPDofs               % Number of operational space degrees of freedom
+        numOperationalDofs      % Number of operational space degrees of freedom
         numCables               % Number of cables
         numCablesActive         % Number of active cables
         numCablesPassive        % Number of active cables
@@ -129,6 +129,14 @@ classdef SystemModel < handle
             obj.cableModel.update(obj.bodyModel);
         end
         
+        % Function that updates the inertia parameters
+        function updateInertiaParameters(obj,m,r_G,I_G,update_flag)
+            obj.bodyModel.updateInertiaParameters(m,r_G,I_G);
+            if(update_flag)
+                obj.update(obj.q,obj.q_dot,obj.q_ddot,obj.W_e);
+            end
+        end
+        
         % Get the linearisation terms for the system.
         function [A,B] = getLinearisedModel(obj)
             % This function assumes that the state input pair for
@@ -162,8 +170,8 @@ classdef SystemModel < handle
         end
         
         % Load the operational space xml object
-        function loadOpXmlObj(obj,op_space_xmlobj)
-            obj.bodyModel.loadOpXmlObj(op_space_xmlobj);
+        function loadOperationalXmlObj(obj,operational_space_xmlobj)
+            obj.bodyModel.loadOperationalXmlObj(operational_space_xmlobj);
         end
         
         % -------
@@ -177,8 +185,8 @@ classdef SystemModel < handle
             value = obj.bodyModel.numDofs;
         end
         
-        function value = get.numOPDofs(obj)
-            value = obj.bodyModel.numOPDofs;
+        function value = get.numOperationalDofs(obj)
+            value = obj.bodyModel.numOperationalDofs;
         end
 
         function value = get.numDofVars(obj)
@@ -328,7 +336,7 @@ classdef SystemModel < handle
 %         end
 
         function value = get.q_ddot_dynamics(obj)
-            obj.bodyModel.q_ddot = obj.M\(-obj.L.'*obj.cableForces + obj.jointTau - obj.C - obj.G - obj.W_e);
+            obj.bodyModel.q_ddot = obj.M\(-obj.L.'*obj.cableForces + obj.A*obj.jointTau - obj.C - obj.G - obj.W_e);
             value = obj.q_ddot;
         end
 

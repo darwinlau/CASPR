@@ -3,16 +3,11 @@
 % Author        : Darwin LAU
 % Created       : 2014
 % Description   :
-classdef JointTrajectory < handle
+classdef JointTrajectory < TrajectoryBase
     properties
         q           % The joint space coordinate as a cell array
         q_dot       % The joint space coordinate derivative as a cell array
         q_ddot      % The joint space coordinate double derivative as a cell array
-        timeVector  % The time vector
-    end
-    
-    properties (Dependent)
-        totalTime 
     end
     
     methods
@@ -40,10 +35,6 @@ classdef JointTrajectory < handle
             title('Trajectory acceleration');
             plot(obj.timeVector, qdd_vector(states_to_plot, :), 'Color', 'k', 'LineWidth', 1.5);
         end
-        
-        function value = get.totalTime(obj)
-            value = obj.timeVector(length(obj.timeVector)) - obj.timeVector(1);
-        end
     end
     
     methods (Static)
@@ -58,6 +49,10 @@ classdef JointTrajectory < handle
                 trajectory = JointTrajectory.CubicTrajectoryLoadXmlObj(xmlObj, bodiesObj);
             elseif (strcmp(node_name, 'quintic_spline_trajectory'))
                 trajectory = JointTrajectory.QuinticTrajectoryLoadXmlObj(xmlObj, bodiesObj);
+            elseif (strcmp(node_name, 'cubic_spline_average_velocity_trajectory'))
+                trajectory = JointTrajectory.CubicTrajectoryAverageVelocityLoadXmlObj(xmlObj, bodiesObj);
+            elseif (strcmp(node_name, 'parabolic_blend_trajectory'))
+                trajectory = JointTrajectory.ParabolicBlendTrajectoryLoadXmlObj(xmlObj, bodiesObj);
             else
                 CASPR_log.Error('Trajectory type in XML undefined');
             end
@@ -72,7 +67,7 @@ classdef JointTrajectory < handle
             num_points = point_nodes.getLength;
             time_step = str2double(xmlObj.getAttribute('time_step'));
             
-            time_abs = JointTrajectory.get_xml_absolute_tag(xmlObj);
+            time_abs = TrajectoryBase.get_xml_absolute_tag(xmlObj);
                   
             % Cell of points of joints coordinates
             q_pj = cell(num_points,1); 
@@ -138,7 +133,7 @@ classdef JointTrajectory < handle
             num_points = point_nodes.getLength;
             time_step = str2double(xmlObj.getAttribute('time_step'));
             
-            time_abs = JointTrajectory.get_xml_absolute_tag(xmlObj);
+            time_abs = TrajectoryBase.get_xml_absolute_tag(xmlObj);
                   
             % Cell of points of joints coordinates
             q_pj = cell(num_points,1); 
@@ -209,7 +204,7 @@ classdef JointTrajectory < handle
             num_points = point_nodes.getLength;
             time_step = str2double(xmlObj.getAttribute('time_step'));
             
-            time_abs = JointTrajectory.get_xml_absolute_tag(xmlObj);
+            time_abs = TrajectoryBase.get_xml_absolute_tag(xmlObj);
                   
             % Cell of points of joints coordinates
             q_pj = cell(num_points,1); 
@@ -275,6 +270,164 @@ classdef JointTrajectory < handle
             trajectory.q_ddot = mat2cell(q_dd_trajectory, size(q_dd_trajectory,1), ones(size(q_dd_trajectory,2),1));
         end        
         
+        function [trajectory] = CubicTrajectoryAverageVelocityLoadXmlObj(xmlObj, bodiesObj)
+            CASPR_log.Assert(strcmp(xmlObj.getNodeName, 'cubic_spline_average_velocity_trajectory'), 'Element should be <cubic_spline_average_velocity_trajectory>');
+            trajectory = JointTrajectory;
+            points_node = xmlObj.getElementsByTagName('points').item(0);
+            point_nodes = points_node.getChildNodes;
+            num_points = point_nodes.getLength;
+            time_step = str2double(xmlObj.getAttribute('time_step'));
+            
+            time_abs = TrajectoryBase.get_xml_absolute_tag(xmlObj);
+                  
+            % Cell of points of joints coordinates
+            q_pj = cell(num_points,1); 
+            q_d_pj = cell(num_points,1);
+            time_points_abs = zeros(1, num_points);
+            
+            q_trajectory = [];
+            q_d_trajectory = [];
+            q_dd_trajectory = [];
+            
+            % First process the data and save it to variables
+            for p = 1:num_points
+                point_node = point_nodes.item(p-1);
+                q = XmlOperations.StringToVector(char(point_node.getElementsByTagName('q').item(0).getFirstChild.getData));
+                % Error checking on whether the XML file is valid
+                CASPR_log.Assert(length(q) == bodiesObj.numDofVars, sprintf('Trajectory config point does not contain correct number of variables, desired : %d, specified : %d', bodiesObj.numDofVars, length(q)));
+                               
+                q_pj{p} = mat2cell(q, bodiesObj.jointsNumDofVars);
+                
+                if (p == 1)
+                    time_points_abs(p) = 0.0;
+                elseif (time_abs)
+                    time_points_abs(p) = str2double(point_node.getAttribute('time'));
+                else
+                    time_points_abs(p) = time_points_abs(p-1) + str2double(point_node.getAttribute('time'));
+                end
+            end
+            
+            % Determine the average velocities
+            for p = 1:num_points
+                if p > 1 && p < num_points
+                    vel1 = (cell2mat(q_pj{p})-cell2mat(q_pj{p-1}))/(time_points_abs(p)-time_points_abs(p-1));
+                    vel2 = (cell2mat(q_pj{p+1})-cell2mat(q_pj{p}))/(time_points_abs(p+1)-time_points_abs(p));
+                    q_d = (vel1+vel2)/2;
+                else
+                    point_node = point_nodes.item(p-1);
+                    CASPR_log.Assert(~isempty(point_node.getElementsByTagName('q_dot').item(0)), 'Initial and final velocities must be specified');
+                    q_d = XmlOperations.StringToVector(char(point_node.getElementsByTagName('q_dot').item(0).getFirstChild.getData));
+                    CASPR_log.Assert(length(q_d) == bodiesObj.numDofs, sprintf('Trajectory config point does not contain correct number of variables, desired : %d, specified : %d', bodiesObj.numDofs, length(q_d)));
+                end        
+                q_d_pj{p} = mat2cell(q_d, bodiesObj.jointsNumDofs);       
+            end
+            
+            % Generate the trajectory between the points
+            for p = 1:num_points-1
+                q_section = [];
+                q_d_section = [];
+                q_dd_section = [];
+                time_section = time_points_abs(p):time_step:time_points_abs(p+1);
+                
+                for j = 1:bodiesObj.numLinks
+                    [q_body, q_d_body, q_dd_body] = bodiesObj.bodies{j}.joint.generateTrajectoryCubicSpline(q_pj{p}{j}, q_d_pj{p}{j}, ...
+                        q_pj{p+1}{j}, q_d_pj{p+1}{j}, time_section);
+                    q_section = [q_section; q_body];
+                    q_d_section = [q_d_section; q_d_body];
+                    q_dd_section = [q_dd_section; q_dd_body];
+                end
+                if (p > 1)
+                    q_section(:,1) = [];
+                    q_d_section(:,1) = [];
+                    q_dd_section(:,1) = [];
+                    time_section(:,1) = [];
+                end
+                
+                q_trajectory = [q_trajectory q_section];
+                q_d_trajectory = [q_d_trajectory q_d_section];
+                q_dd_trajectory = [q_dd_trajectory q_dd_section];
+                trajectory.timeVector = [trajectory.timeVector time_section];
+            end            
+            trajectory.q = mat2cell(q_trajectory, size(q_trajectory,1), ones(size(q_trajectory,2),1));
+            trajectory.q_dot = mat2cell(q_d_trajectory, size(q_d_trajectory,1), ones(size(q_d_trajectory,2),1));
+            trajectory.q_ddot = mat2cell(q_dd_trajectory, size(q_dd_trajectory,1), ones(size(q_dd_trajectory,2),1));
+        end       
+        
+        function [trajectory] = ParabolicBlendTrajectoryLoadXmlObj(xmlObj, bodiesObj)
+            CASPR_log.Assert(strcmp(xmlObj.getNodeName, 'parabolic_blend_trajectory'), 'Element should be <parabolic_blend_trajectory>');
+            trajectory = JointTrajectory;
+            points_node = xmlObj.getElementsByTagName('points').item(0);
+            point_nodes = points_node.getChildNodes;
+            num_points = point_nodes.getLength;
+            time_step = str2double(xmlObj.getAttribute('time_step'));
+            time_blend_default = str2double(xmlObj.getAttribute('blend_time_default'));
+            
+            time_abs = TrajectoryBase.get_xml_absolute_tag(xmlObj);
+                  
+            % Cell of points of joints coordinates
+            q_pj = cell(num_points,1); 
+            q_d_pj = cell(num_points,1);
+            time_points_abs = zeros(1, num_points);
+            time_blend = time_blend_default*ones(1, num_points-1);
+            
+            q_trajectory = [];
+            q_d_trajectory = [];
+            q_dd_trajectory = [];
+            
+            % First process the data and save it to variables
+            for p = 1:num_points
+                point_node = point_nodes.item(p-1);
+                q = XmlOperations.StringToVector(char(point_node.getElementsByTagName('q').item(0).getFirstChild.getData));
+                if (num_points > 1 && ~isempty(char(point_node.getAttribute('blend_time'))))
+                    time_blend(p-1) = str2double(char(point_node.getAttribute('blend_time')));
+                end
+                
+                % Error checking on whether the XML file is valid
+                CASPR_log.Assert(length(q) == bodiesObj.numDofVars, sprintf('Trajectory config point does not contain correct number of variables, desired : %d, specified : %d', bodiesObj.numDofVars, length(q)));
+                               
+                q_pj{p} = mat2cell(q, bodiesObj.jointsNumDofVars);
+                
+                if (p == 1)
+                    time_points_abs(p) = 0.0;
+                elseif (time_abs)
+                    time_points_abs(p) = str2double(point_node.getAttribute('time'));
+                else
+                    time_points_abs(p) = time_points_abs(p-1) + str2double(point_node.getAttribute('time'));
+                end
+            end
+                                   
+            % Generate the trajectory between the points
+            for p = 1:num_points-1
+                t_rel = time_points_abs(p+1)-time_points_abs(p);
+                CASPR_log.Assert(time_blend(p)*2 < t_rel, 'Time between two sections must be larger than two times the blend time');
+                q_section = [];
+                q_d_section = [];
+                q_dd_section = [];
+                time_section = time_points_abs(p):time_step:time_points_abs(p+1);
+                for j = 1:bodiesObj.numLinks
+                    [q_body, q_d_body, q_dd_body] = bodiesObj.bodies{j}.joint.generateTrajectoryParabolicBlend(q_pj{p}{j}, q_pj{p+1}{j}, ...
+                        time_section, time_blend(p));
+                    q_section = [q_section; q_body];
+                    q_d_section = [q_d_section; q_d_body];
+                    q_dd_section = [q_dd_section; q_dd_body];
+                end
+                if (p > 1)
+                    q_section(:,1) = [];
+                    q_d_section(:,1) = [];
+                    q_dd_section(:,1) = [];
+                    time_section(:,1) = [];
+                end
+                
+                q_trajectory = [q_trajectory q_section];
+                q_d_trajectory = [q_d_trajectory q_d_section];
+                q_dd_trajectory = [q_dd_trajectory q_dd_section];
+                trajectory.timeVector = [trajectory.timeVector time_section];
+            end            
+            trajectory.q = mat2cell(q_trajectory, size(q_trajectory,1), ones(size(q_trajectory,2),1));
+            trajectory.q_dot = mat2cell(q_d_trajectory, size(q_d_trajectory,1), ones(size(q_d_trajectory,2),1));
+            trajectory.q_ddot = mat2cell(q_dd_trajectory, size(q_dd_trajectory,1), ones(size(q_dd_trajectory,2),1));
+        end       
+        
         % Loads a complete trajectory by reading a .traj file
         function [trajectory_all, force_trajectory] = LoadCompleteTrajectory(traj_file,model)
             % Initialise a new trajectry
@@ -336,21 +489,6 @@ classdef JointTrajectory < handle
             trajectory_all.totalTime = (num_points-2)*trajectory_all.timeStep;
             trajectory_all.timeVector = [0:trajectory_all.timeStep:trajectory_all.totalTime];            
             fclose(fid);
-        end
-    end
-    
-    methods (Static, Access=private)
-        function time_abs = get_xml_absolute_tag(xmlobj)
-            time_def_str = xmlobj.getAttribute('time_definition');
-            time_abs = 0;
-            
-            if (strcmp(time_def_str, 'relative'))
-                time_abs = 0;
-            elseif (strcmp(time_def_str, 'absolute'))
-                time_abs = 1;
-            else
-                CASPR_log.Error('Value of attribute ''time_definition'' must either be ''relative'' or ''absolute''');
-            end
         end
     end
 end

@@ -97,6 +97,23 @@ classdef (Abstract) CableModelBase < handle
             %assert(k <= obj.numLinks+1, 'Invalid link number');
             c_jk = obj.segments{j}.getCRMTerm(k);
         end
+        
+        function plotCable(obj, axis)
+            for j = 1:obj.numSegments
+                for k = 1:obj.numLinks+1
+                    if obj.getCRMTerm(j,k) == -1
+                        r_OAa0 = obj.segments{j}.attachments{1}.r_OA;
+                    elseif obj.getCRMTerm(j,k) == 1
+                        r_OAb0 = obj.segments{j}.attachments{2}.r_OA;
+                    end
+                end
+                if (obj.isActive)
+                    plot3(axis,[r_OAa0(1) r_OAb0(1)], [r_OAa0(2) r_OAb0(2)], [r_OAa0(3) r_OAb0(3)], 'Color', 'r', 'LineWidth', 1);
+                else
+                    plot3(axis,[r_OAa0(1) r_OAb0(1)], [r_OAa0(2) r_OAb0(2)], [r_OAa0(3) r_OAb0(3)], 'Color', [0.7, 0.7, 0.7], 'LineWidth', 1);
+                end
+            end
+        end
     end
     
     methods (Static)

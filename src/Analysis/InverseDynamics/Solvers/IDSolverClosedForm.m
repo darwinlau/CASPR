@@ -6,7 +6,7 @@
 % Workshop on Computational Kinematics (CK2013), pp. 139-146, 2014.
 %
 % If the puncture method is also utilised please cite:
-% K. M�ller and C. Reichert and T. Bruckmann.
+% K. Muller and C. Reichert and T. Bruckmann.
 % "Analysis of a real-time capable cable force computation method."
 % In Cable-Driven Parallel Robots, pp. 227-238. Springer International
 % Publishing, 2015.
@@ -41,10 +41,14 @@ classdef IDSolverClosedForm < IDSolverBase
                     [cable_forces, id_exit_type] = id_cf_cfm(A_eq, b_eq, fmin, fmax);
                 case ID_CF_SolverType.IMPROVED_CLOSED_FORM
                     [cable_forces, id_exit_type] = id_cf_icfm(A_eq, b_eq, fmin, fmax);
+                case ID_CF_SolverType.ALTERNATE_IMPROVED_CLOSED_FORM
+                    [cable_forces, id_exit_type] = id_cf_aicfm(A_eq, b_eq, fmin, fmax);
                 case ID_CF_SolverType.PUNCTURE_METHOD
                     [cable_forces, id_exit_type] = id_cf_pm(A_eq, b_eq, fmin, fmax);
                 case ID_CF_SolverType.IMPROVED_PUNCTURE_METHOD
                     [cable_forces, id_exit_type] = id_cf_ipm(A_eq, b_eq, fmin, fmax);
+                case ID_CF_SolverType.ALTERNATE_IMPROVED_PUNCTURE_METHOD
+                    [cable_forces, id_exit_type] = id_cf_aipm(A_eq, b_eq, fmin, fmax);    
                 otherwise
                     CASPR_log.Print('ID_CF_SolverType type is not defined',CASPRLogLevel.ERROR);
             end

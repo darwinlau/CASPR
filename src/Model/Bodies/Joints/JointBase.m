@@ -27,8 +27,8 @@ classdef (Abstract) JointBase < handle
         q_dot               % Derivative of q
         q_ddot              % Double derivative of q
         
-        q_min               % Minimum joint values of q
-        q_max               % Maximum joint values of q
+        q_min               % Minimum joint values of q (set by user)
+        q_max               % Maximum joint values of q (set by user)
         q_initial           % The initial value of q for plotting
         
         isActuated = 0      % Is this joint actuated, by default not actuated
@@ -54,11 +54,12 @@ classdef (Abstract) JointBase < handle
         numDofs             % The number of degrees of freedom
         numVars             % The number of variables to describe the degrees of freedom
         
+        q_dofType           % The type of DoF (translation or rotation) for each q value
         q_default           % The default q
         q_dot_default       % The default q_dot
         q_ddot_default      % The default q_ddot
-        q_lb                % The lower bound on joints that are physically meaningful
-        q_ub                % The upper bound on joints that are physically meaningful
+        q_lb                % The lower bound on joints that are physically meaningful (by definition)
+        q_ub                % The upper bound on joints that are physically meaningful (by definition)
     end
     
     methods
@@ -131,11 +132,22 @@ classdef (Abstract) JointBase < handle
                 [q(i,:), q_dot(i,:), q_ddot(i,:)] = Spline.QuinticInterpolation(q_s(i), q_s_d(i), q_s_dd(i), q_e(i), q_e_d(i), q_e_dd(i), time_vector);
             end
         end
+        
+        function [q, q_dot, q_ddot] = generateTrajectoryParabolicBlend(obj, q_s, q_e, time_vector, time_blend)
+            n_dof = obj.numDofs;
+            CASPR_log.Assert(n_dof == length(q_s) && n_dof == length(q_e), 'Length of input states are different to the number of DoFs');
+            q = zeros(n_dof, length(time_vector)); 
+            q_dot = zeros(n_dof, length(time_vector));
+            q_ddot = zeros(n_dof, length(time_vector));
+            for i = 1:n_dof
+                [q(i,:), q_dot(i,:), q_ddot(i,:)] = Spline.ParabolicBlend(q_s(i), q_e(i), time_vector, time_blend);
+            end
+        end
 	end
         
     methods (Static)
         % Create a new joint
-        function j = CreateJoint(jointType, q_initial)
+        function j = CreateJoint(jointType, q_initial, q_min, q_max)
             switch jointType
                 case JointType.R_X
                     j = RevoluteX;
@@ -159,29 +171,35 @@ classdef (Abstract) JointBase < handle
                     j = SphericalEulerXYZ;
                 case JointType.S_FIXED_XYZ
                     j = SphericalFixedXYZ;
-                case JointType.S_QUATERNION
-                    j = SphericalQuaternion;
+%                 case JointType.S_QUATERNION
+%                     j = SphericalQuaternion;
                 case JointType.T_XYZ
                     j = TranslationalXYZ;
-                case JointType.SPATIAL_QUATERNION
-                    j = SpatialQuaternion;
+%                 case JointType.SPATIAL_QUATERNION
+%                     j = SpatialQuaternion;
                 case JointType.SPATIAL_EULER_XYZ
                     j = SpatialEulerXYZ;
                 otherwise
-                    CASPR_log.Print('Joint type is not defined',CASPRLogLevel.ERROR);
+                    CASPR_log.Print('Joint type is not defined', CASPRLogLevel.ERROR);
             end
             j.type = jointType;
             
             
-            if (nargin == 2)
-                j.q_initial = q_initial;
-            else
+            if (nargin < 2)
                 j.q_initial = j.q_default;
+                j.q_min     = j.q_lb;
+                j.q_max     = j.q_ub;
+            elseif(nargin <3) 
+                j.q_initial = q_initial;
+                j.q_min     = j.q_lb;
+                j.q_max     = j.q_ub;
+            else
+                j.q_initial = q_initial;
+                j.q_min     = q_min;
+                j.q_max     = q_max;
             end
             j.update(j.q_initial, j.q_dot_default, j.q_ddot_default);
             
-            j.q_min = j.q_lb;
-            j.q_max = j.q_ub;
             j.tau = [];
             j.tau_min = -Inf*ones(j.numDofs, 1);
             j.tau_max = Inf*ones(j.numDofs, 1);
@@ -192,7 +210,11 @@ classdef (Abstract) JointBase < handle
             jointType = JointType.(char(xmlObj.getAttribute('type')));
             q_initial = XmlOperations.StringToVector(char(xmlObj.getAttribute('q_initial')));
             assert(sum(isnan(q_initial))==0,'q_initial must be defined in the xml file');
-            j = JointBase.CreateJoint(jointType, q_initial);
+            q_min = XmlOperations.StringToVector(char(xmlObj.getAttribute('q_min')));
+            assert(sum(isnan(q_min))==0,'q_min must be defined in the xml file');
+            q_max = XmlOperations.StringToVector(char(xmlObj.getAttribute('q_max')));
+            assert(sum(isnan(q_max))==0,'q_max must be defined in the xml file');
+            j = JointBase.CreateJoint(jointType, q_initial, q_min, q_max);
             if (~isempty(xmlObj.getAttribute('actuated') == '') && strcmp(xmlObj.getAttribute('actuated'), 'true'))
                 j.isActuated = 1;
                 j.tau = zeros(j.numDofs, 1);

@@ -320,7 +320,7 @@ classdef SystemModelCables < handle
                         if(bodyModel.bodiesPathGraph(i,k_max))
                             body_i = bodyModel.bodies{i};
                             R_0i = body_i.R_0k;
-                            S_KA(:,bodyModel.index_k(i):bodyModel.index_k(i)+body_i.numDofs-1) = -sign_factor*R_k0*R_0i*MatrixOperations.SkewSymmetric(-body_i.r_OP + R_0i.'*r_OA)*bodyModel.S(6*i-2:6*i,bodyModel.index_k(i):bodyModel.index_k(i)+body_i.numDofs-1);
+                            S_KA(:,bodyModel.qIndexInit(i):bodyModel.qIndexInit(i)+body_i.numDofs-1) = -sign_factor*R_k0*R_0i*MatrixOperations.SkewSymmetric(-body_i.r_OP + R_0i.'*r_OA)*bodyModel.S(6*i-2:6*i,bodyModel.qIndexInit(i):bodyModel.qIndexInit(i)+body_i.numDofs-1);
                         end
                     end
                 elseif(k == k_max)
@@ -328,7 +328,7 @@ classdef SystemModelCables < handle
                         if(bodyModel.bodiesPathGraph(i,k_max))
                             body_i = bodyModel.bodies{i};
                             R_0i = body_i.R_0k;
-                            S_KA(:,bodyModel.index_k(i):bodyModel.index_k(i)+body_i.numDofs-1) = sign_factor*R_k0*R_0i*MatrixOperations.SkewSymmetric(body_i.r_OP - R_0i.'*r_OA)*bodyModel.S(6*i-2:6*i,bodyModel.index_k(i):bodyModel.index_k(i)+body_i.numDofs-1);
+                            S_KA(:,bodyModel.qIndexInit(i):bodyModel.qIndexInit(i)+body_i.numDofs-1) = sign_factor*R_k0*R_0i*MatrixOperations.SkewSymmetric(body_i.r_OP - R_0i.'*r_OA)*bodyModel.S(6*i-2:6*i,bodyModel.qIndexInit(i):bodyModel.qIndexInit(i)+body_i.numDofs-1);
                         end
                     end
                 end
@@ -360,7 +360,7 @@ classdef SystemModelCables < handle
                             R_0ip = body_ip.R_0k;
                         end
                         body_i = bodyModel.bodies{i};
-                        S_KA(:,bodyModel.index_k(i):bodyModel.index_k(i)+body_i.numDofs-1) = sign_factor*R_k0*R_0ip*bodyModel.S(6*i-5:6*i-3,bodyModel.index_k(i):bodyModel.index_k(i)+body_i.numDofs-1);
+                        S_KA(:,bodyModel.qIndexInit(i):bodyModel.qIndexInit(i)+body_i.numDofs-1) = sign_factor*R_k0*R_0ip*bodyModel.S(6*i-5:6*i-3,bodyModel.qIndexInit(i):bodyModel.qIndexInit(i)+body_i.numDofs-1);
                     end
                 end
             end

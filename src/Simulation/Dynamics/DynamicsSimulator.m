@@ -11,7 +11,7 @@
 %       - plotInteractionForceAngles
 %       - plotInteractionMomentMagnitudes
 %       - plotInteractionForceZ
-classdef DynamicsSimulator < MotionSimulator
+classdef DynamicsSimulator < MotionSimulatorBase
     
     properties
         cableForcesActive   % cell array of cable force vector (active)
@@ -23,7 +23,7 @@ classdef DynamicsSimulator < MotionSimulator
     methods   
         % Constructor fo the dynamics simulator
         function ds = DynamicsSimulator(model)
-            ds@MotionSimulator(model);
+            ds@MotionSimulatorBase(model);
         end
         
         % Plots the cable forces of the CDPR over the trajectory. Users

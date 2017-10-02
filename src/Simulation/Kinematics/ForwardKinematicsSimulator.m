@@ -9,7 +9,7 @@
 %   error by comparing the input length with the length resulting from the
 %   solution generalised coordinates. This can be used as a measure of the
 %   accuracy of the FK approach.
-classdef ForwardKinematicsSimulator < MotionSimulator
+classdef ForwardKinematicsSimulator < MotionSimulatorBase
     
     properties (SetAccess = protected) 
         compTime            % computational time for each time step
@@ -21,7 +21,7 @@ classdef ForwardKinematicsSimulator < MotionSimulator
     methods
         % Constructor for the forward kinematics class
         function fk = ForwardKinematicsSimulator(model, fk_solver)
-            fk@MotionSimulator(model);
+            fk@MotionSimulatorBase(model);
             fk.FKSolver = fk_solver;
         end
         

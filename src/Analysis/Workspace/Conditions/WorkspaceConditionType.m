@@ -1,4 +1,4 @@
-% Enum for the type of metric
+% Enum for the type of condition
 %
 % Author        : Jonathan EDEN
 % Created       : 2016
@@ -8,6 +8,7 @@ classdef WorkspaceConditionType
         WRENCH_CLOSURE
         WRENCH_FEASIBLE
         STATIC
+        INTERFERENCE
     end
 end
 
