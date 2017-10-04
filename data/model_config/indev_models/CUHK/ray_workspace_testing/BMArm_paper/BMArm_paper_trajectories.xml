@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE trajectories SYSTEM "../../../../templates/trajectories.dtd">
+<trajectories>
+    <joint_trajectories>
+        <quintic_spline_trajectory id="traj_test" time_definition="absolute" time_step="0.00667">
+            <points>
+                <point>
+                    <q>0.0 0.0 0.0 0.0</q>
+                    <q_dot>0.0 0.0 0.0 0.0</q_dot>
+                    <q_ddot>0.0 0.0 0.0 0.0</q_ddot>
+                </point>
+                <point time="4">
+                    <q>-0.17453 0.0 0.0 0.17453</q>
+                    <q_dot>0.0 0.0 0.0 0.0</q_dot>
+                    <q_ddot>0.0 0.0 0.0 0.0</q_ddot>
+                </point>
+            </points>
+        </quintic_spline_trajectory>
+        <quintic_spline_trajectory id="traj_test_S" time_definition="absolute" time_step="0.00667">
+            <points>
+                <point>
+                    <q>0.0 0.0 0.0 0.0</q>
+                    <q_dot>0.0 0.0 0.0 0.0</q_dot>
+                    <q_ddot>0.0 0.0 0.0 0.0</q_ddot>
+                </point>
+                <point time="4">
+                    <q>0.2 0.0 -0.2 0.0</q>
+                    <q_dot>0.0 0.0 0.0 0.0</q_dot>
+                    <q_ddot>0.0 0.0 0.0 0.0</q_ddot>
+                </point>
+                <point time="8">
+                    <q>0.2 0.0 0.2 -0.0</q>
+                    <q_dot>0.0 0.0 0.0 0.0</q_dot>
+                    <q_ddot>0.0 0.0 0.0 0.0</q_ddot>
+                </point>
+                <point time="10">
+                    <q>0.0 -0.0 0.2 -0.0</q>
+                    <q_dot>0.0 0.0 0.0 0.0</q_dot>
+                    <q_ddot>0.0 0.0 0.0 0.0</q_ddot>
+                </point>
+                <point time="14">
+                    <q>-0.0 0.0 -0.2 0.0</q>
+                    <q_dot>0.0 0.0 0.0 0.0</q_dot>
+                    <q_ddot>0.0 0.0 0.0 0.0</q_ddot>
+                </point>
+                <point time="16">
+                    <q>-0.2 0.0 -0.2 0.0</q>
+                    <q_dot>0.0 0.0 0.0 0.0</q_dot>
+                    <q_ddot>0.0 0.0 0.0 0.0</q_ddot>
+                </point>
+                <point time="20">
+                    <q>-0.2 0.0 0.2 0.0</q>
+                    <q_dot>0.0 0.0 0.0 0.0</q_dot>
+                    <q_ddot>0.0 0.0 0.0 0.0</q_ddot>
+                </point>
+                <point time="24">
+                    <q>-0.0 0.0 -0.0 0.0</q>
+                    <q_dot>0.0 0.0 0.0 0.0</q_dot>
+                    <q_ddot>0.0 0.0 0.0 0.0</q_ddot>
+                </point>
+            </points>
+        </quintic_spline_trajectory>
+        <linear_spline_trajectory id="traj_test_Sl" time_definition="absolute" time_step="0.00667">
+            <points>
+                <point>
+                    <q>0.0 0.0 0.0 0.0</q>
+                </point>
+                <point time="4">
+                    <q>0.2 0.0 -0.2 0.0</q>
+                </point>
+                <point time="8">
+                    <q>0.2 0.0 0.2 -0.0</q>
+                </point>
+                <point time="10">
+                    <q>0.0 -0.0 0.2 -0.0</q>
+                </point>
+                <point time="14">
+                    <q>-0.0 0.0 -0.2 0.0</q>
+                </point>
+                <point time="16">
+                    <q>-0.2 0.0 -0.2 0.0</q>
+                </point>
+                <point time="20">
+                    <q>-0.2 0.0 0.2 0.0</q>
+                </point>
+                <point time="24">
+                    <q>-0.0 0.0 -0.0 0.0</q>
+                </point>
+            </points>
+        </linear_spline_trajectory>
+    </joint_trajectories>
+    <operational_trajectories>
+      <quintic_spline_trajectory id="simple_motion" time_step="0.005" time_definition="relative">
+        <points>
+          <point>
+            <y>0.2 0.3 0.3</y>
+            <y_dot>0.0 0.0 0.0</y_dot>
+            <y_ddot>0.0 0.0 0.0</y_ddot>
+          </point>
+          <point time="5.0">
+            <y>0.3 0.1 0.2</y>
+            <y_dot>0.0 0.0 0.0</y_dot>
+            <y_ddot>0.0 0.0 0.0</y_ddot>
+          </point>
+        </points>
+      </quintic_spline_trajectory>
+    </operational_trajectories>
+</trajectories>

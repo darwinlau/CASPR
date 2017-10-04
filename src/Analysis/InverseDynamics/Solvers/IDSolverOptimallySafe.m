@@ -45,12 +45,15 @@ classdef IDSolverOptimallySafe < IDSolverBase
             switch (obj.os_solver_type)
                 case ID_OS_SolverType.LP
                     if(isempty(obj.options))
-                        obj.options = optimoptions('linprog', 'Display', 'off', 'MaxIter', 100);
+                        obj.options = optimoptions('linprog', 'Algorithm','dual-simplex','Display', 'off', 'MaxIter', 100);
                     end
                     [cable_forces, id_exit_type] = id_os_matlab(A_eq, b_eq, fmin, fmax, obj.alpha,obj.options);
                     Q_opt = norm(cable_forces,1);
                 case ID_OS_SolverType.EFFICIENT_LP
-                    [cable_forces, id_exit_type,obj.x_prev,obj.active_set] = id_os_efficient(A_eq, b_eq, fmin, fmax, obj.alpha, obj.x_prev, obj.active_set);
+                    if(isempty(obj.options))
+                        obj.options = optimoptions('linprog', 'Algorithm','dual-simplex','Display', 'off', 'MaxIter', 100);
+                    end
+                    [cable_forces, id_exit_type,obj.x_prev,obj.active_set] = id_os_efficient(A_eq, b_eq, fmin, fmax, obj.alpha, obj.x_prev, obj.active_set,obj.options);
                     Q_opt = norm(cable_forces);
                 otherwise
                     CASPR_log.Print('ID_OS_SolverType type is not defined',CASPRLogLevel.ERROR);
