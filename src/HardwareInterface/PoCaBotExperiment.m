@@ -52,6 +52,7 @@ classdef PoCaBotExperiment < ExperimentBase
             %cableLengths_full = ones(numMotor,1)*4.05;
             cableLengths_full = [6.618; 4.800; 6.632;4.800;6.632;5.545;6.618;5.545];
             
+            hw_interface = PoCaBotCASPRInterface('COM8', numMotor, cableLengths_full,false);  %1
             exp@ExperimentBase(hw_interface, modelObj);
             exp.modelConfig = model_config;
             exp.numMotor = numMotor;
@@ -729,7 +730,6 @@ classdef PoCaBotExperiment < ExperimentBase
     end
     
     methods (Static)
-        % The arguments time_blend_s and time_blend_e can be only used to
         % The arguments time_blend_s and time_blend_e can be only used
         
         % decide the acceleration of the triangular/trapezoidal profile.
