@@ -16,6 +16,9 @@ classdef PoCaBotExperiment < ExperimentBase
         ee_real
         hText
         ax_plot
+        
+        server
+        
     end
     
     properties
@@ -28,7 +31,7 @@ classdef PoCaBotExperiment < ExperimentBase
         % l_all = l_original+l_delta = (1+factor_offset_per_Newton_Meter*force)*l_original
         % Given commanded length l_cmd, a length of l_cmd/(1+factor_offset_per_Newton_Meter*force)
         % should be set when under tension force.
-        factor_offset_per_Newton_Meter = 0.0006;
+        factor_offset_per_Newton_Meter = 0.0006; %originally 0.0006
         
         l_feedback_traj    % Temporary variable to store things for now
         l_cmd_traj         % Temporary variable to store things for now
@@ -40,7 +43,7 @@ classdef PoCaBotExperiment < ExperimentBase
     end
     
     methods
-        function exp = PoCaBotExperiment(numMotor,strCableID,timestep)
+        function exp = PoCaBotExperiment(numMotor,strCableID,timestep, server)
             % Create the config
             model_config = ModelConfig('PoCaBot spatial');
             % Load the SystemKinematics object from the XML
@@ -89,13 +92,15 @@ classdef PoCaBotExperiment < ExperimentBase
                 hold off;
                 axis equal;
                 xlabel('x');ylabel('y');zlabel('z');
-                
+
                 axes(ax_bg);
                 descr = {'{\delta{\itq}}:'};
                 exp.hText = text(0.77,0.65,descr);
                 
                 axes(exp.ax_plot);
             end
+            
+            exp.server = server;
         end
         
         function motorSpoolTest(obj)
@@ -606,13 +611,14 @@ classdef PoCaBotExperiment < ExperimentBase
                 obj.q_present = trajectory.q(:,t);
                 tic;
                 % update cable lengths for next command from trajectory
-                % obj.model.update(trajectory.q(:,t), trajectory.q_dot(:,t), trajectory.q_ddot(:,t),zeros(size(trajectory.q_dot(:,t))));
+                obj.model.update(trajectory.q(:,t), trajectory.q_dot(:,t), trajectory.q_ddot(:,t),zeros(size(trajectory.q_dot(:,t))));
                 
                 [~, model_temp, ~, ~, ~] = obj.idsim.IDSolver.resolve(trajectory.q(:,t), trajectory.q_dot(:,t), trajectory.q_ddot(:,t), zeros(obj.idsim.model.numDofs,1));
                 [offset] = obj.hardwareInterface.getCableOffsetByTensionByMotorAngleError(model_temp.cableForces);
                 obj.hardwareInterface.lengthCommandSend(model_temp.cableLengths ./(1+obj.factor_offset_per_Newton_Meter*model_temp.cableForces) + offset);
+                %fprintf(obj.server, '(%f,%f,%f,%f,%f,%f)\n', obj.fksolver.model.q);
                 
-                % Record the relevant states for problem-solving purpose
+             % Record the relevant states for problem-solving purpose
                 obj.time_abs_traj(t) = rem(now,1);
                 obj.l_cmd_traj(t, :) = model_temp.cableLengths'; %(1)
                 % For recording the length of feedback, first assume the
@@ -658,9 +664,12 @@ classdef PoCaBotExperiment < ExperimentBase
             FileOperation.recordData(data);
         end
         
-        function runTrajPeriodicHook(obj)
-            
+        function updateServer(obj, server)
+        obj.server = server;
+         
         end
+        
+        
         
         function application_termination(obj)
             obj.hardwareInterface.systemOffSend();
@@ -704,7 +713,7 @@ classdef PoCaBotExperiment < ExperimentBase
                     time_const_speed = ceil(distance_const_speed/vmax/time_step)*time_step;
                 end
             end
-            time_vector = 0 : time_step : time_acc_s+time_acc_e+time_const_speed;
+            time_vector = time_step : time_step : time_acc_s+time_acc_e+time_const_speed;
             
             q = zeros(n_dof, length(time_vector));
             q_dot = zeros(n_dof, length(time_vector));
