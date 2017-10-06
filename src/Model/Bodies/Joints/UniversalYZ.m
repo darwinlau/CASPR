@@ -12,6 +12,7 @@ classdef UniversalYZ < JointBase
         q_ddot_default = [0; 0];
         q_lb = [-pi; -pi];
         q_ub = [pi; pi];
+        q_dofType = [DoFType.ROTATION; DoFType.ROTATION];
     end
     
     properties (Dependent)
@@ -80,7 +81,7 @@ classdef UniversalYZ < JointBase
         % Generate the N matrix for the joint
         function [N_j,A] = QuadMatrix(q)
             g = SphericalEulerXYZ.GetBeta(q);
-            N_j = [0,0.5*cos(g),0,-0.5*sin(g);0.5*cos(b),0,-0.5*sin(g),0];
+            N_j = [0,0.5*cos(g),0,-0.5*sin(g);0.5*cos(g),0,-0.5*sin(g),0];
             A = [zeros(3,2);1,0;0,1;0,0];
         end
         

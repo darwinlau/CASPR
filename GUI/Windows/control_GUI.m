@@ -31,7 +31,7 @@ function varargout = control_GUI(varargin)
 
     % Edit the above text to modify the response to help control_GUI
 
-    % Last Modified by GUIDE v2.5 05-Jun-2017 22:52:55
+    % Last Modified by GUIDE v2.5 24-Jul-2017 17:10:04
 
     % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;

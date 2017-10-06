@@ -7,7 +7,7 @@ function inWorkspace = static_quadprog(dynamics,~)
     weights = ones(dynamics.numCables,1);
     o = IDObjectiveMinQuadCableForce(weights);
     q = IDSolverQuadProg(dynamics,o, ID_QP_SolverType.MATLAB);
-    [~,~,id_exit_type,~] = q.resolve(dynamics.q,dynamics.q_dot,dynamics.q_ddot,dynamics.W_e);
+    [~,~,~,id_exit_type,~] = q.resolve(dynamics.q,dynamics.q_dot,dynamics.q_ddot,dynamics.W_e);
     if(id_exit_type == IDSolverExitType.NO_ERROR)
         inWorkspace = true;
     else

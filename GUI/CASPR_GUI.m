@@ -285,7 +285,7 @@ end
 
 % Model update button
 % --- Executes on button press in model_update_button.
-function model_update_button_Callback(~, ~, handles) %#ok<DEFNU>
+function missing_term_error = model_update_button_Callback(~, ~, handles) %#ok<DEFNU>
     % hObject    handle to model_update_button (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
@@ -410,9 +410,25 @@ function loadState(handles)
     if(exist(file_name,'file'))
         load(file_name);
         model_popup_update(handles);
+        % Determine if model parameter still exists
         set(handles.model_popup,'value',state.model_popup_value);
+        try
+            contents = cellstr(get(handles.model_popup,'String'));
+            contents{get(handles.model_popup,'Value')};
+        catch
+            CASPR_log.Warn('Previous model state does not exist anymore. Default to first element.');
+            set(handles.model_popup,'value',1);
+        end
         cable_popup_update(handles);
+        % Determine if model parameter still exists
         set(handles.cable_popup,'value',state.cable_popup_value);
+        try
+            contents = cellstr(get(handles.cable_popup,'String'));
+            contents{get(handles.cable_popup,'Value')};
+        catch
+            CASPR_log.Warn('Previous model state does not exist anymore. Default to first element.');
+            set(handles.cable_popup,'value',1);
+        end
         generate_model_object(handles);
     else
         model_popup_update(handles);

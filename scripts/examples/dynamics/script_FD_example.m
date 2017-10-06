@@ -21,7 +21,11 @@ id_solver = IDSolverQuadProg(modelObj, id_objective, ID_QP_SolverType.MATLAB);
 % Setup the inverse dynamics and forward dynamics simulators
 disp('Start Setup Simulation');
 start_tic = tic;
+% Create the inverse dynamics simulator
 idsim = InverseDynamicsSimulator(modelObj, id_solver);
+% Create the forward dynamics simulator
+% NOTE: ForwardDynamicsSimulator has changable input fd_solver_type.
+%       This can be set to any of the enums in FDSolverType.
 fdsim = ForwardDynamicsSimulator(modelObj, FDSolverType.ODE113);
 trajectory = model_config.getJointTrajectory(trajectory_id);
 time_elapsed = toc(start_tic);

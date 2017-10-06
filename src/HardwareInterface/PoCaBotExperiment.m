@@ -11,7 +11,7 @@ classdef PoCaBotExperiment < ExperimentBase
         timestep
         
         % variables for plotting
-        isPlot = true;
+        isPlot = false;
         ee_ideal
         ee_real
         hText
@@ -52,7 +52,6 @@ classdef PoCaBotExperiment < ExperimentBase
             %cableLengths_full = ones(numMotor,1)*4.05;
             cableLengths_full = [6.618; 4.800; 6.632;4.800;6.632;5.545;6.618;5.545];
             
-            hw_interface = PoCaBotCASPRInterface('COM11', numMotor, cableLengths_full,false);  %1
             exp@ExperimentBase(hw_interface, modelObj);
             exp.modelConfig = model_config;
             exp.numMotor = numMotor;
@@ -197,8 +196,8 @@ classdef PoCaBotExperiment < ExperimentBase
             while(index < 500)
                 tic;
                 current = current*(1);
-                obj.hardwareInterface.currentCommandSend(current);
-                obj.hardwareInterface.currentFeedbackRead();
+                obj.hardwareInterface.forceCommandSend(current);
+                obj.hardwareInterface.forceFeedbackRead();
                 
                 index = index + 1;
                 elapsed = toc * 1000;
@@ -227,7 +226,7 @@ classdef PoCaBotExperiment < ExperimentBase
             current = ones(obj.numMotor,1)*20;
             obj.hardwareInterface.lengthInitialSend(1); %(1)
             
-            obj.hardwareInterface.currentCommandSend(current);
+            obj.hardwareInterface.forceCommandSend(current);
             
             obj.hardwareInterface.systemOnSend();
             input('Ready to go? [Y]:','s');
@@ -264,7 +263,7 @@ classdef PoCaBotExperiment < ExperimentBase
             % pause(0.5);
             obj.hardwareInterface.systemOnSend();
             current = ones(obj.numMotor,1)*20;
-            obj.hardwareInterface.currentCommandSend(current);
+            obj.hardwareInterface.forceCommandSend(current);
             
             %             input('Regulate the pose of the end effector, press any key to continue!');
             %
@@ -284,7 +283,7 @@ classdef PoCaBotExperiment < ExperimentBase
                 % Start the system to get feedback
                 obj.hardwareInterface.systemOnSend();
                 current = ones(obj.numMotor,1)*300;
-                obj.hardwareInterface.currentCommandSend(current);
+                obj.hardwareInterface.forceCommandSend(current);
                 
                 profileAcc = ones(obj.numMotor,1)*100;
                 obj.hardwareInterface.setProfileAcceleration(profileAcc);
@@ -316,7 +315,7 @@ classdef PoCaBotExperiment < ExperimentBase
             % Start the system to get feedback
             obj.hardwareInterface.systemOnSend();
             current = ones(obj.numMotor,1)*350;
-            obj.hardwareInterface.currentCommandSend(current);
+            obj.hardwareInterface.forceCommandSend(current);
             
             profileAcc = ones(obj.numMotor,1)*150;
             obj.hardwareInterface.setProfileAcceleration(profileAcc);
@@ -396,7 +395,7 @@ classdef PoCaBotExperiment < ExperimentBase
             obj.hardwareInterface.switchOperatingMode2CURRENT();
             obj.hardwareInterface.systemOnSend();
             current = ones(obj.numMotor,1)*20;
-            obj.hardwareInterface.currentCommandSend(current);
+            obj.hardwareInterface.forceCommandSend(current);
             
             input('Ready to sample the relative length? Press enter to get started.');
             obj.hardwareInterface.lengthInitialSend(l0_guess);
@@ -412,7 +411,7 @@ classdef PoCaBotExperiment < ExperimentBase
                 
                 rotating_direction = (length_r - length_r_pre)>0;
                 obj.hardwareInterface.switchEnable(~rotating_direction);
-                obj.hardwareInterface.currentCommandSend((~rotating_direction).*current);
+                obj.hardwareInterface.forceCommandSend((~rotating_direction).*current);
                 length_r_pre = length_r;
                 
                 sample_present_r = [timestamp length_r'];
@@ -427,7 +426,7 @@ classdef PoCaBotExperiment < ExperimentBase
                 end
             end
             obj.hardwareInterface.systemOnSend();
-            obj.hardwareInterface.currentCommandSend(current);
+            obj.hardwareInterface.forceCommandSend(current);
             fprintf('\nSampling ends!\n');
             fprintf('%d data have been collected within %0.1f seconds!\n',size(samples_r,1),sample_duration);
             
@@ -469,7 +468,7 @@ classdef PoCaBotExperiment < ExperimentBase
             % Start the system to get feedback
             obj.hardwareInterface.systemOnSend();
             current = ones(obj.numMotor,1)*400;%400
-            obj.hardwareInterface.currentCommandSend(current);
+            obj.hardwareInterface.forceCommandSend(current);
             obj.hardwareInterface.lengthCommandSend(length_present_solved);
             
             profileAcc = ones(obj.numMotor,1)*150;
@@ -515,6 +514,56 @@ classdef PoCaBotExperiment < ExperimentBase
             %             q_solved(:,1)
         end
         
+        function rehabilitation_preparation(obj)
+            % Open the hardware interface
+            obj.openHardwareInterface();
+            
+            % Just detect the device to see if it is correct (should change
+            % it later to exit cleanly and throw an error in the future
+            obj.hardwareInterface.detectDevice();
+            
+            % this procedure is to regulate the pose of the endeffector and
+            % make sure that the cable is under the tension.
+            obj.hardwareInterface.switchOperatingMode2CURRENT();
+            obj.hardwareInterface.systemOnSend();
+            current = ones(obj.numMotor,1)*20;
+            obj.hardwareInterface.forceCommandSend(current);
+        end
+        
+        function rehabilitation_run(obj, duration)
+            fac = [8 1 3 2;4 5 7 6;2 3 5 4;6 7 1 8;1 7 5 3;6 8 2 4];
+            maxCurrent = 20;
+            omega = pi*4;%ran/s
+            tstart = tic;
+            current = ones(8,1);
+            while(1)
+                timestamp = toc(tstart);
+                if(timestamp>=duration)
+                    break;
+                end
+                tloop = tic;
+                
+                direction = 1;%random('unid',6);
+                if(floor(direction/2) == direction/2)
+                    direction_counterpart = direction - 1;
+                else
+                    direction_counterpart = direction + 1;
+                end
+                
+%                 current(fac(direction,:))             = (maxCurrent-20)*(sin(omega*timestamp)>0)+20;
+%                 current(fac(direction_counterpart,:)) = (maxCurrent-20)*(sin(omega*timestamp)<=0)+20;
+                current = ones(8,1)*15;
+                obj.hardwareInterface.forceCommandSend(current);
+                
+                elapsed = toc(tloop);
+                if(elapsed < 0.05)
+                    java.lang.Thread.sleep((0.05 - elapsed)*1000);
+                else
+                    toc
+                end
+            end
+        end
+        
         %% BELOW METHODS ARE FOR THE LONG TIME CONSTRUCTING TASK
         % init_pos is a vector with a size of 8 by 1 which is the initial
         % position of the motors. q0 is also a vetor with the same size but
@@ -532,7 +581,7 @@ classdef PoCaBotExperiment < ExperimentBase
             obj.hardwareInterface.switchOperatingMode2CURRENT();
             obj.hardwareInterface.systemOnSend();
             current = ones(obj.numMotor,1)*20;
-            obj.hardwareInterface.currentCommandSend(current);
+            obj.hardwareInterface.forceCommandSend(current);
             
             str = input('Read the initial position from the file? [Y]:','s');
             if isempty(str) || str == 'Y' || str == 'y'
@@ -554,7 +603,7 @@ classdef PoCaBotExperiment < ExperimentBase
                 obj.hardwareInterface.motorPositionCommandSend(init_pos);
                 current = ones(obj.numMotor,1)*200;%200
                 
-                obj.hardwareInterface.currentCommandSend(current);
+                obj.hardwareInterface.forceCommandSend(current);
                 
                 error_position = 100;
                 while (error_position>30)
@@ -577,7 +626,7 @@ classdef PoCaBotExperiment < ExperimentBase
             % Start the system to get feedback
             obj.hardwareInterface.systemOnSend();
             current = ones(obj.numMotor,1)*400;%400
-            obj.hardwareInterface.currentCommandSend(current);
+            obj.hardwareInterface.forceCommandSend(current);
             
             profileAcc = ones(obj.numMotor,1)*150;
             profileAcc = profileAcc/(obj.timestep/0.05);
@@ -681,6 +730,8 @@ classdef PoCaBotExperiment < ExperimentBase
     
     methods (Static)
         % The arguments time_blend_s and time_blend_e can be only used to
+        % The arguments time_blend_s and time_blend_e can be only used
+        
         % decide the acceleration of the triangular/trapezoidal profile.
          function [trajectory] = generateTrajectoryConstantV(q_s, q_e, time_step, time_blend_s, time_blend_e, v_max)
             CASPR_log.Assert(length(q_s) == length(q_e), 'Length of input states are inconsistent!');
@@ -784,7 +835,7 @@ classdef PoCaBotExperiment < ExperimentBase
                     time_const_speed = ceil(distance_const_speed/vmax/time_step)*time_step;
                 end
             end
-            time_vector = time_step : time_step : time_acc_s+time_acc_e+time_const_speed;
+            time_vector = 0 : time_step : time_acc_s+time_acc_e+time_const_speed;
             
             q = zeros(n_dof, length(time_vector));
             q_dot = zeros(n_dof, length(time_vector));

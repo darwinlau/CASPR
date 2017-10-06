@@ -3,12 +3,9 @@
   <!ATTLIST workspace_condition id ID #REQUIRED>
 ]>
 <simulator>
-    <workspace_condition id="WRENCH_CLOSURE">
-        <generation_method_enum>WrenchClosureMethods</generation_method_enum>
-    </workspace_condition>
-    <workspace_condition id="STATIC">
-        <generation_method_enum>WorkspaceStaticMethods</generation_method_enum>
-    </workspace_condition>
+    <workspace_condition id="WRENCH_CLOSURE"/>
+    <workspace_condition id="WRENCH_FEASIBLE"/>
+    <workspace_condition id="STATIC"/>
     <workspace_metrics>
         <workspace_metric>TENSION_FACTOR</workspace_metric>
         <workspace_metric>TENSION_FACTOR_MODIFIED</workspace_metric>

@@ -27,8 +27,8 @@ classdef (Abstract) JointBase < handle
         q_dot               % Derivative of q
         q_ddot              % Double derivative of q
         
-        q_min               % Minimum joint values of q
-        q_max               % Maximum joint values of q
+        q_min               % Minimum joint values of q (set by user)
+        q_max               % Maximum joint values of q (set by user)
         q_initial           % The initial value of q for plotting
         
         isActuated = 0      % Is this joint actuated, by default not actuated
@@ -54,11 +54,12 @@ classdef (Abstract) JointBase < handle
         numDofs             % The number of degrees of freedom
         numVars             % The number of variables to describe the degrees of freedom
         
+        q_dofType           % The type of DoF (translation or rotation) for each q value
         q_default           % The default q
         q_dot_default       % The default q_dot
         q_ddot_default      % The default q_ddot
-        q_lb                % The lower bound on joints that are physically meaningful
-        q_ub                % The upper bound on joints that are physically meaningful
+        q_lb                % The lower bound on joints that are physically meaningful (by definition)
+        q_ub                % The upper bound on joints that are physically meaningful (by definition)
     end
     
     methods
@@ -146,7 +147,7 @@ classdef (Abstract) JointBase < handle
         
     methods (Static)
         % Create a new joint
-        function j = CreateJoint(jointType, q_initial)
+        function j = CreateJoint(jointType, q_initial, q_min, q_max)
             switch jointType
                 case JointType.R_X
                     j = RevoluteX;
@@ -184,15 +185,21 @@ classdef (Abstract) JointBase < handle
             j.type = jointType;
             
             
-            if (nargin == 2)
-                j.q_initial = q_initial;
-            else
+            if (nargin < 2)
                 j.q_initial = j.q_default;
+                j.q_min     = j.q_lb;
+                j.q_max     = j.q_ub;
+            elseif(nargin <3) 
+                j.q_initial = q_initial;
+                j.q_min     = j.q_lb;
+                j.q_max     = j.q_ub;
+            else
+                j.q_initial = q_initial;
+                j.q_min     = q_min;
+                j.q_max     = q_max;
             end
             j.update(j.q_initial, j.q_dot_default, j.q_ddot_default);
             
-            j.q_min = j.q_lb;
-            j.q_max = j.q_ub;
             j.tau = [];
             j.tau_min = -Inf*ones(j.numDofs, 1);
             j.tau_max = Inf*ones(j.numDofs, 1);
@@ -203,7 +210,11 @@ classdef (Abstract) JointBase < handle
             jointType = JointType.(char(xmlObj.getAttribute('type')));
             q_initial = XmlOperations.StringToVector(char(xmlObj.getAttribute('q_initial')));
             assert(sum(isnan(q_initial))==0,'q_initial must be defined in the xml file');
-            j = JointBase.CreateJoint(jointType, q_initial);
+            q_min = XmlOperations.StringToVector(char(xmlObj.getAttribute('q_min')));
+            assert(sum(isnan(q_min))==0,'q_min must be defined in the xml file');
+            q_max = XmlOperations.StringToVector(char(xmlObj.getAttribute('q_max')));
+            assert(sum(isnan(q_max))==0,'q_max must be defined in the xml file');
+            j = JointBase.CreateJoint(jointType, q_initial, q_min, q_max);
             if (~isempty(xmlObj.getAttribute('actuated') == '') && strcmp(xmlObj.getAttribute('actuated'), 'true'))
                 j.isActuated = 1;
                 j.tau = zeros(j.numDofs, 1);

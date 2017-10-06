@@ -12,6 +12,7 @@ classdef PrismaticXY < JointBase
         q_ddot_default = [0; 0];
         q_lb = [-Inf; -Inf];
         q_ub = [Inf; Inf];
+        q_dofType = [DoFType.TRANSLATION; DoFType.TRANSLATION];
     end    
     
     properties (Dependent)

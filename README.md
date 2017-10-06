@@ -65,7 +65,9 @@ To start using CASPR, please follow the steps below
 2. Run the script initialise_CASPR.m.  This will ensure that your path libraries have been set up and **should be run everytime that you use CASPR**.
 3. Go into the script folders to look at examples or open up the CASPR GUI using the CASPR_GUI command.
 
-For further information regarding the operation of CASPR please refer to *CASPR_101.pdf* (located in the *docs* directory). Aditional documentation including the 2016 IROS paper can also be found within this directory.
+For further information regarding the operation of CASPR please refer to the CASPR youtube page https://www.youtube.com/watch?v=b_24t_j1uQo. 
+
+Aditional documentation including the 2016 IROS paper can also be found within the docs folder.
 
 ## Keeping CASPR Up to Date: ##
 To keep CASPR up to date please periodically execute the command *git pull* from your root directory.

@@ -26,7 +26,7 @@
             </parent>
         </link_rigid> -->        
         <link_rigid num="1" name="Large Platform (Gazebo sim)">
-            <joint type="SPATIAL_EULER_XYZ" q_initial="0 0 1 0 0 0"/>
+            <joint type="SPATIAL_EULER_XYZ" q_initial="0 0 1 0 0 0" q_min="-3.5 -3.5 0 -3.1416 -3.1416 -3.1416" q_max="3.5 3.5 3.5 3.1416 3.1416 3.1416"/>
             <physical>
                 <mass>150</mass>
                 <com_location>0 0 0</com_location>

@@ -3,15 +3,15 @@
 <bodies_system>
     <links display_range="-3.0 3.0 -3.0 3.0 -3.0 3.0" view_angle="0 0">
       <link_rigid num="1" name="R_Y 1">
-        <joint type="R_Y" q_initial="0"/>
+        <joint type="R_Y" q_initial="0" q_min="-3.1416" q_max="3.1416"/>
         <physical>
           <mass>1</mass>
           <com_location>0.0 0.0 0.5</com_location>
           <end_location>0.0 0.0 1.0</end_location>
           <inertia ref="com">
             <Ixx>0.083333</Ixx>
-            <Iyy>0.083333</Iyy>
-            <Izz>0.0</Izz>
+            <Iyy>0.0</Iyy>
+            <Izz>0.083333</Izz>
             <Ixy>0.0</Ixy>
             <Ixz>0.0</Ixz>
             <Iyz>0.0</Iyz>
@@ -23,15 +23,15 @@
         </parent>
       </link_rigid>
       <link_rigid num="2" name="R_Y 2">
-        <joint type="R_Y" q_initial="0"/>
+        <joint type="R_Y" q_initial="0" q_min="-3.1416" q_max="3.1416"/>
         <physical>
           <mass>1</mass>
           <com_location>0.0 0.0 0.5</com_location>
           <end_location>0.0 0.0 1.0</end_location>
           <inertia ref="com">
             <Ixx>0.083333</Ixx>
-            <Iyy>0.083333</Iyy>
-            <Izz>0.0</Izz>
+            <Iyy>0.0</Iyy>
+            <Izz>0.083333</Izz>
             <Ixy>0.0</Ixy>
             <Ixz>0.0</Ixz>
             <Iyz>0.0</Iyz>

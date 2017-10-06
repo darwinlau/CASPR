@@ -105,10 +105,13 @@ classdef SystemModelBodies < handle
         q_default
         q_dot_default
         q_ddot_default
-        q_lb
-        q_ub
+        q_lb                        % The lower bound on joints that are physically meaningful (by definition)
+        q_ub                        % The upper bound on joints that are physically meaningful (by definition)
+        q_min                       % Minimum joint values of q (set by user)
+        q_max                       % Maximum joint values of q (set by user)
         % Generalised coordinates time derivative (for special cases q_dot does not equal q_deriv)
-        q_deriv
+        q_deriv                     % This is useful particularly if the derivative of q is not the same as q_dot, but in most cases they are the same
+        q_dofType                   % The type of DoF (translation or rotation) for each q value
         
         tau                         % The joint actuator
         tauMin                      % The joint actuator minimum value
@@ -811,11 +814,37 @@ classdef SystemModelBodies < handle
             end
         end
 
+        function q_min = get.q_min(obj)
+            q_min = zeros(obj.numDofVars, 1);
+            index_vars = 1;
+            for k = 1:obj.numLinks
+                q_min(index_vars:index_vars+obj.bodies{k}.joint.numVars-1) = obj.bodies{k}.joint.q_min;
+                index_vars = index_vars + obj.bodies{k}.joint.numVars;
+            end
+        end
+
+        function q_max = get.q_max(obj)
+            q_max = zeros(obj.numDofVars, 1);
+            index_vars = 1;
+            for k = 1:obj.numLinks
+                q_max(index_vars:index_vars+obj.bodies{k}.joint.numVars-1) = obj.bodies{k}.joint.q_max;
+                index_vars = index_vars + obj.bodies{k}.joint.numVars;
+            end
+        end
+        
         function q_deriv = get.q_deriv(obj)
             q_deriv = zeros(obj.numDofVars, 1);
             index_vars = 1;
             for k = 1:obj.numLinks
                 q_deriv(index_vars:index_vars+obj.bodies{k}.joint.numVars-1) = obj.bodies{k}.joint.q_deriv;
+                index_vars = index_vars + obj.bodies{k}.joint.numVars;
+            end
+        end
+        
+        function q_dofType = get.q_dofType(obj)
+            index_vars = 1;
+            for k = 1:obj.numLinks
+                q_dofType(index_vars:index_vars+obj.bodies{k}.joint.numVars-1) = obj.bodies{k}.joint.q_dofType;
                 index_vars = index_vars + obj.bodies{k}.joint.numVars;
             end
         end
