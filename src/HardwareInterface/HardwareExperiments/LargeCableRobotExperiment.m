@@ -87,7 +87,7 @@ classdef LargeCableRobotExperiment < ExperimentBase
             exp = LargeCableRobotExperiment(hw_interface, model_config, model_obj);
             
             % Setup the trajectory and run the experiment
-            trajectory = model_config.getTrajectory(trajectory_id);
+            trajectory = model_config.getJointTrajectory(trajectory_id);
             exp.hardwareInterface.timeStep = trajectory.timeVector(2)-trajectory.timeVector(1);
             trajectory.plotJointSpace();
             exp.runTrajectory(trajectory);

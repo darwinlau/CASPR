@@ -143,7 +143,7 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
     %         end
     %     end
     
-    methods (Access = private)
+    methods
         % comPort = 'COM3'
         function initialise(obj)
             % Find and Load Libraries
@@ -354,9 +354,9 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
             [~, mode] = obj.sync_read(obj.ADDR_XH_OPERATING_MODE, obj.LEN_XH_OPERATING_MODE);
         end
         
-        % Method to send the vector of current (c_cmd) to hardware
+        % Method to send the vector of current (f_cmd) to hardware
         %
-        % Argument c_cmd is a column vector with size (DXL_NUM x 1)
+        % Argument f_cmd is a column vector with size (DXL_NUM x 1)
         function forceCommandSend(obj, f_cmd)
             if(length(f_cmd) ~= obj.DXL_NUM)
                 obj.close();
