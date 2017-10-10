@@ -88,7 +88,7 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
         
         % Protocol version
         PROTOCOL_VERSION            = 2.0;          % See which protocol version is used in the Dynamixel
-        BAUDRATE                    = 1000000;
+        BAUDRATE                    = 115200;
 %         DEVICENAME                  = 'COM3';       % Check which port is being used on your controller
         % ex) Windows: "COM1"   Linux: "/dev/ttyUSB0"
         
@@ -145,7 +145,11 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
     
     methods
         % comPort = 'COM3'
-        function initialise(obj)
+       
+    end
+    
+    methods
+         function initialise(obj)
             % Find and Load Libraries
             if strcmp(computer, 'PCWIN')
                 libname = 'dxl_x86_c';
@@ -173,9 +177,7 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
             % Initialize PacketHandler Structs
             packetHandler();
         end
-    end
-    
-    methods
+        
         function open(obj)
             % Initialize the serialpush port communication between Dynamixel and MATLAB
             % The input value is the COMPORT should be changed as per requirement

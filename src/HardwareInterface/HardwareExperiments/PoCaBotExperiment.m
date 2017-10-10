@@ -45,14 +45,14 @@ classdef PoCaBotExperiment < ExperimentBase
     methods
         function exp = PoCaBotExperiment(numMotor,strCableID,timestep, server)
             % Create the config
-            model_config = ModelConfig('PoCaBot spatial');
+            model_config = ModelConfig('XL-Laser');
             % Load the SystemKinematics object from the XML
             modelObj = model_config.getModel(strCableID);
             % Create the hardware interface
             %cableLengths_full = ones(numMotor,1)*4.05;
             cableLengths_full = [6.618; 4.800; 6.632;4.800;6.632;5.545;6.618;5.545];
             
-            hw_interface = PoCaBotCASPRInterface('COM8', numMotor, cableLengths_full,false);  %1
+            hw_interface = PoCaBotCASPRInterface('COM11', numMotor, cableLengths_full,false);  %1
             exp@ExperimentBase(hw_interface, modelObj);
             exp.modelConfig = model_config;
             exp.numMotor = numMotor;
