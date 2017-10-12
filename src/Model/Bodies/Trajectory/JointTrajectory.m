@@ -490,5 +490,78 @@ classdef JointTrajectory < TrajectoryBase
             trajectory_all.timeVector = [0:trajectory_all.timeStep:trajectory_all.totalTime];            
             fclose(fid);
         end
+        
+        % The arguments time_blend_s and time_blend_e can be only used to
+        % decide the acceleration of the triangular/trapezoidal profile.        
+        function [trajectory] = ParabolicBlendTrajectoryGenerate(q_s, q_e, time_step, time_blend_s, time_blend_e, v_max)
+            CASPR_log.Assert(length(q_s) == length(q_e), 'Length of input states are inconsistent!');
+            if(q_s == q_e)
+                trajectory.q = q_s;
+                trajectory.q_dot = q_s*0;
+                trajectory.q_ddot = q_s*0;
+                trajectory.timeVector = 0;
+                return;
+            end
+            n_dof = length(q_s);
+            vmax = abs(v_max);
+            delta_q = q_e-q_s;
+            distance = norm(delta_q);
+            
+            if(1/2*vmax*(time_blend_s+time_blend_e)>=distance)
+                % Triangular Profile
+                acc_s = vmax/time_blend_s;
+                acc_e = vmax/time_blend_e;
+                if(time_blend_s == 0)
+                    time_acc_s = 0;
+                    time_acc_e = ceil(sqrt(2*distance/acc_e)/time_step)*time_step;
+                elseif(time_blend_e == 0)
+                    time_acc_s = ceil(sqrt(2*distance/acc_s)/time_step)*time_step;
+                    time_acc_e = 0;
+                else
+                    time_acc_s = ceil(sqrt(2*acc_e*distance/acc_s/(acc_s+acc_e))/time_step)*time_step;
+                    time_acc_e = ceil(sqrt(2*acc_s*distance/acc_e/(acc_s+acc_e))/time_step)*time_step;
+                end
+                time_const_speed = 0;
+            else
+                % Trapezoidal Profile
+                time_acc_s = ceil(time_blend_s/time_step)*time_step;
+                time_acc_e = ceil(time_blend_e/time_step)*time_step;
+                distance_const_speed = distance - (vmax*(time_acc_s+time_acc_e)/2);
+                if(distance_const_speed<=0)
+                    time_const_speed = 0;
+                else
+                    time_const_speed = ceil(distance_const_speed/vmax/time_step)*time_step;
+                end
+            end
+            time_vector = time_step : time_step : time_acc_s+time_acc_e+time_const_speed;
+            
+            q = zeros(n_dof, length(time_vector));
+            q_dot = zeros(n_dof, length(time_vector));
+            q_ddot = zeros(n_dof, length(time_vector));
+            
+            v_max_true = delta_q/(1/2*(time_acc_s+time_acc_e)+time_const_speed);
+            acc_true_s = v_max_true/time_acc_s;
+            acc_true_e = v_max_true/time_acc_e;
+            for t_ind = 1:length(time_vector)
+                t = time_vector(t_ind);
+                if (t <= time_acc_s)
+                    q(:,t_ind) = q_s + acc_true_s*t^2/2;
+                    q_dot(:,t_ind) = acc_true_s*t;
+                    q_ddot(:,t_ind) = acc_true_s;
+                elseif (t <= time_acc_s + time_const_speed)
+                    q(:,t_ind) = q_s + v_max_true*time_acc_s/2 + v_max_true * (t-time_acc_s);
+                    q_dot(:,t_ind) = v_max_true;
+                    q_ddot(:,t_ind) = 0;
+                else
+                    q(:,t_ind) = -acc_true_e*(t-time_acc_s-time_const_speed-time_acc_e)^2/2 + q_e;
+                    q_dot(:,t_ind) = -acc_true_e*(t-time_acc_s-time_const_speed-time_acc_e);
+                    q_ddot(:,t_ind) = -acc_true_e;
+                end
+            end
+            trajectory.q = q;
+            trajectory.q_dot = q_dot;
+            trajectory.q_ddot = q_ddot;
+            trajectory.timeVector = time_vector;
+        end
     end
 end
