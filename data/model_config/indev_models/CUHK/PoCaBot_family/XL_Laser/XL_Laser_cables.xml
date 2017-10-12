@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE cables SYSTEM "../../../../templates/cables.dtd">
-<cables default_cable_set="air_qbot_4423">
-     <cable_set id="air_qbot_4423">
+<cables default_cable_set="box_endeffector_frame4by4by23_improvedjoint_middle">
+     <cable_set id="box_endeffector_frame4by4by23_improvedjoint_middle">
         <cable_ideal name="cable 1" attachment_reference="joint">
             <properties>
                 <force_min>1.0</force_min>
@@ -14,7 +14,7 @@
                 </attachment>
                 <attachment>
                     <link>1</link>
-                    <location>-0.048 0.0245 0.08</location>
+                    <location>-0.115 0.115 -0.0655</location>
                 </attachment>
             </attachments>
         </cable_ideal>
@@ -30,7 +30,7 @@
                 </attachment>
                 <attachment>
                     <link>1</link>
-                    <location>0.048 0.0245 -0.08</location>
+                    <location>0.0615 0.115 0.0655</location>
                 </attachment>
             </attachments>
         </cable_ideal>
@@ -46,7 +46,7 @@
                 </attachment>
                 <attachment>
                     <link>1</link>
-                    <location>0.048 0.0245 0.08</location>
+                    <location>0.115 0.115 -0.0655</location>
                 </attachment>
             </attachments>
         </cable_ideal>
@@ -62,7 +62,7 @@
                 </attachment>
                 <attachment>
                     <link>1</link>
-                    <location>0.048 -0.0245 -0.08</location>
+                    <location>0.0615 -0.115 0.0655</location>
                 </attachment>
             </attachments>
         </cable_ideal>
@@ -78,7 +78,7 @@
                 </attachment>
                 <attachment>
                     <link>1</link>
-                    <location>0.048 -0.0245 0.08</location>
+                    <location>0.115 -0.115 -0.0655</location>
                 </attachment>
             </attachments>
         </cable_ideal>
@@ -94,7 +94,7 @@
                 </attachment>
                 <attachment>
                     <link>1</link>
-                    <location>-0.048 -0.0245 -0.08</location>
+                    <location>-0.0615 -0.115 0.0655</location>
                 </attachment>
             </attachments>
         </cable_ideal>
@@ -110,7 +110,7 @@
                 </attachment>
                 <attachment>
                     <link>1</link>
-                    <location>-0.048 -0.0245 0.08</location>
+                    <location>-0.115 -0.115 -0.0655</location>
                 </attachment>
             </attachments>
         </cable_ideal>
@@ -126,7 +126,7 @@
                 </attachment>
                 <attachment>
                     <link>1</link>
-                    <location>-0.048 0.0245 -0.08</location>
+                    <location>-0.0615 0.115 0.0655</location>
                 </attachment>
             </attachments>
         </cable_ideal>
