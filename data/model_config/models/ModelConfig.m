@@ -9,8 +9,8 @@
 %    ModelConfigType and models_list.csv to be accessible.
 classdef ModelConfig < ModelConfigBase    
     properties (Constant)
-        MODEL_FOLDER_PATH = '/indev_models';
-        LIST_FILENAME = '/indev_models_list.csv';
+        MODEL_FOLDER_PATH = '/models';
+        LIST_FILENAME = '/models_list.csv';
     end
     
     methods
