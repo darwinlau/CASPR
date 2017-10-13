@@ -23,14 +23,16 @@ classdef PoCaBotExperiment < ExperimentBase
     properties
         q_present
         
-        % The extention part of the cable with original length of 1 meter 
-        % under a tension of 1 Newton. Here we assume that the extension of
-        % the cable is linear to the tension.
-        % l_original*factor_offset_per_Newton_Meter*force = l_delta
-        % l_all = l_original+l_delta = (1+factor_offset_per_Newton_Meter*force)*l_original
-        % Given commanded length l_cmd, a length of l_cmd/(1+factor_offset_per_Newton_Meter*force)
+        % Usually the elongation is a linear function of the cable tension
+        % to some extent, so here we assume that the extension of the cable 
+        % is linear to the tension.
+        % l_original*elongation_per_Newton*force = l_delta
+        % l_all = l_original+l_delta = (1+elongation_per_Newton*force)*l_original
+        % Given commanded length l_cmd, a length of l_cmd/(1+elongation_per_Newton*force)
         % should be set when under tension force.
-        factor_offset_per_Newton_Meter = 0.0006; %originally 0.0006
+        % For the orange PE fiber cable, its elongation is 6e-4/N, while
+        % for the STEALTH-BRAID cable, its elongation is 3.2825e-5/N
+        elongation_per_Newton = 0.0006; % 0.0006
         
         l_feedback_traj    % Temporary variable to store things for now
         l_cmd_traj         % Temporary variable to store things for now
@@ -417,7 +419,7 @@ classdef PoCaBotExperiment < ExperimentBase
                 
                 [~, model_temp, ~, ~, ~] = obj.idsim.IDSolver.resolve(trajectory.q(:,t), trajectory.q_dot(:,t), trajectory.q_ddot(:,t), zeros(obj.idsim.model.numDofs,1));
                 [offset] = obj.hardwareInterface.getCableOffsetByTensionByMotorAngleError(model_temp.cableForces);
-                obj.hardwareInterface.lengthCommandSend(model_temp.cableLengths ./(1+obj.factor_offset_per_Newton_Meter*model_temp.cableForces) + offset);
+                obj.hardwareInterface.lengthCommandSend(model_temp.cableLengths ./(1+obj.elongation_per_Newton*model_temp.cableForces) + offset);
                 %fprintf(obj.server, '(%f,%f,%f,%f,%f,%f)\n', obj.fksolver.model.q);
                 
              % Record the relevant states for problem-solving purpose
@@ -430,7 +432,7 @@ classdef PoCaBotExperiment < ExperimentBase
                 while(~any(l_feedback+1))
                     l_feedback = obj.hardwareInterface.lengthFeedbackRead;
                 end
-                obj.l_feedback_traj(t, :) = ((1+obj.factor_offset_per_Newton_Meter*model_temp.cableForces).*l_feedback)';
+                obj.l_feedback_traj(t, :) = ((1+obj.elongation_per_Newton*model_temp.cableForces).*l_feedback)';
                 % And then, we use the feedbacked length to get the true q.
                 [q_solved, ~, ~] = obj.fksolver.compute(obj.l_feedback_traj(t, :)', model_temp.cableLengths, 1:obj.model.numCables, trajectory.q(:,t), zeros(size(trajectory.q(:,t))), 1);
                 obj.q_feedback_traj(t,:) = q_solved'; 
