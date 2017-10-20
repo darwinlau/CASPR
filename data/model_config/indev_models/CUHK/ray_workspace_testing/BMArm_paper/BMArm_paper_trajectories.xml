@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE trajectories SYSTEM "../../../templates/trajectories.dtd">
+<!DOCTYPE trajectories SYSTEM "../../../../templates/trajectories.dtd">
 <trajectories>
     <joint_trajectories>
         <quintic_spline_trajectory id="traj_test" time_definition="absolute" time_step="0.00667">

@@ -25,7 +25,6 @@ function [ x_opt, exit_type, x_prev_new, active_set_new] = id_os_efficient(A_eq,
                 x = x0; % This is the solution to x for given active set. Modify to give the active set and test
                 active_set_new = active_set;
                 exit_flag = 1;
-                disp('yo')
             else
                 % First check if the solution is feasible
                 if(sum(A_ineq*x0>b_ineq)==0)

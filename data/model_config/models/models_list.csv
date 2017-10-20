@@ -5,7 +5,6 @@ Example 2R planar XZ,/examples/Example_2R_planar_XZ/,Example_2R_planar_XZ_bodies
 2 DoF VSD,/SCDM/planar_manipulators/2_DoF_VSD/,2_DoF_VSD_bodies.xml,2_DoF_VSD_cables.xml,2_DoF_VSD_trajectories.xml
 KNTU planar,/SCDM/planar_manipulators/KNTU_planar/,KNTU_planar_bodies.xml,KNTU_planar_cables.xml,KNTU_planar_trajectories.xml
 Passive springs planar,/SCDM/planar_manipulators/Passive_springs_planar/,Passive_springs_planar_bodies.xml,Passive_springs_planar_cables.xml,Passive_springs_planar_trajectories.xml
-PoCaBot planar,/SCDM/planar_manipulators/PoCaBot_planar/,PoCaBot_planar_bodies.xml,PoCaBot_planar_cables.xml,PoCaBot_planar_trajectories.xml
 ACROBOT,/SCDM/spatial_manipulators/ACROBOT/,ACROBOT_bodies.xml,ACROBOT_cables.xml,ACROBOT_trajectories.xml
 CoGiRo,/SCDM/spatial_manipulators/CoGiRo/,CoGiRo_bodies.xml,CoGiRo_cables.xml,CoGiRo_trajectories.xml
 IPAnema 1,/SCDM/spatial_manipulators/IPAnema_1/,IPAnema_1_bodies.xml,IPAnema_1_cables.xml,IPAnema_1_trajectories.xml
@@ -14,7 +13,6 @@ NIST RoboCrane,/SCDM/spatial_manipulators/NIST_RoboCrane/,NIST_RoboCrane_bodies.
 SEGESTA,/SCDM/spatial_manipulators/SEGESTA/,SEGESTA_bodies.xml,SEGESTA_cables.xml,SEGESTA_trajectories.xml
 The Cable Robot Simulator,/SCDM/spatial_manipulators/The_Cable_Robot_Simulator/,The_Cable_Robot_Simulator_bodies.xml,The_Cable_Robot_Simulator_cables.xml,The_Cable_Robot_Simulator_trajectories.xml
 FAST,/SCDM/spatial_manipulators/FAST/,FAST_bodies.xml,FAST_cables.xml,FAST_trajectories.xml
-PoCaBot spatial,/SCDM/spatial_manipulators/PoCaBot_spatial/,PoCaBot_spatial_bodies.xml,PoCaBot_spatial_cables.xml,PoCaBot_spatial_trajectories.xml
 Myorob shoulder,/SCDM/spherical_manipulators/Myorob_shoulder/,Myorob_shoulder_bodies.xml,Myorob_shoulder_cables.xml,Myorob_shoulder_trajectories.xml
 8S neck,/MCDM/8S_neck/,8S_neck_bodies.xml,8S_neck_cables.xml,8S_neck_trajectories.xml
 CAREX,/MCDM/CAREX/,CAREX_bodies.xml,CAREX_cables.xml,CAREX_trajectories.xml
@@ -28,6 +26,3 @@ BioBiped one-leg,/MCDM/BioBiped_one_leg/,BioBiped_one_leg_bodies.xml,BioBiped_on
 BioBiped,/MCDM/BioBiped/,BioBiped_bodies.xml,BioBiped_cables.xml,BioBiped_trajectories.xml
 CAROCA,/SCDM/spatial_manipulators/CAROCA/,CAROCA_bodies.xml,CAROCA_cables.xml,CAROCA_trajectories.xml
 FASTKIT Planar,/HCDM/FASTKIT_Planar/,FASTKIT_Planar_bodies.xml,FASTKIT_Planar_cables.xml,FASTKIT_Planar_trajectories.xml
-4-4_CDPR_planar,/SCDM/planar_manipulators/4-4_CDPR_planar/,4-4_CDPR_planar_bodies.xml,4-4_CDPR_planar_cables.xml,4-4_CDPR_planar_trajectories.xml
-BMArm_paper,/MCDM/BMArm_paper/,BMArm_paper_bodies.xml,BMArm_paper_cables.xml,BMArm_paper_trajectories.xml
-spatial7cable,/SCDM/spatial_manipulators/spatial7cable/,spatial7cable_bodies.xml,spatial7cable_cables.xml,spatial7cable_trajectories.xml
