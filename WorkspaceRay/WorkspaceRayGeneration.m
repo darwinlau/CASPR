@@ -12,14 +12,16 @@ classdef WorkspaceRayGeneration < handle
         numRays
         % --- new ----
         diameter        % the safe buf beteween cables
+        typeWS          % the type of workspace to calculate
     end
     
     
     methods
         % The constructor for the workspace simulator class.
-        function w = WorkspaceRayGeneration(model,grid,safebuf)
+        function w = WorkspaceRayGeneration(model,grid,safebuf,typeWS)
             w.model         = model;
             w.grid          = grid;
+            w.typeWS        = typeWS;
             if isempty(safebuf)
                 w.diameter  = 0;
             else
@@ -74,12 +76,35 @@ classdef WorkspaceRayGeneration < handle
                             cursegvar=CuruGrid.nod2vect(itconsvar);       %from nod2vect calculate the current segment of each variable---n=1--->>[0 0 0 ..]
                             magconvar=CuruGrid.getGridPoint(cursegvar);
                             % --------------------------
-%                             admsrng=segment_computation(obj,curflexvar,magconvar,min_ray_percent);   %computing the range of the admissible range of last variable in wcw
-%                             admsrngIFW = IFW_HyB_MC_dia(obj, curflexvar, magconvar, MatA, MatB, bvar(:,curflexvar), diameter);
-                            admsrng = IFW_HyB_MC_dia(obj, curflexvar, magconvar);
-                            % --------------------------
-%                             [curnseglin spare]=size(admsrng);  %number of segment line
-                            [curnseglin, ~]=size(admsrng);
+%                             admsrngWCW = segment_computation(obj,curflexvar,magconvar,min_ray_percent);   %computing the range of the admissible range of last variable in wcw
+%                             admsrngIFW = IFW_HyB_MC_dia(obj, curflexvar, magconvar, min_ray_percent);
+                            switch obj.typeWS
+                                case 1
+                                    admsrng = segment_computation(obj,curflexvar,magconvar,min_ray_percent);   %computing the range of the admissible range of last variable in wcw
+                                case 2
+                                    admsrng = IFW_HyB_MC_dia(obj, curflexvar, magconvar, min_ray_percent);
+                                case 3
+                                    admsrngWCW = segment_computation(obj,curflexvar,magconvar,min_ray_percent);
+                                    admsrngIFW = IFW_HyB_MC_dia(obj, curflexvar, magconvar, min_ray_percent);
+                                    % intersecting parts of WCW and IFW
+                                    if isempty(admsrngWCW) || isempty(admsrngIFW)
+                                        admsrng = [];
+                                    else
+                                        L_A = admsrngWCW(:, 1);
+                                        R_A = admsrngWCW(:, 2);
+                                        L_B = admsrngIFW(:, 1);
+                                        R_B = admsrngIFW(:, 2);
+                                        [L_admsrng, R_admsrng] = or_and_or(obj, L_A, R_A, L_B, R_B);
+                                        admsrng = [L_admsrng', R_admsrng'];
+                                    end
+                                otherwise
+                                    str = 'Invalid the type of workspace';
+                                    CASPR_log.Warn(str);
+                            end
+                            
+                            
+                            % -------------------------- 
+                            [curnseglin, ~]=size(admsrng); %number of segment line
                             if curnseglin>0
                                 matseglin=[matseglin;[ones(curnseglin,1)*[curflexvar magconvar cursegvar] admsrng(:,:)]];
                             end
@@ -130,7 +155,7 @@ classdef WorkspaceRayGeneration < handle
                 disp('The workspace is empty');
             else
                 obj.MatRays=dlmread('WorkspaceRay/TempData/matseglin.txt');
-                obj.MatNodeGrid=dlmread('WorkspaceRay/TempData/matnod.txt');
+%                 obj.MatNodeGrid=dlmread('WorkspaceRay/TempData/matnod.txt');
 %                 [nrow ncol]=size(obj.MatRays);
                 [nrow,~]=size(obj.MatRays);
                 obj.numRays=nrow;
@@ -138,20 +163,20 @@ classdef WorkspaceRayGeneration < handle
         end
         
         % ------------------
-        function intvifwmc = IFW_HyB_MC_dia(obj, cur, magcon)
+        function intvifwmc = IFW_HyB_MC_dia(obj, cur, magcon, min_ray_percent)
             %% select 2 cables to get non-interset intervals
             flag = 0; % flag for non-null 
-%             ncable = size(MatA, 2);
             ncable=obj.model.numCables;
             L_A = -inf;
             R_A = inf;
             
-            % generate the Lm (m=1?numCables) before review each pair of them
+            % generate the Lm (m=1:numCables) before reviewing each pair of
+            % cables
             SegEndpt = CoeffLm(obj, cur, magcon);
-            SegEndpt{1,1}
-            SegEndpt{1,2}
-            SegEndpt{2,1}
-            SegEndpt{2,2}
+%             SegEndpt{1,1}
+%             SegEndpt{1,2}
+%             SegEndpt{2,1}
+%             SegEndpt{2,2}
             
             % in the form of lower triangular matrix
             for ithcable = 1: ncable % i-th cable
@@ -197,9 +222,18 @@ classdef WorkspaceRayGeneration < handle
             if flag == 1
                 intvifwmc_temp = [];
             else
-                intvifwmc_temp = [L_A', R_A'];
+                intvifwmc_temp = [L_A', R_A'];                
             end
             %% generate non-intersect intervals of multicables
+            % avoid isolated pts occur i.e., L_A == R_A
+%                 if round(intvifwmc_temp(:,1)-intvifwmc_temp(:,2),7)==0
+%                     intvifwmc_temp(round(intvifwmc_temp(:,1)-intvifwmc_temp(:,2),7)==0,:)=[];
+%                 end
+            if ~isempty(intvifwmc_temp)
+                if abs(intvifwmc_temp(:,1)-intvifwmc_temp(:,2)) <= min_ray_percent
+                    intvifwmc_temp(abs(intvifwmc_temp(:,1)-intvifwmc_temp(:,2))<=min_ray_percent,:)=[];
+                end
+            end
             intvifwmc = intvifwmc_temp;
         end
         
@@ -1058,8 +1092,8 @@ classdef WorkspaceRayGeneration < handle
 
             %% interval calculation 
             % MinDisPtSeg is a piece-wise function with 3 cases
-%             inequal = '<';
-            inequal = '<=';
+            inequal = '<';
+%             inequal = '<=';
             % i.e., Union_(i,j)(mindisPoly{i} & CondPoly{j})
             % intv1 (case1)
             CoUniPol_temp{1} = mindisPoly{1};
@@ -1584,7 +1618,7 @@ classdef WorkspaceRayGeneration < handle
                             pt1pt2 = pt2 - pt1;
                             temp1 = SquarePoly(obj, pt1pt2);
                             temp2 = -(obj.diameter)^2 * (conv(denomi,denomi));
-                            mindisPoly = {round(AddPolyCoeff_2P(obj, temp1, temp2),12)};
+                            mindisPoly = {round(AddPolyCoeff_2P(obj, temp1, temp2),8)};
                             % mindisPoly = {AddPolyCoeff_2P(obj, temp1, temp2)};
                             % mindisPoly = {[0 0 0 0 0]};
                             intvMinDis = RealRootsIntersectSet(obj, mindisPoly, flxvar, inequal);
