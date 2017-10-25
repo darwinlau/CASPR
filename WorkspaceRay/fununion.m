@@ -1,3 +1,5 @@
+
+
 function matunion=fununion(mat)
 if ~isempty(mat)
     [nrow ncolumn]=size(mat);
