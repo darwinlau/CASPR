@@ -1,19 +1,15 @@
-% Uniform Grid defined with beginning and end point
-%
-% Author        : Jonathan EDEN
-% Created       : 2015
-% Description    :
+
 classdef RayGridGeneration < handle
 
     properties (SetAccess = private)
         q_begin     % The lower bound on grid generalised coordinates
         q_end       % The upper bound on grid generalised coordinates
-        q_initial
-        nsegvar
+        q_initial   % the value of the variable regarding to the axis with zero discritization number 
+        nsegvar     % the vector of discritization numebr each axes
         delta_q     % The step size in generalised coordinates
         q_length    % The length of each index
-        listnflxvar
-        nflexvar
+        listnflxvar % the varible of the axes with non-zero discritization number
+        nflexvar    % number of variable with non-zero discritization number
     end
 
     methods
