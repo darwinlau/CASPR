@@ -491,6 +491,9 @@ classdef JointTrajectory < TrajectoryBase
             fclose(fid);
         end
         
+        % NEEDS TO BE FIXED TO GENERATE BASED ON JOINTS AND MERGE WITH
+        % EXISTING PARABOLIC BLEND
+        
         % The arguments time_blend_s and time_blend_e can be only used to
         % decide the acceleration of the triangular/trapezoidal profile.        
         function [trajectory] = ParabolicBlendTrajectoryGenerate(q_s, q_e, time_step, time_blend_s, time_blend_e, v_max)

@@ -417,135 +417,140 @@ classdef SystemModelBodies < handle
         % acceleration. This update function is only called when a
         % linearisation object has been used.
         function updateLinearisation(obj)
-            % Store the transpose gradient as this will be reused.
-            W_t_grad = TensorOperations.Transpose(obj.W_grad,[1,2],obj.is_symbolic);
-            % M_grad
-            Minv = inv(obj.M);
-            temp_tensor =  TensorOperations.RightMatrixProduct(W_t_grad,(obj.massInertiaMatrix*obj.W),obj.is_symbolic) + ...
-                                    TensorOperations.LeftMatrixProduct((obj.W.'*obj.massInertiaMatrix),obj.W_grad,obj.is_symbolic);
-            obj.Minv_grad = -TensorOperations.LeftRightMatrixProduct(Minv,temp_tensor,obj.is_symbolic);
-            % C_grad_q - Note C_1 = W'M_BP(\dot{S}+XS)\dot{q} and C_2 = W'c
-            ang_mat = MatrixOperations.Initialise([6*obj.numLinks,6*obj.numLinks],obj.is_symbolic);
-            for k = 1:obj.numLinks
-                kp = obj.bodies{k}.parentLinkId;
-                if (kp > 0)
-                    w_kp = obj.bodies{kp}.w;
-                else
-                    w_kp = zeros(3,1);
-                end
-                w_k = obj.bodies{k}.w;
-                ang_mat(6*k-5:6*k, 6*k-5:6*k) = [2*MatrixOperations.SkewSymmetric(w_kp) zeros(3,3); zeros(3,3) MatrixOperations.SkewSymmetric(w_k)];
-            end
-            % First term is not computed as a block
-            obj.C_grad_q        =   TensorOperations.VectorProduct(W_t_grad,obj.massInertiaMatrix*obj.P*(obj.S_dot + ang_mat*obj.S)*obj.q_dot,2,obj.is_symbolic);
-            WtM                 =   obj.W.'*obj.massInertiaMatrix;
-            obj.C_grad_qdot     =   WtM*obj.P*(obj.S_dot + ang_mat*obj.S);
-            % Block computation
-            for k = 1:obj.numLinks
-                index_a_dofs = 1;
-                m_k = obj.bodies{k}.m;
-                for a = 1:k
-                    body_dofs = obj.bodies{a}.joint.numDofs;
-                    ap = obj.bodies{a}.parentLinkId;
-                    % Derive the original block matrices
-                    % X_a
-                    X_a = ang_mat(6*a-5:6*a, 6*a-5:6*a);
-                    % \dot{S}_a + X_aS_a
-                    S_deriv_a = obj.bodies{a}.joint.S_dot + X_a*obj.bodies{a}.joint.S;
-                    % P_ka
-                    P_ka = obj.P(6*k-5:6*k, 6*a-5:6*a);
-                    % Block gradient computation
-                    % Grad(P_ka)S_deriv_a\dot{q}_a component
-                    P_ka_grad = obj.compute_Pka_grad(k,a);
-                    block_grad = TensorOperations.VectorProduct(P_ka_grad,S_deriv_a*obj.q_dot(index_a_dofs:index_a_dofs+body_dofs-1),2,obj.is_symbolic);
-                    % P_ka Grad(S_deriv_a)\dot{q}_a component
-                    % Grad(S_deriv_a) = Grad(\dot{S}) + Grad(X_a)S + X_a Grad(S)
-                    % Initialise the terms
-                    S_deriv_grad_q = MatrixOperations.Initialise([6,body_dofs,obj.numDofs],obj.is_symbolic);
-                    S_deriv_grad_q_dot = MatrixOperations.Initialise([6,body_dofs,obj.numDofs],obj.is_symbolic);
-                    % Add the Grad(\dot{S}) terms
-                    S_deriv_grad_q(:,:,index_a_dofs:index_a_dofs+body_dofs-1) = obj.bodies{a}.joint.S_dot_grad;
-                    S_deriv_grad_q_dot(:,:,index_a_dofs:index_a_dofs+body_dofs-1) = obj.bodies{a}.joint.S_grad;
-                    % Grad(X_a)S
-                    X_a_grad_q = MatrixOperations.Initialise([6,6,obj.numDofs],obj.is_symbolic);
-                    X_a_grad_q_dot = MatrixOperations.Initialise([6,6,obj.numDofs],obj.is_symbolic);
-                    
-                    [w_ap_grad_q,w_ap_grad_q_dot]   = obj.generate_omega_grad(ap);
-                    [w_a_grad_q,w_a_grad_q_dot]     = obj.generate_omega_grad(a);
-                    for i=1:obj.numDofs
-                        X_a_grad_q(1:3,1:3,i) = 2*MatrixOperations.SkewSymmetric(w_ap_grad_q(:,i));
-                        X_a_grad_q(4:6,4:6,i) = MatrixOperations.SkewSymmetric(w_a_grad_q(:,i));
-                        X_a_grad_q_dot(1:3,1:3,i) = 2*MatrixOperations.SkewSymmetric(w_ap_grad_q_dot(:,i));
-                        X_a_grad_q_dot(4:6,4:6,i) = MatrixOperations.SkewSymmetric(w_a_grad_q_dot(:,i));
-                    end
-                    S_deriv_grad_q = S_deriv_grad_q + TensorOperations.RightMatrixProduct(X_a_grad_q,obj.bodies{a}.joint.S,obj.is_symbolic);
-                    S_deriv_grad_q_dot = S_deriv_grad_q_dot + TensorOperations.RightMatrixProduct(X_a_grad_q_dot,obj.bodies{a}.joint.S,obj.is_symbolic);
-                    % X_a Grad(S)
-                    S_deriv_grad_q(:,:,index_a_dofs:index_a_dofs+body_dofs-1) = S_deriv_grad_q(:,:,index_a_dofs:index_a_dofs+body_dofs-1) + TensorOperations.LeftMatrixProduct(X_a,obj.bodies{a}.joint.S_grad,obj.is_symbolic);
-                    
-                    % Final computation
-                    block_grad = block_grad + P_ka*TensorOperations.VectorProduct(S_deriv_grad_q,obj.q_dot(index_a_dofs:index_a_dofs+body_dofs-1),2,obj.is_symbolic);
-                    
-                    % Map the block gradient back into the relevant term
-                    obj.C_grad_q = obj.C_grad_q + WtM(:,6*k-5:6*k)*block_grad;
-
-                    % C_grad_q_dot
-                    obj.C_grad_qdot = obj.C_grad_qdot + WtM(:,6*k-5:6*k)*P_ka*TensorOperations.VectorProduct(S_deriv_grad_q_dot,obj.q_dot(index_a_dofs:index_a_dofs+body_dofs-1),2,obj.is_symbolic);
-
-                    % The c term
-                    if(ap==0)
-                        R_kam1 = obj.bodies{k}.R_0k.';
-                        ap_w = zeros(3,1);
+            if(isempty(obj.W_grad))
+                CASPR_log.Warn('Cannot update linearisation without updating hessian first')
+                obj.occupied.linearisation = false;
+            else
+                % Store the transpose gradient as this will be reused.
+                W_t_grad = TensorOperations.Transpose(obj.W_grad,[1,2],obj.is_symbolic);
+                % M_grad
+                Minv = inv(obj.M);
+                temp_tensor =  TensorOperations.RightMatrixProduct(W_t_grad,(obj.massInertiaMatrix*obj.W),obj.is_symbolic) + ...
+                                        TensorOperations.LeftMatrixProduct((obj.W.'*obj.massInertiaMatrix),obj.W_grad,obj.is_symbolic);
+                obj.Minv_grad = -TensorOperations.LeftRightMatrixProduct(Minv,temp_tensor,obj.is_symbolic);
+                % C_grad_q - Note C_1 = W'M_BP(\dot{S}+XS)\dot{q} and C_2 = W'c
+                ang_mat = MatrixOperations.Initialise([6*obj.numLinks,6*obj.numLinks],obj.is_symbolic);
+                for k = 1:obj.numLinks
+                    kp = obj.bodies{k}.parentLinkId;
+                    if (kp > 0)
+                        w_kp = obj.bodies{kp}.w;
                     else
-                        R_kam1 = obj.bodies{k}.R_0k.'*obj.bodies{ap}.R_0k;
-                        ap_w = obj.bodies{ap}.w;
+                        w_kp = zeros(3,1);
                     end
-                    R_kam1_grad = obj.compute_Rka_grad(k,ap);
-                            
+                    w_k = obj.bodies{k}.w;
+                    ang_mat(6*k-5:6*k, 6*k-5:6*k) = [2*MatrixOperations.SkewSymmetric(w_kp) zeros(3,3); zeros(3,3) MatrixOperations.SkewSymmetric(w_k)];
+                end
+                % First term is not computed as a block
+                obj.C_grad_q        =   TensorOperations.VectorProduct(W_t_grad,obj.massInertiaMatrix*obj.P*(obj.S_dot + ang_mat*obj.S)*obj.q_dot,2,obj.is_symbolic);
+                WtM                 =   obj.W.'*obj.massInertiaMatrix;
+                obj.C_grad_qdot     =   WtM*obj.P*(obj.S_dot + ang_mat*obj.S);
+                % Block computation
+                for k = 1:obj.numLinks
+                    index_a_dofs = 1;
+                    m_k = obj.bodies{k}.m;
+                    for a = 1:k
+                        body_dofs = obj.bodies{a}.joint.numDofs;
+                        ap = obj.bodies{a}.parentLinkId;
+                        % Derive the original block matrices
+                        % X_a
+                        X_a = ang_mat(6*a-5:6*a, 6*a-5:6*a);
+                        % \dot{S}_a + X_aS_a
+                        S_deriv_a = obj.bodies{a}.joint.S_dot + X_a*obj.bodies{a}.joint.S;
+                        % P_ka
+                        P_ka = obj.P(6*k-5:6*k, 6*a-5:6*a);
+                        % Block gradient computation
+                        % Grad(P_ka)S_deriv_a\dot{q}_a component
+                        P_ka_grad = obj.compute_Pka_grad(k,a);
+                        block_grad = TensorOperations.VectorProduct(P_ka_grad,S_deriv_a*obj.q_dot(index_a_dofs:index_a_dofs+body_dofs-1),2,obj.is_symbolic);
+                        % P_ka Grad(S_deriv_a)\dot{q}_a component
+                        % Grad(S_deriv_a) = Grad(\dot{S}) + Grad(X_a)S + X_a Grad(S)
+                        % Initialise the terms
+                        S_deriv_grad_q = MatrixOperations.Initialise([6,body_dofs,obj.numDofs],obj.is_symbolic);
+                        S_deriv_grad_q_dot = MatrixOperations.Initialise([6,body_dofs,obj.numDofs],obj.is_symbolic);
+                        % Add the Grad(\dot{S}) terms
+                        S_deriv_grad_q(:,:,index_a_dofs:index_a_dofs+body_dofs-1) = obj.bodies{a}.joint.S_dot_grad;
+                        S_deriv_grad_q_dot(:,:,index_a_dofs:index_a_dofs+body_dofs-1) = obj.bodies{a}.joint.S_grad;
+                        % Grad(X_a)S
+                        X_a_grad_q = MatrixOperations.Initialise([6,6,obj.numDofs],obj.is_symbolic);
+                        X_a_grad_q_dot = MatrixOperations.Initialise([6,6,obj.numDofs],obj.is_symbolic);
+
+                        [w_ap_grad_q,w_ap_grad_q_dot]   = obj.generate_omega_grad(ap);
+                        [w_a_grad_q,w_a_grad_q_dot]     = obj.generate_omega_grad(a);
+                        for i=1:obj.numDofs
+                            X_a_grad_q(1:3,1:3,i) = 2*MatrixOperations.SkewSymmetric(w_ap_grad_q(:,i));
+                            X_a_grad_q(4:6,4:6,i) = MatrixOperations.SkewSymmetric(w_a_grad_q(:,i));
+                            X_a_grad_q_dot(1:3,1:3,i) = 2*MatrixOperations.SkewSymmetric(w_ap_grad_q_dot(:,i));
+                            X_a_grad_q_dot(4:6,4:6,i) = MatrixOperations.SkewSymmetric(w_a_grad_q_dot(:,i));
+                        end
+                        S_deriv_grad_q = S_deriv_grad_q + TensorOperations.RightMatrixProduct(X_a_grad_q,obj.bodies{a}.joint.S,obj.is_symbolic);
+                        S_deriv_grad_q_dot = S_deriv_grad_q_dot + TensorOperations.RightMatrixProduct(X_a_grad_q_dot,obj.bodies{a}.joint.S,obj.is_symbolic);
+                        % X_a Grad(S)
+                        S_deriv_grad_q(:,:,index_a_dofs:index_a_dofs+body_dofs-1) = S_deriv_grad_q(:,:,index_a_dofs:index_a_dofs+body_dofs-1) + TensorOperations.LeftMatrixProduct(X_a,obj.bodies{a}.joint.S_grad,obj.is_symbolic);
+
+                        % Final computation
+                        block_grad = block_grad + P_ka*TensorOperations.VectorProduct(S_deriv_grad_q,obj.q_dot(index_a_dofs:index_a_dofs+body_dofs-1),2,obj.is_symbolic);
+
+                        % Map the block gradient back into the relevant term
+                        obj.C_grad_q = obj.C_grad_q + WtM(:,6*k-5:6*k)*block_grad;
+
+                        % C_grad_q_dot
+                        obj.C_grad_qdot = obj.C_grad_qdot + WtM(:,6*k-5:6*k)*P_ka*TensorOperations.VectorProduct(S_deriv_grad_q_dot,obj.q_dot(index_a_dofs:index_a_dofs+body_dofs-1),2,obj.is_symbolic);
+
+                        % The c term
+                        if(ap==0)
+                            R_kam1 = obj.bodies{k}.R_0k.';
+                            ap_w = zeros(3,1);
+                        else
+                            R_kam1 = obj.bodies{k}.R_0k.'*obj.bodies{ap}.R_0k;
+                            ap_w = obj.bodies{ap}.w;
+                        end
+                        R_kam1_grad = obj.compute_Rka_grad(k,ap);
+
+                        % Grad(W)*c
+                        obj.C_grad_q = obj.C_grad_q + m_k*TensorOperations.VectorProduct(W_t_grad(:,6*k-5:6*k-3,:),R_kam1*cross(ap_w, cross(ap_w, obj.bodies{a}.r_Parent + obj.bodies{a}.joint.r_rel)),2,obj.is_symbolic);
+                        % Grad of R
+                        obj.C_grad_q = obj.C_grad_q + m_k*obj.W(6*k-5:6*k-3,:).'*TensorOperations.VectorProduct(R_kam1_grad,cross(ap_w, cross(ap_w, obj.bodies{a}.r_Parent + obj.bodies{a}.joint.r_rel)),2,obj.is_symbolic);
+                        % Grad of omega
+                        obj.C_grad_q = obj.C_grad_q + m_k*obj.W(6*k-5:6*k-3,:).'*R_kam1*TensorOperations.VectorProduct(0.5*X_a_grad_q(1:3,1:3,:),cross(ap_w, obj.bodies{a}.r_Parent + obj.bodies{a}.joint.r_rel),2,obj.is_symbolic);
+                        % Grad of omega
+                        obj.C_grad_q = obj.C_grad_q + m_k*obj.W(6*k-5:6*k-3,:).'*R_kam1*MatrixOperations.SkewSymmetric(ap_w)*TensorOperations.VectorProduct(0.5*X_a_grad_q(1:3,1:3,:),obj.bodies{a}.r_Parent + obj.bodies{a}.joint.r_rel,2,obj.is_symbolic);
+                        % Grad of r
+                        obj.C_grad_q(:,index_a_dofs:index_a_dofs+body_dofs-1) = obj.C_grad_q(:,index_a_dofs:index_a_dofs+body_dofs-1) + m_k*obj.W(6*k-5:6*k-3,:).'*R_kam1*MatrixOperations.SkewSymmetric(ap_w)*MatrixOperations.SkewSymmetric(ap_w)*obj.bodies{a}.joint.S(1:3,:);
+
+                        % q_dot
+                        obj.C_grad_qdot = obj.C_grad_qdot + m_k*obj.W(6*k-5:6*k-3,:).'*R_kam1*TensorOperations.VectorProduct(0.5*X_a_grad_q_dot(1:3,1:3,:),cross(ap_w, obj.bodies{a}.r_Parent + obj.bodies{a}.joint.r_rel),2,obj.is_symbolic);
+                        obj.C_grad_qdot = obj.C_grad_qdot + m_k*obj.W(6*k-5:6*k-3,:).'*R_kam1*MatrixOperations.SkewSymmetric(ap_w)*TensorOperations.VectorProduct(0.5*X_a_grad_q_dot(1:3,1:3,:),obj.bodies{a}.r_Parent + obj.bodies{a}.joint.r_rel,2,obj.is_symbolic);
+
+                        % update a_dofs
+                        index_a_dofs = index_a_dofs + body_dofs;
+                    end
+                    % This is where the other terms go.  They are pretty much
                     % Grad(W)*c
-                    obj.C_grad_q = obj.C_grad_q + m_k*TensorOperations.VectorProduct(W_t_grad(:,6*k-5:6*k-3,:),R_kam1*cross(ap_w, cross(ap_w, obj.bodies{a}.r_Parent + obj.bodies{a}.joint.r_rel)),2,obj.is_symbolic);
-                    % Grad of R
-                    obj.C_grad_q = obj.C_grad_q + m_k*obj.W(6*k-5:6*k-3,:).'*TensorOperations.VectorProduct(R_kam1_grad,cross(ap_w, cross(ap_w, obj.bodies{a}.r_Parent + obj.bodies{a}.joint.r_rel)),2,obj.is_symbolic);
+                    obj.C_grad_q = obj.C_grad_q + m_k*TensorOperations.VectorProduct(W_t_grad(:,6*k-5:6*k-3,:),cross(obj.bodies{k}.w, cross(obj.bodies{k}.w, obj.bodies{k}.r_G)),2,obj.is_symbolic);
                     % Grad of omega
-                    obj.C_grad_q = obj.C_grad_q + m_k*obj.W(6*k-5:6*k-3,:).'*R_kam1*TensorOperations.VectorProduct(0.5*X_a_grad_q(1:3,1:3,:),cross(ap_w, obj.bodies{a}.r_Parent + obj.bodies{a}.joint.r_rel),2,obj.is_symbolic);
+                    obj.C_grad_q = obj.C_grad_q + m_k*obj.W(6*k-5:6*k-3,:).'*TensorOperations.VectorProduct(X_a_grad_q(4:6,4:6,:),cross(obj.bodies{k}.w, obj.bodies{k}.r_G),2,obj.is_symbolic);
                     % Grad of omega
-                    obj.C_grad_q = obj.C_grad_q + m_k*obj.W(6*k-5:6*k-3,:).'*R_kam1*MatrixOperations.SkewSymmetric(ap_w)*TensorOperations.VectorProduct(0.5*X_a_grad_q(1:3,1:3,:),obj.bodies{a}.r_Parent + obj.bodies{a}.joint.r_rel,2,obj.is_symbolic);
-                    % Grad of r
-                    obj.C_grad_q(:,index_a_dofs:index_a_dofs+body_dofs-1) = obj.C_grad_q(:,index_a_dofs:index_a_dofs+body_dofs-1) + m_k*obj.W(6*k-5:6*k-3,:).'*R_kam1*MatrixOperations.SkewSymmetric(ap_w)*MatrixOperations.SkewSymmetric(ap_w)*obj.bodies{a}.joint.S(1:3,:);
+                    obj.C_grad_q = obj.C_grad_q + m_k*obj.W(6*k-5:6*k-3,:).'*MatrixOperations.SkewSymmetric(obj.bodies{k}.w)*TensorOperations.VectorProduct(X_a_grad_q(4:6,4:6,:),obj.bodies{k}.r_G,2,obj.is_symbolic);
+                    %
+                    obj.C_grad_q = obj.C_grad_q + TensorOperations.VectorProduct(W_t_grad(:,6*k-2:6*k,:),cross(obj.bodies{k}.w, obj.bodies{k}.I_G*obj.bodies{k}.w),2,obj.is_symbolic);
+                    obj.C_grad_q = obj.C_grad_q + obj.W(6*k-2:6*k,:).'*TensorOperations.VectorProduct(X_a_grad_q(4:6,4:6,:),obj.bodies{k}.I_G*obj.bodies{k}.w,2,obj.is_symbolic);
+                    obj.C_grad_q = obj.C_grad_q + obj.W(6*k-2:6*k,:).'*MatrixOperations.SkewSymmetric(obj.bodies{k}.w)*obj.bodies{k}.I_G*w_a_grad_q;
 
                     % q_dot
-                    obj.C_grad_qdot = obj.C_grad_qdot + m_k*obj.W(6*k-5:6*k-3,:).'*R_kam1*TensorOperations.VectorProduct(0.5*X_a_grad_q_dot(1:3,1:3,:),cross(ap_w, obj.bodies{a}.r_Parent + obj.bodies{a}.joint.r_rel),2,obj.is_symbolic);
-                    obj.C_grad_qdot = obj.C_grad_qdot + m_k*obj.W(6*k-5:6*k-3,:).'*R_kam1*MatrixOperations.SkewSymmetric(ap_w)*TensorOperations.VectorProduct(0.5*X_a_grad_q_dot(1:3,1:3,:),obj.bodies{a}.r_Parent + obj.bodies{a}.joint.r_rel,2,obj.is_symbolic);
-                    
-                    % update a_dofs
-                    index_a_dofs = index_a_dofs + body_dofs;
+                    obj.C_grad_qdot = obj.C_grad_qdot + m_k*obj.W(6*k-5:6*k-3,:).'*TensorOperations.VectorProduct(X_a_grad_q_dot(4:6,4:6,:),cross(obj.bodies{k}.w, obj.bodies{k}.r_G),2,obj.is_symbolic);
+                    obj.C_grad_qdot = obj.C_grad_qdot + m_k*obj.W(6*k-5:6*k-3,:).'*MatrixOperations.SkewSymmetric(obj.bodies{k}.w)*TensorOperations.VectorProduct(X_a_grad_q_dot(4:6,4:6,:),obj.bodies{k}.r_G,2,obj.is_symbolic);
+                    %
+                    obj.C_grad_qdot = obj.C_grad_qdot + obj.W(6*k-2:6*k,:).'*TensorOperations.VectorProduct(X_a_grad_q_dot(4:6,4:6,:),obj.bodies{k}.I_G*obj.bodies{k}.w,2,obj.is_symbolic);
+                    obj.C_grad_qdot = obj.C_grad_qdot + obj.W(6*k-2:6*k,:).'*MatrixOperations.SkewSymmetric(obj.bodies{k}.w)*obj.bodies{k}.I_G*w_a_grad_q_dot;
                 end
-                % This is where the other terms go.  They are pretty much
-                % Grad(W)*c
-                obj.C_grad_q = obj.C_grad_q + m_k*TensorOperations.VectorProduct(W_t_grad(:,6*k-5:6*k-3,:),cross(obj.bodies{k}.w, cross(obj.bodies{k}.w, obj.bodies{k}.r_G)),2,obj.is_symbolic);
-                % Grad of omega
-                obj.C_grad_q = obj.C_grad_q + m_k*obj.W(6*k-5:6*k-3,:).'*TensorOperations.VectorProduct(X_a_grad_q(4:6,4:6,:),cross(obj.bodies{k}.w, obj.bodies{k}.r_G),2,obj.is_symbolic);
-                % Grad of omega
-                obj.C_grad_q = obj.C_grad_q + m_k*obj.W(6*k-5:6*k-3,:).'*MatrixOperations.SkewSymmetric(obj.bodies{k}.w)*TensorOperations.VectorProduct(X_a_grad_q(4:6,4:6,:),obj.bodies{k}.r_G,2,obj.is_symbolic);
-                %
-                obj.C_grad_q = obj.C_grad_q + TensorOperations.VectorProduct(W_t_grad(:,6*k-2:6*k,:),cross(obj.bodies{k}.w, obj.bodies{k}.I_G*obj.bodies{k}.w),2,obj.is_symbolic);
-                obj.C_grad_q = obj.C_grad_q + obj.W(6*k-2:6*k,:).'*TensorOperations.VectorProduct(X_a_grad_q(4:6,4:6,:),obj.bodies{k}.I_G*obj.bodies{k}.w,2,obj.is_symbolic);
-                obj.C_grad_q = obj.C_grad_q + obj.W(6*k-2:6*k,:).'*MatrixOperations.SkewSymmetric(obj.bodies{k}.w)*obj.bodies{k}.I_G*w_a_grad_q;
-
-                % q_dot
-                obj.C_grad_qdot = obj.C_grad_qdot + m_k*obj.W(6*k-5:6*k-3,:).'*TensorOperations.VectorProduct(X_a_grad_q_dot(4:6,4:6,:),cross(obj.bodies{k}.w, obj.bodies{k}.r_G),2,obj.is_symbolic);
-                obj.C_grad_qdot = obj.C_grad_qdot + m_k*obj.W(6*k-5:6*k-3,:).'*MatrixOperations.SkewSymmetric(obj.bodies{k}.w)*TensorOperations.VectorProduct(X_a_grad_q_dot(4:6,4:6,:),obj.bodies{k}.r_G,2,obj.is_symbolic);
-                %
-                obj.C_grad_qdot = obj.C_grad_qdot + obj.W(6*k-2:6*k,:).'*TensorOperations.VectorProduct(X_a_grad_q_dot(4:6,4:6,:),obj.bodies{k}.I_G*obj.bodies{k}.w,2,obj.is_symbolic);
-                obj.C_grad_qdot = obj.C_grad_qdot + obj.W(6*k-2:6*k,:).'*MatrixOperations.SkewSymmetric(obj.bodies{k}.w)*obj.bodies{k}.I_G*w_a_grad_q_dot;
+                % G_grad
+                temp_grad = MatrixOperations.Initialise([6*obj.numLinks,obj.numDofs],obj.is_symbolic);
+                for k = 1:obj.numLinks
+                    R_k0_grad = obj.compute_Rka_grad(k,0);
+                    temp_grad(6*k-5:6*k-3,:) = TensorOperations.VectorProduct(R_k0_grad,[0; 0; -obj.bodies{k}.m*SystemModel.GRAVITY_CONSTANT],2,obj.is_symbolic);
+                end
+                obj.G_grad = -TensorOperations.VectorProduct(W_t_grad,obj.G_b,2,obj.is_symbolic) - obj.W.'*temp_grad;
             end
-            % G_grad
-            temp_grad = MatrixOperations.Initialise([6*obj.numLinks,obj.numDofs],obj.is_symbolic);
-            for k = 1:obj.numLinks
-                R_k0_grad = obj.compute_Rka_grad(k,0);
-                temp_grad(6*k-5:6*k-3,:) = TensorOperations.VectorProduct(R_k0_grad,[0; 0; -obj.bodies{k}.m*SystemModel.GRAVITY_CONSTANT],2,obj.is_symbolic);
-            end
-            obj.G_grad = -TensorOperations.VectorProduct(W_t_grad,obj.G_b,2,obj.is_symbolic) - obj.W.'*temp_grad;
         end
 
         % Supporting function to connect all of the parent and child bodies
