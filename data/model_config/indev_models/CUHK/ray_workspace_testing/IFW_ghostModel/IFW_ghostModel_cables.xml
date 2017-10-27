@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE cables SYSTEM "../../../../templates/cables.dtd">
+<!-- Template generated XML file for cables in CASPR -->
+<cables default_cable_set="original">
+  <!-- Use cable set tags for each possible set of cable attachments -->  
+  <cable_set id="original">
+        <cable_ideal name="cable i" attachment_reference="joint">
+            <properties>
+                <force_min>0.0</force_min>
+                <force_max>720</force_max>
+            </properties>
+            <attachments>
+                <attachment>
+                    <link>0</link>
+                    <location>0 0 0</location>
+                </attachment>
+                <attachment>
+                    <link>1</link>
+                    <location>0.1 0.1 0.1</location>
+                </attachment>
+            </attachments>
+        </cable_ideal>
+        <cable_ideal name="cable j" attachment_reference="joint">
+            <properties>
+                <force_min>0.0</force_min>
+                <force_max>720</force_max>
+            </properties>
+            <attachments>
+                <attachment>
+                    <link>0</link>
+                    <location>0 0 4</location>
+                </attachment>
+                <attachment>
+                    <link>1</link>
+                    <location>0.1 0.1 -0.1</location>
+                </attachment>
+            </attachments>
+        </cable_ideal>
+    </cable_set>
+</cables>
