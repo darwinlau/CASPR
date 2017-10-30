@@ -6,4 +6,7 @@ spatial7cable,/CUHK/ray_workspace_testing/spatial7cable/,spatial7cable_bodies.xm
 CU-Brick,/CUHK/PoCaBot_family/CU_Brick/,CU_Brick_bodies.xml,CU_Brick_cables.xml,CU_Brick_trajectories.xml
 XL-Laser,/CUHK/PoCaBot_family/XL_Laser/,XL_Laser_bodies.xml,XL_Laser_cables.xml,XL_Laser_trajectories.xml
 LightPainting,/CUHK/PoCaBot_family/LightPainting/,LightPainting_bodies.xml,LightPainting_cables.xml,LightPainting_trajectories.xml
-AirQBot,/CUHK/PoCaBot_family/AirQBot/,AirQBot_bodies.xml,AirQBot_cables.xml,AirQBot_trajectories.xml,
+AirQBot,/CUHK/PoCaBot_family/AirQBot/,AirQBot_bodies.xml,AirQBot_cables.xml,AirQBot_trajectories.xml
+MickMultiIFW,/CUHK/ray_workspace_testing/MickMultiIFW/,MickMultiIFW_bodies.xml,MickMultiIFW_cables.xml,MickMultiIFW_trajectories.xml
+IFW_ghostModel,/CUHK/ray_workspace_testing/IFW_ghostModel/,IFW_ghostModel_bodies.xml,IFW_ghostModel_cables.xml,IFW_ghostModel_trajectories.xml
+Delta_planar,/CUHK/ray_workspace_testing/Delta_planar/,Delta_planar_bodies.xml,Delta_planar_cables.xml,Delta_planar_trajectories.xml

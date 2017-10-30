@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE bodies_system SYSTEM "../../../../templates/bodies.dtd">
+<!-- Template generated XML file for rigid bodies in CASPR -->
+<bodies_system>
+    <links display_range="-7 7 -7 7 -1 9" view_angle="13 13">
+        <link_rigid num="1" name="Link1">
+            <joint type="S_FIXED_XYZ" q_initial="0.0 -0.78544 0" q_min="0 -3.1415926 -3.1415926" q_max="0 3.1415926 3.1415926"/>
+            <physical>
+                <mass>4</mass>
+                <com_location>2 0 0</com_location>
+                <end_location>4 0 0</end_location>
+                <inertia ref="com">
+                    <Ixx>1.0</Ixx>
+                    <Iyy>1.0</Iyy>
+                    <Izz>1.0</Izz>
+                    <Ixy>0.0</Ixy>
+                    <Ixz>0.0</Ixz>
+                    <Iyz>0.0</Iyz>
+                </inertia>
+            </physical>
+            <parent>
+                <num>0</num>
+                <location>0.0 1.0 2.0</location>
+            </parent>
+        </link_rigid>
+        <link_rigid num="2" name="Link2">
+            <joint type="R_Y" q_initial="0" q_min="-3.1415926" q_max="3.1415926"/>
+            <physical>
+                <mass>3</mass>
+                <com_location>1.5 0 0</com_location>
+                <end_location>3 0 0</end_location>
+                <inertia ref="com">
+                    <Ixx>1.0</Ixx>
+                    <Iyy>1.0</Iyy>
+                    <Izz>1.0</Izz>
+                    <Ixy>0.0</Ixy>
+                    <Ixz>0.0</Ixz>
+                    <Iyz>0.0</Iyz>
+                </inertia>
+            </physical>
+            <parent>
+                <num>1</num>
+                <location>4 0.0 0.0</location>
+            </parent>
+        </link_rigid>
+    </links>
+</bodies_system>

@@ -34,3 +34,6 @@ wsim.run(w_condition,[],w_connectivity);
 % Plot the simulation
 disp('Start Plotting Simulation');
 wsim.plotWorkspaceGraph();
+
+
+
