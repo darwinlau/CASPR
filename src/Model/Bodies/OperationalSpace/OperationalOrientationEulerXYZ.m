@@ -32,7 +32,7 @@ classdef OperationalOrientationEulerXYZ < OperationalSpaceBase
     methods(Static)
         % Implementation of the load xml obj
         function o = LoadXmlObj(xmlobj)
-            id = str2double(char(xmlobj.getAttribute('num')));
+            id = str2double(char(xmlobj.getAttribute('marker_id')));
             name = char(xmlobj.getAttribute('name'));
             link = str2double(xmlobj.getElementsByTagName('link').item(0).getFirstChild.getData);
             axes_string = char(xmlobj.getElementsByTagName('axes').item(0).getAttribute('active_axes'));
