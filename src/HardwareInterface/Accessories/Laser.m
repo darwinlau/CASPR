@@ -46,8 +46,8 @@ classdef Laser < handle
         end
         
         function disconnect(obj)
-            delete(instrfind('Name',strcat('serial-',obj.comPort)));
-%             obj.closeserial();
+            obj.closeserial();
+            delete(instrfind('Name',strcat('serial-',obj.strComPort)));
         end
         
         function setLaser(obj, laser)
