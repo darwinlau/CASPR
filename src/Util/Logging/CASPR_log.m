@@ -16,13 +16,13 @@ classdef CASPR_log
                 % Reset the log file to be empty
                 fid = fopen(log_path,'w'); fclose(fid);
             else
-                log_path = [];
+                log_path = []; %#ok<NASGU>
             end
             CASPR_homepath = CASPR_configuration.LoadHomePath();
             if(~exist([CASPR_homepath,'/data/config'],'dir'))
-                mkdir([CASPR_homepath,'/data/config'])
+                CASPR_log.Error('CASPR environment file must be set');
             end
-            save([CASPR_homepath,'/data/config/log_level.mat'], 'log_level', 'log_path');
+            save([CASPR_homepath,'/data/config/CASPR_environment.mat'], 'log_level', 'log_path','-append');
         end
         
         % Prints debug statement
@@ -76,21 +76,20 @@ classdef CASPR_log
     end
     
     methods(Access = private, Static)
-        function [log_level,fid,carrage_return] = Extract()
-            log_struct = load('data/config/log_level.mat');
+        function [log_level,fid,carrage_return] = Extract() %#ok<STOUT>
+            load('data/config/CASPR_environment.mat','log_level','log_path');
             % Determine the what to print to
-            if(isempty(log_struct.log_path))
+            if(isempty(log_path))
                 fid = 1;
                 carrage_return = '\n';
             else
-                fid = fopen(log_struct.log_path,'a');
+                fid = fopen(log_path,'a');
                 if(isunix||ismac)
                     carrage_return = '\n';
                 else
                     carrage_return = '\r\n';
                 end
             end
-            log_level = log_struct.log_level;
         end
     end
 end

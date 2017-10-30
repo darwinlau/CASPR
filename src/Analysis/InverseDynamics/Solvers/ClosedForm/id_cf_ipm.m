@@ -13,7 +13,7 @@
 %                 method.
 function [ x_opt, exit_type] = id_cf_ipm(A_eq, b_eq, x_min, x_max)
     % This is the minimum norm solution if there are no constraints
-    Ap = A_eq'/(A_eq*A_eq'); x_unconstrained_opt = Ap*b_eq;
+    Ap = A_eq'/(A_eq*A_eq'); x_unconstrained_opt = Ap*b_eq; Ap_active = Ap;
     if((sum(x_unconstrained_opt - x_min < -1e-6)>0)||(sum(x_unconstrained_opt - x_max > 1e-6)>0))
         x_m = 0.5*(x_min + x_max);  
         [n,m] = size(A_eq);

@@ -13,7 +13,7 @@ function initialise_CASPR()
     
     cd(CASPR_homepath);
     % Set the current version
-    CASPR_version = 20170706;
+    CASPR_version = 20171030;
     CASPR_model_config_path = [CASPR_homepath,'/data/model_config'];
     CASPR_GUI_dev_model_config = 0; % Developmental models are not shown
     
@@ -42,7 +42,7 @@ function initialise_CASPR()
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 % Add the libraries
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                save([CASPR_homepath,'/data/config/CASPR_environment.mat'],'CASPR_homepath','CASPR_version','CASPR_model_config_path','CASPR_GUI_dev_model_config');
+                save([CASPR_homepath,'/data/config/CASPR_environment.mat'],'CASPR_homepath','CASPR_version','CASPR_model_config_path','CASPR_GUI_dev_model_config','-append');
                 set_CASPR_environment;
                 fprintf('CASPR initialisation complete. Enjoy !\n')
             end
@@ -50,6 +50,9 @@ function initialise_CASPR()
     end
 end
 
+% Function for setting up the CASPR. This first checks the system
+% environment and then runs and a setup and update to create the necessary
+% folders.
 function setup_CASPR()
     % Check the status of the dependencies
     fprintf('\n----------------------------------------------------\n')
@@ -83,6 +86,13 @@ function update_CASPR()
         rmdir([CASPR_homepath,'/logs'],'s'); 
     end
     
+    % Check if the old logging level file is present and remove if so
+    if(exist([CASPR_homepath,'/data/config/log_level.mat'],'file'))
+        fprintf('\n----------------------------------------------------\n')
+        fprintf('Removing outdated log level file.\n')
+        fprintf('----------------------------------------------------\n')
+        delete data/config/log_level.mat
+    end
     num_tests_failed = setup_update_CASPR();
     
     fprintf('\n----------------------------------------------------\n')
