@@ -87,15 +87,21 @@ classdef (Abstract) ModelConfigBase < handle
             c.viewAngle = XmlOperations.StringToVector(char(bodies_xmlobj.getAttribute('view_angle')))';
         end
                 
-        function [sysModel] = getModel(obj, cable_set_id, operational_space_id)
+        function [sysModel] = getModel(obj, cable_set_id, operational_space_id, model_mode)
             bodies_xmlobj = obj.getBodiesPropertiesXmlObj();
             cableset_xmlobj = obj.getCableSetXmlObj(cable_set_id);
-            sysModel = SystemModel.LoadXmlObj(bodies_xmlobj, cableset_xmlobj);
+            if (nargin == 4)
+                % Model mode has been specified
+                sysModel = SystemModel.LoadXmlObj(bodies_xmlobj, cableset_xmlobj,model_mode);
+            else
+                sysModel = SystemModel.LoadXmlObj(bodies_xmlobj, cableset_xmlobj,ModelModeType.DEFAULT);
+            end
             
-            if (nargin >= 3 && ~isempty(operational_space_id))
+            if (nargin == 3 && ~isempty(operational_space_id))
                 operationalset_xmlobj = obj.getOperationalSetXmlObj(obj.defaultOperationalSetId);
                 sysModel.loadOperationalXmlObj(operationalset_xmlobj);
             end
+            
         end
         
         % Getting the joint and operational space trajectories

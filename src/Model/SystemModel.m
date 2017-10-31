@@ -22,6 +22,7 @@ classdef SystemModel < handle
     properties (SetAccess = protected)
         bodyModel               % SystemModelBodies object
         cableModel              % SystemModelCables object
+        modelMode               % The mode of the model
     end
 
     properties (Constant)
@@ -106,11 +107,23 @@ classdef SystemModel < handle
 
     methods (Static)
         % Load the xml objects for bodies and cable sets.
-        function b = LoadXmlObj(body_xmlobj, cable_xmlobj)
-            b               =   SystemModel();
-            b.bodyModel     =   SystemModelBodies.LoadXmlObj(body_xmlobj);
-            b.cableModel    =   SystemModelCables.LoadXmlObj(cable_xmlobj, b.bodyModel);
-            b.update(b.bodyModel.q_initial, b.bodyModel.q_dot_default, b.bodyModel.q_ddot_default, zeros(b.numDofs,1));
+        function b = LoadXmlObj(body_xmlobj, cable_xmlobj, model_mode)
+            if((nargin == 2)||(model_mode == ModelModeType.DEFAULT))
+                b               =   SystemModel();
+                b.modelMode     =   ModelModeType.DEFAULT;
+                b.bodyModel     =   SystemModelBodies.LoadXmlObj(body_xmlobj,b.modelMode);
+                b.cableModel    =   SystemModelCables.LoadXmlObj(cable_xmlobj, b.bodyModel,b.modelMode);
+                b.update(b.bodyModel.q_initial, b.bodyModel.q_dot_default, b.bodyModel.q_ddot_default, zeros(b.numDofs,1));
+            elseif(model_mode == ModelModeType.SYMBOLIC)
+                b               =   SystemModel();
+                b.modelMode     =   model_mode;
+                b.bodyModel     =   SystemModelBodies.LoadXmlObj(body_xmlobj,b.modelMode);
+                b.cableModel    =   SystemModelCables.LoadXmlObj(cable_xmlobj, b.bodyModel,b.modelMode);
+                % Create symbolic variables
+                q = sym('q',[b.numDofs,1]); q_d = sym('q_d',[b.numDofs,1]);
+                q_dd = sym('q_dd',[b.numDofs,1]); w_ext = sym('w_ext',[b.numDofs,1]);
+                b.update(q, q_d, q_dd, w_ext);
+            end
         end
     end
 
@@ -264,7 +277,7 @@ classdef SystemModel < handle
                     obj.cableModel.updateHessian(obj.bodyModel);
                 end
             end
-            is_symbolic = isa(obj.q,'sym');
+            is_symbolic = obj.modelMode == ModelModeType.SYMBOLIC;
             value = TensorOperations.LeftMatrixProduct(obj.cableModel.V,obj.bodyModel.W_grad,is_symbolic) + TensorOperations.RightMatrixProduct(obj.cableModel.V_grad,obj.bodyModel.W,is_symbolic);
         end
         
@@ -277,7 +290,7 @@ classdef SystemModel < handle
         end
         
         function value = get.K(obj)
-            is_symbolic = isa(obj.q,'sym');
+            is_symbolic = obj.modelMode == ModelModeType.SYMBOLIC;
             value = obj.L.'*obj.cableModel.K*obj.L + TensorOperations.VectorProduct(obj.L_grad,obj.cableForces,1,is_symbolic);
         end
         
