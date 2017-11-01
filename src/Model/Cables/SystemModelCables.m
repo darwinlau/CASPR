@@ -35,7 +35,7 @@ classdef SystemModelCables < handle
         cableIndicesActive = [];    % Index of active cables in cables vector
         numLinks = 0;               % The number of links
         K                           % The matix of cable stiffnesses
-        is_symbolic                 % A flag to indicate the need for symbolic computations
+        modelMode                   % A flag to indicate the need for symbolic computations
     end
 
     properties (Dependent)
@@ -62,7 +62,8 @@ classdef SystemModelCables < handle
     end
 
     methods
-        function ck = SystemModelCables(cables, numLinks)
+        function ck = SystemModelCables(cables, numLinks,model_mode)
+            ck.modelMode = model_mode;
             ck.cables = cables;
             ck.numCables = length(cables);
             ck.numLinks = numLinks;
@@ -74,11 +75,11 @@ classdef SystemModelCables < handle
         % function for each cable directly.
         function update(obj, bodyModel)
             CASPR_log.Assert(bodyModel.numLinks == obj.numLinks, 'Number of links between the cable and body kinematics must be consistent');
-            obj.is_symbolic = isa(bodyModel.q,'sym');
+            is_symbolic = obj.modelMode == ModelModeType.SYMBOLIC;
             % Set each cable's kinematics (absolute attachment locations
             % and segment vectors) and Determine V
-            obj.V = MatrixOperations.Initialise([obj.numCables,6*obj.numLinks],obj.is_symbolic);
-            obj.K = MatrixOperations.Initialise([obj.numCables,obj.numCables],obj.is_symbolic);
+            obj.V = MatrixOperations.Initialise([obj.numCables,6*obj.numLinks],is_symbolic);
+            obj.K = MatrixOperations.Initialise([obj.numCables,obj.numCables],is_symbolic);
             
             obj.numCablesActive = 0;
             for i = 1:obj.numCables
@@ -126,23 +127,24 @@ classdef SystemModelCables < handle
         
         % This function updates V_grad
         function updateHessian(obj,bodyModel)
-            obj.V_grad = MatrixOperations.Initialise([obj.numCables,6*obj.numLinks,bodyModel.numDofs],obj.is_symbolic);
+            is_symbolic = obj.modelMode == ModelModeType.SYMBOLIC;
+            obj.V_grad = MatrixOperations.Initialise([obj.numCables,6*obj.numLinks,bodyModel.numDofs],is_symbolic);
             for i = 1:obj.numCables
                 % Cables are already up to date
                 cable = obj.cables{i};
                 num_cable_segments = cable.numSegments;
                 for k = 1:obj.numLinks
                     body_k = bodyModel.bodies{k};
-                    V_ik_t_grad = MatrixOperations.Initialise([1,3,bodyModel.numDofs],obj.is_symbolic);
-                    V_ik_r_grad = MatrixOperations.Initialise([1,3,bodyModel.numDofs],obj.is_symbolic);
+                    V_ik_t_grad = MatrixOperations.Initialise([1,3,bodyModel.numDofs],is_symbolic);
+                    V_ik_r_grad = MatrixOperations.Initialise([1,3,bodyModel.numDofs],is_symbolic);
                     for j = 1:num_cable_segments
                         c_ijk = obj.getCRMTerm(i,j,k+1);
                         if(c_ijk~=0)
                             segment = cable.segments{j};
                             % Initialisations
-                            l_ij_grad = MatrixOperations.Initialise([3,bodyModel.numDofs],obj.is_symbolic); %#ok<NASGU>
-                            l_hat_ij_grad = MatrixOperations.Initialise([1,3,bodyModel.numDofs],obj.is_symbolic);
-                            rot_l_hat_ij_grad = MatrixOperations.Initialise([1,3,bodyModel.numDofs],obj.is_symbolic);
+                            l_ij_grad = MatrixOperations.Initialise([3,bodyModel.numDofs],is_symbolic); %#ok<NASGU>
+                            l_hat_ij_grad = MatrixOperations.Initialise([1,3,bodyModel.numDofs],is_symbolic);
+                            rot_l_hat_ij_grad = MatrixOperations.Initialise([1,3,bodyModel.numDofs],is_symbolic);
                             [k_A,k_B] = obj.determine_anchor_links(i,j,k,c_ijk);
                             % Translational term is the same
                             % THIS CODE SHOULD BE MADE MORE CONSISTENT A
@@ -313,7 +315,7 @@ classdef SystemModelCables < handle
                 k_max = k_b;
             end
             R_k0 = bodyModel.bodies{k}.R_0k.';
-            S_KA = MatrixOperations.Initialise([3,bodyModel.numDofs],obj.is_symbolic);
+            S_KA = MatrixOperations.Initialise([3,bodyModel.numDofs],obj.modelMode == ModelModeType.SYMBOLIC);
             if(k_min == 0 || bodyModel.bodiesPathGraph(k_min,k_max))
                 if(k==k_min)
                     for i = k_min+1:k_max
@@ -348,7 +350,7 @@ classdef SystemModelCables < handle
                 k_max = k_a;
             end
             R_k0 = bodyModel.bodies{k}.R_0k.';
-            S_KA = MatrixOperations.Initialise([3,bodyModel.numDofs],obj.is_symbolic);
+            S_KA = MatrixOperations.Initialise([3,bodyModel.numDofs],obj.modelMode == ModelModeType.SYMBOLIC);
             if(k_min == 0 || bodyModel.bodiesPathGraph(k_min,k_max))
                 for i =k_min+1:k_max
                     if(bodyModel.bodiesPathGraph(i,k_max))
@@ -382,7 +384,7 @@ classdef SystemModelCables < handle
 
 
     methods (Static)
-        function c = LoadXmlObj(cable_prop_xmlobj, bodiesModel)
+        function c = LoadXmlObj(cable_prop_xmlobj, bodiesModel,model_mode)
             CASPR_log.Assert(strcmp(cable_prop_xmlobj.getNodeName, 'cable_set'), 'Root element should be <cable_set>');
             allCableItems = cable_prop_xmlobj.getChildNodes;
             num_cables = allCableItems.getLength;
@@ -414,7 +416,7 @@ classdef SystemModelCables < handle
             end
 
             % Create the actual object to return
-            c = SystemModelCables(xml_cables, bodiesModel.numLinks);
+            c = SystemModelCables(xml_cables, bodiesModel.numLinks,model_mode);
         end
     end
 end

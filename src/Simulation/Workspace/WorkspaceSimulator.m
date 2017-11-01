@@ -184,21 +184,23 @@ classdef WorkspaceSimulator < SimulatorBase
             end
             
             for i=1:length(obj.workspace)
-                % Set the correct list
-                if(point_flag)
-                    point_list = obj.workspace{i}.metrics;
-                else
-                    point_list = obj.workspace{i}.conditions;
-                end
-                if(~isempty(point_list{c_i,1}))
-                    index_vec = (obj.workspace{i}.pose - obj.grid.q_begin)./obj.grid.delta_q + [1;zeros(obj.grid.n_dimensions-1,1)];
-                    for j = 1:obj.grid.n_dimensions
-                        if(isnan(index_vec(j)))
-                            index_vec(j) = 0;
-                        end
+                if(~isempty(obj.workspace{i}))
+                    % Set the correct list
+                    if(point_flag)
+                        point_list = obj.workspace{i}.metrics;
+                    else
+                        point_list = obj.workspace{i}.conditions;
                     end
-                    index_num = int32(index_vec.'*mapping_vector);
-                    wsim_matrix(index_num) = point_list{c_i,2};
+                    if(~isempty(point_list{c_i,1}))
+                        index_vec = (obj.workspace{i}.pose - obj.grid.q_begin)./obj.grid.delta_q + [1;zeros(obj.grid.n_dimensions-1,1)];
+                        for j = 1:obj.grid.n_dimensions
+                            if(isnan(index_vec(j)))
+                                index_vec(j) = 0;
+                            end
+                        end
+                        index_num = int32(index_vec.'*mapping_vector);
+                        wsim_matrix(index_num) = point_list{c_i,2};
+                    end
                 end
             end
         end
@@ -372,14 +374,16 @@ classdef WorkspaceSimulator < SimulatorBase
             c_map = colormap(flipud(gray(floor(scale_factor*mw)+1)));
             for i =1:size(plotting_workspace,1)
                 wp = plotting_workspace{i};
-                % Find which metric entry to use
-                if(wp.metrics{m_i,2} == obj.metrics{m_i}.metricMin)
-                    plot(plot_axis,wp.pose(pose_index(1)),wp.pose(pose_index(2)),'r.')
-                elseif(wp.metrics{m_i,2} == obj.metrics{m_i}.metricMin)
-                    plot(plot_axis,wp.pose(pose_index(1)),wp.pose(pose_index(2)),'r.')
-                else
-                    c = c_map(floor(scale_factor*(wp.metrics{m_i,2} - obj.metrics{m_i}.metricMin))+1,:);
-                    plot(plot_axis,wp.pose(pose_index(1)),wp.pose(pose_index(2)),'Color',c,'Marker','.')
+                if(~isempty(wp))
+                    % Find which metric entry to use
+                    if(wp.metrics{m_i,2} == obj.metrics{m_i}.metricMin)
+                        plot(plot_axis,wp.pose(pose_index(1)),wp.pose(pose_index(2)),'r.')
+                    elseif(wp.metrics{m_i,2} == obj.metrics{m_i}.metricMin)
+                        plot(plot_axis,wp.pose(pose_index(1)),wp.pose(pose_index(2)),'r.')
+                    else
+                        c = c_map(floor(scale_factor*(wp.metrics{m_i,2} - obj.metrics{m_i}.metricMin))+1,:);
+                        plot(plot_axis,wp.pose(pose_index(1)),wp.pose(pose_index(2)),'Color',c,'Marker','.')
+                    end
                 end
             end
             axis([obj.grid.q_begin(pose_index(1)),obj.grid.q_end(pose_index(1)),obj.grid.q_begin(pose_index(2)),obj.grid.q_end(pose_index(2))]);
