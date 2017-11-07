@@ -47,14 +47,15 @@ classdef Laser < handle
         
         function disconnect(obj)
             obj.closeserial();
+            delete(instrfind('Name',strcat('serial-',obj.strComPort)));
         end
         
         function setLaser(obj, laser)
            obj.laser = laser;
-           if obj.laser ~= obj.currentIntensity
+           if 1 %obj.laser ~= obj.currentIntensity
                %pause(0.5); 
                sendLaser(obj);
-               pause(0.5);
+               %pause(0.5);
                 obj.currentIntensity = obj.laser;
            end
         end
@@ -66,7 +67,7 @@ classdef Laser < handle
         end
         
         function laserOff(obj)
-            fprintf(obj.comPort, '0');
+            fprintf(obj.comPort, '1');
         end
         
         function update_us_state(obj)

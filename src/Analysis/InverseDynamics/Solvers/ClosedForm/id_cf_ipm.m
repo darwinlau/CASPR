@@ -12,8 +12,8 @@
 %                 is to be applied to the solution of the closed form
 %                 method.
 function [ x_opt, exit_type] = id_cf_ipm(A_eq, b_eq, x_min, x_max)
-     % This is the minimum norm solution if there are no constraints
-    Ap = A_eq'/(A_eq*A_eq'); x_unconstrained_opt = Ap*b_eq;
+    % This is the minimum norm solution if there are no constraints
+    Ap = A_eq'/(A_eq*A_eq'); x_unconstrained_opt = Ap*b_eq; Ap_active = Ap;
     if((sum(x_unconstrained_opt - x_min < -1e-6)>0)||(sum(x_unconstrained_opt - x_max > 1e-6)>0))
         x_m = 0.5*(x_min + x_max);  
         [n,m] = size(A_eq);
@@ -51,8 +51,9 @@ function [ x_opt, exit_type] = id_cf_ipm(A_eq, b_eq, x_min, x_max)
         % The next two lines do not appear in the original paper. They do
         % appear to provide improved results.
         %------------------------------------------------------------------
-        x_opt_fixed = x_fixed.*(~(x_fixed == x_m));
-        x_unconstrained_opt = x_opt_fixed + Ap*(b_eq - A_eq*x_opt_fixed);
+        x_unconstrained_opt(index) = Ap_active*b_eq_active;
+        x_unconstrained_opt(~index) = x_fixed(~index);
+%         x_unconstrained_opt = Ap*b_eq;
         % The rest is consistent with original paper
         x_offset = x_temp - x_unconstrained_opt;
         s = 0;
@@ -64,6 +65,7 @@ function [ x_opt, exit_type] = id_cf_ipm(A_eq, b_eq, x_min, x_max)
                 end
             end
         end
+        % TEST THE SOLUTION VERSUS THE FIXED VALUES
         x_opt = s*x_offset + x_unconstrained_opt;
         exit_type = IDSolverExitType.NO_ERROR;
     else

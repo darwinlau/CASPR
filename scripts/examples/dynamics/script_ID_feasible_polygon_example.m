@@ -9,9 +9,9 @@
 clc; clear; close all;
 
 % Set up the type of model, trajectory and the set of cables to be used
-model_config = ModelConfig('Example planar XY');
-cable_set_id = 'basic';
-trajectory_id = 'example_quintic';
+model_config = ModelConfig('IPAnema 2');
+cable_set_id = 'original';
+trajectory_id = 'traj_z_up';
 
 modelObj = model_config.getModel(cable_set_id);
 id_solver = IDSolverFeasiblePolygon(modelObj, ID_FP_SolverType.NORM_2);

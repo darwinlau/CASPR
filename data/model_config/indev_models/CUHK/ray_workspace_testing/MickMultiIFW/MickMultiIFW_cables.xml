@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE cables SYSTEM "../../../../templates/cables.dtd">
+<!-- Template generated XML file for cables in CASPR -->
+<cables default_cable_set="original">
+  <!-- Use cable set tags for each possible set of cable attachments -->  
+  <cable_set id="original">
+      <cable_ideal name="1" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>100</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.36 0 0</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>3.0 0.0 -1</location>
+        </attachment>
+      </attachments>
+     </cable_ideal>
+     <cable_ideal name="2" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>100</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.9 -2 0</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>1 0.93 0</location>
+        </attachment>
+      </attachments>
+     </cable_ideal>
+     <cable_ideal name="3" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>100</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-1.68 1.4 0</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>2 -1.2 0</location>
+        </attachment>
+      </attachments>
+     </cable_ideal>
+     <cable_ideal name="4" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>100</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-3.5 -1 0</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>1.5 0 0.34</location>
+        </attachment>
+      </attachments>
+     </cable_ideal>
+     <cable_ideal name="5" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>100</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>3 2.61 8</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>2 -0.37 -0.62</location>
+        </attachment>
+      </attachments>
+     </cable_ideal>   
+  </cable_set>
+</cables>
