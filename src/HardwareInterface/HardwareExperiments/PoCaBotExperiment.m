@@ -32,7 +32,8 @@ classdef PoCaBotExperiment < ExperimentBase
         % should be set when under tension force.
         % For the orange PE fiber cable, its elongation is 6e-4/N, while
         % for the STEALTH-BRAID cable, its elongation is 3.2825e-5/N
-        elongation_per_Newton = 0.0006; % 0.0006
+        % elongation_per_Newton = 3.2825e-5;
+        elongation_per_Newton = 6e-4;
         
         l_feedback_traj    % Temporary variable to store things for now
         l_cmd_traj         % Temporary variable to store things for now
