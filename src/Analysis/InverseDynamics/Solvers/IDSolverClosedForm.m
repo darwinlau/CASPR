@@ -18,6 +18,7 @@ classdef IDSolverClosedForm < IDSolverBase
     properties (SetAccess = private)
         cf_solver_type
         options
+        x_fixed
     end
     
     methods
@@ -25,6 +26,8 @@ classdef IDSolverClosedForm < IDSolverBase
         function id = IDSolverClosedForm(model, cf_solver_type)
             id@IDSolverBase(model);
             id.cf_solver_type = cf_solver_type;
+            id.active_set = true(model.numCables,1);
+            id.x_fixed = zeros(model.numCables,1);
         end
 
         % The implementation of the resolveFunction.
@@ -43,12 +46,16 @@ classdef IDSolverClosedForm < IDSolverBase
                     [cable_forces, id_exit_type] = id_cf_icfm(A_eq, b_eq, fmin, fmax);
                 case ID_CF_SolverType.ALTERNATE_IMPROVED_CLOSED_FORM
                     [cable_forces, id_exit_type] = id_cf_aicfm(A_eq, b_eq, fmin, fmax);
+                case ID_CF_SolverType.WARM_IMPROVED_CLOSED_FORM
+                    [cable_forces, id_exit_type,obj.active_set,obj.x_fixed] = id_cf_wicfm(A_eq, b_eq, fmin, fmax, obj.active_set,obj.x_fixed);
                 case ID_CF_SolverType.PUNCTURE_METHOD
                     [cable_forces, id_exit_type] = id_cf_pm(A_eq, b_eq, fmin, fmax);
                 case ID_CF_SolverType.IMPROVED_PUNCTURE_METHOD
                     [cable_forces, id_exit_type] = id_cf_ipm(A_eq, b_eq, fmin, fmax);
                 case ID_CF_SolverType.ALTERNATE_IMPROVED_PUNCTURE_METHOD
                     [cable_forces, id_exit_type] = id_cf_aipm(A_eq, b_eq, fmin, fmax);    
+                case ID_CF_SolverType.WARM_IMPROVED_PUNCTURE_METHOD
+                    [cable_forces, id_exit_type,obj.active_set,obj.x_fixed] = id_cf_wipm(A_eq, b_eq, fmin, fmax, obj.active_set,obj.x_fixed);    
                 otherwise
                     CASPR_log.Print('ID_CF_SolverType type is not defined',CASPRLogLevel.ERROR);
             end

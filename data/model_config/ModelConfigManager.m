@@ -198,7 +198,7 @@ classdef ModelConfigManager
             fclose(w_fid);
             % Add line to the CSV file
             fid = fopen([root_folder, DevModelConfig.LIST_FILENAME],'a');
-            fprintf(fid,[name,',',folder,',',bodies_xml_filename,',',cable_xml_filename,',',trajectory_xml_filename,',']);
+            fprintf(fid,[name,',',folder,',',bodies_xml_filename,',',cable_xml_filename,',',trajectory_xml_filename,',','','\n']);
             fclose(fid);            
         end
         

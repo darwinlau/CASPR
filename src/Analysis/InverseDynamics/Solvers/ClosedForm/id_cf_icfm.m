@@ -25,7 +25,7 @@ function [ x_opt, exit_type] = id_cf_icfm(A_eq, b_eq, x_min, x_max)
     end
     index = true(m,1); 
     x_fixed = x_m;  
-    b_eq_active = b_eq;
+    b_eq_active = b_eq; 
     while((sum(x_temp - x_min < -1e-6)>0)||(sum(x_temp - x_max > 1e-6)>0))
         % Find the most violated constraint
         [min_violation,min_i] = max(x_min - x_temp);
@@ -43,7 +43,7 @@ function [ x_opt, exit_type] = id_cf_icfm(A_eq, b_eq, x_min, x_max)
             x_opt = x_temp;
             exit_type = IDSolverExitType.INFEASIBLE;
             return;
-        end    
+        end
         % Update the solution
         A_eq_active = A_eq(:,index);
         Ap_active = A_eq_active'/(A_eq_active*A_eq_active');
