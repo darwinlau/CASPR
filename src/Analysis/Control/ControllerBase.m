@@ -16,6 +16,7 @@ classdef ControllerBase < handle
         end
 
         function [cable_forces_active, cable_indices_active, cable_forces]  = execute(obj, q, q_d, q_dd, q_ref, q_ref_d, q_ref_dd, t)
+            obj.dynModel.update(q, q_d, q_dd, zeros(obj.dynModel.numDofs,1));
             [cable_forces_active, model_result] = obj.executeFunction(q, q_d, q_dd, q_ref, q_ref_d, q_ref_dd, t);
             cable_indices_active = model_result.cableModel.cableIndicesActive;
             cable_forces = model_result.cableForces;

@@ -42,6 +42,8 @@ classdef ForwardDynamics < handle
                     solverFn = @(f,t,y0) ode23t(f,t,y0);
                 case FDSolverType.ODE23TB
                     solverFn = @(f,t,y0) ode23tb(f,t,y0);
+                case FDSolverType.ODE4
+                    solverFn = @(f,t,y0) ode4(f,t,y0);
             end
             [~, y_out] = solverFn(@(~,y) ForwardDynamics.eom(0, y, model, cable_forces_active, cable_indices_active, w_ext), [0 dt], y0);
             %[~, y_out] = ode113(@(~,y) ForwardDynamics.eom(0, y, model, cable_forces, w_ext), [0 dt], y0);
