@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE bodies_system SYSTEM "../../../../templates/bodies.dtd">
+<bodies_system>
+    <links display_range="-1 11 -1 11 -1 1" view_angle="0 90">
+      <link_rigid num="1" name="Link 1">
+        <joint type="PLANAR_XY" q_initial="5 5 0" q_min="5 5 -3.1415926" q_max="5 5 3.1415926"/>
+        <physical>
+          <mass>1</mass>
+          <com_location>0.0 0.0 0.0</com_location>
+          <end_location>0.0 0.0 0.0</end_location>
+          <inertia ref="com">
+            <Ixx>0.005208333</Ixx>
+            <Iyy>0.005208333</Iyy>
+            <Izz>0.010416667</Izz>
+            <Ixy>0.0</Ixy>
+            <Ixz>0.0</Ixz>
+            <Iyz>0.0</Iyz>
+          </inertia>
+        </physical>
+        <parent>
+          <num>0</num>
+          <location>0 0 0.0</location>
+        </parent>
+      </link_rigid>
+    </links>
+</bodies_system>

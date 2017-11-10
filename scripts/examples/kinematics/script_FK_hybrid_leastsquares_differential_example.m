@@ -28,7 +28,7 @@ FK_q_dot_estimation_method = FK_LS_QdotOptionType.FIRST_ORDER_DERIV;
 FK_hybrid_frequency = 10;
 
 % 2) Initialise the FK solver
-fksolver = FKHybridLeastSquaresDifferential(modelObj, FK_q_estimation_method, FK_q_dot_estimation_method, hybridFK_frequency);
+fksolver = FKHybridLeastSquaresDifferential(modelObj, FK_q_estimation_method, FK_q_dot_estimation_method, FK_hybrid_frequency);
 % Initialise the inverse/forward kinematics solvers
 iksim = InverseKinematicsSimulator(modelObj);
 fksim = ForwardKinematicsSimulator(modelObj, fksolver);

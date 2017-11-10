@@ -13,8 +13,8 @@ classdef ModelConfigTest < matlab.unittest.TestCase
             fid = fopen([CASPR_configuration.LoadHomePath(),'/data/model_config/models/models_list.csv']);
             cell_array = textscan(fid,'%s %s %s %s %s %s','delimiter',',');
             unique_cell_array = unique(cell_array{1});
-            % Two tests are conducted firstly are there any repeated files
-            % in the masterlist
+            % Test that there are no repeated identifiers in the master
+            % list
             assert(length(cell_array{1}) == length(unique_cell_array), 'There are repeated identifiers in the master list');
             CASPR_log.Debug('Done ModelConfigTest/modelListValidTest');
         end

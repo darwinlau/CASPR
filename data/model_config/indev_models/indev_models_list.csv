@@ -1,3 +1,8 @@
-CUHK_arm,/CUHK/CUHK_arm/,CUHK_arm_bodies.xml,CUHK_arm_cables.xml,CUHK_arm_trajectories.xml
 CUCableRobot,/CUHK/CUCableRobot/,CUHK_CUCableRobot_bodies.xml,CUHK_CUCableRobot_cables.xml,CUHK_CUCableRobot_trajectories.xml
 CUCableRobot_planar,/CUHK/CUCableRobot_planar/,CUHK_CUCableRobot_planar_bodies.xml,CUHK_CUCableRobot_planar_cables.xml,CUHK_CUCableRobot_planar_trajectories.xml
+4-4_CDPR_planar,/CUHK/ray_workspace_testing/4_4_CDPR_planar/,4_4_CDPR_planar_bodies.xml,4_4_CDPR_planar_cables.xml,4_4_CDPR_planar_trajectories.xml
+BMArm_paper,/CUHK/ray_workspace_testing/BMArm_paper/,BMArm_paper_bodies.xml,BMArm_paper_cables.xml,BMArm_paper_trajectories.xml
+spatial7cable,/CUHK/ray_workspace_testing/spatial7cable/,spatial7cable_bodies.xml,spatial7cable_cables.xml,spatial7cable_trajectories.xml
+MickMultiIFW,/CUHK/ray_workspace_testing/MickMultiIFW/,MickMultiIFW_bodies.xml,MickMultiIFW_cables.xml,MickMultiIFW_trajectories.xml
+IFW_ghostModel,/CUHK/ray_workspace_testing/IFW_ghostModel/,IFW_ghostModel_bodies.xml,IFW_ghostModel_cables.xml,IFW_ghostModel_trajectories.xml
+Delta_planar,/CUHK/ray_workspace_testing/Delta_planar/,Delta_planar_bodies.xml,Delta_planar_cables.xml,Delta_planar_trajectories.xml

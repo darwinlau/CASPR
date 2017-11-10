@@ -13,6 +13,7 @@ classdef TranslationalXYZ < JointBase
         q_ddot_default = [0; 0; 0];
         q_lb = [-Inf; -Inf; -Inf];
         q_ub = [Inf; Inf; Inf];
+        q_dofType = [DoFType.TRANSLATION; DoFType.TRANSLATION; DoFType.TRANSLATION];
     end
     
     properties (Dependent)
