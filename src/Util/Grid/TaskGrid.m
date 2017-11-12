@@ -6,7 +6,7 @@
 %   This is a work in progress its point will be to take a starting point 
 %   and give the next grid point to achieve a uniform spacing in the task 
 %   space. TODO: CHANGE task space to op_space
-classdef TaskGrid < Grid
+classdef TaskGrid < GridBase
     properties (SetAccess = private)
         q_begin             % The beginning of the generalised coordinates
         q_end               % The ending of the generalised coordinates

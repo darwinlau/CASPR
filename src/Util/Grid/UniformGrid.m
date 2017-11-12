@@ -3,7 +3,7 @@
 % Author        : Jonathan EDEN
 % Created       : 2015
 % Description    :
-classdef UniformGrid < Grid
+classdef UniformGrid < GridBase
 
     properties (SetAccess = private)
         q_begin     % The lower bound on grid generalised coordinates
