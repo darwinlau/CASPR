@@ -12,5 +12,6 @@ classdef FDSolverType
         ODE23S
         ODE23T
         ODE23TB
+        ODE4
     end
 end

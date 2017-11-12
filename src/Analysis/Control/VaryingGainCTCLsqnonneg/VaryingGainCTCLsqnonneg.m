@@ -73,6 +73,7 @@ classdef VaryingGainCTCLsqnonneg < ControllerBase
             
             obj.dynModel.cableForces = cable_force_active;
             result_model = obj.dynModel;
+            
         end
     end
 end

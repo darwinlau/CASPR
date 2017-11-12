@@ -8,84 +8,656 @@
 %   (ControllerBase object) is specified for the simulator. 
 classdef ControllerSimulator < DynamicsSimulator
     properties (SetAccess = protected)
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % results
         compTime            % computational time for each time step
-        fdSolver            % The forward dynamics solver
-        controller          % The controller for the system
         refTrajectory       % The reference trajectory
-        stateError          % The state space error
+        ctrl_trajectory     % The trajectory containing state variables used in the control command update
+        ob_trajectory       % The observer trajectory containing estimated variables (state and/or disturbance)
+        ctrl_fk_trajectory  % The forward kinematics (used with controller) trajectory containing estimated state variables (probably will only be used in debugging)
+        ob_fk_trajectory    % The forward kinematics (used with observer) trajectory containing estimated state variables (probably will only be used in debugging)
+        
+        
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % simulator components
+        fdSolver            % The forward dynamics solver
+        fkSolver            % the forward kinematics solver, optional to use
+        controller          % The controller for the system
+        observer            % The disturbance observer for the system (if applicable)
         uncertainties       % A list of uncertainties
         true_model          % The true model for the system
-        sim_trajectory      % The simulated trajectory used by the controller
+        
+        
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % simulator configurations
+        simopt              % a ControllerSimulatorOptions object with all related options
+        FK_solver_available % if true an FK solver is passed to the simulator
+        observer_available  % if true an observer is passed to the simulator
+        sim_vec_length      % total number of points run in simulation
+        ctrl_vec_length     % total number of points run in command update
+        ob_vec_length       % total number of points run in observer
+                            
+                            
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % intermediate variables (SHOULD BE UPDATED in corresponding cycles)
+        % trajectory management
+        sim_counter         % counts the number of points run in simulation
+        ctrl_counter        % counts the number of points run in command update
+        ob_counter          % counts the number of points run in observer
+        % component communications
+        % reference trajectory related
+        q_ref               % the current reference point
+        q_dot_ref           % the current reference velocity
+        q_ddot_ref          % the current refernece acceleration
+        % uncertainty related
+        w_ext               % external wrench currently used to store disturbances
+        w_ext_est           % the estimated external wrench
+        q_ddot_ext          % external wrench currently used to store disturbances
+        q_ddot_ext_est      % the equivalent acceleration of the estimated external wrench
+        % controller related
+        f_cmd               % force command in the current control cycle
+        % FK related
+        l                   % current cable lengths vector
+        l_fk_prev_ctrl      % previous cable lengths vector for FK in controller
+        q_fk_prev_ctrl      % previous joint pose for FK in controller
+        q_d_fk_prev_ctrl    % previous joint velocity for FK in controller
+        l_fk_prev_ob        % previous cable lengths vector for FK in observer
+        q_fk_prev_ob        % previous joint pose for FK in observer
+        q_d_fk_prev_ob      % previous joint velocity for FK in observer
+        % FK related - relative encoder
+        l_0_env             % initial cabel lengths in the environment (used to generate relative lengths when relative encoder is used)
+        l_0_ctrl            % initial cabel lengths in the environment (used to restore the absolute lengths when relative encoder is used)
     end
 
     methods
         % The control simulator constructor
-        function ctrl_sim = ControllerSimulator(model, controller, fd_solver, uncertainties, true_model)
+        function ctrl_sim = ControllerSimulator(model, controller, fd_solver, fk_solver, uncertainties, true_model, observer, simopt)
+            % the first 3 inputs will build a most basic controller
+            % simulator, hence they should be valid
             ctrl_sim@DynamicsSimulator(model);
             ctrl_sim.model = model;
             ctrl_sim.controller = controller;
             ctrl_sim.fdSolver = fd_solver;
-            if(nargin <=3)
-                ctrl_sim.uncertainties = [];
-                ctrl_sim.true_model = ctrl_sim.model;
+            
+            % the rest inputs can be considered optional
+            % fk_solver input
+            if (isa(fk_solver, 'FKAnalysisBase'))
+                ctrl_sim.fkSolver               =   fk_solver;
+                ctrl_sim.FK_solver_available    =   true;
             else
-                ctrl_sim.uncertainties = uncertainties;
+                ctrl_sim.fkSolver               =   [];
+                ctrl_sim.FK_solver_available    =   false;
+            end
+            % uncertainties input
+            if (length(uncertainties) >= 1)
+                ctrl_sim.uncertainties = {};
                 for i = 1:length(uncertainties)
+                    ctrl_sim.uncertainties = {};
                     if(isa(uncertainties{i},'ConstructorUncertaintyBase'))
-                        uncertainties{i}.applyConstructorUncertainty(true_model);
+                        if (isa(true_model, 'SystemModel'))
+                            uncertainties{i}.applyConstructorUncertainty(true_model);
+                        end
+                    end
+                    if(isa(uncertainties{i},'ConstructorUncertaintyBase') || isa(uncertainties{i},'PreUpdateUncertaintyBase') || isa(uncertainties{i},'PostUpdateUncertaintyBase'))
+                        ctrl_sim.uncertainties = {ctrl_sim.uncertainties; uncertainties{i}};
                     end
                 end
-                ctrl_sim.true_model = true_model;
+            end
+            % true model input
+            if (isa(true_model, 'SystemModel'))
+                ctrl_sim.true_model     =   true_model;
+            else
+                ctrl_sim.true_model     =   model;
+            end
+            % disturbance observer input
+            if (isa(observer, 'ObserverBase'))
+                ctrl_sim.observer               =   observer;
+                ctrl_sim.observer_available     =   true;
+            else
+                ctrl_sim.observer               =   [];
+                ctrl_sim.observer_available     =   false;
+            end
+            % simulator options input
+            if (isa(simopt, 'ControllerSimulatorOptions'))
+                ctrl_sim.simopt     =   simopt;
+            else
+                ctrl_sim.simopt     =   ControllerSimulatorOptions();
+            end
+            ctrl_sim.optionConsistencyCheck();
+        end
+        
+        % simulator option consistency check
+        function optionConsistencyCheck(obj)
+            % 1. simulation frequency ratio input
+            obj.simopt.sim_freq_ratio = max(1, obj.simopt.sim_freq_ratio);
+            % 2. observer frequency ratio input
+            obj.simopt.ob_freq_ratio = max(1, obj.simopt.ob_freq_ratio);
+            obj.simopt.ob_freq_ratio = min(obj.simopt.ob_freq_ratio, obj.simopt.sim_freq_ratio);
+            % 3. encoder option input (no potential inconsistency)
+            % 4. FK solver toggle
+            if (~obj.FK_solver_available)
+                obj.simopt.enable_FK_solver     =   false;
+            end
+            % 5. FK debugging
+            if (~obj.simopt.enable_FK_solver)
+                obj.simopt.forward_kinematics_debugging = false;
+            end
+            % 6. observer toggle
+            if (~obj.observer_available)
+                obj.simopt.enable_observer      =   false;
+            end
+            % 6. other consistency check
+            if (~obj.simopt.enable_observer)
+                if (obj.simopt.use_ob_state_estimation || obj.simopt.use_ob_disturbance_estimation)
+                    disp('Observer estimation cannot be used without enabling or giving an observer in the simulator. All observer usage will be disabled.');
+                    obj.simopt.use_ob_state_estimation        =   false;
+                    obj.simopt.use_ob_disturbance_estimation  =   false;
+                end
+            end
+            if (~obj.simopt.enable_FK_solver)
+                if (obj.simopt.use_FK_in_controller || obj.simopt.use_FK_in_observer)
+                    disp('FK pose estimation cannot be used without enabling or giving an FK solver in the simulator. All FK usage will be disabled.');
+                    obj.simopt.use_FK_in_controller	=   false;
+                    obj.simopt.use_FK_in_observer	=   false;
+                end
+            end
+            if (obj.simopt.use_ob_state_estimation && obj.simopt.use_FK_in_controller)
+                disp('Observer state and FK state cannot be used in the controller at the same time, only one of them should be enabled. Will enable FK use only');
+                obj.simopt.use_ob_state_estimation	=   false;
+                obj.simopt.use_FK_in_controller     =   false;
             end
         end
 
         % Implementation of the run function. Converts the dynamics
         % information into a controller
         function run(obj, ref_trajectory, q0, q0_dot, q0_ddot)
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            % SIMULATION FREQUENCY SETTINGS
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            % starting time and ending time
+            t0 = ref_trajectory.timeVector(1);
+            tf = ref_trajectory.timeVector(length(ref_trajectory.timeVector));
+            % controller is assumed to run with the same frequency defined
+            % in the reference trajectory
+            obj.ctrl_vec_length	=   length(ref_trajectory.timeVector);
+            obj.sim_vec_length	=   obj.simopt.sim_freq_ratio*obj.ctrl_vec_length;
+            obj.ob_vec_length   =   obj.simopt.ob_freq_ratio*obj.ctrl_vec_length;
+            ctrl_delta_t        =   (tf - t0)/(obj.ctrl_vec_length - 1);
+            ob_delta_t          =   (tf - t0)/(obj.ob_vec_length - 1);
+            
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            % DECLARE SIMULATION TRAJECTORIES
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             obj.refTrajectory = ref_trajectory;
-            obj.timeVector = obj.refTrajectory.timeVector;
-            obj.stateError = cell(1, length(obj.timeVector));
-            obj.cableForces = cell(1, length(obj.timeVector));
+            % controller related variables
+            obj.ctrl_trajectory             =   JointTrajectory;
+            obj.ctrl_trajectory.timeVector  =   obj.refTrajectory.timeVector;
+            obj.cableForces                 =   cell(1, length(obj.ctrl_trajectory.timeVector));
+            obj.ctrl_trajectory.q           =   cell(1, length(obj.ctrl_trajectory.timeVector));
+            obj.ctrl_trajectory.q_dot       =   cell(1, length(obj.ctrl_trajectory.timeVector));
+            obj.ctrl_trajectory.q_ddot      =   cell(1, length(obj.ctrl_trajectory.timeVector));
+            % obj.trajectory and objtimeVector represent the actual world, or the
+            % finer resolution simulation in our case
+            % simulation related variables
+            obj.timeVector              =   t0:(tf - t0)/(obj.sim_vec_length - 1):tf;
+            obj.trajectory              =   JointTrajectory;
+            obj.trajectory.timeVector   =   obj.timeVector;
+            obj.trajectory.q            =   cell(1, length(obj.trajectory.timeVector));
+            obj.trajectory.q_dot        =   cell(1, length(obj.trajectory.timeVector));
+            obj.trajectory.q_ddot       =   cell(1, length(obj.trajectory.timeVector));
+            % disturbance observer related variables
+            obj.ob_trajectory = ObserverTrajectory;
+            obj.ob_trajectory.timeVector = t0:(tf - t0)/(obj.ob_vec_length - 1):tf;
+            obj.ob_trajectory.q_est             =   cell(1, length(obj.ob_trajectory.timeVector));
+            obj.ob_trajectory.q_dot_est         =   cell(1, length(obj.ob_trajectory.timeVector));
+            obj.ob_trajectory.w_ext             =   cell(1, length(obj.ob_trajectory.timeVector));
+            obj.ob_trajectory.w_ext_est         =   cell(1, length(obj.ob_trajectory.timeVector));
+            obj.ob_trajectory.q_ddot_ext        =   cell(1, length(obj.ob_trajectory.timeVector));
+            obj.ob_trajectory.q_ddot_ext_est    =   cell(1, length(obj.ob_trajectory.timeVector));
+            % optional trajectory data (for FK debugging)
+            if (obj.simopt.forward_kinematics_debugging)
+                % forward kinematics solver (used with the controller) related variables
+                obj.ctrl_fk_trajectory              =   JointTrajectory;
+                obj.ctrl_fk_trajectory.timeVector   =   obj.ctrl_trajectory.timeVector;
+                obj.ctrl_fk_trajectory.q            =   cell(1, length(obj.ctrl_fk_trajectory.timeVector));
+                obj.ctrl_fk_trajectory.q_dot        =   cell(1, length(obj.ctrl_fk_trajectory.timeVector));
+                obj.ctrl_fk_trajectory.q_ddot       =   cell(1, length(obj.ctrl_fk_trajectory.timeVector));
+                % forward kinematics solver (used with the controller) related variables
+                obj.ob_fk_trajectory                =   JointTrajectory;
+                obj.ob_fk_trajectory.timeVector     =   obj.ob_trajectory.timeVector;
+                obj.ob_fk_trajectory.q              =   cell(1, length(obj.ob_fk_trajectory.timeVector));
+                obj.ob_fk_trajectory.q_dot          =   cell(1, length(obj.ob_fk_trajectory.timeVector));
+                obj.ob_fk_trajectory.q_ddot         =   cell(1, length(obj.ob_fk_trajectory.timeVector));
+            end
             
-            obj.trajectory = JointTrajectory;
-            obj.trajectory.timeVector = obj.timeVector;
-            obj.trajectory.q = cell(1, length(obj.timeVector));
-            obj.trajectory.q_dot = cell(1, length(obj.timeVector));
-            obj.trajectory.q_ddot = cell(1, length(obj.timeVector));
-            obj.sim_trajectory = JointTrajectory;
-            obj.sim_trajectory.q = cell(1, length(obj.timeVector));
-            obj.sim_trajectory.q_dot = cell(1, length(obj.timeVector));
-            obj.sim_trajectory.q_ddot = cell(1, length(obj.timeVector));
-            
-            obj.trajectory.q{1} = q0;
-            obj.trajectory.q_dot{1} = q0_dot;
-            obj.trajectory.q_ddot{1} = q0_ddot;
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            % SIMULATOR INITIALIZATIONS
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            % initialize the trajectories
+            obj.trajectory.q{1}             =   q0;
+            obj.trajectory.q_dot{1}         =   q0_dot;
+            obj.trajectory.q_ddot{1}        =   q0_ddot;
+            obj.ctrl_trajectory.q{1}        =   q0;
+            obj.ctrl_trajectory.q_dot{1}    =   q0_dot;
+            obj.ctrl_trajectory.q_ddot{1}   =   q0_ddot;
+            obj.ob_trajectory.q{1}          =   q0;
+            obj.ob_trajectory.q_dot{1}      =   q0_dot;
+            if (obj.simopt.forward_kinematics_debugging)
+                obj.ctrl_fk_trajectory.q{1}         =   q0;
+                obj.ctrl_fk_trajectory.q_dot{1}     =   q0_dot;
+                obj.ctrl_fk_trajectory.q_ddot{1}    =   q0_ddot;
+                obj.ob_fk_trajectory.q{1}           =   q0;
+                obj.ob_fk_trajectory.q_dot{1}       =   q0_dot;
+                obj.ob_fk_trajectory.q_ddot{1}      =   q0_ddot;
+            end
+            % apply initial pose uncertainties, if applicable
+            % initial pose error will only affect the simulation (or FD)
+            % process, it will not affect what the controller thinks of the
+            % robot status (will not change ctrl_trajectory), in other
+            % words if something goes wrong, the simulation will tell a
+            % difference but the controll will still think everything's ok
             for i = 1:length(obj.uncertainties)
-                if(isa(obj.uncertainties{i},'PreUpdateUncertaintyBase'))
+                if(isa(obj.uncertainties{i},'InitialPoseUncertaintyBase'))
                     [obj.trajectory.q{1}, obj.trajectory.q_dot{1}] = obj.uncertainties{i}.applyInitialOffset(q0,q0_dot);
                     obj.trajectory.q_ddot{1} = q0_ddot;
                 end
             end
-            obj.sim_trajectory.q{1} = q0;
-            obj.sim_trajectory.q_dot{1} = q0_dot;
-            obj.sim_trajectory.q_ddot{1} = q0_ddot;
             
+            % initialize counters
+            obj.sim_counter     =   1;
+            obj.ctrl_counter    =   1;
+            obj.ob_counter      =   1;
+            
+            % initialize the FK and encoder related variables
+            % update all models first
+            obj.true_model.update(obj.trajectory.q{1}, obj.trajectory.q_dot{1}, zeros(obj.model.numDofs, 1), zeros(obj.model.numDofs,1));
+            obj.model.update(obj.ctrl_trajectory.q{1}, obj.ctrl_trajectory.q_dot{1}, zeros(obj.model.numDofs, 1), zeros(obj.model.numDofs,1));
+            % initialize cable lengths according to the type of encoder
+            % used
+            if (obj.simopt.use_absolute_encoder)
+                % in case absolute encoder used, no need to keep initial
+                % lengths
+                obj.l_0_ctrl    =   [];
+                obj.l_0_env     =   [];
+                obj.l           =   obj.true_model.cableLengths;
+            else
+                % in case relative encoder used, need to keep the initial
+                % lengths, so that relative length can be calculated later
+                obj.l_0_ctrl    =   obj.model.cableLengths;
+                obj.l_0_env     =   obj.true_model.cableLengths;
+                obj.l           =   obj.model.cableLengths;
+            end
+            % initialize FK slover related variables (if needed)
+            if (obj.simopt.enable_FK_solver)
+                obj.l_fk_prev_ctrl      =   obj.l;
+                obj.q_fk_prev_ctrl      =   obj.ctrl_trajectory.q{1};
+                obj.q_d_fk_prev_ctrl    =   obj.ctrl_trajectory.q_dot{1};
+                obj.l_fk_prev_ob        =   obj.l;
+                obj.q_fk_prev_ob        =   obj.ob_trajectory.q{1};
+                obj.q_d_fk_prev_ob      =   obj.ob_trajectory.q_dot{1};
+            else
+                obj.l_fk_prev_ctrl      =   [];
+                obj.q_fk_prev_ctrl      =   [];
+                obj.q_d_fk_prev_ctrl    =   [];
+                obj.l_fk_prev_ob        =   [];
+                obj.q_fk_prev_ob        =   [];
+                obj.q_d_fk_prev_ob      =   [];
+            end
+            
+            % initialize communication variables
+            % force command is always used since the controller is always a
+            % component in the controller simulator
+            obj.f_cmd           =   zeros(obj.model.numCables,1);
+            % l will always be updated in case FK exists as a component
+            obj.l               =   zeros(obj.model.numCables,1);
+            % actual disturbances will be updated if the corresponding
+            % disturbance is given as input. otherwise they will remain 0
+            obj.w_ext           =   zeros(obj.model.numDofs,1);
+            obj.q_ddot_ext      =   zeros(obj.model.numDofs,1);
+            % estimated disturbances will be updated if disturbance
+            % observer exists as a component. otherwies they will remain 0
+            obj.w_ext_est       =   zeros(obj.model.numDofs,1);
+            obj.q_ddot_ext_est  =   zeros(obj.model.numDofs,1);
+            
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            % START THE MAIN LOOP
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            first_cycle = true;
             for t = 1:length(obj.timeVector)
                 CASPR_log.Print(sprintf('Time : %f', obj.timeVector(t)),CASPRLogLevel.INFO);
                 fprintf('Completion Percentage: %3.2f%%\n',100*t/length(obj.timeVector));
-                [obj.cableForcesActive{t}, obj.cableIndicesActive{t}, obj.cableForces{t}] = obj.controller.execute(obj.sim_trajectory.q{t},  obj.sim_trajectory.q_dot{t}, obj.sim_trajectory.q_ddot{t}, ref_trajectory.q{t}, ref_trajectory.q_dot{t}, ref_trajectory.q_ddot{t}, obj.timeVector(t));
-                obj.stateError{t} = ref_trajectory.q{t} - obj.trajectory.q{t};
-                if t < length(obj.timeVector)
-                    [obj.trajectory.q{t+1}, obj.trajectory.q_dot{t+1}, obj.trajectory.q_ddot{t+1}, obj.model] = obj.fdSolver.compute(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.cableForcesActive{t}, obj.cableIndicesActive{t}, zeros(obj.model.numDofs,1), obj.timeVector(t+1)-obj.timeVector(t), obj.true_model);                    
-                    obj.sim_trajectory.q{t+1}         =   obj.trajectory.q{t+1};
-                    obj.sim_trajectory.q_dot{t+1}     =   obj.trajectory.q_dot{t+1};
-                    obj.sim_trajectory.q_ddot{t+1}    =   obj.trajectory.q_ddot{t+1};
-                    for i = 1:length(obj.uncertainties)
-                        if(isa(obj.uncertainties{i},'PreUpdateUncertaintyBase'))
-                            [obj.sim_trajectory.q{t+1}, obj.sim_trajectory.q_dot{t+1}, obj.sim_trajectory.q_ddot{t+1}] = obj.uncertainties{i}.applyPreUpdateUncertainty(obj.trajectory.q{t+1}, obj.trajectory.q_dot{t+1}, obj.trajectory.q_ddot{t+1},obj.timeVector(t+1)-obj.timeVector(t));
-                        end
+                                
+                % extract current time to make component update decisions
+                current_time = obj.timeVector(t);
+                
+                % update model
+                obj.true_model.update(obj.trajectory.q{obj.sim_counter}, obj.trajectory.q_dot{obj.sim_counter}, zeros(obj.model.numDofs, 1), zeros(obj.model.numDofs,1));
+                
+                % update length feedback
+                % post-update disturbance
+                if (obj.simopt.use_absolute_encoder)
+                    % if absolute encoder used, get cable lengths directly from the environment
+                    obj.l       =   obj.true_model.cableLengths;
+                else
+                    % if relative encoder used, get relative cable
+                    % lengths from the environment and then convert into absolute lengths
+                    obj.l       =   obj.l_0_ctrl + obj.true_model.cableLengths - obj.l_0_env;
+                end
+                for i = 1:length(obj.uncertainties)
+                    if(isa(obj.uncertainties{i},'NoiseUncertaintyBase'))
+                        [noise_x, ~] = obj.uncertainties{i}.applyFeedbackNoise(current_time);
+                        obj.l       =   obj.l + noise_x;
                     end
-                end     
+                end
+                
+                
+                % control command (and FK, if applicable) update
+                if (first_cycle)
+                    obj.ctrl_counter = 0;
+                end
+                if (current_time >= obj.ctrl_trajectory.timeVector(obj.ctrl_counter + 1))
+                    % update the counter
+                    obj.ctrl_counter = obj.ctrl_counter + 1;
+                    % update time profile
+                    obj.ctrl_trajectory.timeVector(obj.ctrl_counter) = current_time;
+                    
+%                     % get the cable lengths
+%                     if (obj.simopt.use_absolute_encoder)
+%                         % if absolute encoder used, get cable lengths directly from the environment
+%                         obj.l       =   obj.true_model.cableLengths;
+%                     else
+%                         % if relative encoder used, get relative cable
+%                         % lengths from the environment and then convert into absolute lengths
+%                         obj.l       =   obj.l_0_ctrl + obj.true_model.cableLengths - obj.l_0_env;
+%                     end
+                    
+                    % derive the feedback information for the controller
+                    if (obj.simopt.use_FK_in_controller)
+                        % if FK is used:
+                        % 1. use q_fk_prev, q_d_fk_prev and the l_fk_prev to generate new q and q_dot
+                        % 2. update q_fk_prev, q_d_fk_prev and the l_fk_prev
+                        % 3. also update ctrl_trajectory
+                        [obj.q_fk_prev_ctrl, obj.q_d_fk_prev_ctrl, ~] = ...
+                            obj.fkSolver.compute(obj.l, obj.l_fk_prev_ctrl, obj.model.cableModel.cableIndicesActive, obj.q_fk_prev_ctrl, obj.q_d_fk_prev_ctrl, ctrl_delta_t);
+                        obj.l_fk_prev_ctrl = obj.l;
+                        obj.ctrl_trajectory.q{obj.ctrl_counter}     =   obj.q_fk_prev_ctrl;
+                        obj.ctrl_trajectory.q_dot{obj.ctrl_counter} =   obj.q_d_fk_prev_ctrl;
+                    elseif (obj.simopt.use_ob_state_estimation)
+                        % in this case the latest estimated state will be used in the controller
+                        obj.ctrl_trajectory.q{obj.ctrl_counter}     =   obj.ob_trajectory.q{obj.ob_counter};
+                        obj.ctrl_trajectory.q_dot{obj.ctrl_counter} =   obj.ob_trajectory.q_dot{obj.ob_counter};
+                    else
+                        % if FK is not used:
+                        % directly take joint space variables from
+                        % environment
+                        obj.ctrl_trajectory.q{obj.ctrl_counter}     =   obj.trajectory.q{obj.sim_counter};
+                        obj.ctrl_trajectory.q_dot{obj.ctrl_counter} =   obj.trajectory.q_dot{obj.sim_counter};
+                    end
+                    
+                    % save FK trajectory if required
+                    if (obj.simopt.forward_kinematics_debugging)
+                        if (~obj.simopt.use_FK_in_controller)
+                            % do FK update iff it has not been done for the
+                            % controller yet
+                            [obj.q_fk_prev_ctrl, obj.q_d_fk_prev_ctrl, ~] = ...
+                                obj.fkSolver.compute(obj.l, obj.l_fk_prev_ctrl, obj.model.cableModel.cableIndicesActive, obj.q_fk_prev_ctrl, obj.q_d_fk_prev_ctrl, ctrl_delta_t);
+                        end
+                        obj.l_fk_prev_ctrl = obj.l;
+                        obj.ctrl_fk_trajectory.q{obj.ctrl_counter}     =   obj.q_fk_prev_ctrl;
+                        obj.ctrl_fk_trajectory.q_dot{obj.ctrl_counter} =   obj.q_d_fk_prev_ctrl;
+                    end
+                    
+                    % determine the disturbance estimation
+                    if (obj.simopt.use_ob_disturbance_estimation)
+                        if (~first_cycle)
+                            obj.q_ddot_ext_est  =   obj.ob_trajectory.q_ddot_ext_est{obj.ob_counter};
+                        else
+                            obj.q_ddot_ext_est  =   zeros(obj.model.numDofs,1);
+                        end
+                    else
+                        obj.q_ddot_ext_est  =   zeros(obj.model.numDofs,1);
+                    end
+                    
+                    % run control command update
+                    [obj.f_cmd, ~, ~]  = ...
+                        obj.controller.execute(obj.ctrl_trajectory.q{obj.ctrl_counter}, obj.ctrl_trajectory.q_dot{obj.ctrl_counter}, zeros(obj.model.numDofs,1), obj.refTrajectory.q{obj.ctrl_counter}, obj.refTrajectory.q_dot{obj.ctrl_counter}, obj.refTrajectory.q_ddot{obj.ctrl_counter} - obj.q_ddot_ext_est, obj.ctrl_counter);
+                    
+                    
+                    % save the data
+%                     obj.ctrl_trajectory.q{obj.ctrl_counter}     =   obj.trajectory.q{obj.sim_counter};
+%                     obj.ctrl_trajectory.q{obj.ctrl_counter}     =   obj.trajectory.q_dot{obj.sim_counter};
+                    obj.cableForces{obj.ctrl_counter}           =   obj.f_cmd;
+                end
+                
+                % observer update (the observer should spit out the equivalent acceleration)
+                if (first_cycle)
+                    % update the counter
+                    obj.ob_counter = 0;
+                end
+                if (current_time >= obj.ob_trajectory.timeVector(obj.ob_counter + 1))
+                    if (obj.simopt.enable_observer)
+                        % update the counter
+                        obj.ob_counter = obj.ob_counter + 1;
+                        % update time profile
+                        obj.ob_trajectory.timeVector(obj.ob_counter) = current_time;
+                       
+                        % get the true model updated to derive the inertia
+                        % matrix
+%                         obj.true_model.update(obj.trajectory.q{obj.sim_counter}, obj.trajectory.q_dot{obj.sim_counter}, zeros(obj.model.numDofs, 1), zeros(obj.model.numDofs,1));
+                        
+%                         % get the cable lengths feedback
+%                         if (obj.simopt.use_absolute_encoder)
+%                             % if absolute encoder used, get cable lengths
+%                             % directly from the environment
+%                             obj.l       =   obj.true_model.cableLengths;
+%                         else
+%                             % if relative encoder used, get relative cable
+%                             % lengths from the environment and
+%                             % then convert into absolute lengths
+%                             obj.l       =   obj.l_0_ctrl + obj.true_model.cableLengths - obj.l_0_env;
+%                         end
+                        
+                        % derive the feedback information for the observer
+                        if (obj.simopt.use_FK_in_observer)
+                            % if FK is used:
+                            % 1. use q_fk_prev, q_d_fk_prev and the l_fk_prev to generate new q and q_dot
+                            % 2. update q_fk_prev, q_d_fk_prev and the l_fk_prev
+                            % 3. also update ctrl_trajectory
+                            [obj.q_fk_prev_ob, obj.q_d_fk_prev_ob, ~] = ...
+                                obj.fkSolver.compute(obj.l, obj.l_fk_prev_ob, obj.model.cableModel.cableIndicesActive, obj.q_fk_prev_ob, obj.q_d_fk_prev_ob, ob_delta_t);
+                            obj.l_fk_prev_ob = obj.l;
+                            obj.ob_trajectory.q{obj.ob_counter}     =   obj.q_fk_prev_ob;
+                            obj.ob_trajectory.q_dot{obj.ob_counter} =   obj.q_d_fk_prev_ob;
+                        else
+                            % if FK is not used:
+                            % directly take joint space variables from
+                            % environment
+                            obj.ob_trajectory.q{obj.ob_counter}     =   obj.trajectory.q{obj.sim_counter};
+                            obj.ob_trajectory.q_dot{obj.ob_counter} =   obj.trajectory.q_dot{obj.sim_counter};
+                        end
+                    
+                        % save FK trajectory if required
+                        if (obj.simopt.forward_kinematics_debugging)
+                            if (~obj.simopt.use_FK_in_observer)
+                                % do FK update iff it has not been done for the
+                                % controller yet
+                                [obj.q_fk_prev_ob, obj.q_d_fk_prev_ob, ~] = ...
+                                    obj.fkSolver.compute(obj.l, obj.l_fk_prev_ob, obj.model.cableModel.cableIndicesActive, obj.q_fk_prev_ob, obj.q_d_fk_prev_ob, ob_delta_t);
+                            end
+                            obj.l_fk_prev_ob = obj.l;
+                            obj.ob_fk_trajectory.q{obj.ob_counter}     =   obj.q_fk_prev_ob;
+                            obj.ob_fk_trajectory.q_dot{obj.ob_counter} =   obj.q_d_fk_prev_ob;
+                        end
+
+                        % run observer update (assume that the observer gives disturbance acceleration)
+                        [obj.q_ddot_ext_est]    =   obj.observer.executeFunction(obj.ob_trajectory.q{obj.ob_counter}, obj.ob_trajectory.q_dot{obj.ob_counter}, obj.cableForces{obj.ctrl_counter}, obj.ob_counter);
+                        obj.w_ext_est           =   obj.model.M*obj.q_ddot_ext_est + obj.model.C + obj.model.G;
+                        obj.q_ddot_ext_est      =   obj.model.M\obj.w_ext_est;
+                        
+
+                        
+                        % save the data
+                        obj.ob_trajectory.q_est{obj.ob_counter}             =   obj.observer.q_hat;
+                        obj.ob_trajectory.q_dot_est{obj.ob_counter}         =   obj.observer.q_d_hat;
+                        obj.ob_trajectory.w_ext{obj.ob_counter}             =   -obj.w_ext;
+                        obj.ob_trajectory.w_ext_est{obj.ob_counter}         =   obj.w_ext_est;
+                        obj.ob_trajectory.q_ddot_ext{obj.ob_counter}        =   -obj.q_ddot_ext;
+                        obj.ob_trajectory.q_ddot_ext_est{obj.ob_counter}    =   obj.q_ddot_ext_est;
+                    end
+                end
+                
+                % pre-update disturbance
+                skip_FD = false;
+                for i = 1:length(obj.uncertainties)
+                    if(isa(obj.uncertainties{i},'ExternalWrenchUncertaintyBase'))
+%                         current_time
+                        [obj.w_ext] = obj.uncertainties{i}.applyWrechDisturbance(current_time);
+                        obj.w_ext
+                        obj.q_ddot_ext = obj.true_model.M\obj.w_ext;
+                    end
+                    if(isa(obj.uncertainties{i},'PoseLockUncertaintyBase'))
+                        [skip_FD] = obj.uncertainties{i}.applyPoseLock(current_time);
+                    end
+                end
+                
+                % FD update
+                if (current_time < tf)
+                    if (skip_FD)
+                        % update sim_trajectory with current step data, no
+                        % need to run FD
+                        obj.trajectory.q{obj.sim_counter + 1}       =   obj.trajectory.q{obj.sim_counter};
+                        obj.trajectory.q_dot{obj.sim_counter + 1}	=   obj.trajectory.q_dot{obj.sim_counter};
+                        obj.trajectory.q_ddot{obj.sim_counter + 1}	=   obj.trajectory.q_ddot{obj.sim_counter};
+                    else
+                        % update sim_trajectory with new state from FD
+                        % algorithm
+                        [obj.trajectory.q{obj.sim_counter + 1}, obj.trajectory.q_dot{obj.sim_counter + 1}, obj.trajectory.q_ddot{obj.sim_counter + 1}, obj.true_model] = ...
+                            obj.fdSolver.compute(obj.trajectory.q{obj.sim_counter}, obj.trajectory.q_dot{obj.sim_counter}, obj.cableForces{obj.ctrl_counter}, obj.true_model.cableModel.cableIndicesActive, obj.w_ext, obj.timeVector(obj.sim_counter + 1) - obj.timeVector(obj.sim_counter), obj.true_model);
+                        obj.trajectory.q_ddot{obj.sim_counter + 1}	=   obj.trajectory.q_ddot{obj.sim_counter};
+                    end
+                    obj.sim_counter = obj.sim_counter + 1;
+                else
+                    if (t ~= obj.sim_counter)
+                        disp('Something does not add up in FD update.');
+                    end
+                end
+                
+                
+                first_cycle = false;
+            end
+        end
+        
+        % Assign data to matlab workspace
+        function extractData(obj)
+            ref_timevec     =   obj.refTrajectory.timeVector';
+            ref_q           =   cell2mat(obj.refTrajectory.q)';
+            ref_q_dot      	=   cell2mat(obj.refTrajectory.q_dot)';
+            ref_q_ddot     	=   cell2mat(obj.refTrajectory.q_ddot)';
+            len_ref = min([ size(ref_timevec, 1), ...
+                        size(ref_q, 1), ...
+                        size(ref_q_dot, 1), ...
+                        size(ref_q_ddot, 1)]);
+            ref_timevec     =   ref_timevec(1:len_ref, :);
+            ref_q           =   ref_q(1:len_ref, :);
+            ref_q_dot       =   ref_q_dot(1:len_ref, :);
+            ref_q_ddot      =   ref_q_ddot(1:len_ref, :);
+            assignin('base', 'DataRefTime', ref_timevec);
+            assignin('base', 'DataRefJointPose', ref_q);
+            assignin('base', 'DataRefJointVelocity', ref_q_dot);
+            assignin('base', 'DataRefJointAcceleration', ref_q_ddot);
+            
+            ctrl_timevec   	=   obj.ctrl_trajectory.timeVector';
+            ctrl_q         	=   cell2mat(obj.ctrl_trajectory.q)';
+            ctrl_q_dot     	=   cell2mat(obj.ctrl_trajectory.q_dot)';
+            ctrl_f_cmd    	=   cell2mat(obj.cableForces)';
+            len_ctrl = min([ size(ctrl_timevec, 1), ...
+                        size(ctrl_q, 1), ...
+                        size(ctrl_q_dot, 1), ...
+                        size(ctrl_f_cmd, 1)]);
+            ctrl_timevec     =   ctrl_timevec(1:len_ctrl, :);
+            ctrl_q           =   ctrl_q(1:len_ctrl, :);
+            ctrl_q_dot       =   ctrl_q_dot(1:len_ctrl, :);
+            ctrl_f_cmd      =   ctrl_f_cmd(1:len_ctrl, :);
+            assignin('base', 'DataCtrlTime', ctrl_timevec);
+            assignin('base', 'DataCtrlJointPose', ctrl_q);
+            assignin('base', 'DataCtrlJointVelocity', ctrl_q_dot);
+            assignin('base', 'DataCtrlForceCommands', ctrl_f_cmd);
+            
+            sim_timevec    	=   obj.trajectory.timeVector';
+            sim_q         	=   cell2mat(obj.trajectory.q)';
+            sim_q_dot     	=   cell2mat(obj.trajectory.q_dot)';
+            len_sim = min([ size(sim_timevec, 1), ...
+                        size(sim_q, 1), ...
+                        size(sim_q_dot, 1)]);
+            sim_timevec     =   sim_timevec(1:len_sim, :);
+            sim_q           =   sim_q(1:len_sim, :);
+            sim_q_dot       =   sim_q_dot(1:len_sim, :);
+            assignin('base', 'DataSimTime', sim_timevec);
+            assignin('base', 'DataSimJointPose', sim_q);
+            assignin('base', 'DataSimJointVelocity', sim_q_dot);
+            
+            ob_timevec   	=   obj.ob_trajectory.timeVector';
+            ob_q_est       	=   cell2mat(obj.ob_trajectory.q_est)';
+            ob_q_dot_est   	=   cell2mat(obj.ob_trajectory.q_dot_est)';
+            ob_q         	=   cell2mat(obj.ob_trajectory.q)';
+            ob_q_dot     	=   cell2mat(obj.ob_trajectory.q_dot)';
+            ob_wd        	=   cell2mat(obj.ob_trajectory.w_ext)';
+            ob_ad           =   cell2mat(obj.ob_trajectory.q_ddot_ext)';
+            ob_wd_est      	=   cell2mat(obj.ob_trajectory.w_ext_est)';
+            ob_ad_est     	=   cell2mat(obj.ob_trajectory.q_ddot_ext_est)';
+            len_ob = min([ size(ob_timevec, 1), ...
+                        size(ob_q_est, 1), ...
+                        size(ob_q_dot_est, 1), ...
+                        size(ob_q, 1), ...
+                        size(ob_q_dot, 1), ...
+                        size(ob_wd, 1), ...
+                        size(ob_ad, 1), ...
+                        size(ob_wd_est, 1), ...
+                        size(ob_ad_est, 1)]);
+            ob_timevec      =   ob_timevec(1:len_ob, :);
+            ob_q_est      	=   ob_q_est(1:len_ob, :);
+            ob_q_dot_est   	=   ob_q_dot_est(1:len_ob, :);
+            ob_q            =   ob_q(1:len_ob, :);
+            ob_q_dot        =   ob_q_dot(1:len_ob, :);
+            ob_wd           =   ob_wd(1:len_ob, :);
+            ob_ad           =   ob_ad(1:len_ob, :);
+            ob_wd_est      	=   ob_wd_est(1:len_ob, :);
+            ob_ad_est       =   ob_ad_est(1:len_ob, :);
+            assignin('base', 'DataObTime', ob_timevec);
+            assignin('base', 'DataObJointPoseEst', ob_q_est);
+            assignin('base', 'DataObJointVelocityEst', ob_q_dot_est);
+            assignin('base', 'DataObJointPose', ob_q);
+            assignin('base', 'DataObJointVelocity', ob_q_dot);
+            assignin('base', 'DataObDisturbanceWrench', ob_wd);
+            assignin('base', 'DataObDisturbanceAcceleration', ob_ad);
+            assignin('base', 'DataObDisturbanceWrenchEst', ob_wd_est);
+            assignin('base', 'DataObDisturbanceAccelerationEst', ob_ad_est);
+            if (obj.simopt.forward_kinematics_debugging)
+                ctrl_fk_timevec   	=   obj.ctrl_fk_trajectory.timeVector';
+                ctrl_fk_q         	=   cell2mat(obj.ctrl_fk_trajectory.q)';
+                ctrl_fk_q_dot     	=   cell2mat(obj.ctrl_fk_trajectory.q_dot)';
+                len_ctrl_fk = min([ size(ctrl_fk_timevec, 1), ...
+                            size(ctrl_fk_q, 1), ...
+                            size(ctrl_fk_q_dot, 1)]);
+                ctrl_fk_timevec     =   ctrl_fk_timevec(1:len_ctrl_fk, :);
+                ctrl_fk_q           =   ctrl_fk_q(1:len_ctrl_fk, :);
+                ctrl_fk_q_dot       =   ctrl_fk_q_dot(1:len_ctrl_fk, :);
+                assignin('base', 'DataFKTimeCtrl', ctrl_fk_timevec);
+                assignin('base', 'DataFKJointPoseCtrl', ctrl_fk_q);
+                assignin('base', 'DataFKJointVelocityCtrl', ctrl_fk_q_dot);
+                
+                ob_fk_timevec   	=   obj.ob_fk_trajectory.timeVector';
+                ob_fk_q         	=   cell2mat(obj.ob_fk_trajectory.q)';
+                ob_fk_q_dot     	=   cell2mat(obj.ob_fk_trajectory.q_dot)';
+                len_ob_fk = min([ size(ob_fk_timevec, 1), ...
+                            size(ob_fk_q, 1), ...
+                            size(ob_fk_q_dot, 1)]);
+                ob_fk_timevec     =   ob_fk_timevec(1:len_ob_fk, :);
+                ob_fk_q           =   ob_fk_q(1:len_ob_fk, :);
+                ob_fk_q_dot       =   ob_fk_q_dot(1:len_ob_fk, :);
+                assignin('base', 'DataFKTimeOb', ob_fk_timevec);
+                assignin('base', 'DataFKJointPoseOb', ob_fk_q);
+                assignin('base', 'DataFKJointVelocityOb', ob_fk_q_dot);
             end
         end
         

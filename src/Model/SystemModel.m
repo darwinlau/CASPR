@@ -143,8 +143,8 @@ classdef SystemModel < handle
         end
         
         % Function that updates the inertia parameters
-        function updateInertiaParameters(obj,m,r_G,I_G,update_flag)
-            obj.bodyModel.updateInertiaParameters(m,r_G,I_G);
+        function updateInertiaProperties(obj,m,r_G,I_G,update_flag)
+            obj.bodyModel.updateInertiaProperties(m,r_G,I_G);
             if(update_flag)
                 obj.update(obj.q,obj.q_dot,obj.q_ddot,obj.W_e);
             end
