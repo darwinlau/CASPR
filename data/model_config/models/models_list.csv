@@ -26,3 +26,4 @@ BioBiped one-leg,/MCDM/BioBiped_one_leg/,BioBiped_one_leg_bodies.xml,BioBiped_on
 BioBiped,/MCDM/BioBiped/,BioBiped_bodies.xml,BioBiped_cables.xml,BioBiped_trajectories.xml
 CAROCA,/SCDM/spatial_manipulators/CAROCA/,CAROCA_bodies.xml,CAROCA_cables.xml,CAROCA_trajectories.xml
 FASTKIT Planar,/HCDM/FASTKIT_Planar/,FASTKIT_Planar_bodies.xml,FASTKIT_Planar_cables.xml,FASTKIT_Planar_trajectories.xml
+Example 2S,/MCDM/Example_2S/,Example_2S_bodies.xml,Example_2S_cables.xml,Example_2S_trajectories.xml,
