@@ -38,7 +38,7 @@ classdef RayGridGeneration < handle
             id.q_length=id.nsegvar+1;  
             
             id.listnflxvar=linspace(1,nvar,nvar)';
-            [zerorow, ~]=find(id.nsegvar==0);
+            [zerorow zerocol]=find(id.nsegvar==0);
             for itzirid=1:length(zerorow)
                 id.listnflxvar(id.listnflxvar==zerorow(itzirid))=[];
             end
@@ -48,7 +48,7 @@ classdef RayGridGeneration < handle
         
         
         function obj=DimensionReduction(obj,itnflexvar)
-            CASPR_log.Assert(itnflexvar<=obj.nflexvar,'exceeds the number of flexible variables');
+            CASPR_log.Assert(itnflexvar<=obj.nflexvar,'eceeds the number of flexible variables');
             
             curflexvar=obj.listnflxvar(itnflexvar);
             obj.q_begin(curflexvar,:)=[];
@@ -97,7 +97,7 @@ classdef RayGridGeneration < handle
         
         function matsegvar=var2vect(obj,listvar)
             [nrow,ncol]=size(listvar);
-            matsegvar=ones(nrow,ncol);
+            matsegvar=zeros(nrow,ncol);
             colzdel=find(obj.delta_q~=0);
             matsegvar(:,colzdel)=round((listvar(:,colzdel)-ones(nrow,1)*obj.q_begin(colzdel,1)')./(ones(nrow,1)*obj.delta_q(colzdel,1)'));
             

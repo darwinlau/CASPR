@@ -142,7 +142,7 @@ classdef RayGraphGeneration < handle
             linprogb=[];
             linprogAeq=-(obj.model.L)';
             linprogbeq=zeros(numDofs,1);
-            linproglb=0.1*ones(ncable,1);
+            linproglb=0.01*ones(ncable,1);
             linprogub=[];
             options=optimset('Display', 'off');
             optT = linprog(linprogf,linprogA,linprogb,linprogAeq,linprogbeq,linproglb,linprogub,[],options);
@@ -151,8 +151,73 @@ classdef RayGraphGeneration < handle
         end
         
         
-      
         
+        
+        
+        function [shortpath,listgrid,matpathvar,TFvect]=Path_Generation(obj,start_pose,end_pose)
+            
+            
+              startvect=obj.grid.var2vect(start_pose);
+              startnod=obj.grid.vect2nod(startvect);
+              nstartnod=find(obj.workspace.MatNodeGrid(:,1)==startnod);
+              startseglin=obj.workspace.MatNodeGrid(nstartnod(1),2);
+              [starttotGfilt,colling]=find(obj.uniq_line==startseglin);
+ 
+              finalvect=obj.grid.var2vect(end_pose);
+              finalnod=obj.grid.vect2nod(finalvect);
+              nfinalnod=find(obj.workspace.MatNodeGrid(:,1)==finalnod);
+              finalseglin=obj.workspace.MatNodeGrid(nfinalnod(1),2);
+              [finaltotGfilt,colling]=find(obj.uniq_line==finalseglin);
+
+              [shortpath,pathdist] = shortestpath(obj.final_graph,starttotGfilt,finaltotGfilt);
+            
+              
+              
+              nvar=obj.model.numDofs;
+              gridi=startnod;
+              listgrid=[gridi];
+              linei=find(obj.workspace.MatRays(:,1)==obj.uniq_line(shortpath(1)));
+              lineinumnzgrid=length(find(obj.workspace.MatRays(linei,nvar+4:end)>0));
+              
+              for itnpath=1:length(shortpath)-1
+                  lineip=find(obj.workspace.MatRays(:,1)==obj.uniq_line(shortpath(itnpath+1)));
+                  lineipnumnzgrid=length(find(obj.workspace.MatRays(lineip,nvar+4:end)>0));
+                  
+                  gridip=intersect(obj.workspace.MatRays(linei,nvar+4:nvar+4+lineinumnzgrid-1),obj.workspace.MatRays(lineip,nvar+4:nvar+4+lineipnumnzgrid-1));
+                  
+                  colgridi=nvar+3+find(obj.workspace.MatRays(linei,nvar+4:nvar+4+lineinumnzgrid-1)==gridi);
+                  colgridip=nvar+3+find(obj.workspace.MatRays(linei,nvar+4:nvar+4+lineinumnzgrid-1)==gridip);
+                  if colgridip>=colgridi
+                      listgrid=[listgrid,obj.workspace.MatRays(linei,colgridi+1:colgridip)];
+                      
+                  else
+                      listgrid=[listgrid,obj.workspace.MatRays(linei,colgridi-1:-1:colgridip)];
+                  end
+                  gridi=gridip;
+                  linei=lineip;
+                  lineinumnzgrid=lineipnumnzgrid;
+              end
+              gridip=finalnod;
+              colgridi=nvar+3+find(obj.workspace.MatRays(linei,nvar+4:nvar+4+lineinumnzgrid-1)==gridi);
+              colgridip=nvar+3+find(obj.workspace.MatRays(linei,nvar+4:nvar+4+lineinumnzgrid-1)==gridip);
+              if colgridip>=colgridi
+                  listgrid=[listgrid,obj.workspace.MatRays(linei,colgridi+1:colgridip)];
+                  
+              else
+                  listgrid=[listgrid,obj.workspace.MatRays(linei,colgridi-1:-1:colgridip)];
+              end             
+              segvar=obj.grid.nod2vect(listgrid');
+
+              [n_path_grid,spare]=size(segvar);
+              
+              for itgridpath=1:n_path_grid
+                  matpathvar(itgridpath,:)=obj.grid.getGridPoint(segvar(itgridpath,:));
+                  TFvect(itgridpath,1)=1/obj.TF_Index( matpathvar(itgridpath,:));
+              end
+            
+        end
+        
+    
         
     end
 end
