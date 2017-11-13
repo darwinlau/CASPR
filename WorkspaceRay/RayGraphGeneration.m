@@ -56,7 +56,8 @@ classdef RayGraphGeneration < handle
             
             if  ReadMode==0
                 matnetlin=[];
-                dlmwrite('WorkspaceRay/TempData/matnetlin.txt',matnetlin);
+                
+                dlmwrite([CASPR_configuration.LoadHomePath,'/WorkspaceRay/TempData/matnetlin.txt'],matnetlin);
                 lengnuniqnod=length(nuniqnod);
                 for ituninod=1:lengnuniqnod-1
                     ncurconlin=matnod(nsortcol(nuniqnod(ituninod):nuniqnod(ituninod+1)-1),2);  %number-current-connected-lines
@@ -78,33 +79,33 @@ classdef RayGraphGeneration < handle
                     if mod(ituninod,itwritex)==0
                         ituninod
                         matnetlin=unique([sort(matnetlin(:,1:2),2),matnetlin(:,3)],'rows') ;
-                        dlmwrite('WorkspaceRay/TempData/matnetlin.txt',matnetlin,'precision',textndigit,'-append','delimiter',' ');
+                        dlmwrite([CASPR_configuration.LoadHomePath,'/WorkspaceRay/TempData/matnetlin.txt'],matnetlin,'precision',textndigit,'-append','delimiter',' ');
                         matnetlin=[];
                     end
                 end
                 matnetlin=unique([sort(matnetlin(:,1:2),2),matnetlin(:,3)],'rows') ;
-                dlmwrite('WorkspaceRay/TempData/matnetlin.txt',matnetlin,'precision',textndigit,'-append','delimiter',' ');
-                finmatnetlin=dlmread('WorkspaceRay/TempData/matnetlin.txt');
+                dlmwrite([CASPR_configuration.LoadHomePath,'/WorkspaceRay/TempData/matnetlin.txt'],matnetlin,'precision',textndigit,'-append','delimiter',' ');
+                finmatnetlin=dlmread([CASPR_configuration.LoadHomePath,'/WorkspaceRay/TempData/matnetlin.txt']);
                 finmatnetlin=unique([sort(finmatnetlin(:,1:2),2),finmatnetlin(:,3)],'rows') ;
-                dlmwrite('WorkspaceRay/TempData/finmatnetlin.txt',finmatnetlin,'precision',textndigit,'delimiter',' ');
+                dlmwrite([CASPR_configuration.LoadHomePath,'/WorkspaceRay/TempData/finmatnetlin.txt'],finmatnetlin,'precision',textndigit,'delimiter',' ');
             else
                 finmatnetlin=[];
-                finmatnetlin=dlmread('WorkspaceRay/TempData/finmatnetlin.txt');
+                finmatnetlin=dlmread([CASPR_configuration.LoadHomePath,'/WorkspaceRay/TempData/finmatnetlin.txt']);
             end
             
             if  ReadMode==0
                 uniqmatnetlin=unique(finmatnetlin(:,1:2));
-                dlmwrite('WorkspaceRay/TempData/uniqmatnetlin.txt',uniqmatnetlin,'delimiter',' ');
+                dlmwrite([CASPR_configuration.LoadHomePath,'/WorkspaceRay/TempData/uniqmatnetlin.txt'],uniqmatnetlin,'delimiter',' ');
                 totG=graph(finmatnetlin(:,1),finmatnetlin(:,2),finmatnetlin(:,3));
                 maxnseglin=max(max(finmatnetlin(:,1:2)));
                 nonconlin=setxor(finmatnetlin(:,1:2),1:maxnseglin);
                 totGfilt=rmnode(totG,nonconlin);
-                dlmwrite('WorkspaceRay/TempData/totGfilt.txt',[totGfilt.Edges.EndNodes,totGfilt.Edges.Weight],'precision',textndigit,'delimiter',' ');
+                dlmwrite([CASPR_configuration.LoadHomePath,'/WorkspaceRay/TempData/totGfilt.txt'],[totGfilt.Edges.EndNodes,totGfilt.Edges.Weight],'precision',textndigit,'delimiter',' ');
             else
                 uniqmatnetlin=[];
-                uniqmatnetlin=dlmread('WorkspaceRay/TempData/uniqmatnetlin.txt');
+                uniqmatnetlin=dlmread([CASPR_configuration.LoadHomePath,'/WorkspaceRay/TempData/uniqmatnetlin.txt']);
                 mat_totGfilt=[];
-                mat_totGfilt=dlmread('WorkspaceRay/TempData/totGfilt.txt');
+                mat_totGfilt=dlmread([CASPR_configuration.LoadHomePath,'/WorkspaceRay/TempData/totGfilt.txt']);
                 totGfilt=graph(mat_totGfilt(:,1),mat_totGfilt(:,2),mat_totGfilt(:,3));
             end
             obj.final_network=finmatnetlin;

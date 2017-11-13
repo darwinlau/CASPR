@@ -49,8 +49,9 @@ classdef WorkspaceRayGeneration < handle
 
             
             if ReadMode==0               
-                dlmwrite('WorkspaceRay/TempData/matseglin.txt',matseglin);
-                dlmwrite('WorkspaceRay/TempData/matnod.txt',matnod);
+                
+                dlmwrite([CASPR_configuration.LoadHomePath,'/WorkspaceRay/TempData/matseglin.txt'],matseglin);
+                dlmwrite([CASPR_configuration.LoadHomePath,'/WorkspaceRay/TempData/matnod.txt'],matnod);
                 while itnflexvar<=obj.grid.nflexvar
                     curflexvar=obj.grid.listnflxvar(itnflexvar);
                     CuruGrid= RayGridGeneration(obj.grid.q_begin,obj.grid.q_end,obj.grid.q_initial,obj.grid.nsegvar);
@@ -95,8 +96,8 @@ classdef WorkspaceRayGeneration < handle
                         end
                         
                         
-                        dlmwrite('WorkspaceRay/TempData/matseglin.txt',newmatseglin,'precision',textndigit,'-append','delimiter',' ');
-                        dlmwrite('WorkspaceRay/TempData/matnod.txt',matnod,'precision',textndigit,'-append','delimiter',' ');
+                        dlmwrite([CASPR_configuration.LoadHomePath,'/WorkspaceRay/TempData/matseglin.txt'],newmatseglin,'precision',textndigit,'-append','delimiter',' ');
+                        dlmwrite([CASPR_configuration.LoadHomePath,'/WorkspaceRay/TempData/matnod.txt'],matnod,'precision',textndigit,'-append','delimiter',' ');
                         
                         matseglin=[];
                         newmatseglin=[];
