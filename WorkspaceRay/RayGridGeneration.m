@@ -97,7 +97,7 @@ classdef RayGridGeneration < handle
         
         function matsegvar=var2vect(obj,listvar)
             [nrow,ncol]=size(listvar);
-            matsegvar=ones(nrow,ncol);
+            matsegvar=zeros(nrow,ncol);
             colzdel=find(obj.delta_q~=0);
             matsegvar(:,colzdel)=round((listvar(:,colzdel)-ones(nrow,1)*obj.q_begin(colzdel,1)')./(ones(nrow,1)*obj.delta_q(colzdel,1)'));
             
