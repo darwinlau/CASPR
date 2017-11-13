@@ -91,7 +91,7 @@ start_pose=[0.05,0.1] ;  end_pose=[0.42,0.63] ;
 
 % wsim.plotRayWorkspace([1,2,3])
 
-% gsim   = RayGraphGeneration(modelObj,uGrid,wsim);% GridGraphGeneration(modelObj,uGrid,wsim);  %
+% gsim   = RayGraphGeneration(modelObj,uGrid,wsim);
 % gsim.run(0,0)       % the input can be empty or two digits. the first indicate weighted/unweighted graph. 0 means unweighted and 1 means weighted based on tension factor
                     %the second one is the readmode. if readmode is one then the result of computation in the data file is read without repeating the computation    
 % gsim.plotGraphWorkspace
