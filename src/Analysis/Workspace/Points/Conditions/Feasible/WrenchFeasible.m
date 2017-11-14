@@ -31,4 +31,3 @@ classdef WrenchFeasible < WorkspaceConditionBase
         end
     end
 end
-

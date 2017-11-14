@@ -38,7 +38,6 @@ classdef ScriptTest < matlab.unittest.TestCase
                     i = i+1;
                 end
             end
-            
             for i = 1:size(script_list,2)
                 fprintf('Testing %s \r\n',script_list{i})
                 assert(ScriptTest.script_parser(script_list{i}),'Test Failed');

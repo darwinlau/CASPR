@@ -324,8 +324,8 @@ classdef ControllerSimulator < DynamicsSimulator
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             first_cycle = true;
             for t = 1:length(obj.timeVector)
-                CASPR_log.Print(sprintf('Time : %f', obj.timeVector(t)),CASPRLogLevel.INFO);
-                fprintf('Completion Percentage: %3.2f%%\n',100*t/length(obj.timeVector));
+                CASPR_log.Info(sprintf('Time : %f', obj.timeVector(t)));
+                CASPR_log.Info(sprintf('Completion Percentage: %3.2f%%\n',100*t/length(obj.timeVector)));
                                 
                 % extract current time to make component update decisions
                 current_time = obj.timeVector(t);

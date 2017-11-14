@@ -8,8 +8,5 @@ function inWorkspace = interference_free_mindistance_cable_cable(dynamics, optio
     m = MinCableCableDistanceMetric();
     [~, v, ~] = m.evaluate(dynamics,options);
     inWorkspace = (v > 0);
-    
-
-
 end
 
