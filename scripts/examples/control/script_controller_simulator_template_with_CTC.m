@@ -161,126 +161,123 @@ error0 = [0.6; -0.08; 0.5; 0.3];
 error0 = [0.0; 0.0; 0.0; 0.0];
 
 ctrl_sim.run(trajectory_ref, trajectory_ref.q{1} + error0, trajectory_ref.q_dot{1}, zeros(ideal_model.numDofs, 1));
-ctrl_sim.extractData();
+output_data     =   ctrl_sim.extractData();
 repo_folder = pwd;
 data_folder = '';
 complete_folder = strcat(repo_folder, data_folder);
 
-% figure;
-% plot(DataRefTime, DataRefJointPose, 'LineWidth', 1.5);
-% title('Reference Joint Trajectory');
-% legend('Joint 1','Joint 2','Joint 3','Joint 4')
-% % saveas(gcf, strcat(complete_folder, '\ref_traj.eps'));
-% % saveas(gcf, strcat(complete_folder, '\ref_traj.png'));
-% 
-% figure;
-% plot(DataCtrlTime, DataCtrlJointPose, 'LineWidth', 1.5);
-% title('Controller Joint Trajectory');
-% legend('Joint 1','Joint 2','Joint 3','Joint 4')
-% % saveas(gcf, strcat(complete_folder, '\ctrl_traj.eps'));
-% % saveas(gcf, strcat(complete_folder, '\ctrl_traj.png'));
-% 
-% figure;
-% plot(DataObTime, DataObJointPoseEst, 'LineWidth', 1.5);
-% title('Observer Joint Trajectory');
-% legend('Joint 1','Joint 2','Joint 3','Joint 4')
-% % saveas(gcf, strcat(complete_folder, '\ob_traj.eps'));
-% % saveas(gcf, strcat(complete_folder, '\ob_traj.png'));
-% 
-% figure;
-% plot(DataSimTime, DataSimJointPose, 'LineWidth', 1.5);
-% title('Simulation Joint Trajectory');
-% legend('Joint 1','Joint 2','Joint 3','Joint 4')
-% % saveas(gcf, strcat(complete_folder, '\sim_traj.eps'));
-% % saveas(gcf, strcat(complete_folder, '\sim_traj.png'));
-% 
-% figure;
-% len = min([size(DataRefTime, 1), size(DataRefJointPose, 1), size(DataSimJointPose, 1)]);
-% DataRefTime         =   DataRefTime(1:len, :);
-% DataSimJointPose   	=   DataSimJointPose(1:len, :);
-% DataRefJointPose   	=   DataRefJointPose(1:len, :);
-% plot(DataRefTime, DataSimJointPose - DataRefJointPose, 'LineWidth', 1.5);
-% title('Joint Tracking Error (Actual)');
-% legend('Joint 1','Joint 2','Joint 3','Joint 4')
-% % saveas(gcf, strcat(complete_folder, '\err_q_traj_real.eps'));
-% % saveas(gcf, strcat(complete_folder, '\err_q_traj_real.png'));
-% 
-% figure;
-% plot(DataRefTime, DataSimJointPose, 'LineWidth', 1.0);
-% hold on;
-% plot(DataRefTime, DataRefJointPose, 'LineWidth', 1.0);
-% title('Joint Tracking (Actual)');
-% legend('Env Joint 1','Env Joint 2','Env Joint 3','Env Joint 4', 'Ref Joint 1','Ref Joint 2','Ref Joint 3','Ref Joint 4')
-% % saveas(gcf, strcat(complete_folder, '\compare_q_traj_real.eps'));
-% % saveas(gcf, strcat(complete_folder, '\compare_q_traj_real.png'));
-% 
-% figure;
-% len = min([size(DataRefTime, 1), size(DataRefJointPose, 1), size(DataCtrlJointPose, 1)]);
-% DataRefTime         =   DataRefTime(1:len, :);
-% DataCtrlJointPose  	=   DataCtrlJointPose(1:len, :);
-% DataRefJointPose   	=   DataRefJointPose(1:len, :);
-% plot(DataRefTime, DataCtrlJointPose - DataRefJointPose, 'LineWidth', 1.5);
-% title('Joint Tracking Error');
-% legend('Joint 1','Joint 2','Joint 3','Joint 4')
-% % saveas(gcf, strcat(complete_folder, '\err_q_traj.eps'));
-% % saveas(gcf, strcat(complete_folder, '\err_q_traj.png'));
-% 
-% figure;
-% plot(DataRefTime, DataCtrlJointPose, 'LineWidth', 1.0);
-% hold on;
-% plot(DataRefTime, DataRefJointPose, 'LineWidth', 1.0);
-% title('Joint Tracking');
-% legend('FK Joint 1','FK Joint 2','FK Joint 3','FK Joint 4', 'Ref Joint 1','Ref Joint 2','Ref Joint 3','Ref Joint 4')
-% % saveas(gcf, strcat(complete_folder, '\compare_q_traj.eps'));
-% % saveas(gcf, strcat(complete_folder, '\compare_q_traj.png'));
-% 
-% figure;
-% plot(DataCtrlTime, DataCtrlForceCommands, 'LineWidth', 1.5);
-% title('Force Commands');
-% legend('Cable 1','Cable 2','Cable 3','Cable 4','Cable 5','Cable 6')
-% % saveas(gcf, strcat(complete_folder, '\f_cmd.eps'));
-% % saveas(gcf, strcat(complete_folder, '\f_cmd.png'));
-% 
-% figure;
-% plot(DataObTime, DataObDisturbanceWrench - DataObDisturbanceWrenchEst, 'LineWidth', 1.5);
-% title('Disturbance Wrench Estimation Error');
-% legend('Joint 1','Joint 2','Joint 3','Joint 4')
-% % saveas(gcf, strcat(complete_folder, '\err_dw_est.eps'));
-% % saveas(gcf, strcat(complete_folder, '\err_dw_ext.png'));
-% 
-% figure;
-% plot(DataObTime, DataObDisturbanceWrench, 'LineWidth', 1.5);
-% hold on;
-% plot(DataObTime, DataObDisturbanceWrenchEst, 'LineWidth', 1.5);
-% title('Disturbance Wrench Estimation');
-% legend('Joint 1 real','Joint 2 real','Joint 3 real','Joint 4 real', 'Joint 1 est','Joint 2 est','Joint 3 est','Joint 4 est')
-% % saveas(gcf, strcat(complete_folder, '\estimation_dw.eps'));
-% % saveas(gcf, strcat(complete_folder, '\estimation_dw.png'));
-% 
-% figure;
-% plot(DataObTime, DataObDisturbanceAcceleration - DataObDisturbanceAccelerationEst, 'LineWidth', 1.5);
-% title('Disturbance Acceleration Estimation Error');
-% legend('Joint 1','Joint 2','Joint 3','Joint 4')
-% % saveas(gcf, strcat(complete_folder, '\err_dacc_est.eps'));
-% % saveas(gcf, strcat(complete_folder, '\err_dacc_est.png'));
-% 
-% figure;
-% plot(DataObTime, DataObJointPose - DataObJointPoseEst, 'LineWidth', 1.5);
-% title('Joint Pose Estimation Error');
-% legend('Joint 1','Joint 2','Joint 3','Joint 4')
-% % saveas(gcf, strcat(complete_folder, '\err_q_est.eps'));
-% % saveas(gcf, strcat(complete_folder, '\err_q_est.png'));
-% 
-% figure;
-% len = min([size(DataObTime, 1), size(DataObJointPoseEst, 1), size(DataSimJointPose, 1)]);
-% DataObTime          =   DataObTime(1:len, :);
-% DataSimJointPose  	=   DataSimJointPose(1:len, :);
-% DataObJointPoseEst 	=   DataObJointPoseEst(1:len, :);
-% plot(DataObTime, DataSimJointPose - DataObJointPoseEst, 'LineWidth', 1.5);
-% title('Joint Pose Estimation Error (Actual)');
-% legend('Joint 1','Joint 2','Joint 3','Joint 4')
-% % saveas(gcf, strcat(complete_folder, '\err_q_est_real.eps'));
-% % saveas(gcf, strcat(complete_folder, '\err_q_est_real.png'));
-% 
-% 
-% 
+figure;
+plot(output_data.DataRefTime, output_data.DataRefJointPose, 'LineWidth', 1.5);
+title('Reference Joint Trajectory');
+legend('Joint 1','Joint 2','Joint 3','Joint 4')
+% saveas(gcf, strcat(complete_folder, '\ref_traj.eps'));
+% saveas(gcf, strcat(complete_folder, '\ref_traj.png'));
+
+figure;
+plot(output_data.DataCtrlTime, output_data.DataCtrlJointPose, 'LineWidth', 1.5);
+title('Controller Joint Trajectory');
+legend('Joint 1','Joint 2','Joint 3','Joint 4')
+% saveas(gcf, strcat(complete_folder, '\ctrl_traj.eps'));
+% saveas(gcf, strcat(complete_folder, '\ctrl_traj.png'));
+
+figure;
+plot(output_data.DataObTime, output_data.DataObJointPoseEst, 'LineWidth', 1.5);
+title('Observer Joint Trajectory');
+legend('Joint 1','Joint 2','Joint 3','Joint 4')
+% saveas(gcf, strcat(complete_folder, '\ob_traj.eps'));
+% saveas(gcf, strcat(complete_folder, '\ob_traj.png'));
+
+figure;
+plot(output_data.DataSimTime, output_data.DataSimJointPose, 'LineWidth', 1.5);
+title('Simulation Joint Trajectory');
+legend('Joint 1','Joint 2','Joint 3','Joint 4')
+% saveas(gcf, strcat(complete_folder, '\sim_traj.eps'));
+% saveas(gcf, strcat(complete_folder, '\sim_traj.png'));
+
+figure;
+len = min([size(output_data.DataRefTime, 1), size(output_data.DataRefJointPose, 1), size(output_data.DataSimJointPose, 1)]);
+output_data.DataRefTime         =   output_data.DataRefTime(1:len, :);
+output_data.DataSimJointPose   	=   output_data.DataSimJointPose(1:len, :);
+output_data.DataRefJointPose   	=   output_data.DataRefJointPose(1:len, :);
+plot(output_data.DataRefTime, output_data.DataSimJointPose - output_data.DataRefJointPose, 'LineWidth', 1.5);
+title('Joint Tracking Error (Actual)');
+legend('Joint 1','Joint 2','Joint 3','Joint 4')
+% saveas(gcf, strcat(complete_folder, '\err_q_traj_real.eps'));
+% saveas(gcf, strcat(complete_folder, '\err_q_traj_real.png'));
+
+figure;
+plot(output_data.DataRefTime, output_data.DataSimJointPose, 'LineWidth', 1.0);
+hold on;
+plot(output_data.DataRefTime, output_data.DataRefJointPose, 'LineWidth', 1.0);
+title('Joint Tracking (Actual)');
+legend('Env Joint 1','Env Joint 2','Env Joint 3','Env Joint 4', 'Ref Joint 1','Ref Joint 2','Ref Joint 3','Ref Joint 4')
+% saveas(gcf, strcat(complete_folder, '\compare_q_traj_real.eps'));
+% saveas(gcf, strcat(complete_folder, '\compare_q_traj_real.png'));
+
+figure;
+len = min([size(output_data.DataRefTime, 1), size(output_data.DataRefJointPose, 1), size(output_data.DataCtrlJointPose, 1)]);
+output_data.DataRefTime         =   output_data.DataRefTime(1:len, :);
+output_data.DataCtrlJointPose  	=   output_data.DataCtrlJointPose(1:len, :);
+output_data.DataRefJointPose   	=   output_data.DataRefJointPose(1:len, :);
+plot(output_data.DataRefTime, output_data.DataCtrlJointPose - output_data.DataRefJointPose, 'LineWidth', 1.5);
+title('Joint Tracking Error');
+legend('Joint 1','Joint 2','Joint 3','Joint 4')
+% saveas(gcf, strcat(complete_folder, '\err_q_traj.eps'));
+% saveas(gcf, strcat(complete_folder, '\err_q_traj.png'));
+
+figure;
+plot(output_data.DataRefTime, output_data.DataCtrlJointPose, 'LineWidth', 1.0);
+hold on;
+plot(output_data.DataRefTime, output_data.DataRefJointPose, 'LineWidth', 1.0);
+title('Joint Tracking');
+legend('FK Joint 1','FK Joint 2','FK Joint 3','FK Joint 4', 'Ref Joint 1','Ref Joint 2','Ref Joint 3','Ref Joint 4')
+% saveas(gcf, strcat(complete_folder, '\compare_q_traj.eps'));
+% saveas(gcf, strcat(complete_folder, '\compare_q_traj.png'));
+
+figure;
+plot(output_data.DataCtrlTime, output_data.DataCtrlForceCommands, 'LineWidth', 1.5);
+title('Force Commands');
+legend('Cable 1','Cable 2','Cable 3','Cable 4','Cable 5','Cable 6')
+% saveas(gcf, strcat(complete_folder, '\f_cmd.eps'));
+% saveas(gcf, strcat(complete_folder, '\f_cmd.png'));
+
+figure;
+plot(output_data.DataObTime, output_data.DataObDisturbanceWrench - output_data.DataObDisturbanceWrenchEst, 'LineWidth', 1.5);
+title('Disturbance Wrench Estimation Error');
+legend('Joint 1','Joint 2','Joint 3','Joint 4')
+% saveas(gcf, strcat(complete_folder, '\err_dw_est.eps'));
+% saveas(gcf, strcat(complete_folder, '\err_dw_ext.png'));
+
+figure;
+plot(output_data.DataObTime, output_data.DataObDisturbanceWrench, 'LineWidth', 1.5);
+hold on;
+plot(output_data.DataObTime, output_data.DataObDisturbanceWrenchEst, 'LineWidth', 1.5);
+title('Disturbance Wrench Estimation');
+legend('Joint 1 real','Joint 2 real','Joint 3 real','Joint 4 real', 'Joint 1 est','Joint 2 est','Joint 3 est','Joint 4 est')
+% saveas(gcf, strcat(complete_folder, '\estimation_dw.eps'));
+% saveas(gcf, strcat(complete_folder, '\estimation_dw.png'));
+
+figure;
+plot(output_data.DataObTime, output_data.DataObDisturbanceAcceleration - output_data.DataObDisturbanceAccelerationEst, 'LineWidth', 1.5);
+title('Disturbance Acceleration Estimation Error');
+legend('Joint 1','Joint 2','Joint 3','Joint 4')
+% saveas(gcf, strcat(complete_folder, '\err_dacc_est.eps'));
+% saveas(gcf, strcat(complete_folder, '\err_dacc_est.png'));
+
+figure;
+plot(output_data.DataObTime, output_data.DataObJointPose - output_data.DataObJointPoseEst, 'LineWidth', 1.5);
+title('Joint Pose Estimation Error');
+legend('Joint 1','Joint 2','Joint 3','Joint 4')
+% saveas(gcf, strcat(complete_folder, '\err_q_est.eps'));
+% saveas(gcf, strcat(complete_folder, '\err_q_est.png'));
+
+figure;
+len = min([size(output_data.DataObTime, 1), size(output_data.DataObJointPoseEst, 1), size(output_data.DataSimJointPose, 1)]);
+output_data.DataObTime          =   output_data.DataObTime(1:len, :);
+output_data.DataSimJointPose  	=   output_data.DataSimJointPose(1:len, :);
+output_data.DataObJointPoseEst 	=   output_data.DataObJointPoseEst(1:len, :);
+plot(output_data.DataObTime, output_data.DataSimJointPose - output_data.DataObJointPoseEst, 'LineWidth', 1.5);
+title('Joint Pose Estimation Error (Actual)');
+legend('Joint 1','Joint 2','Joint 3','Joint 4')
+% saveas(gcf, strcat(complete_folder, '\err_q_est_real.eps'));
+% saveas(gcf, strcat(complete_folder, '\err_q_est_real.png'));
