@@ -159,8 +159,9 @@ error0 = [0.8; -0.3; 0.9; 0.4];
 % error0 = [0.8; -0.7; 0.9; 0.4];
 error0 = [0.6; -0.08; 0.5; 0.3];
 error0 = [0.0; 0.0; 0.0; 0.0];
-
+tic
 ctrl_sim.run(trajectory_ref, trajectory_ref.q{1} + error0, trajectory_ref.q_dot{1}, zeros(ideal_model.numDofs, 1));
+toc
 output_data     =   ctrl_sim.extractData();
 repo_folder = pwd;
 data_folder = '';

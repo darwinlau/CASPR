@@ -36,7 +36,7 @@ classdef DisturbanceObserverESO < ObserverBase
 
         % The implementation of the abstract executeFunction for the
         % controller class.
-        function [disturbance] = executeFunction(obj, q, q_d, u, ~)
+        function [q_est, q_dot_est, q_ddot_disturbance_est, wrench_disturbance_est] = executeFunction(obj, q, q_d, u, w_ext_active, ~)
             % the control u here for CDPRs is assumed be the control wrench
             
             if obj.first_time == true
@@ -44,23 +44,40 @@ classdef DisturbanceObserverESO < ObserverBase
                 obj.first_time = false;
                 obj.q_hat = q;
                 obj.q_d_hat = q_d;
-                [q_dot_hat, q_ddot_hat, disturbance_dot] = obj.observerDynmaticFunction(q, q_d, u);
+                [q_dot_hat, q_ddot_hat, disturbance_dot] = obj.observerDynmaticFunction(q, q_d, u, w_ext_active);
                 obj.q_hat = obj.q_hat + obj.delta_t*q_dot_hat;
                 obj.q_d_hat = obj.q_d_hat + obj.delta_t*q_ddot_hat;
                 obj.d_hat = obj.d_hat + obj.delta_t*disturbance_dot;
-                disturbance = obj.d_hat;
+                % do model update using current state feedback and fill up
+                % the required outputs (this part will differ with
+                % different observer)
+                obj.dynModel.update(q, q_d, zeros(obj.NUM_DOFS,1), zeros(obj.NUM_DOFS,1));
+                wrench_disturbance_est  =   obj.dynModel.M*obj.d_hat + obj.dynModel.C + obj.dynModel.G;
+                q_ddot_disturbance_est  =   obj.dynModel.M\wrench_disturbance_est;
+                q_est                   =   obj.q_hat;
+                q_dot_est             	=   obj.q_d_hat;
             else                
-                [q_dot_hat, q_ddot_hat, disturbance_dot] = obj.observerDynmaticFunction(q, q_d, u);
+                [q_dot_hat, q_ddot_hat, disturbance_dot] = obj.observerDynmaticFunction(q, q_d, u, w_ext_active);
                 obj.q_hat = obj.q_hat + obj.delta_t*q_dot_hat;
                 obj.q_d_hat = obj.q_d_hat + obj.delta_t*q_ddot_hat;
                 obj.d_hat = obj.d_hat + obj.delta_t*disturbance_dot;
-                disturbance = obj.d_hat;
+                % do model update using current state feedback and fill up
+                % the required outputs (this part will differ with
+                % different observer)
+                obj.dynModel.update(q, q_d, zeros(obj.NUM_DOFS,1), zeros(obj.NUM_DOFS,1));
+                wrench_disturbance_est  =   obj.dynModel.M*obj.d_hat + obj.dynModel.C + obj.dynModel.G;
+                q_ddot_disturbance_est  =   obj.dynModel.M\wrench_disturbance_est;
+                q_est                   =   obj.q_hat;
+                q_dot_est             	=   obj.q_d_hat;
             end            
         end
-        function [q_dot_hat, q_ddot_hat, disturbance_dot] = observerDynmaticFunction(obj, q, ~, u)
-            % among the inputs: only the term q and u are actually used
-            %                   the control u here for CDPRs is assumed be cable forces
-            %                   q is used to derive the estimation error
+        
+        
+        % among the inputs: the control u here for CDPRs is assumed be cable forces
+        %                   q is used to derive the estimation error
+        %                   w_ext_active is the expected output wrench
+        % among the outputs: disturbance_dot is in the form of q_ddot
+        function [q_dot_hat, q_ddot_hat, disturbance_dot] = observerDynmaticFunction(obj, q, ~, u, w_ext_active)
             
             % here update the model with the estimated variables
             obj.dynModel.update(obj.q_hat, obj.q_d_hat, zeros(obj.NUM_DOFS,1), zeros(obj.NUM_DOFS,1));
@@ -71,16 +88,9 @@ classdef DisturbanceObserverESO < ObserverBase
 %             G = obj.dynModel.G;
             L = obj.dynModel.L;
             
-            % SHOULD THIS INPUT BE CABLE FORCES OR WRENCHES?
-            % assume it to be cable forces first
-            % following is the backup of old way: using wrench as the
-            % control and the disturbance is also in the form of wrench
-%             q_dot_hat           = obj.q_d_hat + diag(obj.alpha_1)*e;
-%             q_ddot_hat          = M\(-C - G + u + obj.d_hat) + diag(obj.alpha_2)*e;
-%             disturbance_dot     = diag(obj.alpha_3)*e;
             q_dot_hat           = obj.q_d_hat + diag(obj.alpha_1)*e;
-%             q_ddot_hat          = M\(-C - G - L'*u) + obj.d_hat + diag(obj.alpha_2)*e;
-            q_ddot_hat          = obj.d_hat + diag(obj.alpha_2)*e - M\L'*u;
+%             q_ddot_hat          = M\(-C - G - w_ext_active - L'*u) + obj.d_hat + diag(obj.alpha_2)*e;
+            q_ddot_hat          = obj.d_hat + diag(obj.alpha_2)*e + M\(-w_ext_active - L'*u);
             disturbance_dot     = diag(obj.alpha_3)*e;
         end
     end

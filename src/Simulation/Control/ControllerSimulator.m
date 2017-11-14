@@ -234,14 +234,15 @@ classdef ControllerSimulator < DynamicsSimulator
             % SIMULATOR INITIALIZATIONS
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             % initialize the trajectories
-            obj.trajectory.q{1}             =   q0;
-            obj.trajectory.q_dot{1}         =   q0_dot;
-            obj.trajectory.q_ddot{1}        =   q0_ddot;
-            obj.ctrl_trajectory.q{1}        =   q0;
-            obj.ctrl_trajectory.q_dot{1}    =   q0_dot;
-            obj.ctrl_trajectory.q_ddot{1}   =   q0_ddot;
-            obj.ob_trajectory.q{1}          =   q0;
-            obj.ob_trajectory.q_dot{1}      =   q0_dot;
+            obj.trajectory.q{1}                 =   q0;
+            obj.trajectory.q_dot{1}             =   q0_dot;
+            obj.trajectory.q_ddot{1}            =   q0_ddot;
+            obj.ctrl_trajectory.q{1}            =   q0;
+            obj.ctrl_trajectory.q_dot{1}        =   q0_dot;
+            obj.ctrl_trajectory.q_ddot{1}       =   q0_ddot;
+            obj.ob_trajectory.q{1}              =   q0;
+            obj.ob_trajectory.q_dot{1}          =   q0_dot;
+            obj.ob_trajectory.q_ddot_ext_est{1}	=   zeros(obj.model.numDofs, 1);
             if (obj.simopt.forward_kinematics_debugging)
                 obj.ctrl_fk_trajectory.q{1}         =   q0;
                 obj.ctrl_fk_trajectory.q_dot{1}     =   q0_dot;
@@ -319,6 +320,11 @@ classdef ControllerSimulator < DynamicsSimulator
             obj.w_ext_est       =   zeros(obj.model.numDofs,1);
             obj.q_ddot_ext_est  =   zeros(obj.model.numDofs,1);
             
+            % update length feedback
+            obj.cableLengthFeedbackUpdate();
+            % post-update uncertainty update
+            obj.postUpdateUncertainyUpdate(0);
+            
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             % START THE MAIN LOOP
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -333,24 +339,6 @@ classdef ControllerSimulator < DynamicsSimulator
                 % update model
                 obj.true_model.update(obj.trajectory.q{obj.sim_counter}, obj.trajectory.q_dot{obj.sim_counter}, zeros(obj.model.numDofs, 1), zeros(obj.model.numDofs,1));
                 
-                % update length feedback
-                % post-update disturbance
-                if (obj.simopt.use_absolute_encoder)
-                    % if absolute encoder used, get cable lengths directly from the environment
-                    obj.l       =   obj.true_model.cableLengths;
-                else
-                    % if relative encoder used, get relative cable
-                    % lengths from the environment and then convert into absolute lengths
-                    obj.l       =   obj.l_0_ctrl + obj.true_model.cableLengths - obj.l_0_env;
-                end
-                for i = 1:length(obj.uncertainties)
-                    if(isa(obj.uncertainties{i},'NoiseUncertaintyBase'))
-                        [noise_x, ~] = obj.uncertainties{i}.applyFeedbackNoise(current_time);
-                        obj.l       =   obj.l + noise_x;
-                    end
-                end
-                
-                
                 % control command (and FK, if applicable) update
                 if (first_cycle)
                     obj.ctrl_counter = 0;
@@ -360,73 +348,9 @@ classdef ControllerSimulator < DynamicsSimulator
                     obj.ctrl_counter = obj.ctrl_counter + 1;
                     % update time profile
                     obj.ctrl_trajectory.timeVector(obj.ctrl_counter) = current_time;
-                    
-%                     % get the cable lengths
-%                     if (obj.simopt.use_absolute_encoder)
-%                         % if absolute encoder used, get cable lengths directly from the environment
-%                         obj.l       =   obj.true_model.cableLengths;
-%                     else
-%                         % if relative encoder used, get relative cable
-%                         % lengths from the environment and then convert into absolute lengths
-%                         obj.l       =   obj.l_0_ctrl + obj.true_model.cableLengths - obj.l_0_env;
-%                     end
-                    
-                    % derive the feedback information for the controller
-                    if (obj.simopt.use_FK_in_controller)
-                        % if FK is used:
-                        % 1. use q_fk_prev, q_d_fk_prev and the l_fk_prev to generate new q and q_dot
-                        % 2. update q_fk_prev, q_d_fk_prev and the l_fk_prev
-                        % 3. also update ctrl_trajectory
-                        [obj.q_fk_prev_ctrl, obj.q_d_fk_prev_ctrl, ~] = ...
-                            obj.fkSolver.compute(obj.l, obj.l_fk_prev_ctrl, obj.model.cableModel.cableIndicesActive, obj.q_fk_prev_ctrl, obj.q_d_fk_prev_ctrl, ctrl_delta_t);
-                        obj.l_fk_prev_ctrl = obj.l;
-                        obj.ctrl_trajectory.q{obj.ctrl_counter}     =   obj.q_fk_prev_ctrl;
-                        obj.ctrl_trajectory.q_dot{obj.ctrl_counter} =   obj.q_d_fk_prev_ctrl;
-                    elseif (obj.simopt.use_ob_state_estimation)
-                        % in this case the latest estimated state will be used in the controller
-                        obj.ctrl_trajectory.q{obj.ctrl_counter}     =   obj.ob_trajectory.q{obj.ob_counter};
-                        obj.ctrl_trajectory.q_dot{obj.ctrl_counter} =   obj.ob_trajectory.q_dot{obj.ob_counter};
-                    else
-                        % if FK is not used:
-                        % directly take joint space variables from
-                        % environment
-                        obj.ctrl_trajectory.q{obj.ctrl_counter}     =   obj.trajectory.q{obj.sim_counter};
-                        obj.ctrl_trajectory.q_dot{obj.ctrl_counter} =   obj.trajectory.q_dot{obj.sim_counter};
-                    end
-                    
-                    % save FK trajectory if required
-                    if (obj.simopt.forward_kinematics_debugging)
-                        if (~obj.simopt.use_FK_in_controller)
-                            % do FK update iff it has not been done for the
-                            % controller yet
-                            [obj.q_fk_prev_ctrl, obj.q_d_fk_prev_ctrl, ~] = ...
-                                obj.fkSolver.compute(obj.l, obj.l_fk_prev_ctrl, obj.model.cableModel.cableIndicesActive, obj.q_fk_prev_ctrl, obj.q_d_fk_prev_ctrl, ctrl_delta_t);
-                        end
-                        obj.l_fk_prev_ctrl = obj.l;
-                        obj.ctrl_fk_trajectory.q{obj.ctrl_counter}     =   obj.q_fk_prev_ctrl;
-                        obj.ctrl_fk_trajectory.q_dot{obj.ctrl_counter} =   obj.q_d_fk_prev_ctrl;
-                    end
-                    
-                    % determine the disturbance estimation
-                    if (obj.simopt.use_ob_disturbance_estimation)
-                        if (~first_cycle)
-                            obj.q_ddot_ext_est  =   obj.ob_trajectory.q_ddot_ext_est{obj.ob_counter};
-                        else
-                            obj.q_ddot_ext_est  =   zeros(obj.model.numDofs,1);
-                        end
-                    else
-                        obj.q_ddot_ext_est  =   zeros(obj.model.numDofs,1);
-                    end
-                    
-                    % run control command update
-                    [obj.f_cmd, ~, ~]  = ...
-                        obj.controller.execute(obj.ctrl_trajectory.q{obj.ctrl_counter}, obj.ctrl_trajectory.q_dot{obj.ctrl_counter}, zeros(obj.model.numDofs,1), obj.refTrajectory.q{obj.ctrl_counter}, obj.refTrajectory.q_dot{obj.ctrl_counter}, obj.refTrajectory.q_ddot{obj.ctrl_counter} - obj.q_ddot_ext_est, obj.ctrl_counter);
-                    
-                    
-                    % save the data
-%                     obj.ctrl_trajectory.q{obj.ctrl_counter}     =   obj.trajectory.q{obj.sim_counter};
-%                     obj.ctrl_trajectory.q{obj.ctrl_counter}     =   obj.trajectory.q_dot{obj.sim_counter};
-                    obj.cableForces{obj.ctrl_counter}           =   obj.f_cmd;
+                    % update control command and save the corresponding
+                    % data
+                    obj.controlCommandUpdate(ctrl_delta_t);
                 end
                 
                 % observer update (the observer should spit out the equivalent acceleration)
@@ -440,110 +364,202 @@ classdef ControllerSimulator < DynamicsSimulator
                         obj.ob_counter = obj.ob_counter + 1;
                         % update time profile
                         obj.ob_trajectory.timeVector(obj.ob_counter) = current_time;
-                       
-                        % get the true model updated to derive the inertia
-                        % matrix
-%                         obj.true_model.update(obj.trajectory.q{obj.sim_counter}, obj.trajectory.q_dot{obj.sim_counter}, zeros(obj.model.numDofs, 1), zeros(obj.model.numDofs,1));
-                        
-%                         % get the cable lengths feedback
-%                         if (obj.simopt.use_absolute_encoder)
-%                             % if absolute encoder used, get cable lengths
-%                             % directly from the environment
-%                             obj.l       =   obj.true_model.cableLengths;
-%                         else
-%                             % if relative encoder used, get relative cable
-%                             % lengths from the environment and
-%                             % then convert into absolute lengths
-%                             obj.l       =   obj.l_0_ctrl + obj.true_model.cableLengths - obj.l_0_env;
-%                         end
-                        
-                        % derive the feedback information for the observer
-                        if (obj.simopt.use_FK_in_observer)
-                            % if FK is used:
-                            % 1. use q_fk_prev, q_d_fk_prev and the l_fk_prev to generate new q and q_dot
-                            % 2. update q_fk_prev, q_d_fk_prev and the l_fk_prev
-                            % 3. also update ctrl_trajectory
-                            [obj.q_fk_prev_ob, obj.q_d_fk_prev_ob, ~] = ...
-                                obj.fkSolver.compute(obj.l, obj.l_fk_prev_ob, obj.model.cableModel.cableIndicesActive, obj.q_fk_prev_ob, obj.q_d_fk_prev_ob, ob_delta_t);
-                            obj.l_fk_prev_ob = obj.l;
-                            obj.ob_trajectory.q{obj.ob_counter}     =   obj.q_fk_prev_ob;
-                            obj.ob_trajectory.q_dot{obj.ob_counter} =   obj.q_d_fk_prev_ob;
-                        else
-                            % if FK is not used:
-                            % directly take joint space variables from
-                            % environment
-                            obj.ob_trajectory.q{obj.ob_counter}     =   obj.trajectory.q{obj.sim_counter};
-                            obj.ob_trajectory.q_dot{obj.ob_counter} =   obj.trajectory.q_dot{obj.sim_counter};
-                        end
-                    
-                        % save FK trajectory if required
-                        if (obj.simopt.forward_kinematics_debugging)
-                            if (~obj.simopt.use_FK_in_observer)
-                                % do FK update iff it has not been done for the
-                                % controller yet
-                                [obj.q_fk_prev_ob, obj.q_d_fk_prev_ob, ~] = ...
-                                    obj.fkSolver.compute(obj.l, obj.l_fk_prev_ob, obj.model.cableModel.cableIndicesActive, obj.q_fk_prev_ob, obj.q_d_fk_prev_ob, ob_delta_t);
-                            end
-                            obj.l_fk_prev_ob = obj.l;
-                            obj.ob_fk_trajectory.q{obj.ob_counter}     =   obj.q_fk_prev_ob;
-                            obj.ob_fk_trajectory.q_dot{obj.ob_counter} =   obj.q_d_fk_prev_ob;
-                        end
-
-                        % run observer update (assume that the observer gives disturbance acceleration)
-                        [obj.q_ddot_ext_est]    =   obj.observer.executeFunction(obj.ob_trajectory.q{obj.ob_counter}, obj.ob_trajectory.q_dot{obj.ob_counter}, obj.cableForces{obj.ctrl_counter}, obj.ob_counter);
-                        obj.w_ext_est           =   obj.model.M*obj.q_ddot_ext_est + obj.model.C + obj.model.G;
-                        obj.q_ddot_ext_est      =   obj.model.M\obj.w_ext_est;
-                        
-
-                        
-                        % save the data
-                        obj.ob_trajectory.q_est{obj.ob_counter}             =   obj.observer.q_hat;
-                        obj.ob_trajectory.q_dot_est{obj.ob_counter}         =   obj.observer.q_d_hat;
-                        obj.ob_trajectory.w_ext{obj.ob_counter}             =   -obj.w_ext;
-                        obj.ob_trajectory.w_ext_est{obj.ob_counter}         =   obj.w_ext_est;
-                        obj.ob_trajectory.q_ddot_ext{obj.ob_counter}        =   -obj.q_ddot_ext;
-                        obj.ob_trajectory.q_ddot_ext_est{obj.ob_counter}    =   obj.q_ddot_ext_est;
+                        % update the observer estimation
+                        obj.observerEstimationUpdate(ob_delta_t);
                     end
                 end
                 
-                % pre-update disturbance
-                skip_FD = false;
-                for i = 1:length(obj.uncertainties)
-                    if(isa(obj.uncertainties{i},'ExternalWrenchUncertaintyBase'))
-%                         current_time
-                        [obj.w_ext] = obj.uncertainties{i}.applyWrechDisturbance(current_time);
-                        obj.w_ext
-                        obj.q_ddot_ext = obj.true_model.M\obj.w_ext;
-                    end
-                    if(isa(obj.uncertainties{i},'PoseLockUncertaintyBase'))
-                        [skip_FD] = obj.uncertainties{i}.applyPoseLock(current_time);
-                    end
-                end
                 
                 % FD update
                 if (current_time < tf)
-                    if (skip_FD)
-                        % update sim_trajectory with current step data, no
-                        % need to run FD
-                        obj.trajectory.q{obj.sim_counter + 1}       =   obj.trajectory.q{obj.sim_counter};
-                        obj.trajectory.q_dot{obj.sim_counter + 1}	=   obj.trajectory.q_dot{obj.sim_counter};
-                        obj.trajectory.q_ddot{obj.sim_counter + 1}	=   obj.trajectory.q_ddot{obj.sim_counter};
-                    else
-                        % update sim_trajectory with new state from FD
-                        % algorithm
-                        [obj.trajectory.q{obj.sim_counter + 1}, obj.trajectory.q_dot{obj.sim_counter + 1}, obj.trajectory.q_ddot{obj.sim_counter + 1}, obj.true_model] = ...
-                            obj.fdSolver.compute(obj.trajectory.q{obj.sim_counter}, obj.trajectory.q_dot{obj.sim_counter}, obj.cableForces{obj.ctrl_counter}, obj.true_model.cableModel.cableIndicesActive, obj.w_ext, obj.timeVector(obj.sim_counter + 1) - obj.timeVector(obj.sim_counter), obj.true_model);
-                        obj.trajectory.q_ddot{obj.sim_counter + 1}	=   obj.trajectory.q_ddot{obj.sim_counter};
-                    end
-                    obj.sim_counter = obj.sim_counter + 1;
+                    % pre-update uncertainty update
+                    skip_FD     =   obj.preUpdateUncertainyUpdate(current_time);
+                    % do forward dynamic update
+                    obj.forwardDynamicUpdate(skip_FD);
+                    % update length feedback
+                    obj.cableLengthFeedbackUpdate();
+                    % post-update uncertainty update
+                    obj.postUpdateUncertainyUpdate(current_time);
                 else
                     if (t ~= obj.sim_counter)
                         CASPR_log.Error(sprintf('Something does not add up in FD update.'));
                     end
                 end
                 
-                
                 first_cycle = false;
+            end
+        end
+        
+        % function to do cable length feedback update
+        function cableLengthFeedbackUpdate(obj)
+            if (obj.simopt.use_absolute_encoder)
+                % if absolute encoder used, get cable lengths directly from the environment
+                obj.l	=   obj.true_model.cableLengths;
+            else
+                % if relative encoder used, get relative cable
+                % lengths from the environment and then convert into absolute lengths
+                obj.l	=   obj.l_0_ctrl + obj.true_model.cableLengths - obj.l_0_env;
+            end
+        end
+        
+        % function to do control command update
+        function controlCommandUpdate(obj, ctrl_delta_t)
+
+            % derive the feedback information for the controller
+            obj.controllerFeedbackUpdate(ctrl_delta_t);
+
+
+            % get the disturbance estimation
+            if (obj.simopt.use_ob_disturbance_estimation)
+                obj.q_ddot_ext_est  =   obj.ob_trajectory.q_ddot_ext_est{obj.ob_counter};
+            else
+                obj.q_ddot_ext_est  =   zeros(obj.model.numDofs,1);
+            end
+
+            % run control command update
+            [obj.f_cmd, ~, ~]  = ...
+                obj.controller.execute(obj.ctrl_trajectory.q{obj.ctrl_counter}, obj.ctrl_trajectory.q_dot{obj.ctrl_counter}, zeros(obj.model.numDofs,1), obj.refTrajectory.q{obj.ctrl_counter}, obj.refTrajectory.q_dot{obj.ctrl_counter}, obj.refTrajectory.q_ddot{obj.ctrl_counter} - obj.q_ddot_ext_est, obj.ctrl_counter);
+
+            % save the data
+            obj.cableForces{obj.ctrl_counter}           =   obj.f_cmd;
+        end
+        
+        % update state feedback for controller and save the data into
+        % obj.ctrl_trajectory
+        function controllerFeedbackUpdate(obj, ctrl_delta_t)
+            if (obj.simopt.use_FK_in_controller)
+                % if FK is used:
+                % 1. use q_fk_prev, q_d_fk_prev and the l_fk_prev to generate new q and q_dot
+                % 2. update q_fk_prev, q_d_fk_prev and the l_fk_prev
+                % 3. also update ctrl_trajectory
+                [obj.q_fk_prev_ctrl, obj.q_d_fk_prev_ctrl, ~] = ...
+                    obj.fkSolver.compute(obj.l, obj.l_fk_prev_ctrl, obj.model.cableModel.cableIndicesActive, obj.q_fk_prev_ctrl, obj.q_d_fk_prev_ctrl, ctrl_delta_t);
+                obj.l_fk_prev_ctrl = obj.l;
+                obj.ctrl_trajectory.q{obj.ctrl_counter}     =   obj.q_fk_prev_ctrl;
+                obj.ctrl_trajectory.q_dot{obj.ctrl_counter} =   obj.q_d_fk_prev_ctrl;
+            elseif (obj.simopt.use_ob_state_estimation)
+                % in this case the latest estimated state will be used in the controller
+                obj.ctrl_trajectory.q{obj.ctrl_counter}     =   obj.ob_trajectory.q{obj.ob_counter};
+                obj.ctrl_trajectory.q_dot{obj.ctrl_counter} =   obj.ob_trajectory.q_dot{obj.ob_counter};
+            else
+                % if FK is not used:
+                % directly take joint space variables from
+                % environment
+                obj.ctrl_trajectory.q{obj.ctrl_counter}     =   obj.trajectory.q{obj.sim_counter};
+                obj.ctrl_trajectory.q_dot{obj.ctrl_counter} =   obj.trajectory.q_dot{obj.sim_counter};
+            end
+            
+            % save FK trajectory if required
+            if (obj.simopt.forward_kinematics_debugging)
+                if (~obj.simopt.use_FK_in_controller)
+                    % do FK update iff it has not been done for the
+                    % controller yet
+                    [obj.q_fk_prev_ctrl, obj.q_d_fk_prev_ctrl, ~] = ...
+                        obj.fkSolver.compute(obj.l, obj.l_fk_prev_ctrl, obj.model.cableModel.cableIndicesActive, obj.q_fk_prev_ctrl, obj.q_d_fk_prev_ctrl, ctrl_delta_t);
+                end
+                obj.l_fk_prev_ctrl = obj.l;
+                obj.ctrl_fk_trajectory.q{obj.ctrl_counter}     =   obj.q_fk_prev_ctrl;
+                obj.ctrl_fk_trajectory.q_dot{obj.ctrl_counter} =   obj.q_d_fk_prev_ctrl;
+            end
+        end
+        
+        % function to do observer estimation update
+        function observerEstimationUpdate(obj, ob_delta_t)
+            % derive the feedback information for the observer
+            obj.observerFeedbackUpdate(ob_delta_t);
+            
+            % update the observer estimation
+            [q_est, q_dot_est, q_ddot_disturbance_est, wrench_disturbance_est]    =   ...
+                obj.observer.executeFunction(obj.ob_trajectory.q{obj.ob_counter}, obj.ob_trajectory.q_dot{obj.ob_counter}, obj.cableForces{obj.ctrl_counter}, zeros(obj.model.numDofs, 1), obj.ob_counter);
+            obj.w_ext_est           =   wrench_disturbance_est;
+            obj.q_ddot_ext_est      =   q_ddot_disturbance_est;
+            
+            % save the data
+            obj.ob_trajectory.q_est{obj.ob_counter}             =   q_est;
+            obj.ob_trajectory.q_dot_est{obj.ob_counter}         =   q_dot_est;
+            obj.ob_trajectory.w_ext{obj.ob_counter}             =   -obj.w_ext;
+            obj.ob_trajectory.w_ext_est{obj.ob_counter}         =   wrench_disturbance_est;
+            obj.ob_trajectory.q_ddot_ext{obj.ob_counter}        =   -obj.q_ddot_ext;
+            obj.ob_trajectory.q_ddot_ext_est{obj.ob_counter}    =   q_ddot_disturbance_est;
+        end
+        
+        % update state feedback for observer and save the data into
+        % obj.ob_trajectory
+        function observerFeedbackUpdate(obj, ob_delta_t)
+            if (obj.simopt.use_FK_in_observer)
+                % if FK is used:
+                % 1. use q_fk_prev, q_d_fk_prev and the l_fk_prev to generate new q and q_dot
+                % 2. update q_fk_prev, q_d_fk_prev and the l_fk_prev
+                % 3. also update ctrl_trajectory
+                [obj.q_fk_prev_ob, obj.q_d_fk_prev_ob, ~] = ...
+                    obj.fkSolver.compute(obj.l, obj.l_fk_prev_ob, obj.model.cableModel.cableIndicesActive, obj.q_fk_prev_ob, obj.q_d_fk_prev_ob, ob_delta_t);
+                obj.l_fk_prev_ob = obj.l;
+                obj.ob_trajectory.q{obj.ob_counter}     =   obj.q_fk_prev_ob;
+                obj.ob_trajectory.q_dot{obj.ob_counter} =   obj.q_d_fk_prev_ob;
+            else
+                % if FK is not used:
+                % directly take joint space variables from
+                % environment
+                obj.ob_trajectory.q{obj.ob_counter}     =   obj.trajectory.q{obj.sim_counter};
+                obj.ob_trajectory.q_dot{obj.ob_counter} =   obj.trajectory.q_dot{obj.sim_counter};
+            end
+
+            % save FK trajectory if required
+            if (obj.simopt.forward_kinematics_debugging)
+                if (~obj.simopt.use_FK_in_observer)
+                    % do FK update iff it has not been done for the
+                    % controller yet
+                    [obj.q_fk_prev_ob, obj.q_d_fk_prev_ob, ~] = ...
+                        obj.fkSolver.compute(obj.l, obj.l_fk_prev_ob, obj.model.cableModel.cableIndicesActive, obj.q_fk_prev_ob, obj.q_d_fk_prev_ob, ob_delta_t);
+                end
+                obj.l_fk_prev_ob = obj.l;
+                obj.ob_fk_trajectory.q{obj.ob_counter}     =   obj.q_fk_prev_ob;
+                obj.ob_fk_trajectory.q_dot{obj.ob_counter} =   obj.q_d_fk_prev_ob;
+            end
+        end
+        
+        % function to do forward dynamic update
+        function forwardDynamicUpdate(obj, skip_FD)
+            if (skip_FD)
+                % update sim_trajectory with current step data, no
+                % need to run FD
+                obj.trajectory.q{obj.sim_counter + 1}       =   obj.trajectory.q{obj.sim_counter};
+                obj.trajectory.q_dot{obj.sim_counter + 1}	=   obj.trajectory.q_dot{obj.sim_counter};
+                obj.trajectory.q_ddot{obj.sim_counter + 1}	=   obj.trajectory.q_ddot{obj.sim_counter};
+            else
+                % update sim_trajectory with new state from FD
+                % algorithm
+                [obj.trajectory.q{obj.sim_counter + 1}, obj.trajectory.q_dot{obj.sim_counter + 1}, obj.trajectory.q_ddot{obj.sim_counter + 1}, obj.true_model] = ...
+                    obj.fdSolver.compute(obj.trajectory.q{obj.sim_counter}, obj.trajectory.q_dot{obj.sim_counter}, obj.cableForces{obj.ctrl_counter}, obj.true_model.cableModel.cableIndicesActive, obj.w_ext, obj.timeVector(obj.sim_counter + 1) - obj.timeVector(obj.sim_counter), obj.true_model);
+                obj.trajectory.q_ddot{obj.sim_counter + 1}	=   obj.trajectory.q_ddot{obj.sim_counter};
+            end
+            obj.sim_counter = obj.sim_counter + 1;
+        end
+        
+        % function to do pre-update uncertainty update
+        function [skip_FD]  =   preUpdateUncertainyUpdate(obj, current_time)
+            % pre-update uncertainty update
+            skip_FD = false;
+            for i = 1:length(obj.uncertainties)
+                if(isa(obj.uncertainties{i},'ExternalWrenchUncertaintyBase'))
+                    [obj.w_ext] = obj.uncertainties{i}.applyWrechDisturbance(current_time);
+                    obj.w_ext
+                    obj.q_ddot_ext = obj.true_model.M\obj.w_ext;
+                end
+                if(isa(obj.uncertainties{i},'PoseLockUncertaintyBase'))
+                    [skip_FD] = obj.uncertainties{i}.applyPoseLock(current_time);
+                end
+            end
+        end
+        
+        % function to do post-update uncertainty update
+        function postUpdateUncertainyUpdate(obj, current_time)
+            % post-update uncertainty update
+            for i = 1:length(obj.uncertainties)
+                if(isa(obj.uncertainties{i},'NoiseUncertaintyBase'))
+                    [noise_x, ~] = obj.uncertainties{i}.applyFeedbackNoise(current_time);
+                    obj.l       =   obj.l + noise_x;
+                end
             end
         end
         
