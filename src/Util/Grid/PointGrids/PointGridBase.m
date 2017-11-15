@@ -3,7 +3,7 @@
 % Author        : Jonathan EDEN
 % Created       : 2015
 % Description    :
-classdef GridBase < handle
+classdef PointGridBase < handle
         
     properties (SetAccess = protected)
         n_dimensions        % The number of dimensions for the system

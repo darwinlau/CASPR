@@ -1,33 +1,19 @@
-
-
-
-
 classdef RayGraphGeneration < handle
-    
-    
     properties
-        
         model
         grid
         workspace            % Grid object for brute force workspace (input)
-        
         final_network
         uniq_line
         final_graph
     end
-    
-    
     methods
-        
         function w = RayGraphGeneration(model,grid,workspace)
             w.model         = model;
             w.workspace     = workspace;
             w.grid          = grid;
-        end
-        
-        
+        end        
         function run(obj,varargin)
-            
             if (nargin<2)
                 WeightCond=0;
                 ReadMode=0;
@@ -44,9 +30,7 @@ classdef RayGraphGeneration < handle
             textndigit='%12.12f';
             
             
-            matseglin=[];
             matseglin=obj.workspace.MatRays;
-            matnod=[];
             matnod=obj.workspace.MatNodeGrid;
             
             [sortcol,nsortcol]=sort(matnod(:,1));
@@ -70,14 +54,12 @@ classdef RayGraphGeneration < handle
                         else
                             inv_TF=1;
                         end
-                        curnet=[];
                         curnet=nchoosek(ncurconlin,2);
-                        [rowcurnet colcurnet]=size(curnet);
+                        [rowcurnet,~]=size(curnet);
                         curnet=[curnet,ones(rowcurnet,1)*inv_TF];
                         matnetlin=[matnetlin;curnet];
                     end
                     if mod(ituninod,itwritex)==0
-                        ituninod
                         matnetlin=unique([sort(matnetlin(:,1:2),2),matnetlin(:,3)],'rows') ;
                         dlmwrite([CASPR_configuration.LoadHomePath,'/WorkspaceRay/TempData/matnetlin.txt'],matnetlin,'precision',textndigit,'-append','delimiter',' ');
                         matnetlin=[];
@@ -89,7 +71,6 @@ classdef RayGraphGeneration < handle
                 finmatnetlin=unique([sort(finmatnetlin(:,1:2),2),finmatnetlin(:,3)],'rows') ;
                 dlmwrite([CASPR_configuration.LoadHomePath,'/WorkspaceRay/TempData/finmatnetlin.txt'],finmatnetlin,'precision',textndigit,'delimiter',' ');
             else
-                finmatnetlin=[];
                 finmatnetlin=dlmread([CASPR_configuration.LoadHomePath,'/WorkspaceRay/TempData/finmatnetlin.txt']);
             end
             
@@ -102,9 +83,7 @@ classdef RayGraphGeneration < handle
                 totGfilt=rmnode(totG,nonconlin);
                 dlmwrite([CASPR_configuration.LoadHomePath,'/WorkspaceRay/TempData/totGfilt.txt'],[totGfilt.Edges.EndNodes,totGfilt.Edges.Weight],'precision',textndigit,'delimiter',' ');
             else
-                uniqmatnetlin=[];
                 uniqmatnetlin=dlmread([CASPR_configuration.LoadHomePath,'/WorkspaceRay/TempData/uniqmatnetlin.txt']);
-                mat_totGfilt=[];
                 mat_totGfilt=dlmread([CASPR_configuration.LoadHomePath,'/WorkspaceRay/TempData/totGfilt.txt']);
                 totGfilt=graph(mat_totGfilt(:,1),mat_totGfilt(:,2),mat_totGfilt(:,3));
             end
@@ -113,10 +92,7 @@ classdef RayGraphGeneration < handle
             obj.final_graph=totGfilt;
         end
         
-
-
         function plotGraphWorkspace(obj)   %nsegvar= the division number of interval of variables
-            
             nedges=length(obj.final_graph.Edges.Weight);
             figure;
             LWidths = 1./(obj.final_graph.Edges.Weight);
@@ -127,17 +103,12 @@ classdef RayGraphGeneration < handle
             plgraf.MarkerSize = 0.1;
             colorbar
             set(gca,'xtick',[],'ytick',[])
-          
         end
         
-        
         function inv_TF=TF_Index(obj,magvar)
-            
             ncable=obj.model.numCables;
             numDofs=obj.model.numDofs;
             obj.model.update(magvar', zeros(numDofs,1), zeros(numDofs,1),zeros(numDofs,1));
- 
-            
             linprogf=ones(ncable,1);
             linprogA=[];
             linprogb=[];
@@ -148,31 +119,22 @@ classdef RayGraphGeneration < handle
             options=optimset('Display', 'off');
             optT = linprog(linprogf,linprogA,linprogb,linprogAeq,linprogbeq,linproglb,linprogub,[],options);
             inv_TF=max(optT)/min(optT);
-            
         end
         
-        
-        
-        
-        
         function [shortpath,listgrid,matpathvar,TFvect]=Path_Generation(obj,start_pose,end_pose)
-            
-            
               startvect=obj.grid.var2vect(start_pose);
               startnod=obj.grid.vect2nod(startvect);
               nstartnod=find(obj.workspace.MatNodeGrid(:,1)==startnod);
               startseglin=obj.workspace.MatNodeGrid(nstartnod(1),2);
-              [starttotGfilt,colling]=find(obj.uniq_line==startseglin);
+              [starttotGfilt,~]=find(obj.uniq_line==startseglin);
  
               finalvect=obj.grid.var2vect(end_pose);
               finalnod=obj.grid.vect2nod(finalvect);
               nfinalnod=find(obj.workspace.MatNodeGrid(:,1)==finalnod);
               finalseglin=obj.workspace.MatNodeGrid(nfinalnod(1),2);
-              [finaltotGfilt,colling]=find(obj.uniq_line==finalseglin);
+              [finaltotGfilt,~]=find(obj.uniq_line==finalseglin);
 
-              [shortpath,pathdist] = shortestpath(obj.final_graph,starttotGfilt,finaltotGfilt);
-            
-              
+              [shortpath,~] = shortestpath(obj.final_graph,starttotGfilt,finaltotGfilt);
               
               nvar=obj.model.numDofs;
               gridi=startnod;
@@ -209,23 +171,12 @@ classdef RayGraphGeneration < handle
               end             
               segvar=obj.grid.nod2vect(listgrid');
 
-              [n_path_grid,spare]=size(segvar);
+              [n_path_grid,~]=size(segvar);
               
               for itgridpath=1:n_path_grid
                   matpathvar(itgridpath,:)=obj.grid.getGridPoint(segvar(itgridpath,:));
                   TFvect(itgridpath,1)=1/obj.TF_Index( matpathvar(itgridpath,:));
-              end
-            
-        end
-        
-    
-        
+              end 
+        end       
     end
 end
-    
-    
-    
-    
-    
-    
-    

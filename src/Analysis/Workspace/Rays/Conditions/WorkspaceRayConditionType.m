@@ -1,0 +1,12 @@
+% Enum for the type of ray workspace condition
+%
+% Author        : Jonathan EDEN
+% Created       : 2017
+% Description   :
+classdef WorkspaceRayConditionType
+    enumeration 
+        WRENCH_CLOSURE
+        INTERFERENCE
+    end
+end
+

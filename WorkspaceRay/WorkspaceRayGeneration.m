@@ -19,8 +19,7 @@ classdef WorkspaceRayGeneration < handle
         % The constructor for the workspace simulator class.
         function w = WorkspaceRayGeneration(model,grid)
             w.model         = model;
-            w.grid          = grid;
-            
+            w.grid          = grid;            
         end
         
         
@@ -53,10 +52,17 @@ classdef WorkspaceRayGeneration < handle
                 dlmwrite([CASPR_configuration.LoadHomePath,'/WorkspaceRay/TempData/matseglin.txt'],matseglin);
                 dlmwrite([CASPR_configuration.LoadHomePath,'/WorkspaceRay/TempData/matnod.txt'],matnod);
                 while itnflexvar<=obj.grid.nflexvar
-                    curflexvar=obj.grid.listnflxvar(itnflexvar);
-                    CuruGrid= RayGridGeneration(obj.grid.q_begin,obj.grid.q_end,obj.grid.q_initial,obj.grid.nsegvar);
-                    CuruGrid.DimensionReduction(itnflexvar);
+                    curflexvar=obj.grid.listnflxvar(itnflexvar); 
+                    % Create the index to be using
+                    grid_index = true(obj.grid.nflexvar,1); grid_index(curflexvar) = false;
+                    CuruGrid= RayGridGeneration(obj.grid.q_begin(grid_index),obj.grid.q_end(grid_index),obj.grid.q_initial(grid_index),obj.grid.nsegvar(grid_index));
+                    % So it now has the grid 
+                    % For the new grid it determines the number of points
                     maxitconsvar=prod(CuruGrid.q_length);
+                    % This variable is a rounding of the number of
+                    % points/itwritex1
+                    % My guess is that this is placing an upper bound on
+                    % what can be written
                     divconsvar=fix(maxitconsvar/itwritex1);
                     while divitconsvar <= divconsvar+1
                         sitconsvar=(divitconsvar-1)*itwritex1+1;
@@ -65,22 +71,22 @@ classdef WorkspaceRayGeneration < handle
                             fitconsvar=maxitconsvar;
                         end
                         for itconsvar=sitconsvar:fitconsvar
-                            itconsvar;
                             cursegvar=CuruGrid.nod2vect(itconsvar);       %from nod2vect calculate the current segment of each variable---n=1--->>[0 0 0 ..]
-                            magconvar=CuruGrid.getGridPoint(cursegvar);
-                            admsrng=segment_computation(obj,curflexvar,magconvar,min_ray_percent);   %computing the range of the admissible range of last variable in wcw
-                            [curnseglin spare]=size(admsrng);                                %number of segment line
+                            magconvar=CuruGrid.getGridPoint(itconsvar);
+                            admsrng=segment_computation(obj,curflexvar,magconvar,min_ray_percent)   %computing the range of the admissible range of last variable in wcw
+                            [curnseglin,~]=size(admsrng);                                %number of segment line
                             if curnseglin>0
                                 matseglin=[matseglin;[ones(curnseglin,1)*[curflexvar magconvar cursegvar] admsrng(:,:)]];
                             end
                         end
-                        [nseglin spare]=size(matseglin);
+                        [nseglin,~]=size(matseglin);
+                        % What is this doing - so we look at the number of
+                        % segments and loop
                         for itnlin=1:nseglin
                             countlin=countlin+1;
                             lsegvarit=ceil((matseglin(itnlin,2*numDofs)-obj.grid.q_begin(curflexvar,1))/obj.grid.delta_q(curflexvar));                   %the lower segment number of the variable of the line segment
                             usegvarit=fix((matseglin(itnlin,2*numDofs+1)-obj.grid.q_begin(curflexvar,1))/obj.grid.delta_q(curflexvar));                 %the upper segment number of the variable of the line segment
                             matcursegvar=[ones(usegvarit-lsegvarit+1,1)*matseglin(itnlin,(numDofs+1):(numDofs+curflexvar-1)) (lsegvarit:usegvarit)' ones(usegvarit-lsegvarit+1,1)*matseglin(itnlin,(numDofs+curflexvar):(numDofs+numDofs-1))];
-                            
                             
                             nodlist=obj.grid.vect2nod(matcursegvar)';
                             
@@ -91,10 +97,7 @@ classdef WorkspaceRayGeneration < handle
                             curmatnod(:,1)=nodlist';
                             curmatnod(:,2)=ones(countnod,1)*countlin;
                             matnod=[matnod;curmatnod];
-                            
-                            
                         end
-                        
                         
                         dlmwrite([CASPR_configuration.LoadHomePath,'/WorkspaceRay/TempData/matseglin.txt'],newmatseglin,'precision',textndigit,'-append','delimiter',' ');
                         dlmwrite([CASPR_configuration.LoadHomePath,'/WorkspaceRay/TempData/matnod.txt'],matnod,'precision',textndigit,'-append','delimiter',' ');
@@ -103,9 +106,7 @@ classdef WorkspaceRayGeneration < handle
                         newmatseglin=[];
                         matnod=[];
                         
-                        
                         divitconsvar=divitconsvar+1;
-                        fitconsvar
                     end
                     divitconsvar=1;
                     itnflexvar=itnflexvar+1;
@@ -121,7 +122,7 @@ classdef WorkspaceRayGeneration < handle
             else
                 obj.MatRays=dlmread('WorkspaceRay/TempData/matseglin.txt');
                 obj.MatNodeGrid=dlmread('WorkspaceRay/TempData/matnod.txt');
-                [nrow ncol]=size(obj.MatRays);
+                [nrow,~]=size(obj.MatRays);
                 obj.numRays=nrow;
             end
         end
@@ -142,7 +143,7 @@ classdef WorkspaceRayGeneration < handle
             end
             flxvarlinspace=linspace(obj.grid.q_begin(curflexvar),obj.grid.q_end(curflexvar),maxdeg+1);
             cab_comb=nchoosek(1:numCables,numDofs+1);
-            [numcomb spar]=size(cab_comb);
+            [numcomb,~]=size(cab_comb);
             matf=zeros(maxdeg+1,numcomb*(numDofs+1));
             for it1=1:maxdeg+1
                 magvar=[magconvar(1:curflexvar-1) flxvarlinspace(it1) magconvar(curflexvar:end)];
@@ -235,9 +236,6 @@ classdef WorkspaceRayGeneration < handle
             admsrng=fununion(admsrng);
         end
         
-        
-        
-        
         function plotRayWorkspace(obj,plot_axis)   %nsegvar= the division number of interval of variables
             
             numDofs=obj.model.numDofs;
@@ -309,10 +307,3 @@ classdef WorkspaceRayGeneration < handle
         end
     end
 end
-
-
-
-
-
-
-

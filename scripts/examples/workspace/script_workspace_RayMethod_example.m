@@ -11,7 +11,8 @@ modelObj        =   model_config.getModel(cable_set_id);
 
 
 q_begin         =   modelObj.bodyModel.q_min; q_end = modelObj.bodyModel.q_max; q_initial=modelObj.bodyModel.q_initial;  
-
+modelObj.bodyModel.q_min 
+modelObj.bodyModel.q_max
 nsegvar= [25;25];      % number of discritization on each axis. if the user desire to ignor discritization on one axis its corresponding discritiaztion number can be set to zero
 uGrid           =   RayGridGeneration(q_begin,q_end,q_initial,nsegvar); 
 
@@ -20,13 +21,13 @@ uGrid           =   RayGridGeneration(q_begin,q_end,q_initial,nsegvar);
 wsim            =   WorkspaceRayGeneration(modelObj,uGrid);
 wsim.run(2,0);    % the input can be empty or two digits. the first indicate the percentage of ray length which are ignored in workspace. 
                   % the second one is the readmode. if readmode is one then the result of computation in the data file is read without repeating the computation    
-wsim.plotRayWorkspace([1,2]);     % the inout is a 1x2 or 1x3 vector of axes for plotting.
-gsim   =  RayGraphGeneration(modelObj,uGrid,wsim); 
-gsim.run(1,0)       % the input can be empty or two digits. the first indicate weighted/unweighted graph. 0 means unweighted and 1 means weighted based on tension factor
-                    % the second one is the readmode. if readmode is one then the result of computation in the data file is read without repeating the computation    
-gsim.plotGraphWorkspace
-start_pose=[0.05,0.1] ;  end_pose=[0.42,0.63] ;
-[shortpath,listgrid,matpathvar,TFvect]=gsim.Path_Generation(start_pose,end_pose);
+% wsim.plotRayWorkspace([1,2]);     % the inout is a 1x2 or 1x3 vector of axes for plotting.
+% gsim   =  RayGraphGeneration(modelObj,uGrid,wsim); 
+% gsim.run(1,0)       % the input can be empty or two digits. the first indicate weighted/unweighted graph. 0 means unweighted and 1 means weighted based on tension factor
+%                     % the second one is the readmode. if readmode is one then the result of computation in the data file is read without repeating the computation    
+% gsim.plotGraphWorkspace
+% start_pose=[0.05,0.1] ;  end_pose=[0.42,0.63] ;
+% [shortpath,listgrid,matpathvar,TFvect]=gsim.Path_Generation(start_pose,end_pose);
 
 
 %          4-4_CDPR_planar
@@ -103,12 +104,12 @@ start_pose=[0.05,0.1] ;  end_pose=[0.42,0.63] ;
 
 
 
-figure
-
-subplot(2,3,1);
-plot(matpathvar(:,1));
-subplot(2,3,2);
-plot(matpathvar(:,2));
+% figure
+% 
+% subplot(2,3,1);
+% plot(matpathvar(:,1));
+% subplot(2,3,2);
+% plot(matpathvar(:,2));
 % subplot(2,3,3);
 % plot(matpathvar(:,3));
 % subplot(2,3,4);
@@ -117,8 +118,8 @@ plot(matpathvar(:,2));
 % plot(matpathvar(:,5));
 % subplot(2,3,6);
 % plot(matpathvar(:,6));
-figure
-plot(TFvect);
+% figure
+% plot(TFvect);
 
 
 

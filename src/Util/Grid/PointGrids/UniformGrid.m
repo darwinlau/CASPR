@@ -3,7 +3,7 @@
 % Author        : Jonathan EDEN
 % Created       : 2015
 % Description    :
-classdef UniformGrid < GridBase
+classdef UniformGrid < PointGridBase
 
     properties (SetAccess = private)
         q_begin     % The lower bound on grid generalised coordinates
@@ -26,7 +26,7 @@ classdef UniformGrid < GridBase
             id.setNDimensions(size(q_begin,1));
             for i=1:id.n_dimensions
                 if(delta_q(i)~=0)
-                    id.q_length(i) = floor((id.q_end(i) - id.q_begin(i))/id.delta_q(i) + 1);
+                    id.q_length(i) = round((id.q_end(i) - id.q_begin(i))/id.delta_q(i))+1;
                 else
                     id.q_length(i) = 1;
                 end

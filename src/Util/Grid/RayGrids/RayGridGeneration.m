@@ -5,7 +5,7 @@ classdef RayGridGeneration < handle
         q_begin     % The lower bound on grid generalised coordinates
         q_end       % The upper bound on grid generalised coordinates
         q_initial   % the value of the variable regarding to the axis with zero discritization number 
-        nsegvar     % the vector of discritization numebr each axes
+        nsegvar     % the vector of discritization number each axes
         delta_q     % The step size in generalised coordinates
         q_length    % The length of each index
         listnflxvar % the varible of the axes with non-zero discritization number
@@ -38,7 +38,7 @@ classdef RayGridGeneration < handle
             id.q_length=id.nsegvar+1;  
             
             id.listnflxvar=linspace(1,nvar,nvar)';
-            [zerorow zerocol]=find(id.nsegvar==0);
+            [zerorow,~]=find(id.nsegvar==0);
             for itzirid=1:length(zerorow)
                 id.listnflxvar(id.listnflxvar==zerorow(itzirid))=[];
             end
@@ -59,19 +59,13 @@ classdef RayGridGeneration < handle
             obj.q_length(curflexvar,:)=[];    
 %             obj.listnflxvar(curflexvar,:)=[];
 %             obj.nflexvar=obj.nflexvar-1;
-            
-            
-            
         end
 
-        
-        
-        
         function cursegvar=nod2vect(obj,nodlist)  %nsegvar= the division number of interval of variables
             nodlist=nodlist-1;                 % a list of number of nodes for which the vector
             % of number of segment of each variable is computed
             nvar=length(obj.nsegvar);
-            [nodnum,spare]=size(nodlist);      %just to find the number of current variables
+            [nodnum,~]=size(nodlist);      %just to find the number of current variables
             weight=prod((obj.nsegvar(1:nvar)+1));  % weight  of binary to decimal
             
             for itnvar=nvar:-1:1%:nvar
@@ -80,11 +74,10 @@ classdef RayGridGeneration < handle
                 nodlist=rem(nodlist,weight);
             end
         end  
-
         
         function nodlist=vect2nod(obj,cursegvar)   %nsegvar= the division number of interval of variables
             nvar=length(obj.nsegvar);
-            [nodnum,spare]=size(cursegvar);
+            [nodnum,~]=size(cursegvar);
             weight=1;
             nodlist=zeros(nodnum,1);
             for itnvar=1:nvar%:-1:1
@@ -93,27 +86,17 @@ classdef RayGridGeneration < handle
             end
             nodlist=nodlist+1;
         end   
-       
         
         function matsegvar=var2vect(obj,listvar)
             [nrow,ncol]=size(listvar);
             matsegvar=zeros(nrow,ncol);
             colzdel=find(obj.delta_q~=0);
             matsegvar(:,colzdel)=round((listvar(:,colzdel)-ones(nrow,1)*obj.q_begin(colzdel,1)')./(ones(nrow,1)*obj.delta_q(colzdel,1)'));
-            
         end
         
-        
-        
-        
-
         % Obtain the grid point from a given index
         function q = getGridPoint(obj,cursegvar)
-         
             q=obj.q_begin'+obj.delta_q'.*cursegvar;       %the current magnitude of the variable which are constant
-  
         end
-        
-        
     end
 end
