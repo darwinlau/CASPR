@@ -536,7 +536,7 @@ classdef JointTrajectory < TrajectoryBase
                     time_const_speed = ceil(distance_const_speed/vmax/time_step)*time_step;
                 end
             end
-            time_vector = time_step : time_step : time_acc_s+time_acc_e+time_const_speed;
+            time_vector = 0 : time_step : time_acc_s+time_acc_e+time_const_speed;
             
             q = zeros(n_dof, length(time_vector));
             q_dot = zeros(n_dof, length(time_vector));

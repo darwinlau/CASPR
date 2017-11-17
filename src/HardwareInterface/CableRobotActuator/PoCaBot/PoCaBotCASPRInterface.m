@@ -18,6 +18,13 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
         dynamixel_direction_factor_position
         dynamixel_direction_factor_current
         dynamixel_direction_reversed
+        
+        dynamixel_marks_per_turn = 4096;
+        maxCurrent = 648;% nominal value.
+        maxTorque = 1.5;%N.m
+        KpP_scalefactor = 128;
+        KpI_scalefactor = 65536;
+        KpD_scalefactor = 16;
     end
     
     properties (Access = public)
@@ -261,7 +268,7 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
         %
         % For application of dynamixels, this funciton is used to specify
         % the initial length from the motor model outlet point to the
-        % attachment point on the end effector.
+        % correspondnig attachment point on the end effector.
         % The size of l0 here should be DXL_NUM X 1. The elements in l0 is
         % the absolute length, so they should be positive.
         function lengthInitialSend(obj, l0)
@@ -275,8 +282,19 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
             for i = 1:obj.DXL_NUM
                 obj.accessories(i).setInitState(deltaLengths_init(i));
             end
-            [~, ret] = obj.sync_read(obj.ADDR_XH_PRESENT_POSITION, obj.LEN_XH_PRESENT_POSITION);
-            obj.dynamixel_position_initial = ret;
+        end
+        
+        % Method to send the initial motor position information to the
+        % hardware interface and hardware (as appropriate)
+        %
+        % For application of dynamixels, this funciton is used to specify
+        % the initial  motor position which is the real position where
+        % end effector is in its initial position and the cable is under no
+        % tension.
+        % The size of p0 here should be DXL_NUM X 1. The elements in p0 is
+        % the absolute position.
+        function motorPosInitialSend(obj,p0)
+            obj.dynamixel_position_initial = p0;
         end
         
         function motorPositionCommandSend(obj, p_cmd)
@@ -291,7 +309,7 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
         function [length] = lengthFeedbackRead(obj)
             [bState, ret] = obj.sync_read(obj.ADDR_XH_PRESENT_POSITION, obj.LEN_XH_PRESENT_POSITION);
             if(bState)
-                deltaAngle = (ret - obj.dynamixel_position_initial)/4096*2*pi;
+                deltaAngle = (ret - obj.dynamixel_position_initial)/obj.dynamixel_marks_per_turn*2*pi;
                 deltalength = zeros(size(deltaAngle));
                 for i = 1:obj.DXL_NUM
                     deltalength(i) = obj.dynamixel_direction_factor_position * obj.accessories(i).getDeltaLength(deltaAngle(i));
@@ -424,15 +442,38 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
         % This function is used when the motor is working in position mode
         % with the KpI set to zero.
         % offset: the offset length of the cable caused by KpP.
-        function [offset] = getCableOffsetByTensionByMotorAngleError(obj, tension)
+        function [offset] = getCableOffsetByTension(obj, tension)
             % when the supplied voltage is 12V, the stall torque from the
             % manual is 2.5N.m
-            maxLoad = 2.5;%UNIT:N.m; This value of 1.5 N.m was obtained by our experiment.
-            maxTension = maxLoad/obj.accessories(1).radius;
-            current = tension/maxTension*648;
-            Kp = obj.KpP/128;% KPP = KPP(TBL) / 128
+            % obj.maxTorque = 1.5    UNIT:N.m; This value of 1.5 N.m was obtained by our experiment.
+            maxTension = obj.maxTorque/obj.accessories(1).radius;
+            current = tension/maxTension*obj.maxCurrent;
+            Kp = obj.KpP/obj.KpP_scalefactor;% KPP = KPP(TBL) / 128
             errAngle = current./Kp;
-            offset = -1 * errAngle/4096*obj.accessories(1).len_per_circle;
+            offset = -1 * errAngle/obj.dynamixel_marks_per_turn.*[obj.accessories(:).len_per_circle]';
+        end
+        
+        % This function is used when the motor is working in current mode
+        % Tension: The approximating force derived from the nominal
+        % current.
+        function [tension] = getCableTensionByCurrent(obj, current)
+            maxTension = obj.maxTorque./[obj.accessories(:).radius]';
+            tension = current/obj.maxCurrent*maxTension;
+        end
+        
+        % When initialize the system, there is a time when all the cables
+        % are tensioned and then we can put the end effector at the
+        % specified initial position. This method is to get the motor
+        % position offset produced when the cables are tensioned initially.
+        % The input argument 'deltaLengh' with size (DXL_NUM x 1) and with 
+        % all entries positive is the 
+        % cable length offset caused when the cables are tensioned.
+        function [motorPosOffset] = getMotorPosInitOffset(obj, deltaLength)
+            if(length(deltaLength) ~= obj.DXL_NUM)
+                obj.close();
+                CASPR_log.Error('Input argument error, please check the size of the argument deltaLength and try again');
+            end
+            motorPosOffset = obj.dynamixel_direction_factor_position*deltaLength./[obj.accessories(:).len_per_circle]'*obj.dynamixel_marks_per_turn;
         end
     end
     
@@ -450,7 +491,7 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
             for i = 1:obj.DXL_NUM
                 angle_delta(i) = obj.accessories(i).getDeltaAngle(delta_lengths(i));
             end
-            dynamixel_position_delta = obj.dynamixel_direction_factor_position * angle_delta/2/pi*4096;
+            dynamixel_position_delta = obj.dynamixel_direction_factor_position * angle_delta/2/pi*obj.dynamixel_marks_per_turn;
             dynamixel_position_cmd = obj.dynamixel_position_initial + dynamixel_position_delta';
         end
         
@@ -459,7 +500,7 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
                 obj.close();
                 CASPR_log.Error('Input argument error, please check the size of the argument angle_delta and try again');
             end
-            pos = angle/2/pi*4096;
+            pos = angle/2/pi*obj.dynamixel_marks_per_turn;
         end
         
         % cmd could be TORQUE_ENABLE or TORQUE_DISABLE
