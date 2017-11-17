@@ -20,10 +20,29 @@ classdef CASPR_configuration
             model_config = load('CASPR_environment.mat', 'CASPR_GUI_dev_model_config');
             GUI_dev_model_config = model_config.CASPR_GUI_dev_model_config;            
         end
-        % Set the GUI_dev_model_config
-        function SetDevModelConfig(CASPR_GUI_dev_model_config)
-            % Load the environment
-            save('CASPR_environment.mat','CASPR_GUI_dev_model_config','-append');
+        % Load reuse_compiled flag
+        function reuse_compiled = LoadReuseCompiled()
+            model_config = load('CASPR_environment.mat', 'reuse_compiled');
+            reuse_compiled = model_config.reuse_compiled;
         end
+        % Set the reuse_compiled flag
+        function SetReuseCompiled(value)            
+            load('CASPR_environment.mat');
+            config_details = whos(matfile('CASPR_environment.mat'));            
+            reuse_compiled = value;
+            home_path = CASPR_configuration.LoadHomePath();
+            save([home_path,'/data/config/CASPR_environment.mat'], config_details.name);
+            CASPR_log.Info(['Reuse_compiled flag set to ',num2str(value)]);
+        end
+        % Set the GUI_dev_model_config
+        function SetDevModelConfig(value)
+            load('CASPR_environment.mat');
+            config_details = whos(matfile('CASPR_environment.mat'));            
+            CASPR_GUI_dev_model_config = value;
+            home_path = CASPR_configuration.LoadHomePath();
+            save([home_path,'/data/config/CASPR_environment.mat'], config_details.name);
+            CASPR_log.Info(['Reuse_compiled flag set to ',num2str(value)]);
+        end
+        
     end
 end

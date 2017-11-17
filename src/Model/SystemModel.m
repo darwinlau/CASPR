@@ -23,6 +23,7 @@ classdef SystemModel < handle
         bodyModel               % SystemModelBodies object
         cableModel              % SystemModelCables object
         modelMode               % The mode of the model
+        filesCompiled           % Flag indicating whether files are compiled
     end
 
     properties (Constant)
@@ -111,18 +112,29 @@ classdef SystemModel < handle
             if((nargin == 2)||(model_mode == ModelModeType.DEFAULT))
                 b               =   SystemModel();
                 b.modelMode     =   ModelModeType.DEFAULT;
-                b.bodyModel     =   SystemModelBodies.LoadXmlObj(body_xmlobj,b.modelMode);
-                b.cableModel    =   SystemModelCables.LoadXmlObj(cable_xmlobj, b.bodyModel,b.modelMode);
+                b.bodyModel     =   SystemModelBodies.LoadXmlObj(body_xmlobj,b.modelMode);                
+                b.cableModel    =   SystemModelCables.LoadXmlObj(cable_xmlobj, b.bodyModel,b.modelMode);                
                 b.update(b.bodyModel.q_initial, b.bodyModel.q_dot_default, b.bodyModel.q_ddot_default, zeros(b.numDofs,1));
-            elseif(model_mode == ModelModeType.SYMBOLIC)
+            elseif(model_mode == ModelModeType.SYMBOLIC )
                 b               =   SystemModel();
-                b.modelMode     =   model_mode;
-                b.bodyModel     =   SystemModelBodies.LoadXmlObj(body_xmlobj,b.modelMode);
-                b.cableModel    =   SystemModelCables.LoadXmlObj(cable_xmlobj, b.bodyModel,b.modelMode);
+                b.modelMode     =   ModelModeType.SYMBOLIC;
+                b.bodyModel     =   SystemModelBodies.LoadXmlObj(body_xmlobj,b.modelMode);                
+                b.cableModel    =   SystemModelCables.LoadXmlObj(cable_xmlobj, b.bodyModel,b.modelMode);                
                 % Create symbolic variables
                 q = sym('q',[b.numDofs,1]); q_d = sym('q_d',[b.numDofs,1]);
-                q_dd = sym('q_dd',[b.numDofs,1]); w_ext = sym('w_ext',[b.numDofs,1]);
-                b.update(q, q_d, q_dd, w_ext);
+                q_dd = sym('q_dd',[b.numDofs,1]); w_ext = sym('w_ext',[b.numDofs,1]);                               
+                b.update(q, q_d, q_dd, w_ext);  
+            elseif(model_mode == ModelModeType.COMPILED)
+                b               =   SystemModel();
+                b.modelMode     =   ModelModeType.COMPILED;
+                b.bodyModel     =   SystemModelBodies.LoadXmlObj(body_xmlobj,b.modelMode);                
+                b.cableModel    =   SystemModelCables.LoadXmlObj(cable_xmlobj, b.bodyModel,b.modelMode);                
+                % Create symbolic variables
+                q = sym('q',[b.numDofs,1]); q_d = sym('q_d',[b.numDofs,1]);
+                q_dd = sym('q_dd',[b.numDofs,1]); w_ext = sym('w_ext',[b.numDofs,1]);                               
+                b.setFilesCompiled(false); 
+                b.setModelMode(model_mode);
+                b.update(q, q_d, q_dd, w_ext);                
             end
         end
     end
@@ -136,10 +148,13 @@ classdef SystemModel < handle
         % cables of the system with the joint state (q, q_dot and q_ddot)
         function update(obj, q, q_dot, q_ddot, w_ext)
             % Assert that the body model uses the correct 
+            
             CASPR_log.Assert(length(q) == obj.bodyModel.numDofVars && length(q_dot) == obj.bodyModel.numDofs ...
                 && length(q_ddot) == obj.bodyModel.numDofs && length(w_ext) == obj.bodyModel.numDofs,'Incorrect input to update function');
-            obj.bodyModel.update(q, q_dot, q_ddot, w_ext);
-            obj.cableModel.update(obj.bodyModel);
+            
+            obj.bodyModel.update(q, q_dot, q_ddot, w_ext);  
+            
+            obj.cableModel.update(obj.bodyModel);   
         end
         
         % Function that updates the inertia parameters
@@ -231,10 +246,7 @@ classdef SystemModel < handle
         end
 
         function value = get.cableLengths(obj)
-            value = zeros(obj.numCables,1);
-            for i = 1:obj.numCables
-                value(i) = obj.cableModel.cables{i}.length;
-            end
+            value = obj.cableModel.lengths;            
         end
 
         function value = get.cableLengthsDot(obj)
@@ -257,8 +269,8 @@ classdef SystemModel < handle
             value = obj.bodyModel.q_ddot;
         end
 
-        function value = get.L(obj)
-            value = obj.cableModel.V*obj.bodyModel.W;
+        function value = get.L(obj)            
+            value = obj.cableModel.V*obj.bodyModel.W;                      
         end
         
         function value = get.L_active(obj)
@@ -423,6 +435,81 @@ classdef SystemModel < handle
                 CASPR_log.Assert(((size(I_bounds,1)==1)&&(length(I_bounds) == 12*obj.numLinks)),'Inertia must be of size 12 * number of lins');
                 obj.bodyModel.addInertiaUncertainty(m_bounds,I_bounds);
             end
+        end
+        
+        % Model Mode Related Functions %        
+        
+        % set model mode
+        function setModelMode(obj, model_mode)
+            obj.modelMode = model_mode;
+            obj.bodyModel.setModelMode(model_mode);
+            obj.cableModel.setModelMode(model_mode);
+        end       
+        
+        % set filesCompiled Flag
+        function setFilesCompiled(obj, value)
+            obj.filesCompiled = value;
+            obj.bodyModel.setFilesCompiled(value);
+            obj.cableModel.setFilesCompiled(value);
+        end
+        
+        % System Compiling Procedure in COMPILED mode
+        % - New folders are created in model_config to store the compiled
+        % body and cable .m files
+        function compile(obj)           
+            % Define the paths for storing the compiled files
+            model_config_path = CASPR_configuration.LoadModelConfigPath();
+            tmp_path = [model_config_path, '/tmp_compilations'];
+            tmp_body_path = [tmp_path, '/Bodies'];
+            tmp_cable_path = [tmp_path, '/Cables'];
+           
+            % Remove all the existing compiled files to ensure all compiled
+            % files are up-to-date
+            if exist(tmp_path)
+                warning('off','all');  
+                try
+                    rmdir(tmp_path, 's');
+                    CASPR_log.Info('Previously compiled files are removed.');
+                catch
+                    CASPR_log.Warn('You might not have the permission to remove previously compiled files');
+                    CASPR_log.Warn('Please check your permission before running COMPILED mode.');
+                    return;
+                end
+                warning('on','all');
+            else
+                % Make folders
+                mkdir(tmp_path);  
+            end            
+            CASPR_log.Info('New files will be compiled.');
+                      
+            if ~exist(tmp_body_path)
+                mkdir(tmp_body_path);              
+            end
+            if ~exist(tmp_cable_path)
+                mkdir(tmp_cable_path);              
+            end                        
+            CASPR_log.Info('Created Folders.');
+            
+            % Body Variables Compilations
+            CASPR_log.Info('Start Body Compilations...');
+            obj.bodyModel.compile(tmp_body_path);
+            CASPR_log.Info('Finished Body Compilations.');
+            % Cable Variables Compilations
+            CASPR_log.Info('Start Cable Compilations...');
+            obj.cableModel.compile(tmp_cable_path, obj.bodyModel);
+            CASPR_log.Info('Finished Cable Compilations.');
+            % System Variables Compilations
+            CASPR_log.Info('Start System Compilation...');  
+            % Currently only L is needed.
+            % If more system variables are needed in the future, a separate
+            % function handling these variables might be prefered.
+            CASPR_log.Info('- Compiling L...');            
+            matlabFunction(obj.L, 'File', strcat(tmp_path, "/compile_L"), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});
+            CASPR_log.Info('Finished L Compilation.');  
+            
+            % Add the compiled files to the path
+            addpath(genpath(tmp_path));
+            CASPR_log.Info('Finished All Compilations.\n');
         end
     end
 end

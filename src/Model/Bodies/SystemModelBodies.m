@@ -57,7 +57,7 @@ classdef SystemModelBodies < handle
         W                       % W = P*S : 6p x n matrix representing mapping \dot{\mathbf{x}} = W \dot{\mathbf{q}}
         J     = [];             % J matrix representing relationship between generalised coordinate velocities and operational space coordinates
         J_dot = [];             % Derivative of J
-        T     = [];             % Projection of operational coordinates
+        T     = [];             % Projection of operational coordinates        
 
         % Gradient terms
         W_grad          = []; % The gradient tensor of the W matrix
@@ -70,7 +70,7 @@ classdef SystemModelBodies < handle
         x_dot                   % Absolute velocities
         x_ddot                  % Absolute accelerations (x_ddot = W(q)*q_ddot + C_a(q,q_dot))
         C_a                     % Relationship between body and joint accelerations \ddot{\mathbf{x}} = W \ddot{\mathbf{q}} + C_a
-
+        
         % Mass matrix
         massInertiaMatrix = [];       % Mass-inertia 6p x 6p matrix
 
@@ -90,6 +90,9 @@ classdef SystemModelBodies < handle
         G = [];
         W_e = [];
         A = [];
+        
+        % Function for update
+        update;
 
         % Indices for ease of computation
         qIndexInit                          % A vector consisting of the first index in q to each joint
@@ -98,6 +101,7 @@ classdef SystemModelBodies < handle
 
         % Flags
         modelMode                           % The model mode
+        filesCompiled                       % whether files are compiled
     end
 
     properties (Dependent)
@@ -127,6 +131,7 @@ classdef SystemModelBodies < handle
 
     properties
         occupied                     % An object to keep flags for whether or not matrices are occupied
+        compiled                     % An object to keep flags for whether or not the type of variables are compiled
     end
 
     methods
@@ -147,7 +152,7 @@ classdef SystemModelBodies < handle
                     num_dof_actuated = num_dof_actuated + bodies{k}.joint.numDofs;
                 end
             end
-            b.modelMode = model_mode;
+            b.setModelMode(model_mode);
             b.bodies = bodies;
             b.numDofs = num_dofs;
             b.numDofVars = num_dof_vars;
@@ -177,22 +182,28 @@ classdef SystemModelBodies < handle
             % Connects the objects of the system and create the
             % connectivity and body path graphs
             b.formConnectiveMap();
-            b.occupied = BodyFlags();
+            b.occupied = BodyFlags();  
+            b.occupied.dynamics = true;
+            b.createMassInertiaMatrix();  
         end
 
         % Update the kinematics of the body model for the entire
         % system using the generalised coordinates, velocity and
-        % acceleration. This update function should also be called to
+        % acceleration. 3 update functions are set for the 3 model modes.
+        % These update function should also be called to
         % update the entire system, rather than calling the update function
-        % for each body directly.
-        function update(obj, q, q_dot, q_ddot, w_ext)
+        % for each body directly.  
+        
+        % Update function under DEFAULT mode
+        % - update using numerical methods
+        function defaultUpdate(obj, q, q_dot, q_ddot, w_ext)              
             % Assign q, q_dot, q_ddot
             obj.q = q;
             obj.q_dot = q_dot;
             obj.q_ddot = q_ddot;
             obj.W_e = w_ext;
-            is_symbolic = obj.modelMode == ModelModeType.SYMBOLIC;
-
+            is_symbolic = obj.modelMode==ModelModeType.SYMBOLIC;
+           
             % Update each body first
             index_vars = 1;
             index_dofs = 1;
@@ -214,8 +225,10 @@ classdef SystemModelBodies < handle
                 % Determine rotation matrix
                 % Determine joint location
                 if parent_link_num > 0
-                    obj.bodies{k}.R_0k = obj.bodies{parent_link_num}.R_0k*obj.bodies{k}.joint.R_pe;
-                    obj.bodies{k}.r_OP = obj.bodies{k}.joint.R_pe.'*(obj.bodies{parent_link_num}.r_OP + obj.bodies{k}.r_Parent + obj.bodies{k}.joint.r_rel);
+                    parent_R_0k = obj.bodies{parent_link_num}.R_0k;
+                    R_pe = obj.bodies{k}.joint.R_pe;                    
+                    obj.bodies{k}.R_0k = parent_R_0k*R_pe; 
+                    obj.bodies{k}.r_OP = R_pe.'*(obj.bodies{parent_link_num}.r_OP + obj.bodies{k}.r_Parent + obj.bodies{k}.joint.r_rel);
                 else
                     obj.bodies{k}.R_0k = obj.bodies{k}.joint.R_pe;
                     obj.bodies{k}.r_OP = obj.bodies{k}.joint.R_pe.'*(obj.bodies{k}.r_Parent + obj.bodies{k}.joint.r_rel);
@@ -230,41 +243,50 @@ classdef SystemModelBodies < handle
                 end
             end
 
-            % Set S (joint state matrix) and S_dot
+            % Set S (joint state matrix) and S_dot            
             index_dofs = 1;
             obj.S = MatrixOperations.Initialise([6*obj.numLinks,obj.numDofs],is_symbolic);
             obj.S_dot = MatrixOperations.Initialise([6*obj.numLinks,obj.numDofs],is_symbolic);
-            for k = 1:obj.numLinks
+            for k = 1:obj.numLinks                
                 obj.S(6*k-5:6*k, index_dofs:index_dofs+obj.bodies{k}.joint.numDofs-1) = obj.bodies{k}.joint.S;
                 obj.S_dot(6*k-5:6*k, index_dofs:index_dofs+obj.bodies{k}.joint.numDofs-1) = obj.bodies{k}.joint.S_dot;
                 index_dofs = index_dofs + obj.bodies{k}.joint.numDofs;
-            end
-
-            % Set P (relationship with joint propagation)
+            end            
+            
+            % P
             obj.P = MatrixOperations.Initialise([6*obj.numLinks,6*obj.numLinks],is_symbolic);
             for k = 1:obj.numLinks
                 body_k = obj.bodies{k};
+                k_R_0k = body_k.R_0k;
+                
                 for a = 1:k
-                    body_a = obj.bodies{a};
-                    R_ka = body_k.R_0k.'*body_a.R_0k;
-                    Pak = obj.bodiesPathGraph(a,k)*[R_ka*body_a.joint.R_pe.' -R_ka*MatrixOperations.SkewSymmetric(-body_a.r_OP + R_ka.'*body_k.r_OG); ...
-                        zeros(3,3) R_ka];
-                    obj.P(6*k-5:6*k, 6*a-5:6*a) = Pak;
+                    body_a = obj.bodies{a}; 
+                    a_R_0k = body_a.R_0k;                    
+                    R_ka = k_R_0k.'*a_R_0k;
+                    Pak_1 = R_ka*body_a.joint.R_pe.';
+                    r_OP = body_a.r_OP;
+                    r_OG = body_k.r_OG;
+                    Pak_2_1 = MatrixOperations.SkewSymmetric(-r_OP + R_ka.'*r_OG);
+                    Pak_2 = -R_ka*Pak_2_1;
+                    Pak = obj.bodiesPathGraph(a,k)*[Pak_1 Pak_2; ...
+                        zeros(3,3) R_ka];                     
+                    obj.P(6*k-5:6*k, 6*a-5:6*a) = Pak;                    
                 end
-            end
-
-            % W = P*S
-            obj.W = obj.P*obj.S;
+            end        
             
-            % Determine x_dot
-            obj.x_dot = obj.W*obj.q_dot;
+            % W = P*S              
+            obj.W = obj.P*obj.S;                      
+       
+            % Determine x_dot              
+            obj.x_dot = obj.W*obj.q_dot;          
+            
             % Extract absolute velocities
             for k = 1:obj.numLinks
                 obj.bodies{k}.v_OG = obj.x_dot(6*k-5:6*k-3);
                 obj.bodies{k}.w = obj.x_dot(6*k-2:6*k);
             end
-
-            % Determine x_ddot
+            
+            % C_a
             ang_mat = MatrixOperations.Initialise([6*obj.numLinks,6*obj.numLinks],is_symbolic);
             for k = 1:obj.numLinks
                 kp = obj.bodies{k}.parentLinkId;
@@ -273,7 +295,7 @@ classdef SystemModelBodies < handle
                 else
                     w_kp = zeros(3,1);
                 end
-                w_k = obj.bodies{k}.w;
+                w_k = obj.bodies{k}.w;                            
                 ang_mat(6*k-5:6*k, 6*k-5:6*k) = [2*MatrixOperations.SkewSymmetric(w_kp) zeros(3,3); zeros(3,3) MatrixOperations.SkewSymmetric(w_k)];
             end
 
@@ -288,101 +310,442 @@ classdef SystemModelBodies < handle
                 obj.C_a(6*k-5:6*k-3) = obj.C_a(6*k-5:6*k-3) + cross(obj.bodies{k}.w, cross(obj.bodies{k}.w, obj.bodies{k}.r_G));
             end
             obj.x_ddot = obj.P*obj.S*obj.q_ddot + obj.C_a;
-
+            
             % Extract absolute accelerations
             for k = 1:obj.numLinks
                 obj.bodies{k}.a_OG = obj.x_ddot(6*k-5:6*k-3);
                 obj.bodies{k}.w_dot = obj.x_ddot(6*k-2:6*k);
-            end
-
+            end                     
+            
             % The operational space variables
             if(obj.occupied.operational_space)
-                % Now determine the operational space vector y
-                obj.y = MatrixOperations.Initialise([obj.numOperationalDofs,1],is_symbolic); l = 1;
-                for k = 1:length(obj.operationalSpaceBodyIndices)
-                    body_index = obj.operationalSpaceBodyIndices(k);
-                    n_y = obj.bodies{body_index}.numOperationalDofs;
-                    obj.y(l:l+n_y-1) = obj.bodies{body_index}.operationalSpace.extractOperationalSpace(obj.bodies{body_index}.r_OY,obj.bodies{body_index}.R_0k);
-                    l = l + n_y;
-                end
-
-                % Set Q (relationship with joint propagation for operational space)
-                Q = MatrixOperations.Initialise([6*obj.numLinks,6*obj.numLinks],is_symbolic);
-                for k = 1:obj.numLinks
-                    body_k = obj.bodies{k};
-                    for a = 1:k
-                        body_a = obj.bodies{a};
-                        R_ka = body_k.R_0k.'*body_a.R_0k;
-                        Qak = [body_k.R_0k,zeros(3);zeros(3),body_k.R_0k]*(obj.bodiesPathGraph(a,k)*[R_ka*body_a.joint.R_pe.' -R_ka*MatrixOperations.SkewSymmetric(-body_a.r_OP + R_ka.'*body_k.r_OY); ...
-                            zeros(3,3) R_ka]);
-                        Q(6*k-5:6*k, 6*a-5:6*a) = Qak;
-                    end
-                end
-                % J = T*Q*S
-                obj.J = obj.T*Q*obj.S;
-                % Determine y_dot
-                obj.y_dot = obj.J*obj.q_dot;
-
-                % Determine J_dot
-                temp_j_dot = Q*obj.S_dot + Q*ang_mat*obj.S;
-                for k = 1:obj.numLinks
-                    for a = 1:k
-                        ap = obj.bodies{a}.parentLinkId;
-                        if (ap > 0 && obj.bodiesPathGraph(a,k))
-                            temp_j_dot(6*k-5:6*k-3,:) = temp_j_dot(6*k-5:6*k-3,:) - ...
-                                obj.bodies{k}.R_0k*obj.bodies{k}.R_0k.'*obj.bodies{ap}.R_0k*MatrixOperations.SkewSymmetric(obj.bodies{ap}.w)*MatrixOperations.SkewSymmetric(obj.bodies{a}.r_Parent + obj.bodies{a}.joint.r_rel)*obj.W(6*ap-2:6*ap,:);
-                        end
-                    end
-                    temp_j_dot(6*k-5:6*k-3,:) = temp_j_dot(6*k-5:6*k-3,:) - obj.bodies{k}.R_0k*MatrixOperations.SkewSymmetric(obj.bodies{k}.w)*MatrixOperations.SkewSymmetric(obj.bodies{k}.r_y)*obj.W(6*k-2:6*k,:);
-                end
-                obj.J_dot = obj.T*temp_j_dot;
-                obj.y_ddot = obj.J_dot*q_dot + obj.J*obj.q_ddot;
-            end
-
+                obj.updateOperationalSpace();                        
+            end            
+            
             % The dynamics variables
             if(obj.occupied.dynamics)
                 obj.updateDynamics();
             end
-
+            
             % The Hessian Variables
             if(obj.occupied.hessian)
                 obj.updateHessian();
-            end
-
+            end  
+        
             % The linearisation variables
             if(obj.occupied.linearisation)
                 obj.updateLinearisation();
+            end    
+        end
+        
+        % Update function for preparation of compilation
+        % - Symbolic expressions are calculated for the variables
+        % - Simplification takes a long time, but it makes compilation
+        % easier and more chance to be successfully done
+        function compiledPreparationUpdate(obj, q, q_dot, q_ddot, w_ext)
+            % Assign q, q_dot, q_ddot
+            obj.q = q;
+            obj.q_dot = q_dot;
+            obj.q_ddot = q_ddot;
+            obj.W_e = w_ext;
+            is_symbolic = true;
+            
+            % Update each body first
+            index_vars = 1;
+            index_dofs = 1;
+            for k = 1:obj.numLinks
+                q_k = q(index_vars:index_vars+obj.bodies{k}.joint.numVars-1);
+                q_dot_k = q_dot(index_dofs:index_dofs+obj.bodies{k}.joint.numDofs-1);
+                q_ddot_k = q_ddot(index_dofs:index_dofs+obj.bodies{k}.joint.numDofs-1);
+                obj.bodies{k}.update(q_k, q_dot_k, q_ddot_k);
+                index_vars = index_vars + obj.bodies{k}.joint.numVars;
+                index_dofs = index_dofs + obj.bodies{k}.joint.numDofs;
             end
+            
+            % Now the global system updates
+            % Set bodies kinematics (rotation matrices)
+            CASPR_log.Info('Body Kinematics: ');
+            for k = 1:obj.numLinks
+                % Displaying the update status of the k-th link
+                CASPR_log.Info(['- k: ',num2str(k)]);
+                parent_link_num = obj.bodies{k}.parentLinkId;
+                CASPR_log.Assert(parent_link_num < k, 'Problem with numbering of links with parent and child');
+
+                % Determine rotation matrix
+                % Determine joint location
+                if parent_link_num > 0                    
+                    parent_R_0k = obj.bodies{parent_link_num}.R_0k;
+                    R_pe = obj.bodies{k}.joint.R_pe;       
+                    % Simplifying internal elements of big rotation
+                    % matrices
+                    parent_R_0k = simplify(parent_R_0k, 'Step', k*20);
+                    R_pe = simplify(R_pe, 'Step', k*20);
+                    obj.bodies{k}.R_0k = parent_R_0k*R_pe;                     
+                    obj.bodies{k}.R_0k = simplify(obj.bodies{k}.R_0k, 'Step', k*20);
+                    obj.bodies{k}.r_OP = R_pe.'*(obj.bodies{parent_link_num}.r_OP + obj.bodies{k}.r_Parent + obj.bodies{k}.joint.r_rel);
+                else                    
+                    obj.bodies{k}.R_0k = obj.bodies{k}.joint.R_pe;
+                    obj.bodies{k}.r_OP = obj.bodies{k}.joint.R_pe.'*(obj.bodies{k}.r_Parent + obj.bodies{k}.joint.r_rel);
+                    obj.bodies{k}.R_0k = simplify(obj.bodies{k}.R_0k, 'Step', k*20);
+                end
+                % Determine absolute position of COG
+                obj.bodies{k}.r_OG  = obj.bodies{k}.r_OP + obj.bodies{k}.r_G;
+                % Determine absolute position of link's ending position
+                obj.bodies{k}.r_OPe = obj.bodies{k}.r_OP + obj.bodies{k}.r_Pe;
+                % Determine absolute position of the operational space
+                if(~isempty(obj.bodies{k}.operationalSpace))
+                    obj.bodies{k}.r_OY  = obj.bodies{k}.r_OP + obj.bodies{k}.r_y;
+                end
+            end
+
+            % Set S (joint state matrix) and S_dot           
+            CASPR_log.Info('Calculating S...');               
+            CASPR_log.Info('Calculating S_dot...');  
+            index_dofs = 1;
+            obj.S = MatrixOperations.Initialise([6*obj.numLinks,obj.numDofs],is_symbolic);
+            obj.S_dot = MatrixOperations.Initialise([6*obj.numLinks,obj.numDofs],is_symbolic);
+            for k = 1:obj.numLinks                
+                obj.S(6*k-5:6*k, index_dofs:index_dofs+obj.bodies{k}.joint.numDofs-1) = obj.bodies{k}.joint.S;
+                obj.S_dot(6*k-5:6*k, index_dofs:index_dofs+obj.bodies{k}.joint.numDofs-1) = obj.bodies{k}.joint.S_dot;
+                index_dofs = index_dofs + obj.bodies{k}.joint.numDofs;
+            end            
+            
+            % Set P
+            CASPR_log.Info('Calculating P...'); 
+            obj.P = MatrixOperations.Initialise([6*obj.numLinks,6*obj.numLinks],is_symbolic);
+            for k = 1:obj.numLinks        
+                % As k increases, the rotation matrices get more complex
+                % Thus, need more simplification steps
+                body_k = obj.bodies{k};
+                k_R_0k = body_k.R_0k;
+                k_R_0k = simplify(k_R_0k, 'Step', k*20);             
+                
+                for a = 1:k
+                    CASPR_log.Info(['- k: ',num2str(k),' -a: ',num2str(a)']);
+                    body_a = obj.bodies{a}; 
+                    a_R_0k = body_a.R_0k;
+                    a_R_0k = simplify(a_R_0k, 'Step', a*20); 
+                    
+                    R_ka = k_R_0k.'*a_R_0k;                      
+                    R_ka = simplify(R_ka, 'Step', k*20);
+                    
+                    Pak_1 = R_ka*body_a.joint.R_pe.';
+                    r_OP = body_a.r_OP;
+                    r_OG = body_k.r_OG;                   
+                    r_OP = simplify(r_OP, 'Step', k*20);
+                    r_OG = simplify(r_OG, 'Step', k*20);  
+                    
+                    Pak_2_1 = MatrixOperations.SkewSymmetric(-r_OP + R_ka.'*r_OG);
+
+                    Pak_2 = -R_ka*Pak_2_1;                 
+                        
+                    Pak_1 = simplify(Pak_1);                        
+                    Pak_2 = simplify(Pak_2);                        
+                    
+                    Pak = obj.bodiesPathGraph(a,k)*[Pak_1 Pak_2; ...
+                        zeros(3,3) R_ka]; 
+                    
+                    obj.P(6*k-5:6*k, 6*a-5:6*a) = Pak;                    
+                end
+            end        
+            
+            % W = P*S              
+            CASPR_log.Info('Calculating W...');            
+            obj.W = obj.P*obj.S;              
+            obj.W = simplify(obj.W, 'Step', 50);                       
+       
+            % Determine x_dot              
+            CASPR_log.Info('Calculating x_dot...');            
+            obj.x_dot = obj.W*obj.q_dot;          
+            
+            % Extract absolute velocities
+            for k = 1:obj.numLinks
+                obj.bodies{k}.v_OG = obj.x_dot(6*k-5:6*k-3);
+                obj.bodies{k}.w = obj.x_dot(6*k-2:6*k);
+            end
+            
+            % C_a
+            CASPR_log.Info('Calculating C_a...');            
+            ang_mat = MatrixOperations.Initialise([6*obj.numLinks,6*obj.numLinks],is_symbolic);
+            for k = 1:obj.numLinks
+                kp = obj.bodies{k}.parentLinkId;
+                if (kp > 0)
+                    w_kp = obj.bodies{kp}.w;
+                else
+                    w_kp = zeros(3,1);
+                end
+                w_k = obj.bodies{k}.w;                
+                w_k = simplify(w_k);                             
+                ang_mat(6*k-5:6*k, 6*k-5:6*k) = [2*MatrixOperations.SkewSymmetric(w_kp) zeros(3,3); zeros(3,3) MatrixOperations.SkewSymmetric(w_k)];
+            end
+
+            obj.C_a = obj.P*obj.S_dot*obj.q_dot + obj.P*ang_mat*obj.S*obj.q_dot;
+            for k = 1:obj.numLinks
+                for a = 1:k
+                    ap = obj.bodies{a}.parentLinkId;
+                    if (ap > 0 && obj.bodiesPathGraph(a,k))
+                        obj.C_a(6*k-5:6*k-3) = obj.C_a(6*k-5:6*k-3) + obj.bodies{k}.R_0k.'*obj.bodies{ap}.R_0k*cross(obj.bodies{ap}.w, cross(obj.bodies{ap}.w, obj.bodies{a}.r_Parent + obj.bodies{a}.joint.r_rel));
+                    end
+                end
+                obj.C_a(6*k-5:6*k-3) = obj.C_a(6*k-5:6*k-3) + cross(obj.bodies{k}.w, cross(obj.bodies{k}.w, obj.bodies{k}.r_G));
+            end 
+
+            obj.x_ddot = obj.P*obj.S*obj.q_ddot + obj.C_a;           
+            
+            % Extract absolute accelerations
+            for k = 1:obj.numLinks
+                obj.bodies{k}.a_OG = obj.x_ddot(6*k-5:6*k-3);
+                obj.bodies{k}.w_dot = obj.x_ddot(6*k-2:6*k);
+            end                     
+            
+            % The operational space variables
+            if(obj.occupied.operational_space)
+                obj.updateOperationalSpace();                      
+            end
+                        
+            % The dynamics variables
+            if(obj.occupied.dynamics)
+                obj.updateDynamics();
+            end
+            
+            % The Hessian Variables
+            if(obj.occupied.hessian)
+                obj.updateHessian();
+            end  
+        
+            % The linearisation variables
+            if(obj.occupied.linearisation)
+                obj.updateLinearisation();
+            end    
+        end
+        
+        % Update function under COMPILED mode
+        % - Update using compiled files       
+        function compiledUpdate(obj, q, q_dot, q_ddot, w_ext)    
+            
+            obj.q = q;
+            obj.q_dot = q_dot;
+            obj.q_ddot = q_ddot;
+            obj.W_e = w_ext;
+            
+            obj.C = compile_C(q, q_dot, q_ddot, w_ext);   
+            obj.G = compile_G(q, q_dot, q_ddot, w_ext);           
+            obj.M = compile_M(q, q_dot, q_ddot, w_ext);            
+            obj.W = compile_W(q, q_dot, q_ddot, w_ext);
+            obj.x_ddot = compile_x_ddot(q, q_dot, q_ddot, w_ext);
+            obj.x_dot = compile_x_dot(q, q_dot, q_ddot, w_ext);
+            
+            if obj.occupied.operational_space                
+                obj.J = compile_J(q, q_dot, q_ddot, w_ext);
+                obj.J_dot = compile_J_dot(q, q_dot, q_ddot, w_ext);
+                obj.y = compile_y(q, q_dot, q_ddot, w_ext);
+                obj.y_ddot = compile_y_ddot(q, q_dot, q_ddot, w_ext);
+                obj.y_dot = compile_y_dot(q, q_dot, q_ddot, w_ext);                
+            end               
+        end
+        
+        % Update the operational space variables
+        function updateOperationalSpace(obj)
+            is_symbolic = obj.modelMode==ModelModeType.SYMBOLIC; 
+            is_preparation = obj.modelMode==ModelModeType.COMPILED && ~obj.filesCompiled;            
+            
+            if is_preparation
+               is_symbolic = true;
+            end
+            if is_preparation
+                % Now determine the operational space vector y 
+                CASPR_log.Info('Calculating y...'); 
+                
+                obj.y = MatrixOperations.Initialise([obj.numOperationalDofs,1],is_symbolic); l = 1;
+                for k = 1:length(obj.operationalSpaceBodyIndices)
+                    body_index = obj.operationalSpaceBodyIndices(k);
+                    n_y = obj.bodies{body_index}.numOperationalDofs;
+                    R_0k = obj.bodies{body_index}.R_0k;
+                    R_0k = simplify(R_0k, 'Step', k*50);
+                    obj.bodies{body_index}.r_OY  = obj.bodies{body_index}.r_OP + obj.bodies{body_index}.r_y;
+                    obj.y(l:l+n_y-1) = obj.bodies{body_index}.operationalSpace.extractOperationalSpace(obj.bodies{body_index}.r_OY,R_0k);
+                    l = l + n_y;
+                end           
+                obj.y = simplify(obj.y);
+                
+                
+                % ang_mat
+                ang_mat = MatrixOperations.Initialise([6*obj.numLinks,6*obj.numLinks],is_symbolic);
+                for k = 1:obj.numLinks
+                    kp = obj.bodies{k}.parentLinkId;
+                    if (kp > 0)
+                        w_kp = obj.bodies{kp}.w;
+                    else
+                        w_kp = zeros(3,1);
+                    end
+                    w_k = obj.bodies{k}.w;                
+                    w_k = simplify(w_k);                             
+                    ang_mat(6*k-5:6*k, 6*k-5:6*k) = [2*MatrixOperations.SkewSymmetric(w_kp) zeros(3,3); zeros(3,3) MatrixOperations.SkewSymmetric(w_k)];
+                end
+
+                % Set Q (relationship with joint propagation for operational space) 
+                CASPR_log.Info('Calculating Q...');                
+                Q = MatrixOperations.Initialise([6*obj.numLinks,6*obj.numLinks],is_symbolic);
+                for k = 1:obj.numLinks
+                    body_k = obj.bodies{k};
+                    k_R_0k = body_k.R_0k;
+                    k_R_0k = simplify(k_R_0k, 'Step', k*50);
+                    for a = 1:k
+                        body_a = obj.bodies{a};
+                        a_R_0k = body_a.R_0k;
+                        a_R_0k = simplify(a_R_0k, 'Step', k*20);                        
+                        R_ka = k_R_0k.'*a_R_0k;                        
+                        R_ka = simplify(R_ka, 'Step', k*20);                       
+                        Qak = [k_R_0k,zeros(3);zeros(3),k_R_0k]*(obj.bodiesPathGraph(a,k)*[R_ka*body_a.joint.R_pe.' -R_ka*MatrixOperations.SkewSymmetric(-body_a.r_OP + R_ka.'*body_k.r_OY); ...
+                            zeros(3,3) R_ka]);
+                        Q(6*k-5:6*k, 6*a-5:6*a) = Qak;
+                    end
+                end  
+                Q = simplify(Q);
+
+                % J = T*Q*S
+                CASPR_log.Info('Calculating J...');
+                obj.J = obj.T*Q*obj.S; 
+
+                % Determine y_dot
+                CASPR_log.Info('Calculating y_dot...');
+                obj.y_dot = obj.J*obj.q_dot;
+
+                % Determine J_dot
+                CASPR_log.Info('Calculating J_dot...');
+                temp_j_dot = Q*obj.S_dot + Q*ang_mat*obj.S;
+                for k = 1:obj.numLinks
+                    k_R_0k = obj.bodies{k}.R_0k;                    
+                    k_R_0k = simplify(k_R_0k, 'Step', k*50);                    
+                    for a = 1:k
+                        ap = obj.bodies{a}.parentLinkId;
+                        if (ap > 0 && obj.bodiesPathGraph(a,k))
+                            temp_j_dot(6*k-5:6*k-3,:) = temp_j_dot(6*k-5:6*k-3,:) - ...
+                                k_R_0k*k_R_0k.'*obj.bodies{ap}.R_0k*MatrixOperations.SkewSymmetric(obj.bodies{ap}.w)*MatrixOperations.SkewSymmetric(obj.bodies{a}.r_Parent + obj.bodies{a}.joint.r_rel)*obj.W(6*ap-2:6*ap,:);
+                        end
+                    end
+                    temp_j_dot(6*k-5:6*k-3,:) = temp_j_dot(6*k-5:6*k-3,:) - obj.bodies{k}.R_0k*MatrixOperations.SkewSymmetric(obj.bodies{k}.w)*MatrixOperations.SkewSymmetric(obj.bodies{k}.r_y)*obj.W(6*k-2:6*k,:);
+                end
+                obj.J_dot = obj.T*temp_j_dot;                 
+                obj.J_dot = simplify(obj.J_dot);
+
+                % Determine y_ddot
+                CASPR_log.Info('Calculating y_ddot...');
+                obj.y_ddot = obj.J_dot*obj.q_dot + obj.J*obj.q_ddot;  
+            else
+                % Now determine the operational space vector y                 
+                obj.y = MatrixOperations.Initialise([obj.numOperationalDofs,1],is_symbolic); l = 1;
+                for k = 1:length(obj.operationalSpaceBodyIndices)
+                    body_index = obj.operationalSpaceBodyIndices(k);
+                    n_y = obj.bodies{body_index}.numOperationalDofs;
+                    R_0k = obj.bodies{body_index}.R_0k; 
+                    obj.bodies{body_index}.r_OY  = obj.bodies{body_index}.r_OP + obj.bodies{body_index}.r_y;
+                    obj.y(l:l+n_y-1) = obj.bodies{body_index}.operationalSpace.extractOperationalSpace(obj.bodies{body_index}.r_OY,R_0k);
+                    l = l + n_y;
+                end
+                
+                % ang_mat
+                ang_mat = MatrixOperations.Initialise([6*obj.numLinks,6*obj.numLinks],is_symbolic);
+                for k = 1:obj.numLinks
+                    kp = obj.bodies{k}.parentLinkId;
+                    if (kp > 0)
+                        w_kp = obj.bodies{kp}.w;
+                    else
+                        w_kp = zeros(3,1);
+                    end
+                    w_k = obj.bodies{k}.w;    
+                    ang_mat(6*k-5:6*k, 6*k-5:6*k) = [2*MatrixOperations.SkewSymmetric(w_kp) zeros(3,3); zeros(3,3) MatrixOperations.SkewSymmetric(w_k)];
+                end
+                % Set Q (relationship with joint propagation for operational space)                
+                Q = MatrixOperations.Initialise([6*obj.numLinks,6*obj.numLinks],is_symbolic);
+                for k = 1:obj.numLinks
+                    body_k = obj.bodies{k};
+                    k_R_0k = body_k.R_0k;
+                    
+                    for a = 1:k
+                        body_a = obj.bodies{a};                       
+                        R_ka = k_R_0k.'*body_a.R_0k;                        
+                        Qak = [k_R_0k,zeros(3);zeros(3),k_R_0k]*(obj.bodiesPathGraph(a,k)*[R_ka*body_a.joint.R_pe.' -R_ka*MatrixOperations.SkewSymmetric(-body_a.r_OP + R_ka.'*body_k.r_OY); ...
+                            zeros(3,3) R_ka]);
+                        Q(6*k-5:6*k, 6*a-5:6*a) = Qak;
+                    end
+                end 
+               
+                % J = T*Q*S
+                obj.J = obj.T*Q*obj.S; 
+                
+                % Determine y_dot
+                obj.y_dot = obj.J*obj.q_dot;
+                
+                % Determine J_dot
+                temp_j_dot = Q*obj.S_dot + Q*ang_mat*obj.S;
+                for k = 1:obj.numLinks
+                    k_R_0k = obj.bodies{k}.R_0k;
+                    
+                    for a = 1:k
+                        ap = obj.bodies{a}.parentLinkId;
+                        if (ap > 0 && obj.bodiesPathGraph(a,k))
+                            temp_j_dot(6*k-5:6*k-3,:) = temp_j_dot(6*k-5:6*k-3,:) - ...
+                                k_R_0k*k_R_0k.'*obj.bodies{ap}.R_0k*MatrixOperations.SkewSymmetric(obj.bodies{ap}.w)*MatrixOperations.SkewSymmetric(obj.bodies{a}.r_Parent + obj.bodies{a}.joint.r_rel)*obj.W(6*ap-2:6*ap,:);
+                        end
+                    end
+                    temp_j_dot(6*k-5:6*k-3,:) = temp_j_dot(6*k-5:6*k-3,:) - obj.bodies{k}.R_0k*MatrixOperations.SkewSymmetric(obj.bodies{k}.w)*MatrixOperations.SkewSymmetric(obj.bodies{k}.r_y)*obj.W(6*k-2:6*k,:);
+                end
+                obj.J_dot = obj.T*temp_j_dot;                 
+                
+                % Determine y_ddot
+                obj.y_ddot = obj.J_dot*obj.q_dot + obj.J*obj.q_ddot;  
+            end             
         end
 
         % Update the dynamics of the body model for the entire
         % system using the generalised coordinates, velocity and
         % acceleration. This update function is only called when a dynamics
         % object has been used.
-        function updateDynamics(obj)
-            % Body equation of motion terms
+        function updateDynamics(obj)             
+            is_symbolic = obj.modelMode==ModelModeType.SYMBOLIC;            
+            is_preparation = obj.modelMode==ModelModeType.COMPILED && ~obj.filesCompiled;            
+            
+            if is_preparation
+               is_symbolic = true;
+               CASPR_log.Info('Calculating MCG_b...');
+            end
+            % Body equation of motion terms           
             obj.M_b = obj.massInertiaMatrix*obj.W;
             obj.C_b = obj.massInertiaMatrix*obj.C_a;
-            obj.G_b = MatrixOperations.Initialise([6*obj.numLinks,1],obj.modelMode == ModelModeType.SYMBOLIC);
+            obj.G_b = MatrixOperations.Initialise([6*obj.numLinks,1],is_symbolic);
             for k = 1:obj.numLinks
                 body_k = obj.bodies{k};
+                R_0k = body_k.R_0k;
+                if is_preparation
+                    R_0k = simplify(R_0k, 'Step', k*50);
+                end
                 obj.C_b(6*k-2:6*k) = obj.C_b(6*k-2:6*k) + cross(body_k.w, body_k.I_G*body_k.w);
-                obj.G_b(6*k-5:6*k-3) = body_k.R_0k.'*[0; 0; -body_k.m*SystemModel.GRAVITY_CONSTANT];
+                obj.G_b(6*k-5:6*k-3) = R_0k.'*[0; 0; -body_k.m*SystemModel.GRAVITY_CONSTANT];
+            end  
+            if is_preparation
+                obj.M_b = simplify(obj.M_b);
+                obj.C_b = simplify(obj.C_b);
+                obj.G_b = simplify(obj.G_b);
             end
-
-            % Joint space equation of motion terms
+           
+            % Joint space equation of motion terms 
+            if is_preparation
+               CASPR_log.Info('Calculating MCG...');
+            end
             obj.M =   obj.W.' * obj.M_b;
             obj.C =   obj.W.' * obj.C_b;
-            obj.G = - obj.W.' * obj.G_b;
-            
+            obj.G = - obj.W.' * obj.G_b;            
+           
             % Operational space equation of motion terms
-            if(obj.occupied.operational_space)
+            % It takes 'forever' to calculate the symbolic M_y...
+            if(obj.occupied.operational_space && ~is_symbolic)                
                 obj.M_y = inv(obj.J*inv(obj.M)*obj.J'); %#ok<MINV>
                 Jpinv   = obj.J'/(obj.J*obj.J');
                 obj.C_y = Jpinv'*obj.C - obj.M_y*obj.J_dot*obj.q_dot;
                 obj.G_y = Jpinv'*obj.G;
-            end
-        end
+            end            
+        end        
         
         % Update the hessian of the body model for the entire
         % system using the generalised coordinates, velocity and
@@ -393,7 +756,8 @@ classdef SystemModelBodies < handle
             % S_grad*P
             % In the interest of saving memory blockwise computation will
             % be used in place of storing complete gradient tensors
-            is_symbolic = obj.modelMode == ModelModeType.SYMBOLIC;
+            is_symbolic = obj.modelMode == ModelModeType.SYMBOLIC;            
+           
             obj.W_grad = MatrixOperations.Initialise([6*obj.numLinks,obj.numDofs,obj.numDofs],is_symbolic);
             % At the moment I will separate the two loops
             for k = 1:obj.numLinks
@@ -404,14 +768,14 @@ classdef SystemModelBodies < handle
                     P_ka = obj.P(6*k-5:6*k, 6*a-5:6*a);
                     % S_Grad component
                     % Add P \nabla S
-					obj.W_grad(6*k-5:6*k,index_a_dofs:index_a_dofs+body_dofs-1,index_a_dofs:index_a_dofs+body_dofs-1) = obj.W_grad(6*k-5:6*k,index_a_dofs:index_a_dofs+body_dofs-1,index_a_dofs:index_a_dofs+body_dofs-1) + TensorOperations.LeftMatrixProduct(P_ka,S_a_grad,is_symbolic);
-					% P_grad component
+                    obj.W_grad(6*k-5:6*k,index_a_dofs:index_a_dofs+body_dofs-1,index_a_dofs:index_a_dofs+body_dofs-1) = obj.W_grad(6*k-5:6*k,index_a_dofs:index_a_dofs+body_dofs-1,index_a_dofs:index_a_dofs+body_dofs-1) + TensorOperations.LeftMatrixProduct(P_ka,S_a_grad,is_symbolic);
+                    % P_grad component
                     P_ka_grad = obj.compute_Pka_grad(k,a);
                     % Add \nabla P S
                     obj.W_grad(6*k-5:6*k,index_a_dofs:index_a_dofs+body_dofs-1,1:obj.numDofs) = obj.W_grad(6*k-5:6*k,index_a_dofs:index_a_dofs+body_dofs-1,1:obj.numDofs) + TensorOperations.RightMatrixProduct(P_ka_grad,obj.S(6*a-5:6*a, index_a_dofs:index_a_dofs+body_dofs-1),is_symbolic);
                     index_a_dofs = index_a_dofs + body_dofs;
                 end
-            end
+            end                      
         end
 
         % Update the linearisation of the body model for the entire
@@ -424,6 +788,7 @@ classdef SystemModelBodies < handle
                 obj.occupied.linearisation = false;
             else
                 is_symbolic = obj.modelMode == ModelModeType.SYMBOLIC;
+                
                 % Store the transpose gradient as this will be reused.
                 W_t_grad = TensorOperations.Transpose(obj.W_grad,[1,2],is_symbolic);
                 % M_grad
@@ -954,10 +1319,10 @@ classdef SystemModelBodies < handle
         end
 
         function W_grad = get.W_grad(obj)
-%             if(~obj.occupied.hessian)
-%                 obj.occupied.hessian = true;
-%                 obj.updateHessian();
-%             end
+            if(~obj.occupied.hessian)
+                obj.occupied.hessian = true;
+                obj.updateHessian();
+            end
             W_grad = obj.W_grad;
         end
 
@@ -1064,6 +1429,70 @@ classdef SystemModelBodies < handle
             for k = 1:obj.numOperationalSpaces
                 operationalNumDofs(k) = obj.bodies{obj.operationalSpaceBodyIndices(k)}.operationalSpace.numOperationalDofs;
             end
+        end
+        
+       
+        % Model Mode Related Functions %        
+        
+        % set update function
+        function setupdate(obj, model_mode)  
+           if model_mode==ModelModeType.COMPILED
+               if obj.filesCompiled
+                   % When compiled files are available
+                   obj.update = @obj.compiledUpdate;
+               else
+                   % Preparation for compilations
+                   obj.update = @obj.compiledPreparationUpdate;
+               end   
+           else
+               % DEFAULT and SYMBOLIC 
+               obj.update = @obj.defaultUpdate;
+           end
+        end
+        % set model mode
+        function setModelMode(obj, model_mode)
+            obj.modelMode = model_mode;  
+            obj.setupdate(model_mode);
+        end      
+        % set files compiled flag
+        function setFilesCompiled(obj, value)
+            obj.filesCompiled = value;
+        end   
+        
+        % Compiling body variables under COMPILED mode
+        % - Symbolic Variables are compiled into .m files and saved to the
+        % path
+        function compile(obj, path)  
+            % A flag keeping record of what kind of variables are compiled
+            obj.compiled = BodyFlags();
+            % Jacobians
+            CASPR_log.Info('- Compiling Jacobians...');
+            matlabFunction(obj.W, 'File', strcat(path, "/compile_W"), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});
+            
+            % Operational space
+            if(obj.occupied.operational_space)
+                CASPR_log.Info('- Compiling Operational Space Variables...');
+                matlabFunction(obj.y, 'File', strcat(path, "/compile_y"), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});                
+                matlabFunction(obj.y_dot, 'File', strcat(path, "/compile_y_dot"), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});                
+                matlabFunction(obj.y_ddot, 'File', strcat(path, "/compile_y_ddot"), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});                
+                matlabFunction(obj.J, 'File', strcat(path, "/compile_J"), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});
+                matlabFunction(obj.J_dot, 'File', strcat(path, "/compile_J_dot"), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});
+                obj.compiled.operational_space = true;
+            end
+            
+            % Absolute CoM velocities and accelerations (linear and angular)
+            CASPR_log.Info('- Compiling Velocities and Accelerations...');            
+            matlabFunction(obj.x_dot, 'File', strcat(path, "/compile_x_dot"), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
+            matlabFunction(obj.x_ddot, 'File', strcat(path, "/compile_x_ddot"), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
+            
+            % Dynamics
+            if(obj.occupied.dynamics)
+                CASPR_log.Info('- Compiling Dynamics Variables...');               
+                matlabFunction(obj.M, 'File', strcat(path, "/compile_M"), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
+                matlabFunction(obj.C, 'File', strcat(path, "/compile_C"), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
+                matlabFunction(obj.G, 'File', strcat(path, "/compile_G"), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
+                obj.compiled.dynamics = true;               
+            end            
         end
     end
 
