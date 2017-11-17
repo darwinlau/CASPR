@@ -34,7 +34,6 @@ classdef PoCaBotExperiment < ExperimentBase
         % for the STEALTH-BRAID cable, its elongation is 3.2825e-5/N
         elongation_per_Newton = 0.0006; % 
         
-        
         l_feedback_traj    % Temporary variable to store things for now
         l_cmd_traj         % Temporary variable to store things for now
         time_abs_traj
@@ -333,7 +332,8 @@ classdef PoCaBotExperiment < ExperimentBase
             obj.hardwareInterface.detectDevice();
             
             % this procedure is to regulate the pose of the endeffector and
-            % make sure that the cable is under the tension.
+            % make sure that the cable is under the tension(the very 
+            % tension to keep the cable from slack).
             obj.hardwareInterface.switchOperatingMode2CURRENT();
             obj.hardwareInterface.systemOnSend();
             
