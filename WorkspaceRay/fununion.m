@@ -1,9 +1,8 @@
 
-
 function matunion=fununion(mat)
 if ~isempty(mat)
-    [nrow ncolumn]=size(mat);
-    [fcolsor indsort]=sort(mat,1);
+    [nrow,~]=size(mat);
+    [fcolsor,indsort]=sort(mat,1);
     mat=mat(indsort(:,1),:);
     itrow=1;
     while itrow<nrow

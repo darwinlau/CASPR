@@ -21,7 +21,7 @@ function num_test_failed = CASPRTestScript(mode)
         CASPR_analysis_tests = matlab.unittest.TestSuite.fromFolder([CASPR_homepath '/unit_tests/Analysis'], 'IncludingSubfolders', true);
         CASPR_analysis_testresults = CASPR_analysis_tests.run();
     end
-    if((mode == TestModeType.SCRIPTS)||(mode == TestModeType.DEFAULT)||(mode == TestModeType.ALL))
+    if((mode == TestModeType.SCRIPTS)||(mode == TestModeType.ALL))
         CASPR_scripts_tests = matlab.unittest.TestSuite.fromFolder([CASPR_homepath '/unit_tests/Scripts'], 'IncludingSubfolders', true);
         CASPR_scripts_testresults = CASPR_scripts_tests.run();
     end
@@ -62,7 +62,7 @@ function num_test_failed = CASPRTestScript(mode)
             table(CASPR_analysis_testfailed)
         end
     end
-    if((mode == TestModeType.SCRIPTS)||(mode == TestModeType.DEFAULT)||(mode == TestModeType.ALL))
+    if((mode == TestModeType.SCRIPTS)||(mode == TestModeType.ALL))
         disp('Test results for Scripts:');
         tr = CASPR_scripts_testresults;
         fprintf('%d Passed, %d Failed, %d Incomplete, %f seconds testing time.\n', nnz([tr.Passed]), nnz([tr.Failed]), nnz([tr.Incomplete]), sum([tr.Duration]));
