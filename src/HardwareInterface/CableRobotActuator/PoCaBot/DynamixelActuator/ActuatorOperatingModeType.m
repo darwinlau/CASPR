@@ -1,5 +1,4 @@
 classdef ActuatorOperatingModeType
-    % The method used to approximate q_approx
     enumeration 
         CURRENT_MODE
         VELOCITY_MODE

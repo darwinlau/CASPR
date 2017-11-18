@@ -12,7 +12,7 @@ classdef (Abstract) CableActuatorInterfaceBase < handle
     
     methods (Abstract)
         % Method to open the connection or files for the interface
-        open(obj)                
+        open(obj)
         % Method to close the connection or files when finished
         close(obj)
         % Method to detect (optional) if the device is alive (returns 1 is
