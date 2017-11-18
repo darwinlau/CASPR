@@ -333,7 +333,8 @@ classdef PoCaBotExperiment < ExperimentBase
             obj.hardwareInterface.detectDevice();
             
             % this procedure is to regulate the pose of the endeffector and
-            % make sure that the cable is under the tension.
+            % make sure that the cable is under the tension(the very 
+            % tension to keep the cable from slack).
             obj.hardwareInterface.switchOperatingMode2CURRENT();
             obj.hardwareInterface.systemOnSend();
             current = ones(obj.numMotor,1)*20;
