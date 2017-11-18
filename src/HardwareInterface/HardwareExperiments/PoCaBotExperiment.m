@@ -50,10 +50,8 @@ classdef PoCaBotExperiment < ExperimentBase
             % Load the SystemKinematics object from the XML
             modelObj = model_config.getModel(strCableID);
             % Create the hardware interface
-            cableLengths_full = ones(numMotor,1)*4.7;
-            % cableLengths_full = [6.618; 4.800; 6.632;4.800;6.632;5.545;6.618;5.545];
-            
-            hw_interface = PoCaBotCASPRInterface('COM11', numMotor, cableLengths_full,false);  %1
+            strCOMPort = {'COM11'};
+            hw_interface = PoCaBotCASPRInterface(strCOMPort, DynamixelType.XH430_W210, numMotor,false);  %1
             exp@ExperimentBase(hw_interface, modelObj);
             exp.modelConfig = model_config;
             exp.numMotor = numMotor;
@@ -440,11 +438,11 @@ classdef PoCaBotExperiment < ExperimentBase
                 
                 % Record the relevant states for problem-solving purpose
                 obj.time_abs_traj(t) = rem(now,1);
-                obj.l_cmd_traj(t, :) = model_temp.cableLengths'; %(1)
+                obj.l_cmd_traj(t, :) = model_temp.cableLengths'; %
+                
                 % For recording the length of feedback, first assume the
                 % elasticity factor is appropriate. So for get the true
                 % length, we calculate back the extended length.
-                
                 l_feedback = obj.hardwareInterface.lengthFeedbackRead;
                 while(~any(l_feedback+1))
                     l_feedback = obj.hardwareInterface.lengthFeedbackRead;
