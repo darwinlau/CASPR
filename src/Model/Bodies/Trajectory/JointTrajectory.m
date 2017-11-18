@@ -405,7 +405,7 @@ classdef JointTrajectory < TrajectoryBase
                 q_dd_section = [];
                 time_section = time_points_abs(p):time_step:time_points_abs(p+1);
                 for j = 1:bodiesObj.numLinks
-                    [q_body, q_d_body, q_dd_body] = bodiesObj.bodies{j}.joint.generateTrajectoryParabolicBlend(q_pj{p}{j}, q_pj{p+1}{j}, ...
+                    [q_body, q_d_body, q_dd_body] = bodiesObj.bodies{j}.joint.ParabolicBlendTrajectoryGenerate(q_pj{p}{j}, q_pj{p+1}{j}, ...
                         time_section, time_blend(p));
                     q_section = [q_section; q_body];
                     q_d_section = [q_d_section; q_d_body];
@@ -536,7 +536,7 @@ classdef JointTrajectory < TrajectoryBase
                     time_const_speed = ceil(distance_const_speed/vmax/time_step)*time_step;
                 end
             end
-            time_vector = time_step : time_step : time_acc_s+time_acc_e+time_const_speed;
+            time_vector = 0 : time_step : time_acc_s+time_acc_e+time_const_speed;
             
             q = zeros(n_dof, length(time_vector));
             q_dot = zeros(n_dof, length(time_vector));
