@@ -147,13 +147,10 @@ classdef SystemModel < handle
         % Function updates the kinematics and dynamics of the bodies and
         % cables of the system with the joint state (q, q_dot and q_ddot)
         function update(obj, q, q_dot, q_ddot, w_ext)
-            % Assert that the body model uses the correct 
-            
+            % Assert that the body model uses the correct             
             CASPR_log.Assert(length(q) == obj.bodyModel.numDofVars && length(q_dot) == obj.bodyModel.numDofs ...
                 && length(q_ddot) == obj.bodyModel.numDofs && length(w_ext) == obj.bodyModel.numDofs,'Incorrect input to update function');
-            
-            obj.bodyModel.update(q, q_dot, q_ddot, w_ext);  
-            
+            obj.bodyModel.update(q, q_dot, q_ddot, w_ext);              
             obj.cableModel.update(obj.bodyModel);   
         end
         
@@ -507,8 +504,14 @@ classdef SystemModel < handle
             matlabFunction(obj.L, 'File', strcat(tmp_path, "/compile_L"), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});
             CASPR_log.Info('Finished L Compilation.');  
             
-            % Add the compiled files to the path
+            % Add the compiled files to the path            
             addpath(genpath(tmp_path));
+            
+            % Perform an update under compiled mode to initialise
+            obj.setFilesCompiled(true);
+            obj.setModelMode(ModelModeType.COMPILED);
+            obj.update(obj.bodyModel.q_initial, obj.bodyModel.q_dot_default, obj.bodyModel.q_ddot_default, zeros(obj.numDofs,1));
+           
             CASPR_log.Info('Finished All Compilations.\n');
         end
     end

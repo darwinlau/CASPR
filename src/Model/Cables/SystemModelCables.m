@@ -307,11 +307,11 @@ classdef SystemModelCables < handle
             value = obj.lengths;
         end
         
-        function value = get.lengthsActive(obj)
+        function value = get.lengthsActive(obj)           
             value = obj.lengths(obj.cableIndicesActive);
         end
         
-        function value = get.lengthsPassive(obj)
+        function value = get.lengthsPassive(obj)            
             value = obj.lengths(obj.cableIndicesPassive);
         end
         
@@ -329,42 +329,42 @@ classdef SystemModelCables < handle
             end
         end
         
-        function value = get.forcesActive(obj)
+        function value = get.forcesActive(obj)            
             value = obj.forces(obj.cableIndicesActive);
         end
         
-        function value = get.forcesActiveMin(obj)
+        function value = get.forcesActiveMin(obj)           
             value = zeros(obj.numCablesActive, 1);
             for i = 1:obj.numCablesActive
                 value(i) = obj.cables{obj.cableIndicesActive(i)}.forceMin;
             end
         end
         
-        function value = get.forcesActiveMax(obj)
+        function value = get.forcesActiveMax(obj)            
             value = zeros(obj.numCablesActive, 1);
             for i = 1:obj.numCablesActive
                 value(i) = obj.cables{obj.cableIndicesActive(i)}.forceMax;
             end
         end
                 
-        function value = get.forcesPassive(obj)
+        function value = get.forcesPassive(obj)            
             value = obj.forces(obj.cableIndicesPassive);
         end
         
-        function value = get.cableIndicesPassive(obj)
+        function value = get.cableIndicesPassive(obj)            
             cableIndices = 1:obj.numCables;
             value = cableIndices(setdiff(1:length(cableIndices), obj.cableIndicesActive));
         end
         
-        function value = get.numCablesPassive(obj)
+        function value = get.numCablesPassive(obj)            
             value = obj.numCables - obj.numCablesActive;
         end        
         
-        function value = get.V_active(obj)
+        function value = get.V_active(obj)            
             value = obj.V(obj.cableIndicesActive, :);
         end
         
-        function value = get.V_passive(obj)
+        function value = get.V_passive(obj)            
             value = obj.V(obj.cableIndicesPassive, :);
         end
         
@@ -373,6 +373,10 @@ classdef SystemModelCables < handle
         end
         
         function value = get.V_grad(obj)
+            if obj.modelMode==ModelModeType.COMPILED
+                CASPR_log.Warn('You are not allowed to assess this variable under COMPILED mode');
+                return;
+            end
 %             if(isempty(obj.V_grad))
 %                 obj.updateHessian(obj.bodyModel);
 %             end
@@ -380,10 +384,18 @@ classdef SystemModelCables < handle
         end
         
         function value = get.V_grad_active(obj)
+            if obj.modelMode==ModelModeType.COMPILED
+                CASPR_log.Warn('You are not allowed to assess this variable under COMPILED mode');
+                return;
+            end
             value = obj.V_grad(obj.cableIndicesActive, :, :);
         end
         
         function value = get.V_grad_passive(obj)
+            if obj.modelMode==ModelModeType.COMPILED
+                CASPR_log.Warn('You are not allowed to assess this variable under COMPILED mode');
+                return;
+            end
             value = obj.V_grad(obj.cableIndicesPassive, :, :);
         end
         
