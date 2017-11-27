@@ -9,13 +9,13 @@ clc; clear; close all;
 
 % Set up the model 
 model_config = ModelConfig('2 DoF VSD');
-cable_set_id = 'basic_vsd';
+cable_set_id = 'basic';
 modelObj = model_config.getModel(cable_set_id);
 
 % Set up the workspace simulator
 % First the grid
 q_step          =   0.05; n_dim           =   2;
-uGrid           =   UniformGrid(0.05*ones(n_dim,1),0.45*ones(n_dim,1),q_step*ones(n_dim,1));
+uGrid           =   UniformGrid(0.05*ones(n_dim,1),0.45*ones(n_dim,1),q_step*ones(n_dim,1),'step_size');
 % Define the workspace condition and metrics
 w_condition  =   {WorkspaceConditionBase.CreateWorkspaceCondition(WorkspaceConditionType.WRENCH_CLOSURE,[],[])};
 w_metric = {WorkspaceMetricBase.CreateWorkspaceMetric(WorkspaceMetricType.SEACM,[])};

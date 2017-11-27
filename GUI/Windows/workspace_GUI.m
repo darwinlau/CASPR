@@ -216,7 +216,7 @@ function generate_button_Callback(~, ~, handles) %#ok<DEFNU>
     % First the grid
     q_begin         =   modObj.bodyModel.q_min; q_end = modObj.bodyModel.q_max;
     q_step          =   (modObj.bodyModel.q_max - modObj.bodyModel.q_min)/10;
-    uGrid           =   UniformGrid(q_begin,q_end,q_step);
+    uGrid           =   UniformGrid(q_begin,q_end,q_step,'step_size');
     % First the condition
     contents = cellstr(get(handles.workspace_condition_popup,'String'));
     wc_string = contents{get(handles.workspace_condition_popup,'Value')};

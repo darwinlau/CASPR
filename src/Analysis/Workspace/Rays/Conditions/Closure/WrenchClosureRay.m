@@ -19,7 +19,6 @@ classdef WrenchClosureRay < WorkspaceRayConditionBase
         function intervals = evaluateFunction(obj,model,workspace_ray)
             zeroval=1e-8; % THIS COULD BE MADE AN OPTION FOR THE SOLVER
             % Variable initialisation
-            intervals=[];
             numDofs=model.numDofs;
             numCables=model.numCables;
             curtypevar= model.bodyModel.q_dofType;
@@ -64,8 +63,10 @@ classdef WrenchClosureRay < WorkspaceRayConditionBase
                 end
             end
             countcol=0;
+            intervals=zeros(numcomb*((maxdeg+2)*numDofs),2);
+            interval_i = 1;
             for itcomb=1:numcomb
-                matcoefpoly=[];
+                matcoefpoly=zeros(numDofs+1,maxdeg+1);
                 for itdof=1:numDofs+1
                     countcol=countcol+1;
                     vectf=matf(:,countcol);
@@ -81,10 +82,12 @@ classdef WrenchClosureRay < WorkspaceRayConditionBase
                 end
                 % THE LINE BELOW SHOULD CHANGE (IN THAT IT IS INEFFICIENT) BUT I HAVE LEFT IT
                 % CONSISTENT WITH ORIGINAL CODE FOR THE MOMENT
-                finrealr=[workspace_ray.free_variable_range(1),workspace_ray.free_variable_range(2)]';  %% final-real-roots
+                finrealr=zeros(2+numDofs*maxdeg,1);
+                finrealr([1,2])=[workspace_ray.free_variable_range(1);workspace_ray.free_variable_range(2)];  %% final-real-roots
+                finrealr_index = 3;
+                curlencoef = maxdeg+1;
                 for it=1:numDofs+1
                     curcoef=matcoefpoly(it,:);
-                    curlencoef=length(curcoef);
                     numz=0;
                     for itzcoef=1:curlencoef
                         if abs(curcoef(itzcoef))<1e-8
@@ -96,18 +99,16 @@ classdef WrenchClosureRay < WorkspaceRayConditionBase
                     curcoef(1:numz)=[];
                     curcomr=roots(curcoef);   %current-complex-roots
                     curcomr=curcomr(imag(curcomr)==0);  % eliminating the complex roots
-                    if curtypevar(curflexvar)==DoFType.TRANSLATION
-                        curcomr=curcomr;  % eliminating the complex roots
-                    else
+                    if curtypevar(curflexvar)~=DoFType.TRANSLATION
                         curcomr=2*atan(curcomr);  % eliminating the complex roots
                     end
-                    finrealr=[finrealr;curcomr];       % storing the current real roots to the final-real-roots matrix
+                    finrealr(finrealr_index:finrealr_index+length(curcomr)-1)=curcomr;       % storing the current real roots to the final-real-roots matrix
+                    finrealr_index = finrealr_index + length(curcomr);
                 end
-                finrealr=finrealr';
+                finrealr = finrealr(1:finrealr_index-1)';
                 finrealr(finrealr<workspace_ray.free_variable_range(1))=[];          %eliminating the roots beyond the bound of the variable
                 finrealr(finrealr>workspace_ray.free_variable_range(2))=[];          %eliminating the roots beyond the bound of the variable
                 finrealr=sort(finrealr);
-                
                 for it1=1:length(finrealr)-1
                     segpercent=((finrealr(1,it1+1)-finrealr(1,it1))/(workspace_ray.free_variable_range(2)-workspace_ray.free_variable_range(1)))*100;
                     if segpercent>obj.min_ray_percentage
@@ -118,26 +119,28 @@ classdef WrenchClosureRay < WorkspaceRayConditionBase
                             tstval=tan(mean([finrealr(1,it1) finrealr(1,it1+1)])/2);
                         end
                         
-                        signvect=[];
+                        signvect=zeros(numDofs+1,1);
                         for it2=1:numDofs+1
                             signvect(it2)=polyval(matcoefpoly(it2,:),tstval);
                         end
                         if (signvect>zeroval)
-                            intervals=[intervals;[finrealr(it1) finrealr(it1+1)]];
+                            intervals(interval_i,:)=[finrealr(it1) finrealr(it1+1)];
+                            interval_i = interval_i + 1;
                         end
                         if (signvect<-zeroval)
-                            intervals=[intervals;[finrealr(it1) finrealr(it1+1)]];
+                            intervals(interval_i,:)=[finrealr(it1) finrealr(it1+1)];
+                            interval_i = interval_i + 1;
                         end
                     end
                 end
             end
-            intervals=obj.mat_union(intervals);
+            intervals=obj.mat_union(intervals(1:interval_i-1,:));
         end
     end
     
     methods (Access = private)
         % THIS SHOULD PROBABLY BE MOVED ELSEWHERE
-        function matunion=mat_union(obj,mat)
+        function matunion=mat_union(obj,mat) %#ok<INUSL>
             if ~isempty(mat)
                 [nrow,~]=size(mat);
                 [~,indsort]=sort(mat,1);

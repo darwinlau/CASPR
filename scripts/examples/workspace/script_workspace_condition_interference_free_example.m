@@ -15,7 +15,7 @@ modelObj = model_config.getModel(cable_set_id);
 % Set up the workspace simulator
 % First the grid
 q_step          =  0.1 ; n_dim           = 3;
-uGrid           =   UniformGrid([0.5; 0.5; 0], [0.5; 0.5; pi], [0; 0; pi/2]);
+uGrid           =   UniformGrid([0.5; 0.5; 0], [0.5; 0.5; pi], [0; 0; pi/2],'step_size');
 
 % Define the workspace condition and metrics
 w_condition =   {WorkspaceConditionBase.CreateWorkspaceCondition(WorkspaceConditionType.INTERFERENCE,[],[])};

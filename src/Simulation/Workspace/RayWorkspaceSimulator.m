@@ -76,7 +76,7 @@ classdef RayWorkspaceSimulator < SimulatorBase
                 for i = 1:obj.grid.n_dimensions
                     grid_index = true(obj.grid.n_dimensions,1); grid_index(i) = false;
                     % Create a subgrid
-                    sub_grid = UniformGrid(obj.grid.q_begin(grid_index),obj.grid.q_end(grid_index),obj.grid.delta_q(grid_index),obj.grid.q_wrap(grid_index));
+                    sub_grid = UniformGrid(obj.grid.q_begin(grid_index),obj.grid.q_end(grid_index),obj.grid.delta_q(grid_index),'step_size',obj.grid.q_wrap(grid_index));
                     for j = 1:sub_grid.n_points
                         CASPR_log.Info([sprintf('Workspace ray %d. ',k),sprintf('Completion Percentage: %3.2f',100*k/n_grid_points)]);
                         % Load the current fixed grid coordinates
@@ -96,9 +96,11 @@ classdef RayWorkspaceSimulator < SimulatorBase
     %                                wr.addCondition(workspace_prev{i}.conditions{j_c,1},j_c);
     %                            end
                             else
-                               % New condition
-                               [condition_type, condition_intervals, comp_time] = obj.conditions{j_c}.evaluate(obj.model,wr);
-                               condition_intervals
+                                % New condition
+                                [condition_type, condition_intervals, comp_time] = obj.conditions{j_c}.evaluate(obj.model,wr);
+                                if(~isempty(condition_intervals))
+                                    wr.addCondition(condition_type,condition_intervals,j_c);
+                                end
 %                                %% THIS PORTION SHOULD BE REMOVED OR INTEGRATED
 %                                [curnseglin,~]=size(condition_interval);                                %number of segment line
 %                                if curnseglin>0
@@ -111,7 +113,18 @@ classdef RayWorkspaceSimulator < SimulatorBase
                             end
                         end
                         % Determine whether to add the condition to the workspace
-                        %% THIS NEEDS TO BE FILLED IN
+                        test_conditions = cellfun(@isempty,wr.conditions);
+                        % Determine whether to add to workspace
+                        if(obj.options.union)
+                            entry_condition = (~isempty(obj.metrics)||(sum(test_conditions(:,1))~=n_conditions));
+                        else
+                            entry_condition = (sum(test_conditions(:,1))==0);
+                        end
+                        if(entry_condition)
+                            % Add the workspace point to the 
+                            obj.workspace{k} = wr;
+                            workspace_count = workspace_count + 1;
+                        end
                         % Note that another ray has been constructed
                         k = k+1;
                     end
