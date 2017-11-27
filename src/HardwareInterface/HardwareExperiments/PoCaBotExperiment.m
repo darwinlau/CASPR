@@ -32,7 +32,7 @@ classdef PoCaBotExperiment < ExperimentBase
         % should be set when under tension force.
         % For the orange PE fiber cable, its elongation is 6e-4/N, while
         % for the STEALTH-BRAID cable, its elongation is 3.2825e-5/N
-        elongation_per_Newton = 0.0006; % 
+        elongation_per_Newton = 0.000476; % 
         
         l_feedback_traj    % Temporary variable to store things for now
         l_cmd_traj         % Temporary variable to store things for now
@@ -339,12 +339,6 @@ classdef PoCaBotExperiment < ExperimentBase
             current = ones(obj.numMotor,1)*initialCurrent;
             obj.hardwareInterface.forceCommandSend(current);
             
-            % PID Check;
-            %fprintf('Check the PID parameters!\n');
-            [KpD] = obj.hardwareInterface.getKpD();
-            [KpI] = obj.hardwareInterface.getKpI();
-            [KpP] = obj.hardwareInterface.getKpP();
-            
             % Update the system state when the end effector is at the initial position.
             obj.model.update(q0, zeros(size(q0)), zeros(size(q0)),zeros(size(q0)));
             [tension] = obj.hardwareInterface.getCableTensionByCurrent(initialCurrent);
@@ -390,7 +384,7 @@ classdef PoCaBotExperiment < ExperimentBase
             end
             
             % Send the initial commands to the hardware
-            obj.hardwareInterface.lengthInitialSend(originalLength);
+            obj.hardwareInterface.lengthInitialSend(obj.model.cableLengths);
             obj.hardwareInterface.motorPosInitialSend(init_pos);
             
             obj.hardwareInterface.switchOperatingMode2POSITION_LIMITEDCURRENT();
@@ -405,6 +399,12 @@ classdef PoCaBotExperiment < ExperimentBase
             obj.hardwareInterface.setProfileAcceleration(profileAcc);
             profileVel = ones(obj.numMotor,1)*360;
             obj.hardwareInterface.setProfileVelocity(profileVel);
+            
+            % PID Check;
+            %fprintf('Check the PID parameters!\n');
+            [KpD] = obj.hardwareInterface.getKpD();
+            [KpI] = obj.hardwareInterface.getKpI();
+            [KpP] = obj.hardwareInterface.getKpP();
         end
         
         % run the trajectory directly no need to inilize the hardware which
@@ -459,6 +459,11 @@ classdef PoCaBotExperiment < ExperimentBase
                     q0 = trajectory.q(:,t);
                     q1 = q_solved;
                     q_delta = q1-q0;
+                    
+                    if(any(abs(q_delta(4:end))>0.2))
+                        x=1;
+                    end
+                    
                     axis([q0(1)-0.2 q0(1)+0.2 q0(2)-0.2 q0(2)+0.2 q0(3)-0.2 q0(3)+0.2]);
                     descr = {'{\delta{\itq}}:';...
                         sprintf('%.5f',q_delta(1));...
