@@ -38,9 +38,9 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
         DXL_NUM;
         
         % The default KpD, KpI and KpP
-        KpD = 0;% KPD = KPD(TBL) / 16
-        KpI = 0;% KPI = KPI(TBL) / 65536
-        KpP = 900;% KPP = KPP(TBL) / 128
+        KpD;% KPD = KPD(TBL) / 16
+        KpI;% KPI = KPI(TBL) / 65536
+        KpP;% KPP = KPP(TBL) / 128
         
         ActuatorParas
     end
@@ -426,6 +426,10 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
                 CASPR_log.Error('Input argument error, please check the size of the argument deltaLength and try again');
             end
             motorPosOffset = obj.dynamixel_direction_factor_position*deltaLength./[obj.accessories(:).len_per_circle]'*obj.ActuatorParas.ENCODER_COUNT_PER_TURN;
+        end
+        
+        function [drivemode] = getDriveMode(obj)
+            [~, drivemode] = obj.sync_read(obj.ActuatorParas.ADDR_DRIVE_MODE, obj.ActuatorParas.LEN_DRIVE_MODE);
         end
     end
     
