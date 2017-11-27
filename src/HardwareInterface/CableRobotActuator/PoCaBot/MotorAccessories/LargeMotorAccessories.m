@@ -6,10 +6,10 @@ classdef LargeMotorAccessories < MotorAccessoriesBase
     properties (Constant = true)
         % Spool
         % one way to initialize the spool model
-        cableLength_full_load = 2.284;%2.284;
-        numCircles_full_load = 12;%12;
+        cableLength_full_load = 4.5692;%2.284;
+        numCircles_full_load = 24;%12;
         len_per_circle = LargeMotorAccessories.cableLength_full_load/LargeMotorAccessories.numCircles_full_load;
-        width_per_circle = 0.025/LargeMotorAccessories.numCircles_full_load; % the width of one circular coil
+        width_per_circle = 0.048/LargeMotorAccessories.numCircles_full_load; % the width of one circular coil
         radius = sqrt(LargeMotorAccessories.len_per_circle^2-LargeMotorAccessories.width_per_circle^2)/2/pi;
         % another way to initialize the spool model
         % width_per_circle = 0.002;
@@ -18,7 +18,7 @@ classdef LargeMotorAccessories < MotorAccessoriesBase
         
         % Dynamixel Holder
         lenCoS2Outlet = 0.210; % distance from cetre of the spool to the cable outlet
-        cableLengths_full = [6.618; 4.800; 6.632;4.800;6.632;5.545;6.618;5.545];
+        cableLengths_full = [6.618; 4.800; 6.632;4.800;6.632;4.845;6.618;4.845];
     end
     
     
