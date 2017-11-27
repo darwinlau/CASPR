@@ -561,10 +561,21 @@ classdef JointTrajectory < TrajectoryBase
                     q_ddot(:,t_ind) = -acc_true_e;
                 end
             end
-            trajectory.q = q;
-            trajectory.q_dot = q_dot;
-            trajectory.q_ddot = q_ddot;
-            trajectory.timeVector = time_vector;
+%             trajectory.q = q;
+%             trajectory.q_dot = q_dot;
+%             trajectory.q_ddot = q_ddot;
+%             trajectory.timeVector = time_vector;
+            
+            % The purpose to add the start and end points without velocity
+            % and acceleration is to make sure the end effector is still
+            % when it is ready to go or stops.
+            % Doing this is a little unreasonable, especially for the start
+            % point due to the replicated time 0, however, we can use this
+            % to debug, and anyway, the added end point is worth keeping.
+            trajectory.q = [q_s,q,q_e];
+            trajectory.q_dot = [q_s*0,q_dot,q_e*0];
+            trajectory.q_ddot = [q_s*0,q_ddot,q_e*0];
+            trajectory.timeVector = [-time_step, time_vector, time_vector(end)+time_step];
         end
     end
 end
