@@ -19,8 +19,8 @@ classdef MotorAccessoriesBase < handle
     
     properties
         % When the cable is loosing up, coil_position is increasing. When
-        % this property is zero, the loosed segment of the cable in the
-        % holder reaches minimal value.
+        % this property is zero, the segment of the cable between the spool 
+        % and the cable outlet point reaches minimal value.
         % coil_position % unused here
         % cableLength_in_accessories_init
         
