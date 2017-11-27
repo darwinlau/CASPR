@@ -31,6 +31,11 @@ classdef DynamixelActuatorParaBase < handle
         ADDR_PROFILE_VELOCITY 
         LEN_PROFILE_VELOCITY 
         
+        % Drive mode
+        ADDR_DRIVE_MODE
+        LEN_DRIVE_MODE
+        ROTATION_DIRECTION_BIT_POSITION
+        
         % Beware of that when trying to modify the operatiing mode, the
         % motors must be turned off.
         ADDR_OPERATING_MODE 

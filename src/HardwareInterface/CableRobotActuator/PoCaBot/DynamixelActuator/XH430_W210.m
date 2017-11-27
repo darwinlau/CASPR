@@ -31,6 +31,11 @@ classdef XH430_W210 < DynamixelActuatorParaBase
         ADDR_PROFILE_VELOCITY = 112;
         LEN_PROFILE_VELOCITY = 4;
         
+        % Drive mode
+        ADDR_DRIVE_MODE = 10;
+        LEN_DRIVE_MODE = 1;
+        ROTATION_DIRECTION_BIT_POSITION = 0;
+        
         % Beware of that when trying to modify the operatiing mode, the
         % motors must be turned off.
         ADDR_OPERATING_MODE         = 11;
