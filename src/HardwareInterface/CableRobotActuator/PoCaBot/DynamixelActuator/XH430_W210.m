@@ -48,6 +48,11 @@ classdef XH430_W210 < DynamixelActuatorParaBase
         OPERATING_MODE_CURRENT_BASED_POSITION = 5;
         OPERATING_MODE_PWM = 16;
         
+        % Hardware Error Status
+        % This value indicates hardware error status. For more details, please refer to the Shutdown.
+        ADDR_HARDWARE_ERROR_STATUS = 70;
+        LEN_HARDWARE_ERROR_STATUS = 1;
+        
         % The PID parameters of Position Control Loop
         % Range: 0~16383 for all three paras
         % 

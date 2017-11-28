@@ -431,6 +431,12 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
         function [drivemode] = getDriveMode(obj)
             [~, drivemode] = obj.sync_read(obj.ActuatorParas.ADDR_DRIVE_MODE, obj.ActuatorParas.LEN_DRIVE_MODE);
         end
+        
+        % if hardware_error_status is greater than 0, the dynamixel needs
+        % to be rebooted.
+        function [hardware_error_status] = getHardwareErrorStatus(obj)
+            [~, hardware_error_status] = obj.sync_read(obj.ActuatorParas.ADDR_HARDWARE_ERROR_STATUS, obj.ActuatorParas.LEN_HARDWARE_ERROR_STATUS);
+        end
     end
     
     methods (Access = private)

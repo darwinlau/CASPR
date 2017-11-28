@@ -48,6 +48,11 @@ classdef DynamixelActuatorParaBase < handle
         OPERATING_MODE_CURRENT_BASED_POSITION
         OPERATING_MODE_PWM
         
+        % Hardware Error Status
+        % This value indicates hardware error status. For more details, please refer to the Shutdown.
+        ADDR_HARDWARE_ERROR_STATUS
+        LEN_HARDWARE_ERROR_STATUS
+        
         % The PID parameters of Position Control Loop
         % Range: 0~16383 for all three paras
         % 
