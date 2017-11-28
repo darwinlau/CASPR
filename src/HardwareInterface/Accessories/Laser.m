@@ -23,6 +23,8 @@ classdef Laser < handle
         
         % The default value is 1 second. The minimum value is 0.01 second.
         TIMERPERIOD = 0.05;%s
+        
+        OUTPUTBUFFERSIZE = 4;
     end
     
     methods (Access = public)
