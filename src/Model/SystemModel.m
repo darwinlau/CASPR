@@ -501,7 +501,7 @@ classdef SystemModel < handle
             % If more system variables are needed in the future, a separate
             % function handling these variables might be prefered.
             CASPR_log.Info('- Compiling L...');            
-            matlabFunction(obj.L, 'File', strcat(tmp_path, "/compile_L"), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});
+            matlabFunction(obj.L, 'File', strcat(tmp_path, '/compile_L'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});
             CASPR_log.Info('Finished L Compilation.');  
             
             % Add the compiled files to the path            
