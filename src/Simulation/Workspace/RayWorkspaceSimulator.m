@@ -83,6 +83,7 @@ classdef RayWorkspaceSimulator < SimulatorBase
                         q_fixed = sub_grid.getGridPoint(j);
                         % Construct the workspace ray
                         wr = WorkspaceRay(q_fixed,n_metrics,n_conditions,i,[obj.grid.q_begin(i),obj.grid.q_end(i)]);
+
                         % For each metric compute the value of the ray
                         for j_m=1:n_metrics
                             %% THIS NEEDS TO BE FILLED IN
@@ -144,5 +145,117 @@ classdef RayWorkspaceSimulator < SimulatorBase
 %                 obj.numRays=nrow;
 %             end
         end
+     
+ %       plotRayWorkspace is a temporary function for plotting the computed
+ %       ray workspace and verify if the result is reasonable
+               
+        function plotRayWorkspace(obj,plot_axis)   %nsegvar= the division number of interval of variables
+            
+            numDofs=obj.grid.n_dimensions;
+            if numDofs>2
+                if(nargin<2)
+                    plot_axis=[1,2,3];
+                end
+                axis1=[];
+                axis2=[];
+                axis3=[];
+                [size_workspace spare]=size(obj.workspace);
+                for it=1:size_workspace
+                    if ~isempty(obj.workspace{it})
+                        plotflag=0;
+                        obj.workspace{it}.free_variable_index
+                        consvar=zeros(1,numDofs);
+                        consvar(1:obj.workspace{it}.free_variable_index-1)=obj.workspace{it}.fixed_variables(1:obj.workspace{it}.free_variable_index-1,1);
+                        consvar(obj.workspace{it}.free_variable_index)=0;
+                        consvar(obj.workspace{it}.free_variable_index+1:numDofs)=obj.workspace{it}.fixed_variables(obj.workspace{it}.free_variable_index:numDofs-1,1);
+
+                        if obj.workspace{it}.free_variable_index==plot_axis(1)
+                            axis1=obj.workspace{it}.free_variable_range;
+                            axis2=(consvar(plot_axis(2))*ones(1,2));
+                            axis3=(consvar(plot_axis(3))*ones(1,2));
+                            plotflag=1;
+                        elseif obj.workspace{it}.free_variable_index==plot_axis(2)
+                            axis1=(consvar(plot_axis(1))*ones(1,2));
+                            axis2=obj.workspace{it}.free_variable_range;
+                            axis3=(consvar(plot_axis(3))*ones(1,2));
+                            plotflag=1;
+                        elseif obj.workspace{it}.free_variable_index==plot_axis(3)
+                            axis1=(consvar(plot_axis(1))*ones(1,2));
+                            axis2=(consvar(plot_axis(2))*ones(1,2));
+                            axis3=obj.workspace{it}.free_variable_range;
+                            plotflag=1;
+                        end
+                        if plotflag==1
+                            plot3(axis1,axis2,axis3,'k','LineWidth',1);
+                            axis1=strcat('axis_',int2str(plot_axis(1)));
+                            axis2=strcat('axis_',int2str(plot_axis(2)));
+                            axis3=strcat('axis_',int2str(plot_axis(3)));
+                            xlabel(axis1)
+                            ylabel(axis2)
+                            zlabel(axis3)
+                            hold on
+                        end
+                    end
+                end
+            else
+                if(nargin<2)
+                    plot_axis=[1,2];
+                end
+                axis1=[];
+                axis2=[];
+                [size_workspace spare]=size(obj.workspace);
+                for it=1:size_workspace                  
+                    if ~isempty(obj.workspace{it})
+                        plotflag=0;
+                        consvar=zeros(1,numDofs);
+                        consvar(1:obj.workspace{it}.free_variable_index-1)=obj.workspace{it}.fixed_variables(1:obj.workspace{it}.free_variable_index-1,1);
+                        consvar(obj.workspace{it}.free_variable_index)=0;
+                        consvar(obj.workspace{it}.free_variable_index+1:numDofs)=obj.workspace{it}.fixed_variables(obj.workspace{it}.free_variable_index:numDofs-1,1);
+                        if obj.workspace{it}.free_variable_index==plot_axis(1)
+                            axis1=obj.workspace{it}.free_variable_range;
+                            axis2=(consvar(plot_axis(2))*ones(1,2));
+                            plotflag=1;
+                        elseif obj.workspace{it}.free_variable_index==plot_axis(2)                         
+                            axis1=(consvar(plot_axis(1))*ones(1,2));
+                            axis2=obj.workspace{it}.free_variable_range;
+                            plotflag=1;
+                        end
+                        if plotflag==1
+                            plot(axis1,axis2,'k','LineWidth',1);
+                            axis1=strcat('axis_',int2str(plot_axis(1)));
+                            axis2=strcat('axis_',int2str(plot_axis(2)));
+                            xlabel(axis1)
+                            ylabel(axis2)
+                            hold on
+                        end
+                    end
+                end
+            end
+        end
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     end    
 end
