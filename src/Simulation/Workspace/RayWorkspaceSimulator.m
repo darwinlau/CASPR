@@ -121,7 +121,7 @@ classdef RayWorkspaceSimulator < SimulatorBase
                         k = k+1;
                     end
                 end              
-%                 obj.createWorkspaceGraph();
+                obj.createWorkspaceGraph();
             end
         end
         
@@ -218,10 +218,14 @@ classdef RayWorkspaceSimulator < SimulatorBase
             node_length = length(obj.workspace);
             obj.graph = zeros(node_length,node_length);
             for i = 1:node_length
-                obj.graph(i,i) = 0;
-                for j = i+1:node_length
-                    obj.graph(i,j) = obj.workspace{i}.intersect(obj.workspace{j});
-                    obj.graph(j,i) = obj.graph(i,j);
+                if(~isempty(obj.workspace{i}))
+                    obj.graph(i,i) = 1;
+                    for j = i+1:node_length
+                        if(~isempty(obj.workspace{j}))
+                            obj.graph(i,j) = obj.workspace{i}.intersect(obj.workspace{j});
+                            obj.graph(j,i) = obj.graph(i,j);
+                        end
+                    end
                 end
             end
         end
