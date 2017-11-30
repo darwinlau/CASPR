@@ -1,5 +1,6 @@
 % A container class to hold workspace analysis information for ray based
-% generation
+% generation. NOTE: For the moment this class will assume that the ray is
+% generated about one of the principle axes.
 %
 % Author        : Jonathan EDEN
 % Created       : 2017
@@ -13,6 +14,10 @@ classdef WorkspaceRay < handle
         conditions              % A cell array of different workspace conditions (enum and intervals)
         free_variable_index     % The index that is left free
         free_variable_range     % The range of values that the free variable takes (1st element should be min and 2nd element max)
+        % FOR FUTURE EXTENSION
+        % CHANGE THE RAY TO BE STORED AS Y=MX+C FORM WHERE STORE THE
+        % GRADIENT M (made into a unit vector), THE OFFSET C AND THE
+        % RANGE [X_MIN,X_MAX]
     end
     
     methods
@@ -23,6 +28,8 @@ classdef WorkspaceRay < handle
             wp.conditions           =   cell(n_constraints,2);
             wp.free_variable_index  =   free_variable_index;
             wp.free_variable_range  =   free_variable_range;
+            % FOR FUTURE EXTENSION
+            % INPUT M, C, AND X
         end
         
         % A function to add the metric information to the point
@@ -100,6 +107,10 @@ classdef WorkspaceRay < handle
                     is_intersected = 0;
                 end
             end
+            % THIS METHODOLOGY NEEDS TO BE MODIFIED FOR THE TRANSFORMATION
+            % COORDINATES. IN PARTICULAR THE TWO RAYS MAY NOT POSSESS THE
+            % SAME COORDINATES AND THEREFORE THE RAY SHOULD BE DESCRIBED IN
+            % TERMS OF A UNIT GRADIENT, RAY BOUNDS AND OFFSET TERM
         end
     end    
 end

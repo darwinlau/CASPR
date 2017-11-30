@@ -147,21 +147,18 @@ classdef RayWorkspaceSimulator < SimulatorBase
                         consvar(obj.workspace{it}.free_variable_index+1:numDofs)=obj.workspace{it}.fixed_variables(obj.workspace{it}.free_variable_index:numDofs-1,1);
                         if obj.workspace{it}.free_variable_index==plot_axis(1)
                             axis1=obj.workspace{it}.conditions{2};
-%                             axis1=obj.workspace{it}.free_variable_range;
                             axis2=(consvar(plot_axis(2))*ones(1,2));
                             axis3=(consvar(plot_axis(3))*ones(1,2));
                             plotflag=1;
                         elseif obj.workspace{it}.free_variable_index==plot_axis(2)
                             axis1=(consvar(plot_axis(1))*ones(1,2));
                             axis2=obj.workspace{it}.conditions{2};
-%                             axis2=obj.workspace{it}.free_variable_range;
                             axis3=(consvar(plot_axis(3))*ones(1,2));
                             plotflag=1;
                         elseif obj.workspace{it}.free_variable_index==plot_axis(3)
                             axis1=(consvar(plot_axis(1))*ones(1,2));
                             axis2=(consvar(plot_axis(2))*ones(1,2));
                             axis3=obj.workspace{it}.conditions{2};
-%                             axis3=obj.workspace{it}.free_variable_range;
                             plotflag=1;
                         end
                         if plotflag==1
@@ -191,12 +188,12 @@ classdef RayWorkspaceSimulator < SimulatorBase
                         consvar(obj.workspace{it}.free_variable_index)=0;
                         consvar(obj.workspace{it}.free_variable_index+1:numDofs)=obj.workspace{it}.fixed_variables(obj.workspace{it}.free_variable_index:numDofs-1,1);
                         if obj.workspace{it}.free_variable_index==plot_axis(1)
-                            axis1=obj.workspace{it}.free_variable_range;
+                            axis1=obj.workspace{it}.conditions{2};
                             axis2=(consvar(plot_axis(2))*ones(1,2));
                             plotflag=1;
                         elseif obj.workspace{it}.free_variable_index==plot_axis(2)                         
                             axis1=(consvar(plot_axis(1))*ones(1,2));
-                            axis2=obj.workspace{it}.free_variable_range;
+                            axis2=obj.workspace{it}.conditions{2};
                             plotflag=1;
                         end
                         if plotflag==1
@@ -211,6 +208,34 @@ classdef RayWorkspaceSimulator < SimulatorBase
                 end
             end
         end
+        
+        % A function for plotting a graph
+        function plotGraph(obj)
+            % Shrink the graph to remove all nodes that are empty
+            l_graph = length(obj.graph);
+            l_free = l_graph/obj.grid.n_dimensions;
+            index = false(l_graph,1);
+            X = zeros(l_graph,1);
+            Y = zeros(l_graph,1);
+            k = 1;
+            plotting_graph = obj.graph;
+            for i = 1:length(obj.graph)
+                if(obj.graph(i,i))
+                    X(k) = mod(i,l_free);
+                    Y(k) = ceil(i/l_free);
+                    index(i) = true;
+                    plotting_graph(i,i)=0;
+                    k = k+1;
+                end
+            end
+            X = X(1:k-1); Y = Y(1:k-1); 
+            plot(graph(plotting_graph(index,index)),'XData',X,'YData',Y); %#ok<CPROP>
+        end
+        
+        function plotGraphImage(obj)
+            imagesc(obj.graph)
+        end
+        
     end
     
     methods(Access = private)
