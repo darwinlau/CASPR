@@ -11,8 +11,6 @@ modelObj        =   model_config.getModel(cable_set_id);
 
 
 q_begin         =   modelObj.bodyModel.q_min; q_end = modelObj.bodyModel.q_max; q_initial=modelObj.bodyModel.q_initial;  
-modelObj.bodyModel.q_min 
-modelObj.bodyModel.q_max
 nsegvar= [25;25];      % number of discritization on each axis. if the user desire to ignor discritization on one axis its corresponding discritiaztion number can be set to zero
 uGrid           =   RayGridGeneration(q_begin,q_end,q_initial,nsegvar); 
 

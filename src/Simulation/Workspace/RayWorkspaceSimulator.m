@@ -129,6 +129,8 @@ classdef RayWorkspaceSimulator < SimulatorBase
                         k = k+1;
                     end
                 end
+                
+                obj.createWorkspaceGraph();
             end
             %% FIX THIS
 %             fid=fopen('WorkspaceRay/TempData/matseglin.txt');
@@ -144,5 +146,19 @@ classdef RayWorkspaceSimulator < SimulatorBase
 %                 obj.numRays=nrow;
 %             end
         end
-    end    
+    end
+    
+    methods(Access = private)
+        function createWorkspaceGraph(obj)
+            node_length = length(obj.workspace);
+            obj.graph = zeros(node_length,node_length);
+            for i = 1:node_length
+                obj.graph(i,i) = 0;
+                for j = i+1:node_length
+                    obj.graph(i,j) = obj.workspace{i}.intersect(obj.workspace{j});
+                    obj.graph(j,i) = obj.graph(i,j);
+                end
+            end
+        end
+    end
 end
