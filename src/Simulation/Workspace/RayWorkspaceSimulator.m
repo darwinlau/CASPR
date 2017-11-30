@@ -141,26 +141,26 @@ classdef RayWorkspaceSimulator < SimulatorBase
                 for it=1:size_workspace
                     if ~isempty(obj.workspace{it})
                         plotflag=0;
-                        obj.workspace{it}.free_variable_index
+                        obj.workspace{it}.free_variable_index;
                         consvar=zeros(1,numDofs);
                         consvar(1:obj.workspace{it}.free_variable_index-1)=obj.workspace{it}.fixed_variables(1:obj.workspace{it}.free_variable_index-1,1);
                         consvar(obj.workspace{it}.free_variable_index)=0;
                         consvar(obj.workspace{it}.free_variable_index+1:numDofs)=obj.workspace{it}.fixed_variables(obj.workspace{it}.free_variable_index:numDofs-1,1);
 
                         if obj.workspace{it}.free_variable_index==plot_axis(1)
-                            axis1=obj.workspace{it}.free_variable_range;
+                            axis1=obj.workspace{it}.conditions{2};
                             axis2=(consvar(plot_axis(2))*ones(1,2));
                             axis3=(consvar(plot_axis(3))*ones(1,2));
                             plotflag=1;
                         elseif obj.workspace{it}.free_variable_index==plot_axis(2)
                             axis1=(consvar(plot_axis(1))*ones(1,2));
-                            axis2=obj.workspace{it}.free_variable_range;
+                            axis2=obj.workspace{it}.conditions{2};
                             axis3=(consvar(plot_axis(3))*ones(1,2));
                             plotflag=1;
                         elseif obj.workspace{it}.free_variable_index==plot_axis(3)
                             axis1=(consvar(plot_axis(1))*ones(1,2));
                             axis2=(consvar(plot_axis(2))*ones(1,2));
-                            axis3=obj.workspace{it}.free_variable_range;
+                            axis3=obj.workspace{it}.conditions{2};
                             plotflag=1;
                         end
                         if plotflag==1
@@ -190,12 +190,12 @@ classdef RayWorkspaceSimulator < SimulatorBase
                         consvar(obj.workspace{it}.free_variable_index)=0;
                         consvar(obj.workspace{it}.free_variable_index+1:numDofs)=obj.workspace{it}.fixed_variables(obj.workspace{it}.free_variable_index:numDofs-1,1);
                         if obj.workspace{it}.free_variable_index==plot_axis(1)
-                            axis1=obj.workspace{it}.free_variable_range;
+                            axis1=obj.workspace{it}.conditions{2};
                             axis2=(consvar(plot_axis(2))*ones(1,2));
                             plotflag=1;
                         elseif obj.workspace{it}.free_variable_index==plot_axis(2)                         
                             axis1=(consvar(plot_axis(1))*ones(1,2));
-                            axis2=obj.workspace{it}.free_variable_range;
+                            axis2=obj.workspace{it}.conditions{2};
                             plotflag=1;
                         end
                         if plotflag==1
