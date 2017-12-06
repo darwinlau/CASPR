@@ -11,13 +11,16 @@ classdef PoCaBotExperiment < ExperimentBase
         timestep
         
         % variables for plotting
-        isPlot = true;
+        isPlot = false;
         ee_ideal
         ee_real
         hText
         ax_plot
         
         server
+        % This variable is for recording the initial original length for 
+        % each cable. So it is a numMotor by 1 vector
+        initialLength
     end
     
     properties
@@ -30,9 +33,11 @@ classdef PoCaBotExperiment < ExperimentBase
         % l_all = l_original+l_delta = (1+elongation_per_Newton*force)*l_original
         % Given commanded length l_cmd, a length of l_cmd/(1+elongation_per_Newton*force)
         % should be set when under tension force.
-        % For the orange PE fiber cable, its elongation is 6e-4/N, while
+        % For the orange PE fiber cable with diameter 0.6mm, its elongation is 6e-4/N,
+        % For the orange PE fiber cable with diameter 0.8mm, its elongation is 4.1478e-4/N,
+        % For the orange PE fiber cable with diameter 1.2mm, its elongation is 4.7847e-4/N,
         % for the STEALTH-BRAID cable, its elongation is 3.2825e-5/N
-        elongation_per_Newton = 0.000476; % 
+        elongation_per_Newton = [1;0;1;0;1;0;1;0]*3.2825e-5 + [0;1;0;1;0;1;0;1]*4.1478e-4; 
         
         l_feedback_traj    % Temporary variable to store things for now
         l_cmd_traj         % Temporary variable to store things for now
@@ -46,12 +51,12 @@ classdef PoCaBotExperiment < ExperimentBase
     methods
         function exp = PoCaBotExperiment(numMotor,strCableID,timestep, server)
             % Create the config
-            model_config = DevModelConfig('XL-Laser');
+            model_config = DevModelConfig('CU-Brick');
             % Load the SystemKinematics object from the XML
             modelObj = model_config.getModel(strCableID);
             % Create the hardware interface
-            strCOMPort = {'COM11'};
-            hw_interface = PoCaBotCASPRInterface(strCOMPort, DynamixelType.XH430_W210, numMotor,false);  %1
+            strCOMPort = {'COM11','COM5'};
+            hw_interface = PoCaBotCASPRInterface(strCOMPort, DynamixelType.XM540_W150, numMotor,false);  %1
             exp@ExperimentBase(hw_interface, modelObj);
             exp.modelConfig = model_config;
             exp.numMotor = numMotor;
@@ -335,14 +340,21 @@ classdef PoCaBotExperiment < ExperimentBase
             obj.hardwareInterface.switchOperatingMode2CURRENT();
             obj.hardwareInterface.systemOnSend();
             
-            initialCurrent = 15;
+            initialCurrent = obj.hardwareInterface.ActuatorParas.MAX_WORK_CURRENT/15;
             current = ones(obj.numMotor,1)*initialCurrent;
-            obj.hardwareInterface.forceCommandSend(current);
-            
+            cnt = 10;
+            for i = 1:cnt
+                obj.hardwareInterface.forceCommandSend(current*i/cnt);
+                pause(0.1);
+            end
             % Update the system state when the end effector is at the initial position.
             obj.model.update(q0, zeros(size(q0)), zeros(size(q0)),zeros(size(q0)));
             [tension] = obj.hardwareInterface.getCableTensionByCurrent(initialCurrent);
-            originalLength = obj.model.cableLengths ./(1+obj.elongation_per_Newton*tension);
+            originalLength = obj.model.cableLengths ./(1+obj.elongation_per_Newton.*tension);
+            
+            profileVel = ones(obj.numMotor,1)*obj.hardwareInterface.ActuatorParas.PROFILE_VEL;
+            profileAcc = ones(obj.numMotor,1)*obj.hardwareInterface.ActuatorParas.PROFILE_ACC;
+            
             
             str = input('Read the initial position from the file? [Y]:','s');
             if isempty(str) || str == 'Y' || str == 'y'
@@ -355,15 +367,14 @@ classdef PoCaBotExperiment < ExperimentBase
                 obj.hardwareInterface.switchOperatingMode2POSITION_LIMITEDCURRENT();
                 % Start the system to get feedback
                 obj.hardwareInterface.systemOnSend();
+                obj.hardwareInterface.setKpP(ones(obj.numMotor,1)*obj.hardwareInterface.ActuatorParas.KpP);
                 
-                profileAcc = ones(obj.numMotor,1)*50;
                 obj.hardwareInterface.setProfileAcceleration(profileAcc);
-                profileVel = ones(obj.numMotor,1)*50;
                 obj.hardwareInterface.setProfileVelocity(profileVel);
                 
                 obj.hardwareInterface.motorPositionCommandSend(init_pos);
                 
-                current = ones(obj.numMotor,1)*200;%200
+                current = ones(obj.numMotor,1)*obj.hardwareInterface.ActuatorParas.MAX_WORK_CURRENT/3;
                 obj.hardwareInterface.forceCommandSend(current);
                 
                 error_position = 100;
@@ -384,27 +395,26 @@ classdef PoCaBotExperiment < ExperimentBase
             end
             
             % Send the initial commands to the hardware
+            obj.initialLength = obj.model.cableLengths;
             obj.hardwareInterface.lengthInitialSend(obj.model.cableLengths);
             obj.hardwareInterface.motorPosInitialSend(init_pos);
             
             obj.hardwareInterface.switchOperatingMode2POSITION_LIMITEDCURRENT();
-            
+            obj.hardwareInterface.setKpP(ones(obj.numMotor,1)*obj.hardwareInterface.ActuatorParas.KpP);
             % Get the system ready to work
             obj.hardwareInterface.systemOnSend();
-            current = ones(obj.numMotor,1)*600;%400
+            current = ones(obj.numMotor,1)*obj.hardwareInterface.ActuatorParas.MAX_WORK_CURRENT;
             obj.hardwareInterface.forceCommandSend(current);
             
-            profileAcc = ones(obj.numMotor,1)*150;
             profileAcc = profileAcc/(obj.timestep/0.05);
             obj.hardwareInterface.setProfileAcceleration(profileAcc);
-            profileVel = ones(obj.numMotor,1)*360;
             obj.hardwareInterface.setProfileVelocity(profileVel);
             
             % PID Check;
             %fprintf('Check the PID parameters!\n');
-            [KpD] = obj.hardwareInterface.getKpD();
-            [KpI] = obj.hardwareInterface.getKpI();
-            [KpP] = obj.hardwareInterface.getKpP();
+            [KpD] = obj.hardwareInterface.getKpD()
+            [KpI] = obj.hardwareInterface.getKpI()
+            [KpP] = obj.hardwareInterface.getKpP()
         end
         
         % run the trajectory directly no need to inilize the hardware which
@@ -431,26 +441,34 @@ classdef PoCaBotExperiment < ExperimentBase
                 [~, model_temp, ~, ~, ~] = obj.idsim.IDSolver.resolve(trajectory.q(:,t), trajectory.q_dot(:,t), trajectory.q_ddot(:,t), zeros(obj.idsim.model.numDofs,1));
                 [offset] = obj.hardwareInterface.getCableOffsetByTension(model_temp.cableForces);
                 if(any(model_temp.cableForces<0))
-                    x = 1;
+                    fprintf('The force solved from ID gets beyond the limit!!!\n');
                 end
-                obj.hardwareInterface.lengthCommandSend(model_temp.cableLengths ./(1+obj.elongation_per_Newton*model_temp.cableForces) + offset);
+                lengthCommand = model_temp.cableLengths ./(1+obj.elongation_per_Newton.*model_temp.cableForces) + offset;
+%                 lengthModifiedElongation = lengthCommand - obj.initialLength;
+%                 if(lengthModifiedElongation > 0)
+%                     lengthTuned
+%                 else
+%                     
+%                 end
+                lengthTuned = 0;
+                obj.hardwareInterface.lengthCommandSend(lengthCommand + lengthTuned);
                 %fprintf(obj.server, '(%f,%f,%f,%f,%f,%f)\n', obj.fksolver.model.q);
                 
-                % Record the relevant states for problem-solving purpose
-                obj.time_abs_traj(t) = rem(now,1);
-                obj.l_cmd_traj(t, :) = model_temp.cableLengths'; %
-                
-                % For recording the length of feedback, first assume the
-                % elasticity factor is appropriate. So for get the true
-                % length, we calculate back the extended length.
-                l_feedback = obj.hardwareInterface.lengthFeedbackRead;
-                while(~any(l_feedback+1))
-                    l_feedback = obj.hardwareInterface.lengthFeedbackRead;
-                end
-                obj.l_feedback_traj(t, :) = ((1+obj.elongation_per_Newton*model_temp.cableForces).*l_feedback)';
-                % And then, we use the feedbacked length to get the true q.
-                [q_solved, ~, ~] = obj.fksolver.compute(obj.l_feedback_traj(t, :)', model_temp.cableLengths, 1:obj.model.numCables, trajectory.q(:,t), zeros(size(trajectory.q(:,t))), 1);
-                obj.q_feedback_traj(t,:) = q_solved'; 
+%                 % Record the relevant states for problem-solving purpose
+%                 obj.time_abs_traj(t) = rem(now,1);
+%                 obj.l_cmd_traj(t, :) = model_temp.cableLengths'; %
+%                 
+%                 % For recording the length of feedback, first assume the
+%                 % elasticity factor is appropriate. So for get the true
+%                 % length, we calculate back the extended length.
+%                 l_feedback = obj.hardwareInterface.lengthFeedbackRead;
+%                 while(~any(l_feedback+1))
+%                     l_feedback = obj.hardwareInterface.lengthFeedbackRead;
+%                 end
+%                 obj.l_feedback_traj(t, :) = ((1+obj.elongation_per_Newton.*model_temp.cableForces).*l_feedback)';
+%                 % And then, we use the feedbacked length to get the true q.
+%                 [q_solved, ~, ~] = obj.fksolver.compute(obj.l_feedback_traj(t, :)', model_temp.cableLengths, 1:obj.model.numCables, trajectory.q(:,t), zeros(size(trajectory.q(:,t))), 1);
+%                 obj.q_feedback_traj(t,:) = q_solved'; 
                 
                 
                 ratio = 1;
