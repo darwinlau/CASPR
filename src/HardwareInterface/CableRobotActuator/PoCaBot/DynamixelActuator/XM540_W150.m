@@ -65,19 +65,20 @@ classdef XM540_W150 < DynamixelActuatorParaBase
         LEN_KpP = 2;
 
         DXL_MINIMUM_CURRENT_VALUE  = 0;
-        %DXL_MAXIMUM_CURRENT_VALUE  = 2047;
+        DXL_MAXIMUM_CURRENT_VALUE  = 2047;
         DXL_MOVING_STATUS_THRESHOLD = 20;           % Dynamixel moving status threshold
         
         ENCODER_COUNT_PER_TURN = 4096;
-        % MAX_CURRENT = 648;% nominal value.
-        % MAX_TORQUE = 1.5;%N.m
+        MAX_CURRENT = 2047;% nominal value.
+        MAX_TORQUE = 4.7;%N.m 12kg*9.8*0.06
         KpP_SCALE_FACTOR = 128;
         KpI_SCALE_FACTOR = 65536;
         KpD_SCALE_FACTOR = 16;
         
         % Below paras are based on experiences.
-        % PROFILE_ACC = 150;
-        % PROFILE_VEL = 300;
-        % MAX_WORK_CURRENT = 400;
+        PROFILE_ACC = 20;
+        PROFILE_VEL = 180;
+        MAX_WORK_CURRENT = 1700;
+        KpP = 2800;
     end
 end
