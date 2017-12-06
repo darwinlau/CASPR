@@ -76,7 +76,7 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
             end
             
             for i = 1: numMotor
-                accessories_temp(i) = LargeMotorAccessories;
+                accessories_temp(i) = MegaMotorAccessories;
             end
             interface.accessories = accessories_temp;
             interface.cableLengths_full = accessories_temp(1).cableLengths_full;
@@ -280,7 +280,17 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
         
         % Method to send some "off" state to the hardware (optional)
         function systemOffSend(obj)
+            [current] = obj.forceFeedbackRead();
+            cnt = 20;
+            for i = 1:cnt
+                obj.forceCommandSend(current*(1-i/cnt));
+                pause(0.1);
+            end
             obj.toggleEnableAllDynamixel(obj.TORQUE_DISABLE);
+        end
+        
+        function shutdownGentlely(obj)
+            
         end
         
         function switchOperatingMode(obj,om)
@@ -365,6 +375,7 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
         end
         
         % Set the PID paras of the Position loop
+        % The arguments KpP/KpI/KpD are with size numMotor by 1
         function setKpD(obj,KpD)
             obj.KpD = KpD;
             obj.sync_write(obj.ActuatorParas.ADDR_KpD, obj.ActuatorParas.LEN_KpD, KpD);
@@ -436,6 +447,10 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
         % to be rebooted.
         function [hardware_error_status] = getHardwareErrorStatus(obj)
             [~, hardware_error_status] = obj.sync_read(obj.ActuatorParas.ADDR_HARDWARE_ERROR_STATUS, obj.ActuatorParas.LEN_HARDWARE_ERROR_STATUS);
+        end
+        
+        function [actuatorParas] = getActuatorParas(obj)
+            actuatorParas = obj.ActuatorParas;
         end
     end
     
