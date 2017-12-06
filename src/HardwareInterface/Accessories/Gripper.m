@@ -20,14 +20,22 @@ classdef Gripper < handle
         MIN_HAND_ANGLE = 70;
         INI_HAND_ANGLE = 180;
         
-        BEST_HAND_ANGLE = 99;% For gripping
-        RELEASE_HAND_ANGLE = 107; % For releasing the brick
+        BEST_HAND_ANGLE = 85;% For gripping
+        RELEASE_HAND_ANGLE = 92; % For releasing the brick
         LOOSE_HAND_ANGLE = 144;
         
         
         MAX_ARM_ANGLE  = 180;
         MIN_ARM_ANGLE  = 0;
         INI_ARM_ANGLE  = 90;
+        
+        LOOKUP_ARM_ANGLE = [  ...
+            hex2dec('08'), 95;...
+            hex2dec('0E'), 90;...
+            hex2dec('37'), 45;...
+            hex2dec('61'),  0;...
+            hex2dec('8A'),-40;...
+            hex2dec('B4'),-85];
         
         CMD_MOTOR_HEADER = [hex2dec('FF') hex2dec('AA')];
         CMD_DISTANCE_READ = uint8(hex2dec(['FF';'22';'22';'22']))';
@@ -213,6 +221,10 @@ classdef Gripper < handle
             end
             obj.us_enable = isEnable;
         end
+        
+        function detect(obj)
+            
+        end
     end
     
     methods (Access = private)
@@ -241,35 +253,19 @@ classdef Gripper < handle
         
         function [arm_angle_cmd] = armAngleConvert(obj, arm_angle_needed)
             CASPR_log.Assert(arm_angle_needed<= obj.MAX_ARM_ANGLE && arm_angle_needed>=obj.MIN_ARM_ANGLE,'The argument is out of range!');
-            % calibration of gripper B
-            b_ang = 9; c_ang = 99; d_ang = 180;
-            a_ang = c_ang - (92/90)*(c_ang-b_ang);
             
-            if (arm_angle_needed < 92)
-                temp = (1/92)*(c_ang-a_ang)*(92-arm_angle_needed)+a_ang;                
-            else
-                temp = ((180-arm_angle_needed)*(d_ang-c_ang))/(180-92)+c_ang;                
+            if(arm_angle_needed>=95)
+                arm_angle_needed = arm_angle_needed - 180;
             end
-            %             % calibration variables
-            %             angle180 = 90;% 90 DEGREE real;
-            %             angle0 = 274;%DEGREE
-            %             k = (angle180-angle0)/(180-0);
-            %             if(arm_angle_cmd>=90)
-            %                 temp = (arm_angle_cmd-angle0)/k;
-            %             else
-            %                 temp = (arm_angle_cmd-angle180)/k;
-            %             end
-            % model easily: equation of one unknow, one order
-            %             angle0 = 187; % decimalism
-            %             angle180 = -3;
-            %             k = (angle180-angle0)/(180-0);
-            %             temp = (arm_angle_cmd-angle0)/k;
-            %             if temp<0
-            %                 temp = temp + 180;
-            %             elseif temp>180
-            %                 temp = temp - 180;
-            %             end
-            arm_angle_cmd = temp;
+            
+            arm_angle_cmd = interp1(obj.LOOKUP_ARM_ANGLE(:,2),obj.LOOKUP_ARM_ANGLE(:,1),arm_angle_needed);
+            
+            % interpolation testing
+%             figure;
+%             x = (1:180)';
+%             x(find(x>=95)) = x(find(x>=95)) - 180;
+%             y = interp1(LOOKUP_ARM_ANGLE(:,2),LOOKUP_ARM_ANGLE(:,1),x,'PCHIP');
+%             plot(LOOKUP_ARM_ANGLE(:,2),LOOKUP_ARM_ANGLE(:,1),'o', x, y, 'r');
         end
     end
 end
