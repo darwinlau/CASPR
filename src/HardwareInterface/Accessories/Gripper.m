@@ -7,14 +7,19 @@ classdef Gripper < handle
         strComPort
         comPort
         send_list
-
+        
         us_enable = 0;
         us_distance
         us_timer = 0;
+        
+        z_offset_pickup = 0;
+        z_offset_place = 0;
     end
     
     properties (Access = public, Constant = true)
         BAUDRATE       = 9600;
+        
+        GRIP_DEPTH = 0.035;
         
         MAX_HAND_ANGLE = 180;
         MIN_HAND_ANGLE = 70;
@@ -30,6 +35,22 @@ classdef Gripper < handle
         INI_ARM_ANGLE  = 90;
         
         LOOKUP_ARM_ANGLE = [  ...
+            hex2dec('08'), 95;...
+            hex2dec('0E'), 90;...
+            hex2dec('37'), 45;...
+            hex2dec('61'),  0;...
+            hex2dec('8A'),-40;...
+            hex2dec('B4'),-85];
+        
+        LOOKUP_DISTANCE_SENSOR1 = [  ...
+            hex2dec('08'), 95;...
+            hex2dec('0E'), 90;...
+            hex2dec('37'), 45;...
+            hex2dec('61'),  0;...
+            hex2dec('8A'),-40;...
+            hex2dec('B4'),-85];
+        
+        LOOKUP_DISTANCE_SENSOR2 = [  ...
             hex2dec('08'), 95;...
             hex2dec('0E'), 90;...
             hex2dec('37'), 45;...
@@ -57,8 +78,8 @@ classdef Gripper < handle
         function gripper = Gripper(strComPort)
             gripper.strComPort = strComPort;
             gripper.arm_angle_cmd  = gripper.INI_ARM_ANGLE;
-%             import java.util.LinkedList
-%             gripper.send_list = LinkedList();
+            %             import java.util.LinkedList
+            %             gripper.send_list = LinkedList();
         end
         
         function initialize(obj)
@@ -68,14 +89,14 @@ classdef Gripper < handle
             obj.comPort.ReadAsyncMode = 'continuous';
             
             % async read settings
-%             obj.comPort.BytesAvailableFcnCount = obj.US_BYTES_NUM;
-%             obj.comPort.BytesAvailableFcnMode = 'byte';
-%             obj.comPort.BytesAvailableFcn = {@serial_callback,obj};
+            %             obj.comPort.BytesAvailableFcnCount = obj.US_BYTES_NUM;
+            %             obj.comPort.BytesAvailableFcnMode = 'byte';
+            %             obj.comPort.BytesAvailableFcn = {@serial_callback,obj};
             
             obj.comPort.TimerPeriod = obj.TIMERPERIOD; % s
-%            obj.comPort.TimerFcn = {@serial_callback,obj};
+            %            obj.comPort.TimerFcn = {@serial_callback,obj};
             
-%             obj.comPort.OutputEmptyFcn = {@serial_callback,obj};
+            %             obj.comPort.OutputEmptyFcn = {@serial_callback,obj};
             
             obj.openserial();
         end
@@ -85,23 +106,67 @@ classdef Gripper < handle
         end
         
         function setHandAngle(obj,hand_angle_cmd)
-%             CASPR_log.Assert(hand_angle_cmd<= obj.MAX_HAND_ANGLE && hand_angle_cmd>=obj.MIN_HAND_ANGLE,'The argument is out of range!');
+            %             CASPR_log.Assert(hand_angle_cmd<= obj.MAX_HAND_ANGLE && hand_angle_cmd>=obj.MIN_HAND_ANGLE,'The argument is out of range!');
             obj.hand_angle_cmd = hand_angle_cmd;
             cmd = [obj.CMD_MOTOR_HEADER obj.hand_angle_cmd obj.arm_angle_cmd];
             fwrite(obj.comPort,cmd);
         end
         
-        function setHandAngleAsync(obj,hand_angle_cmd)
-%             CASPR_log.Assert(hand_angle_cmd<= obj.MAX_HAND_ANGLE && hand_angle_cmd>=obj.MIN_HAND_ANGLE,'The argument is out of range!');
-            obj.hand_angle_cmd = hand_angle_cmd;
-            cmd = [obj.CMD_MOTOR_HEADER obj.hand_angle_cmd obj.arm_angle_cmd];
-            obj.send_list.add(cmd);
-        end
+
         
         function setArmAngle(obj,arm_angle_needed)
             obj.arm_angle_cmd = obj.armAngleConvert(arm_angle_needed);
             cmd = [obj.CMD_MOTOR_HEADER obj.hand_angle_cmd obj.arm_angle_cmd];
             fwrite(obj.comPort,cmd);
+        end
+        
+        function [intensity, bState] = getDistanceRawData(obj)
+            fwrite(obj.comPort, obj.CMD_DISTANCE_READ);
+            [ret, ~, msg] = fread(obj.comPort, 4);
+            if(isempty(msg) && ret(1) == obj.RET_DISTANCE_HEADER(1) && ret(2) == obj.RET_DISTANCE_HEADER(2)...
+                    && ret(3)>=0 && ret(4) >=0)
+                bState = true;
+                intensity = ret(3:4);
+            else
+                bState = false;
+                intensity = -1;
+            end
+        end
+            
+        function [distance, bSuccess] = getDistance(obj)
+            while(true)
+                [intensity, bState] = obj.getDistanceRawData();
+                if(bState)
+                    break;
+                end
+            end
+%             if(intensity(1)>=obj.LOOKUP_DISTANCE_SENSOR1(1,1)
+            distance = obj.distanceConvert(intensity);
+            bSuccess = true;
+        end
+        
+        function enablePower(obj)
+            fwrite(obj.comPort,obj.CMD_ENABLE_POWER);
+        end
+        
+        function disablePower(obj)
+            fwrite(obj.comPort, obj.CMD_DISABLE_POWER);
+        end
+        
+        function detect(obj)
+            
+        end
+        
+        
+        
+        
+        
+        
+        function setHandAngleAsync(obj,hand_angle_cmd)
+            %             CASPR_log.Assert(hand_angle_cmd<= obj.MAX_HAND_ANGLE && hand_angle_cmd>=obj.MIN_HAND_ANGLE,'The argument is out of range!');
+            obj.hand_angle_cmd = hand_angle_cmd;
+            cmd = [obj.CMD_MOTOR_HEADER obj.hand_angle_cmd obj.arm_angle_cmd];
+            obj.send_list.add(cmd);
         end
         
         function setArmAngleAsync(obj,arm_angle_cmd)
@@ -111,29 +176,29 @@ classdef Gripper < handle
             a_ang = c_ang - (92/90)*(c_ang-b_ang);
             
             if (arm_angle_cmd < 92)
-                temp = (1/92)*(c_ang-a_ang)*(92-arm_angle_cmd)+a_ang;                
+                temp = (1/92)*(c_ang-a_ang)*(92-arm_angle_cmd)+a_ang;
             else
-                temp = ((180-arm_angle_cmd)*(d_ang-c_ang))/(180-92)+c_ang;                
+                temp = ((180-arm_angle_cmd)*(d_ang-c_ang))/(180-92)+c_ang;
             end
-%             % calibration variables
-%             angle180 = 90;% 90 DEGREE real;
-%             angle0 = 274;%DEGREE
-%             k = (angle180-angle0)/(180-0);
-%             if(arm_angle_cmd>=90)
-%                 temp = (arm_angle_cmd-angle0)/k;
-%             else
-%                 temp = (arm_angle_cmd-angle180)/k;
-%             end
+            %             % calibration variables
+            %             angle180 = 90;% 90 DEGREE real;
+            %             angle0 = 274;%DEGREE
+            %             k = (angle180-angle0)/(180-0);
+            %             if(arm_angle_cmd>=90)
+            %                 temp = (arm_angle_cmd-angle0)/k;
+            %             else
+            %                 temp = (arm_angle_cmd-angle180)/k;
+            %             end
             % model easily: equation of one unknow, one order
-%             angle0 = 187; % decimalism
-%             angle180 = -3;
-%             k = (angle180-angle0)/(180-0);
-%             temp = (arm_angle_cmd-angle0)/k;
-%             if temp<0
-%                 temp = temp + 180;
-%             elseif temp>180
-%                 temp = temp - 180;
-%             end
+            %             angle0 = 187; % decimalism
+            %             angle180 = -3;
+            %             k = (angle180-angle0)/(180-0);
+            %             temp = (arm_angle_cmd-angle0)/k;
+            %             if temp<0
+            %                 temp = temp + 180;
+            %             elseif temp>180
+            %                 temp = temp - 180;
+            %             end
             
             obj.arm_angle_cmd = temp;
             cmd = [obj.CMD_MOTOR_HEADER obj.hand_angle_cmd obj.arm_angle_cmd];
@@ -148,68 +213,46 @@ classdef Gripper < handle
             cmd = [obj.CMD_MOTOR_HEADER obj.hand_angle_cmd obj.arm_angle_cmd];
             obj.send_list.add(cmd);
         end
-
-        function [distance, bState] = getDistance(obj)
-            fwrite(obj.comPort, obj.CMD_DISTANCE_READ);
-            [ret, ~, msg] = fread(obj.comPort, 4);
-            
-            if(isempty(msg) && ret(1) == obj.RET_DISTANCE_HEADER(1) && ret(2) == obj.RET_DISTANCE_HEADER(2)...
-                && ret(3)>=0 && ret(4) >=0)
-                bState = true;
-                distance = ret(3:4);
-            else
-                bState = false;
-                distance = -1;
-            end
-        end
-        
-        function enablePower(obj)
-            fwrite(obj.comPort,obj.CMD_ENABLE_POWER);
-        end
-        
-        function disablePower(obj)
-            fwrite(obj.comPort, obj.CMD_DISABLE_POWER);
-        end
         
         function us_distance = getUltraSonic(obj)
             us_distance = obj.us_distance;
         end
         
         
-%         % The default value is 1 second. The minimum value is 0.01 second.
-%         TIMERPERIOD = 0.05;%s
+        %         % The default value is 1 second. The minimum value is 0.01 second.
+        %         TIMERPERIOD = 0.05;%s
         function timer_callback(obj)
-%             if(obj.us_enable)
-%                 if(obj.us_timer == 0)
-%                     % upload the us cmd
-%                     obj.send_list.add(double(obj.CMD_DISTANCE_READ));
-%                 end
-%                 obj.us_timer = obj.us_timer + 1;
-%                 if(obj.us_timer >= obj.US_READ_PERIOD/obj.TIMERPERIOD)
-%                     obj.us_timer = 0;
-%                 end
-%             else
-%                 obj.us_timer = 0;
-%             end
+            %             if(obj.us_enable)
+            %                 if(obj.us_timer == 0)
+            %                     % upload the us cmd
+            %                     obj.send_list.add(double(obj.CMD_DISTANCE_READ));
+            %                 end
+            %                 obj.us_timer = obj.us_timer + 1;
+            %                 if(obj.us_timer >= obj.US_READ_PERIOD/obj.TIMERPERIOD)
+            %                     obj.us_timer = 0;
+            %                 end
+            %             else
+            %                 obj.us_timer = 0;
+            %             end
             
             if(obj.send_list.size() > 0 && ...
-                (strcmpi(obj.comPort.TransferStatus,'read') || strcmpi(obj.comPort.TransferStatus,'idle')))
+                    (strcmpi(obj.comPort.TransferStatus,'read') || strcmpi(obj.comPort.TransferStatus,'idle')))
                 obj.sendCMDAsync(obj.send_list.remove());
             end
         end
         
-%         function trigger_us(obj)
-%             flushinput(obj.comPort);
-%             obj.sendReadCMD();
-%             %readasync(obj.comPort, obj.US_BYTES_NUM);
-%         end
+        %         function trigger_us(obj)
+        %             flushinput(obj.comPort);
+        %             obj.sendReadCMD();
+        %             %readasync(obj.comPort, obj.US_BYTES_NUM);
+        %         end
         
-%         function update_write_state(obj)
-%             if(obj.send_list.size() > 0 && ...
-%                 (strcmpi(obj.comPort.TransferStatus,'read') || strcmpi(obj.comPort.TransferStatus,'idle')))
-%                 obj.sendCMDAsync(obj.send_list.remove());
-%             end
-%         end
+        %         function update_write_state(obj)
+        %             if(obj.send_list.size() > 0 && ...
+        %                 (strcmpi(obj.comPort.TransferStatus,'read') || strcmpi(obj.comPort.TransferStatus,'idle')))
+        %                 obj.sendCMDAsync(obj.send_list.remove());
+        %             end
+        %         end
         
         function update_us_state(obj)
             obj.us_distance = fread(obj.comPort,obj.US_BYTES_NUM,'int8');
@@ -221,10 +264,6 @@ classdef Gripper < handle
             end
             obj.us_enable = isEnable;
         end
-        
-        function detect(obj)
-            
-        end
     end
     
     methods (Access = private)
@@ -233,8 +272,8 @@ classdef Gripper < handle
         end
         
         function closeserial(obj)
-%            stopasync(obj.comPort);
-%            pause(1);
+            %            stopasync(obj.comPort);
+            %            pause(1);
             fclose(obj.comPort);
             delete(obj.comPort);
             clear obj.comPort;
@@ -261,11 +300,17 @@ classdef Gripper < handle
             arm_angle_cmd = interp1(obj.LOOKUP_ARM_ANGLE(:,2),obj.LOOKUP_ARM_ANGLE(:,1),arm_angle_needed);
             
             % interpolation testing
-%             figure;
-%             x = (1:180)';
-%             x(find(x>=95)) = x(find(x>=95)) - 180;
-%             y = interp1(LOOKUP_ARM_ANGLE(:,2),LOOKUP_ARM_ANGLE(:,1),x,'PCHIP');
-%             plot(LOOKUP_ARM_ANGLE(:,2),LOOKUP_ARM_ANGLE(:,1),'o', x, y, 'r');
+            %             figure;
+            %             x = (1:180)';
+            %             x(find(x>=95)) = x(find(x>=95)) - 180;
+            %             y = interp1(LOOKUP_ARM_ANGLE(:,2),LOOKUP_ARM_ANGLE(:,1),x,'PCHIP');
+            %             plot(LOOKUP_ARM_ANGLE(:,2),LOOKUP_ARM_ANGLE(:,1),'o', x, y, 'r');
+        end
+        
+        function [distance] = distanceConvert(obj, intensity)
+            distance = zeros(size(intensity));
+            distance(1) = interp1(obj.LOOKUP_DISTANCE_SENSOR1(:,1),obj.LOOKUP_ARM_ANGLE(:,2),intensity(1));
+            distance(2) = interp1(obj.LOOKUP_DISTANCE_SENSOR2(:,1),obj.LOOKUP_ARM_ANGLE(:,2),intensity(2));
         end
     end
 end
