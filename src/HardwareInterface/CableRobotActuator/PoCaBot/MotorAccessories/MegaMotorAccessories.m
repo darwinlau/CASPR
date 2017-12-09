@@ -21,7 +21,7 @@ classdef MegaMotorAccessories < MotorAccessoriesBase
         % len_per_circle = sqrt(MegaMotorAccessories.width_per_circle^2 + (MegaMotorAccessories.radius*2*pi)^2);
         
         % Dynamixel Holder
-        lenCoS2Outlet = 0.210; % distance from cetre of the spool to the cable outlet
+        lenCoS2Outlet = 0.50; % distance from cetre of the spool to the cable outlet
         cableLengths_full = ones(8,1)*(10.2464+0.5);
     end
     
