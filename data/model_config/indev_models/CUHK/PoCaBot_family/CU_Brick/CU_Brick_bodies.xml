@@ -5,7 +5,7 @@
     <link_rigid num="1" name="PoCaBot_spatial">
       <joint type="SPATIAL_EULER_XYZ" q_initial="2.0 2.0 1.0 0.0 0.0 0.0" q_min="0.0 0.0 0.0 -3.1416 -3.1416 -3.1416" q_max="4.0 4.0 2.5 3.1416 3.1416 3.1416" />
       <physical>
-        <mass>3.00</mass>
+        <mass>2.435</mass>
         <com_location>0.0 0.0 0.0</com_location>
         <end_location>0.0 0.0 0.0</end_location>
         <inertia ref="com">
