@@ -11,15 +11,10 @@ classdef Gripper < handle
         us_enable = 0;
         us_distance
         us_timer = 0;
-        
-        z_offset_pickup = 0;
-        z_offset_place = 0;
     end
     
     properties (Access = public, Constant = true)
         BAUDRATE       = 9600;
-        
-        GRIP_DEPTH = 0.035;
         
         MAX_HAND_ANGLE = 180;
         MIN_HAND_ANGLE = 70;
