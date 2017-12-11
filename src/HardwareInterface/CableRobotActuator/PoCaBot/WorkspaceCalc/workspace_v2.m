@@ -18,9 +18,6 @@ flag_geo = zeros(length(x),length(y),length(z));
 
 for i = 1:length(x)
     for j = 1:length(y)
-%         if y(j) <= frame_size(2)/frame_size(1)*x(i)
-%             continue;
-%         end
         for k = 1:length(z)
             co_brick = [x(i),y(j),z(k)]';
             co_ee = [co_brick(1),co_brick(2),co_brick(3)+height_ee-brick_size(3)]';
@@ -146,14 +143,14 @@ end
 %% output the data into *.txt file
 [I1,I2,I3] = ind2sub(size(flag_dynamics_forcelimit),find(flag_dynamics_forcelimit));
 [I4,I5,I6] = ind2sub(size(flag_calb),find(flag_calb));
-filename_txt = 'C:\Users\user\Desktop\Tristan\workspace.txt';
-filename_csv = 'C:\Users\user\Desktop\Tristan\workspace.csv';
-fileID = fopen(filename_txt,'w');
-fprintf(fileID,'%.3f %.3f %.3f\n', [frame_size(1)-x(I1)',y(I2)',z(I3)']');
-fprintf(fileID,'%.3f %.3f %.3f\n', [frame_size(1)-x(I1)',frame_size(2)-y(I2)',z(I3)']');
-fprintf(fileID,'%.3f %.3f %.3f\n', [x(I4)',y(I5)',z(I6)']');
-fprintf(fileID,'%.3f %.3f %.3f\n', [x(I4)',frame_size(2)-y(I5)',z(I6)']');
-fclose(fileID);
+% filename_txt = 'C:\Users\trist\OneDrive\Desktop\workspace.txt';
+filename_csv = 'C:\Users\trist\OneDrive\Desktop\workspace.csv';
+% fileID = fopen(filename_txt,'w');
+% fprintf(fileID,'%.3f %.3f %.3f\n', [frame_size(1)-x(I1)',y(I2)',z(I3)']');
+% fprintf(fileID,'%.3f %.3f %.3f\n', [frame_size(1)-x(I1)',frame_size(2)-y(I2)',z(I3)']');
+% fprintf(fileID,'%.3f %.3f %.3f\n', [x(I4)',y(I5)',z(I6)']');
+% fprintf(fileID,'%.3f %.3f %.3f\n', [x(I4)',frame_size(2)-y(I5)',z(I6)']');
+% fclose(fileID);
 dlmwrite(filename_csv,[frame_size(1)-x(I1)',y(I2)',z(I3)'],'precision','%.3f');
 dlmwrite(filename_csv,[frame_size(1)-x(I1)',frame_size(2)-y(I2)',z(I3)'],'-append','precision','%.3f');
 dlmwrite(filename_csv,[x(I4)',y(I5)',z(I6)'],'-append','precision','%.3f');
@@ -177,3 +174,21 @@ title('workspace');
 axis equal;
 grid on;
 save('workspace_v2.mat');
+
+%% consider giving away the occupied central space for the end effector to do calibration and avoid cable-construction collision.
+ee_side_length = 0.3;
+flag_geo_v2 = zeros(length(x),length(y),length(z));
+slope_yx = (frame_size(2)/2-co_frame6(2))/(frame_size(1)/2-co_frame6(1));
+for i = 1:length(x)
+    for j = 1:length(y)
+        if y(j)-co_frame6(2) >= slope_yx*(x(i)-co_frame6(1))
+            if(x(i)<frame_size(1)/2-ee_side_length/2)
+                flag_geo_v2(i,j,:)=1;
+            end
+        end
+    end
+end
+[I1,I2,I3] = ind2sub(size(flag_geo_v2),find(flag_geo_v2));
+figure;
+plot3(x(I1),y(I2),z(I3),'.');xlabel('x');ylabel('y');zlabel('z');
+grid on;
