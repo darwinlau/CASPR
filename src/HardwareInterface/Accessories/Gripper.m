@@ -22,7 +22,7 @@ classdef Gripper < handle
         
         BEST_HAND_ANGLE = hex2dec('5B');% For gripping
         RELEASE_HAND_ANGLE = hex2dec('5F'); % For releasing the brick
-        LOOSE_HAND_ANGLE = hex2dec('85');% 90
+        LOOSE_HAND_ANGLE = hex2dec('80');% 90
         
         
         MAX_ARM_ANGLE  = 180;
