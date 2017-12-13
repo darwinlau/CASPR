@@ -1,7 +1,7 @@
 classdef Gripper < handle
     properties (Access = public)
-        hand_angle_cmd
-        arm_angle_cmd
+        hand_angle_cmd = Gripper.LOOSE_HAND_ANGLE;
+        arm_angle_cmd = 90;
         arm_angle_needed
         
         strComPort
@@ -20,9 +20,9 @@ classdef Gripper < handle
         MIN_HAND_ANGLE = 70;
         INI_HAND_ANGLE = 180;
         
-        BEST_HAND_ANGLE = hex2dec('5B');% For gripping
+        BEST_HAND_ANGLE = hex2dec('59');% For gripping
         RELEASE_HAND_ANGLE = hex2dec('5F'); % For releasing the brick
-        LOOSE_HAND_ANGLE = hex2dec('80');% 90
+        LOOSE_HAND_ANGLE = hex2dec('70');% 90
         
         
         MAX_ARM_ANGLE  = 180;
@@ -53,12 +53,12 @@ classdef Gripper < handle
             28.4400    0.0300];
         
         LOOKUP_DISTANCE_SENSOR2 = [  ...
-            56.8600   -0.0235;...
-            50.9800   -0.0175;...
-            39.6900         0;...
-            32.9100    0.0100;...
-            29.5600    0.0200;...
-            26.4200    0.0300];
+            48.5900   -0.0235;...
+            43.0200   -0.0175;...
+            38.8000         0;...
+            31.0000    0.0100;...
+            28.0000    0.0200;...
+            26.0000    0.0300];
         
         CMD_MOTOR_HEADER = [hex2dec('FF') hex2dec('AA')];
         CMD_DISTANCE_READ = uint8(hex2dec(['FF';'22';'22';'22']))';
@@ -66,7 +66,7 @@ classdef Gripper < handle
         CMD_DISABLE_POWER = uint8(hex2dec(['FF';'77';'77';'00']))';
         CMD_ENABLE_POWER = uint8(hex2dec(['FF';'77';'77';'01']))';
         
-        SERIAL_TIMEOUT = 1;%s Waiting time to complete a read or write operation
+        SERIAL_TIMEOUT = 2;%s Waiting time to complete a read or write operation
         
         US_BYTES_NUM = 1;
         US_READ_PERIOD = 1;%s
@@ -123,6 +123,7 @@ classdef Gripper < handle
         end
         
         function [intensity, bState] = getDistanceRawData(obj)
+            flushinput(obj.comPort);
             fwrite(obj.comPort, obj.CMD_DISTANCE_READ);
             [ret, ~, msg] = fread(obj.comPort, 4);
             if(isempty(msg) && ret(1) == obj.RET_DISTANCE_HEADER(1) && ret(2) == obj.RET_DISTANCE_HEADER(2)...
