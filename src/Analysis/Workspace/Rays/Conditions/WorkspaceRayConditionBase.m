@@ -39,7 +39,7 @@ classdef WorkspaceRayConditionBase < handle
                 case WorkspaceRayConditionType.WRENCH_CLOSURE
                     wc = WrenchClosureRay(min_ray_percentage);
                 case WorkspaceRayConditionType.INTERFERENCE
-                    CASPR_log.Error('Workspace condition has not yet been defined')
+                    wc = InterferenceFreeRay(min_ray_percentage);
                 otherwise
                     CASPR_log.Error('Workspace condition type is not defined');
             end

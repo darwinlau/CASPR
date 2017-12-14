@@ -5,21 +5,19 @@ clc;  close all; warning off
 
 % Set up the model 
 % 
-model_config    =   ModelConfig('2 DoF VSD');   %    spatial7cable   BMArm_paper   BMArm_paper
-cable_set_id    =   'basic';
-modelObj        =   model_config.getModel(cable_set_id);
+% model_config    =   ModelConfig('2 DoF VSD');   %    spatial7cable   BMArm_paper   BMArm_paper
+% cable_set_id    =   'basic';
+% modelObj        =   model_config.getModel(cable_set_id);
 
 
-q_begin         =   modelObj.bodyModel.q_min; q_end = modelObj.bodyModel.q_max; q_initial=modelObj.bodyModel.q_initial;  
-modelObj.bodyModel.q_min 
-modelObj.bodyModel.q_max
-nsegvar= [25;25];      % number of discritization on each axis. if the user desire to ignor discritization on one axis its corresponding discritiaztion number can be set to zero
-uGrid           =   RayGridGeneration(q_begin,q_end,q_initial,nsegvar); 
+% q_begin         =   modelObj.bodyModel.q_min; q_end = modelObj.bodyModel.q_max; q_initial=modelObj.bodyModel.q_initial;  
+% nsegvar= [25;25];      % number of discritization on each axis. if the user desire to ignor discritization on one axis its corresponding discritiaztion number can be set to zero
+% uGrid           =   RayGridGeneration(q_begin,q_end,q_initial,nsegvar); 
 
 % Set up the workspace simulator
 
-wsim            =   WorkspaceRayGeneration(modelObj,uGrid);
-wsim.run(2,0);    % the input can be empty or two digits. the first indicate the percentage of ray length which are ignored in workspace. 
+% wsim            =   WorkspaceRayGeneration(modelObj,uGrid);
+% wsim.run(2,0);    % the input can be empty or two digits. the first indicate the percentage of ray length which are ignored in workspace. 
                   % the second one is the readmode. if readmode is one then the result of computation in the data file is read without repeating the computation    
 % wsim.plotRayWorkspace([1,2]);     % the inout is a 1x2 or 1x3 vector of axes for plotting.
 % gsim   =  RayGraphGeneration(modelObj,uGrid,wsim); 
@@ -32,17 +30,17 @@ wsim.run(2,0);    % the input can be empty or two digits. the first indicate the
 
 %          4-4_CDPR_planar
 % 
-% model_config    =   DevModelConfig('4-4_CDPR_planar');   %    spatial7cable   BMArm_paper   BMArm_paper
-% cable_set_id    =   'original';
-% modelObj        =   model_config.getModel(cable_set_id);
+model_config    =   DevModelConfig('4_4_CDPR_planar');   %    spatial7cable   BMArm_paper   BMArm_paper
+cable_set_id    =   'original';
+modelObj        =   model_config.getModel(cable_set_id);
 % 
-% q_begin         =   modelObj.bodyModel.q_min; q_end = modelObj.bodyModel.q_max; q_initial=modelObj.bodyModel.q_initial;
-% nsegvar= [30;30;30];  
-% uGrid           =   RayGridGeneration(q_begin,q_end,q_initial,nsegvar);
+q_begin         =   modelObj.bodyModel.q_min; q_end = modelObj.bodyModel.q_max; q_initial=modelObj.bodyModel.q_initial;
+nsegvar= [25;25;25];  
+uGrid           =   RayGridGeneration(q_begin,q_end,q_initial,nsegvar);
 % 
-% wsim            =   WorkspaceRayGeneration(modelObj,uGrid);
-% wsim.run(0,0)            % the input can be empty or two digits. the first indicate the percentage of ray length which are ignored in workspace the second one is the readmode. if readmode is one then the result of computation in the data file is read without repeating the computation    
-% wsim.plotRayWorkspace([1,2,3])
+wsim            =   WorkspaceRayGeneration(modelObj,uGrid);
+wsim.run(2,0)            % the input can be empty or two digits. the first indicate the percentage of ray length which are ignored in workspace the second one is the readmode. if readmode is one then the result of computation in the data file is read without repeating the computation    
+wsim.plotRayWorkspace([1,2,3])
 % 
 % gsim   = RayGraphGeneration(modelObj,uGrid,wsim); 
 % 
