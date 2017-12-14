@@ -435,8 +435,8 @@ classdef SystemModelCables < handle
         % path
         function compile(obj, path, bodyModel)   
             CASPR_log.Info('- Compiling Cable Variables...');
-            matlabFunction(obj.V, 'File', strcat(path, "/compile_V"), 'Vars', {bodyModel.q, bodyModel.q_dot, bodyModel.q_ddot, bodyModel.W_e});                   
-            matlabFunction(obj.lengths, 'File', strcat(path, "/compile_lengths"), 'Vars', {bodyModel.q, bodyModel.q_dot, bodyModel.q_ddot, bodyModel.W_e});                   
+            matlabFunction(obj.V, 'File', strcat(path, '/compile_V'), 'Vars', {bodyModel.q, bodyModel.q_dot, bodyModel.q_ddot, bodyModel.W_e});                   
+            matlabFunction(obj.lengths, 'File', strcat(path, '/compile_lengths'), 'Vars', {bodyModel.q, bodyModel.q_dot, bodyModel.q_ddot, bodyModel.W_e});                   
         end
     end
     
