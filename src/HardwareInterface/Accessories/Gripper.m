@@ -141,10 +141,18 @@ classdef Gripper < handle
         % when distance is NaN, it means that the object is very close to
         % the sensor
         function [distance, bSuccess] = getDistance(obj)
+            det_cnt_max = 60;
+            det_cnt = 0;
             while(true)
                 [intensity, bState] = obj.getDistanceRawData();
                 if(bState)
                     break;
+                end
+                det_cnt = det_cnt + 1;
+                if(det_cnt>det_cnt_max)
+                    bSuccess = false;
+                    distance = -1;
+                    return;
                 end
                 pause(1);
             end
