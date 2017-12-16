@@ -281,17 +281,24 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
         % Method to send some "off" state to the hardware (optional)
         function systemOffSend(obj)
             %[current] = obj.forceFeedbackRead();
-            current = ones(obj.numMotor,1)*100;
+            cur_release = 200;
+            current = ones(obj.numMotor,1)*cur_release;
+            obj.forceCommandSend(current);
+            obj.tightenCablesWithinPositionMode();%if it is not in current based position operating mode, it should be fine. Because in this case, this statement shall not work by any means.
             cnt = 50;
             for i = 1:cnt
-                obj.forceCommandSend(current*(1-i/cnt));
+                current(1:2:obj.obj.numMotor) = cur_release*(1-i/cnt);
+                obj.forceCommandSend(current);
                 pause(0.1);
             end
-            obj.toggleEnableAllDynamixel(obj.TORQUE_DISABLE);
-        end
-        
-        function shutdownGentlely(obj)
             
+            for i = 1:cnt
+                current(2:2:obj.obj.numMotor) = cur_release*(1-i/cnt);
+                obj.forceCommandSend(current);
+                pause(0.1);
+            end
+            pause(1);
+            obj.toggleEnableAllDynamixel(obj.TORQUE_DISABLE);
         end
         
         function switchOperatingMode(obj,om)
@@ -365,10 +372,10 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
 %         % Tighten the cables without chaning the mode into CURRENT mode.
 %         % The precondition is that the motors are working under Extended
 %         % Position Mode, no matter with or without current constrained.
-%         function tightenCablesWithinPositionMode(obj)
-%             cmd = -1*obj.dynamixel_direction_reversed*1048574*ones(obj.numMotor,1);
-%             obj.motorPositionCommandSend(cmd);
-%         end
+        function tightenCablesWithinPositionMode(obj)
+            cmd = obj.dynamixel_direction_factor_position*1048574*ones(obj.numMotor,1);
+            obj.motorPositionCommandSend(cmd);
+        end
         
         % Enable or Disable the motors
         function switchEnable(obj, cmd)
