@@ -287,13 +287,13 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
             obj.tightenCablesWithinPositionMode();%if it is not in current based position operating mode, it should be fine. Because in this case, this statement shall not work by any means.
             cnt = 50;
             for i = 1:cnt
-                current(1:2:obj.obj.numMotor) = cur_release*(1-i/cnt);
+                current(1:2:obj.numMotor) = cur_release*(1-i/cnt);
                 obj.forceCommandSend(current);
                 pause(0.1);
             end
             
             for i = 1:cnt
-                current(2:2:obj.obj.numMotor) = cur_release*(1-i/cnt);
+                current(2:2:obj.numMotor) = cur_release*(1-i/cnt);
                 obj.forceCommandSend(current);
                 pause(0.1);
             end
@@ -373,7 +373,7 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
 %         % The precondition is that the motors are working under Extended
 %         % Position Mode, no matter with or without current constrained.
         function tightenCablesWithinPositionMode(obj)
-            cmd = obj.dynamixel_direction_factor_position*1048574*ones(obj.numMotor,1);
+            cmd = -1*obj.dynamixel_direction_factor_position*1048574*ones(obj.numMotor,1);
             obj.motorPositionCommandSend(cmd);
         end
         
