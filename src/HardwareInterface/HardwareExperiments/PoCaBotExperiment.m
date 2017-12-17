@@ -377,8 +377,8 @@ classdef PoCaBotExperiment < ExperimentBase
                 current = ones(obj.numMotor,1)*obj.hardwareInterface.ActuatorParas.MAX_WORK_CURRENT/3;
                 obj.hardwareInterface.forceCommandSend(current);
                 
-                error_position = 100;
-                while (error_position>30)
+                error_position = 1000;
+                while (error_position>120)
                     pause(0.5);
                     present_position = obj.hardwareInterface.motorPositionFeedbackRead();
                     error_position = sum(abs(present_position - init_pos));
