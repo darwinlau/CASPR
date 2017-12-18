@@ -17,8 +17,8 @@ classdef CableModelLinearSpring < CableModelBase
     end
     
     methods 
-        function ck = CableModelLinearSpring(name, numLinks)
-            ck@CableModelBase(name, numLinks);
+        function ck = CableModelLinearSpring(name, numLinks, diameter)
+            ck@CableModelBase(name, numLinks, diameter);
         end
         
         function update(obj, bodyModel)
@@ -47,11 +47,20 @@ classdef CableModelLinearSpring < CableModelBase
                 CASPR_log.Print(sprintf('Unknown cableAttachmentReference type: %s', attachRefString),CASPRLogLevel.ERROR);
             end
             
-            % Generate an ideal cable object
-            c = CableModelLinearSpring(name, bodiesModel.numLinks);
             
             % <properties> tag
             propertiesObj = xmlobj.getElementsByTagName('properties').item(0);
+            % <diameter>
+            lol = propertiesObj.getElementsByTagName('diameter');
+            if (lol.getLength() == 0) % not exist
+                diameter = 0;   
+            else
+                diameter = str2double(propertiesObj.getElementsByTagName('diameter').item(0).getFirstChild.getData);
+            end
+            
+            % Generate an ideal cable object
+            c = CableModelLinearSpring(name, bodiesModel.numLinks, diameter);
+            
             % <K>
             c.K_cable = str2double(propertiesObj.getElementsByTagName('K').item(0).getFirstChild.getData);
             % <force_min>

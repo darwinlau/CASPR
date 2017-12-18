@@ -39,6 +39,7 @@ classdef (Abstract) CableModelBase < handle
     properties (SetAccess = private)
         name        = '';                  % Cable name
         numLinks    = -1;
+        diameter
     end
     
     properties (Dependent)
@@ -56,9 +57,10 @@ classdef (Abstract) CableModelBase < handle
     end
         
     methods
-        function ck = CableModelBase(name, numLinks)
+        function ck = CableModelBase(name, numLinks, diameter)
             ck.name = name;
             ck.numLinks = numLinks;
+            ck.diameter = diameter;
         end
                 
         % NOT SURE HOW THIS IS USED YET, but just a demo of what can be

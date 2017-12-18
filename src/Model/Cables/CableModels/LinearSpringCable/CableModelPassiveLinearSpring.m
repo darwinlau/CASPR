@@ -16,8 +16,8 @@ classdef CableModelPassiveLinearSpring < CableModelBase
     end
     
     methods 
-        function ck = CableModelPassiveLinearSpring(name, numLinks)
-            ck@CableModelBase(name, numLinks);
+        function ck = CableModelPassiveLinearSpring(name, numLinks, diameter)
+            ck@CableModelBase(name, numLinks, diameter);
             ck.isActive = false;
         end
         
@@ -47,12 +47,20 @@ classdef CableModelPassiveLinearSpring < CableModelBase
             else
                 CASPR_log.Print(sprintf('Unknown cableAttachmentReference type: %s', attachRefString),CASPRLogLevel.ERROR);
             end
-            
-            % Generate an object
-            c = CableModelPassiveLinearSpring(name, bodiesModel.numLinks);
-            
+                        
             % <properties> tag
             propertiesObj = xmlobj.getElementsByTagName('properties').item(0);
+            % <diameter>
+            lol = propertiesObj.getElementsByTagName('diameter');
+            if (lol.getLength() == 0) % not exist
+                diameter = 0;   
+            else
+                diameter = str2double(propertiesObj.getElementsByTagName('diameter').item(0).getFirstChild.getData);
+            end 
+            
+            % Generate an object
+            c = CableModelPassiveLinearSpring(name, bodiesModel.numLinks, diameter);
+            
             % <K>
             c.K_cable = str2double(propertiesObj.getElementsByTagName('K').item(0).getFirstChild.getData);
             % <l0>

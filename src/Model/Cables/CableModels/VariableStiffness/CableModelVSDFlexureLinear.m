@@ -25,9 +25,9 @@ classdef CableModelVSDFlexureLinear < CableModelBase
     end
         
     methods 
-        function ck = CableModelVSDFlexureLinear(name, numLinks, K_cable, forceDeformationRelationCoeff)
+        function ck = CableModelVSDFlexureLinear(name, numLinks, K_cable, forceDeformationRelationCoeff, diameter)
             % Constructor
-            ck@CableModelBase(name, numLinks);
+            ck@CableModelBase(name, numLinks, diameter);
             ck.K_cable = K_cable;
             ck.forceDeformationRelationCoeff = forceDeformationRelationCoeff;
         end
@@ -75,9 +75,16 @@ classdef CableModelVSDFlexureLinear < CableModelBase
             % <vsd_force_deformation_relation>: quadratic relationship
             % between force and deformation [a b c]
             forceDeformationRelationCoeff = XmlOperations.StringToVector3(char(propertiesObj.getElementsByTagName('vsd_force_deformation_relation').item(0).getFirstChild.getData));
+            % <diameter>
+            lol = propertiesObj.getElementsByTagName('diameter');
+            if (lol.getLength() == 0) % not exist
+                diameter = 0;   
+            else
+                diameter = str2double(propertiesObj.getElementsByTagName('diameter').item(0).getFirstChild.getData);
+            end 
             
             % Generate an ideal cable object
-            c = CableModelVSDFlexureLinear(name, bodiesModel.numLinks, K_cable, forceDeformationRelationCoeff);
+            c = CableModelVSDFlexureLinear(name, bodiesModel.numLinks, K_cable, forceDeformationRelationCoeff, diameter);
             
             % <force_min>
             c.forceMin = str2double(propertiesObj.getElementsByTagName('force_min').item(0).getFirstChild.getData);

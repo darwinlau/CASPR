@@ -13,8 +13,8 @@ classdef CableModelIdeal < CableModelBase
     end
     
     methods 
-        function ck = CableModelIdeal(name, numLinks)
-            ck@CableModelBase(name, numLinks);
+        function ck = CableModelIdeal(name, numLinks, diameter)
+            ck@CableModelBase(name, numLinks, diameter);
         end
         
         function update(obj, bodyModel)
@@ -43,12 +43,20 @@ classdef CableModelIdeal < CableModelBase
             else
                 error('Unknown cableAttachmentReference type: %s', attachRefString);
             end
-            
-            % Generate an ideal cable object
-            c = CableModelIdeal(name, bodiesModel.numLinks);
-            
+                        
             % <properties> tag
             propertiesObj = xmlobj.getElementsByTagName('properties').item(0);
+            % <diameter>
+            lol = propertiesObj.getElementsByTagName('diameter');
+            if (lol.getLength() == 0) % not exist
+                diameter = 0;   
+            else
+                diameter = str2double(propertiesObj.getElementsByTagName('diameter').item(0).getFirstChild.getData);
+            end 
+                        
+            % Generate an ideal cable object
+            c = CableModelIdeal(name, bodiesModel.numLinks, diameter);
+            
             % <force_min>
             c.forceMin = str2double(propertiesObj.getElementsByTagName('force_min').item(0).getFirstChild.getData);
             % <force_max>

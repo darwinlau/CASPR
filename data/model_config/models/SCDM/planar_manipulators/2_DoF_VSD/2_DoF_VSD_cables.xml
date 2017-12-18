@@ -10,6 +10,7 @@
         <torsion_spring_length>0.01</torsion_spring_length>        
         <force_min>3</force_min>
         <force_max>80</force_max>
+        <diameter>0.367</diameter>
       </properties>
       <attachments>
         <attachment>
@@ -30,6 +31,7 @@
         <torsion_spring_length>0.01</torsion_spring_length>        
         <force_min>3</force_min>
         <force_max>80</force_max>
+        <diameter>0.368</diameter>
       </properties>
       <attachments>
         <attachment>
@@ -50,6 +52,7 @@
         <torsion_spring_length>0.01</torsion_spring_length>        
         <force_min>3</force_min>
         <force_max>80</force_max>
+        <diameter>0.369</diameter>
       </properties>
       <attachments>
         <attachment>

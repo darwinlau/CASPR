@@ -31,7 +31,7 @@ classdef WrenchClosureRay < WorkspaceRayConditionBase
             end
             % Set up a lin space for the free variable
             flxvarlinspace=linspace(workspace_ray.free_variable_range(1),workspace_ray.free_variable_range(2),maxdeg+1);
-            % Determine combinatoric vaqiables
+            % Determine combinatoric variables
             cab_comb=nchoosek(1:numCables,numDofs+1);
             [numcomb,~]=size(cab_comb);
             % Compute matf
