@@ -403,7 +403,7 @@ classdef PoCaBotExperiment < ExperimentBase
             obj.hardwareInterface.setKpP(ones(obj.numMotor,1)*obj.hardwareInterface.ActuatorParas.KpP);
             % Get the system ready to work
             obj.hardwareInterface.systemOnSend();
-            current = ones(obj.numMotor,1)*obj.hardwareInterface.ActuatorParas.MAX_WORK_CURRENT;
+            current = ones(obj.numMotor,1)*obj.hardwareInterface.ActuatorParas.MAX_WORK_CURRENT/1.5;
             obj.hardwareInterface.forceCommandSend(current);
             
             profileAcc = profileAcc/(obj.timestep/0.05);
