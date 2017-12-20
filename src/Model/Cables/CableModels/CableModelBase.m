@@ -34,12 +34,12 @@ classdef (Abstract) CableModelBase < handle
         % Minimum and maximum allowable cable force
         forceMin
         forceMax
+        diameter    = 0;            % diameter/thickness of cable (default value 0)
     end    
     
     properties (SetAccess = private)
         name        = '';                  % Cable name
         numLinks    = -1;
-        diameter
     end
     
     properties (Dependent)
@@ -57,10 +57,9 @@ classdef (Abstract) CableModelBase < handle
     end
         
     methods
-        function ck = CableModelBase(name, numLinks, diameter)
+        function ck = CableModelBase(name, numLinks)
             ck.name = name;
             ck.numLinks = numLinks;
-            ck.diameter = diameter;
         end
                 
         % NOT SURE HOW THIS IS USED YET, but just a demo of what can be

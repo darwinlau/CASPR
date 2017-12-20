@@ -25,9 +25,9 @@ classdef CableModelVSDFlexureLinear < CableModelBase
     end
         
     methods 
-        function ck = CableModelVSDFlexureLinear(name, numLinks, K_cable, forceDeformationRelationCoeff, diameter)
+        function ck = CableModelVSDFlexureLinear(name, numLinks, K_cable, forceDeformationRelationCoeff)
             % Constructor
-            ck@CableModelBase(name, numLinks, diameter);
+            ck@CableModelBase(name, numLinks);
             ck.K_cable = K_cable;
             ck.forceDeformationRelationCoeff = forceDeformationRelationCoeff;
         end
@@ -75,21 +75,18 @@ classdef CableModelVSDFlexureLinear < CableModelBase
             % <vsd_force_deformation_relation>: quadratic relationship
             % between force and deformation [a b c]
             forceDeformationRelationCoeff = XmlOperations.StringToVector3(char(propertiesObj.getElementsByTagName('vsd_force_deformation_relation').item(0).getFirstChild.getData));
-            % <diameter>
-            lol = propertiesObj.getElementsByTagName('diameter');
-            if (lol.getLength() == 0) % not exist
-                diameter = 0;   
-            else
-                diameter = str2double(propertiesObj.getElementsByTagName('diameter').item(0).getFirstChild.getData);
-            end 
-            
             % Generate an ideal cable object
-            c = CableModelVSDFlexureLinear(name, bodiesModel.numLinks, K_cable, forceDeformationRelationCoeff, diameter);
+            c = CableModelVSDFlexureLinear(name, bodiesModel.numLinks, K_cable, forceDeformationRelationCoeff);
             
             % <force_min>
             c.forceMin = str2double(propertiesObj.getElementsByTagName('force_min').item(0).getFirstChild.getData);
             % <force_max>
             c.forceMax = str2double(propertiesObj.getElementsByTagName('force_max').item(0).getFirstChild.getData);
+            % <diameter>
+            lol = propertiesObj.getElementsByTagName('diameter');
+            if (lol.getLength() ~= 0) % exist
+                c.diameter = str2double(propertiesObj.getElementsByTagName('diameter').item(0).getFirstChild.getData);
+            end
             
             % <attachments> tag
             attachmentObjs = xmlobj.getElementsByTagName('attachments').item(0).getChildNodes();

@@ -26,8 +26,8 @@ classdef CableModelVSDTorsionSpring < CableModelBase
     end
     
     methods 
-        function ck = CableModelVSDTorsionSpring(name, numLinks, K_cable, numSprings, springStiffness, springLength, diameter)
-            ck@CableModelBase(name, numLinks, diameter);
+        function ck = CableModelVSDTorsionSpring(name, numLinks, K_cable, numSprings, springStiffness, springLength)
+            ck@CableModelBase(name, numLinks);
             ck.K_cable = K_cable;
             ck.numSprings = numSprings;
             ck.springStiffness = springStiffness;
@@ -80,21 +80,18 @@ classdef CableModelVSDTorsionSpring < CableModelBase
             springStiffness = str2double(propertiesObj.getElementsByTagName('torsion_spring_stiffness').item(0).getFirstChild.getData);
             % <torsion_spring_length>
             springLength = str2double(propertiesObj.getElementsByTagName('torsion_spring_length').item(0).getFirstChild.getData);
-            % <diameter>
-            lol = propertiesObj.getElementsByTagName('diameter');
-            if (lol.getLength() == 0) % not exist
-                diameter = 0;   
-            else
-                diameter = str2double(propertiesObj.getElementsByTagName('diameter').item(0).getFirstChild.getData);
-            end                
-            
             % Generate an ideal cable object
-            c = CableModelVSDTorsionSpring(name, bodiesModel.numLinks, K_cable, numSprings, springStiffness, springLength, diameter);
+            c = CableModelVSDTorsionSpring(name, bodiesModel.numLinks, K_cable, numSprings, springStiffness, springLength);
             
             % <force_min>
             c.forceMin = str2double(propertiesObj.getElementsByTagName('force_min').item(0).getFirstChild.getData);
             % <force_max>
             c.forceMax = str2double(propertiesObj.getElementsByTagName('force_max').item(0).getFirstChild.getData);
+            % <diameter>
+            lol = propertiesObj.getElementsByTagName('diameter');
+            if (lol.getLength() ~= 0) % exist
+                c.diameter = str2double(propertiesObj.getElementsByTagName('diameter').item(0).getFirstChild.getData);
+            end
             
             % <attachments> tag
             attachmentObjs = xmlobj.getElementsByTagName('attachments').item(0).getChildNodes();

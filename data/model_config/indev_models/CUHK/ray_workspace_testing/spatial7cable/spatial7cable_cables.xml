@@ -7,6 +7,7 @@
       <properties>
         <force_min>0.0</force_min>
         <force_max>1000</force_max>
+        <diameter>0.367</diameter>
       </properties>
       <attachments>
         <attachment>
@@ -23,6 +24,7 @@
       <properties>
         <force_min>0.0</force_min>
         <force_max>5000</force_max>
+        <diameter>0.368</diameter>
       </properties>
       <attachments>
         <attachment>

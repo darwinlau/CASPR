@@ -17,8 +17,8 @@ classdef CableModelLinearSpring < CableModelBase
     end
     
     methods 
-        function ck = CableModelLinearSpring(name, numLinks, diameter)
-            ck@CableModelBase(name, numLinks, diameter);
+        function ck = CableModelLinearSpring(name, numLinks)
+            ck@CableModelBase(name, numLinks);
         end
         
         function update(obj, bodyModel)
@@ -46,20 +46,11 @@ classdef CableModelLinearSpring < CableModelBase
             else
                 CASPR_log.Print(sprintf('Unknown cableAttachmentReference type: %s', attachRefString),CASPRLogLevel.ERROR);
             end
-            
-            
+                        
             % <properties> tag
             propertiesObj = xmlobj.getElementsByTagName('properties').item(0);
-            % <diameter>
-            lol = propertiesObj.getElementsByTagName('diameter');
-            if (lol.getLength() == 0) % not exist
-                diameter = 0;   
-            else
-                diameter = str2double(propertiesObj.getElementsByTagName('diameter').item(0).getFirstChild.getData);
-            end
-            
             % Generate an ideal cable object
-            c = CableModelLinearSpring(name, bodiesModel.numLinks, diameter);
+            c = CableModelLinearSpring(name, bodiesModel.numLinks);
             
             % <K>
             c.K_cable = str2double(propertiesObj.getElementsByTagName('K').item(0).getFirstChild.getData);
@@ -67,6 +58,11 @@ classdef CableModelLinearSpring < CableModelBase
             c.forceMin = str2double(propertiesObj.getElementsByTagName('force_min').item(0).getFirstChild.getData);
             % <force_max>
             c.forceMax = str2double(propertiesObj.getElementsByTagName('force_max').item(0).getFirstChild.getData);
+            % <diameter>
+            lol = propertiesObj.getElementsByTagName('diameter');
+            if (lol.getLength() ~= 0) % exist
+                c.diameter = str2double(propertiesObj.getElementsByTagName('diameter').item(0).getFirstChild.getData);
+            end
             
             % <attachments> tag
             attachmentObjs = xmlobj.getElementsByTagName('attachments').item(0).getChildNodes();          

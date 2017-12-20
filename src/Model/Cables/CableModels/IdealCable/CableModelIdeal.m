@@ -13,8 +13,8 @@ classdef CableModelIdeal < CableModelBase
     end
     
     methods 
-        function ck = CableModelIdeal(name, numLinks, diameter)
-            ck@CableModelBase(name, numLinks, diameter);
+        function ck = CableModelIdeal(name, numLinks)
+            ck@CableModelBase(name, numLinks);
         end
         
         function update(obj, bodyModel)
@@ -46,21 +46,18 @@ classdef CableModelIdeal < CableModelBase
                         
             % <properties> tag
             propertiesObj = xmlobj.getElementsByTagName('properties').item(0);
-            % <diameter>
-            lol = propertiesObj.getElementsByTagName('diameter');
-            if (lol.getLength() == 0) % not exist
-                diameter = 0;   
-            else
-                diameter = str2double(propertiesObj.getElementsByTagName('diameter').item(0).getFirstChild.getData);
-            end 
-                        
             % Generate an ideal cable object
-            c = CableModelIdeal(name, bodiesModel.numLinks, diameter);
+            c = CableModelIdeal(name, bodiesModel.numLinks);
             
             % <force_min>
             c.forceMin = str2double(propertiesObj.getElementsByTagName('force_min').item(0).getFirstChild.getData);
             % <force_max>
             c.forceMax = str2double(propertiesObj.getElementsByTagName('force_max').item(0).getFirstChild.getData);
+            % <diameter>
+            lol = propertiesObj.getElementsByTagName('diameter');
+            if (lol.getLength() ~= 0) % exist
+                c.diameter = str2double(propertiesObj.getElementsByTagName('diameter').item(0).getFirstChild.getData);
+            end
             
             % <attachments> tag
             attachmentObjs = xmlobj.getElementsByTagName('attachments').item(0).getChildNodes();            
