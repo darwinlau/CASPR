@@ -327,6 +327,8 @@ classdef PoCaBotExperiment < ExperimentBase
         % position of the motors. q0 is also a vetor with the same size but
         % it is the initial state of the end effector.
         function application_preparation(obj, fo, q0)
+            obj.q_present = q0;
+            
             % Open the hardware interface
             obj.openHardwareInterface();
             
