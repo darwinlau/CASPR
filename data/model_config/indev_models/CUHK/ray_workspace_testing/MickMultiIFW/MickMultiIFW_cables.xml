@@ -8,6 +8,7 @@
       <properties>
         <force_min>0</force_min>
         <force_max>100</force_max>
+        <diameter>0.03</diameter>
       </properties>
       <attachments>
         <attachment>
@@ -24,6 +25,7 @@
       <properties>
         <force_min>0</force_min>
         <force_max>100</force_max>
+        <diameter>0.03</diameter>
       </properties>
       <attachments>
         <attachment>
@@ -40,6 +42,7 @@
       <properties>
         <force_min>0</force_min>
         <force_max>100</force_max>
+        <diameter>0.03</diameter>
       </properties>
       <attachments>
         <attachment>
@@ -56,6 +59,7 @@
       <properties>
         <force_min>0</force_min>
         <force_max>100</force_max>
+        <diameter>0.03</diameter>
       </properties>
       <attachments>
         <attachment>
@@ -72,6 +76,7 @@
       <properties>
         <force_min>0</force_min>
         <force_max>100</force_max>
+        <diameter>0.03</diameter>
       </properties>
       <attachments>
         <attachment>

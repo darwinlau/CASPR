@@ -28,11 +28,7 @@ classdef InterferenceFreeRay < WorkspaceRayConditionBase
             
             % generate the Lm (m=1:numCables) before reviewing each pair of
             % cables
-            % testing ----
-            workspace_ray.free_variable_index = 4;
-            workspace_ray.fixed_variables=[0.5,0.5,0.5,-1.5708,-1.5708]';
-            % ------------
-            SegEndpt = CoeffLm(obj, model, workspace_ray)
+            SegEndpt = CoeffLm(obj, model, workspace_ray);
             
             % in the form of lower triangular matrix
             for ithcable = 1: ncable % i-th cable
@@ -73,8 +69,8 @@ classdef InterferenceFreeRay < WorkspaceRayConditionBase
 %                     intvifwmc_temp(round(intvifwmc_temp(:,1)-intvifwmc_temp(:,2),7)==0,:)=[];
 %                 end
             if ~isempty(intvifwmc_temp)
-                if abs(intvifwmc_temp(:,1)-intvifwmc_temp(:,2)) <= min_ray_percent
-                    intvifwmc_temp(abs(intvifwmc_temp(:,1)-intvifwmc_temp(:,2))<=min_ray_percent,:)=[];
+                if abs(intvifwmc_temp(:,1)-intvifwmc_temp(:,2)) <= obj.min_ray_percentage
+                    intvifwmc_temp(abs(intvifwmc_temp(:,1)-intvifwmc_temp(:,2))<=obj.min_ray_percentage,:)=[];
                 end
             end
             intvifwmc = intvifwmc_temp;
@@ -155,11 +151,11 @@ classdef InterferenceFreeRay < WorkspaceRayConditionBase
             if isparallel == 1
                 %% parallel cables
                 % NEED TO BE FILLED IN
-%                 % MinDis is MinDisPtSeg e.g. Ai v.s. lj
-%                 pt = SegEndpt{1,1};
-%                 segendpt = SegEndpt(2,:);
-%                 seg = L{2};
-%                 intvInterf =  MinDisPtSeg(obj, curflxvar, pt, segendpt, seg); % null or [min, max]
+                % MinDis is MinDisPtSeg e.g. Ai v.s. lj
+                pt = SegEndpt{1,1};
+                segendpt = SegEndpt(2,:);
+                seg = L{2};
+                intvInterf = MinDisPtSeg(obj, model, workspace_ray, pt, segendpt, seg);
             else
                 %% NON-parallel cables
                 % coefficients of nti/ntj/nhatcp_2/den(3*4 or 5*4 matrix)
