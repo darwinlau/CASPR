@@ -19,7 +19,7 @@ classdef UniformGrid < PointGridBase
             CASPR_log.Assert((size(q_begin,2)==1)&&(size(q_end,2)==1)&&(size(q_info,2)==1),'Input to UniformGrid must be a column vector');
             CASPR_log.Assert((size(q_begin,1)==size(q_end,1))&&(size(q_begin,1)==size(q_info,1)),'Inputs must be of the same dimension');
             CASPR_log.Assert(sum(q_begin - q_end > 0) == 0,'Invalid input range');
-            CASPR_log.Assert(sum(q_info <= 0) == 0,'q_info variable contain only positive terms');
+            CASPR_log.Assert(sum(q_info < 0) == 0,'q_info variable contain only non-negative terms');
             % Maybe add more checks to ensure
             id.q_begin  =   q_begin;
             id.q_end    =   q_end;
@@ -27,7 +27,13 @@ classdef UniformGrid < PointGridBase
             
             if((nargin==3)||strcmp(info_type,'step_size'))
                 id.delta_q = q_info;
-                id.q_length = round((id.q_end - id.q_begin)./id.delta_q)+1;
+                for i = 1:id.n_dimensions
+                    if(id.delta_q(i) == 0)
+                        id.q_length(i) = 1;
+                    else
+                        id.q_length(i) = round((id.q_end(i) - id.q_begin(i))/id.delta_q(i))+1;
+                    end
+                end
             elseif(strcmp(info_type,'number_steps'))
                 id.q_length = q_info;
                 for i = 1:id.n_dimensions
