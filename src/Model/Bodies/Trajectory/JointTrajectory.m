@@ -60,8 +60,7 @@ classdef JointTrajectory < TrajectoryBase
                 
         % Perform linear trajectory spline to produce trajectory
         function [trajectory] = LinearTrajectoryLoadXmlObj(xmlObj, bodiesObj)
-            CASPR_log.Assert(strcmp(xmlObj.getNodeName, 'linear_spline_trajectory'), 'Element should be <linear_spline_trajectory>');
-            trajectory = JointTrajectory;
+            CASPR_log.Assert(strcmp(xmlObj.getNodeName, 'linear_spline_trajectory'), 'Element should be <linear_spline_trajectory>');            
             points_node = xmlObj.getElementsByTagName('points').item(0);
             point_nodes = points_node.getChildNodes;
             num_points = point_nodes.getLength;
@@ -71,11 +70,7 @@ classdef JointTrajectory < TrajectoryBase
                   
             % Cell of points of joints coordinates
             q_pj = cell(num_points,1); 
-            time_points_abs = zeros(1, num_points);
-            
-            q_trajectory = [];
-            q_d_trajectory = [];
-            q_dd_trajectory = [];
+            time_points_abs = zeros(1, num_points);          
             
             % First process the data and save it to variables
             for p = 1:num_points
@@ -95,6 +90,18 @@ classdef JointTrajectory < TrajectoryBase
                 end
             end
                                    
+            % Call the create function                 
+            trajectory = JointTrajectory.LinearTrajectoryCreate(q_pj, time_points_abs, time_step, bodiesObj);
+        end
+        
+        % Create the linear spline trajectory with given information
+        function [trajectory] = LinearTrajectoryCreate(q_pj, time_points_abs, time_step, bodiesObj)
+            trajectory = JointTrajectory;
+            num_points = length(q_pj);
+            q_trajectory = [];
+            q_d_trajectory = [];
+            q_dd_trajectory = [];
+            
             % Generate the trajectory between the points
             for p = 1:num_points-1
                 q_section = [];
@@ -124,10 +131,10 @@ classdef JointTrajectory < TrajectoryBase
             trajectory.q_ddot = mat2cell(q_dd_trajectory, size(q_dd_trajectory,1), ones(size(q_dd_trajectory,2),1));
         end
         
-        % Perform quintic trajectory spline to produce trajectory
+        % Perform cubic trajectory spline to produce trajectory
         function [trajectory] = CubicTrajectoryLoadXmlObj(xmlObj, bodiesObj)
             CASPR_log.Assert(strcmp(xmlObj.getNodeName, 'cubic_spline_trajectory'), 'Element should be <cubic_spline_trajectory>');
-            trajectory = JointTrajectory;
+            
             points_node = xmlObj.getElementsByTagName('points').item(0);
             point_nodes = points_node.getChildNodes;
             num_points = point_nodes.getLength;
@@ -138,11 +145,7 @@ classdef JointTrajectory < TrajectoryBase
             % Cell of points of joints coordinates
             q_pj = cell(num_points,1); 
             q_d_pj = cell(num_points,1);
-            time_points_abs = zeros(1, num_points);
-            
-            q_trajectory = [];
-            q_d_trajectory = [];
-            q_dd_trajectory = [];
+            time_points_abs = zeros(1, num_points);            
             
             % First process the data and save it to variables
             for p = 1:num_points
@@ -165,6 +168,17 @@ classdef JointTrajectory < TrajectoryBase
                 end
             end
                                    
+            % Call the create function                 
+            trajectory = JointTrajectory.CubicTrajectoryCreate(q_pj, q_d_pj, time_points_abs, time_step, bodiesObj);
+        end
+        
+        % Create the cubic spline trajectory with given information
+        function [trajectory] = CubicTrajectoryCreate(q_pj, q_d_pj, time_points_abs, time_step, bodiesObj)
+            trajectory = JointTrajectory;
+            num_points = length(q_pj);
+            q_trajectory = [];
+            q_d_trajectory = [];
+            q_dd_trajectory = [];
             % Generate the trajectory between the points
             for p = 1:num_points-1
                 q_section = [];
@@ -198,7 +212,7 @@ classdef JointTrajectory < TrajectoryBase
         % Perform quintic trajectory spline to produce trajectory
         function [trajectory] = QuinticTrajectoryLoadXmlObj(xmlObj, bodiesObj)
             CASPR_log.Assert(strcmp(xmlObj.getNodeName, 'quintic_spline_trajectory'), 'Element should be <quintic_spline_trajectory>');
-            trajectory = JointTrajectory;
+            
             points_node = xmlObj.getElementsByTagName('points').item(0);
             point_nodes = points_node.getChildNodes;
             num_points = point_nodes.getLength;
@@ -210,11 +224,7 @@ classdef JointTrajectory < TrajectoryBase
             q_pj = cell(num_points,1); 
             q_d_pj = cell(num_points,1);
             q_dd_pj = cell(num_points,1);
-            time_points_abs = zeros(1, num_points);
-            
-            q_trajectory = [];
-            q_d_trajectory = [];
-            q_dd_trajectory = [];
+            time_points_abs = zeros(1, num_points);            
             
             % First process the data and save it to variables
             for p = 1:num_points
@@ -240,6 +250,19 @@ classdef JointTrajectory < TrajectoryBase
                 end
             end
                                    
+            % Call the create function                 
+            trajectory = JointTrajectory.QuinticTrajectoryCreate(q_pj, q_d_pj, q_dd_pj, ...
+                time_points_abs, time_step, bodiesObj);
+        end        
+        
+        % Create the quintic spline trajectory with given information
+        function [trajectory] = QuinticTrajectoryCreate(q_pj, q_d_pj, q_dd_pj, time_points_abs, time_step, bodiesObj)
+            trajectory = JointTrajectory;
+            num_points = length(q_pj);
+            q_trajectory = [];
+            q_d_trajectory = [];
+            q_dd_trajectory = [];
+            
             % Generate the trajectory between the points
             for p = 1:num_points-1
                 q_section = [];
@@ -268,11 +291,11 @@ classdef JointTrajectory < TrajectoryBase
             trajectory.q = mat2cell(q_trajectory, size(q_trajectory,1), ones(size(q_trajectory,2),1));
             trajectory.q_dot = mat2cell(q_d_trajectory, size(q_d_trajectory,1), ones(size(q_d_trajectory,2),1));
             trajectory.q_ddot = mat2cell(q_dd_trajectory, size(q_dd_trajectory,1), ones(size(q_dd_trajectory,2),1));
-        end        
+        end
         
         function [trajectory] = CubicTrajectoryAverageVelocityLoadXmlObj(xmlObj, bodiesObj)
             CASPR_log.Assert(strcmp(xmlObj.getNodeName, 'cubic_spline_average_velocity_trajectory'), 'Element should be <cubic_spline_average_velocity_trajectory>');
-            trajectory = JointTrajectory;
+            
             points_node = xmlObj.getElementsByTagName('points').item(0);
             point_nodes = points_node.getChildNodes;
             num_points = point_nodes.getLength;
@@ -283,11 +306,7 @@ classdef JointTrajectory < TrajectoryBase
             % Cell of points of joints coordinates
             q_pj = cell(num_points,1); 
             q_d_pj = cell(num_points,1);
-            time_points_abs = zeros(1, num_points);
-            
-            q_trajectory = [];
-            q_d_trajectory = [];
-            q_dd_trajectory = [];
+            time_points_abs = zeros(1, num_points);            
             
             % First process the data and save it to variables
             for p = 1:num_points
@@ -322,6 +341,18 @@ classdef JointTrajectory < TrajectoryBase
                 q_d_pj{p} = mat2cell(q_d, bodiesObj.jointsNumDofs);       
             end
             
+            % Call the create function                 
+            trajectory = JointTrajectory.CubicTrajectoryAverageVelocityCreate(q_pj, q_d_pj, time_points_abs, time_step, bodiesObj);
+        end       
+        
+        % Create the cubic trajectory (average velocity) with given information
+        function [trajectory] = CubicTrajectoryAverageVelocityCreate(q_pj, q_d_pj, time_points_abs, time_step, bodiesObj)
+            trajectory = JointTrajectory;
+            num_points = length(q_pj);
+            q_trajectory = [];
+            q_d_trajectory = [];
+            q_dd_trajectory = [];
+            
             % Generate the trajectory between the points
             for p = 1:num_points-1
                 q_section = [];
@@ -351,11 +382,11 @@ classdef JointTrajectory < TrajectoryBase
             trajectory.q = mat2cell(q_trajectory, size(q_trajectory,1), ones(size(q_trajectory,2),1));
             trajectory.q_dot = mat2cell(q_d_trajectory, size(q_d_trajectory,1), ones(size(q_d_trajectory,2),1));
             trajectory.q_ddot = mat2cell(q_dd_trajectory, size(q_dd_trajectory,1), ones(size(q_dd_trajectory,2),1));
-        end       
+        end
         
         function [trajectory] = ParabolicBlendTrajectoryLoadXmlObj(xmlObj, bodiesObj)
             CASPR_log.Assert(strcmp(xmlObj.getNodeName, 'parabolic_blend_trajectory'), 'Element should be <parabolic_blend_trajectory>');
-            trajectory = JointTrajectory;
+           
             points_node = xmlObj.getElementsByTagName('points').item(0);
             point_nodes = points_node.getChildNodes;
             num_points = point_nodes.getLength;
@@ -365,14 +396,9 @@ classdef JointTrajectory < TrajectoryBase
             time_abs = TrajectoryBase.get_xml_absolute_tag(xmlObj);
                   
             % Cell of points of joints coordinates
-            q_pj = cell(num_points,1); 
-            q_d_pj = cell(num_points,1);
+            q_pj = cell(num_points,1);         
             time_points_abs = zeros(1, num_points);
-            time_blend = time_blend_default*ones(1, num_points-1);
-            
-            q_trajectory = [];
-            q_d_trajectory = [];
-            q_dd_trajectory = [];
+            time_blend = time_blend_default*ones(1, num_points-1);           
             
             % First process the data and save it to variables
             for p = 1:num_points
@@ -396,6 +422,19 @@ classdef JointTrajectory < TrajectoryBase
                 end
             end
                                    
+            % Call the create function                 
+            trajectory = JointTrajectory.ParabolicBlendTrajectoryCreate(q_pj, ...
+                time_points_abs, time_step, time_blend, bodiesObj);
+        end       
+        
+        % Create the parabolic blend trajectory with given information
+        function [trajectory] = ParabolicBlendTrajectoryCreate(q_pj, time_points_abs, time_step, time_blend, bodiesObj)
+            trajectory = JointTrajectory;
+            num_points = length(q_pj);
+            q_trajectory = [];
+            q_d_trajectory = [];
+            q_dd_trajectory = [];
+            
             % Generate the trajectory between the points
             for p = 1:num_points-1
                 t_rel = time_points_abs(p+1)-time_points_abs(p);
@@ -426,7 +465,7 @@ classdef JointTrajectory < TrajectoryBase
             trajectory.q = mat2cell(q_trajectory, size(q_trajectory,1), ones(size(q_trajectory,2),1));
             trajectory.q_dot = mat2cell(q_d_trajectory, size(q_d_trajectory,1), ones(size(q_d_trajectory,2),1));
             trajectory.q_ddot = mat2cell(q_dd_trajectory, size(q_dd_trajectory,1), ones(size(q_dd_trajectory,2),1));
-        end       
+        end
         
         % Loads a complete trajectory by reading a .traj file
         function [trajectory_all, force_trajectory] = LoadCompleteTrajectory(traj_file,model)

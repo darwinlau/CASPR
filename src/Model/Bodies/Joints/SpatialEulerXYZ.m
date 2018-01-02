@@ -69,7 +69,7 @@ classdef SpatialEulerXYZ < JointBase
                 obj.GetTranslationQ(q_e), obj.GetTranslationQd(q_e_d), time_vector);
             [q_orient, q_orient_dot, q_orient_ddot] = obj.orientation.generateTrajectoryCubicSpline( ...
                 obj.GetOrientationQ(q_s), obj.GetOrientationQd(q_s_d), ...
-                obj.GetOrientationQ(q_e), obj.GetOrientationQd(q_s_e), time_vector);
+                obj.GetOrientationQ(q_e), obj.GetOrientationQd(q_e_d), time_vector);
             q = [q_trans; q_orient];
             q_dot = [q_trans_dot; q_orient_dot];
             q_ddot = [q_trans_ddot; q_orient_ddot];

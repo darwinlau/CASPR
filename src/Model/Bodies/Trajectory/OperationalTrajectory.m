@@ -60,8 +60,7 @@ classdef OperationalTrajectory < TrajectoryBase
         
         % Perform linear trajectory spline to produce trajectory
         function [trajectory] = LinearTrajectoryLoadXmlObj(xmlObj, bodiesObj)
-            CASPR_log.Assert(strcmp(xmlObj.getNodeName, 'linear_spline_trajectory'), 'Element should be <linear_spline_trajectory>');
-            trajectory = OperationalTrajectory;
+            CASPR_log.Assert(strcmp(xmlObj.getNodeName, 'linear_spline_trajectory'), 'Element should be <linear_spline_trajectory>');            
             points_node = xmlObj.getElementsByTagName('points').item(0);
             point_nodes = points_node.getChildNodes;
             num_points = point_nodes.getLength;
@@ -71,11 +70,7 @@ classdef OperationalTrajectory < TrajectoryBase
                   
             % Cell of points of joints coordinates
             y_pj = cell(num_points,1); 
-            time_points_abs = zeros(1, num_points);
-            
-            y_trajectory = [];
-            y_d_trajectory = [];
-            y_dd_trajectory = [];
+            time_points_abs = zeros(1, num_points);          
             
             % First process the data and save it to variables
             for p = 1:num_points
@@ -94,7 +89,17 @@ classdef OperationalTrajectory < TrajectoryBase
                     time_points_abs(p) = time_points_abs(p-1) + str2double(point_node.getAttribute('time'));
                 end
             end
-                                   
+            % Call the create function                 
+            trajectory = OperationalTrajectory.LinearTrajectoryCreate(y_pj, time_points_abs, time_step, bodiesObj);
+        end
+        
+        % Create the linear spline trajectory with given information
+        function [trajectory] = LinearTrajectoryCreate(y_pj, time_points_abs, time_step, bodiesObj)
+            trajectory = OperationalTrajectory;
+            num_points = length(y_pj);
+            y_trajectory = [];
+            y_d_trajectory = [];
+            y_dd_trajectory = [];
             % Generate the trajectory between the points
             for p = 1:num_points-1
                 y_section = [];
@@ -124,15 +129,20 @@ classdef OperationalTrajectory < TrajectoryBase
             trajectory.y_ddot = mat2cell(y_dd_trajectory, size(y_dd_trajectory,1), ones(size(y_dd_trajectory,2),1));
         end
         
-        % Perform quintic trajectory spline to produce trajectory
+        % Perform cubic trajectory spline to produce trajectory
         function [trajectory] = CubicTrajectoryLoadXmlObj(xmlObj, bodiesObj)
+            CASPR_log.Error('Function has not been implemented yet');
+        end
+        
+        % Create the cubic spline trajectory with given information
+        function [trajectory] = CubicTrajectoryCreate(num_points, y_pj, y_d_pj, y_dd_pj, time_points_abs, time_step, bodiesObj)
             CASPR_log.Error('Function has not been implemented yet');
         end
         
         % Perform quintic trajectory spline to produce trajectory
         function [trajectory] = QuinticTrajectoryLoadXmlObj(xmlObj, bodiesObj)
             CASPR_log.Assert(strcmp(xmlObj.getNodeName, 'quintic_spline_trajectory'), 'Element should be <quintic_spline_trajectory>');
-            trajectory = OperationalTrajectory;
+            
             points_node = xmlObj.getElementsByTagName('points').item(0);
             point_nodes = points_node.getChildNodes;
             num_points = point_nodes.getLength;
@@ -144,11 +154,7 @@ classdef OperationalTrajectory < TrajectoryBase
             y_pj = cell(num_points,1); 
             y_d_pj = cell(num_points,1);
             y_dd_pj = cell(num_points,1);
-            time_points_abs = zeros(1, num_points);
-            
-            y_trajectory = [];
-            y_d_trajectory = [];
-            y_dd_trajectory = [];
+            time_points_abs = zeros(1, num_points);            
             
             % First process the data and save it to variables
             for p = 1:num_points
@@ -174,6 +180,18 @@ classdef OperationalTrajectory < TrajectoryBase
                 end
             end
                                    
+            % Call the create function                 
+            trajectory = OperationalTrajectory.QuinticTrajectoryCreate(y_pj, y_d_pj, y_dd_pj, ...
+                time_points_abs, time_step, bodiesObj);
+        end     
+        
+        % Create the quintic spline trajectory with given information
+        function [trajectory] = QuinticTrajectoryCreate(y_pj, y_d_pj, y_dd_pj, time_points_abs, time_step, bodiesObj)
+            trajectory = OperationalTrajectory;
+            num_points = length(y_pj);
+            y_trajectory = [];
+            y_d_trajectory = [];
+            y_dd_trajectory = [];
             % Generate the trajectory between the points
             for p = 1:num_points-1
                 y_section = [];
@@ -202,15 +220,23 @@ classdef OperationalTrajectory < TrajectoryBase
             trajectory.y = mat2cell(y_trajectory, size(y_trajectory,1), ones(size(y_trajectory,2),1));
             trajectory.y_dot = mat2cell(y_d_trajectory, size(y_d_trajectory,1), ones(size(y_d_trajectory,2),1));
             trajectory.y_ddot = mat2cell(y_dd_trajectory, size(y_dd_trajectory,1), ones(size(y_dd_trajectory,2),1));
-        end        
+        end
         
         function [trajectory] = CubicTrajectoryAverageVelocityLoadXmlObj(xmlObj, bodiesObj)
             CASPR_log.Error('Function has not been implemented yet');
-        end       
+        end  
+        
+        function [trajectory] = CubicTrajectoryAverageVelocityCreate(num_points, y_pj, y_d_pj, y_dd_pj, time_points_abs, time_step, bodiesObj)
+            CASPR_log.Error('Function has not been implemented yet');
+        end 
         
         function [trajectory] = ParabolicBlendTrajectoryLoadXmlObj(xmlObj, bodiesObj)
             CASPR_log.Error('Function has not been implemented yet');
-        end       
+        end   
+        
+        function [trajectory] = ParabolicBlendTrajectoryCreate(num_points, y_pj, y_d_pj, y_dd_pj, time_points_abs, time_step, bodiesObj)
+            CASPR_log.Error('Function has not been implemented yet');
+        end 
         
         % Loads a complete trajectory by reading a .traj file
         function [trajectory_all, force_trajectory] = LoadCompleteTrajectory(traj_file,model)
