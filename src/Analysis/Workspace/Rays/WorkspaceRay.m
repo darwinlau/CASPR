@@ -45,15 +45,18 @@ classdef WorkspaceRay < handle
         end
         
         % A function to determine if two rays intersect
-        function is_intersected = intersect(obj,workspace_ray)
+        function [is_intersected,intersection_point] = intersect(obj,obj_range,workspace_ray,workspace_range)
             % MODIFY FOR INTERSECTION VERSUS UNION
             if(obj.free_variable_index == workspace_ray.free_variable_index)
                 % The rays are parallel
                 if(norm(obj.fixed_variables - workspace_ray.free_variable_index) < 1e-10)
                     % Covers the case where the same ray is sent
                     is_intersected = 1;
+                    intersection_point = [];
+                    CASPR_log.Error('Both rays lie on the same line');
                 else
                     is_intersected = 0;
+                    intersection_point = [];
                 end
             else
                 % The rays are not parallel
@@ -76,35 +79,56 @@ classdef WorkspaceRay < handle
                     numConditionsObj = size(obj.conditions,1);
                     objRayIntersect = 0; % Does the fixed value of ray intersect with any of the intervals of obj
                     for i = 1:numConditionsObj
-                        intervals = obj.conditions{i,2};
-                        for j = 1:size(intervals,1)
-                            if((intervals(j,1) <= fixed_variable_obj)&&(intervals(j,2) >= fixed_variable_obj))
-                                objRayIntersect = 1;
-                                break; 
-                            end
-                        end
-                        if(objRayIntersect)
+                        if((obj_range(1) <= fixed_variable_obj)&&(obj_range(2) >= fixed_variable_obj))
+                            objRayIntersect = 1;
                             break;
                         end
+%                         intervals = obj.conditions{i,2};
+%                         for j = 1:size(intervals,1)
+%                             if((intervals(j,1) <= fixed_variable_obj)&&(intervals(j,2) >= fixed_variable_obj))
+%                                 objRayIntersect = 1;
+%                                 break; 
+%                             end
+%                         end
+%                         if(objRayIntersect)
+%                             break;
+%                         end
                     end
                     numConditionsRay = size(workspace_ray.conditions,1);
                     rayObjIntersect = 0; % Does the fixed value of obj intersect with any of the intervals of ray
                     for i = 1:numConditionsRay
-                        intervals = workspace_ray.conditions{i,2};
-                        for j = 1:size(intervals,1)
-                            if((intervals(j,1) <= fixed_variable_ray)&&(intervals(j,2) >= fixed_variable_ray))
-                                rayObjIntersect = 1;
-                                break; 
-                            end
-                        end
-                        if(rayObjIntersect)
+                        if((workspace_range(1) <= fixed_variable_ray)&&(workspace_range(2) >= fixed_variable_ray))
+                            rayObjIntersect = 1;
                             break;
                         end
+%                         intervals = workspace_ray.conditions{i,2};
+%                         for j = 1:size(intervals,1)
+%                             if((intervals(j,1) <= fixed_variable_ray)&&(intervals(j,2) >= fixed_variable_ray))
+%                                 rayObjIntersect = 1;
+%                                 break; 
+%                             end
+%                         end
+%                         if(rayObjIntersect)
+%                             break;
+%                         end
                     end                    
-                    is_intersected = objRayIntersect*rayObjIntersect;
+                    is_intersected = objRayIntersect&rayObjIntersect;
+                    if(is_intersected)
+                        intersection_point = zeros(numDofs,1);
+                        temp_vec = zeros(numDofs,1);
+                        selection_vec_obj = ones_vec; selection_vec_obj(obj.free_variable_index) = false;
+                        intersection_point(selection_vec_obj) = obj.fixed_variables; 
+                        % Now need to fill in the extra point
+                        selection_vec_ray = ones_vec; selection_vec_ray(workspace_ray.free_variable_index) = false;
+                        temp_vec(selection_vec_ray) = workspace_ray.fixed_variables;
+                        intersection_point(obj.free_variable_index) = temp_vec(obj.free_variable_index);
+                    else
+                        intersection_point = [];
+                    end
                 else
                     % The two rays are not coplanar
                     is_intersected = 0;
+                    intersection_point = [];
                 end
             end
             % THIS METHODOLOGY NEEDS TO BE MODIFIED FOR THE TRANSFORMATION

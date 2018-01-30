@@ -14,7 +14,7 @@ classdef RayWorkspaceSimulator < SimulatorBase
         conditions = [] % A list of conditions to be evaluated for
         metrics = []    % A list of metrics to be evaluated for
         options         % The workspace simulator options
-        graph = []      % The graph representation for the workspace
+        graph_rep = []      % The graph representation for the workspace
     end
     
     methods
@@ -121,7 +121,7 @@ classdef RayWorkspaceSimulator < SimulatorBase
                         k = k+1;
                     end
                 end              
-                obj.createWorkspaceGraph();
+                obj.createWorkspaceGraph(w_conditions{1});
             end
         end
         
@@ -212,48 +212,63 @@ classdef RayWorkspaceSimulator < SimulatorBase
         % A function for plotting a graph
         function plotGraph(obj)
             % Shrink the graph to remove all nodes that are empty
-            l_graph = length(obj.graph);
-            l_free = l_graph/obj.grid.n_dimensions;
-            index = false(l_graph,1);
-            X = zeros(l_graph,1);
-            Y = zeros(l_graph,1);
-            k = 1;
-            plotting_graph = obj.graph;
-            for i = 1:length(obj.graph)
-                if(obj.graph(i,i))
-                    X(k) = mod(i,l_free);
-                    Y(k) = ceil(i/l_free);
-                    index(i) = true;
-                    plotting_graph(i,i)=0;
-                    k = k+1;
-                end
+            G = graph(obj.graph_rep(:,1),obj.graph_rep(:,2));
+            for i = 1:obj.grid.n_dimensions
+                figure;
+                G.Edges.EdgeColours = obj.graph_rep(:,2+i); % INTERSECT NEEDS TO BE CHANGED TO INCLUDE THE POINT ITSELF
+                p = plot(G);
+                layout(p,'auto')
+                p.EdgeCData = G.Edges.EdgeColours;
+                p.LineWidth = 2;
+                colormap(jet)
             end
-            X = X(1:k-1); Y = Y(1:k-1); 
-            plot(graph(plotting_graph(index,index)),'XData',X,'YData',Y); %#ok<CPROP>
         end
-        
-        function plotGraphImage(obj)
-            imagesc(obj.graph)
-        end
-        
     end
     
     methods(Access = private)
-        function createWorkspaceGraph(obj)
-            node_length = length(obj.workspace);
-            obj.graph = zeros(node_length,node_length);
-            for i = 1:node_length
+        function createWorkspaceGraph(obj,condition)
+            % For the moment this will be written as if there was only one
+            % condition I will subsequently modify
+            number_rays = length(obj.workspace);
+            % Create list of nodes
+            node_list = zeros(10*number_rays,3); % THIS DATA TYPE WILL CHANGE LATER TO BE A STRUCT OR CLASS
+            number_node = 0;
+            % For each ray
+            for i = 1:number_rays
+                % Determine the number of the condition - NOTE THIS COULD
+                % POSSIBLY MOVE UP
                 if(~isempty(obj.workspace{i}))
-                    obj.graph(i,i) = 1;
-                    for j = i+1:node_length
-                        if(~isempty(obj.workspace{j}))
-                            obj.graph(i,j) = obj.workspace{i}.intersect(obj.workspace{j});
-                            obj.graph(j,i) = obj.graph(i,j);
+                    n_constraints = size(obj.workspace{i}.conditions,1);
+                    intervals = [];
+                    for j = 1:n_constraints
+                        if(condition.type == obj.workspace{i}.conditions{j,1})
+                            intervals = obj.workspace{i}.conditions{j,2};
+                            break;
                         end
+                    end
+                    for j = 1:size(intervals,1)
+                        number_node = number_node + 1;
+                        node_list(number_node,:) = [i,intervals(j,:)];
+                    end
+                end
+            end                
+            % Resize to the correct size
+            node_list = node_list(1:number_node,:); 
+            
+            % Initialise an adjacency list
+            obj.graph_rep = zeros(number_node*number_node,2+obj.grid.n_dimensions);
+            number_intersects = 0;
+            for i = 1:number_node
+                i
+                for j = i+1:number_node
+                    [is_intersected,intersection_point] = obj.workspace{node_list(i,1)}.intersect(node_list(i,2:3),obj.workspace{node_list(j,1)},node_list(j,2:3));
+                    if(is_intersected)
+                        number_intersects = number_intersects + 1;
+                        obj.graph_rep(number_intersects,:) = [i,j,intersection_point'];
                     end
                 end
             end
+            obj.graph_rep = obj.graph_rep(1:number_intersects,:);
         end
     end
-
 end
