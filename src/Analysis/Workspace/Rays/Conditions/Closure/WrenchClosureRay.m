@@ -7,6 +7,7 @@
 classdef WrenchClosureRay < WorkspaceRayConditionBase
     properties (SetAccess = protected, GetAccess = protected)
         min_ray_percentage          % The minimum percentage of the ray at which it is included
+        tolerance = 1e-8;
     end
     
     methods
@@ -17,8 +18,6 @@ classdef WrenchClosureRay < WorkspaceRayConditionBase
         
         % The new evaluate function
         function intervals = evaluateFunction(obj,model,workspace_ray)
-            % Settings - COULD BE MADE INTO OPTIONS
-            tolerance = 1e-8;
             % Variable Initialisation
             number_dofs = model.numDofs;
             number_cables = model.numCables;
@@ -62,11 +61,11 @@ classdef WrenchClosureRay < WorkspaceRayConditionBase
                 end
                 % Set up all of the components
                 for combination_index = 1:number_combinations
-                    A_comb = A(:,cable_combinations(combination_index));
-                    determinant_matrix(linear_space_index,combinations_index) = det(A_comb);
+                    A_comb = A(:,cable_combinations(combination_index,:));
+                    determinant_matrix(linear_space_index,combination_index) = det(A_comb);
                     matrix_a_t(:,linear_space_index,combination_index) = -sum(A_comb,2); % a_t = -\Sum a_i
                     for combination_index_2 = 1:number_combinations
-                        A_comb_2 = A(:,cable_combinations(combination_index_2));
+                        A_comb_2 = A(:,cable_combinations(combination_index_2,:));
                         matrix_k(:,linear_space_index,combination_index,combination_index_2) = A_comb_2\matrix_a_t(:,linear_space_index,combination_index);
                     end
                 end
@@ -81,15 +80,15 @@ classdef WrenchClosureRay < WorkspaceRayConditionBase
                 determinant_vector = determinant_matrix(:,combination_index);
                 if(joint_type(free_variable_index)==DoFType.TRANSLATION)
                     % Double check regarding the use of -1
-                    polynomial_coefficients_det(:,number_combinations) = polyfit(free_variable_linear_space,determinant_vector',maximum_degree+1);
+                    polynomial_coefficients_det(:,number_combinations) = polyfit(free_variable_linear_space,determinant_vector',maximum_degree);
                 else
-                    polynomial_coefficients_det(:,number_combinations) = polyfit(tan(0.5*free_variable_linear_space),determinant_vector',maximum_degree+1);
+                    polynomial_coefficients_det(:,number_combinations) = polyfit(tan(0.5*free_variable_linear_space),determinant_vector',maximum_degree);
                 end
                 % Find the roots
                 % First remove anything that has magnitude below tolerance
                 coefficients_det = polynomial_coefficients_det(:,number_combinations);
                 for i = 1:maximum_degree+1
-                    if(abs(coefficients_det(i))>tolerance)
+                    if(abs(coefficients_det(i))>obj.tolerance)
                         leading_zero_number = i-1;
                         break;
                     end
@@ -113,23 +112,25 @@ classdef WrenchClosureRay < WorkspaceRayConditionBase
                         k = matrix_k(dof_index,:,combination_index,combination_index_2);
                         if(joint_type(free_variable_index)==DoFType.TRANSLATION)
                             % Double check regarding the use of -1
-                            polynomial_coefficients_k(dof_index,:) = polyfit(free_variable_linear_space,k',maximum_degree+1);
+                            polynomial_coefficients_k(dof_index,:) = polyfit(free_variable_linear_space,k,maximum_degree);
                         else
-                            polynomial_coefficients_k(dof_index,:) = polyfit(tan(0.5*free_variable_linear_space),k',maximum_degree+1);
+                            polynomial_coefficients_k(dof_index,:) = polyfit(tan(0.5*free_variable_linear_space),k,maximum_degree);
                         end
                         coefficients_k_i = polynomial_coefficients_k(dof_index,:);
-                        k_i_roots = roots(coefficients_k_i);
-                        % Remove roots that are complex
-                        k_i_roots = k_i_roots(imag(k_i_roots)==0); 
-                        % If rotation convert back to angle
-                        if(joint_type(free_variable_index)~=DoFType.TRANSLATION)
-                           k_i_roots = 2*atan(k_i_roots); 
+                        if((sum(isinf(coefficients_k_i))==0)&&(sum(isnan(coefficients_k_i))==0))
+                            k_i_roots = roots(coefficients_k_i);
+                            % Remove roots that are complex
+                            k_i_roots = k_i_roots(imag(k_i_roots)==0); 
+                            % If rotation convert back to angle
+                            if(joint_type(free_variable_index)~=DoFType.TRANSLATION)
+                               k_i_roots = 2*atan(k_i_roots); 
+                            end
+                            % Remove roots that lie outside of the range
+                            k_i_roots(k_i_roots<workspace_ray.free_variable_range(1)) = []; 
+                            k_i_roots(k_i_roots>workspace_ray.free_variable_range(2)) = [];
+                            % incorporate the roots into the roots for all k
+                            k_roots = [k_roots;k_i_roots];
                         end
-                        % Remove roots that lie outside of the range
-                        k_i_roots(temp_roots<workspace_ray.free_variable_range(1)) = []; 
-                        k_i_roots(temp_roots>workspace_ray.free_variable_range(2)) = [];
-                        % incorporate the roots into the roots for all k
-                        k_roots = [k_roots;k_i_roots];
                     end
                     % sort the roots
                     k_roots = sort(k_roots);
@@ -137,13 +138,36 @@ classdef WrenchClosureRay < WorkspaceRayConditionBase
                     % midpoints they have the same sign 
                     for root_index=1:length(k_roots)-1
                         evaluation_interval = [k_roots(root_index),k_roots(root_index+1)];
-                        for root_index_2 = 1:length(roots_cell_array{combination_index})
-                            root_i = roots_cell_array{combination_index}(root_index_2);
-                            if((root_i > evaluation_interval(1))&&(root_i < evaluation_interval(2)))
-                                % The root is within the evaluation
-                                % interval
-                                evaluation_interval(2) = root_i - tolerance;
+                        number_determinant_roots = length(roots_cell_array{combination_index});
+                        if(number_determinant_roots > 0)
+                            for root_index_2 = 1:length(roots_cell_array{combination_index})
+                                root_i = roots_cell_array{combination_index}(root_index_2);
+                                if((root_i > evaluation_interval(1))&&(root_i < evaluation_interval(2)))
+                                    % The root is within the evaluation
+                                    % interval
+                                    evaluation_interval(2) = root_i - obj.tolerance;
+                                end
+                                % Take the mean value of the interval
+                                if(joint_type(free_variable_index)==DoFType.TRANSLATION)
+                                    mean_value = mean(evaluation_interval);
+                                else
+                                    mean_value=tan(mean(evaluation_interval)/2);
+                                end
+                                % Check the sign
+                                sign_vector=zero_n;
+                                for dof_index=1:number_dofs
+                                    sign_vector(dof_index)=polyval(polynomial_coefficients_k(dof_index,:),mean_value);
+                                end
+                                if((sum(sign_vector>obj.tolerance) == number_dofs)||(sum(sign_vector<-obj.tolerance) == number_dofs))
+                                    % Add the interval
+                                    new_interval = evaluation_interval;
+                                    intervals = obj.set_union(intervals,new_interval);
+                                end
+                                if(evaluation_interval(2) == k_roots(root_index+1))
+                                    break;
+                                end
                             end
+                        else
                             % Take the mean value of the interval
                             if(joint_type(free_variable_index)==DoFType.TRANSLATION)
                                 mean_value = mean(evaluation_interval);
@@ -155,7 +179,7 @@ classdef WrenchClosureRay < WorkspaceRayConditionBase
                             for dof_index=1:number_dofs
                                 sign_vector(dof_index)=polyval(polynomial_coefficients_k(dof_index,:),mean_value);
                             end
-                            if((sum(sign_vector>threshold) == number_dofs)||(sum(sign_vector<-threshold) == number_dofs))
+                            if((sum(sign_vector>obj.tolerance) == number_dofs)||(sum(sign_vector<-obj.tolerance) == number_dofs))
                                 % Add the interval
                                 new_interval = evaluation_interval;
                                 intervals = obj.set_union(intervals,new_interval);
@@ -165,6 +189,10 @@ classdef WrenchClosureRay < WorkspaceRayConditionBase
                             end
                         end
                     end
+                end
+                % Stop if the interval is the whole set
+                if((abs(intervals(1,1) - workspace_ray.free_variable_range(1)) < obj.tolerance) && (abs(intervals(1,2) - workspace_ray.free_variable_range(2))<obj.tolerance))
+                    return;
                 end
             end
             count = 1;
@@ -332,14 +360,25 @@ classdef WrenchClosureRay < WorkspaceRayConditionBase
             for interval_index = 1:number_intervals
                 interval_set_i_min = interval_set(interval_index,1);
                 interval_set_i_max = interval_set(interval_index,2);
-                
                 % Determine the interval that it is overlapping with 
-                if((interval_min - interval_set_i_max <= tolerance)&&(interval_max - interval_set_i_max > tolerance))
+                if((interval_min - interval_set_i_max <= obj.tolerance)&&(interval_max - interval_set_i_max > obj.tolerance))
+                    % Interval should be extended on the max side
                     interval_set(interval_index,2) = interval_max;
+                    % Check if this can be combined with an existing
+                    % element
+                    interval_set = obj.set_union([interval_set(1:interval_index-1,:);interval_set(interval_index+1:number_intervals,:)],interval_set(interval_index,:));
                     new_interval = false;
                     break;
-                elseif((interval_set_i_min - interval_max <= tolerance)&&(interval_set_i_min - interval_min > tolerance))
+                elseif((interval_set_i_min - interval_max <= obj.tolerance)&&(interval_set_i_min - interval_min > obj.tolerance))
+                    % Interval should be extended on the min side
                     interval_set(interval_index,1) = interval_min;
+                    % Check if this can be combined with an existing
+                    % element
+                    interval_set = obj.set_union([interval_set(1:interval_index-1,:);interval_set(interval_index+1:number_intervals,:)],interval_set(interval_index,:));
+                    new_interval = false;
+                    break;
+                elseif((interval_max - interval_set_i_max <= obj.tolerance)&&(interval_set_i_min - interval_min <= obj.tolerance))
+                    % Interval is contained within another interval
                     new_interval = false;
                     break;
                 end
