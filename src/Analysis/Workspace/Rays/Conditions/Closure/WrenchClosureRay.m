@@ -87,66 +87,89 @@ classdef WrenchClosureRay < WorkspaceRayConditionBase
                 % Find the roots
                 % First remove anything that has magnitude below tolerance
                 coefficients_det = polynomial_coefficients_det(:,number_combinations);
+                leading_zero_number = -1;
                 for i = 1:maximum_degree+1
                     if(abs(coefficients_det(i))>obj.tolerance)
                         leading_zero_number = i-1;
                         break;
                     end
                 end
-                coefficients_det(1:leading_zero_number) = [];
-                temp_roots = roots(coefficients_det);
-                % Remove roots that are complex
-                temp_roots = temp_roots(imag(temp_roots)==0); 
-                % If rotation convert back to angle
-                if(joint_type(free_variable_index)~=DoFType.TRANSLATION)
-                   temp_roots = 2*atan(temp_roots); 
-                end
-                % Remove roots that lie outside of the range
-                temp_roots(temp_roots<workspace_ray.free_variable_range(1)) = []; 
-                temp_roots(temp_roots>workspace_ray.free_variable_range(2)) = [];
-                roots_cell_array{combination_index} = sort(temp_roots);
-                % Repeat for each combination and k
-                for combination_index_2 = 1:number_combinations
-                    k_roots = [workspace_ray.free_variable_range(1);workspace_ray.free_variable_range(2)];
-                    for dof_index = 1:number_dofs
-                        k = matrix_k(dof_index,:,combination_index,combination_index_2);
-                        if(joint_type(free_variable_index)==DoFType.TRANSLATION)
-                            % Double check regarding the use of -1
-                            polynomial_coefficients_k(dof_index,:) = polyfit(free_variable_linear_space,k,maximum_degree);
-                        else
-                            polynomial_coefficients_k(dof_index,:) = polyfit(tan(0.5*free_variable_linear_space),k,maximum_degree);
-                        end
-                        coefficients_k_i = polynomial_coefficients_k(dof_index,:);
-                        if((sum(isinf(coefficients_k_i))==0)&&(sum(isnan(coefficients_k_i))==0))
-                            k_i_roots = roots(coefficients_k_i);
-                            % Remove roots that are complex
-                            k_i_roots = k_i_roots(imag(k_i_roots)==0); 
-                            % If rotation convert back to angle
-                            if(joint_type(free_variable_index)~=DoFType.TRANSLATION)
-                               k_i_roots = 2*atan(k_i_roots); 
-                            end
-                            % Remove roots that lie outside of the range
-                            k_i_roots(k_i_roots<workspace_ray.free_variable_range(1)) = []; 
-                            k_i_roots(k_i_roots>workspace_ray.free_variable_range(2)) = [];
-                            % incorporate the roots into the roots for all k
-                            k_roots = [k_roots;k_i_roots];
-                        end
+                if(leading_zero_number ~= -1)
+                    coefficients_det(1:leading_zero_number) = [];
+                    temp_roots = roots(coefficients_det);
+                    % Remove roots that are complex
+                    temp_roots = temp_roots(imag(temp_roots)==0);
+                    % If rotation convert back to angle
+                    if(joint_type(free_variable_index)~=DoFType.TRANSLATION)
+                        temp_roots = 2*atan(temp_roots);
                     end
-                    % sort the roots
-                    k_roots = sort(k_roots);
-                    % go through all of the roots and check if at the
-                    % midpoints they have the same sign 
-                    for root_index=1:length(k_roots)-1
-                        evaluation_interval = [k_roots(root_index),k_roots(root_index+1)];
-                        number_determinant_roots = length(roots_cell_array{combination_index});
-                        if(number_determinant_roots > 0)
-                            for root_index_2 = 1:length(roots_cell_array{combination_index})
-                                root_i = roots_cell_array{combination_index}(root_index_2);
-                                if((root_i > evaluation_interval(1))&&(root_i < evaluation_interval(2)))
-                                    % The root is within the evaluation
-                                    % interval
-                                    evaluation_interval(2) = root_i - obj.tolerance;
+                    % Remove roots that lie outside of the range
+                    temp_roots(temp_roots<workspace_ray.free_variable_range(1)) = [];
+                    temp_roots(temp_roots>workspace_ray.free_variable_range(2)) = [];
+                    roots_cell_array{combination_index} = sort(temp_roots);
+                    % Repeat for each combination and k
+                    for combination_index_2 = 1:number_combinations
+                        k_roots = [workspace_ray.free_variable_range(1);workspace_ray.free_variable_range(2)];
+                        for dof_index = 1:number_dofs
+                            k = matrix_k(dof_index,:,combination_index,combination_index_2);
+                            if(joint_type(free_variable_index)==DoFType.TRANSLATION)
+                                % Double check regarding the use of -1
+                                polynomial_coefficients_k(dof_index,:) = polyfit(free_variable_linear_space,k,maximum_degree);
+                            else
+                                polynomial_coefficients_k(dof_index,:) = polyfit(tan(0.5*free_variable_linear_space),k,maximum_degree);
+                            end
+                            coefficients_k_i = polynomial_coefficients_k(dof_index,:);
+                            if((sum(isinf(coefficients_k_i))==0)&&(sum(isnan(coefficients_k_i))==0))
+                                k_i_roots = roots(coefficients_k_i);
+                                % Remove roots that are complex
+                                k_i_roots = k_i_roots(imag(k_i_roots)==0);
+                                % If rotation convert back to angle
+                                if(joint_type(free_variable_index)~=DoFType.TRANSLATION)
+                                    k_i_roots = 2*atan(k_i_roots);
                                 end
+                                % Remove roots that lie outside of the range
+                                k_i_roots(k_i_roots<workspace_ray.free_variable_range(1)) = [];
+                                k_i_roots(k_i_roots>workspace_ray.free_variable_range(2)) = [];
+                                % incorporate the roots into the roots for all k
+                                k_roots = [k_roots;k_i_roots];
+                            end
+                        end
+                        % sort the roots
+                        k_roots = sort(k_roots);
+                        % go through all of the roots and check if at the
+                        % midpoints they have the same sign
+                        for root_index=1:length(k_roots)-1
+                            evaluation_interval = [k_roots(root_index),k_roots(root_index+1)];
+                            number_determinant_roots = length(roots_cell_array{combination_index});
+                            if(number_determinant_roots > 0)
+                                for root_index_2 = 1:length(roots_cell_array{combination_index})
+                                    root_i = roots_cell_array{combination_index}(root_index_2);
+                                    if((root_i > evaluation_interval(1))&&(root_i < evaluation_interval(2)))
+                                        % The root is within the evaluation
+                                        % interval
+                                        evaluation_interval(2) = root_i - obj.tolerance;
+                                    end
+                                    % Take the mean value of the interval
+                                    if(joint_type(free_variable_index)==DoFType.TRANSLATION)
+                                        mean_value = mean(evaluation_interval);
+                                    else
+                                        mean_value=tan(mean(evaluation_interval)/2);
+                                    end
+                                    % Check the sign
+                                    sign_vector=zero_n;
+                                    for dof_index=1:number_dofs
+                                        sign_vector(dof_index)=polyval(polynomial_coefficients_k(dof_index,:),mean_value);
+                                    end
+                                    if((sum(sign_vector>obj.tolerance) == number_dofs)||(sum(sign_vector<-obj.tolerance) == number_dofs))
+                                        % Add the interval
+                                        new_interval = evaluation_interval;
+                                        intervals = obj.set_union(intervals,new_interval);
+                                    end
+                                    if(evaluation_interval(2) == k_roots(root_index+1))
+                                        break;
+                                    end
+                                end
+                            else
                                 % Take the mean value of the interval
                                 if(joint_type(free_variable_index)==DoFType.TRANSLATION)
                                     mean_value = mean(evaluation_interval);
@@ -167,32 +190,12 @@ classdef WrenchClosureRay < WorkspaceRayConditionBase
                                     break;
                                 end
                             end
-                        else
-                            % Take the mean value of the interval
-                            if(joint_type(free_variable_index)==DoFType.TRANSLATION)
-                                mean_value = mean(evaluation_interval);
-                            else
-                                mean_value=tan(mean(evaluation_interval)/2);
-                            end
-                            % Check the sign
-                            sign_vector=zero_n;
-                            for dof_index=1:number_dofs
-                                sign_vector(dof_index)=polyval(polynomial_coefficients_k(dof_index,:),mean_value);
-                            end
-                            if((sum(sign_vector>obj.tolerance) == number_dofs)||(sum(sign_vector<-obj.tolerance) == number_dofs))
-                                % Add the interval
-                                new_interval = evaluation_interval;
-                                intervals = obj.set_union(intervals,new_interval);
-                            end
-                            if(evaluation_interval(2) == k_roots(root_index+1))
-                                break;
-                            end
                         end
                     end
-                end
-                % Stop if the interval is the whole set
-                if((abs(intervals(1,1) - workspace_ray.free_variable_range(1)) < obj.tolerance) && (abs(intervals(1,2) - workspace_ray.free_variable_range(2))<obj.tolerance))
-                    return;
+                    % Stop if the interval is the whole set
+                    if((abs(intervals(1,1) - workspace_ray.free_variable_range(1)) < obj.tolerance) && (abs(intervals(1,2) - workspace_ray.free_variable_range(2))<obj.tolerance))
+                        return;
+                    end
                 end
             end
             count = 1;
