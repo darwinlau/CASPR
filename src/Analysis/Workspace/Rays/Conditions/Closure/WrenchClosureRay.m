@@ -33,6 +33,13 @@ classdef WrenchClosureRay < WorkspaceRayConditionBase
             end
             % Set up a linear space for the free variable
             free_variable_linear_space = linspace(workspace_ray.free_variable_range(1),workspace_ray.free_variable_range(2),maximum_degree+1);
+            % Use the joint type to determine the maximum polynomial
+            % degrees
+            if(joint_type(free_variable_index)==DoFType.TRANSLATION)
+                least_squares_matrix = GeneralMathOperations.ComputeLeastSquareMatrix(free_variable_linear_space',maximum_degree);
+            else
+                least_squares_matrix = GeneralMathOperations.ComputeLeastSquareMatrix(tan(0.5*free_variable_linear_space)',maximum_degree);
+            end
             % Determine all of the sets of combinatorics that will be used
             cable_combinations = nchoosek(1:number_cables,number_dofs);
             number_combinations = size(cable_combinations,1);
@@ -78,14 +85,16 @@ classdef WrenchClosureRay < WorkspaceRayConditionBase
             intervals = [];
             % THE ORDERING NEEDS TO BE CHANGED IN THIS VICINITY
             for combination_index = 1:number_combinations
-                polynomial_coefficients_k = zeros(number_dofs,maximum_degree+1);
                 determinant_vector = determinant_matrix(:,combination_index);
-                if(joint_type(free_variable_index)==DoFType.TRANSLATION)
-                    % Double check regarding the use of -1
-                    polynomial_coefficients_det(:,combination_index) = polyfit(free_variable_linear_space,determinant_vector',maximum_degree);
-                else
-                    polynomial_coefficients_det(:,combination_index) = polyfit(tan(0.5*free_variable_linear_space),determinant_vector',maximum_degree);
-                end
+                polynomial_coefficients_det(:,combination_index) = least_squares_matrix\determinant_vector;
+%                 if(joint_type(free_variable_index)==DoFType.TRANSLATION)
+%                     % Double check regarding the use of -1
+% %                     polynomial_coefficients_det(:,combination_index) = polyfit(free_variable_linear_space,determinant_vector',maximum_degree);
+%                     polynomial_coefficients_det(:,combination_index) = GeneralMathOperations.PolynomialFit(free_variable_linear_space',determinant_vector,maximum_degree)';
+%                 else
+% %                     polynomial_coefficients_det(:,combination_index) = polyfit(tan(0.5*free_variable_linear_space),determinant_vector',maximum_degree);
+%                     polynomial_coefficients_det(:,combination_index) = GeneralMathOperations.PolynomialFit(tan(0.5*free_variable_linear_space)',determinant_vector,maximum_degree)';
+%                 end
                 % Find the roots
                 % First remove anything that has magnitude below tolerance
                 coefficients_det = polynomial_coefficients_det(:,combination_index);
@@ -110,6 +119,7 @@ classdef WrenchClosureRay < WorkspaceRayConditionBase
                     roots_cell_array{combination_index} = sort(temp_roots);
                 end
             end
+            polynomial_coefficients_k = zeros(number_dofs,maximum_degree+1); % Initialised once it is always completely updated
             for combination_index = 1:number_combinations
                 if(leading_zero_number(combination_index) ~= -1)
                     % Repeat for each combination and k
@@ -118,12 +128,14 @@ classdef WrenchClosureRay < WorkspaceRayConditionBase
                             k_roots = [workspace_ray.free_variable_range(1);workspace_ray.free_variable_range(2)];
                             for dof_index = 1:number_dofs
                                 k = matrix_k(dof_index,:,combination_index,combination_index_2);
-                                if(joint_type(free_variable_index)==DoFType.TRANSLATION)
-                                    % Double check regarding the use of -1
-                                    polynomial_coefficients_k(dof_index,:) = polyfit(free_variable_linear_space,k,maximum_degree);
-                                else
-                                    polynomial_coefficients_k(dof_index,:) = polyfit(tan(0.5*free_variable_linear_space),k,maximum_degree);
-                                end
+                                polynomial_coefficients_k(dof_index,:) = least_squares_matrix\(k');
+%                                 if(joint_type(free_variable_index)==DoFType.TRANSLATION)
+% %                                     polynomial_coefficients_k(dof_index,:) = polyfit(free_variable_linear_space,k,maximum_degree);
+%                                     polynomial_coefficients_k(dof_index,:) = GeneralMathOperations.PolynomialFit(free_variable_linear_space',k',maximum_degree)';
+%                                 else
+% %                                     polynomial_coefficients_k(dof_index,:) = polyfit(tan(0.5*free_variable_linear_space),k,maximum_degree);
+%                                     polynomial_coefficients_k(dof_index,:) = GeneralMathOperations.PolynomialFit(tan(0.5*free_variable_linear_space)',k',maximum_degree)';
+%                                 end
                                 coefficients_k_i = polynomial_coefficients_k(dof_index,:);
                                 if((sum(isinf(coefficients_k_i))==0)&&(sum(isnan(coefficients_k_i))==0))
                                     k_i_roots = roots(coefficients_k_i);
