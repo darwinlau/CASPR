@@ -90,6 +90,8 @@ classdef (Abstract) ModelConfigBase < handle
         function [sysModel] = getModel(obj, cable_set_id, operational_space_id, model_mode)
             bodies_xmlobj = obj.getBodiesPropertiesXmlObj();
             cableset_xmlobj = obj.getCableSetXmlObj(cable_set_id);
+            % THIS NEEDS TO BE CHANGED IN ORDER TO BE CONSISTENT WITH THE
+            % REST OF CASPR
             switch nargin
                 % Only cable set id
                 case 2
