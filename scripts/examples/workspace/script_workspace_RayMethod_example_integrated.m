@@ -15,8 +15,7 @@ model_config    =   DevModelConfig('4_4_CDPR_planar'); nsegvar = [25 25 25]';
 % model_config    =   DevModelConfig('MickMultiIFW'); nsegvar = [2 6 6 6]';
 
 cable_set_id    =   'original';
-% modelObj        =   model_config.getModel(cable_set_id);
-modelObj = model_config.getModel(cable_set_id,ModelModeType.COMPILED);
+modelObj        =   model_config.getModel(cable_set_id);
 
 q_begin         =   modelObj.bodyModel.q_min; q_end = modelObj.bodyModel.q_max; 
 uGrid           =   UniformGrid(q_begin,q_end,(q_end-q_begin)./(nsegvar-1),'step_size');
