@@ -121,7 +121,11 @@ classdef RayWorkspaceSimulator < SimulatorBase
                         k = k+1;
                     end
                 end              
-                obj.createWorkspaceGraph(w_conditions{1});
+                if((nargin == 2) || isempty(w_metrics))
+                    obj.createWorkspaceGraph(w_conditions{1},[]);
+                else
+                    obj.createWorkspaceGraph(w_conditions{1},w_metrics{1});
+                end
             end
         end
         
@@ -213,7 +217,12 @@ classdef RayWorkspaceSimulator < SimulatorBase
         function plotGraph(obj)
             % Shrink the graph to remove all nodes that are empty
             G = graph(obj.graph_rep(:,1),obj.graph_rep(:,2));
-            for i = 1:obj.grid.n_dimensions
+            if(isempty(obj.metrics))
+                metric_flag = 0;
+            else
+                metric_flag = 1;
+            end
+            for i = 1:obj.grid.n_dimensions+1+metric_flag
                 figure;
                 G.Edges.EdgeColours = obj.graph_rep(:,2+i); % INTERSECT NEEDS TO BE CHANGED TO INCLUDE THE POINT ITSELF
                 p = plot(G);
@@ -223,10 +232,135 @@ classdef RayWorkspaceSimulator < SimulatorBase
                 colormap(jet)
             end
         end
+        
+%         function plotGraphAdjacency(obj)
+%             % Determine the maximum number of rays
+%             number_points = length(obj.workspace);
+%             max_number_rays = 0;
+%             for i = 1:number_points
+%                 if(~isempty(obj.workspace{i}))
+%                     number_rays = size(obj.workspace{i}.conditions{1,2},1);
+%                     if(number_rays > max_number_rays)
+%                         max_number_rays = number_rays;
+%                     end
+%                 end
+%             end
+%             number_nodes = max_number_rays*number_points;
+%             adjacency_matrix = zeros(number_nodes,number_nodes);
+%             % FIGURE OUT HOW TO BREAK DOWN
+%             number_points_1 = 1;
+%             for i = 1:number_points
+%                 if(~isempty(obj.workspace{i}))
+%                     adjacency_matrix(i,i) = 1;
+%                     for j = i+1:number_points
+%                         if(~isempty(obj.workspace{j}))
+%                             % Check if there is an intersection
+%                             adjacency_matrix(i,j) = obj.workspace{i}.intersect(obj.workspace{i}.conditions{1,2},obj.workspace{j},obj.workspace{j}.conditions{1,2});
+%                         end
+%                     end
+%                 end
+%                 number_points_1 = number_points_1 + 1;
+%             end
+%             
+%             % REMOVE THE HARDCODING
+%             % DETERMINE HOW TO LABEL
+%             
+%             % Perform reordering for slice plot construction
+%             % Determine the number of nodes per dimension
+%             number_nodes_per_dimension = number_nodes/obj.grid.n_dimensions;
+%             number_point = 25;
+% %             adjacency_matrix(1:number_nodes_per_dimension,number_nodes_per_dimension+1:2*number_nodes_per_dimension) = adjacency_matrix([1:25:number_nodes_per_dimension,2:25:number_nodes_per_dimension,3:25:number_nodes_per_dimension,4:25:number_nodes_per_dimension,5:25:number_nodes_per_dimension,6:25:number_nodes_per_dimension,7:25:number_nodes_per_dimension,8:25:number_nodes_per_dimension,9:25:number_nodes_per_dimension,10:25:number_nodes_per_dimension,11:25:number_nodes_per_dimension,12:25:number_nodes_per_dimension,13:25:number_nodes_per_dimension,14:25:number_nodes_per_dimension,15:25:number_nodes_per_dimension,16:25:number_nodes_per_dimension,17:25:number_nodes_per_dimension,18:25:number_nodes_per_dimension,19:25:number_nodes_per_dimension,20:25:number_nodes_per_dimension,21:25:number_nodes_per_dimension,22:25:number_nodes_per_dimension,23:25:number_nodes_per_dimension,24:25:number_nodes_per_dimension,25:25:number_nodes_per_dimension],...
+% %                 [number_nodes_per_dimension+1:25:2*number_nodes_per_dimension,number_nodes_per_dimension+2:25:2*number_nodes_per_dimension,number_nodes_per_dimension+3:25:2*number_nodes_per_dimension,number_nodes_per_dimension+4:25:2*number_nodes_per_dimension,number_nodes_per_dimension+5:25:2*number_nodes_per_dimension,number_nodes_per_dimension+6:25:2*number_nodes_per_dimension,number_nodes_per_dimension+7:25:2*number_nodes_per_dimension,number_nodes_per_dimension+8:25:2*number_nodes_per_dimension,number_nodes_per_dimension+9:25:2*number_nodes_per_dimension,number_nodes_per_dimension+10:25:2*number_nodes_per_dimension,number_nodes_per_dimension+11:25:2*number_nodes_per_dimension,number_nodes_per_dimension+12:25:2*number_nodes_per_dimension,number_nodes_per_dimension+13:25:2*number_nodes_per_dimension,number_nodes_per_dimension+14:25:2*number_nodes_per_dimension,number_nodes_per_dimension+15:25:2*number_nodes_per_dimension,number_nodes_per_dimension+16:25:2*number_nodes_per_dimension,number_nodes_per_dimension+17:25:2*number_nodes_per_dimension,number_nodes_per_dimension+18:25:2*number_nodes_per_dimension,number_nodes_per_dimension+19:25:2*number_nodes_per_dimension,number_nodes_per_dimension+20:25:2*number_nodes_per_dimension,number_nodes_per_dimension+21:25:2*number_nodes_per_dimension,number_nodes_per_dimension+22:25:2*number_nodes_per_dimension,number_nodes_per_dimension+23:25:2*number_nodes_per_dimension,number_nodes_per_dimension+24:25:2*number_nodes_per_dimension,number_nodes_per_dimension+25:25:2*number_nodes_per_dimension]);
+% %             adjacency_matrix(1:number_nodes_per_dimension,2*number_nodes_per_dimension+1:3*number_nodes_per_dimension) = adjacency_matrix(1:number_nodes_per_dimension,...
+% %                 [2*number_nodes_per_dimension+1:25:3*number_nodes_per_dimension,2*number_nodes_per_dimension+2:25:3*number_nodes_per_dimension,2*number_nodes_per_dimension+3:25:3*number_nodes_per_dimension,2*number_nodes_per_dimension+4:25:3*number_nodes_per_dimension,2*number_nodes_per_dimension+5:25:3*number_nodes_per_dimension,2*number_nodes_per_dimension+6:25:3*number_nodes_per_dimension,2*number_nodes_per_dimension+7:25:3*number_nodes_per_dimension,2*number_nodes_per_dimension+8:25:3*number_nodes_per_dimension,2*number_nodes_per_dimension+9:25:3*number_nodes_per_dimension,2*number_nodes_per_dimension+10:25:3*number_nodes_per_dimension,2*number_nodes_per_dimension+11:25:3*number_nodes_per_dimension,2*number_nodes_per_dimension+12:25:3*number_nodes_per_dimension,2*number_nodes_per_dimension+13:25:3*number_nodes_per_dimension,2*number_nodes_per_dimension+14:25:3*number_nodes_per_dimension,2*number_nodes_per_dimension+15:25:3*number_nodes_per_dimension,2*number_nodes_per_dimension+16:25:3*number_nodes_per_dimension,2*number_nodes_per_dimension+17:25:3*number_nodes_per_dimension,2*number_nodes_per_dimension+18:25:3*number_nodes_per_dimension,2*number_nodes_per_dimension+19:25:3*number_nodes_per_dimension,2*number_nodes_per_dimension+20:25:3*number_nodes_per_dimension,2*number_nodes_per_dimension+21:25:3*number_nodes_per_dimension,2*number_nodes_per_dimension+22:25:3*number_nodes_per_dimension,2*number_nodes_per_dimension+23:25:3*number_nodes_per_dimension,2*number_nodes_per_dimension+24:25:3*number_nodes_per_dimension,2*number_nodes_per_dimension+25:25:3*number_nodes_per_dimension]);
+%             adjacency_matrix(1:number_nodes_per_dimension,number_nodes_per_dimension+1:2*number_nodes_per_dimension) = adjacency_matrix([1:5:number_nodes_per_dimension,2:5:number_nodes_per_dimension,3:5:number_nodes_per_dimension,4:5:number_nodes_per_dimension,5:5:number_nodes_per_dimension],...
+%                 [number_nodes_per_dimension+1:5:2*number_nodes_per_dimension,number_nodes_per_dimension+2:5:2*number_nodes_per_dimension,number_nodes_per_dimension+3:5:2*number_nodes_per_dimension,number_nodes_per_dimension+4:5:2*number_nodes_per_dimension,number_nodes_per_dimension+5:5:2*number_nodes_per_dimension]);
+%             adjacency_matrix(1:number_nodes_per_dimension,2*number_nodes_per_dimension+1:3*number_nodes_per_dimension) = adjacency_matrix(1:number_nodes_per_dimension,...
+%                 [2*number_nodes_per_dimension+1:5:3*number_nodes_per_dimension,2*number_nodes_per_dimension+2:5:3*number_nodes_per_dimension,2*number_nodes_per_dimension+3:5:3*number_nodes_per_dimension,2*number_nodes_per_dimension+4:5:3*number_nodes_per_dimension,2*number_nodes_per_dimension+5:5:3*number_nodes_per_dimension]);
+%             % Determine a reordering approach - start with 3D and extend
+%             cmap = hot(5);
+%             subplot(3,3,1); 
+%             for i = 1:25
+%                 if(adjacency_matrix(i,i))
+%                     plot(i,i,'.','color',[0,0,0]); hold on
+%                 end
+%             end
+%             axis([1,25,1,25]);
+%             xlabel('q_1 ray #'); set(gca,'xaxisLocation','top'); ylabel('q_1 ray #');
+%             set(gca,'Ydir','reverse');
+% %             imagesc(5-5*adjacency_matrix(1:number_nodes_per_dimension,1:number_nodes_per_dimension)); colormap(fliplr(hot)); xlabel('q_1 ray #'); set(gca,'xaxisLocation','top'); ylabel('q_1 ray #'); 
+%             scaling_matrix = blkdiag(eye(5),2*eye(5),3*eye(5),4*eye(5),5*eye(5));
+%             subplot(3,3,2); 
+%             for i = 1:25
+%                 for j = 1:25
+%                     if(adjacency_matrix(i,25+j))
+%                         plot(j,i,'.','color',cmap(4-floor(j/5),:)); hold on
+%                     end
+%                 end
+%             end
+%             axis([1,25,1,25]);
+%             xlabel('q_2 ray #'); set(gca,'xaxisLocation','top'); set(gca,'yTick',[]); 
+%             set(gca,'Ydir','reverse');
+%             
+% %             imagesc(5-scaling_matrix*adjacency_matrix(1:number_nodes_per_dimension,number_nodes_per_dimension+1:2*number_nodes_per_dimension)); colormap(hot); xlabel('q_2 ray #'); set(gca,'xaxisLocation','top'); set(gca,'yTick',[]); 
+%             subplot(3,3,3); 
+% %             imagesc(5-scaling_matrix*adjacency_matrix(1:number_nodes_per_dimension,2*number_nodes_per_dimension+1:3*number_nodes_per_dimension)); colormap(hot); xlabel('q_3 ray #'); set(gca,'xaxisLocation','top'); set(gca,'yTick',[]); 
+%             for i = 1:25
+%                 for j = 1:25
+%                     if(adjacency_matrix(i,50+j))
+%                         plot(j,i,'.','color',cmap(4-floor(j/5),:)); hold on
+%                     end
+%                 end
+%             end
+%             axis([1,25,1,25]);
+%             xlabel('q_3 ray #'); set(gca,'xaxisLocation','top'); set(gca,'yTick',[]); 
+%             set(gca,'Ydir','reverse');
+%             subplot(3,3,5); 
+%             for i = 1:25
+%                 if(adjacency_matrix(25+i,25+i))
+%                     plot(i,i,'.','color',[0,0,0]); hold on
+%                 end
+%             end
+%             axis([1,25,1,25]);
+%             set(gca,'xTick',[]); ylabel('q_2 ray #');
+%             set(gca,'Ydir','reverse');
+% %             imagesc(5-5*adjacency_matrix(number_nodes_per_dimension+1:2*number_nodes_per_dimension,number_nodes_per_dimension+1:2*number_nodes_per_dimension)); colormap(hot); set(gca,'xTick',[]); ylabel('q_2 ray #');
+%             subplot(3,3,6); 
+%             for i = 1:25
+%                 for j = 1:25
+%                     if(adjacency_matrix(25+i,50+j))
+%                         plot(j,i,'.','color',cmap(4-floor(j/5),:)); hold on
+%                     end
+%                 end
+%             end
+%             axis([1,25,1,25]);
+%             set(gca,'xTick',[]); set(gca,'yTick',[]); 
+%             set(gca,'Ydir','reverse');
+% %             imagesc(5-scaling_matrix*adjacency_matrix(number_nodes_per_dimension+1:2*number_nodes_per_dimension,2*number_nodes_per_dimension+1:3*number_nodes_per_dimension)); colormap(hot); set(gca,'xTick',[]); set(gca,'yTick',[]); 
+%             subplot(3,3,9); 
+%             for i = 1:25
+%                 if(adjacency_matrix(50+i,50+i))
+%                     plot(i,i,'.','color',[0,0,0]); hold on
+%                 end
+%             end
+%             axis([1,25,1,25]);
+%             set(gca,'xTick',[]); ylabel('q_3 ray #');
+%             set(gca,'Ydir','reverse');
+% %             imagesc(5-5*adjacency_matrix(2*number_nodes_per_dimension+1:3*number_nodes_per_dimension,2*number_nodes_per_dimension+1:3*number_nodes_per_dimension)); colormap(hot); set(gca,'xTick',[]); ylabel('q_3 ray #');
+% %             for i = 1:25
+% %                 subplot(1,25,i); imagesc(adjacency_matrix((i-1)*25+1:(i-1)*25+25,number_nodes_per_dimension+(i-1)*25+1:number_nodes_per_dimension+(i-1)*25+25)); colormap(gray);
+% %             end
+%         end
     end
     
     methods(Access = private)
-        function createWorkspaceGraph(obj,condition)
+        function createWorkspaceGraph(obj,condition,metric)
+            if(isempty(metric))
+                metric_flag = 0;
+            else
+                metric_flag = 1;
+            end
+                
             % For the moment this will be written as if there was only one
             % condition I will subsequently modify
             number_rays = length(obj.workspace);
@@ -256,7 +390,7 @@ classdef RayWorkspaceSimulator < SimulatorBase
             node_list = node_list(1:number_node,:); 
             
             % Initialise an adjacency list
-            obj.graph_rep = zeros(number_node*number_node,2+obj.grid.n_dimensions);
+            obj.graph_rep = zeros(number_node*number_node,2+obj.grid.n_dimensions+1+metric_flag);
             number_intersects = 0;
             for i = 1:number_node
                 i
@@ -264,7 +398,12 @@ classdef RayWorkspaceSimulator < SimulatorBase
                     [is_intersected,intersection_point] = obj.workspace{node_list(i,1)}.intersect(node_list(i,2:3),obj.workspace{node_list(j,1)},node_list(j,2:3));
                     if(is_intersected)
                         number_intersects = number_intersects + 1;
-                        obj.graph_rep(number_intersects,:) = [i,j,intersection_point'];
+                        obj.graph_rep(number_intersects,1:2+obj.grid.n_dimensions+1) = [i,j,intersection_point',min([min(abs((intersection_point - obj.grid.q_begin)./(obj.grid.q_end - obj.grid.q_begin))),min(abs((intersection_point - obj.grid.q_end)./(obj.grid.q_end - obj.grid.q_begin)))])];
+                        if(metric_flag)
+                            obj.model.update(intersection_point,zeros(obj.grid.n_dimensions,1),zeros(obj.grid.n_dimensions,1),zeros(obj.grid.n_dimensions,1))
+%                             obj.metrics{1}.evaluate()
+                            [~,obj.graph_rep(number_intersects,2+obj.grid.n_dimensions+2),~] = obj.metrics{1}.evaluate(obj.model,[]);
+                        end
                     end
                 end
             end

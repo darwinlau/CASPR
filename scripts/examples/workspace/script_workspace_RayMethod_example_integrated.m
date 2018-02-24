@@ -15,12 +15,15 @@ model_config    =   DevModelConfig('4_4_CDPR_planar'); nsegvar = [25 25 25]';
 % model_config    =   DevModelConfig('MickMultiIFW'); nsegvar = [2 6 6 6]';
 
 cable_set_id    =   'original';
-modelObj        =   model_config.getModel(cable_set_id);
+% modelObj        =   model_config.getModel(cable_set_id);
+modelObj        =   model_config.getModel(cable_set_id,ModelModeType.COMPILED);
+
 
 q_begin         =   modelObj.bodyModel.q_min; q_end = modelObj.bodyModel.q_max; 
 uGrid           =   UniformGrid(q_begin,q_end,(q_end-q_begin)./(nsegvar-1),'step_size');
 % Workspace settings and conditions
 w_condition     =   {WorkspaceRayConditionBase.CreateWorkspaceRayCondition(WorkspaceRayConditionType.WRENCH_CLOSURE,2)};
+w_metrics       =   {WorkspaceMetricBase.CreateWorkspaceMetric(WorkspaceMetricType.TENSION_FACTOR)};
 % w_condition     =   {WorkspaceRayConditionBase.CreateWorkspaceRayCondition(WorkspaceRayConditionType.INTERFERENCE,2)};
 opt             =   RayWorkspaceSimulatorOptions(false,false);
 % Start the simulation
@@ -29,5 +32,5 @@ wsim            =   RayWorkspaceSimulator(modelObj,uGrid,opt);
 
 % Run the simulation
 disp('Start Running Simulation');
-wsim.run(w_condition,[])
+wsim.run(w_condition,w_metrics)
 wsim.plotGraph();
