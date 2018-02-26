@@ -14,7 +14,8 @@ classdef RayWorkspaceSimulator < SimulatorBase
         conditions = [] % A list of conditions to be evaluated for
         metrics = []    % A list of metrics to be evaluated for
         options         % The workspace simulator options
-        graph_rep = []      % The graph representation for the workspace
+        graph_rep = []  % The graph representation for the workspace
+        node_list = []  % A list of all nodes
     end
     
     methods
@@ -222,14 +223,35 @@ classdef RayWorkspaceSimulator < SimulatorBase
             else
                 metric_flag = 1;
             end
+            cmap = 0.5*ones(257,3);
+            cmap(1:128,:) = winter(128);
+            cmap(130:257,:) = flipud(autumn(128));
             for i = 1:obj.grid.n_dimensions+1+metric_flag
                 figure;
                 G.Edges.EdgeColours = obj.graph_rep(:,2+i); % INTERSECT NEEDS TO BE CHANGED TO INCLUDE THE POINT ITSELF
                 p = plot(G);
-                layout(p,'auto')
+                layout(p,'auto')  
+                edge_range = (max(G.Edges.EdgeColours)-min(G.Edges.EdgeColours));
+                zero_colour = min(G.Edges.EdgeColours) - edge_range/256;
+                if(i <= obj.grid.n_dimensions)
+                    centroid_list = mean(obj.node_list(:,2:3),2);
+                    max_centroid_list = max(centroid_list(obj.node_list(:,3+obj.grid.n_dimensions)==i));
+                    min_centroid_list = min(centroid_list(obj.node_list(:,3+obj.grid.n_dimensions)==i));
+                    G.Nodes.NodeColours = zeros(G.numnodes,1);
+                    for j = 1:G.numnodes
+                        if(obj.node_list(j,3+obj.grid.n_dimensions)==i)
+                            G.Nodes.NodeColours(j) = -edge_range/(max_centroid_list-min_centroid_list)*(centroid_list(j) - min_centroid_list) + min(G.Edges.EdgeColours) - edge_range/128;
+                        else
+                            G.Nodes.NodeColours(j) = zero_colour;
+                        end
+                    end
+                    p.NodeCData = G.Nodes.NodeColours;
+                end
                 p.EdgeCData = G.Edges.EdgeColours;
                 p.LineWidth = 2;
-                colormap(jet)
+                set(gca,'XTick',[]);set(gca,'YTick',[]);
+                colormap(cmap)
+                colorbar
             end
         end
         
@@ -365,7 +387,7 @@ classdef RayWorkspaceSimulator < SimulatorBase
             % condition I will subsequently modify
             number_rays = length(obj.workspace);
             % Create list of nodes
-            node_list = zeros(10*number_rays,3); % THIS DATA TYPE WILL CHANGE LATER TO BE A STRUCT OR CLASS
+            obj.node_list = zeros(10*number_rays,3+obj.grid.n_dimensions); % THIS DATA TYPE WILL CHANGE LATER TO BE A STRUCT OR CLASS
             number_node = 0;
             % For each ray
             for i = 1:number_rays
@@ -382,12 +404,12 @@ classdef RayWorkspaceSimulator < SimulatorBase
                     end
                     for j = 1:size(intervals,1)
                         number_node = number_node + 1;
-                        node_list(number_node,:) = [i,intervals(j,:)];
+                        obj.node_list(number_node,:) = [i,intervals(j,:),obj.workspace{i}.fixed_variables',obj.workspace{i}.free_variable_index];
                     end
                 end
             end                
             % Resize to the correct size
-            node_list = node_list(1:number_node,:); 
+            obj.node_list = obj.node_list(1:number_node,:); 
             
             % Initialise an adjacency list
             obj.graph_rep = zeros(number_node*number_node,2+obj.grid.n_dimensions+1+metric_flag);
@@ -395,12 +417,12 @@ classdef RayWorkspaceSimulator < SimulatorBase
             for i = 1:number_node
                 i
                 for j = i+1:number_node
-                    [is_intersected,intersection_point] = obj.workspace{node_list(i,1)}.intersect(node_list(i,2:3),obj.workspace{node_list(j,1)},node_list(j,2:3));
+                    [is_intersected,intersection_point] = obj.workspace{obj.node_list(i,1)}.intersect(obj.node_list(i,2:3),obj.workspace{obj.node_list(j,1)},obj.node_list(j,2:3));
                     if(is_intersected)
                         number_intersects = number_intersects + 1;
                         obj.graph_rep(number_intersects,1:2+obj.grid.n_dimensions+1) = [i,j,intersection_point',min([min(abs((intersection_point - obj.grid.q_begin)./(obj.grid.q_end - obj.grid.q_begin))),min(abs((intersection_point - obj.grid.q_end)./(obj.grid.q_end - obj.grid.q_begin)))])];
                         if(metric_flag)
-                            obj.model.update(intersection_point,zeros(obj.grid.n_dimensions,1),zeros(obj.grid.n_dimensions,1),zeros(obj.grid.n_dimensions,1))
+                            obj.model.update(intersection_point,zeros(obj.grid.n_dimensions,1),zeros(obj.grid.n_dimensions,1),zeros(obj.grid.n_dimensions,1));
 %                             obj.metrics{1}.evaluate()
                             [~,obj.graph_rep(number_intersects,2+obj.grid.n_dimensions+2),~] = obj.metrics{1}.evaluate(obj.model,[]);
                         end
