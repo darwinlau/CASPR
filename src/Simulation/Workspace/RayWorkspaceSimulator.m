@@ -223,7 +223,7 @@ classdef RayWorkspaceSimulator < SimulatorBase
             else
                 metric_flag = 1;
             end
-            cmap = 0.5*ones(257,3);
+            cmap = 0.7*ones(257,3);
             cmap(1:128,:) = winter(128);
             cmap(130:257,:) = flipud(autumn(128));
             for i = 1:obj.grid.n_dimensions+1+metric_flag
