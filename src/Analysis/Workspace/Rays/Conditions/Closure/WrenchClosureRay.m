@@ -6,7 +6,7 @@
 % Description    : 
 classdef WrenchClosureRay < WorkspaceRayConditionBase
     properties (SetAccess = protected, GetAccess = protected)
-        min_ray_percentage          % The minimum percentage of the ray at which it is included
+        min_ray_percentage           % The minimum percentage of the ray at which it is included
         tolerance = 1e-8;
     end
     

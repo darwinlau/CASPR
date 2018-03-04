@@ -230,21 +230,33 @@ classdef RayWorkspaceSimulator < SimulatorBase
                 figure;
                 G.Edges.EdgeColours = obj.graph_rep(:,2+i); % INTERSECT NEEDS TO BE CHANGED TO INCLUDE THE POINT ITSELF
                 ax1 = axes;
-                p = plot(G);
+                p = plot(G,'MarkerSize',2);
                 layout(p,'auto')  
                 edge_range = (max(G.Edges.EdgeColours)-min(G.Edges.EdgeColours));
                 zero_colour = min(G.Edges.EdgeColours) - edge_range/256;
                 if(i <= obj.grid.n_dimensions)
                     centroid_list = mean(obj.node_list(:,2:3),2);
-                    max_centroid_list = max(centroid_list(obj.node_list(:,3+obj.grid.n_dimensions)==i));
-                    min_centroid_list = min(centroid_list(obj.node_list(:,3+obj.grid.n_dimensions)==i));
+                    max_list = max(centroid_list(obj.node_list(:,3+obj.grid.n_dimensions)==i));
+                    min_list = min(centroid_list(obj.node_list(:,3+obj.grid.n_dimensions)==i));
                     G.Nodes.NodeColours = zeros(G.numnodes,1);
                     for j = 1:G.numnodes
                         if(obj.node_list(j,3+obj.grid.n_dimensions)==i)
-                            G.Nodes.NodeColours(j) = -edge_range/(max_centroid_list-min_centroid_list)*(centroid_list(j) - min_centroid_list) + min(G.Edges.EdgeColours) - edge_range/128;
+                            G.Nodes.NodeColours(j) = -edge_range/(max_list-min_list)*(centroid_list(j) - min_list) + min(G.Edges.EdgeColours) - edge_range/128;
                         else
                             G.Nodes.NodeColours(j) = zero_colour;
                         end
+                    end
+                    p.NodeCData = G.Nodes.NodeColours;
+                else
+                    ray_distance_list = zeros(G.numnodes,1);
+                    for j = 1:G.numnodes
+                        ray_distance_list(j) =  (obj.node_list(j,3) - obj.node_list(j,2))/(obj.grid.q_end(obj.node_list(j,3+obj.grid.n_dimensions)) - obj.grid.q_begin(obj.node_list(j,3+obj.grid.n_dimensions)));
+                    end
+                    max_list = max(ray_distance_list);
+                    min_list = min(ray_distance_list);
+                    G.Nodes.NodeColours = zeros(G.numnodes,1);
+                    for j = 1:G.numnodes
+                        G.Nodes.NodeColours(j) = -edge_range/(max_list-min_list)*(ray_distance_list(j) - min_list) + min(G.Edges.EdgeColours) - edge_range/128;
                     end
                     p.NodeCData = G.Nodes.NodeColours;
                 end
@@ -252,7 +264,7 @@ classdef RayWorkspaceSimulator < SimulatorBase
                 p.LineWidth = 2;
                 set(gca,'XTick',[]);set(gca,'YTick',[]);
                 ax2 = axes;
-                linkaxes([ax1,ax2])
+                linkaxes([ax1,ax2]);
                 %% Hide the top axes
                 ax2.Visible = 'off';
                 ax2.XTick = [];
@@ -263,10 +275,8 @@ classdef RayWorkspaceSimulator < SimulatorBase
                 set([ax1,ax2],'Position',[.15 .11 .685 .815]);
                 cb1 = colorbar(ax1,'Position',[.07 .11 .0675 .815]);
                 set(cb1,'Limits',[min(G.Edges.EdgeColours),max(G.Edges.EdgeColours)])
-                if(i <= obj.grid.n_dimensions)
-                    cb2 = colorbar(ax2,'Position',[.85 .11 .0675 .815]);
-                    caxis(ax2,[min_centroid_list,max_centroid_list]);
-                end
+                cb2 = colorbar(ax2,'Position',[.85 .11 .0675 .815]);
+                caxis(ax2,[min_list,max_list]);
             end
         end
         

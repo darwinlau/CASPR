@@ -10,7 +10,9 @@ clc;  close all; warning off; clear all;
 % 'spatial7cable' 
 % model_config    =   DevModelConfig('spatial7cable'); nsegvar= [3, 3, 3, 6, 6, 6]';
 % '4_4_CDPR_planar'
-model_config    =   DevModelConfig('4_4_CDPR_planar'); nsegvar = [25 25 25]';
+% model_config    =   DevModelConfig('4_4_CDPR_planar'); nsegvar = [25 25 25]';
+% BM arm
+model_config    =    DevModelConfig('BMArm_paper'); nsegvar = [20 20 20 20]';
 % % 'MickMultiIFW'
 % model_config    =   DevModelConfig('MickMultiIFW'); nsegvar = [2 6 6 6]';
 
@@ -20,9 +22,10 @@ modelObj        =   model_config.getModel(cable_set_id,ModelModeType.COMPILED);
 
 
 q_begin         =   modelObj.bodyModel.q_min; q_end = modelObj.bodyModel.q_max; 
+% q_begin         =   [-0.1;-0.1;-0.85;0]; q_end = [0.1;0.1;-0.65;0.8]; 
 uGrid           =   UniformGrid(q_begin,q_end,(q_end-q_begin)./(nsegvar-1),'step_size');
 % Workspace settings and conditions
-w_condition     =   {WorkspaceRayConditionBase.CreateWorkspaceRayCondition(WorkspaceRayConditionType.WRENCH_CLOSURE,2)};
+w_condition     =   {WorkspaceRayConditionBase.CreateWorkspaceRayCondition(WorkspaceRayConditionType.WRENCH_CLOSURE,100/24)};
 w_metrics       =   {WorkspaceMetricBase.CreateWorkspaceMetric(WorkspaceMetricType.TENSION_FACTOR)};
 % w_condition     =   {WorkspaceRayConditionBase.CreateWorkspaceRayCondition(WorkspaceRayConditionType.INTERFERENCE,2)};
 opt             =   RayWorkspaceSimulatorOptions(false,false);
