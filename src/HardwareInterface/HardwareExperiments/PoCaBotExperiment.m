@@ -55,7 +55,7 @@ classdef PoCaBotExperiment < ExperimentBase
             % Load the SystemKinematics object from the XML
             modelObj = model_config.getModel(strCableID);
             % Create the hardware interface
-            strCOMPort = {'COM11','COM5'};
+            strCOMPort = {'COM3','COM5'};
             hw_interface = PoCaBotCASPRInterface(strCOMPort, DynamixelType.XM540_W150, numMotor,false);  %1
             exp@ExperimentBase(hw_interface, modelObj);
             exp.modelConfig = model_config;
@@ -408,9 +408,9 @@ classdef PoCaBotExperiment < ExperimentBase
             current = ones(obj.numMotor,1)*obj.hardwareInterface.ActuatorParas.MAX_WORK_CURRENT;
             obj.hardwareInterface.forceCommandSend(current);
             
-            profileAcc = profileAcc/(obj.timestep/0.05);
+            profileAcc = profileAcc/(obj.timestep/0.05)/2;
             obj.hardwareInterface.setProfileAcceleration(profileAcc);
-            obj.hardwareInterface.setProfileVelocity(profileVel);
+            obj.hardwareInterface.setProfileVelocity(profileVel/2);
             
             % PID Check;
             %fprintf('Check the PID parameters!\n');
@@ -442,9 +442,9 @@ classdef PoCaBotExperiment < ExperimentBase
                 
                 [~, model_temp, ~, ~, ~] = obj.idsim.IDSolver.resolve(trajectory.q(:,t), trajectory.q_dot(:,t), trajectory.q_ddot(:,t), zeros(obj.idsim.model.numDofs,1));
                 [offset] = obj.hardwareInterface.getCableOffsetByTension(model_temp.cableForces);
-                if(any(model_temp.cableForces<0))
-                    fprintf('The force solved from ID gets beyond the limit!!!\n');
-                end
+%                 if(any(model_temp.cableForces<0))
+%                     fprintf('The force solved from ID gets beyond the limit!!!\n');
+%                 end
                 lengthCommand = model_temp.cableLengths ./(1+obj.elongation_per_Newton.*model_temp.cableForces) + offset;
 %                 lengthModifiedElongation = lengthCommand - obj.initialLength;
 %                 if(lengthModifiedElongation > 0)
