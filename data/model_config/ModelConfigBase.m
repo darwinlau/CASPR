@@ -100,9 +100,7 @@ classdef (Abstract) ModelConfigBase < handle
                 % Two cases: 
                 % 1. (obj, cable_id, mode); 2. (obj, cable_id, op_id)
                 case 3
-                    % Check if 3rd argument is model mode
-                    [~, modeTypeCell] = enumeration('ModelModeType');
-                    if (any(strcmp(modeTypeCell, operational_space_id)))
+                    if (isa(operational_space_id,'ModelModeType'))
                         % 3rd argument is model mode
                         model_mode = operational_space_id;
                         % Decide action according to the model_mode
