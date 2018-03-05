@@ -22,8 +22,11 @@ classdef SEACM < WorkspaceMetricBase
             if(w.n_faces > 0)
                 q   =   length(w.b);
                 s   =   zeros(q,1);
-                for j=1:length(w.b)
-                    s(j) = (w.b(j) - w.A(j,:)*(dynamics.M\(dynamics.G + dynamics.L_passive.'*dynamics.cableForcesPassive)))/norm(w.A(j,:),2);
+                b = w.b; 
+                A = w.A;
+                dyn_var = (dynamics.M\(dynamics.G + dynamics.L_passive.'*dynamics.cableForcesPassive));
+                parfor j=1:length(b)
+                    s(j) = (b(j) - A(j,:)*dyn_var)/norm(A(j,:),2);
                 end
                 v = min(s);
             else
