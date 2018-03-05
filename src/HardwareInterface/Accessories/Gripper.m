@@ -29,36 +29,53 @@ classdef Gripper < handle
         MIN_ARM_ANGLE  = 0;
         INI_ARM_ANGLE  = 90;
         
-%         LOOKUP_ARM_ANGLE = [  ...
-%             hex2dec('08'), 95;...
-%             hex2dec('0E'), 90;...
-%             hex2dec('37'), 45;...
-%             hex2dec('61'),  0;...
-%             hex2dec('8A'),-40;...
-%             hex2dec('B4'),-85];
         LOOKUP_ARM_ANGLE = [  ...
-            hex2dec('08'), 185;...
-            hex2dec('0E'), 180;...
-            hex2dec('37'), 135;...
-            hex2dec('61'),  90;...
-            hex2dec('8A'),  50;...
-            hex2dec('B4'),   5];
+            hex2dec('00'), 106;...
+            hex2dec('10'), 90;...
+            hex2dec('37'), 50;...
+            hex2dec('61'),  7;...
+            hex2dec('68'),  0;...
+            hex2dec('8A'),-32;...
+            hex2dec('B4'),-80];
+%         LOOKUP_ARM_ANGLE = [  ...
+%             hex2dec('08'), 185;...
+%             hex2dec('0E'), 180;...
+%             hex2dec('37'), 135;...
+%             hex2dec('61'),  90;...
+%             hex2dec('8A'),  50;...
+%             hex2dec('B4'),   5];
+        
+%         LOOKUP_DISTANCE_SENSOR1 = [  ...
+%             49.7000   -0.0250
+%             47.2600   -0.0100
+%             40.2500         0
+%             35.9800    0.0100
+%             31.2400    0.0200
+%             28.2400    0.0300];
+%         
+%         LOOKUP_DISTANCE_SENSOR2 = [  ...
+%             55.9700   -0.0250
+%             43.0100   -0.0100
+%             37.0000         0
+%             32.0300    0.0100
+%             28.0000    0.0200
+%             25.0000    0.0300];
         
         LOOKUP_DISTANCE_SENSOR1 = [  ...
-            49.7000   -0.0250
-            47.2600   -0.0100
-            40.2500         0
-            35.9800    0.0100
-            31.2400    0.0200
-            28.2400    0.0300];
+            62.0100   -0.0250
+            49.0200   -0.0100
+            43.0200         0
+            37.0000    0.0100
+            32.7000    0.0200
+            28.9200    0.0300];
         
         LOOKUP_DISTANCE_SENSOR2 = [  ...
-            55.9700   -0.0250
-            43.0100   -0.0100
-            37.0000         0
-            32.0300    0.0100
-            28.0000    0.0200
-            25.0000    0.0300];
+            60.0000   -0.0250
+            47.6900   -0.0100
+            41.0000         0
+            35.0600    0.0100
+            31.0000    0.0200
+            27.1100    0.0300];
         
         CMD_MOTOR_HEADER = [hex2dec('FF') hex2dec('AA')];
         CMD_DISTANCE_READ = uint8(hex2dec(['FF';'22';'22';'22']))';
@@ -314,9 +331,11 @@ classdef Gripper < handle
         function [arm_angle_cmd] = armAngleConvert(obj, arm_angle_needed)
             CASPR_log.Assert(arm_angle_needed<= obj.MAX_ARM_ANGLE && arm_angle_needed>=obj.MIN_ARM_ANGLE,'The argument is out of range!');
             
-%             if(arm_angle_needed>=95)
-            if(arm_angle_needed<5)
-                arm_angle_needed = arm_angle_needed + 180;
+%             if(arm_angle_needed<5)
+%                 arm_angle_needed = arm_angle_needed + 180;
+%             end
+            if(arm_angle_needed>106)
+                arm_angle_needed = arm_angle_needed - 180;
             end
             
             arm_angle_cmd = interp1(obj.LOOKUP_ARM_ANGLE(:,2),obj.LOOKUP_ARM_ANGLE(:,1),arm_angle_needed);
