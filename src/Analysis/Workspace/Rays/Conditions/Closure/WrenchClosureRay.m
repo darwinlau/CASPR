@@ -42,14 +42,16 @@ classdef WrenchClosureRay < WorkspaceRayConditionBase
                 % Matrix for least squares computations
                 least_squares_matrix = GeneralMathOperations.ComputeLeastSquareMatrix(tan(0.5*free_variable_linear_space)',maximum_degree);
             end
+            % Take the inverse of the least squares matrix
+            least_squares_matrix_i = inv(least_squares_matrix);
             % Determine all of the sets of combinatorics that will be used
             cable_vector = 1:number_cables;
             cable_combinations = nchoosek(cable_vector,number_dofs);
             number_combinations = size(cable_combinations,1);
-            number_secondary_combinations = 0;
-            for combinations_index = 1:degree_redundancy
-                number_secondary_combinations = number_secondary_combinations + nchoosek(degree_redundancy,combinations_index);
-            end
+            number_secondary_combinations = 2^degree_redundancy - 1;
+%             for combinations_index = 1:degree_redundancy
+%                 number_secondary_combinations = number_secondary_combinations + nchoosek(degree_redundancy,combinations_index);
+%             end
             % Pose data
             q_fixed = workspace_ray.fixed_variables;
             fixed_index = true(number_dofs,1); fixed_index(workspace_ray.free_variable_index) = false;
@@ -72,32 +74,35 @@ classdef WrenchClosureRay < WorkspaceRayConditionBase
                 end
                 % Scale the Jacobian by the cable lengths (to remove the
                 % denominator)
-                for cable_index = 1:number_cables
-                    A(:,cable_index) = A(:,cable_index)*model.cableLengths(cable_index);
-                end
+                A = A*diag(model.cableLengths);
                 % Set up all of the components
                 for combination_index = 1:number_combinations
                     A_comb = A(:,cable_combinations(combination_index,:));
                     determinant_matrix(linear_space_index,combination_index) = det(A_comb);
                     secondary_combination_index = 0;
-                    for combinations_index_2 = 1:degree_redundancy
+                    for combination_index_2 = 1:degree_redundancy
                         % Extract the combinations
                         temp_cable_vector = cable_vector; temp_cable_vector(cable_combinations(combination_index,:)) = [];
-                        secondary_combinations_matrix = nchoosek(temp_cable_vector,combinations_index_2);
+                        if(combination_index_2 == degree_redundancy)
+                            secondary_combinations_matrix = temp_cable_vector;
+                        else
+                            secondary_combinations_matrix = nchoosek(temp_cable_vector,combination_index_2);
+                        end
                         for secondary_combinations_index_2 = 1:size(secondary_combinations_matrix,1)
                             secondary_combination_index = secondary_combination_index+1;
                             % Create the combined matrix
-                            if(combinations_index == 1)
-                                A_np1 = [A_comb,A(:,secondary_combinations_matrix(secondary_combinations_index_2))];
+                            if(combination_index == 1)
+                                A_np1 = [A_comb,A(:,secondary_combinations_matrix)];
                             else
                                 A_np1 = [A_comb,sum(A(:,secondary_combinations_matrix(secondary_combinations_index_2)),2)];
                             end
                             % Go through it and fill in all the
                             % determinants
+                            true_np1 = true(number_dofs+1,1);
                             for dof_iterations=1:number_dofs+1
-                                temp_A_np1 = A_np1;    %%current-matrix-determinant
-                                temp_A_np1(:,dof_iterations)=[];
-                                null_matrix(linear_space_index,combination_index,secondary_combination_index,dof_iterations) = det(temp_A_np1);
+                                temp_true = true_np1;
+                                temp_true(dof_iterations) = false;
+                                null_matrix(linear_space_index,combination_index,secondary_combination_index,dof_iterations) = det(A_np1(:,temp_true));
                             end
                         end
                     end
@@ -111,7 +116,8 @@ classdef WrenchClosureRay < WorkspaceRayConditionBase
             intervals = [];
             for combination_index = 1:number_combinations
                 determinant_vector = determinant_matrix(:,combination_index);
-                polynomial_coefficients_det(:,combination_index) = least_squares_matrix\determinant_vector;
+                polynomial_coefficients_det(:,combination_index) = least_squares_matrix_i*determinant_vector;
+                
                 % Find the roots
                 % First remove anything that has magnitude below tolerance
                 coefficients_det = polynomial_coefficients_det(:,combination_index);
@@ -145,7 +151,7 @@ classdef WrenchClosureRay < WorkspaceRayConditionBase
                         null_roots = [workspace_ray.free_variable_range(1);workspace_ray.free_variable_range(2)];
                         for dof_index = 1:number_dofs+1
                             null_vector = null_matrix(:,combination_index,combination_index_2,dof_index);
-                            polynomial_coefficients_null(dof_index,:) = ((-1)^(dof_index+1))*(least_squares_matrix\null_vector);
+                            polynomial_coefficients_null(dof_index,:) = ((-1)^(dof_index+1))*(least_squares_matrix_i*null_vector);
                             coefficients_null = polynomial_coefficients_null(dof_index,:);
                             if((sum(isinf(coefficients_null))==0)&&(sum(isnan(coefficients_null))==0))
                                 null_i_roots = roots(coefficients_null);
@@ -179,14 +185,15 @@ classdef WrenchClosureRay < WorkspaceRayConditionBase
                                         evaluation_interval(2) = root_ij - obj.tolerance;
                                         % Take the mean value of the interval
                                         if(joint_type(free_variable_index)==DoFType.TRANSLATION)
-                                            mean_value = mean(evaluation_interval);
+                                            mean_value = 0.5*(evaluation_interval(2) + evaluation_interval(1));
                                         else
-                                            mean_value=tan(mean(evaluation_interval)/2);
+                                            mean_value=tan(0.25*(evaluation_interval(2) + evaluation_interval(1)));
                                         end
                                         % Check the sign
                                         sign_vector=zeros(number_dofs+1,1);
+                                        poly_vector=GeneralMathOperations.ComputePolynomialVector(mean_value,maximum_degree); 
                                         for dof_index=1:number_dofs+1
-                                            sign_vector(dof_index)=polyval(polynomial_coefficients_null(dof_index,:),mean_value);
+                                            sign_vector(dof_index)=polynomial_coefficients_null(dof_index,:)*poly_vector;
                                         end
                                         if((sum(sign_vector>obj.tolerance) == number_dofs+1)||(sum(sign_vector<-obj.tolerance) == number_dofs+1))
                                             % Add the interval
@@ -202,14 +209,15 @@ classdef WrenchClosureRay < WorkspaceRayConditionBase
                                             % last root
                                             % Take the mean value of the interval
                                             if(joint_type(free_variable_index)==DoFType.TRANSLATION)
-                                                mean_value = mean(evaluation_interval);
+                                                mean_value = 0.5*(evaluation_interval(2) + evaluation_interval(1));
                                             else
-                                                mean_value=tan(mean(evaluation_interval)/2);
+                                                mean_value=tan(0.25*(evaluation_interval(2) + evaluation_interval(1)));
                                             end
                                             % Check the sign
                                             sign_vector=zeros(number_dofs+1,1);
+                                            poly_vector=GeneralMathOperations.ComputePolynomialVector(mean_value,maximum_degree);
                                             for dof_index=1:number_dofs+1
-                                                sign_vector(dof_index)=polyval(polynomial_coefficients_null(dof_index,:),mean_value);
+                                                sign_vector(dof_index)=polynomial_coefficients_null(dof_index,:)*poly_vector;
                                             end
                                             if((sum(sign_vector>obj.tolerance) == number_dofs+1)||(sum(sign_vector<-obj.tolerance) == number_dofs+1))
                                                 % Add the interval
@@ -220,14 +228,14 @@ classdef WrenchClosureRay < WorkspaceRayConditionBase
                                     elseif(root_ij >= evaluation_interval(2))
                                         % Evaluate
                                         if(joint_type(free_variable_index)==DoFType.TRANSLATION)
-                                            mean_value = mean(evaluation_interval);
+                                            mean_value = 0.5*(evaluation_interval(2) + evaluation_interval(1));
                                         else
-                                            mean_value=tan(mean(evaluation_interval)/2);
+                                            mean_value=tan(0.25*(evaluation_interval(2) + evaluation_interval(1)));
                                         end
                                         % Check the sign
-                                        sign_vector=zeros(number_dofs+1,1);
+                                        poly_vector=GeneralMathOperations.ComputePolynomialVector(mean_value,maximum_degree);
                                         for dof_index=1:number_dofs+1
-                                            sign_vector(dof_index)=polyval(polynomial_coefficients_null(dof_index,:),mean_value);
+                                            sign_vector(dof_index)=polynomial_coefficients_null(dof_index,:)*poly_vector;
                                         end
                                         if((sum(sign_vector>obj.tolerance) == number_dofs+1)||(sum(sign_vector<-obj.tolerance) == number_dofs+1))
                                             % Add the interval
@@ -240,14 +248,15 @@ classdef WrenchClosureRay < WorkspaceRayConditionBase
                             else
                                 % Take the mean value of the interval
                                 if(joint_type(free_variable_index)==DoFType.TRANSLATION)
-                                    mean_value = mean(evaluation_interval);
+                                    mean_value = 0.5*(evaluation_interval(2) + evaluation_interval(1));
                                 else
-                                    mean_value=tan(mean(evaluation_interval)/2);
+                                    mean_value=tan(0.25*(evaluation_interval(2) + evaluation_interval(1)));
                                 end
                                 % Check the sign
                                 sign_vector=zeros(number_dofs+1,1);
+                                poly_vector=GeneralMathOperations.ComputePolynomialVector(mean_value,maximum_degree); 
                                 for dof_index=1:number_dofs+1
-                                    sign_vector(dof_index)=polyval(polynomial_coefficients_null(dof_index,:),mean_value);
+                                    sign_vector(dof_index)=polynomial_coefficients_null(dof_index,:)*poly_vector;
                                 end
                                 if((sum(sign_vector>obj.tolerance) == number_dofs+1)||(sum(sign_vector<-obj.tolerance) == number_dofs+1))
                                     new_interval = evaluation_interval;

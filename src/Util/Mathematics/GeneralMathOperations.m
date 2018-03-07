@@ -22,6 +22,13 @@ classdef GeneralMathOperations
                 T(:,j) = X.^(degree-j+1);
             end
         end
+        
+        function v = ComputePolynomialVector(x,degree)
+            v = ones(degree+1,1);
+            for j = 1:degree
+                v(j) = x.^(degree-j+1);
+            end
+        end
     end
 end
 
