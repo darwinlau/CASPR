@@ -267,7 +267,11 @@ classdef SystemModel < handle
         end
 
         function value = get.L(obj)            
-            value = obj.cableModel.V*obj.bodyModel.W;                      
+            if((obj.modelMode == ModelModeType.COMPILED)&&obj.filesCompiled)
+                value = compile_L(obj.bodyModel.q,obj.bodyModel.q_dot,obj.bodyModel.q_ddot,obj.bodyModel.W_e);                      
+            else
+                value = obj.cableModel.V*obj.bodyModel.W;                      
+            end
         end
         
         function value = get.L_active(obj)
@@ -509,9 +513,9 @@ classdef SystemModel < handle
             
             % Perform an update under compiled mode to initialise
             obj.setFilesCompiled(true);
+            obj.bodyModel.occupied = BodyFlags();
             obj.setModelMode(ModelModeType.COMPILED);
             obj.update(obj.bodyModel.q_initial, obj.bodyModel.q_dot_default, obj.bodyModel.q_ddot_default, zeros(obj.numDofs,1));
-           
             CASPR_log.Info('Finished All Compilations.\n');
         end
     end

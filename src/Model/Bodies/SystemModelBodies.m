@@ -530,15 +530,17 @@ classdef SystemModelBodies < handle
             obj.W_e = w_ext;
             
             % Update class properties by calling the compiled functions
-            obj.C = compile_C(q, q_dot, q_ddot, w_ext);   
-            obj.G = compile_G(q, q_dot, q_ddot, w_ext);           
-            obj.M = compile_M(q, q_dot, q_ddot, w_ext);    
-            obj.C_b = compile_C_b(q, q_dot, q_ddot, w_ext);   
-            obj.G_b = compile_G_b(q, q_dot, q_ddot, w_ext);           
-            obj.M_b = compile_M_b(q, q_dot, q_ddot, w_ext);
-            obj.W = compile_W(q, q_dot, q_ddot, w_ext);
-            obj.x_ddot = compile_x_ddot(q, q_dot, q_ddot, w_ext);
-            obj.x_dot = compile_x_dot(q, q_dot, q_ddot, w_ext);
+            if obj.occupied.dynamics
+                obj.C = compile_C(q, q_dot, q_ddot, w_ext);   
+                obj.G = compile_G(q, q_dot, q_ddot, w_ext);           
+                obj.M = compile_M(q, q_dot, q_ddot, w_ext);    
+                obj.C_b = compile_C_b(q, q_dot, q_ddot, w_ext);   
+                obj.G_b = compile_G_b(q, q_dot, q_ddot, w_ext);           
+                obj.M_b = compile_M_b(q, q_dot, q_ddot, w_ext);
+                obj.W = compile_W(q, q_dot, q_ddot, w_ext);
+                obj.x_ddot = compile_x_ddot(q, q_dot, q_ddot, w_ext);
+                obj.x_dot = compile_x_dot(q, q_dot, q_ddot, w_ext);
+            end
             
             % Update operational space variables
             if obj.occupied.operational_space                

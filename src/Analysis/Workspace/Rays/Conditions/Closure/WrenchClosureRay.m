@@ -8,12 +8,14 @@ classdef WrenchClosureRay < WorkspaceRayConditionBase
     properties (SetAccess = protected, GetAccess = protected)
         min_ray_percentage           % The minimum percentage of the ray at which it is included
         tolerance = 1e-8;
+        joint_type;                  % Boolean set to true if translation and false if rotation
     end
     
     methods
         % Constructor for wrench closure workspace
-        function w = WrenchClosureRay(min_ray_percent)
+        function w = WrenchClosureRay(min_ray_percent,q_dof_type)
             w.min_ray_percentage = min_ray_percent;
+            w.joint_type = q_dof_type==DoFType.TRANSLATION;
         end
         
         % The taghirad inspired method
@@ -22,12 +24,11 @@ classdef WrenchClosureRay < WorkspaceRayConditionBase
             number_dofs = model.numDofs;
             number_cables = model.numCables;
             degree_redundancy = number_cables - number_dofs;
-            joint_type = model.bodyModel.q_dofType;
             free_variable_index = workspace_ray.free_variable_index;
             zero_n = zeros(number_dofs,1);
             % Use the joint type to determine the maximum polynomial
             % degrees
-            if(joint_type(free_variable_index)==DoFType.TRANSLATION)
+            if(obj.joint_type(free_variable_index))
                 % THIS MAY NEED TO BE CHANGED
                 maximum_degree = number_dofs;
                 % Set up a linear space for the free variable
@@ -67,14 +68,17 @@ classdef WrenchClosureRay < WorkspaceRayConditionBase
                 % Update the model
                 model.update(q,zero_n,zero_n,zero_n);
                 % Obtain the Jacobian for computation
-                if(joint_type(free_variable_index)==DoFType.TRANSLATION)
+                if(obj.joint_type(free_variable_index))
+%                     A = -compile_L(q,zero_n,zero_n,zero_n)';
                     A = -(model.L)';
                 else
+%                     A = - (1+tan(0.5*q_free)^2)*(compile_L(q,zero_n,zero_n,zero_n))'; % Scalar multiplication is to multiply out the denominator of the Weierstrauss substitution
                     A = - (1+tan(0.5*q_free)^2)*(model.L)'; % Scalar multiplication is to multiply out the denominator of the Weierstrauss substitution
                 end
                 % Scale the Jacobian by the cable lengths (to remove the
                 % denominator)
                 A = A*diag(model.cableLengths);
+%                 A = A*diag(compile_lengths(q,zero_n,zero_n,zero_n));
                 % Set up all of the components
                 for combination_index = 1:number_combinations
                     A_comb = A(:,cable_combinations(combination_index,:));
@@ -133,7 +137,7 @@ classdef WrenchClosureRay < WorkspaceRayConditionBase
                     % Remove roots that are complex
                     temp_roots = temp_roots(imag(temp_roots)==0);
                     % If rotation convert back to angle
-                    if(joint_type(free_variable_index)~=DoFType.TRANSLATION)
+                    if(~obj.joint_type(free_variable_index))
                         temp_roots = 2*atan(temp_roots);
                     end
                     % Remove roots that lie outside of the range
@@ -158,7 +162,7 @@ classdef WrenchClosureRay < WorkspaceRayConditionBase
                                 % Remove roots that are complex
                                 null_i_roots = null_i_roots(imag(null_i_roots)==0);
                                 % If rotation convert back to angle
-                                if(joint_type(free_variable_index)~=DoFType.TRANSLATION)
+                                if(~obj.joint_type(free_variable_index))
                                     null_i_roots = 2*atan(null_i_roots);
                                 end
                                 % Remove roots that lie outside of the range
@@ -184,7 +188,7 @@ classdef WrenchClosureRay < WorkspaceRayConditionBase
                                         % interval
                                         evaluation_interval(2) = root_ij - obj.tolerance;
                                         % Take the mean value of the interval
-                                        if(joint_type(free_variable_index)==DoFType.TRANSLATION)
+                                        if(obj.joint_type(free_variable_index))
                                             mean_value = 0.5*(evaluation_interval(2) + evaluation_interval(1));
                                         else
                                             mean_value=tan(0.25*(evaluation_interval(2) + evaluation_interval(1)));
@@ -208,7 +212,7 @@ classdef WrenchClosureRay < WorkspaceRayConditionBase
                                             % interval if this is the
                                             % last root
                                             % Take the mean value of the interval
-                                            if(joint_type(free_variable_index)==DoFType.TRANSLATION)
+                                            if(obj.joint_type(free_variable_index))
                                                 mean_value = 0.5*(evaluation_interval(2) + evaluation_interval(1));
                                             else
                                                 mean_value=tan(0.25*(evaluation_interval(2) + evaluation_interval(1)));
@@ -227,7 +231,7 @@ classdef WrenchClosureRay < WorkspaceRayConditionBase
                                         end
                                     elseif(root_ij >= evaluation_interval(2))
                                         % Evaluate
-                                        if(joint_type(free_variable_index)==DoFType.TRANSLATION)
+                                        if(obj.joint_type(free_variable_index))
                                             mean_value = 0.5*(evaluation_interval(2) + evaluation_interval(1));
                                         else
                                             mean_value=tan(0.25*(evaluation_interval(2) + evaluation_interval(1)));
@@ -247,7 +251,7 @@ classdef WrenchClosureRay < WorkspaceRayConditionBase
                                 end
                             else
                                 % Take the mean value of the interval
-                                if(joint_type(free_variable_index)==DoFType.TRANSLATION)
+                                if(obj.joint_type(free_variable_index))
                                     mean_value = 0.5*(evaluation_interval(2) + evaluation_interval(1));
                                 else
                                     mean_value=tan(0.25*(evaluation_interval(2) + evaluation_interval(1)));
