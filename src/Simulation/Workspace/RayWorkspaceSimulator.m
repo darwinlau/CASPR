@@ -84,7 +84,7 @@ classdef RayWorkspaceSimulator < SimulatorBase
                         q_fixed = sub_grid.getGridPoint(j);
                         % Construct the workspace ray
                         wr = WorkspaceRay(q_fixed,n_metrics,n_conditions,i,[obj.grid.q_begin(i),obj.grid.q_end(i)]);
-
+                            
                         % For each metric compute the value of the ray
                         for j_m=1:n_metrics
                             %% THIS NEEDS TO BE FILLED IN
@@ -247,7 +247,7 @@ classdef RayWorkspaceSimulator < SimulatorBase
                         end
                     end
                     p.NodeCData = G.Nodes.NodeColours;
-                else
+                elseif(i == obj.grid.n_dimensions+1)
                     ray_distance_list = zeros(G.numnodes,1);
                     for j = 1:G.numnodes
                         ray_distance_list(j) =  (obj.node_list(j,3) - obj.node_list(j,2))/(obj.grid.q_end(obj.node_list(j,3+obj.grid.n_dimensions)) - obj.grid.q_begin(obj.node_list(j,3+obj.grid.n_dimensions)));
@@ -259,24 +259,44 @@ classdef RayWorkspaceSimulator < SimulatorBase
                         G.Nodes.NodeColours(j) = -edge_range/(max_list-min_list)*(ray_distance_list(j) - min_list) + min(G.Edges.EdgeColours) - edge_range/128;
                     end
                     p.NodeCData = G.Nodes.NodeColours;
+                else
+                    p.NodeCData = (zero_colour-0.1)*ones(G.numnodes,1);
                 end
-                p.EdgeCData = G.Edges.EdgeColours;
-                p.LineWidth = 2;
-                set(gca,'XTick',[]);set(gca,'YTick',[]);
-                ax2 = axes;
-                linkaxes([ax1,ax2]);
-                %% Hide the top axes
-                ax2.Visible = 'off';
-                ax2.XTick = [];
-                ax2.YTick = [];
-                colormap(ax1,cmap);
-                colormap(ax2,winter(128));
-                %                 colorbar
-                set([ax1,ax2],'Position',[.15 .11 .685 .815]);
-                cb1 = colorbar(ax1,'Position',[.07 .11 .0675 .815]);
-                set(cb1,'Limits',[min(G.Edges.EdgeColours),max(G.Edges.EdgeColours)])
-                cb2 = colorbar(ax2,'Position',[.85 .11 .0675 .815]);
-                caxis(ax2,[min_list,max_list]);
+                if(i <= obj.grid.n_dimensions+1)
+                    p.EdgeCData = G.Edges.EdgeColours;
+                    p.LineWidth = 2;
+                    set(gca,'XTick',[]);set(gca,'YTick',[]);
+                    ax2 = axes;
+                    linkaxes([ax1,ax2]);
+                    %% Hide the top axes
+                    ax2.Visible = 'off';
+                    ax2.XTick = [];
+                    ax2.YTick = [];
+                    colormap(ax1,cmap);
+                    colormap(ax2,flipud(winter(128)));
+                    %                 colorbar
+                    set([ax1,ax2],'Position',[.15 .11 .685 .815]);
+                    cb1 = colorbar(ax1,'Position',[.07 .11 .0675 .815]);
+                    if(min(G.Edges.EdgeColours)==max(G.Edges.EdgeColours))
+                        set(cb1,'Limits',[min(G.Edges.EdgeColours),max(G.Edges.EdgeColours)+1e-4])
+                    else
+                        set(cb1,'Limits',[min(G.Edges.EdgeColours),max(G.Edges.EdgeColours)])
+                    end
+                    cb2 = colorbar(ax2,'Position',[.85 .11 .0675 .815]);
+                    caxis(ax2,[min_list,max_list]);
+                else
+                    p.EdgeCData = G.Edges.EdgeColours;
+                    p.LineWidth = 2;
+                    set(gca,'XTick',[]);set(gca,'YTick',[]);
+                    set(gca,'Position',[.15 .11 .685 .815]);
+                    colormap(cmap(129:257,:));
+                    cb1 = colorbar(gca,'Position',[.07 .11 .0675 .815]);
+                    if(min(G.Edges.EdgeColours)==max(G.Edges.EdgeColours))
+                        set(cb1,'Limits',[min(G.Edges.EdgeColours),max(G.Edges.EdgeColours)+1e-4])
+                    else
+                        set(cb1,'Limits',[min(G.Edges.EdgeColours),max(G.Edges.EdgeColours)])
+                    end
+                end
             end
         end
     end
@@ -317,8 +337,17 @@ classdef RayWorkspaceSimulator < SimulatorBase
             % Resize to the correct size
             obj.node_list = obj.node_list(1:number_node,:); 
             
+            % Computation for the maximum number of nodes
+            max_edges = 0;
+            for i = 1:obj.grid.n_dimensions
+                % Determine the number of nodes for a given free variable
+                % index
+                num_nodes_i = sum(obj.node_list(:,3+obj.grid.n_dimensions)==i);
+                max_edges = max_edges + (number_node-num_nodes_i);
+            end
+            
             % Initialise an adjacency list
-            obj.graph_rep = zeros(number_node*number_node,2+obj.grid.n_dimensions+1+metric_flag);
+            obj.graph_rep = zeros(max_edges,2+obj.grid.n_dimensions+1+metric_flag);
             number_intersects = 0;
             for i = 1:number_node
                 i
@@ -327,21 +356,21 @@ classdef RayWorkspaceSimulator < SimulatorBase
                     if(is_intersected)
                         number_intersects = number_intersects + 1;
                         min_dist = min([abs(intersection_point(obj.node_list(i,3+obj.grid.n_dimensions))-obj.node_list(i,2)),abs(intersection_point(obj.node_list(i,3+obj.grid.n_dimensions))-obj.node_list(i,3)),abs(intersection_point(obj.node_list(j,3+obj.grid.n_dimensions))-obj.node_list(j,2)),abs(intersection_point(obj.node_list(j,3+obj.grid.n_dimensions))-obj.node_list(j,3))]);
-%                         % Go through all of the nodes to determine if there
-%                         % is another node that is closer and intersects
-%                         % with the point of intersection
-%                         for k = 1:number_node
-%                             selection_vector = true(obj.grid.n_dimensions,1); selection_vector(obj.node_list(k,3+obj.grid.n_dimensions)) = false;
-%                             % Condition to ensure that it is suitable
-%                             if((k~=i)&&(k~=j)&&(sum(obj.node_list(k,4:3+obj.grid.n_dimensions-1)'==intersection_point(selection_vector))==obj.grid.n_dimensions-1))
-%                                 % Compute distance
-%                                 k_dist = min([abs(intersection_point(obj.node_list(k,3+obj.grid.n_dimensions))-obj.node_list(k,2)),abs(intersection_point(obj.node_list(k,3+obj.grid.n_dimensions))-obj.node_list(k,3))]);
-%                                 % If smaller update
-%                                 if(k_dist <= min_dist)
-%                                     min_dist = k_dist;
-%                                 end
-%                             end
-%                         end
+                        % Go through all of the nodes to determine if there
+                        % is another node that is closer and intersects
+                        % with the point of intersection
+                        for k = 1:number_node
+                            selection_vector = true(obj.grid.n_dimensions,1); selection_vector(obj.node_list(k,3+obj.grid.n_dimensions)) = false;
+                            % Condition to ensure that it is suitable
+                            if((k~=i)&&(k~=j)&&(sum(obj.node_list(k,4:3+obj.grid.n_dimensions-1)'==intersection_point(selection_vector))==obj.grid.n_dimensions-1))
+                                % Compute distance
+                                k_dist = min([abs(intersection_point(obj.node_list(k,3+obj.grid.n_dimensions))-obj.node_list(k,2)),abs(intersection_point(obj.node_list(k,3+obj.grid.n_dimensions))-obj.node_list(k,3))]);
+                                % If smaller update
+                                if(k_dist <= min_dist)
+                                    min_dist = k_dist;
+                                end
+                            end
+                        end
                         obj.graph_rep(number_intersects,1:2+obj.grid.n_dimensions+1) = [i,j,intersection_point',min_dist];
                         if(metric_flag)
                             obj.model.update(intersection_point,zeros(obj.grid.n_dimensions,1),zeros(obj.grid.n_dimensions,1),zeros(obj.grid.n_dimensions,1));

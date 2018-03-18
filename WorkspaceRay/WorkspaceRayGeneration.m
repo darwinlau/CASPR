@@ -49,8 +49,8 @@ classdef WorkspaceRayGeneration < handle
             
             if ReadMode==0               
                 
-                dlmwrite([CASPR_configuration.LoadHomePath,'/WorkspaceRay/TempData/matseglin.txt'],matseglin);
-                dlmwrite([CASPR_configuration.LoadHomePath,'/WorkspaceRay/TempData/matnod.txt'],matnod);
+                dlmwrite([CASPR_configuration.LoadHomePath,'/WorkspaceRay/TempData/matseglin.txt'],matseglin); % Writes what appears to be an empty matrix
+                dlmwrite([CASPR_configuration.LoadHomePath,'/WorkspaceRay/TempData/matnod.txt'],matnod); % Writes what appears to be an empty matrix
                 while itnflexvar<=obj.grid.nflexvar
                     curflexvar=obj.grid.listnflxvar(itnflexvar); 
                     % Create the index to be using
@@ -73,9 +73,13 @@ classdef WorkspaceRayGeneration < handle
                         for itconsvar=sitconsvar:fitconsvar
                             cursegvar=CuruGrid.nod2vect(itconsvar);       %from nod2vect calculate the current segment of each variable---n=1--->>[0 0 0 ..]
                             magconvar=CuruGrid.getGridPoint(itconsvar);
-                            admsrng=segment_computation(obj,curflexvar,magconvar,min_ray_percent)   %computing the range of the admissible range of last variable in wcw
+                            admsrng=segment_computation(obj,curflexvar,magconvar,min_ray_percent);   %computing the range of the admissible range of last variable in wcw
                             [curnseglin,~]=size(admsrng);                                %number of segment line
                             if curnseglin>0
+                                curflexvar 
+                                magconvar
+                                admsrng
+                                dsksjh
                                 matseglin=[matseglin;[ones(curnseglin,1)*[curflexvar magconvar cursegvar] admsrng(:,:)]];
                             end
                         end
@@ -86,6 +90,7 @@ classdef WorkspaceRayGeneration < handle
                             countlin=countlin+1;
                             lsegvarit=ceil((matseglin(itnlin,2*numDofs)-obj.grid.q_begin(curflexvar,1))/obj.grid.delta_q(curflexvar));                   %the lower segment number of the variable of the line segment
                             usegvarit=fix((matseglin(itnlin,2*numDofs+1)-obj.grid.q_begin(curflexvar,1))/obj.grid.delta_q(curflexvar));                 %the upper segment number of the variable of the line segment
+                            % List all grid points for a particular ray
                             matcursegvar=[ones(usegvarit-lsegvarit+1,1)*matseglin(itnlin,(numDofs+1):(numDofs+curflexvar-1)) (lsegvarit:usegvarit)' ones(usegvarit-lsegvarit+1,1)*matseglin(itnlin,(numDofs+curflexvar):(numDofs+numDofs-1))];
                             
                             nodlist=obj.grid.vect2nod(matcursegvar)';
@@ -96,9 +101,8 @@ classdef WorkspaceRayGeneration < handle
                             curmatnod=[];
                             curmatnod(:,1)=nodlist';
                             curmatnod(:,2)=ones(countnod,1)*countlin;
-                            matnod=[matnod;curmatnod];
+                            matnod=[matnod;curmatnod]
                         end
-                        
                         dlmwrite([CASPR_configuration.LoadHomePath,'/WorkspaceRay/TempData/matseglin.txt'],newmatseglin,'precision',textndigit,'-append','delimiter',' ');
                         dlmwrite([CASPR_configuration.LoadHomePath,'/WorkspaceRay/TempData/matnod.txt'],matnod,'precision',textndigit,'-append','delimiter',' ');
                         
@@ -120,8 +124,8 @@ classdef WorkspaceRayGeneration < handle
             if fgetl(fid) == -1
                 disp('The workspace is empty');
             else
-                obj.MatRays=dlmread('WorkspaceRay/TempData/matseglin.txt');
-                obj.MatNodeGrid=dlmread('WorkspaceRay/TempData/matnod.txt');
+                obj.MatRays=dlmread('WorkspaceRay/TempData/matseglin.txt')
+                obj.MatNodeGrid=dlmread('WorkspaceRay/TempData/matnod.txt')
                 [nrow,~]=size(obj.MatRays);
                 obj.numRays=nrow;
             end
