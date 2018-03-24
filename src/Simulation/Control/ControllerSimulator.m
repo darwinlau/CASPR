@@ -67,6 +67,7 @@ classdef ControllerSimulator < DynamicsSimulator
         % FK related - relative encoder
         l_0_env             % initial cabel lengths in the environment (used to generate relative lengths when relative encoder is used)
         l_0_ctrl            % initial cabel lengths in the environment (used to restore the absolute lengths when relative encoder is used)
+        rounding_error_guard % used to cut the effect of rounding error
     end
 
     methods
@@ -123,6 +124,7 @@ classdef ControllerSimulator < DynamicsSimulator
             else
                 ctrl_sim.simopt     =   ControllerSimulatorOptions();
             end
+            ctrl_sim.rounding_error_guard = 1e-5;
             ctrl_sim.optionConsistencyCheck();
         end
         
@@ -184,6 +186,9 @@ classdef ControllerSimulator < DynamicsSimulator
             obj.ob_vec_length   =   obj.simopt.ob_freq_ratio*obj.ctrl_vec_length;
             ctrl_delta_t        =   (tf - t0)/(obj.ctrl_vec_length - 1);
             ob_delta_t          =   (tf - t0)/(obj.ob_vec_length - 1);
+            % initialize the computational time record variable
+            obj.compTime        =   zeros(obj.ctrl_vec_length, 1);
+
             
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             % DECLARE SIMULATION TRAJECTORIES
@@ -330,7 +335,7 @@ classdef ControllerSimulator < DynamicsSimulator
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             first_cycle = true;
             for t = 1:length(obj.timeVector)
-                CASPR_log.Info(sprintf('Time : %f', obj.timeVector(t)));
+                CASPR_log.Info(sprintf('Time : %f\n', obj.timeVector(t)));
                 CASPR_log.Info(sprintf('Completion Percentage: %3.2f%%\n',100*t/length(obj.timeVector)));
                                 
                 % extract current time to make component update decisions
@@ -343,7 +348,7 @@ classdef ControllerSimulator < DynamicsSimulator
                 if (first_cycle)
                     obj.ctrl_counter = 0;
                 end
-                if (current_time >= obj.ctrl_trajectory.timeVector(obj.ctrl_counter + 1))
+                if (current_time >= obj.ctrl_trajectory.timeVector(obj.ctrl_counter + 1) - obj.rounding_error_guard)
                     % update the counter
                     obj.ctrl_counter = obj.ctrl_counter + 1;
                     % update time profile
@@ -358,7 +363,7 @@ classdef ControllerSimulator < DynamicsSimulator
                     % update the counter
                     obj.ob_counter = 0;
                 end
-                if (current_time >= obj.ob_trajectory.timeVector(obj.ob_counter + 1))
+                if (current_time >= obj.ob_trajectory.timeVector(obj.ob_counter + 1) - obj.rounding_error_guard)
                     if (obj.simopt.enable_observer)
                         % update the counter
                         obj.ob_counter = obj.ob_counter + 1;
@@ -404,7 +409,8 @@ classdef ControllerSimulator < DynamicsSimulator
         
         % function to do control command update
         function controlCommandUpdate(obj, ctrl_delta_t)
-
+            
+            tic;
             % derive the feedback information for the controller
             obj.controllerFeedbackUpdate(ctrl_delta_t);
 
@@ -419,7 +425,9 @@ classdef ControllerSimulator < DynamicsSimulator
             % run control command update
             [obj.f_cmd, ~, ~]  = ...
                 obj.controller.execute(obj.ctrl_trajectory.q{obj.ctrl_counter}, obj.ctrl_trajectory.q_dot{obj.ctrl_counter}, zeros(obj.model.numDofs,1), obj.refTrajectory.q{obj.ctrl_counter}, obj.refTrajectory.q_dot{obj.ctrl_counter}, obj.refTrajectory.q_ddot{obj.ctrl_counter} - obj.q_ddot_ext_est, obj.ctrl_counter);
-
+            
+            obj.compTime(obj.ctrl_counter)              =   toc;
+            
             % save the data
             obj.cableForces{obj.ctrl_counter}           =   obj.f_cmd;
         end
@@ -681,6 +689,20 @@ classdef ControllerSimulator < DynamicsSimulator
                 output_data.DataFKJointPoseOb    	=   ob_fk_q;
                 output_data.DataFKJointVelocityOb	=   ob_fk_q_dot;
             end
+            output_data.compTime    =   obj.compTime;
+            len_tmp = min([length(output_data.DataRefJointPose), length(output_data.DataCtrlJointPose)]);
+            output_data.DataCtrlTrackingError = output_data.DataRefJointPose(1:len_tmp, :) - output_data.DataCtrlJointPose(1:len_tmp, :);
+            average_absolute_error = zeros(size(output_data.DataCtrlTrackingError, 2), 1);
+            for i = 1:length(average_absolute_error)
+                average_absolute_error(i) = norm(output_data.DataCtrlTrackingError(:,i), 1)/size(output_data.DataCtrlTrackingError, 1);
+            end
+            output_data.DataAvgCtrlTrackingError = average_absolute_error;
+            average_force_command = zeros(size(output_data.DataCtrlForceCommands, 2), 1);
+            for i = 1:length(average_force_command)
+                average_force_command(i) = norm((output_data.DataCtrlForceCommands(:,i)), 1)/size(output_data.DataCtrlForceCommands, 1);
+            end
+            output_data.DataAvgCtrlForceCommand = average_force_command;
+            output_data.DataAvgComputationalTime = norm(output_data.compTime, 1)/length(output_data.compTime);
         end
         
 %         % Plots the tracking error in generalised coordinates
