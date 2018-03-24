@@ -4,6 +4,8 @@
 % Created       : 2017
 % Description    :
 %    External wrench disturbance uncertainties with discrete sequence
+%    The disturbance is considered as being applied to the right hand side
+%    of the EoM.
 classdef ExternalWrenchUncertaintyDisccreteSequence < ExternalWrenchUncertaintyBase
     properties
         time_sequence               % Time points when disturbance change happens. Format: [t_1; t_2; ...; t_m]
@@ -70,14 +72,14 @@ classdef ExternalWrenchUncertaintyDisccreteSequence < ExternalWrenchUncertaintyB
                 if (section_flag == -1)
                     % in this case we should use the last disturbance in disturbance_sequence
                     section_flag = obj.sequence_length;
-                    w_ext = obj.disturbance_sequence(section_flag, :)';
+                    w_ext = -obj.disturbance_sequence(section_flag, :)';
                 elseif (section_flag == 0)
                     % in this case we should use zero disturbance, hence
                     % basically do nothing
                 else
                     % in this case we should use one of the disturbances in the
                     % sequence
-                    w_ext = obj.disturbance_sequence(section_flag, :)';
+                    w_ext = -obj.disturbance_sequence(section_flag, :)';
                 end
             end
         end

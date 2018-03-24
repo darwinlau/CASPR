@@ -6,6 +6,8 @@
 % Description    :
 %    External wrench disturbance uncertainties with discrete sequence with
 %    sinusoid disturbance functions
+%    The disturbance is considered as being applied to the right hand side
+%    of the EoM.
 classdef ExternalWrenchUncertaintySinusoid < ExternalWrenchUncertaintyBase
     properties
         amplitude_vec               % The vector contains amplitudes of sinusoid disturbances in different channels. Format: [a_1; a_2; ...; a_m]
@@ -53,7 +55,7 @@ classdef ExternalWrenchUncertaintySinusoid < ExternalWrenchUncertaintyBase
             % change the disturbance if input sequences are valid
             if (obj.flag_apply_disturbance)
                 for i = 1:obj.model.numDofs
-                    w_ext(i) = obj.amplitude_vec(i)*sin(obj.angular_velocity_vec(i)*t + obj.phase_vec(i));
+                    w_ext(i) = -obj.amplitude_vec(i)*sin(obj.angular_velocity_vec(i)*t + obj.phase_vec(i));
                 end
             end
         end
