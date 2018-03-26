@@ -38,6 +38,6 @@ wsim            =   RayWorkspaceSimulator(modelObj,uGrid,opt);
 
 % Run the simulation
 disp('Start Running Simulation');
-% wsim.run(w_condition,[])
-wsim.run(w_condition,w_metrics)
+wsim.run(w_condition,[])
+% wsim.run(w_condition,w_metrics)
 wsim.plotGraph();

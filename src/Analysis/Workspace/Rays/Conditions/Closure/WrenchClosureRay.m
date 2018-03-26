@@ -793,7 +793,7 @@ classdef WrenchClosureRay < WorkspaceRayConditionBase
                 if(obj.joint_type(free_variable_index))
                     A = -(model.L)';
                 else
-                    A = - (1+tan(0.5*q_free)^2)*(model.L)'; % Scalar multiplication is to multiply out the denominator of the Weierstrauss substitution
+                    A = -(1+tan(0.5*q_free)^2)*(model.L)'; % Scalar multiplication is to multiply out the denominator of the Weierstrauss substitution
                 end
                 % Scale the Jacobian by the cable lengths (to remove the
                 % denominator)
@@ -814,12 +814,10 @@ classdef WrenchClosureRay < WorkspaceRayConditionBase
                         for secondary_combinations_index_2 = 1:size(secondary_combinations_matrix,1)
                             secondary_combination_index = secondary_combination_index+1;
                             % Create the combined matrix
-                            % NEEDS TO BE INVESTIGATED WHY DOES IT LEAD TO
-                            % PROBLEMS IN THE RESULTS
                             if(combination_index_2 == 1)
                                 A_np1 = [A_comb,A(:,secondary_combinations_matrix)];
                             else
-                                A_np1 = [A_comb,sum(A(:,secondary_combinations_matrix(secondary_combinations_index_2)),2)];
+                                A_np1 = [A_comb,sum(A(:,secondary_combinations_matrix(secondary_combinations_index_2,:)),2)];
                             end
                             % Go through it and fill in all the
                             % determinants
