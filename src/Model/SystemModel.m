@@ -283,7 +283,7 @@ classdef SystemModel < handle
         end
         
         function value = get.L_grad(obj)
-            if(isempty(obj.bodyModel.W_grad))
+            if(isempty(obj.cableModel.V_grad))
                 if(~obj.bodyModel.occupied.hessian)
                     obj.bodyModel.occupied.hessian = true;
                     obj.bodyModel.updateHessian();
@@ -304,8 +304,8 @@ classdef SystemModel < handle
         
         function value = get.K(obj)
             is_symbolic = obj.modelMode == ModelModeType.SYMBOLIC;
-%             value = obj.L.'*obj.cableModel.K*obj.L + TensorOperations.VectorProduct(obj.L_grad,obj.cableForces,1,is_symbolic);
-            value = obj.L.'*obj.cableModel.K*obj.L;
+            value = obj.L.'*obj.cableModel.K*obj.L + TensorOperations.VectorProduct(obj.L_grad,obj.cableForces,1,is_symbolic);
+%             value = obj.L.'*obj.cableModel.K*obj.L;
         end
         
         function value = get.J(obj)
