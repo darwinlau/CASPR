@@ -315,12 +315,11 @@ classdef RayWorkspaceSimulator < SimulatorBase
             % condition I will subsequently modify
             number_rays = length(obj.workspace);
             % Create list of nodes
-            obj.node_list = zeros(10*number_rays,3+obj.grid.n_dimensions); % THIS DATA TYPE WILL CHANGE LATER TO BE A STRUCT OR CLASS
+            obj.node_list = zeros(10*number_rays,3+obj.grid.n_dimensions); 
             number_node = 0;
             % For each ray
             for i = 1:number_rays
-                % Determine the number of the condition - NOTE THIS COULD
-                % POSSIBLY MOVE UP
+                % Determine the number of the condition
                 if(~isempty(obj.workspace{i}))
                     n_constraints = size(obj.workspace{i}.conditions,1);
                     intervals = [];
@@ -340,92 +339,18 @@ classdef RayWorkspaceSimulator < SimulatorBase
             obj.node_list = obj.node_list(1:number_node,:); 
             
             % Computation for the maximum number of nodes
-            max_edges = 0;
-            for i = 1:obj.grid.n_dimensions
-                % Determine the number of nodes for a given free variable
-                % index
-                num_nodes_i = sum(obj.node_list(:,3+obj.grid.n_dimensions)==i);
-                max_edges = max_edges + (number_node-num_nodes_i);
-            end
-            
-%             % Initialise an adjacency list
-%             obj.graph_rep = zeros(max_edges,2+obj.grid.n_dimensions+1+metric_flag);
-%             number_intersects = 0;
-%             shift_index = [0];
-%             length_q = length(obj.grid.q_length);
-%             for segment_index = 1:length_q
-%                 q_length_temp = obj.grid.q_length;
-%                 q_length_temp(segment_index) = [];
-%                 shift_index = [shift_index,prod(q_length_temp)];
+%             max_edges = 0;
+%             for i = 1:obj.grid.n_dimensions
+%                 % Determine the number of nodes for a given free variable
+%                 % index
+%                 num_nodes_i = sum(obj.node_list(:,3+obj.grid.n_dimensions)==i);
+%                 max_edges = max_edges + num_nodes_i*(number_node-num_nodes_i);
 %             end
-%             for k1 = 1:obj.model.numDofs - 1
-%                 numsegA = obj.grid.q_length;
-%                 numsegA(k1) = [];
-%                 numsegA = fliplr(numsegA);
-%                 for k2 = 1:prod(numsegA)
-%                     ray_A_index = sum(shift_index(1:k1)) + k2;
-%                     if (~isempty(obj.workspace{ray_A_index}))
-%                         for k3 = (k1 + 1):obj.model.numDofs
-%                             numsegB = obj.grid.q_length;
-%                             numsegB(k3) = [];
-%                             numsegB(1) = [];
-%                             seg_prod = [];
-%                             coeff = cell(1,obj.model.numDofs-1);
-%                             [coeff{:}] = ind2sub(numsegA,k2);
-%                             coeff = fliplr(cell2mat(coeff)-1);
-%                             coeff(k3-1) = [];
-%                             for k5 = 1:length(numsegB)
-%                                 seg_prod = [seg_prod, prod(numsegB)];
-%                                 numsegB(1) = [];
-%                             end
-%                             seg_prod = [seg_prod, 1];
-%                             
-%                             for k4 = 0:obj.grid.q_length(k1)-1
-%                                 
-%                                 tmp_coeff = coeff;
-%                                 tmp_coeff = [tmp_coeff(1:k1-1),k4,tmp_coeff(k1:end)];
-%                                 ray_B_index = dot(tmp_coeff,seg_prod) +1 + sum(shift_index(1:k3));
-%                                 if(~isempty(obj.workspace{ray_B_index}))
-%                                     if (obj.workspace{ray_A_index}.fixed_variables(k3-1) <= obj.workspace{ray_B_index}.conditions{2}(2)) ...
-%                                             && (obj.workspace{ray_A_index}.fixed_variables(k3-1) >= obj.workspace{ray_B_index}.conditions{2}(1)) ...
-%                                             && (obj.workspace{ray_B_index}.fixed_variables(k1) <= obj.workspace{ray_A_index}.conditions{2}(2)) ...
-%                                             && (obj.workspace{ray_B_index}.fixed_variables(k1) >= obj.workspace{ray_A_index}.conditions{2}(1))
-%                                         
-%                                         
-%                                         intersection_point = zeros(length(obj.grid.q_length),1);
-%                                         temp_vec = zeros(length(obj.grid.q_length),1);
-%                                         ones_vec = true(length(obj.grid.q_length),1);
-%                                         selection_vec_obj = ones_vec; selection_vec_obj(obj.workspace{ray_A_index}.free_variable_index) = false;
-%                                         intersection_point(selection_vec_obj) = obj.workspace{ray_A_index}.fixed_variables;
-%                                         
-%                                         selection_vec_ray = ones_vec; selection_vec_ray(obj.workspace{ray_B_index}.free_variable_index) = false;
-%                                         temp_vec(selection_vec_ray) = obj.workspace{ray_B_index}.fixed_variables;
-%                                         
-%                                         intersection_point(obj.workspace{ray_A_index}.free_variable_index) = temp_vec(obj.workspace{ray_A_index}.free_variable_index);
-%                                         
-%                                         number_intersects = number_intersects + 1;
-%                                         
-%                                         min_dist = min([abs(intersection_point(obj.workspace{ray_A_index}.free_variable_index)-obj.workspace{ray_A_index}.conditions{2}(1)),...
-%                                             abs(intersection_point(obj.workspace{ray_A_index}.free_variable_index)-obj.workspace{ray_A_index}.conditions{2}(2)),...
-%                                             abs(intersection_point(obj.workspace{ray_B_index}.free_variable_index)-obj.workspace{ray_B_index}.conditions{2}(1)),...
-%                                             abs(intersection_point(obj.workspace{ray_B_index}.free_variable_index)-obj.workspace{ray_B_index}.conditions{2}(2))]);
-%                                         
-%                                         obj.graph_rep(number_intersects,1:2+obj.grid.n_dimensions+1) = [find(obj.node_list(:,1)==ray_A_index),find(obj.node_list(:,1)==ray_B_index),intersection_point',min_dist];
-% %                                         obj.graph_rep(number_intersects,1:2+obj.grid.n_dimensions+1) = [i,j,intersection_point',min_dist];
-%                                        % the output index is different from the original
-%                                     end
-%                                 end 
-%                             end
-%                         end
-%                     end
-%                 end
-%             end
-%             obj.graph_rep = obj.graph_rep(1:number_intersects,:);            
+            max_edges = number_node*max(obj.grid.q_length)*obj.grid.n_dimensions;
 
             % Initialise an adjacency list
             obj.graph_rep = zeros(max_edges,2+obj.grid.n_dimensions+1+metric_flag);
             number_intersects = 0;
-%             fixed_indices = zeros(obj.grid.n_dimensions-1,1);
             fixed_index_intersect_candidate = zeros(obj.grid.n_dimensions-1,1);
             intersect_fixed_indices = zeros(obj.grid.n_dimensions-1,1);
             for i = 1:number_node
@@ -466,7 +391,6 @@ classdef RayWorkspaceSimulator < SimulatorBase
                             node_indices = find(obj.node_list(:,1) == j_index);
                             for k = 1:length(node_indices)
                                 [is_intersected,intersection_point] = obj.workspace{workspace_index_i}.intersect(workspace_interval_i,obj.workspace{obj.node_list(node_indices(k),1)},obj.node_list(node_indices(k),2:3));
-                                
                                 if(is_intersected)
                                     number_intersects = number_intersects + 1;
                                     min_dist = min([abs(intersection_point(obj.node_list(i,3+obj.grid.n_dimensions))-obj.node_list(i,2)),abs(intersection_point(obj.node_list(i,3+obj.grid.n_dimensions))-obj.node_list(i,3)),abs(intersection_point(obj.node_list(node_indices(k),3+obj.grid.n_dimensions))-obj.node_list(node_indices(k),2)),abs(intersection_point(obj.node_list(node_indices(k),3+obj.grid.n_dimensions))-obj.node_list(node_indices(k),3))]);
@@ -479,7 +403,6 @@ classdef RayWorkspaceSimulator < SimulatorBase
                                     % values
                                     intersect_fixed_indices(~active_vector_i) = fixed_indices;
                                     intersect_fixed_indices(~active_vector_j) = fixed_indices_j;
-                                    
                                     for intersection_dimension_index = 1:obj.grid.n_dimensions
                                         if((intersection_dimension_index ~= free_variable_index)&&(intersection_dimension_index ~= free_variable_index_j))
                                             % Convert the fixed variable
@@ -501,7 +424,10 @@ classdef RayWorkspaceSimulator < SimulatorBase
                                             end
                                         end
                                     end
-                                    obj.graph_rep(number_intersects,1:2+obj.grid.n_dimensions+1) = [i,node_indices(k),intersection_point',min_dist];
+                                    obj.graph_rep(number_intersects,1) = i;
+                                    obj.graph_rep(number_intersects,2) = node_indices(k);
+                                    obj.graph_rep(number_intersects,3:2+obj.grid.n_dimensions) = transpose(intersection_point);
+                                    obj.graph_rep(number_intersects,2+obj.grid.n_dimensions+1) = min_dist;
                                     if(metric_flag)
                                         obj.model.update(intersection_point,zeros(obj.grid.n_dimensions,1),zeros(obj.grid.n_dimensions,1),zeros(obj.grid.n_dimensions,1));
                                         [~,obj.graph_rep(number_intersects,2+obj.grid.n_dimensions+2),~] = obj.metrics{1}.evaluate(obj.model,[]);

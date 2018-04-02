@@ -11,7 +11,7 @@ clc;  close all; warning off; clear all;
 % segment_number = 11;
 % model_config    =   DevModelConfig('spatial7cable'); nsegvar= [11, 11, 11, 11, 11, 11]';
 % '4_4_CDPR_planar'
-segment_number = 25;
+segment_number = 80;
 model_config    =   DevModelConfig('4_4_CDPR_planar'); nsegvar = [segment_number segment_number segment_number]';
 % BM arm
 % segment_number = 20;
@@ -40,4 +40,4 @@ wsim            =   RayWorkspaceSimulator(modelObj,uGrid,opt);
 disp('Start Running Simulation');
 wsim.run(w_condition,[])
 % wsim.run(w_condition,w_metrics)
-wsim.plotGraph();
+% wsim.plotGraph();

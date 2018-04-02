@@ -14,6 +14,10 @@ classdef WorkspaceRay < handle
         conditions              % A cell array of different workspace conditions (enum and intervals)
         free_variable_index     % The index that is left free
         free_variable_range     % The range of values that the free variable takes (1st element should be min and 2nd element max)
+        number_dofs             % The number of degrees of freedom associated with this ray
+        number_conditions       % The number of conditions
+        true_n                  % A vector of true
+        zero_n                  % A vector of 0
         % FOR FUTURE EXTENSION
         % CHANGE THE RAY TO BE STORED AS Y=MX+C FORM WHERE STORE THE
         % GRADIENT M (made into a unit vector), THE OFFSET C AND THE
@@ -28,6 +32,10 @@ classdef WorkspaceRay < handle
             wp.conditions           =   cell(n_constraints,2);
             wp.free_variable_index  =   free_variable_index;
             wp.free_variable_range  =   free_variable_range;
+            wp.number_dofs          =   length(wp.fixed_variables)+1;
+            wp.number_conditions    =   size(wp.conditions,1);
+            wp.true_n               =   true(wp.number_dofs,1);
+            wp.zero_n               =   zeros(wp.number_dofs,1);
             % FOR FUTURE EXTENSION
             % INPUT M, C, AND X
         end
@@ -143,29 +151,25 @@ classdef WorkspaceRay < handle
         function [is_intersected,intersection_point] = intersect(obj,obj_range,workspace_ray,workspace_range)
             % The rays are not parallel
             % Determine if the rays are coplanar
-            numDofs = length(obj.fixed_variables)+1;
-            ones_vec = true(numDofs,1);
-            q_obj = zeros(numDofs,1);
-            selection_vec_obj = ones_vec; selection_vec_obj(obj.free_variable_index) = false;
+            q_obj = obj.zero_n;
+            selection_vec_obj = obj.true_n; selection_vec_obj(obj.free_variable_index) = false;
             q_obj(selection_vec_obj) = obj.fixed_variables;
             fixed_variable_ray = q_obj(workspace_ray.free_variable_index);
-            q_ray = zeros(numDofs,1);
-            selection_vec_ray = ones_vec; selection_vec_ray(workspace_ray.free_variable_index) = false;
+            q_ray = obj.zero_n;
+            selection_vec_ray = obj.true_n; selection_vec_ray(workspace_ray.free_variable_index) = false;
             q_ray(selection_vec_ray) = workspace_ray.fixed_variables;
             fixed_variable_obj = q_ray(obj.free_variable_index);
             % The two rays are coplanar
             % Determine if they intersect with overlapping region
-            numConditionsObj = size(obj.conditions,1);
             objRayIntersect = 0; % Does the fixed value of ray intersect with any of the intervals of obj
-            for i = 1:numConditionsObj
+            for i = 1:obj.number_conditions
                 if((obj_range(1) <= fixed_variable_obj)&&(obj_range(2) >= fixed_variable_obj))
                     objRayIntersect = 1;
                     break;
                 end
             end
-            numConditionsRay = size(workspace_ray.conditions,1);
             rayObjIntersect = 0; % Does the fixed value of obj intersect with any of the intervals of ray
-            for i = 1:numConditionsRay
+            for i = 1:workspace_ray.number_conditions
                 if((workspace_range(1) <= fixed_variable_ray)&&(workspace_range(2) >= fixed_variable_ray))
                     rayObjIntersect = 1;
                     break;
@@ -173,12 +177,10 @@ classdef WorkspaceRay < handle
             end
             is_intersected = objRayIntersect&rayObjIntersect;
             if(is_intersected)
-                intersection_point = zeros(numDofs,1);
-                temp_vec = zeros(numDofs,1);
-                selection_vec_obj = ones_vec; selection_vec_obj(obj.free_variable_index) = false;
+                intersection_point = obj.zero_n;
+                temp_vec = obj.zero_n;
                 intersection_point(selection_vec_obj) = obj.fixed_variables;
                 % Now need to fill in the extra point
-                selection_vec_ray = ones_vec; selection_vec_ray(workspace_ray.free_variable_index) = false;
                 temp_vec(selection_vec_ray) = workspace_ray.fixed_variables;
                 intersection_point(obj.free_variable_index) = temp_vec(obj.free_variable_index);
             else
