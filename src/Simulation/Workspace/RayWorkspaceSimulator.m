@@ -17,6 +17,7 @@ classdef RayWorkspaceSimulator < SimulatorBase
         options                 % The workspace simulator options
         graph_rep = []          % The graph representation for the workspace
         node_list = []          % A list of all nodes
+        comp_time               % Computational time structure
     end
     
     methods
@@ -25,6 +26,7 @@ classdef RayWorkspaceSimulator < SimulatorBase
             w@SimulatorBase(model);
             w.grid          = grid;
             w.options       = options;
+            w.comp_time     = struct('ray_construction',0,'graph_construction',0,'total',0);
         end
         
         % Implementation of the run function
@@ -76,12 +78,14 @@ classdef RayWorkspaceSimulator < SimulatorBase
                 % dimension
                 % each point
                 k = 1;
+                ray_t_in = tic;
+                total_t_in = tic;
                 for i = 1:obj.grid.n_dimensions
                     grid_index = true(obj.grid.n_dimensions,1); grid_index(i) = false;
                     % Create a subgrid
                     sub_grid = UniformGrid(obj.grid.q_begin(grid_index),obj.grid.q_end(grid_index),obj.grid.delta_q(grid_index),'step_size',obj.grid.q_wrap(grid_index));
                     for j = 1:sub_grid.n_points
-                        CASPR_log.Info([sprintf('Workspace ray %d. ',k),sprintf('Completion Percentage: %3.2f',100*k/n_grid_points)]);
+%                         CASPR_log.Info([sprintf('Workspace ray %d. ',k),sprintf('Completion Percentage: %3.2f',100*k/n_grid_points)]);
                         % Load the current fixed grid coordinates
                         q_fixed = sub_grid.getGridPoint(j);
                         % Construct the workspace ray
@@ -123,12 +127,16 @@ classdef RayWorkspaceSimulator < SimulatorBase
                         % Note that another ray has been constructed
                         k = k+1;
                     end
-                end              
+                end
+                obj.comp_time.ray_construction = toc(ray_t_in);
+                graph_t_in = tic;
                 if((nargin == 2) || isempty(w_metrics))
                     obj.createWorkspaceGraph(w_conditions{1},[]);
                 else
                     obj.createWorkspaceGraph(w_conditions{1},w_metrics{1});
                 end
+                obj.comp_time.graph_construction = toc(graph_t_in);
+                obj.comp_time.total = toc(total_t_in);
             end
         end
         
