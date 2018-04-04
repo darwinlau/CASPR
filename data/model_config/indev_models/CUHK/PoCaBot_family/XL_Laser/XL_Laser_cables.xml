@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE cables SYSTEM "../../../../templates/cables.dtd">
 <cables default_cable_set="box_endeffector_frame4by4by23_improvedjoint_middle">
-     <cable_set id="box_endeffector_frame4by4by23_improvedjoint_middle">
+    <cable_set id="box_endeffector_frame4by4by23_improvedjoint_middle">
         <cable_ideal name="cable 1" attachment_reference="joint">
             <properties>
                 <force_min>0</force_min>
@@ -10,7 +10,7 @@
             <attachments>
                 <attachment>
                     <link>0</link>
-                    <location>0.06 3.933 2.3</location>
+                    <location>0.080 3.923 2.29</location>
                 </attachment>
                 <attachment>
                     <link>1</link>
@@ -26,7 +26,7 @@
             <attachments>
                 <attachment>
                     <link>0</link>
-                    <location>3.937 3.932 0.08</location>
+                    <location>3.923 3.923 0.103</location>
                 </attachment>
                 <attachment>
                     <link>1</link>
@@ -42,7 +42,7 @@
             <attachments>
                 <attachment>
                     <link>0</link>
-                    <location>3.940 3.938 2.3</location>
+                    <location>3.923 3.923 2.29</location>
                 </attachment>
                 <attachment>
                     <link>1</link>
@@ -58,7 +58,7 @@
             <attachments>
                 <attachment>
                     <link>0</link>
-                    <location>3.942 0.06329 0.08</location>
+                    <location>3.922 0.077 0.103</location>
                 </attachment>
                 <attachment>
                     <link>1</link>
@@ -74,7 +74,7 @@
             <attachments>
                 <attachment>
                     <link>0</link>
-                    <location>3.941 0.064 2.3</location>
+                    <location>3.922 0.077 2.29</location>
                 </attachment>
                 <attachment>
                     <link>1</link>
@@ -90,7 +90,7 @@
             <attachments>
                 <attachment>
                     <link>0</link>
-                    <location>0.060 0.062 0.08</location>
+                    <location>0.08 0.075 0.109</location>
                 </attachment>
                 <attachment>
                     <link>1</link>
@@ -106,7 +106,7 @@
             <attachments>
                 <attachment>
                     <link>0</link>
-                    <location>0.060 0.064 2.3</location>
+                    <location>0.08 0.075 2.287</location>
                 </attachment>
                 <attachment>
                     <link>1</link>
@@ -122,7 +122,7 @@
             <attachments>
                 <attachment>
                     <link>0</link>
-                    <location>0.060 3.9324 0.08</location>
+                    <location>0.080 3.923 0.105</location>
                 </attachment>
                 <attachment>
                     <link>1</link>
@@ -134,7 +134,7 @@
     
     
     
-         <cable_set id="expo_model">
+    <cable_set id="expo_model">
         <cable_ideal name="cable 1" attachment_reference="joint">
             <properties>
                 <force_min>1.0</force_min>
@@ -462,7 +462,7 @@
     </cable_set>
     
     
-<cable_set id="point_mass">
+    <cable_set id="point_mass">
         <cable_ideal name="cable 1" attachment_reference="joint">
             <properties>
                 <force_min>0</force_min>

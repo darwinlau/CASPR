@@ -17,3 +17,4 @@ data/model_config/models/SCDM/planar_manipulators/2_DoF_VSD/2_DoF_VSD_bodies.xml
 data/model_config/models/SCDM/planar_manipulators/2_DoF_VSD/2_DoF_VSD_cables.xml
 README.md
 data/model_config/models/SCDM/planar_manipulators/2_DoF_VSD/2_DoF_VSD_cables.xml
+src/HardwareInterface/HardwareExperiments/PoCaBotExperiment.m
