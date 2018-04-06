@@ -173,6 +173,8 @@ classdef (Abstract) JointBase < handle
                     j = SphericalFixedXYZ;
 %                 case JointType.S_QUATERNION
 %                     j = SphericalQuaternion;
+                case JointType.T_X
+                    j = TranslationalX;
                 case JointType.T_XYZ
                     j = TranslationalXYZ;
 %                 case JointType.SPATIAL_QUATERNION

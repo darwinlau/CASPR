@@ -18,6 +18,7 @@ classdef JointType
         S_FIXED_XYZ             % Spherical xyz-fixed
 %         S_QUATERNION            % Spherical joint using quaternion
         T_XYZ                   % Translational joint XYZ
+        T_X                     % Translational X
 %         SPATIAL_QUATERNION      % T_XYZ + SPHERICAL
         SPATIAL_EULER_XYZ       % T_XYZ + S_EULER_XYZ
     end
