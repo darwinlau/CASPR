@@ -159,6 +159,8 @@ classdef (Abstract) JointBase < handle
                     j = UniversalXY;
                 case JointType.U_YZ
                     j = UniversalYZ;
+                case JointType.P_X
+                    j = PrismaticX;
                 case JointType.P_XY
                     j = PrismaticXY;
                 case JointType.PLANAR_XY
@@ -173,8 +175,6 @@ classdef (Abstract) JointBase < handle
                     j = SphericalFixedXYZ;
 %                 case JointType.S_QUATERNION
 %                     j = SphericalQuaternion;
-                case JointType.T_X
-                    j = TranslationalX;
                 case JointType.T_XYZ
                     j = TranslationalXYZ;
 %                 case JointType.SPATIAL_QUATERNION

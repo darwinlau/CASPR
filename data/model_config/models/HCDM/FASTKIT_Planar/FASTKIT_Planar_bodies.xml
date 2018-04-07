@@ -28,7 +28,7 @@
         </link_rigid>
 
             <link_rigid num="2" name="Mobile_bot_2">
-            <joint type="T_X" actuated="true" q_initial="3" q_min="1.0" q_max="10.0"/>
+            <joint type="P_X" actuated="true" q_initial="3" q_min="1.0" q_max="10.0"/>
             <physical>
                 <mass>10</mass>
                 <com_location>0 0 0.35</com_location>

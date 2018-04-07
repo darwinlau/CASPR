@@ -6,14 +6,14 @@
         <linear_spline_trajectory id="traj_1" time_definition="relative" time_step="0.1">
             <points>
                 <point>
-                    <q>0 0 0 0 0 0 0 0 0</q>
+                    <q>0 0 0 0 0 0 0</q>
                     <!-- 
             <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
             <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
              -->
                 </point>
                 <point time="10.0">
-                    <q>3 0 0 3 0 0 0 0 0</q>
+                    <q>3 3 0 0 0 0 0</q>
                     <!-- 
             <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
             <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>

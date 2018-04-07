@@ -3,7 +3,7 @@
 % Author        : Darwin LAU
 % Created       : 2017
 % Description   :
-classdef TranslationalX < JointBase        
+classdef PrismaticX < JointBase        
     properties (Constant = true)
         numDofs = 1;
         numVars = 1;
@@ -41,7 +41,7 @@ classdef TranslationalX < JointBase
 
         % Get the relative translation vector
         function r_rel = RelTranslationVector(q)
-            x = TranslationalX.GetX(q);
+            x = PrismaticX.GetX(q);
             r_rel = [x; 0; 0];
         end
         

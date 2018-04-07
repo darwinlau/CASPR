@@ -10,6 +10,7 @@ classdef JointType
         R_Z                     % Revolute in Z
         U_XY                    % Universal with xy-euler
         U_YZ                    % Universal with yz-euler %%
+        P_X                     % Translational X
         P_XY                    % Translational joint in XY plane
         PLANAR_XY               % Planar in XY plane
         PLANAR_YZ               % Planar in YZ plane
@@ -18,7 +19,6 @@ classdef JointType
         S_FIXED_XYZ             % Spherical xyz-fixed
 %         S_QUATERNION            % Spherical joint using quaternion
         T_XYZ                   % Translational joint XYZ
-        T_X                     % Translational X
 %         SPATIAL_QUATERNION      % T_XYZ + SPHERICAL
         SPATIAL_EULER_XYZ       % T_XYZ + S_EULER_XYZ
     end
