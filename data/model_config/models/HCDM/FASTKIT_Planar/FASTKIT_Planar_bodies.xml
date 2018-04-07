@@ -7,7 +7,7 @@
             Further details are provided in CASPR documentation -->
             
         <link_rigid num="1" name="Mobile_bot_1">
-            <joint type="PLANAR_XY" actuated="true" q_initial="0 0 0" q_min="-1.0 -1.0 -3.1416" q_max="1.0 1.0 3.1416"/>
+            <joint type="PLANAR_XY" actuated="true" q_initial="0 0 0" q_min="-10.0 -10.0 -3.1416" q_max="10.0 10.0 3.1416"/>
             <physical>
                 <mass>10</mass>
                 <com_location>0 0 0.35</com_location>
@@ -28,7 +28,7 @@
         </link_rigid>
 
             <link_rigid num="2" name="Mobile_bot_2">
-            <joint type="T_X" actuated="true" q_initial="3" q_min="1.0" q_max="10.0"/>
+            <joint type="T_X" actuated="true" q_initial="3" q_min="3.0" q_max="4.0"/>
             <physical>
                 <mass>10</mass>
                 <com_location>0 0 0.35</com_location>
@@ -49,7 +49,7 @@
         </link_rigid>
         
            <link_rigid num="3" name="Platform">
-            <joint type="PLANAR_XZ" q_initial="1.5 1 0"  q_min="0.5 0.0 -3.1416" q_max="2.5 2.0 3.1416"/> <!-- Platform itself is not actuated-->  
+            <joint type="PLANAR_XZ" q_initial="1.5 1.5 0"  q_min="0.5 0.0 -3.1416" q_max="2.5 2.0 3.1416"/> <!-- Platform itself is not actuated-->  
             <physical>
                 <mass>10</mass>
                 <com_location>0 0 0</com_location>
@@ -67,7 +67,15 @@
                 <num>1</num>
                 <location>0 0 0</location>
             </parent>
-        </link_rigid>
-        
+        </link_rigid>        
     </links>
+    <operational_spaces default_operational_set="ee_position">
+	  <operational_set id="ee_position">
+        <position marker_id="1" name="ee_pos">
+          <link>3</link>
+          <offset>0.0 0.0 0.0</offset>
+          <axes active_axes="xyz"/>
+        </position>
+	  </operational_set>    
+    </operational_spaces>
 </bodies_system>
