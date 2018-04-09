@@ -159,6 +159,8 @@ classdef (Abstract) JointBase < handle
                     j = UniversalXY;
                 case JointType.U_YZ
                     j = UniversalYZ;
+                case JointType.P_X
+                    j = PrismaticX;
                 case JointType.P_XY
                     j = PrismaticXY;
                 case JointType.PLANAR_XY

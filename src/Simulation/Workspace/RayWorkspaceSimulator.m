@@ -9,12 +9,15 @@
 classdef RayWorkspaceSimulator < SimulatorBase
     
     properties
-        grid            % Grid object for brute force workspace (input)
-        workspace       % Final Workspace (output)
-        conditions = [] % A list of conditions to be evaluated for
-        metrics = []    % A list of metrics to be evaluated for
-        options         % The workspace simulator options
-        graph = []      % The graph representation for the workspace
+        grid                    % Grid object for brute force workspace (input)
+        free_variable_length    % The number of rays for each free variable
+        workspace               % Final Workspace (output)
+        conditions = []         % A list of conditions to be evaluated for
+        metrics = []            % A list of metrics to be evaluated for
+        options                 % The workspace simulator options
+        graph_rep = []          % The graph representation for the workspace
+        node_list = []          % A list of all nodes
+        comp_time               % Computational time structure
     end
     
     methods
@@ -23,6 +26,7 @@ classdef RayWorkspaceSimulator < SimulatorBase
             w@SimulatorBase(model);
             w.grid          = grid;
             w.options       = options;
+            w.comp_time     = struct('ray_construction',0,'graph_construction',0,'total',0);
         end
         
         % Implementation of the run function
@@ -60,8 +64,9 @@ classdef RayWorkspaceSimulator < SimulatorBase
                 n_grid_points = 0; 
                 for i =1:obj.grid.n_dimensions
                     grid_index = true(obj.grid.n_dimensions,1); grid_index(i) = false;
-                    n_grid_points = n_grid_points + prod(obj.grid.q_length(grid_index));
-                end % THIS NEEDS TO BE TESTED HERE
+                    obj.free_variable_length(i) = prod(obj.grid.q_length(grid_index));
+                    n_grid_points = n_grid_points + obj.free_variable_length(i);
+                end 
                 obj.workspace = cell(n_grid_points,1);
                 workspace_count = 0;
                 n_metrics       = length(obj.metrics);
@@ -73,17 +78,19 @@ classdef RayWorkspaceSimulator < SimulatorBase
                 % dimension
                 % each point
                 k = 1;
+                ray_t_in = tic;
+                total_t_in = tic;
                 for i = 1:obj.grid.n_dimensions
                     grid_index = true(obj.grid.n_dimensions,1); grid_index(i) = false;
                     % Create a subgrid
                     sub_grid = UniformGrid(obj.grid.q_begin(grid_index),obj.grid.q_end(grid_index),obj.grid.delta_q(grid_index),'step_size',obj.grid.q_wrap(grid_index));
                     for j = 1:sub_grid.n_points
-                        CASPR_log.Info([sprintf('Workspace ray %d. ',k),sprintf('Completion Percentage: %3.2f',100*k/n_grid_points)]);
+%                         CASPR_log.Info([sprintf('Workspace ray %d. ',k),sprintf('Completion Percentage: %3.2f',100*k/n_grid_points)]);
                         % Load the current fixed grid coordinates
                         q_fixed = sub_grid.getGridPoint(j);
                         % Construct the workspace ray
                         wr = WorkspaceRay(q_fixed,n_metrics,n_conditions,i,[obj.grid.q_begin(i),obj.grid.q_end(i)]);
-
+                            
                         % For each metric compute the value of the ray
                         for j_m=1:n_metrics
                             %% THIS NEEDS TO BE FILLED IN
@@ -120,8 +127,16 @@ classdef RayWorkspaceSimulator < SimulatorBase
                         % Note that another ray has been constructed
                         k = k+1;
                     end
-                end              
-                obj.createWorkspaceGraph();
+                end
+                obj.comp_time.ray_construction = toc(ray_t_in);
+                graph_t_in = tic;
+                if((nargin == 2) || isempty(w_metrics))
+                    obj.createWorkspaceGraph(w_conditions{1},[]);
+                else
+                    obj.createWorkspaceGraph(w_conditions{1},w_metrics{1});
+                end
+                obj.comp_time.graph_construction = toc(graph_t_in);
+                obj.comp_time.total = toc(total_t_in);
             end
         end
         
@@ -212,48 +227,252 @@ classdef RayWorkspaceSimulator < SimulatorBase
         % A function for plotting a graph
         function plotGraph(obj)
             % Shrink the graph to remove all nodes that are empty
-            l_graph = length(obj.graph);
-            l_free = l_graph/obj.grid.n_dimensions;
-            index = false(l_graph,1);
-            X = zeros(l_graph,1);
-            Y = zeros(l_graph,1);
-            k = 1;
-            plotting_graph = obj.graph;
-            for i = 1:length(obj.graph)
-                if(obj.graph(i,i))
-                    X(k) = mod(i,l_free);
-                    Y(k) = ceil(i/l_free);
-                    index(i) = true;
-                    plotting_graph(i,i)=0;
-                    k = k+1;
-                end
+            G = graph(obj.graph_rep(:,1),obj.graph_rep(:,2));
+            if(isempty(obj.metrics))
+                metric_flag = 0;
+            else
+                metric_flag = 1;
             end
-            X = X(1:k-1); Y = Y(1:k-1); 
-            plot(graph(plotting_graph(index,index)),'XData',X,'YData',Y); %#ok<CPROP>
-        end
-        
-        function plotGraphImage(obj)
-            imagesc(obj.graph)
-        end
-        
-    end
-    
-    methods(Access = private)
-        function createWorkspaceGraph(obj)
-            node_length = length(obj.workspace);
-            obj.graph = zeros(node_length,node_length);
-            for i = 1:node_length
-                if(~isempty(obj.workspace{i}))
-                    obj.graph(i,i) = 1;
-                    for j = i+1:node_length
-                        if(~isempty(obj.workspace{j}))
-                            obj.graph(i,j) = obj.workspace{i}.intersect(obj.workspace{j});
-                            obj.graph(j,i) = obj.graph(i,j);
+            cmap = 0.7*ones(257,3);
+            cmap(1:128,:) = winter(128);
+            cmap(130:257,:) = flipud(autumn(128));
+            for i = 1:obj.grid.n_dimensions+1+metric_flag
+                figure;
+                G.Edges.EdgeColours = obj.graph_rep(:,2+i); % INTERSECT NEEDS TO BE CHANGED TO INCLUDE THE POINT ITSELF
+                ax1 = axes;
+                p = plot(G,'MarkerSize',2);
+                layout(p,'auto')  
+                edge_range = (max(G.Edges.EdgeColours)-min(G.Edges.EdgeColours));
+                zero_colour = min(G.Edges.EdgeColours) - edge_range/256;
+                if(i <= obj.grid.n_dimensions)
+                    centroid_list = mean(obj.node_list(:,2:3),2);
+                    max_list = max(centroid_list(obj.node_list(:,3+obj.grid.n_dimensions)==i));
+                    min_list = min(centroid_list(obj.node_list(:,3+obj.grid.n_dimensions)==i));
+                    G.Nodes.NodeColours = zeros(G.numnodes,1);
+                    for j = 1:G.numnodes
+                        if(obj.node_list(j,3+obj.grid.n_dimensions)==i)
+                            G.Nodes.NodeColours(j) = -edge_range/(max_list-min_list)*(centroid_list(j) - min_list) + min(G.Edges.EdgeColours) - edge_range/128;
+                        else
+                            G.Nodes.NodeColours(j) = zero_colour;
                         end
+                    end
+                    p.NodeCData = G.Nodes.NodeColours;
+                elseif(i == obj.grid.n_dimensions+1)
+                    ray_distance_list = zeros(G.numnodes,1);
+                    for j = 1:G.numnodes
+                        ray_distance_list(j) =  (obj.node_list(j,3) - obj.node_list(j,2))/(obj.grid.q_end(obj.node_list(j,3+obj.grid.n_dimensions)) - obj.grid.q_begin(obj.node_list(j,3+obj.grid.n_dimensions)));
+                    end
+                    max_list = max(ray_distance_list);
+                    min_list = min(ray_distance_list);
+                    G.Nodes.NodeColours = zeros(G.numnodes,1);
+                    for j = 1:G.numnodes
+                        G.Nodes.NodeColours(j) = -edge_range/(max_list-min_list)*(ray_distance_list(j) - min_list) + min(G.Edges.EdgeColours) - edge_range/128;
+                    end
+                    p.NodeCData = G.Nodes.NodeColours;
+                else
+                    p.NodeCData = (zero_colour-0.1)*ones(G.numnodes,1);
+                end
+                if(i <= obj.grid.n_dimensions+1)
+                    p.EdgeCData = G.Edges.EdgeColours;
+                    p.LineWidth = 2;
+                    set(gca,'XTick',[]);set(gca,'YTick',[]);
+                    ax2 = axes;
+                    linkaxes([ax1,ax2]);
+                    %% Hide the top axes
+                    ax2.Visible = 'off';
+                    ax2.XTick = [];
+                    ax2.YTick = [];
+                    colormap(ax1,cmap);
+                    colormap(ax2,flipud(winter(128)));
+                    %                 colorbar
+                    set([ax1,ax2],'Position',[.15 .11 .685 .815]);
+                    cb1 = colorbar(ax1,'Position',[.07 .11 .0675 .815]);
+                    if(min(G.Edges.EdgeColours)==max(G.Edges.EdgeColours))
+                        set(cb1,'Limits',[min(G.Edges.EdgeColours),max(G.Edges.EdgeColours)+1e-4])
+                    else
+                        set(cb1,'Limits',[min(G.Edges.EdgeColours),max(G.Edges.EdgeColours)])
+                    end
+                    cb2 = colorbar(ax2,'Position',[.85 .11 .0675 .815]);
+                    caxis(ax2,[min_list,max_list]);
+                else
+                    p.EdgeCData = G.Edges.EdgeColours;
+                    p.LineWidth = 2;
+                    set(gca,'XTick',[]);set(gca,'YTick',[]);
+                    set(gca,'Position',[.15 .11 .685 .815]);
+                    colormap(cmap(129:257,:));
+                    cb1 = colorbar(gca,'Position',[.07 .11 .0675 .815]);
+                    if(min(G.Edges.EdgeColours)==max(G.Edges.EdgeColours))
+                        set(cb1,'Limits',[min(G.Edges.EdgeColours),max(G.Edges.EdgeColours)+1e-4])
+                    else
+                        set(cb1,'Limits',[min(G.Edges.EdgeColours),max(G.Edges.EdgeColours)])
                     end
                 end
             end
         end
     end
+    
+    methods(Access = private)
+        function createWorkspaceGraph(obj,condition,metric)
+            if(isempty(metric))
+                metric_flag = 0;
+            else
+                metric_flag = 1;
+            end
+                
+            % For the moment this will be written as if there was only one
+            % condition I will subsequently modify
+            number_rays = length(obj.workspace);
+            % Create list of nodes
+            obj.node_list = zeros(10*number_rays,3+obj.grid.n_dimensions); 
+            number_node = 0;
+            % For each ray
+            for i = 1:number_rays
+                % Determine the number of the condition
+                if(~isempty(obj.workspace{i}))
+                    n_constraints = size(obj.workspace{i}.conditions,1);
+                    intervals = [];
+                    for j = 1:n_constraints
+                        if(condition.type == obj.workspace{i}.conditions{j,1})
+                            intervals = obj.workspace{i}.conditions{j,2};
+                            break;
+                        end
+                    end
+                    for j = 1:size(intervals,1)
+                        number_node = number_node + 1;
+                        obj.node_list(number_node,:) = [i,intervals(j,:),obj.workspace{i}.fixed_variables',obj.workspace{i}.free_variable_index];
+                    end
+                end
+            end                
+            % Resize to the correct size
+            obj.node_list = obj.node_list(1:number_node,:); 
+            
+            % Computation for the maximum number of nodes
+%             max_edges = 0;
+%             for i = 1:obj.grid.n_dimensions
+%                 % Determine the number of nodes for a given free variable
+%                 % index
+%                 num_nodes_i = sum(obj.node_list(:,3+obj.grid.n_dimensions)==i);
+%                 max_edges = max_edges + num_nodes_i*(number_node-num_nodes_i);
+%             end
+            max_edges = number_node*max(obj.grid.q_length)*obj.grid.n_dimensions;
 
+            % Initialise an adjacency list
+            obj.graph_rep = zeros(max_edges,2+obj.grid.n_dimensions+1+metric_flag);
+            number_intersects = 0;
+            fixed_index_intersect_candidate = zeros(obj.grid.n_dimensions-1,1);
+            intersect_fixed_indices = zeros(obj.grid.n_dimensions-1,1);
+            for i = 1:number_node
+                % Determine the current workspace index and interval
+                workspace_index_i = obj.node_list(i,1);
+                workspace_interval_i = obj.node_list(i,2:3);
+                free_variable_index = obj.workspace{workspace_index_i}.free_variable_index;
+                if(free_variable_index == obj.grid.n_dimensions)
+                    % There are no possible intersects that haven't been
+                    % already checked
+                    break;
+                else
+                    active_vector = false(obj.grid.n_dimensions-1,1); active_vector(free_variable_index) = true;
+                    fixed_indices = obj.workspace_index_to_index_vector(workspace_index_i,free_variable_index);
+                    % Now remove the indices that are not coplanar
+                    % For each subsequent dimension determine the indices
+                    % Possible sources of intersect
+                    coplanar_indices = zeros((obj.grid.n_dimensions-free_variable_index)*obj.grid.q_length(free_variable_index),1);
+                    current_coplanar_index = 1;
+                    for dimension_index = free_variable_index+1:obj.grid.n_dimensions
+                        % First determine the fixed index components
+                        fixed_index_nm2 = fixed_indices;
+                        % Remove the value for the new dimension
+                        fixed_index_nm2(dimension_index-1) = [];
+                        fixed_index_intersect_candidate(~active_vector) = fixed_index_nm2;
+                        for growth_index = 1:obj.grid.q_length(free_variable_index)
+                            fixed_index_intersect_candidate(active_vector) = growth_index;
+                            % Convert the vector back into an index
+                            coplanar_indices(current_coplanar_index) = obj.index_vector_to_workspace_index(fixed_index_intersect_candidate,dimension_index);
+                            current_coplanar_index = current_coplanar_index + 1;
+                        end
+                    end
+                    intersect_check_i = coplanar_indices;
+                    for j = 1:length(intersect_check_i)
+                        j_index = intersect_check_i(j);
+                        if(~isempty(obj.workspace{j_index}))
+                            % find the node list entry
+                            node_indices = find(obj.node_list(:,1) == j_index);
+                            for k = 1:length(node_indices)
+                                [is_intersected,intersection_point] = obj.workspace{workspace_index_i}.intersect(workspace_interval_i,obj.workspace{obj.node_list(node_indices(k),1)},obj.node_list(node_indices(k),2:3));
+                                if(is_intersected)
+                                    number_intersects = number_intersects + 1;
+                                    min_dist = min([abs(intersection_point(obj.node_list(i,3+obj.grid.n_dimensions))-obj.node_list(i,2)),abs(intersection_point(obj.node_list(i,3+obj.grid.n_dimensions))-obj.node_list(i,3)),abs(intersection_point(obj.node_list(node_indices(k),3+obj.grid.n_dimensions))-obj.node_list(node_indices(k),2)),abs(intersection_point(obj.node_list(node_indices(k),3+obj.grid.n_dimensions))-obj.node_list(node_indices(k),3))]);
+                                    % Determine the fixed_indices
+                                    free_variable_index_j = obj.workspace{j_index}.free_variable_index;
+                                    fixed_indices_j = obj.workspace_index_to_index_vector(j_index,free_variable_index_j);
+                                    active_vector_i = false(obj.grid.n_dimensions,1); active_vector_i(free_variable_index) = true;
+                                    active_vector_j = false(obj.grid.n_dimensions,1); active_vector_j(free_variable_index_j) = true;
+                                    % Determine the fixed variable
+                                    % values
+                                    intersect_fixed_indices(~active_vector_i) = fixed_indices;
+                                    intersect_fixed_indices(~active_vector_j) = fixed_indices_j;
+                                    for intersection_dimension_index = 1:obj.grid.n_dimensions
+                                        if((intersection_dimension_index ~= free_variable_index)&&(intersection_dimension_index ~= free_variable_index_j))
+                                            % Convert the fixed variable
+                                            % into an index
+                                            intersect_fixed_temp = intersect_fixed_indices;
+                                            intersect_fixed_temp(intersection_dimension_index) = [];
+                                            % Convert the index into a node
+                                            workspace_index_min_dist = obj.index_vector_to_workspace_index(intersect_fixed_temp,intersection_dimension_index);
+                                            % list entry
+                                            node_index_candidates = find(obj.node_list(:,1) == workspace_index_min_dist);
+                                            % compute the distance
+                                            for dist_index = 1:size(node_index_candidates,1)
+                                                k_dist = min([abs(intersection_point(obj.node_list(node_index_candidates(dist_index),3+obj.grid.n_dimensions))-obj.node_list(node_index_candidates(dist_index),2)),abs(intersection_point(obj.node_list(node_index_candidates(dist_index),3+obj.grid.n_dimensions))-obj.node_list(node_index_candidates(dist_index),3))]);
+                                                % Update the minimum if
+                                                % necessary
+                                                if(k_dist <= min_dist)
+                                                    min_dist = k_dist;
+                                                end
+                                            end
+                                        end
+                                    end
+                                    obj.graph_rep(number_intersects,1) = i;
+                                    obj.graph_rep(number_intersects,2) = node_indices(k);
+                                    obj.graph_rep(number_intersects,3:2+obj.grid.n_dimensions) = transpose(intersection_point);
+                                    obj.graph_rep(number_intersects,2+obj.grid.n_dimensions+1) = min_dist;
+                                    if(metric_flag)
+                                        obj.model.update(intersection_point,zeros(obj.grid.n_dimensions,1),zeros(obj.grid.n_dimensions,1),zeros(obj.grid.n_dimensions,1));
+                                        [~,obj.graph_rep(number_intersects,2+obj.grid.n_dimensions+2),~] = obj.metrics{1}.evaluate(obj.model,[]);
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+            obj.graph_rep = obj.graph_rep(1:number_intersects,:);
+        end
+        
+        function index_vector = workspace_index_to_index_vector(obj,workspace_index,free_variable_index)
+            index_vector = zeros(obj.grid.n_dimensions-1,1);
+            temp_index = workspace_index; temp_index = temp_index - sum(obj.free_variable_length(1:free_variable_index-1));
+            dimension_vector_temp = 1:obj.grid.n_dimensions;
+            dimension_vector_temp(free_variable_index) = [];
+            q_length_temp = obj.grid.q_length(dimension_vector_temp);
+            q_div = prod(q_length_temp);
+            for dimension_index = 1:obj.grid.n_dimensions-1
+                q_div = q_div/q_length_temp(dimension_index);
+                index_vector(dimension_index) = ceil((temp_index)/q_div);
+                temp_index = temp_index - (index_vector(dimension_index)-1)*q_div;
+            end
+        end
+        
+        function workspace_index = index_vector_to_workspace_index(obj,index_vector,free_variable_index)
+            dimension_vector_temp = 1:obj.grid.n_dimensions;
+            dimension_vector_temp(free_variable_index) = [];
+            q_length_temp = obj.grid.q_length(dimension_vector_temp);
+            q_div = prod(q_length_temp);
+            workspace_index = sum(obj.free_variable_length(1:free_variable_index-1))+1;
+            for count_index = 1:obj.grid.n_dimensions-1
+                q_div = q_div/q_length_temp(count_index);
+                workspace_index = workspace_index + q_div*(index_vector(count_index)-1);
+            end
+        end
+    end
 end

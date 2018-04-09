@@ -514,7 +514,7 @@ classdef SystemModelCables < handle
                 k_A = k_A - 1; % To account for CRM indexing
             else
                 k_A = k;
-                k_B = find(obj.getCRMTerm(i,j,:)==1);
+                k_B = find(obj.getCRMTerm(i,j,1:obj.numLinks+1)==1);
                 k_B = k_B - 1; % To account for CRM indexing
             end
         end 
