@@ -11,6 +11,110 @@ classdef JointTrajectory < TrajectoryBase
     end
     
     methods
+        % Function that samples the reference trajectory for frequency analysis later.
+        % Should be called after the generation of the joint space
+        % trajectory. Several options can be considered:
+        %   1. Keep constant until the next trajectory point (ZOH)
+        %       mode == 1
+        %   2. Linearly interpolate two adjacent points
+        %       mode == 2
+        %   3. Keep the sampling rate the same as the trajectory's original
+        %   sampling rate
+        %       mode == 3
+        function output_data = trajectorySampling(obj, working_mode, sampling_rate_ratio)
+            % initialize the working mode and sampling frequency ratio
+            mode    =   -1;
+            sampling_frequency_ratio = 1;
+            if (nargin < 3)
+                disp('Default frequency analysis will be applied (use the original trajectory frequency as the sampling rate).');
+                mode = 3;
+            else
+                if working_mode == 1
+                    mode = 1;
+                    sampling_frequency_ratio = floor(sampling_rate_ratio);
+                    if sampling_frequency_ratio < 1
+                        sampling_frequency_ratio = 1;
+                    end
+                elseif working_mode == 2
+                    mode = 2;
+                    sampling_frequency_ratio = floor(sampling_rate_ratio);
+                    if sampling_frequency_ratio < 1
+                        sampling_frequency_ratio = 1;
+                    end
+                else
+                    mode = 3;
+                end
+            end
+            
+            % generate the source signal for different modes
+            traj_len = length(obj.q);
+            traj_dim = length(obj.q{1});
+            % Fs being the sampling frequency
+            Fs      =   1/(obj.timeVector(2)-obj.timeVector(1));
+            if mode == 1
+                % ZOH approach
+                q_source_sig        =   zeros(sampling_frequency_ratio*traj_len, traj_dim);
+                q_dot_source_sig    =   zeros(sampling_frequency_ratio*traj_len, traj_dim);
+                q_ddot_source_sig   =   zeros(sampling_frequency_ratio*traj_len, traj_dim);
+                for i = 1:traj_len-1
+                    for j = 1:sampling_frequency_ratio
+                        q_source_sig(sampling_frequency_ratio*(i-1)+j, :) = obj.q{i}';
+                        q_dot_source_sig(sampling_frequency_ratio*(i-1)+j, :) = obj.q_dot{i}';
+                        q_ddot_source_sig(sampling_frequency_ratio*(i-1)+j, :) = obj.q_ddot{i}';
+                    end
+                end
+                q_source_sig(sampling_frequency_ratio*(traj_len-1)+1, :) = obj.q{traj_len}';
+                q_dot_source_sig(sampling_frequency_ratio*(traj_len-1)+1, :) = obj.q_dot{itraj_len}';
+                q_ddot_source_sig(sampling_frequency_ratio*(traj_len-1)+1, :) = obj.q_ddot{traj_len}';
+                time_vec_source_sig = obj.timeVector(1):sampling_frequency_ratio*(traj_len-1):obj.timeVector(length(obj.timeVector));
+                % update the sampling frequency when necessary
+                Fs = Fs*sampling_frequency_ratio;
+            elseif mode == 2
+                % linear interpolation approach
+                q_source_sig        =   zeros(sampling_frequency_ratio*traj_len, traj_dim);
+                q_dot_source_sig    =   zeros(sampling_frequency_ratio*traj_len, traj_dim);
+                q_ddot_source_sig   =   zeros(sampling_frequency_ratio*traj_len, traj_dim);
+                for i = 1:traj_len-1
+                    q_interval      =   obj.q{i+1}' - obj.q{i}';
+                    q_dot_interval  =   obj.q_dot{i+1}' - obj.q_dot{i}';
+                    q_ddot_interval =   obj.q_ddot{i+1}' - obj.q_ddot{i}';
+                    q_step          =   q_interval/sampling_frequency_ratio;
+                    q_dot_step      =   q_dot_interval/sampling_frequency_ratio;
+                    q_ddot_step     =   q_ddot_interval/sampling_frequency_ratio;
+                    for j = 1:sampling_frequency_ratio
+                        q_source_sig(sampling_frequency_ratio*(i-1)+j, :) = obj.q{i}' + (j-1)*q_step;
+                        q_dot_source_sig(sampling_frequency_ratio*(i-1)+j, :) = obj.q_dot{i}' + (j-1)*q_dot_step;
+                        q_ddot_source_sig(sampling_frequency_ratio*(i-1)+j, :) = obj.q_ddot{i}' + (j-1)*q_ddot_step;
+                    end
+                end
+                q_source_sig(sampling_frequency_ratio*(traj_len-1)+1, :) = obj.q{traj_len}';
+                q_dot_source_sig(sampling_frequency_ratio*(traj_len-1)+1, :) = obj.q_dot{itraj_len}';
+                q_ddot_source_sig(sampling_frequency_ratio*(traj_len-1)+1, :) = obj.q_ddot{traj_len}';
+                time_vec_source_sig = obj.timeVector(1):sampling_frequency_ratio*(traj_len-1):obj.timeVector(length(obj.timeVector));
+                % update the sampling frequency when necessary
+                Fs = Fs*sampling_frequency_ratio;
+            elseif mode == 3
+                q_source_sig        =   cell2mat(obj.q)';
+                q_dot_source_sig    =   cell2mat(obj.q_dot)';
+                q_ddot_source_sig   =   cell2mat(obj.q_ddot)';
+                time_vec_source_sig =   obj.timeVector;
+            else
+                q_source_sig        =   cell2mat(obj.q)';
+                q_dot_source_sig    =   cell2mat(obj.q_dot)';
+                q_ddot_source_sig   =   cell2mat(obj.q_ddot)';
+                time_vec_source_sig =   obj.timeVector;
+            end
+            
+            output_data.q_sampled_data = q_source_sig;
+            output_data.q_dot_sampled_data = q_dot_source_sig;
+            output_data.q_ddot_sampled_data = q_ddot_source_sig;
+            output_data.t_sampled_data = time_vec_source_sig;
+            
+            [output_data.q_fs_1, output_data.f] = fftAnalysis(output_data.t_sampled_data, output_data.q_sampled_data);
+            [output_data.q_dot_fs_1, ~] = fftAnalysis(output_data.t_sampled_data, output_data.q_dot_sampled_data);
+            [output_data.q_ddot_fs_1, ~] = fftAnalysis(output_data.t_sampled_data, output_data.q_ddot_sampled_data);
+            
+        end
         % Function plots the joint trajectory, velocity and acceleration
         function plotJointSpace(obj, states_to_plot)
             n_dof = length(obj.q{1});
