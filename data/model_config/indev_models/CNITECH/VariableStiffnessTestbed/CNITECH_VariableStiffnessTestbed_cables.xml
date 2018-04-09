@@ -1,0 +1,683 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE cables SYSTEM "../../../templates/cables.dtd">
+
+<cables default_cable_set="calibration_setup">
+  <cable_set id="calibration_setup">
+    <cable_ideal name="1" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>200</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.0637 -0.08 0.0397</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0.0025 0.08 0.058</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="2" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>200</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.0637 -0.08 0.0397</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>-0.0025 0.08 0.0580</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="3" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>200</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.0662 -0.08 0.0353</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>-0.0515 0.08 -0.0268</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="4" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>200</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.0025 -0.08 -0.075</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>-0.049 0.08 -0.0312</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="5" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>200</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.0025 -0.08 -0.075</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0.049 0.08 -0.0312</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="6" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>200</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.0662 -0.08 0.0353</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0.0515 0.08 -0.0268</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+  </cable_set>
+  <cable_set id="vsd_test_1">
+    <cable_vsd_polynomial name="1" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>200</force_max>
+        <K_cable>40000</K_cable>
+        <num_stiffness_polynomial_coeff>4</num_stiffness_polynomial_coeff>
+        <stiffness_poly_coeff>5.229e3 1.433e2 -3.226e-2 1.77e-2</stiffness_poly_coeff>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.0637 -0.08 0.0397</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0.0025 0.08 0.058</location>
+        </attachment>
+      </attachments>
+    </cable_vsd_polynomial>
+    <cable_vsd_polynomial name="2" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>200</force_max>
+        <K_cable>40000</K_cable>
+        <num_stiffness_polynomial_coeff>4</num_stiffness_polynomial_coeff>
+        <stiffness_poly_coeff>5.229e3 1.433e2 -3.226e-2 1.77e-2</stiffness_poly_coeff>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.0637 -0.08 0.0397</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>-0.0025 0.08 0.0580</location>
+        </attachment>
+      </attachments>
+    </cable_vsd_polynomial>
+    <cable_vsd_polynomial name="3" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>200</force_max>
+        <K_cable>40000</K_cable>
+        <num_stiffness_polynomial_coeff>4</num_stiffness_polynomial_coeff>
+        <stiffness_poly_coeff>5.229e3 1.433e2 -3.226e-2 1.77e-2</stiffness_poly_coeff>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.0662 -0.08 0.0353</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>-0.0515 0.08 -0.0268</location>
+        </attachment>
+      </attachments>
+    </cable_vsd_polynomial>
+    <cable_vsd_polynomial name="4" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>200</force_max>
+        <K_cable>40000</K_cable>
+        <num_stiffness_polynomial_coeff>4</num_stiffness_polynomial_coeff>
+        <stiffness_poly_coeff>5.229e3 1.433e2 -3.226e-2 1.77e-2</stiffness_poly_coeff>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.0025 -0.08 -0.075</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>-0.049 0.08 -0.0312</location>
+        </attachment>
+      </attachments>
+    </cable_vsd_polynomial>
+    <cable_vsd_polynomial name="5" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>200</force_max>
+        <K_cable>40000</K_cable>
+        <num_stiffness_polynomial_coeff>4</num_stiffness_polynomial_coeff>
+        <stiffness_poly_coeff>5.229e3 1.433e2 -3.226e-2 1.77e-2</stiffness_poly_coeff>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.0025 -0.08 -0.075</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0.049 0.08 -0.0312</location>
+        </attachment>
+      </attachments>
+    </cable_vsd_polynomial>
+    <cable_vsd_polynomial name="6" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>200</force_max>
+        <K_cable>40000</K_cable>
+        <num_stiffness_polynomial_coeff>4</num_stiffness_polynomial_coeff>
+        <stiffness_poly_coeff>5.229e3 1.433e2 -3.226e-2 1.77e-2</stiffness_poly_coeff>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.0662 -0.08 0.0353</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0.0515 0.08 -0.0268</location>
+        </attachment>
+      </attachments>
+    </cable_vsd_polynomial>
+  </cable_set>
+  <cable_set id="vsd_test_2">
+    <cable_vsd_polynomial name="1" attachment_reference="joint">
+      <properties>
+        <force_min>10</force_min>
+        <force_max>200</force_max>
+        <K_cable>40000</K_cable>
+        <num_stiffness_polynomial_coeff>4</num_stiffness_polynomial_coeff>
+        <stiffness_poly_coeff>5.229e3 1.433e2 -3.226e-2 1.77e-2</stiffness_poly_coeff>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.0637 -0.08 0.0397</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0.0025 0.08 0.058</location>
+        </attachment>
+      </attachments>
+    </cable_vsd_polynomial>
+    <cable_vsd_polynomial name="2" attachment_reference="joint">
+      <properties>
+        <force_min>10</force_min>
+        <force_max>200</force_max>
+        <K_cable>40000</K_cable>
+        <num_stiffness_polynomial_coeff>4</num_stiffness_polynomial_coeff>
+        <stiffness_poly_coeff>5.229e3 1.433e2 -3.226e-2 1.77e-2</stiffness_poly_coeff>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.0637 -0.08 0.0397</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>-0.0025 0.08 0.0580</location>
+        </attachment>
+      </attachments>
+    </cable_vsd_polynomial>
+    <cable_vsd_polynomial name="3" attachment_reference="joint">
+      <properties>
+        <force_min>10</force_min>
+        <force_max>200</force_max>
+        <K_cable>40000</K_cable>
+        <num_stiffness_polynomial_coeff>4</num_stiffness_polynomial_coeff>
+        <stiffness_poly_coeff>5.229e3 1.433e2 -3.226e-2 1.77e-2</stiffness_poly_coeff>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.0662 -0.08 0.0353</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>-0.0515 0.08 -0.0268</location>
+        </attachment>
+      </attachments>
+    </cable_vsd_polynomial>
+    <cable_vsd_polynomial name="4" attachment_reference="joint">
+      <properties>
+        <force_min>10</force_min>
+        <force_max>200</force_max>
+        <K_cable>40000</K_cable>
+        <num_stiffness_polynomial_coeff>4</num_stiffness_polynomial_coeff>
+        <stiffness_poly_coeff>5.229e3 1.433e2 -3.226e-2 1.77e-2</stiffness_poly_coeff>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.0025 -0.08 -0.075</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>-0.049 0.08 -0.0312</location>
+        </attachment>
+      </attachments>
+    </cable_vsd_polynomial>
+    <cable_vsd_polynomial name="5" attachment_reference="joint">
+      <properties>
+        <force_min>10</force_min>
+        <force_max>200</force_max>
+        <K_cable>40000</K_cable>
+        <num_stiffness_polynomial_coeff>4</num_stiffness_polynomial_coeff>
+        <stiffness_poly_coeff>5.229e3 1.433e2 -3.226e-2 1.77e-2</stiffness_poly_coeff>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.0025 -0.08 -0.075</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0.049 0.08 -0.0312</location>
+        </attachment>
+      </attachments>
+    </cable_vsd_polynomial>
+    <cable_vsd_polynomial name="6" attachment_reference="joint">
+      <properties>
+        <force_min>10</force_min>
+        <force_max>200</force_max>
+        <K_cable>40000</K_cable>
+        <num_stiffness_polynomial_coeff>4</num_stiffness_polynomial_coeff>
+        <stiffness_poly_coeff>5.229e3 1.433e2 -3.226e-2 1.77e-2</stiffness_poly_coeff>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.0662 -0.08 0.0353</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0.0515 0.08 -0.0268</location>
+        </attachment>
+      </attachments>
+    </cable_vsd_polynomial>
+  </cable_set>
+  <cable_set id="vsd_test_3">
+    <cable_vsd_polynomial name="1" attachment_reference="joint">
+      <properties>
+        <force_min>20</force_min>
+        <force_max>200</force_max>
+        <K_cable>40000</K_cable>
+        <num_stiffness_polynomial_coeff>4</num_stiffness_polynomial_coeff>
+        <stiffness_poly_coeff>5.229e3 1.433e2 -3.226e-2 1.77e-2</stiffness_poly_coeff>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.0637 -0.08 0.0397</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0.0025 0.08 0.058</location>
+        </attachment>
+      </attachments>
+    </cable_vsd_polynomial>
+    <cable_vsd_polynomial name="2" attachment_reference="joint">
+      <properties>
+        <force_min>20</force_min>
+        <force_max>200</force_max>
+        <K_cable>40000</K_cable>
+        <num_stiffness_polynomial_coeff>4</num_stiffness_polynomial_coeff>
+        <stiffness_poly_coeff>5.229e3 1.433e2 -3.226e-2 1.77e-2</stiffness_poly_coeff>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.0637 -0.08 0.0397</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>-0.0025 0.08 0.0580</location>
+        </attachment>
+      </attachments>
+    </cable_vsd_polynomial>
+    <cable_vsd_polynomial name="3" attachment_reference="joint">
+      <properties>
+        <force_min>20</force_min>
+        <force_max>200</force_max>
+        <K_cable>40000</K_cable>
+        <num_stiffness_polynomial_coeff>4</num_stiffness_polynomial_coeff>
+        <stiffness_poly_coeff>5.229e3 1.433e2 -3.226e-2 1.77e-2</stiffness_poly_coeff>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.0662 -0.08 0.0353</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>-0.0515 0.08 -0.0268</location>
+        </attachment>
+      </attachments>
+    </cable_vsd_polynomial>
+    <cable_vsd_polynomial name="4" attachment_reference="joint">
+      <properties>
+        <force_min>20</force_min>
+        <force_max>200</force_max>
+        <K_cable>40000</K_cable>
+        <num_stiffness_polynomial_coeff>4</num_stiffness_polynomial_coeff>
+        <stiffness_poly_coeff>5.229e3 1.433e2 -3.226e-2 1.77e-2</stiffness_poly_coeff>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.0025 -0.08 -0.075</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>-0.049 0.08 -0.0312</location>
+        </attachment>
+      </attachments>
+    </cable_vsd_polynomial>
+    <cable_vsd_polynomial name="5" attachment_reference="joint">
+      <properties>
+        <force_min>20</force_min>
+        <force_max>200</force_max>
+        <K_cable>40000</K_cable>
+        <num_stiffness_polynomial_coeff>4</num_stiffness_polynomial_coeff>
+        <stiffness_poly_coeff>5.229e3 1.433e2 -3.226e-2 1.77e-2</stiffness_poly_coeff>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.0025 -0.08 -0.075</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0.049 0.08 -0.0312</location>
+        </attachment>
+      </attachments>
+    </cable_vsd_polynomial>
+    <cable_vsd_polynomial name="6" attachment_reference="joint">
+      <properties>
+        <force_min>20</force_min>
+        <force_max>200</force_max>
+        <K_cable>40000</K_cable>
+        <num_stiffness_polynomial_coeff>4</num_stiffness_polynomial_coeff>
+        <stiffness_poly_coeff>5.229e3 1.433e2 -3.226e-2 1.77e-2</stiffness_poly_coeff>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.0662 -0.08 0.0353</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0.0515 0.08 -0.0268</location>
+        </attachment>
+      </attachments>
+    </cable_vsd_polynomial>
+  </cable_set>
+  <cable_set id="vsd_test_4">
+    <cable_vsd_polynomial name="1" attachment_reference="joint">
+      <properties>
+        <force_min>30</force_min>
+        <force_max>200</force_max>
+        <K_cable>40000</K_cable>
+        <num_stiffness_polynomial_coeff>4</num_stiffness_polynomial_coeff>
+        <stiffness_poly_coeff>5.229e3 1.433e2 -3.226e-2 1.77e-2</stiffness_poly_coeff>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.0637 -0.08 0.0397</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0.0025 0.08 0.058</location>
+        </attachment>
+      </attachments>
+    </cable_vsd_polynomial>
+    <cable_vsd_polynomial name="2" attachment_reference="joint">
+      <properties>
+        <force_min>30</force_min>
+        <force_max>200</force_max>
+        <K_cable>40000</K_cable>
+        <num_stiffness_polynomial_coeff>4</num_stiffness_polynomial_coeff>
+        <stiffness_poly_coeff>5.229e3 1.433e2 -3.226e-2 1.77e-2</stiffness_poly_coeff>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.0637 -0.08 0.0397</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>-0.0025 0.08 0.0580</location>
+        </attachment>
+      </attachments>
+    </cable_vsd_polynomial>
+    <cable_vsd_polynomial name="3" attachment_reference="joint">
+      <properties>
+        <force_min>30</force_min>
+        <force_max>200</force_max>
+        <K_cable>40000</K_cable>
+        <num_stiffness_polynomial_coeff>4</num_stiffness_polynomial_coeff>
+        <stiffness_poly_coeff>5.229e3 1.433e2 -3.226e-2 1.77e-2</stiffness_poly_coeff>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.0662 -0.08 0.0353</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>-0.0515 0.08 -0.0268</location>
+        </attachment>
+      </attachments>
+    </cable_vsd_polynomial>
+    <cable_vsd_polynomial name="4" attachment_reference="joint">
+      <properties>
+        <force_min>30</force_min>
+        <force_max>200</force_max>
+        <K_cable>40000</K_cable>
+        <num_stiffness_polynomial_coeff>4</num_stiffness_polynomial_coeff>
+        <stiffness_poly_coeff>5.229e3 1.433e2 -3.226e-2 1.77e-2</stiffness_poly_coeff>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.0025 -0.08 -0.075</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>-0.049 0.08 -0.0312</location>
+        </attachment>
+      </attachments>
+    </cable_vsd_polynomial>
+    <cable_vsd_polynomial name="5" attachment_reference="joint">
+      <properties>
+        <force_min>30</force_min>
+        <force_max>200</force_max>
+        <K_cable>40000</K_cable>
+        <num_stiffness_polynomial_coeff>4</num_stiffness_polynomial_coeff>
+        <stiffness_poly_coeff>5.229e3 1.433e2 -3.226e-2 1.77e-2</stiffness_poly_coeff>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.0025 -0.08 -0.075</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0.049 0.08 -0.0312</location>
+        </attachment>
+      </attachments>
+    </cable_vsd_polynomial>
+    <cable_vsd_polynomial name="6" attachment_reference="joint">
+      <properties>
+        <force_min>30</force_min>
+        <force_max>200</force_max>
+        <K_cable>40000</K_cable>
+        <num_stiffness_polynomial_coeff>4</num_stiffness_polynomial_coeff>
+        <stiffness_poly_coeff>5.229e3 1.433e2 -3.226e-2 1.77e-2</stiffness_poly_coeff>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.0662 -0.08 0.0353</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0.0515 0.08 -0.0268</location>
+        </attachment>
+      </attachments>
+    </cable_vsd_polynomial>
+  </cable_set>
+  <cable_set id="vsd_test_5">
+    <cable_vsd_polynomial name="1" attachment_reference="joint">
+      <properties>
+        <force_min>40</force_min>
+        <force_max>200</force_max>
+        <K_cable>40000</K_cable>
+        <num_stiffness_polynomial_coeff>4</num_stiffness_polynomial_coeff>
+        <stiffness_poly_coeff>5.229e3 1.433e2 -3.226e-2 1.77e-2</stiffness_poly_coeff>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.0637 -0.08 0.0397</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0.0025 0.08 0.058</location>
+        </attachment>
+      </attachments>
+    </cable_vsd_polynomial>
+    <cable_vsd_polynomial name="2" attachment_reference="joint">
+      <properties>
+        <force_min>40</force_min>
+        <force_max>200</force_max>
+        <K_cable>40000</K_cable>
+        <num_stiffness_polynomial_coeff>4</num_stiffness_polynomial_coeff>
+        <stiffness_poly_coeff>5.229e3 1.433e2 -3.226e-2 1.77e-2</stiffness_poly_coeff>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.0637 -0.08 0.0397</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>-0.0025 0.08 0.0580</location>
+        </attachment>
+      </attachments>
+    </cable_vsd_polynomial>
+    <cable_vsd_polynomial name="3" attachment_reference="joint">
+      <properties>
+        <force_min>40</force_min>
+        <force_max>200</force_max>
+        <K_cable>40000</K_cable>
+        <num_stiffness_polynomial_coeff>4</num_stiffness_polynomial_coeff>
+        <stiffness_poly_coeff>5.229e3 1.433e2 -3.226e-2 1.77e-2</stiffness_poly_coeff>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.0662 -0.08 0.0353</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>-0.0515 0.08 -0.0268</location>
+        </attachment>
+      </attachments>
+    </cable_vsd_polynomial>
+    <cable_vsd_polynomial name="4" attachment_reference="joint">
+      <properties>
+        <force_min>40</force_min>
+        <force_max>200</force_max>
+        <K_cable>40000</K_cable>
+        <num_stiffness_polynomial_coeff>4</num_stiffness_polynomial_coeff>
+        <stiffness_poly_coeff>5.229e3 1.433e2 -3.226e-2 1.77e-2</stiffness_poly_coeff>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.0025 -0.08 -0.075</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>-0.049 0.08 -0.0312</location>
+        </attachment>
+      </attachments>
+    </cable_vsd_polynomial>
+    <cable_vsd_polynomial name="5" attachment_reference="joint">
+      <properties>
+        <force_min>40</force_min>
+        <force_max>200</force_max>
+        <K_cable>40000</K_cable>
+        <num_stiffness_polynomial_coeff>4</num_stiffness_polynomial_coeff>
+        <stiffness_poly_coeff>5.229e3 1.433e2 -3.226e-2 1.77e-2</stiffness_poly_coeff>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.0025 -0.08 -0.075</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0.049 0.08 -0.0312</location>
+        </attachment>
+      </attachments>
+    </cable_vsd_polynomial>
+    <cable_vsd_polynomial name="6" attachment_reference="joint">
+      <properties>
+        <force_min>40</force_min>
+        <force_max>200</force_max>
+        <K_cable>40000</K_cable>
+        <num_stiffness_polynomial_coeff>4</num_stiffness_polynomial_coeff>
+        <stiffness_poly_coeff>5.229e3 1.433e2 -3.226e-2 1.77e-2</stiffness_poly_coeff>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.0662 -0.08 0.0353</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0.0515 0.08 -0.0268</location>
+        </attachment>
+      </attachments>
+    </cable_vsd_polynomial>
+  </cable_set>
+</cables>
