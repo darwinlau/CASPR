@@ -17,7 +17,6 @@ classdef ControllerSimulator < DynamicsSimulator
         ctrl_fk_trajectory  % The forward kinematics (used with controller) trajectory containing estimated state variables (probably will only be used in debugging)
         ob_fk_trajectory    % The forward kinematics (used with observer) trajectory containing estimated state variables (probably will only be used in debugging)
         
-        
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % simulator components
         fdSolver            % The forward dynamics solver
@@ -67,6 +66,8 @@ classdef ControllerSimulator < DynamicsSimulator
         % FK related - relative encoder
         l_0_env             % initial cabel lengths in the environment (used to generate relative lengths when relative encoder is used)
         l_0_ctrl            % initial cabel lengths in the environment (used to restore the absolute lengths when relative encoder is used)
+    
+        rounding_error_guard % used to cut the effect of rounding error
     end
 
     methods
@@ -123,6 +124,7 @@ classdef ControllerSimulator < DynamicsSimulator
             else
                 ctrl_sim.simopt     =   ControllerSimulatorOptions();
             end
+            ctrl_sim.rounding_error_guard = 1e-5;
             ctrl_sim.optionConsistencyCheck();
         end
         
@@ -184,6 +186,8 @@ classdef ControllerSimulator < DynamicsSimulator
             obj.ob_vec_length   =   obj.simopt.ob_freq_ratio*obj.ctrl_vec_length;
             ctrl_delta_t        =   (tf - t0)/(obj.ctrl_vec_length - 1);
             ob_delta_t          =   (tf - t0)/(obj.ob_vec_length - 1);
+            % initialize the computational time record variable
+            obj.compTime        =   zeros(obj.ctrl_vec_length, 1);
             
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             % DECLARE SIMULATION TRAJECTORIES
@@ -205,6 +209,14 @@ classdef ControllerSimulator < DynamicsSimulator
             obj.trajectory.q            =   cell(1, length(obj.trajectory.timeVector));
             obj.trajectory.q_dot        =   cell(1, length(obj.trajectory.timeVector));
             obj.trajectory.q_ddot       =   cell(1, length(obj.trajectory.timeVector));
+            if (obj.controller.ctrlconfig.flag_is_op_space_control)
+                % task space related variables
+                obj.trajectory_op               =   OperationalTrajectory;
+                obj.trajectory_op.timeVector    =   obj.timeVector;
+                obj.trajectory_op.y             =   cell(1, length(obj.trajectory_op.timeVector));
+                obj.trajectory_op.y_dot         =   cell(1, length(obj.trajectory_op.timeVector));
+                obj.trajectory_op.y_ddot        =   cell(1, length(obj.trajectory_op.timeVector));
+            end
             % disturbance observer related variables
             obj.ob_trajectory = ObserverTrajectory;
             obj.ob_trajectory.timeVector = t0:(tf - t0)/(obj.ob_vec_length - 1):tf;
@@ -330,7 +342,7 @@ classdef ControllerSimulator < DynamicsSimulator
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             first_cycle = true;
             for t = 1:length(obj.timeVector)
-                CASPR_log.Info(sprintf('Time : %f', obj.timeVector(t)));
+                CASPR_log.Info(sprintf('Time : %f\n', obj.timeVector(t)));
                 CASPR_log.Info(sprintf('Completion Percentage: %3.2f%%\n',100*t/length(obj.timeVector)));
                                 
                 % extract current time to make component update decisions
@@ -343,7 +355,7 @@ classdef ControllerSimulator < DynamicsSimulator
                 if (first_cycle)
                     obj.ctrl_counter = 0;
                 end
-                if (current_time >= obj.ctrl_trajectory.timeVector(obj.ctrl_counter + 1))
+                if (current_time >= obj.ctrl_trajectory.timeVector(obj.ctrl_counter + 1) - obj.rounding_error_guard)
                     % update the counter
                     obj.ctrl_counter = obj.ctrl_counter + 1;
                     % update time profile
@@ -358,7 +370,7 @@ classdef ControllerSimulator < DynamicsSimulator
                     % update the counter
                     obj.ob_counter = 0;
                 end
-                if (current_time >= obj.ob_trajectory.timeVector(obj.ob_counter + 1))
+                if (current_time >= obj.ob_trajectory.timeVector(obj.ob_counter + 1) - obj.rounding_error_guard)
                     if (obj.simopt.enable_observer)
                         % update the counter
                         obj.ob_counter = obj.ob_counter + 1;
@@ -404,7 +416,7 @@ classdef ControllerSimulator < DynamicsSimulator
         
         % function to do control command update
         function controlCommandUpdate(obj, ctrl_delta_t)
-
+            tic;
             % derive the feedback information for the controller
             obj.controllerFeedbackUpdate(ctrl_delta_t);
 
@@ -417,9 +429,14 @@ classdef ControllerSimulator < DynamicsSimulator
             end
 
             % run control command update
-            [obj.f_cmd, ~, ~]  = ...
-                obj.controller.execute(obj.ctrl_trajectory.q{obj.ctrl_counter}, obj.ctrl_trajectory.q_dot{obj.ctrl_counter}, zeros(obj.model.numDofs,1), obj.refTrajectory.q{obj.ctrl_counter}, obj.refTrajectory.q_dot{obj.ctrl_counter}, obj.refTrajectory.q_ddot{obj.ctrl_counter} - obj.q_ddot_ext_est, obj.ctrl_counter);
-
+            if (obj.controller.ctrlconfig.flag_is_op_space_control)
+                [obj.f_cmd, ~, ~]  = ...
+                    obj.controller.execute(obj.ctrl_trajectory.q{obj.ctrl_counter}, obj.ctrl_trajectory.q_dot{obj.ctrl_counter}, zeros(obj.model.numDofs,1), obj.refTrajectory.y{obj.ctrl_counter}, obj.refTrajectory.y_dot{obj.ctrl_counter}, obj.refTrajectory.y_ddot{obj.ctrl_counter}, obj.q_ddot_ext_est, obj.ctrl_counter);
+            else
+                [obj.f_cmd, ~, ~]  = ...
+                    obj.controller.execute(obj.ctrl_trajectory.q{obj.ctrl_counter}, obj.ctrl_trajectory.q_dot{obj.ctrl_counter}, zeros(obj.model.numDofs,1), obj.refTrajectory.q{obj.ctrl_counter}, obj.refTrajectory.q_dot{obj.ctrl_counter}, obj.refTrajectory.q_ddot{obj.ctrl_counter}, obj.q_ddot_ext_est, obj.ctrl_counter);
+            end
+            obj.compTime(obj.ctrl_counter)              =   toc;
             % save the data
             obj.cableForces{obj.ctrl_counter}           =   obj.f_cmd;
         end
@@ -532,6 +549,11 @@ classdef ControllerSimulator < DynamicsSimulator
                 [obj.trajectory.q{obj.sim_counter + 1}, obj.trajectory.q_dot{obj.sim_counter + 1}, obj.trajectory.q_ddot{obj.sim_counter + 1}, obj.true_model] = ...
                     obj.fdSolver.compute(obj.trajectory.q{obj.sim_counter}, obj.trajectory.q_dot{obj.sim_counter}, obj.cableForces{obj.ctrl_counter}, obj.true_model.cableModel.cableIndicesActive, obj.w_ext, obj.timeVector(obj.sim_counter + 1) - obj.timeVector(obj.sim_counter), obj.true_model);
                 obj.trajectory.q_ddot{obj.sim_counter + 1}	=   obj.trajectory.q_ddot{obj.sim_counter};
+                if (obj.controller.ctrlconfig.flag_is_op_space_control)
+                    obj.trajectory_op.y{obj.sim_counter + 1}        =   obj.true_model.y;
+                    obj.trajectory_op.y_dot{obj.sim_counter + 1}    =   obj.true_model.y_dot;
+                    obj.trajectory_op.y_ddot{obj.sim_counter + 1}   =   obj.true_model.y_ddot;
+                end
             end
             obj.sim_counter = obj.sim_counter + 1;
         end
@@ -543,7 +565,7 @@ classdef ControllerSimulator < DynamicsSimulator
             for i = 1:length(obj.uncertainties)
                 if(isa(obj.uncertainties{i},'ExternalWrenchUncertaintyBase'))
                     [obj.w_ext] = obj.uncertainties{i}.applyWrechDisturbance(current_time);
-                    obj.w_ext
+%                     obj.w_ext
                     obj.q_ddot_ext = obj.true_model.M\obj.w_ext;
                 end
                 if(isa(obj.uncertainties{i},'PoseLockUncertaintyBase'))
@@ -565,23 +587,54 @@ classdef ControllerSimulator < DynamicsSimulator
         
         % Assign data to matlab workspace
         function [output_data]     =   extractData(obj)
-            ref_timevec     =   obj.refTrajectory.timeVector';
-            ref_q           =   cell2mat(obj.refTrajectory.q)';
-            ref_q_dot      	=   cell2mat(obj.refTrajectory.q_dot)';
-            ref_q_ddot     	=   cell2mat(obj.refTrajectory.q_ddot)';
-            len_ref = min([ size(ref_timevec, 1), ...
-                        size(ref_q, 1), ...
-                        size(ref_q_dot, 1), ...
-                        size(ref_q_ddot, 1)]);
-            ref_timevec     =   ref_timevec(1:len_ref, :);
-            ref_q           =   ref_q(1:len_ref, :);
-            ref_q_dot       =   ref_q_dot(1:len_ref, :);
-            ref_q_ddot      =   ref_q_ddot(1:len_ref, :);
-            
-            output_data.DataRefTime                 =   ref_timevec;
-            output_data.DataRefJointPose            =   ref_q;
-            output_data.DataRefJointVelocity        =   ref_q_dot;
-            output_data.DataRefJointAcceleration	=   ref_q_ddot;
+            if (obj.controller.ctrlconfig.flag_is_op_space_control)
+                ref_timevec     =   obj.refTrajectory.timeVector';
+                ref_y           =   cell2mat(obj.refTrajectory.y)';
+                ref_y_dot      	=   cell2mat(obj.refTrajectory.y_dot)';
+                ref_y_ddot     	=   cell2mat(obj.refTrajectory.y_ddot)';
+                len_ref = min([ size(ref_timevec, 1), ...
+                            size(ref_y, 1), ...
+                            size(ref_y_dot, 1), ...
+                            size(ref_y_ddot, 1)]);
+                ref_timevec     =   ref_timevec(1:len_ref, :);
+                ref_y           =   ref_y(1:len_ref, :);
+                ref_y_dot       =   ref_y_dot(1:len_ref, :);
+                ref_y_ddot      =   ref_y_ddot(1:len_ref, :);
+                
+                output_data.DataRefTime           	=   ref_timevec;
+                output_data.DataRefPose             =   ref_y;
+                output_data.DataRefVelocity         =   ref_y_dot;
+                output_data.DataRefAcceleration 	=   ref_y_ddot;
+            else
+                ref_timevec     =   obj.refTrajectory.timeVector';
+                ref_q           =   cell2mat(obj.refTrajectory.q)';
+                ref_q_dot      	=   cell2mat(obj.refTrajectory.q_dot)';
+                ref_q_ddot     	=   cell2mat(obj.refTrajectory.q_ddot)';
+                len_ref = min([ size(ref_timevec, 1), ...
+                            size(ref_q, 1), ...
+                            size(ref_q_dot, 1), ...
+                            size(ref_q_ddot, 1)]);
+                ref_timevec     =   ref_timevec(1:len_ref, :);
+                ref_q           =   ref_q(1:len_ref, :);
+                ref_q_dot       =   ref_q_dot(1:len_ref, :);
+                ref_q_ddot      =   ref_q_ddot(1:len_ref, :);
+                
+                output_data.DataRefTime                 =   ref_timevec;
+                output_data.DataRefPose            =   ref_q;
+                output_data.DataRefVelocity        =   ref_q_dot;
+                output_data.DataRefAcceleration	=   ref_q_ddot;
+            end
+            % perform frequency analysis and output the data
+            output_data.freqAnalysis.referenceTime              =   output_data.DataRefTime;
+            output_data.freqAnalysis.referencePose         =   output_data.DataRefPose;
+            output_data.freqAnalysis.referenceVelocity     =   output_data.DataRefVelocity;
+            output_data.freqAnalysis.referenceAcceleration =   output_data.DataRefAcceleration;
+            [output_data.freqAnalysis.referencePoseFS1, output_data.freqAnalysis.referenceF1, output_data.freqAnalysis.referencePoseFS1Threshold, output_data.freqAnalysis.referencePoseFS1Summed]...
+                = fftAnalysis(output_data.freqAnalysis.referenceTime, output_data.freqAnalysis.referencePose, 0.9);
+            [output_data.freqAnalysis.referenceVelocityFS1, ~, output_data.freqAnalysis.referenceVelocityFS1Threshold, output_data.freqAnalysis.referenceVelocityFS1Summed]...
+                = fftAnalysis(output_data.freqAnalysis.referenceTime, output_data.freqAnalysis.referenceVelocity, 0.9);
+            [output_data.freqAnalysis.referenceAccelerationFS1, ~, output_data.freqAnalysis.referenceAccelerationFS1Threshold, output_data.freqAnalysis.referenceAccelerationFS1Summed]...
+                = fftAnalysis(output_data.freqAnalysis.referenceTime, output_data.freqAnalysis.referenceAcceleration, 0.9);
             
             ctrl_timevec   	=   obj.ctrl_trajectory.timeVector';
             ctrl_q         	=   cell2mat(obj.ctrl_trajectory.q)';
@@ -614,6 +667,19 @@ classdef ControllerSimulator < DynamicsSimulator
             output_data.DataSimTime           	=   sim_timevec;
             output_data.DataSimJointPose    	=   sim_q;
             output_data.DataSimJointVelocity	=   sim_q_dot;
+            if (obj.controller.ctrlconfig.flag_is_op_space_control)
+                sim_timevec    	=   obj.trajectory_op.timeVector';
+                sim_y         	=   cell2mat(obj.trajectory_op.y)';
+                sim_y_dot     	=   cell2mat(obj.trajectory_op.y_dot)';
+                len_sim = min([ size(sim_timevec, 1), ...
+                            size(sim_y, 1), ...
+                            size(sim_y_dot, 1)]);
+                sim_y           =   sim_y(1:len_sim, :);
+                sim_y_dot       =   sim_y_dot(1:len_sim, :);
+                
+                output_data.DataSimOpPose    	=   sim_y;
+                output_data.DataSimOpVelocity	=   sim_y_dot;
+            end
             
             ob_timevec   	=   obj.ob_trajectory.timeVector';
             ob_q_est       	=   cell2mat(obj.ob_trajectory.q_est)';
@@ -652,6 +718,15 @@ classdef ControllerSimulator < DynamicsSimulator
             output_data.DataObDisturbanceAcceleration     	=   ob_ad;
             output_data.DataObDisturbanceWrenchEst       	=   ob_wd_est;
             output_data.DataObDisturbanceAccelerationEst	=   ob_ad_est;
+            % perform frequency analysis and output the data
+            output_data.freqAnalysis.disturbanceTime       	=   output_data.DataObTime;
+            output_data.freqAnalysis.disturbanceInAcc       =   output_data.DataObDisturbanceAcceleration;
+            output_data.freqAnalysis.disturbanceEstInAcc    =   output_data.DataObDisturbanceAccelerationEst;
+            [output_data.freqAnalysis.disturbanceInAccFS1, output_data.freqAnalysis.disturbanceInAccF1, output_data.freqAnalysis.disturbanceInAccFS1Threshold, output_data.freqAnalysis.disturbanceInAccFS1Summed]...
+                = fftAnalysis(output_data.freqAnalysis.disturbanceTime, output_data.freqAnalysis.disturbanceInAcc, 0.9);
+            [output_data.freqAnalysis.disturbanceEstInAccFS1, output_data.freqAnalysis.disturbanceEstInAccF1, output_data.freqAnalysis.disturbanceEstInAccFS1Threshold, output_data.freqAnalysis.disturbanceEstInAccFS1Summed]...
+                = fftAnalysis(output_data.freqAnalysis.disturbanceTime, output_data.freqAnalysis.disturbanceEstInAcc, 0.9);
+            
             if (obj.simopt.forward_kinematics_debugging)
                 ctrl_fk_timevec   	=   obj.ctrl_fk_trajectory.timeVector';
                 ctrl_fk_q         	=   cell2mat(obj.ctrl_fk_trajectory.q)';
@@ -681,6 +756,25 @@ classdef ControllerSimulator < DynamicsSimulator
                 output_data.DataFKJointPoseOb    	=   ob_fk_q;
                 output_data.DataFKJointVelocityOb	=   ob_fk_q_dot;
             end
+            output_data.compTime    =   obj.compTime;
+            if (obj.controller.ctrlconfig.flag_is_op_space_control)
+                len_tmp = min([length(output_data.DataRefPose), length(output_data.DataSimOpPose)]);
+                output_data.DataCtrlTrackingError = output_data.DataRefPose(1:len_tmp, :) - output_data.DataSimOpPose(1:len_tmp, :);
+            else
+                len_tmp = min([length(output_data.DataRefPose), length(output_data.DataCtrlJointPose)]);
+                output_data.DataCtrlTrackingError = output_data.DataRefPose(1:len_tmp, :) - output_data.DataCtrlJointPose(1:len_tmp, :);
+            end
+            average_absolute_error = zeros(size(output_data.DataCtrlTrackingError, 2), 1);
+            for i = 1:length(average_absolute_error)
+                average_absolute_error(i) = norm(output_data.DataCtrlTrackingError(:,i), 1)/size(output_data.DataCtrlTrackingError, 1);
+            end
+            output_data.DataAvgCtrlTrackingError = average_absolute_error;
+            average_force_command = zeros(size(output_data.DataCtrlForceCommands, 2), 1);
+            for i = 1:length(average_force_command)
+                average_force_command(i) = norm((output_data.DataCtrlForceCommands(:,i)), 1)/size(output_data.DataCtrlForceCommands, 1);
+            end
+            output_data.DataAvgCtrlForceCommand = average_force_command;
+            output_data.DataAvgComputationalTime = norm(output_data.compTime, 1)/length(output_data.compTime);
         end
         
 %         % Plots the tracking error in generalised coordinates
