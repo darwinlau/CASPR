@@ -283,7 +283,7 @@ classdef SystemModel < handle
         end
         
         function value = get.L_grad(obj)
-            if(isempty(obj.bodyModel.W_grad))
+            if(isempty(obj.cableModel.V_grad))
                 if(~obj.bodyModel.occupied.hessian)
                     obj.bodyModel.occupied.hessian = true;
                     obj.bodyModel.updateHessian();
