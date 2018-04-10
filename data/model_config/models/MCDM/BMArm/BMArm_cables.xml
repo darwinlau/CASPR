@@ -99,7 +99,123 @@
       </attachments>
     </cable_ideal>
   </cable_set>
-  <cable_set id="vgCTC_CS">
+  <cable_set id="vsd_test">
+    <cable_vsd_polynomial name="cable 1" attachment_reference="com">
+      <properties>
+        <force_min>7</force_min>
+        <force_max>60</force_max>
+        <K_cable>40000</K_cable>
+        <num_stiffness_polynomial_coeff>4</num_stiffness_polynomial_coeff>
+        <stiffness_poly_coeff>5.229e3 1.433e2 -3.226e-2 1.77e-2</stiffness_poly_coeff>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.106066 0.020 -0.106066</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>-0.050 0.0735 0.0</location>
+        </attachment>
+      </attachments>
+    </cable_vsd_polynomial>
+    <cable_vsd_polynomial name="cable 2" attachment_reference="com">
+      <properties>
+        <force_min>7</force_min>
+        <force_max>60</force_max>
+        <K_cable>40000</K_cable>
+        <num_stiffness_polynomial_coeff>4</num_stiffness_polynomial_coeff>
+        <stiffness_poly_coeff>5.229e3 1.433e2 -3.226e-2 1.77e-2</stiffness_poly_coeff>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.106066 0.020 0.106066</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>-0.050 0.0935 0.0</location>
+        </attachment>
+      </attachments>
+    </cable_vsd_polynomial>
+    <cable_vsd_polynomial name="cable 3" attachment_reference="com">
+      <properties>
+        <force_min>7</force_min>
+        <force_max>60</force_max>
+        <K_cable>40000</K_cable>
+        <num_stiffness_polynomial_coeff>4</num_stiffness_polynomial_coeff>
+        <stiffness_poly_coeff>5.229e3 1.433e2 -3.226e-2 1.77e-2</stiffness_poly_coeff>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.106066 0.020 -0.106066</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0.050 0.0735 0.0</location>
+        </attachment>
+      </attachments>
+    </cable_vsd_polynomial>
+    <cable_vsd_polynomial name="cable 4" attachment_reference="com">
+      <properties>
+        <force_min>7</force_min>
+        <force_max>60</force_max>
+        <K_cable>40000</K_cable>
+        <num_stiffness_polynomial_coeff>4</num_stiffness_polynomial_coeff>
+        <stiffness_poly_coeff>5.229e3 1.433e2 -3.226e-2 1.77e-2</stiffness_poly_coeff>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.106066 0.020 0.106066</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0.050 0.0935 0.0</location>
+        </attachment>
+      </attachments>
+    </cable_vsd_polynomial>
+    <cable_vsd_polynomial name="cable 5" attachment_reference="com">
+      <properties>
+        <force_min>7</force_min>
+        <force_max>60</force_max>
+        <K_cable>40000</K_cable>
+        <num_stiffness_polynomial_coeff>4</num_stiffness_polynomial_coeff>
+        <stiffness_poly_coeff>5.229e3 1.433e2 -3.226e-2 1.77e-2</stiffness_poly_coeff>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.0 0.020 0.25</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>0.0 -0.0075 0.025</location>
+        </attachment>
+      </attachments>
+    </cable_vsd_polynomial>
+    <cable_vsd_polynomial name="cable 6" attachment_reference="com">
+      <properties>
+        <force_min>7</force_min>
+        <force_max>60</force_max>
+        <K_cable>40000</K_cable>
+        <num_stiffness_polynomial_coeff>4</num_stiffness_polynomial_coeff>
+        <stiffness_poly_coeff>5.229e3 1.433e2 -3.226e-2 1.77e-2</stiffness_poly_coeff>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.0 0.020 -0.25</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>0.0 -0.0075 -0.025</location>
+        </attachment>
+      </attachments>
+    </cable_vsd_polynomial>
+  </cable_set>
+  <cable_set id="result_collection_CS">
     <cable_ideal name="cable 1" attachment_reference="com">
       <properties>
         <force_min>5</force_min>

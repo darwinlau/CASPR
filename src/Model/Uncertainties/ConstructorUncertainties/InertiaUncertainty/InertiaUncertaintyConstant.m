@@ -6,10 +6,10 @@
 %    Constant inertia uncertainties .
 classdef InertiaUncertaintyConstant < InertiaUncertaintyBase
     properties
-        m_uncertainty % A vector which defines the upper and lower bounds on mass
-        r_G_uncertainty % A vector which defines the upper and lower bounds on r_G
-        I_uncertainty % A vector which defines the upper and lower bounds on Inertia (I_G)
-        use_relative_uncertainty % the input uncertainty is relative if this is true
+        m_uncertainty               % A vector which defines the upper and lower bounds on mass
+        r_G_uncertainty             % A vector which defines the upper and lower bounds on r_G
+        I_uncertainty               % A vector which defines the upper and lower bounds on Inertia (I_G)
+        use_relative_uncertainty    % the input uncertainty is relative if this is true
     end
     
     methods

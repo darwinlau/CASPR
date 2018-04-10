@@ -1,10 +1,10 @@
-% Disturbance observver.
+% Disturbance observer.
 %
 % Author        : Chen SONG
 % Created       : 2017
 % Description    :
 %    Disturbance observer using ESO (extended state observer): the
-%    disturbance is assumed to be in joint space acceleration form, and the
+%    disturbance is assumed to be in joint space acceleration form at the r.h.s. of the EoM, and the
 %    control input is assumed to be the cable forces
 
 classdef DisturbanceObserverESO < ObserverBase
@@ -18,6 +18,7 @@ classdef DisturbanceObserverESO < ObserverBase
         alpha_1
         alpha_2
         alpha_3
+        input_est_ob    % the observer's input estimation
     end
 
     methods
@@ -31,7 +32,10 @@ classdef DisturbanceObserverESO < ObserverBase
             c.d_hat         =   zeros(dyn_model.numDofs, 1);
             c.alpha_1       =   3*pole_vec;
             c.alpha_2       =   3*pole_vec.*pole_vec;
+%             c.alpha_1       =   pole_vec;
+%             c.alpha_2       =   pole_vec.*pole_vec;
             c.alpha_3       =   pole_vec.*pole_vec.*pole_vec;
+            c.input_est_ob  =   zeros(dyn_model.numDofs, 1);
         end
 
         % The implementation of the abstract executeFunction for the
@@ -80,7 +84,8 @@ classdef DisturbanceObserverESO < ObserverBase
         function [q_dot_hat, q_ddot_hat, disturbance_dot] = observerDynmaticFunction(obj, q, ~, u, w_ext_active)
             
             % here update the model with the estimated variables
-            obj.dynModel.update(obj.q_hat, obj.q_d_hat, zeros(obj.NUM_DOFS,1), zeros(obj.NUM_DOFS,1));
+%             obj.dynModel.update(obj.q_hat, obj.q_d_hat, zeros(obj.NUM_DOFS,1), zeros(obj.NUM_DOFS,1));
+            obj.dynModel.update(q, zeros(obj.NUM_DOFS,1), zeros(obj.NUM_DOFS,1), zeros(obj.NUM_DOFS,1));
             
             e = (q - obj.q_hat);
             M = obj.dynModel.M;
@@ -88,10 +93,58 @@ classdef DisturbanceObserverESO < ObserverBase
 %             G = obj.dynModel.G;
             L = obj.dynModel.L;
             
-            q_dot_hat           = obj.q_d_hat + diag(obj.alpha_1)*e;
-%             q_ddot_hat          = M\(-C - G - w_ext_active - L'*u) + obj.d_hat + diag(obj.alpha_2)*e;
-            q_ddot_hat          = obj.d_hat + diag(obj.alpha_2)*e + M\(-w_ext_active - L'*u);
-            disturbance_dot     = diag(obj.alpha_3)*e;
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            % LESO
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            obj.input_est_ob    =   M\(-w_ext_active - L'*u);
+            q_dot_hat           =   obj.q_d_hat + diag(obj.alpha_1)*e;
+%             q_ddot_hat          =   M\(-C - G - w_ext_active - L'*u) + obj.d_hat + diag(obj.alpha_2)*e;
+            q_ddot_hat          =   obj.d_hat + diag(obj.alpha_2)*e + obj.input_est_ob;
+            disturbance_dot     =   diag(obj.alpha_3)*e;
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            % NLESO
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%             alpha =0.5;
+%             delta = 0.01;
+%             obj.input_est_ob    =   M\(-w_ext_active - L'*u);
+%             q_dot_hat           =   obj.q_d_hat + obj.pole_vec.*obj.nonlinearErrorFunction(e./(obj.pole_vec.^2), alpha, delta);
+% %             q_ddot_hat          =   M\(-C - G - w_ext_active - L'*u) + obj.d_hat + diag(obj.alpha_2)*e;
+%             q_ddot_hat          =   obj.d_hat + obj.nonlinearErrorFunction(e./(obj.pole_vec.^2), alpha, delta) + obj.input_est_ob;
+%             disturbance_dot     =   obj.nonlinearErrorFunction(e./(obj.pole_vec.^2), alpha, delta)./obj.pole_vec;
+        end
+        
+        % experimental feature, nonlinear ESO
+        function [e_output] = nonlinearErrorFunction(obj, e_input, alpha, delta)
+            e_output = zeros(size(e_input));
+            for i = 1:length(e_input)
+                if length(e_input)==length(alpha) && length(e_input)==length(delta)
+                    if (abs(e_input(i)) <= delta(i))
+                        e_output(i) = e_input(i)/delta(i)^(1-alpha(i));
+                    else
+                        e_output(i) = abs(e_input(i))^alpha(i)*sign(e_input(i));
+                    end
+                else
+                    if length(e_input)==length(alpha)
+                        if (abs(e_input(i)) <= delta(1))
+                            e_output(i) = e_input(i)/delta(1)^(1-alpha(i));
+                        else
+                            e_output(i) = abs(e_input(i))^alpha(i)*sign(e_input(i));
+                        end
+                    elseif length(e_input)==length(delta)
+                        if (abs(e_input(i)) <= delta(i))
+                            e_output(i) = e_input(i)/delta(i)^(1-alpha(1));
+                        else
+                            e_output(i) = abs(e_input(i))^alpha(1)*sign(e_input(i));
+                        end
+                    else
+                        if (abs(e_input(i)) <= delta(1))
+                            e_output(i) = e_input(i)/delta(1)^(1-alpha(1));
+                        else
+                            e_output(i) = abs(e_input(i))^alpha(1)*sign(e_input(i));
+                        end
+                    end
+                end
+            end
         end
     end
 end

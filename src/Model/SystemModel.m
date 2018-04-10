@@ -305,6 +305,7 @@ classdef SystemModel < handle
         function value = get.K(obj)
             is_symbolic = obj.modelMode == ModelModeType.SYMBOLIC;
             value = obj.L.'*obj.cableModel.K*obj.L + TensorOperations.VectorProduct(obj.L_grad,obj.cableForces,1,is_symbolic);
+%             value = obj.L.'*obj.cableModel.K*obj.L;
         end
         
         function value = get.J(obj)

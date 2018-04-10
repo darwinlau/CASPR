@@ -20,7 +20,8 @@ classdef (Abstract) MotionSimulatorBase < SimulatorBase
 
     properties
         timeVector          % time vector (needed for forward problems since there is no trajectory)
-        trajectory          % Trajectory object for inverse problems only
+        trajectory          % Trajectory object for inverse problems only (joint space)
+        trajectory_op      	% Trajectory object for inverse problems only (operational space)
         cableLengths        % cell array of cable lengths
         cableLengthsDot     % cell array of cable lengths dot            
     end

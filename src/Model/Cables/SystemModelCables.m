@@ -544,6 +544,8 @@ classdef SystemModelCables < handle
                     xml_cables{k} = CableModelVSDTorsionSpring.LoadXmlObj(currentCableItem, bodiesModel);
                 elseif (strcmp(type, 'cable_vsd_flexure_linear'))
                     xml_cables{k} = CableModelVSDFlexureLinear.LoadXmlObj(currentCableItem, bodiesModel);
+                elseif (strcmp(type, 'cable_vsd_polynomial'))
+                    xml_cables{k} = CableModelVSDPolynomial.LoadXmlObj(currentCableItem, bodiesModel);
                 elseif (strcmp(type, 'muscle_hill_type'))
                     CASPR_log.Print('muscle_hill_type not implemented yet, please try again later.', CASPRLogLevel.ERROR);
                 elseif (strcmp(type, 'pneumatic_artificial_muscle'))

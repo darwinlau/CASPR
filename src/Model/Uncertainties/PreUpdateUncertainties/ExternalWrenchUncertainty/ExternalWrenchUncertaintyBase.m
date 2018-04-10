@@ -20,6 +20,8 @@ classdef (Abstract) ExternalWrenchUncertaintyBase < PreUpdateUncertaintyBase
     methods(Abstract)
         % Apply external wrench disturbance before the update
         [w_ext] = applyWrechDisturbance(obj, t);
+        % do frequency domain analysis
+        % extract frequency domain analysis
     end
 end
 
