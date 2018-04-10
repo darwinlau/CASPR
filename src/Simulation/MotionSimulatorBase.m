@@ -23,13 +23,13 @@ classdef (Abstract) MotionSimulatorBase < SimulatorBase
         trajectory          % Trajectory object for inverse problems only (joint space)
         trajectory_op      	% Trajectory object for inverse problems only (operational space)
         cableLengths        % cell array of cable lengths
-        cableLengthsDot     % cell array of cable lengths dot
+        cableLengthsDot     % cell array of cable lengths dot            
     end
     
     properties (Constant)
         MOVIE_DEFAULT_WIDTH = 700;
         MOVIE_DEFAULT_HEIGHT = 700;
-    end
+    end   
 
     methods
         % The motion simulator constructor
@@ -39,7 +39,7 @@ classdef (Abstract) MotionSimulatorBase < SimulatorBase
 
         % Plots an avi movie file of the trajector motion of the robot.
         % Uses the static function implementation
-        function plotMovie(obj, plot_axis, view_angle, filename, time, width, height)
+        function plotMovie(obj, plot_axis, view_angle, filename, time, width, height)            
             MotionSimulatorBase.PlotMovie(obj.model, obj.trajectory, plot_axis, view_angle, filename, time, width, height);
         end
 
@@ -326,7 +326,7 @@ classdef (Abstract) MotionSimulatorBase < SimulatorBase
         % Users can specify the plotting axis and also which figure handle
         % to plot too. If no or empty figure handle is specified then a new
         % figure plot will be created.
-        function PlotFrame(kinematics, plot_axis, view_angle, fig_handle, axis_handle)
+        function [op_point] = PlotFrame(kinematics, plot_axis, view_angle, fig_handle, axis_handle)
             if nargin < 4 || isempty(fig_handle)
                 figure;
             else
@@ -357,18 +357,44 @@ classdef (Abstract) MotionSimulatorBase < SimulatorBase
                 plot3(ax,[r_OP0(1) r_OPe0(1)], [r_OP0(2) r_OPe0(2)], [r_OP0(3) r_OPe0(3)], 'Color', 'k', 'LineWidth', 3);
             end
             
+            op_point = zeros(body_model.numOperationalSpaces, 3);
             for k = 1:body_model.numOperationalSpaces
                 % TODO: check types of operational spaces and perform accordingly, let's just
                 % assume now it is only cartesian
                 %if (body_model.bodies{operationalSpaceBodyIndices(k)}
                 r_OY0 = body_model.bodies{body_model.operationalSpaceBodyIndices(k)}.R_0k*body_model.bodies{body_model.operationalSpaceBodyIndices(k)}.r_OY;
-                plot3(ax, r_OY0(1), r_OY0(2), r_OY0(3), 'Color', 'g', 'Marker', 'o', 'LineWidth', 2);
+                plot3(ax, r_OY0(1), r_OY0(2), r_OY0(3), 'Color', 'g', 'Marker', 'o', 'LineWidth', 2); 
+                op_point(k,:) = r_OY0;
             end
 
             cable_model = kinematics.cableModel;
             for i = 1:cable_model.numCables
                 cable_model.cables{i}.plotCable(ax);
             end
+            hold off;            
+        end
+        
+        % Plots the history of operational space 
+        function PlotHistory(operationalHistory, fig_handle, axis_handle)
+            if nargin < 2 || isempty(fig_handle)
+                figure;
+            else
+                figure(fig_handle);
+            end
+            
+            if nargin < 3 || isempty(axis_handle)
+                ax = gca;
+            else
+                ax = axis_handle;
+            end
+            axes(ax);
+            hold on;
+            % Plot History   
+            for i = 1:size(operationalHistory,1)
+                history_array = cell2mat(operationalHistory(i,:));
+                plot3(ax, history_array(1,:), history_array(2,:), history_array(3,:),...
+                    'Color', [0.5 0.5 0.5], 'LineWidth', 2, 'LineStyle', '--'); 
+            end            
             hold off;
         end
         
@@ -378,7 +404,7 @@ classdef (Abstract) MotionSimulatorBase < SimulatorBase
         % video. The video will be recorded at 30 fps so the number of
         % frames will be computed to confirm to the total time of the
         % video.
-        function PlotMovie(modelObj, trajectory, plot_axis, view_angle, filename, time, width, height)
+        function PlotMovie(modelObj, trajectory, plot_axis, view_angle, filename, time, isHistory, width, height)
             CASPR_log.Assert(~isempty(trajectory), 'Cannot plot since trajectory is empty');
             if (nargin < 6)
                 % Default time to be time of trajectory (no speed up or
@@ -386,6 +412,9 @@ classdef (Abstract) MotionSimulatorBase < SimulatorBase
                 time = trajectory.totalTime;
             end
             if (nargin < 7)
+                isHistory = false;
+            end
+            if (nargin < 8)
                 width = MotionSimulatorBase.MOVIE_DEFAULT_WIDTH;
                 height = MotionSimulatorBase.MOVIE_DEFAULT_HEIGHT;
             end
@@ -394,16 +423,23 @@ classdef (Abstract) MotionSimulatorBase < SimulatorBase
             %writerObj.Quality = 100;
             writerObj.open();
             plot_handle = figure('Position', [10, 10, width, height]);
+            operationalHistory = cell(modelObj.bodyModel.numOperationalSpaces, 0);
             for i = 1:round(fps*time)
                 t = round(length(trajectory.timeVector)/round(fps*time)*i);
                 if t == 0
                     t = 1;
                 end
                 modelObj.update(trajectory.q{t}, trajectory.q_dot{t}, trajectory.q_ddot{t}, zeros(size(trajectory.q_dot{t})));
-                MotionSimulatorBase.PlotFrame(modelObj, plot_axis, view_angle, plot_handle)
+                op_point = MotionSimulatorBase.PlotFrame(modelObj, plot_axis, view_angle, plot_handle); 
+                if isHistory
+                    for j=1:size(op_point,1)
+                        operationalHistory{j, end+1} = op_point(j, :)';
+                    end
+                    MotionSimulatorBase.PlotHistory(operationalHistory, plot_handle);
+                end
                 frame = getframe(plot_handle);
                 writerObj.writeVideo(frame);
-                clf(plot_handle);
+                clf(plot_handle);                
             end
             writerObj.close();
             close(plot_handle);
