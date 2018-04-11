@@ -296,62 +296,64 @@ function run_button_Callback(~, ~, handles) %#ok<DEFNU>
     model_config = getappdata(handles.trajectory_popup,'model_config');
     % Then read the form of dynamics
     modObj = getappdata(handles.cable_text,'modObj');
-    % Get the inverse dynamics object
-    id_solver = load_idsolver(handles,modObj);
     
-    % Get the controller
-    control_class_contents = cellstr(get(handles.control_class_popup,'String'));
-    control_class_id = control_class_contents{get(handles.control_class_popup,'Value')};
-    if(strcmp(control_class_id,'ComputedTorqueController'))
-        Kp_computedtorque = 50*eye(modObj.numDofs);
-        Kd_computedtorque = 15*eye(modObj.numDofs);
-        controller = ComputedTorqueController(modObj, id_solver, Kp_computedtorque, Kd_computedtorque);
-    elseif(strcmp(control_class_id,'LyapunovStaticCompensation'))
-        Kp_computedtorque = 50*eye(modObj.numDofs);
-        Kd_computedtorque = 15*eye(modObj.numDofs);
-        controller = LyapunovStaticCompensation(modObj, id_solver, Kp_computedtorque, Kd_computedtorque);
-    else
-        CASPR_log.Print(CASPR_log.Error,'Unknown control solver used');
-    end
-    
-    % Setup the inverse dynamics simulator with the SystemKinematicsDynamics
-    % object and the inverse dynamics solver
-    disp('Start Setup Simulation');
-    set(handles.status_text,'String','Setting up simulation');
-    drawnow;
-    start_tic = tic;
-    fdSolver = ForwardDynamics(FDSolverType.ODE113);
-    control_sim = ControllerSimulator(modObj, controller,fdSolver);
-    trajectory_ref = model_config.getJointTrajectory(trajectory_id);
-    time_elapsed = toc(start_tic);
-    fprintf('End Setup Simulation : %f seconds\n', time_elapsed);
-
-    % Run the solver on the desired trajectory
-    disp('Start Running Simulation');
-    set(handles.status_text,'String','Simulation running');
-    drawnow;
-    start_tic = tic;
-    % THIS WILL BE CHANGED AT A LATER TIME
-    n_q     =   modObj.numDofs;
-    initial_pose_error = 0.2*rand(n_q,1) - 0.1*ones(n_q,1);
-    control_sim.run(trajectory_ref, trajectory_ref.q{1} + initial_pose_error, trajectory_ref.q_dot{1}, trajectory_ref.q_ddot{1});
-    time_elapsed = toc(start_tic);
-    fprintf('End Running Simulation : %f seconds\n', time_elapsed);
-    
-    figure;
-%     control_sim.plotTrackingError();
-    assignin('base','control_simulator',control_sim);
-    % To be uncommented after discussions with Darwin
-    % Plot the data
-%     disp('Start Plotting Simulation');
-%     set(handles.status_text,'String','Simulation plotting');
+    run_control(handles,modObj,model_config,trajectory_id)
+%     % Get the inverse dynamics object
+%     id_solver = load_idsolver(handles,modObj);
+%     
+%     % Get the controller
+%     control_class_contents = cellstr(get(handles.control_class_popup,'String'));
+%     control_class_id = control_class_contents{get(handles.control_class_popup,'Value')};
+%     if(strcmp(control_class_id,'ComputedTorqueController'))
+%         Kp_computedtorque = 50*eye(modObj.numDofs);
+%         Kd_computedtorque = 15*eye(modObj.numDofs);
+%         controller = ComputedTorqueController(modObj, id_solver, Kp_computedtorque, Kd_computedtorque);
+%     elseif(strcmp(control_class_id,'LyapunovStaticCompensation'))
+%         Kp_computedtorque = 50*eye(modObj.numDofs);
+%         Kd_computedtorque = 15*eye(modObj.numDofs);
+%         controller = LyapunovStaticCompensation(modObj, id_solver, Kp_computedtorque, Kd_computedtorque);
+%     else
+%         CASPR_log.Print(CASPR_log.Error,'Unknown control solver used');
+%     end
+%     
+%     % Setup the inverse dynamics simulator with the SystemKinematicsDynamics
+%     % object and the inverse dynamics solver
+%     disp('Start Setup Simulation');
+%     set(handles.status_text,'String','Setting up simulation');
 %     drawnow;
 %     start_tic = tic;
-%     plot_for_GUI(plot_type,idsim,handles,str2double(getappdata(handles.plot_type_popup,'num_plots')));
+%     fdSolver = ForwardDynamics(FDSolverType.ODE113);
+%     control_sim = ControllerSimulator(modObj, controller, fdSolver, [], [], [], [], []);
+%     trajectory_ref = model_config.getJointTrajectory(trajectory_id);
 %     time_elapsed = toc(start_tic);
-%     fprintf('End Plotting Simulation : %f seconds\n', time_elapsed);
-%     set(handles.status_text,'String','No simulation running');
-%     setappdata(handles.figure1,'sim',idsim);
+%     fprintf('End Setup Simulation : %f seconds\n', time_elapsed);
+% 
+%     % Run the solver on the desired trajectory
+%     disp('Start Running Simulation');
+%     set(handles.status_text,'String','Simulation running');
+%     drawnow;
+%     start_tic = tic;
+%     % THIS WILL BE CHANGED AT A LATER TIME
+%     n_q     =   modObj.numDofs;
+%     initial_pose_error = 0.2*rand(n_q,1) - 0.1*ones(n_q,1);
+%     control_sim.run(trajectory_ref, trajectory_ref.q{1} + initial_pose_error, trajectory_ref.q_dot{1}, trajectory_ref.q_ddot{1});
+%     time_elapsed = toc(start_tic);
+%     fprintf('End Running Simulation : %f seconds\n', time_elapsed);
+%     
+% %     figure;
+% %     control_sim.plotTrackingError();
+%     assignin('base','control_simulator',control_sim);
+%     % To be uncommented after discussions with Darwin
+%     % Plot the data
+% %     disp('Start Plotting Simulation');
+% %     set(handles.status_text,'String','Simulation plotting');
+% %     drawnow;
+% %     start_tic = tic;
+% %     plot_for_GUI(plot_type,idsim,handles,str2double(getappdata(handles.plot_type_popup,'num_plots')));
+% %     time_elapsed = toc(start_tic);
+% %     fprintf('End Plotting Simulation : %f seconds\n', time_elapsed);
+% %     set(handles.status_text,'String','No simulation running');
+% %     setappdata(handles.figure1,'sim',idsim);
 end
 
 % --- Executes on button press in plot_button.
@@ -447,6 +449,68 @@ end
 %--------------------------------------------------------------------------
 % Additional Functions
 %--------------------------------------------------------------------------
+function run_control(handles,modObj,model_config,trajectory_id)
+    % Get the inverse dynamics object
+    id_solver = load_idsolver(handles,modObj);
+    
+    % Get the controller
+    control_class_contents = cellstr(get(handles.control_class_popup,'String'));
+    control_class_id = control_class_contents{get(handles.control_class_popup,'Value')};
+    if(strcmp(control_class_id,'ComputedTorqueController'))
+        Kp_computedtorque = 50*eye(modObj.numDofs);
+        Kd_computedtorque = 15*eye(modObj.numDofs);
+        controller = ComputedTorqueController(modObj, id_solver, Kp_computedtorque, Kd_computedtorque);
+    elseif(strcmp(control_class_id,'LyapunovStaticCompensation'))
+        Kp_computedtorque = 50*eye(modObj.numDofs);
+        Kd_computedtorque = 15*eye(modObj.numDofs);
+        controller = LyapunovStaticCompensation(modObj, id_solver, Kp_computedtorque, Kd_computedtorque);
+    else
+        CASPR_log.Print(CASPR_log.Error,'Unknown control solver used');
+    end
+    
+    
+    % Read the type of plot
+    contents = cellstr(get(handles.plot_type_popup,'String'));
+    plot_type = contents{get(handles.plot_type_popup,'Value')};
+    
+    % Setup the inverse dynamics simulator with the SystemKinematicsDynamics
+    % object and the inverse dynamics solver
+    disp('Start Setup Simulation');
+    set(handles.status_text,'String','Setting up simulation');
+    drawnow;
+    start_tic = tic;
+    fdSolver = ForwardDynamics(FDSolverType.ODE113);
+    control_sim = ControllerSimulator(modObj, controller, fdSolver, [], [], [], [], []);
+    trajectory_ref = model_config.getJointTrajectory(trajectory_id);
+    time_elapsed = toc(start_tic);
+    fprintf('End Setup Simulation : %f seconds\n', time_elapsed);
+
+    % Run the solver on the desired trajectory
+    disp('Start Running Simulation');
+    set(handles.status_text,'String','Simulation running');
+    drawnow;
+    start_tic = tic;
+    % THIS WILL BE CHANGED AT A LATER TIME
+    n_q     =   modObj.numDofs;
+    initial_pose_error = 0.2*rand(n_q,1) - 0.1*ones(n_q,1);
+    control_sim.run(trajectory_ref, trajectory_ref.q{1} + initial_pose_error, trajectory_ref.q_dot{1}, trajectory_ref.q_ddot{1});
+    time_elapsed = toc(start_tic);
+    fprintf('End Running Simulation : %f seconds\n', time_elapsed);
+    
+    
+    % Plot the data
+    disp('Start Plotting Simulation');
+    set(handles.status_text,'String','Simulation plotting');
+    drawnow;
+    start_tic = tic;
+    GUIOperations.GUIPlot(plot_type,control_sim,handles,str2double(getappdata(handles.plot_type_popup,'num_plots')),get(handles.undock_box,'Value'));
+    time_elapsed = toc(start_tic);
+    fprintf('End Plotting Simulation : %f seconds\n', time_elapsed);
+    set(handles.status_text,'String','No simulation running');
+    setappdata(handles.figure1,'sim',control_sim);
+    assignin('base','controller_simulator',control_sim);
+    
+end
 function id_solver = load_idsolver(handles,modelObj)
     solver_class_contents = cellstr(get(handles.solver_class_popup,'String'));
     solver_class_id = solver_class_contents{get(handles.solver_class_popup,'Value')};
@@ -550,7 +614,7 @@ function plot_movie_button_Callback(~, ~, handles) %#ok<DEFNU>
         model_config = getappdata(handles.trajectory_popup,'model_config');
         file_name = [path_string,'/data/videos/control_gui_output.avi'];
         [file,path] = uiputfile(file_name,'Save file name');
-        sim.plotMovie(model_config.displayRange, model_config.viewAngle, [path,file], sim.timeVector(length(sim.timeVector)), 700, 700);
+        sim.plotMovie(model_config.displayRange, model_config.viewAngle, [path,file], sim.timeVector(length(sim.timeVector)), 0, 700, 700);
     end
 end
 

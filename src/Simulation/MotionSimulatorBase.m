@@ -39,8 +39,8 @@ classdef (Abstract) MotionSimulatorBase < SimulatorBase
 
         % Plots an avi movie file of the trajector motion of the robot.
         % Uses the static function implementation
-        function plotMovie(obj, plot_axis, view_angle, filename, time, width, height)            
-            MotionSimulatorBase.PlotMovie(obj.model, obj.trajectory, plot_axis, view_angle, filename, time, width, height);
+        function plotMovie(obj, plot_axis, view_angle, filename, time, isHistory, width, height)            
+            MotionSimulatorBase.PlotMovie(obj.model, obj.trajectory, plot_axis, view_angle, filename, time, isHistory, width, height);
         end
 
         % Plots the cable lengths of the CDPR over the trajectory. Users

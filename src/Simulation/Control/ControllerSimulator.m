@@ -209,7 +209,7 @@ classdef ControllerSimulator < DynamicsSimulator
             obj.trajectory.q            =   cell(1, length(obj.trajectory.timeVector));
             obj.trajectory.q_dot        =   cell(1, length(obj.trajectory.timeVector));
             obj.trajectory.q_ddot       =   cell(1, length(obj.trajectory.timeVector));
-            if (obj.controller.ctrlconfig.flag_is_op_space_control)
+            if (obj.simopt.is_operational_space_control)
                 % task space related variables
                 obj.trajectory_op               =   OperationalTrajectory;
                 obj.trajectory_op.timeVector    =   obj.timeVector;
@@ -342,8 +342,8 @@ classdef ControllerSimulator < DynamicsSimulator
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             first_cycle = true;
             for t = 1:length(obj.timeVector)
-                CASPR_log.Info(sprintf('Time : %f\n', obj.timeVector(t)));
-                CASPR_log.Info(sprintf('Completion Percentage: %3.2f%%\n',100*t/length(obj.timeVector)));
+                CASPR_log.Info(sprintf('Time : %f', obj.timeVector(t)));
+                CASPR_log.Info(sprintf('Completion Percentage: %3.2f%%',100*t/length(obj.timeVector)));
                                 
                 % extract current time to make component update decisions
                 current_time = obj.timeVector(t);
@@ -429,7 +429,7 @@ classdef ControllerSimulator < DynamicsSimulator
             end
 
             % run control command update
-            if (obj.controller.ctrlconfig.flag_is_op_space_control)
+            if (obj.simopt.is_operational_space_control)
                 [obj.f_cmd, ~, ~]  = ...
                     obj.controller.execute(obj.ctrl_trajectory.q{obj.ctrl_counter}, obj.ctrl_trajectory.q_dot{obj.ctrl_counter}, zeros(obj.model.numDofs,1), obj.refTrajectory.y{obj.ctrl_counter}, obj.refTrajectory.y_dot{obj.ctrl_counter}, obj.refTrajectory.y_ddot{obj.ctrl_counter}, obj.q_ddot_ext_est, obj.ctrl_counter);
             else
@@ -549,7 +549,7 @@ classdef ControllerSimulator < DynamicsSimulator
                 [obj.trajectory.q{obj.sim_counter + 1}, obj.trajectory.q_dot{obj.sim_counter + 1}, obj.trajectory.q_ddot{obj.sim_counter + 1}, obj.true_model] = ...
                     obj.fdSolver.compute(obj.trajectory.q{obj.sim_counter}, obj.trajectory.q_dot{obj.sim_counter}, obj.cableForces{obj.ctrl_counter}, obj.true_model.cableModel.cableIndicesActive, obj.w_ext, obj.timeVector(obj.sim_counter + 1) - obj.timeVector(obj.sim_counter), obj.true_model);
                 obj.trajectory.q_ddot{obj.sim_counter + 1}	=   obj.trajectory.q_ddot{obj.sim_counter};
-                if (obj.controller.ctrlconfig.flag_is_op_space_control)
+                if (obj.simopt.is_operational_space_control)
                     obj.trajectory_op.y{obj.sim_counter + 1}        =   obj.true_model.y;
                     obj.trajectory_op.y_dot{obj.sim_counter + 1}    =   obj.true_model.y_dot;
                     obj.trajectory_op.y_ddot{obj.sim_counter + 1}   =   obj.true_model.y_ddot;
@@ -587,7 +587,7 @@ classdef ControllerSimulator < DynamicsSimulator
         
         % Assign data to matlab workspace
         function [output_data]     =   extractData(obj)
-            if (obj.controller.ctrlconfig.flag_is_op_space_control)
+            if (obj.simopt.is_operational_space_control)
                 ref_timevec     =   obj.refTrajectory.timeVector';
                 ref_y           =   cell2mat(obj.refTrajectory.y)';
                 ref_y_dot      	=   cell2mat(obj.refTrajectory.y_dot)';
@@ -667,7 +667,7 @@ classdef ControllerSimulator < DynamicsSimulator
             output_data.DataSimTime           	=   sim_timevec;
             output_data.DataSimJointPose    	=   sim_q;
             output_data.DataSimJointVelocity	=   sim_q_dot;
-            if (obj.controller.ctrlconfig.flag_is_op_space_control)
+            if (obj.simopt.is_operational_space_control)
                 sim_timevec    	=   obj.trajectory_op.timeVector';
                 sim_y         	=   cell2mat(obj.trajectory_op.y)';
                 sim_y_dot     	=   cell2mat(obj.trajectory_op.y_dot)';
@@ -757,7 +757,7 @@ classdef ControllerSimulator < DynamicsSimulator
                 output_data.DataFKJointVelocityOb	=   ob_fk_q_dot;
             end
             output_data.compTime    =   obj.compTime;
-            if (obj.controller.ctrlconfig.flag_is_op_space_control)
+            if (obj.simopt.is_operational_space_control)
                 len_tmp = min([length(output_data.DataRefPose), length(output_data.DataSimOpPose)]);
                 output_data.DataCtrlTrackingError = output_data.DataRefPose(1:len_tmp, :) - output_data.DataSimOpPose(1:len_tmp, :);
             else

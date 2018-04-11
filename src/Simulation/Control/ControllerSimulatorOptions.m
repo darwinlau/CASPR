@@ -16,6 +16,7 @@
 %       EnableFKSolver              ->  enable_FK_solver
 %       EnableObserver              ->  enable_observer
 %       FKDebugging                 ->  forward_kinematics_debugging
+%       IsOpSpaceControl            ->  is_operational_space_control
 %   The syntex for constructor call:
 %       opt = ControllerSimulatorOptions()
 %           -->  use the default options
@@ -37,6 +38,7 @@ classdef ControllerSimulatorOptions < handle
         enable_FK_solver                    % if true FK solver is assumed to be passed to the simulator and enabled
         enable_observer                     % if true observer is assumed to be passed to the simulator and enabled
         forward_kinematics_debugging        % if true, simulator will save all available FK data for future debugging
+        is_operational_space_control        % if true the simulator will be cofigured to perform operational space control
     end
     methods
         % constructors
@@ -76,6 +78,7 @@ classdef ControllerSimulatorOptions < handle
             obj.enable_FK_solver                =   false;
             obj.enable_observer                 =   false;
             obj.forward_kinematics_debugging    =   false;
+            obj.is_operational_space_control    =   false;
         end
         
         % process option input
@@ -140,6 +143,13 @@ classdef ControllerSimulatorOptions < handle
                     obj.forward_kinematics_debugging     =   true;
                 else
                     obj.forward_kinematics_debugging     =   false;
+                end
+            end
+            if (strcmp(input_category, 'IsOpSpaceControl'))
+                if (strcmp(input_value, 'true'))
+                    obj.is_operational_space_control     =   true;
+                else
+                    obj.is_operational_space_control     =   false;
                 end
             end
         end
