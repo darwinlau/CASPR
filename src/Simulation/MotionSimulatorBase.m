@@ -39,8 +39,8 @@ classdef (Abstract) MotionSimulatorBase < SimulatorBase
 
         % Plots an avi movie file of the trajector motion of the robot.
         % Uses the static function implementation
-        function plotMovie(obj, plot_axis, view_angle, filename, time, width, height)            
-            MotionSimulatorBase.PlotMovie(obj.model, obj.trajectory, plot_axis, view_angle, filename, time, width, height);
+        function plotMovie(obj, plot_axis, view_angle, filename, time, isHistory, width, height)            
+            MotionSimulatorBase.PlotMovie(obj.model, obj.trajectory, plot_axis, view_angle, filename, time, isHistory, width, height);
         end
 
         % Plots the cable lengths of the CDPR over the trajectory. Users
@@ -423,7 +423,10 @@ classdef (Abstract) MotionSimulatorBase < SimulatorBase
             %writerObj.Quality = 100;
             writerObj.open();
             plot_handle = figure('Position', [10, 10, width, height]);
+            % Create a cell array to hold the operational space history
             operationalHistory = cell(modelObj.bodyModel.numOperationalSpaces, 0);
+            % Use default mode to update individual bodies
+            modelObj.setModelMode(ModelModeType.DEFAULT);
             for i = 1:round(fps*time)
                 t = round(length(trajectory.timeVector)/round(fps*time)*i);
                 if t == 0
