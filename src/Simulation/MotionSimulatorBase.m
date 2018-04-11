@@ -423,7 +423,10 @@ classdef (Abstract) MotionSimulatorBase < SimulatorBase
             %writerObj.Quality = 100;
             writerObj.open();
             plot_handle = figure('Position', [10, 10, width, height]);
+            % Create a cell array to hold the operational space history
             operationalHistory = cell(modelObj.bodyModel.numOperationalSpaces, 0);
+            % Use default mode to update individual bodies
+            modelObj.setModelMode(ModelModeType.DEFAULT);
             for i = 1:round(fps*time)
                 t = round(length(trajectory.timeVector)/round(fps*time)*i);
                 if t == 0
