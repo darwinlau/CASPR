@@ -41,3 +41,4 @@ disp('Start Running Simulation');
 wsim.run(w_condition,[])
 % wsim.run(w_condition,w_metrics)
 % wsim.plotGraph();
+% wsim.plotRayWorkspace([1,2,3])

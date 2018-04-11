@@ -19,17 +19,14 @@ classdef InterferenceFreeRay < WorkspaceRayConditionBase
             
         % Evaluate the interference free intervals 
         function intvifwmc =  evaluateFunction(obj,model,workspace_ray)
-            %% NEED TO BE FILLED IN
+            % generate the Lm (m=1:numCables) before reviewing each pair of
+            % cables
+            SegEndpt = CoeffLm(obj, model, workspace_ray);
             %% select 2 cables to get non-interset intervals
             flag   = 0; % flag for non-null 
             ncable = model.numCables;
             L_A = -inf;
             R_A = inf;
-            
-            % generate the Lm (m=1:numCables) before reviewing each pair of
-            % cables
-            SegEndpt = CoeffLm(obj, model, workspace_ray);
-            
             % in the form of lower triangular matrix
             for ithcable = 1: ncable % i-th cable
                 for jthcable = 1: (ithcable - 1) % j-th cable
@@ -76,22 +73,22 @@ classdef InterferenceFreeRay < WorkspaceRayConditionBase
             intvifwmc = intvifwmc_temp;
         end
         
-        %% --v2.0 to calcualte Lm (m=1:numCables)
+        %% --v2.0 to calcualte Lm (m=1:numSeg)
         function SegEndpt = CoeffLm(~, model, workspace_ray)
             curflxvar = workspace_ray.free_variable_index;
             magconvar = workspace_ray.fixed_variables';
             % ---- the bound of curflxvar ----------
             curValmin = workspace_ray.free_variable_range(1);
             curValmax = workspace_ray.free_variable_range(2);
+            % just for cables collisions
+            nseg = model.numCables;
             
-            ncable = model.numCables;
-            SegEndpt = cell(ncable,2);
-            curtypevar = model.bodyModel.q_dofType;
-            
+            SegEndpt = cell(nseg,2);
+            curtypevar = model.bodyModel.q_dofType;            
             if curtypevar(curflxvar)==DoFType.TRANSLATION 
                 % -- q1, q2 ----
-                curVal1 = (curValmin+curValmax)*0.3; 
-                curVal2 = (curValmin+curValmax)*0.6;
+                curVal1 = curValmin+(curValmax-curValmin)*0.3; 
+                curVal2 = curValmin+(curValmax-curValmin)*0.6;
                 q_temp = zeros(model.numDofs,2);
                 q_temp(:,1) = [magconvar(1:curflxvar-1) curVal1 magconvar(curflxvar:end)]';
                 q_temp(:,2) = [magconvar(1:curflxvar-1) curVal2 magconvar(curflxvar:end)]';
@@ -115,7 +112,7 @@ classdef InterferenceFreeRay < WorkspaceRayConditionBase
             w_ext = zeros(model.numDofs,1);
             Ep_iax = zeros(size(q_temp,2),1); Ep_iay = zeros(size(q_temp,2),1); Ep_iaz = zeros(size(q_temp,2),1);
             Ep_ibx = zeros(size(q_temp,2),1); Ep_iby = zeros(size(q_temp,2),1); Ep_ibz = zeros(size(q_temp,2),1);
-            for rmflg = 1:ncable
+            for rmflg = 1:nseg
                 for cnt = 1:size(q_temp,2)
                     model.update(q_temp(:,cnt), q_dot, q_ddot,w_ext);
                     endpt_ia = model.cableModel.cables{rmflg}.attachments{1}.r_OA;
@@ -134,11 +131,8 @@ classdef InterferenceFreeRay < WorkspaceRayConditionBase
                 % ref  SegEndpt = [Liendpt; Ljendpt]; Liendpt \in 1*2 cell
                 SegEndpt(rmflg,:) = Liendpt;
             end
-%             % ref  SegEndpt = [Liendpt; Ljendpt]; Liendpt \in 1*2 cell
-%             SegEndpt = [Liendpt; Ljendpt];
         end
         
-%         function intvifw2c = IFW_HyB_2C_safebuf(obj, curflxvar, magconvar, SegEndpt, flagCable)
         function intvifw2c = IFW_HyB_2C_safebuf(obj, model, workspace_ray, SegEndpt, flagCable)
             L{1} = SegEndpt{1,2} - SegEndpt{1,1};
             L{2} = SegEndpt{2,2} - SegEndpt{2,1};  
@@ -151,13 +145,14 @@ classdef InterferenceFreeRay < WorkspaceRayConditionBase
             if isparallel == 1
                 %% parallel cables
                 % NEED TO BE FILLED IN
-                % MinDis is MinDisPtSeg e.g. Ai v.s. lj
-                pt = SegEndpt{1,1};
-                segendpt = SegEndpt(2,:);
-                seg = L{2};
-                intvInterf = MinDisPtSeg(obj, model, workspace_ray, pt, segendpt, seg);
+%                 % MinDis is MinDisPtSeg e.g. Ai v.s. lj
+%                 pt = SegEndpt{1,1};
+%                 segendpt = SegEndpt(2,:);
+%                 seg = L{2};
+%                 intvInterf = MinDisPtSeg(obj, model, workspace_ray, pt, segendpt, seg);
+                warning('Parallel segments')
             else
-                %% NON-parallel cables
+                %% NON-parallel cables [C-C]
                 % coefficients of nti/ntj/nhatcp_2/den(3*4 or 5*4 matrix)
                 Coeff4Poly = Coeff_ntijdenhat_2(obj, model, workspace_ray, flagCable);
                 temp_coeff{1} = Coeff4Poly(:,1)'; % nti      (row vector)
@@ -176,16 +171,66 @@ classdef InterferenceFreeRay < WorkspaceRayConditionBase
                 coeff_den = coeff{3};
                 coeff_nhatcp_2 = coeff{4};
                 
+%                 % For CABLEs v.s. END-EFFECOTR case [C-E]
+%                 lix = L{1}(1,:); liy = L{1}(2,:); liz = L{1}(3,:); % 1 for cable
+%                 x_Ej = L{2}(1,:); y_Ej = L{2}(2,:); z_Ej = L{2}(3,:); % 2 for ee
+%                 BE =  SegEndpt{2,1} - SegEndpt{1,2};
+%                 x_BE = BE(1,:); y_BE = BE(2,:); z_BE =  BE(3,:);
+%                 nti = conv((-conv(liy,y_BE)-conv(liz,z_BE)),conv(x_Ej,x_Ej))+...
+%                     conv((conv((conv(lix,y_BE)+conv(liy,x_BE)),y_Ej)+conv(z_Ej,(conv(lix,z_BE)+conv(liz,x_BE)))),x_Ej)+...
+%                     conv((-conv(lix,x_BE)-conv(liz,z_BE)),conv(y_Ej,y_Ej))+...
+%                     conv(z_Ej,conv((conv(liy,z_BE)+conv(liz,y_BE)),y_Ej))-...
+%                     conv(conv(z_Ej,z_Ej),(conv(lix,x_BE)+conv(liy,y_BE)));
+%                 ntj = conv((-conv(y_BE,y_Ej)-conv(z_BE,z_Ej)),conv(lix,lix))+...
+%                     conv((conv((conv(x_BE,y_Ej)+conv(x_Ej,y_BE)),liy)+conv(liz,(conv(x_BE,z_Ej)+conv(x_Ej,z_BE)))),lix)+...
+%                     conv((-conv(x_BE,x_Ej)-conv(z_BE,z_Ej)),conv(liy,liy))+...
+%                     conv(liz,conv((conv(y_BE,z_Ej)+conv(y_Ej,z_BE)),liy))-...
+%                     conv(conv(liz,liz),(conv(x_BE,x_Ej)+conv(y_BE,y_Ej)));
+%                 temmp = conv((conv(x_BE,y_Ej)-conv(x_Ej,y_BE)),liz)+...
+%                     conv(conv(lix,y_BE),z_Ej)-conv(conv(lix,y_Ej),z_BE)-...
+%                     conv(liy,conv(x_BE,z_Ej))+conv(liy,conv(x_Ej,z_BE));
+%                 nhatcp_2 = conv(temmp,temmp);
+%                 den = conv((conv(liy,liy)+conv(liz,liz)),conv(x_Ej,x_Ej))-...
+%                     2*conv(conv(lix,x_Ej),(conv(liy,y_Ej)+conv(liz,z_Ej)))+...
+%                     conv((conv(lix,lix)+conv(liz,liz)),conv(y_Ej,y_Ej))-...
+%                     2*conv(conv(liy,liz),conv(y_Ej,z_Ej))+...
+%                     conv(conv(z_Ej,z_Ej),(conv(lix,lix)+conv(liy,liy)));
+
+%                 % For CABLEs v.s. OBJECT case [C-O]
+%                 lix = L{1}(1,:); liy = L{1}(2,:); liz = L{1}(3,:); % 1 for cable
+%                 x_Ej = L{2}(1,end); y_Ej = L{2}(2,end); z_Ej = L{2}(3,end); % 2 for obj constant
+%                 AE = SegEndpt{2,1} - SegEndpt{1,1}; % constant
+%                 x_AE = AE(1,end); y_AE = AE(2,end); z_AE =  AE(3,end);
+%                 nti = conv((liy*y_AE+liz*z_AE),conv(x_Ej,x_Ej))+...
+%                     conv((conv((-lix*y_AE-liy*x_AE),y_Ej)-conv(z_Ej,(lix*z_AE+liz*x_AE))),x_Ej)+...
+%                     conv((lix*x_AE+liz*z_AE),conv(y_Ej,y_Ej))-...
+%                     conv(conv(z_Ej,(liy*z_AE+liz*y_AE)),y_Ej)+...
+%                     conv(conv(z_Ej,z_Ej),(lix*x_AE+liy*y_AE));
+%                 ntj = conv((-y_AE*y_Ej-z_AE*z_Ej),conv(lix,lix))+...
+%                     conv((conv((x_AE*y_Ej+x_Ej*y_AE),liy)+conv(liz,(x_AE*z_Ej+x_Ej*z_AE))),lix)+...
+%                     conv((-x_AE*x_Ej-z_AE*z_Ej),conv(liy,liy))+...
+%                     conv(conv(liz,(y_AE*z_Ej+y_Ej*z_AE)),liy)-...
+%                     conv(conv(liz,liz),(x_AE*x_Ej+y_AE*y_Ej));
+%                 temmp = conv((x_AE*y_Ej-x_Ej*y_AE),liz)+lix*y_AE*z_Ej-lix*y_Ej*z_AE-liy*x_AE*z_Ej+liy*x_Ej*z_AE;
+%                 nhatcp_2 = conv(temmp,temmp);
+%                 den = (conv(liy,liy)+conv(liz,liz))*(x_Ej^2)-2*(conv(lix,(liy*y_Ej+liz*z_Ej)))*x_Ej+...
+%                     (conv(lix,lix)+conv(liz,liz))*(y_Ej^2)-2*(conv(liy,liz))*y_Ej*z_Ej+...
+%                     (z_Ej^2)*(conv(lix,lix)+conv(liy,liy));
+%                 %%%%%%%%%%%%%%%%%%%%% simplify
+%                 coeff_nti = CoeffUniPoly(obj, nti);
+%                 coeff_ntj = CoeffUniPoly(obj, ntj);
+%                 coeff_nhatcp_2 = CoeffUniPoly(obj, nhatcp_2);
+%                 coeff_den = CoeffUniPoly(obj, den);
+                
                 %% solve the univariable polynomial equations
-                % ---------(MinDis is the length of Common Perpendicular Segment (C.P.S))-start-----------------------
-                % i.e. 0<ti & ti<1 & 0<tj & tj<1 & norm(C.P.S.)^2<dia^2 
-                % 5 univariable polynomial equations
-                % uniform dim of coeff_flxvar to 5 entries to addication
+                % reshape to 5th degree (ROW Vectors) to addication
                 coeff_nti = padarray(coeff_nti, [0 5-length(coeff_nti)], 'pre');
                 coeff_ntj = padarray(coeff_ntj, [0 5-length(coeff_ntj)], 'pre');
                 coeff_den = padarray(coeff_den, [0 5-length(coeff_den)], 'pre');
                 coeff_nhatcp_2 = padarray(coeff_nhatcp_2, [0 5-length(coeff_nhatcp_2)], 'pre');
-
+                
+                % ---------(MinDis is the length of Common Perpendicular Segment (C.P.S))-start-----------------------
+                % i.e. 0<ti & ti<1 & 0<tj & tj<1 & norm(C.P.S.)^2<dia^2
                 % obtain the Coefficient of 5 Univariable Polynomials
                 CoUniPol{1}  = coeff_nti;
                 CoUniPol{2}  = coeff_ntj;

@@ -3,7 +3,7 @@
 <bodies_system>
     <links display_range="-1 11 -1 11 -1 1" view_angle="0 90">
       <link_rigid num="1" name="Link 1">
-        <joint type="PLANAR_XY" q_initial="5 5 0" q_min="5 5 -3.1415926" q_max="5 5 3.1415926"/>
+        <joint type="PLANAR_XY" q_initial="5 5 0" q_min="0 3 -3.1415926" q_max="10 3 3.1415926"/>
         <physical>
           <mass>1</mass>
           <com_location>0.0 0.0 0.0</com_location>

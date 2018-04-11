@@ -7,6 +7,6 @@
 function inWorkspace = interference_free_mindistance_cable_cable(dynamics, options)
     m = MinCableCableDistanceMetric();
     [~, v, ~] = m.evaluate(dynamics,options);
-    inWorkspace = (v > 0);
+    inWorkspace = (v > 0.02); % Specify the diameter of the segment
 end
 
