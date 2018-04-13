@@ -625,16 +625,18 @@ classdef ControllerSimulator < DynamicsSimulator
                 output_data.DataRefAcceleration	=   ref_q_ddot;
             end
             % perform frequency analysis and output the data
-            output_data.freqAnalysis.referenceTime              =   output_data.DataRefTime;
-            output_data.freqAnalysis.referencePose         =   output_data.DataRefPose;
-            output_data.freqAnalysis.referenceVelocity     =   output_data.DataRefVelocity;
-            output_data.freqAnalysis.referenceAcceleration =   output_data.DataRefAcceleration;
-            [output_data.freqAnalysis.referencePoseFS1, output_data.freqAnalysis.referenceF1, output_data.freqAnalysis.referencePoseFS1Threshold, output_data.freqAnalysis.referencePoseFS1Summed]...
-                = fftAnalysis(output_data.freqAnalysis.referenceTime, output_data.freqAnalysis.referencePose, 0.9);
-            [output_data.freqAnalysis.referenceVelocityFS1, ~, output_data.freqAnalysis.referenceVelocityFS1Threshold, output_data.freqAnalysis.referenceVelocityFS1Summed]...
-                = fftAnalysis(output_data.freqAnalysis.referenceTime, output_data.freqAnalysis.referenceVelocity, 0.9);
-            [output_data.freqAnalysis.referenceAccelerationFS1, ~, output_data.freqAnalysis.referenceAccelerationFS1Threshold, output_data.freqAnalysis.referenceAccelerationFS1Summed]...
-                = fftAnalysis(output_data.freqAnalysis.referenceTime, output_data.freqAnalysis.referenceAcceleration, 0.9);
+            output_data.freqAnalysis.referenceTime       	=   output_data.DataRefTime;
+            output_data.freqAnalysis.referencePose          =   output_data.DataRefPose;
+            output_data.freqAnalysis.referenceVelocity      =   output_data.DataRefVelocity;
+            output_data.freqAnalysis.referenceAcceleration  =   output_data.DataRefAcceleration;
+            if (~isempty(output_data.freqAnalysis.referenceTime))
+                [output_data.freqAnalysis.referencePoseFS1, output_data.freqAnalysis.referenceF1, output_data.freqAnalysis.referencePoseFS1Threshold, output_data.freqAnalysis.referencePoseFS1Summed]...
+                    = fftAnalysis(output_data.freqAnalysis.referenceTime, output_data.freqAnalysis.referencePose, 0.9);
+                [output_data.freqAnalysis.referenceVelocityFS1, ~, output_data.freqAnalysis.referenceVelocityFS1Threshold, output_data.freqAnalysis.referenceVelocityFS1Summed]...
+                    = fftAnalysis(output_data.freqAnalysis.referenceTime, output_data.freqAnalysis.referenceVelocity, 0.9);
+                [output_data.freqAnalysis.referenceAccelerationFS1, ~, output_data.freqAnalysis.referenceAccelerationFS1Threshold, output_data.freqAnalysis.referenceAccelerationFS1Summed]...
+                    = fftAnalysis(output_data.freqAnalysis.referenceTime, output_data.freqAnalysis.referenceAcceleration, 0.9);
+            end
             
             ctrl_timevec   	=   obj.ctrl_trajectory.timeVector';
             ctrl_q         	=   cell2mat(obj.ctrl_trajectory.q)';
@@ -722,10 +724,12 @@ classdef ControllerSimulator < DynamicsSimulator
             output_data.freqAnalysis.disturbanceTime       	=   output_data.DataObTime;
             output_data.freqAnalysis.disturbanceInAcc       =   output_data.DataObDisturbanceAcceleration;
             output_data.freqAnalysis.disturbanceEstInAcc    =   output_data.DataObDisturbanceAccelerationEst;
-            [output_data.freqAnalysis.disturbanceInAccFS1, output_data.freqAnalysis.disturbanceInAccF1, output_data.freqAnalysis.disturbanceInAccFS1Threshold, output_data.freqAnalysis.disturbanceInAccFS1Summed]...
-                = fftAnalysis(output_data.freqAnalysis.disturbanceTime, output_data.freqAnalysis.disturbanceInAcc, 0.9);
-            [output_data.freqAnalysis.disturbanceEstInAccFS1, output_data.freqAnalysis.disturbanceEstInAccF1, output_data.freqAnalysis.disturbanceEstInAccFS1Threshold, output_data.freqAnalysis.disturbanceEstInAccFS1Summed]...
-                = fftAnalysis(output_data.freqAnalysis.disturbanceTime, output_data.freqAnalysis.disturbanceEstInAcc, 0.9);
+            if (~isempty(output_data.freqAnalysis.disturbanceTime))
+                [output_data.freqAnalysis.disturbanceInAccFS1, output_data.freqAnalysis.disturbanceInAccF1, output_data.freqAnalysis.disturbanceInAccFS1Threshold, output_data.freqAnalysis.disturbanceInAccFS1Summed]...
+                    = fftAnalysis(output_data.freqAnalysis.disturbanceTime, output_data.freqAnalysis.disturbanceInAcc, 0.9);
+                [output_data.freqAnalysis.disturbanceEstInAccFS1, output_data.freqAnalysis.disturbanceEstInAccF1, output_data.freqAnalysis.disturbanceEstInAccFS1Threshold, output_data.freqAnalysis.disturbanceEstInAccFS1Summed]...
+                    = fftAnalysis(output_data.freqAnalysis.disturbanceTime, output_data.freqAnalysis.disturbanceEstInAcc, 0.9);
+            end
             
             if (obj.simopt.forward_kinematics_debugging)
                 ctrl_fk_timevec   	=   obj.ctrl_fk_trajectory.timeVector';

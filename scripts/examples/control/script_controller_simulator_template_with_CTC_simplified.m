@@ -12,6 +12,10 @@ clc; clear; close all;
 warning off;
 
 disp('Start Setup Simulation');
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% DO YOUR DEFINITION HERE
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Set up the type of model, trajectory and the set of cables:
 model_config = ModelConfig('BMArm');
 trajectory_id = 'traj_test';
@@ -38,19 +42,19 @@ simopt = ControllerSimulatorOptions(simopt, 'SimulationFrequencyRatio', sim_freq
 % observer frequency
 simopt = ControllerSimulatorOptions(simopt, 'ObserverFrequencyRatio', ob_freq_ratio);
 % absolute encoder
-simopt = ControllerSimulatorOptions(simopt, 'UseAbsoluteEncoder', 'false');
+simopt = ControllerSimulatorOptions(simopt, 'UseAbsoluteEncoder', 'true');
 % FK usage - enable FK
-simopt = ControllerSimulatorOptions(simopt, 'EnableFKSolver', 'true');
+simopt = ControllerSimulatorOptions(simopt, 'EnableFKSolver', 'false');
 % FK usage - use FK in controller
-simopt = ControllerSimulatorOptions(simopt, 'UseFKInController', 'true');
+simopt = ControllerSimulatorOptions(simopt, 'UseFKInController', 'false');
 % FK usage - use FK in observer
-simopt = ControllerSimulatorOptions(simopt, 'UseFKInObserver', 'true');
+simopt = ControllerSimulatorOptions(simopt, 'UseFKInObserver', 'false');
 % FK usage - debug FK solvers
 simopt = ControllerSimulatorOptions(simopt, 'FKDebugging', 'false');
 % observer usage - enable observer
-simopt = ControllerSimulatorOptions(simopt, 'EnableObserver', 'true');
+simopt = ControllerSimulatorOptions(simopt, 'EnableObserver', 'false');
 % observer usage - use estimated disturbance
-simopt = ControllerSimulatorOptions(simopt, 'UseDisturbanceEstimation', 'true');
+simopt = ControllerSimulatorOptions(simopt, 'UseDisturbanceEstimation', 'false');
 % observer usage - use estimated state
 simopt = ControllerSimulatorOptions(simopt, 'UseStateEstimation', 'false');
 
@@ -63,20 +67,9 @@ fd_solver = ForwardDynamics(FDSolverType.ODE4);
 id_objective = IDObjectiveMinQuadCableForce(ones(ideal_model.numCables,1));
 id_solver = IDSolverQuadProg(ideal_model, id_objective, ID_QP_SolverType.MATLAB);
 
-% Construct FK object
-% % 1) differential FK
-fk_solver = FKDifferential(ideal_model);
-% % 2) empty FK
-% fk_solver = [];
-% % 3) least square FK
-% % Setup the options
-% % How the initial guess for the FK is made (FK_LS_ApproxOptionType enum)
-% FK_q_estimation_method = FK_LS_ApproxOptionType.FIRST_ORDER_INTEGRATE_PSEUDOINV; 
-% % How to q_dot is estimated (FK_LS_QdotOptionType enum)
-% FK_q_dot_estimation_method = FK_LS_QdotOptionType.FIRST_ORDER_DERIV; 
-% % Initialise the FK solver
-% fk_solver = FKLeastSquares(ideal_model, FK_LS_ApproxOptionType.FIRST_ORDER_INTEGRATE_PSEUDOINV, FK_LS_QdotOptionType.FIRST_ORDER_DERIV);
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% DO YOUR DEFINITION HERE
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Construct Controller objects
 damping_ratio = 1;
 target_ratio = 0.6;
@@ -90,61 +83,18 @@ controller = ComputedTorqueController(ideal_model, id_solver, kp_tar*eye(ideal_m
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-% Construct Disturbance Observer
-ob_pole     =   100;
-observer    =   DisturbanceObserverESO(ideal_model, ob_delta_t, ob_pole*[1; 1; 1; 1]);
 
 % Construct Disturbance objects
 num_of_uncertainties    =   0;
 uncertainties           =   [];
-% % 1) Inertia uncertainties (uniformly distributed)
-% num_of_uncertainties    =   num_of_uncertainties + 1;
-% m_uncertainty_range     =   ;
-% r_G_uncertainty_range   =   ;
-% I_uncertainty_range     =   ;
-% uncertainties{num_of_uncertainties} = InertiaUncertaintyUniform(m_uncertainty_range,r_G_uncertainty_range,I_uncertainty_range);
-% % 2) Inertia uncertainties (constant)
-% num_of_uncertainties        =   num_of_uncertainties + 1;
-% use_relative_uncertainty    =   true;
-% m_uncertainty_range         =   [0.5; 0.5];
-% r_G_uncertainty_range       =   [-0.1; 0.1; 0.3; 0.1; 0.2; -0.2];
-% I_uncertainty_range         =   0.1*[1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1];
-% uncertainties{num_of_uncertainties} = InertiaUncertaintyConstant(m_uncertainty_range,r_G_uncertainty_range,I_uncertainty_range,use_relative_uncertainty);
-% % 3) Disturbance uncertainties
-% num_of_uncertainties    =   num_of_uncertainties + 1;
-% time_sequence           =   [1; 3];
-% disturbance_sequence    =   [2, 0, 0, 0; 0, 0, 0, 0];
-% uncertainties{num_of_uncertainties} = ExternalWrenchUncertaintyDisccreteSequence(true_model, time_sequence, disturbance_sequence);
-% % Pose lock uncertainties
-% num_of_uncertainties    =   num_of_uncertainties + 1;
-% t_sequence              =   [1; 2];
-% uncertainties{num_of_uncertainties} = PoseLockUncertaintyJointLock(true_model, t_sequence);
-% % 4) Initial pose uncertainties (uniformly distributed)
-% num_of_uncertainties    =   num_of_uncertainties + 1;
-% q_initial               =   trajectory_ref.q{1};
-% q_d_initial             =   trajectory_ref.q_dot{1};
-% q_bound_range           =   0.1*[-0.4; 0.4; -0.08; 0.08; -0.5; 0.5; -0.3; 0.3];
-% q_d_bound_range         =   0*[-0.001; 0.001; -0.001; 0.001; -0.001; 0.001; -0.001; 0.001];
-% uncertainties{num_of_uncertainties} = InitialPoseUncertaintyUniform(fk_solver, true_model, q_initial, q_d_initial, q_bound_range, q_d_bound_range);
-% 5) Initial pose uncertainties (constant)
+% 3) Disturbance uncertainties
 num_of_uncertainties    =   num_of_uncertainties + 1;
-q_initial               =   trajectory_ref.q{1};
-q_d_initial             =   trajectory_ref.q_dot{1};
-q_err                   =   [5; 1; -3; 2]/57.3;
-q_d_err                 =   0*[-0.001; 0.001; 0.001; -0.001];
-uncertainties{num_of_uncertainties} = InitialPoseUncertaintyConstant(fk_solver, true_model, q_initial, q_d_initial, q_err, q_d_err);
-% % 6) White Gaussian Noise
-% num_of_uncertainties    =   num_of_uncertainties + 1;
-% nx_specification        =   [1e-8; 1e-8; 1e-8; 1e-8; 1e-8; 1e-8];
-% nx_dot_specification    =   [1e-6; 1e-6; 1e-6; 1e-6; 1e-6; 1e-6];
-% use_power_of_signal     =   false;
-% % nx_specification        =   [-120; -120; -120; -120; -120; -120];
-% % nx_dot_specification    =   [-120; -120; -120; -120; -120; -120];
-% % use_power_of_signal     =   true;
-% uncertainties{num_of_uncertainties} = NoiseUncertaintyBaseCableWhiteGaussian(true_model, nx_specification, nx_dot_specification, use_power_of_signal);
+time_sequence           =   [1; 3];
+disturbance_sequence    =   [2, 0, 0, 0; 0, 0, 0, 0];
+uncertainties{num_of_uncertainties} = ExternalWrenchUncertaintyDisccreteSequence(true_model, time_sequence, disturbance_sequence);
 
 
-ctrl_sim = ControllerSimulator(ideal_model, controller, fd_solver, fk_solver, uncertainties, true_model, observer, simopt);
+ctrl_sim = ControllerSimulator(ideal_model, controller, fd_solver, [], uncertainties, true_model, [], simopt);
 
 disp('Finished Setup Simulation');
 
@@ -153,9 +103,6 @@ disp('Finished Setup Simulation');
 
 % Run the solver on the desired trajectory
 disp('Start Running Simulation');
-error0 = [0.8; -0.3; 0.9; 0.4];
-% error0 = [0.8; -0.7; 0.9; 0.4];
-error0 = [0.6; -0.08; 0.5; 0.3];
 error0 = [0.0; 0.0; 0.0; 0.0];
 tic
 ctrl_sim.run(trajectory_ref, trajectory_ref.q{1} + error0, trajectory_ref.q_dot{1}, zeros(ideal_model.numDofs, 1));
