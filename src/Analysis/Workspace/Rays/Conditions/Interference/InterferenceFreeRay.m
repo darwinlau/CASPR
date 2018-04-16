@@ -13,7 +13,7 @@ classdef InterferenceFreeRay < WorkspaceRayConditionBase
     
     methods
         % Constructor for interference free worksapce
-        function w= InterferenceFreeRay(min_ray_percent)
+        function w= InterferenceFreeRay(min_ray_percent,~)
             w.min_ray_percentage = min_ray_percent;
         end
             
