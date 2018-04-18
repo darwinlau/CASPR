@@ -5,16 +5,16 @@
       <link_rigid num="1" name="link 1">
         <joint type="U_YZ" q_initial="0.0 0.0" q_min="-0.5 -0.5" q_max="0.5 0.5"/>
         <physical>
-          <mass>0.0965</mass>
-          <com_location>0.0455000000000000 0 0</com_location>
+          <mass>0.136648507</mass>
+          <com_location>0.034394797534 0.000000710 -0.000000019</com_location>
           <end_location>0.0910000000000000 0 0</end_location>
           <inertia ref="com">
-            <Ixx>4.18257965067972e-05</Ixx>
-            <Iyy>6.98161645063733e-05</Iyy>
-            <Izz>6.98161645063733e-05</Izz>
-            <Ixy>0</Ixy>
-            <Ixz>0</Ixz>
-            <Iyz>0</Iyz>
+            <Ixx>57.225690266e-06</Ixx>
+            <Iyy>129.949736497e-06</Iyy>
+            <Izz>131.271924037e-06</Izz>
+            <Ixy>-0.000003794e-06</Ixy>
+            <Ixz>0.000000117e-06</Ixz>
+            <Iyz>0.000025053e-06</Iyz>
           </inertia>
         </physical>
         <parent>
@@ -25,16 +25,16 @@
       <link_rigid num="2" name="link 2">
         <joint type="U_YZ" q_initial="0.0 0.0" q_min="-0.5 -0.5" q_max="0.5 0.5"/>
         <physical>
-          <mass>0.0965</mass>
-          <com_location>0.0455000000000000 0 0</com_location>
+          <mass>0.179735796</mass>
+          <com_location>0.047718594667 0.000000555 -0.000000555</com_location>
           <end_location>0.0910000000000000 0 0</end_location>
           <inertia ref="com">
-            <Ixx>4.18257965067972e-05</Ixx>
-            <Iyy>6.98161645063733e-05</Iyy>
-            <Izz>6.98161645063733e-05</Izz>
-            <Ixy>0</Ixy>
-            <Ixz>0</Ixz>
-            <Iyz>0</Iyz>
+            <Ixx>71.326639430e-06</Ixx>
+            <Iyy>238.937833166e-06</Iyy>
+            <Izz>239.443445852e-06</Izz>
+            <Ixy>-0.000004925e-06</Ixy>
+            <Ixz>-0.000005308e-06</Ixz>
+            <Iyz>-0.165114789e-06</Iyz>
           </inertia>
         </physical>
         <parent>
@@ -45,16 +45,16 @@
       <link_rigid num="3" name="link 3">
         <joint type="U_YZ" q_initial="0.0 0.0" q_min="-0.5 -0.5" q_max="0.5 0.5"/>
         <physical>
-          <mass>0.0965</mass>
-          <com_location>0.0455000000000000 0 0</com_location>
+          <mass>0.179735796</mass>
+          <com_location>0.047718594667 0.000000555 -0.000000555</com_location>
           <end_location>0.0910000000000000 0 0</end_location>
           <inertia ref="com">
-            <Ixx>4.18257965067972e-05</Ixx>
-            <Iyy>6.98161645063733e-05</Iyy>
-            <Izz>6.98161645063733e-05</Izz>
-            <Ixy>0</Ixy>
-            <Ixz>0</Ixz>
-            <Iyz>0</Iyz>
+            <Ixx>71.326639430e-06</Ixx>
+            <Iyy>238.937833166e-06</Iyy>
+            <Izz>239.443445852e-06</Izz>
+            <Ixy>-0.000004925e-06</Ixy>
+            <Ixz>-0.000005308e-06</Ixz>
+            <Iyz>-0.165114789e-06</Iyz>
           </inertia>
         </physical>
         <parent>
@@ -65,16 +65,16 @@
       <link_rigid num="4" name="link 4">
         <joint type="U_YZ" q_initial="0.0 0.0" q_min="-0.5 -0.5" q_max="0.5 0.5"/>
         <physical>
-          <mass>0.0965</mass>
-          <com_location>0.0455000000000000 0 0</com_location>
+          <mass>0.179735796</mass>
+          <com_location>0.047718594667 0.000000555 -0.000000555</com_location>
           <end_location>0.0910000000000000 0 0</end_location>
           <inertia ref="com">
-            <Ixx>4.18257965067972e-05</Ixx>
-            <Iyy>6.98161645063733e-05</Iyy>
-            <Izz>6.98161645063733e-05</Izz>
-            <Ixy>0</Ixy>
-            <Ixz>0</Ixz>
-            <Iyz>0</Iyz>
+            <Ixx>71.326639430e-06</Ixx>
+            <Iyy>238.937833166e-06</Iyy>
+            <Izz>239.443445852e-06</Izz>
+            <Ixy>-0.000004925e-06</Ixy>
+            <Ixz>-0.000005308e-06</Ixz>
+            <Iyz>-0.165114789e-06</Iyz>
           </inertia>
         </physical>
         <parent>
@@ -85,16 +85,16 @@
       <link_rigid num="5" name="link 5">
         <joint type="U_YZ" q_initial="0.0 0.0" q_min="-0.5 -0.5" q_max="0.5 0.5"/>
         <physical>
-          <mass>0.0965</mass>
-          <com_location>0.0455000000000000 0 0</com_location>
+          <mass>0.179735796</mass>
+          <com_location>0.047718594667 0.000000555 -0.000000555</com_location>
           <end_location>0.0910000000000000 0 0</end_location>
           <inertia ref="com">
-            <Ixx>4.18257965067972e-05</Ixx>
-            <Iyy>6.98161645063733e-05</Iyy>
-            <Izz>6.98161645063733e-05</Izz>
-            <Ixy>0</Ixy>
-            <Ixz>0</Ixz>
-            <Iyz>0</Iyz>
+            <Ixx>71.326639430e-06</Ixx>
+            <Iyy>238.937833166e-06</Iyy>
+            <Izz>239.443445852e-06</Izz>
+            <Ixy>-0.000004925e-06</Ixy>
+            <Ixz>-0.000005308e-06</Ixz>
+            <Iyz>-0.165114789e-06</Iyz>
           </inertia>
         </physical>
         <parent>
@@ -105,16 +105,16 @@
       <link_rigid num="6" name="link 6">
         <joint type="U_YZ" q_initial="0.0 0.0" q_min="-0.5 -0.5" q_max="0.5 0.5"/>
         <physical>
-          <mass>0.0965</mass>
-          <com_location>0.0455000000000000 0 0</com_location>
+          <mass>0.179735796</mass>
+          <com_location>0.047718594667 0.000000555 -0.000000555</com_location>
           <end_location>0.0910000000000000 0 0</end_location>
           <inertia ref="com">
-            <Ixx>4.18257965067972e-05</Ixx>
-            <Iyy>6.98161645063733e-05</Iyy>
-            <Izz>6.98161645063733e-05</Izz>
-            <Ixy>0</Ixy>
-            <Ixz>0</Ixz>
-            <Iyz>0</Iyz>
+            <Ixx>71.326639430e-06</Ixx>
+            <Iyy>238.937833166e-06</Iyy>
+            <Izz>239.443445852e-06</Izz>
+            <Ixy>-0.000004925e-06</Ixy>
+            <Ixz>-0.000005308e-06</Ixz>
+            <Iyz>-0.165114789e-06</Iyz>
           </inertia>
         </physical>
         <parent>
@@ -125,16 +125,16 @@
       <link_rigid num="7" name="link 7">
         <joint type="U_YZ" q_initial="0.0 0.0" q_min="-0.5 -0.5" q_max="0.5 0.5"/>
         <physical>
-          <mass>0.0965</mass>
-          <com_location>0.0455000000000000 0 0</com_location>
+          <mass>0.179735796</mass>
+          <com_location>0.047718594667 0.000000555 -0.000000555</com_location>
           <end_location>0.0910000000000000 0 0</end_location>
           <inertia ref="com">
-            <Ixx>4.18257965067972e-05</Ixx>
-            <Iyy>6.98161645063733e-05</Iyy>
-            <Izz>6.98161645063733e-05</Izz>
-            <Ixy>0</Ixy>
-            <Ixz>0</Ixz>
-            <Iyz>0</Iyz>
+            <Ixx>71.326639430e-06</Ixx>
+            <Iyy>238.937833166e-06</Iyy>
+            <Izz>239.443445852e-06</Izz>
+            <Ixy>-0.000004925e-06</Ixy>
+            <Ixz>-0.000005308e-06</Ixz>
+            <Iyz>-0.165114789e-06</Iyz>
           </inertia>
         </physical>
         <parent>
@@ -145,16 +145,16 @@
       <link_rigid num="8" name="link 8">
         <joint type="U_YZ" q_initial="0.0 0.0" q_min="-0.5 -0.5" q_max="0.5 0.5"/>
         <physical>
-          <mass>0.0965</mass>
-          <com_location>0.0455000000000000 0 0</com_location>
+          <mass>0.179735796</mass>
+          <com_location>0.047718594667 0.000000555 -0.000000555</com_location>
           <end_location>0.0910000000000000 0 0</end_location>
           <inertia ref="com">
-            <Ixx>4.18257965067972e-05</Ixx>
-            <Iyy>6.98161645063733e-05</Iyy>
-            <Izz>6.98161645063733e-05</Izz>
-            <Ixy>0</Ixy>
-            <Ixz>0</Ixz>
-            <Iyz>0</Iyz>
+            <Ixx>71.326639430e-06</Ixx>
+            <Iyy>238.937833166e-06</Iyy>
+            <Izz>239.443445852e-06</Izz>
+            <Ixy>-0.000004925e-06</Ixy>
+            <Ixz>-0.000005308e-06</Ixz>
+            <Iyz>-0.165114789e-06</Iyz>
           </inertia>
         </physical>
         <parent>
@@ -165,16 +165,16 @@
       <link_rigid num="9" name="link 9">
         <joint type="U_YZ" q_initial="0.0 0.0" q_min="-0.5 -0.5" q_max="0.5 0.5"/>
         <physical>
-          <mass>0.0965</mass>
-          <com_location>0.0455000000000000 0 0</com_location>
+          <mass>0.179735796</mass>
+          <com_location>0.047718594667 0.000000555 -0.000000555</com_location>
           <end_location>0.0910000000000000 0 0</end_location>
           <inertia ref="com">
-            <Ixx>4.18257965067972e-05</Ixx>
-            <Iyy>6.98161645063733e-05</Iyy>
-            <Izz>6.98161645063733e-05</Izz>
-            <Ixy>0</Ixy>
-            <Ixz>0</Ixz>
-            <Iyz>0</Iyz>
+            <Ixx>71.326639430e-06</Ixx>
+            <Iyy>238.937833166e-06</Iyy>
+            <Izz>239.443445852e-06</Izz>
+            <Ixy>-0.000004925e-06</Ixy>
+            <Ixz>-0.000005308e-06</Ixz>
+            <Iyz>-0.165114789e-06</Iyz>
           </inertia>
         </physical>
         <parent>
@@ -185,16 +185,16 @@
       <link_rigid num="10" name="link 10">
         <joint type="U_YZ" q_initial="0.0 0.0" q_min="-0.5 -0.5" q_max="0.5 0.5"/>
         <physical>
-          <mass>0.0965</mass>
-          <com_location>0.0455000000000000 0 0</com_location>
+          <mass>0.179735796</mass>
+          <com_location>0.047718594667 0.000000555 -0.000000555</com_location>
           <end_location>0.0910000000000000 0 0</end_location>
           <inertia ref="com">
-            <Ixx>4.18257965067972e-05</Ixx>
-            <Iyy>6.98161645063733e-05</Iyy>
-            <Izz>6.98161645063733e-05</Izz>
-            <Ixy>0</Ixy>
-            <Ixz>0</Ixz>
-            <Iyz>0</Iyz>
+            <Ixx>71.326639430e-06</Ixx>
+            <Iyy>238.937833166e-06</Iyy>
+            <Izz>239.443445852e-06</Izz>
+            <Ixy>-0.000004925e-06</Ixy>
+            <Ixz>-0.000005308e-06</Ixz>
+            <Iyz>-0.165114789e-06</Iyz>
           </inertia>
         </physical>
         <parent>
@@ -205,16 +205,16 @@
       <link_rigid num="11" name="link 11">
         <joint type="U_YZ" q_initial="0.0 0.0" q_min="-0.5 -0.5" q_max="0.5 0.5"/>
         <physical>
-          <mass>0.0965</mass>
-          <com_location>0.0455000000000000 0 0</com_location>
+          <mass>0.179735796</mass>
+          <com_location>0.047718594667 0.000000555 -0.000000555</com_location>
           <end_location>0.0910000000000000 0 0</end_location>
           <inertia ref="com">
-            <Ixx>4.18257965067972e-05</Ixx>
-            <Iyy>6.98161645063733e-05</Iyy>
-            <Izz>6.98161645063733e-05</Izz>
-            <Ixy>0</Ixy>
-            <Ixz>0</Ixz>
-            <Iyz>0</Iyz>
+            <Ixx>71.326639430e-06</Ixx>
+            <Iyy>238.937833166e-06</Iyy>
+            <Izz>239.443445852e-06</Izz>
+            <Ixy>-0.000004925e-06</Ixy>
+            <Ixz>-0.000005308e-06</Ixz>
+            <Iyz>-0.165114789e-06</Iyz>
           </inertia>
         </physical>
         <parent>
@@ -225,16 +225,16 @@
       <link_rigid num="12" name="link 12">
         <joint type="U_YZ" q_initial="0.0 0.0" q_min="-0.5 -0.5" q_max="0.5 0.5"/>
         <physical>
-          <mass>0.0965</mass>
-          <com_location>0.0455000000000000 0 0</com_location>
+          <mass>0.179735796</mass>
+          <com_location>0.047718594667 0.000000555 -0.000000555</com_location>
           <end_location>0.0910000000000000 0 0</end_location>
           <inertia ref="com">
-            <Ixx>4.18257965067972e-05</Ixx>
-            <Iyy>6.98161645063733e-05</Iyy>
-            <Izz>6.98161645063733e-05</Izz>
-            <Ixy>0</Ixy>
-            <Ixz>0</Ixz>
-            <Iyz>0</Iyz>
+            <Ixx>71.326639430e-06</Ixx>
+            <Iyy>238.937833166e-06</Iyy>
+            <Izz>239.443445852e-06</Izz>
+            <Ixy>-0.000004925e-06</Ixy>
+            <Ixz>-0.000005308e-06</Ixz>
+            <Iyz>-0.165114789e-06</Iyz>
           </inertia>
         </physical>
         <parent>
