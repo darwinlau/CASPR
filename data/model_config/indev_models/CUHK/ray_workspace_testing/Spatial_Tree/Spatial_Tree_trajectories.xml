@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE trajectories SYSTEM "../../../templates/trajectories.dtd">
+<!DOCTYPE trajectories SYSTEM "../../../../templates/trajectories.dtd">
 <!-- Template generated file for XML joint_trajectories in CASPR -->
 <trajectories>
     <joint_trajectories>
