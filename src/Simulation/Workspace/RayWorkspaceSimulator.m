@@ -143,7 +143,6 @@ classdef RayWorkspaceSimulator < SimulatorBase
         %       plotRayWorkspace is a temporary function for plotting the computed
         %       ray workspace and verify if the result is reasonable       
         function plotRayWorkspace(obj,plot_axis)   %nsegvar= the division number of interval of variables
-            
             numDofs=obj.grid.n_dimensions;
             if numDofs>2
                 if(nargin<2)
@@ -161,19 +160,20 @@ classdef RayWorkspaceSimulator < SimulatorBase
                         consvar(obj.workspace{it}.free_variable_index)=0;
                         consvar(obj.workspace{it}.free_variable_index+1:numDofs)=obj.workspace{it}.fixed_variables(obj.workspace{it}.free_variable_index:numDofs-1,1);
                         if obj.workspace{it}.free_variable_index==plot_axis(1)
-                            axis1=obj.workspace{it}.conditions{2};
-                            axis2=(consvar(plot_axis(2))*ones(1,2));
-                            axis3=(consvar(plot_axis(3))*ones(1,2));
+                            %%% results could be multiple intervals
+                            axis1=obj.workspace{it}.conditions{2}';%':respect "plot" fn
+                            axis2=consvar(plot_axis(2))*ones(size(axis1));
+                            axis3=consvar(plot_axis(3))*ones(size(axis1));
                             plotflag=1;
                         elseif obj.workspace{it}.free_variable_index==plot_axis(2)
-                            axis1=(consvar(plot_axis(1))*ones(1,2));
-                            axis2=obj.workspace{it}.conditions{2};
-                            axis3=(consvar(plot_axis(3))*ones(1,2));
+                            axis2=obj.workspace{it}.conditions{2}';
+                            axis1=consvar(plot_axis(1))*ones(size(axis2));
+                            axis3=consvar(plot_axis(3))*ones(size(axis2));
                             plotflag=1;
                         elseif obj.workspace{it}.free_variable_index==plot_axis(3)
-                            axis1=(consvar(plot_axis(1))*ones(1,2));
-                            axis2=(consvar(plot_axis(2))*ones(1,2));
-                            axis3=obj.workspace{it}.conditions{2};
+                            axis3=obj.workspace{it}.conditions{2}';
+                            axis1=consvar(plot_axis(1))*ones(size(axis3));
+                            axis2=consvar(plot_axis(2))*ones(size(axis3));                            
                             plotflag=1;
                         end
                         if plotflag==1
@@ -203,12 +203,12 @@ classdef RayWorkspaceSimulator < SimulatorBase
                         consvar(obj.workspace{it}.free_variable_index)=0;
                         consvar(obj.workspace{it}.free_variable_index+1:numDofs)=obj.workspace{it}.fixed_variables(obj.workspace{it}.free_variable_index:numDofs-1,1);
                         if obj.workspace{it}.free_variable_index==plot_axis(1)
-                            axis1=obj.workspace{it}.conditions{2};
-                            axis2=(consvar(plot_axis(2))*ones(1,2));
+                            axis1=obj.workspace{it}.conditions{2}';
+                            axis2=consvar(plot_axis(2))*ones(size(axis1)); 
                             plotflag=1;
-                        elseif obj.workspace{it}.free_variable_index==plot_axis(2)                         
-                            axis1=(consvar(plot_axis(1))*ones(1,2));
-                            axis2=obj.workspace{it}.conditions{2};
+                        elseif obj.workspace{it}.free_variable_index==plot_axis(2)
+                            axis2=obj.workspace{it}.conditions{2}';
+                            axis1=consvar(plot_axis(1))*ones(size(axis2));  
                             plotflag=1;
                         end
                         if plotflag==1
