@@ -11,8 +11,8 @@ clc;  close all; warning off; clear all;
 % segment_number = 11;
 % model_config    =   DevModelConfig('spatial7cable'); nsegvar= [11, 11, 11, 11, 11, 11]';
 % '4_4_CDPR_planar'
-segment_number = 80;
-model_config    =   DevModelConfig('4_4_CDPR_planar'); nsegvar = [segment_number segment_number segment_number]';
+segment_number = 11;
+model_config    =   DevModelConfig('4_4_CDPR_planar'); nsegvar = [segment_number segment_number 0]';
 % BM arm
 % segment_number = 20;
 % model_config    =    DevModelConfig('BMArm_paper'); nsegvar = [20 20 20 20]';
@@ -20,8 +20,8 @@ model_config    =   DevModelConfig('4_4_CDPR_planar'); nsegvar = [segment_number
 % model_config    =   DevModelConfig('MickMultiIFW'); nsegvar = [2 6 6 6]';
 
 cable_set_id    =   'original';
-% modelObj        =   model_config.getModel(cable_set_id);
-modelObj        =   model_config.getModel(cable_set_id,ModelModeType.COMPILED);
+modelObj        =   model_config.getModel(cable_set_id);
+% modelObj        =   model_config.getModel(cable_set_id,ModelModeType.COMPILED);
 
 
 q_begin         =   modelObj.bodyModel.q_min; q_end = modelObj.bodyModel.q_max; 
@@ -41,4 +41,4 @@ disp('Start Running Simulation');
 wsim.run(w_condition,[])
 % wsim.run(w_condition,w_metrics)
 % wsim.plotGraph();
-% wsim.plotRayWorkspace([1,2,3])
+wsim.plotRayWorkspace([1,2,3])
