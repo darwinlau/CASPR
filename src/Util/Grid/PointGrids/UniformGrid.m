@@ -11,6 +11,7 @@ classdef UniformGrid < PointGridBase
         delta_q     % The step size in generalised coordinates
         q_length    % The length of each index
         q_wrap      % A boolean vector to indicate if the coordinate wraps around at its limits
+        dim_disc_ia % array contains the index of dimensions to be discretized
     end
 
     methods
@@ -24,6 +25,7 @@ classdef UniformGrid < PointGridBase
             id.q_begin  =   q_begin;
             id.q_end    =   q_end;
             id.setNDimensions(size(q_begin,1));
+            id.dim_disc_ia = find(q_info ~= 0);
             
             if((nargin==3)||strcmp(info_type,'step_size'))
                 id.delta_q = q_info;

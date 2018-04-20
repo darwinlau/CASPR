@@ -62,8 +62,10 @@ classdef RayWorkspaceSimulator < SimulatorBase
                 % Firstly determine the number of points -- AT THE MOMENT THIS
                 % IS ASSUMING UNIFORM GRIDS
                 n_grid_points = 0; 
-                for i =1:obj.grid.n_dimensions
-                    grid_index = true(obj.grid.n_dimensions,1); grid_index(i) = false;
+%                 for i =1:obj.grid.n_dimensions
+%                     grid_index = true(obj.grid.n_dimensions,1); grid_index(i) = false;
+                for i =1:length(obj.grid.dim_disc_ia)
+                    grid_index = true(obj.grid.n_dimensions,1); grid_index(obj.grid.dim_disc_ia(i)) = false;
                     obj.free_variable_length(i) = prod(obj.grid.q_length(grid_index));
                     n_grid_points = n_grid_points + obj.free_variable_length(i);
                 end 
@@ -80,8 +82,11 @@ classdef RayWorkspaceSimulator < SimulatorBase
                 k = 1;
                 ray_t_in = tic;
                 total_t_in = tic;
-                for i = 1:obj.grid.n_dimensions
-                    grid_index = true(obj.grid.n_dimensions,1); grid_index(i) = false;
+%                 for i = 1:obj.grid.n_dimensions
+%                     grid_index = true(obj.grid.n_dimensions,1); grid_index(i) = false;
+                for i = 1:length(obj.grid.dim_disc_ia)
+                    free_var_i = obj.grid.dim_disc_ia(i);
+                    grid_index = true(obj.grid.n_dimensions,1); grid_index(free_var_i) = false;
                     % Create a subgrid
                     sub_grid = UniformGrid(obj.grid.q_begin(grid_index),obj.grid.q_end(grid_index),obj.grid.delta_q(grid_index),'step_size',obj.grid.q_wrap(grid_index));
                     for j = 1:sub_grid.n_points
@@ -89,8 +94,9 @@ classdef RayWorkspaceSimulator < SimulatorBase
                         % Load the current fixed grid coordinates
                         q_fixed = sub_grid.getGridPoint(j);
                         % Construct the workspace ray
-                        wr = WorkspaceRay(q_fixed,n_metrics,n_conditions,i,[obj.grid.q_begin(i),obj.grid.q_end(i)]);
-                            
+%                         wr = WorkspaceRay(q_fixed,n_metrics,n_conditions,i,[obj.grid.q_begin(i),obj.grid.q_end(i)]);
+                        wr = WorkspaceRay(q_fixed,n_metrics,n_conditions,free_var_i,[obj.grid.q_begin(free_var_i),obj.grid.q_end(free_var_i)]);
+   
                         % For each metric compute the value of the ray
                         for j_m=1:n_metrics
                             %% THIS NEEDS TO BE FILLED IN
