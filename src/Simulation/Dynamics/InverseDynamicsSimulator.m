@@ -53,8 +53,11 @@ classdef InverseDynamicsSimulator < DynamicsSimulator
                 obj.interactionWrench{t}    =   obj.model.interactionWrench;
                 obj.cableLengths{t}         =   obj.model.cableLengths;
                 obj.cableLengthsDot{t}      =   obj.model.cableLengthsDot;
-                % record the stiffness
-                obj.stiffness{t}            =   obj.model.K;
+                % record the stiffness when the system is not in the
+                % compiled mode
+                if (obj.model.modelMode ~= ModelModeType.COMPILED)
+                    obj.stiffness{t}            =   obj.model.K;
+                end
                 
                 if (obj.IDExitType{t} ~= IDSolverExitType.NO_ERROR)
                     CASPR_log.Print('No feasible solution for the ID',CASPRLogLevel.WARNING);

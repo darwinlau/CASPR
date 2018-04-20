@@ -16,6 +16,7 @@ classdef ControllerSimulator < DynamicsSimulator
         ob_trajectory       % The observer trajectory containing estimated variables (state and/or disturbance)
         ctrl_fk_trajectory  % The forward kinematics (used with controller) trajectory containing estimated state variables (probably will only be used in debugging)
         ob_fk_trajectory    % The forward kinematics (used with observer) trajectory containing estimated state variables (probably will only be used in debugging)
+        stiffness           % The stiffness matrices of the CDPR along the whole trajectory
         
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % simulator components
@@ -541,8 +542,16 @@ classdef ControllerSimulator < DynamicsSimulator
                 % update sim_trajectory with current step data, no
                 % need to run FD
                 obj.trajectory.q{obj.sim_counter + 1}       =   obj.trajectory.q{obj.sim_counter};
-                obj.trajectory.q_dot{obj.sim_counter + 1}	=   obj.trajectory.q_dot{obj.sim_counter};
-                obj.trajectory.q_ddot{obj.sim_counter + 1}	=   obj.trajectory.q_ddot{obj.sim_counter};
+%                 obj.trajectory.q_dot{obj.sim_counter + 1}	=   obj.trajectory.q_dot{obj.sim_counter};
+%                 obj.trajectory.q_ddot{obj.sim_counter + 1}	=   obj.trajectory.q_ddot{obj.sim_counter};
+                obj.trajectory.q_dot{obj.sim_counter + 1}	=   0*obj.trajectory.q_dot{obj.sim_counter};
+                obj.trajectory.q_ddot{obj.sim_counter + 1}	=   0*obj.trajectory.q_ddot{obj.sim_counter};
+                % record the stiffness when the system is not in the
+                % compiled mode
+                if (obj.model.modelMode ~= ModelModeType.COMPILED)
+                    obj.stiffness{obj.sim_counter + 1}     	 =   obj.model.K;
+                    obj.stiffness{obj.sim_counter + 1}
+                end
             else
                 % update sim_trajectory with new state from FD
                 % algorithm
@@ -553,6 +562,12 @@ classdef ControllerSimulator < DynamicsSimulator
                     obj.trajectory_op.y{obj.sim_counter + 1}        =   obj.true_model.y;
                     obj.trajectory_op.y_dot{obj.sim_counter + 1}    =   obj.true_model.y_dot;
                     obj.trajectory_op.y_ddot{obj.sim_counter + 1}   =   obj.true_model.y_ddot;
+                end
+                % record the stiffness when the system is not in the
+                % compiled mode
+                if (obj.model.modelMode ~= ModelModeType.COMPILED)
+                    obj.stiffness{obj.sim_counter + 1}     	 =   obj.model.K;
+                    obj.stiffness{obj.sim_counter + 1}
                 end
             end
             obj.sim_counter = obj.sim_counter + 1;

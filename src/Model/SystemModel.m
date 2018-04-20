@@ -302,10 +302,14 @@ classdef SystemModel < handle
             value = obj.L_grad(obj.cableModel.cableIndicesPassive, :, :);
         end
         
-        function value = get.K(obj)
-            is_symbolic = obj.modelMode == ModelModeType.SYMBOLIC;
-            value = obj.L.'*obj.cableModel.K*obj.L + TensorOperations.VectorProduct(obj.L_grad,obj.cableForces,1,is_symbolic);
-%             value = obj.L.'*obj.cableModel.K*obj.L;
+        function value = get.K(obj)          
+            if(obj.modelMode == ModelModeType.COMPILED)
+                CASPR_log.Error('Stiffness calculation is not supported in the compiled mode.');                      
+            else
+                is_symbolic = obj.modelMode == ModelModeType.SYMBOLIC;
+                value = obj.L.'*obj.cableModel.K*obj.L + TensorOperations.VectorProduct(obj.L_grad,obj.cableForces,1,is_symbolic);
+%                 value = obj.L.'*obj.cableModel.K*obj.L;
+            end
         end
         
         function value = get.J(obj)
