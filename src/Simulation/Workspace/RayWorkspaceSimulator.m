@@ -18,6 +18,7 @@ classdef RayWorkspaceSimulator < SimulatorBase
         graph_rep = []          % The graph representation for the workspace
         node_list = []          % A list of all nodes
         comp_time               % Computational time structure
+        dim_disc_ia             % An array involving the indices of dimensions to be discretized
     end
     
     methods
@@ -61,11 +62,12 @@ classdef RayWorkspaceSimulator < SimulatorBase
                 % Create a cell array for workspace
                 % Firstly determine the number of points -- AT THE MOMENT THIS
                 % IS ASSUMING UNIFORM GRIDS
+                obj.dim_disc_ia = find(obj.grid.delta_q~=0);
                 n_grid_points = 0; 
 %                 for i =1:obj.grid.n_dimensions
 %                     grid_index = true(obj.grid.n_dimensions,1); grid_index(i) = false;
-                for i =1:length(obj.grid.dim_disc_ia)
-                    grid_index = true(obj.grid.n_dimensions,1); grid_index(obj.grid.dim_disc_ia(i)) = false;
+                for i =1:length(obj.dim_disc_ia)
+                    grid_index = true(obj.grid.n_dimensions,1); grid_index(obj.dim_disc_ia(i)) = false;
                     obj.free_variable_length(i) = prod(obj.grid.q_length(grid_index));
                     n_grid_points = n_grid_points + obj.free_variable_length(i);
                 end 
@@ -84,8 +86,8 @@ classdef RayWorkspaceSimulator < SimulatorBase
                 total_t_in = tic;
 %                 for i = 1:obj.grid.n_dimensions
 %                     grid_index = true(obj.grid.n_dimensions,1); grid_index(i) = false;
-                for i = 1:length(obj.grid.dim_disc_ia)
-                    free_var_i = obj.grid.dim_disc_ia(i);
+                for i = 1:length(obj.dim_disc_ia)
+                    free_var_i = obj.dim_disc_ia(i);
                     grid_index = true(obj.grid.n_dimensions,1); grid_index(free_var_i) = false;
                     % Create a subgrid
                     sub_grid = UniformGrid(obj.grid.q_begin(grid_index),obj.grid.q_end(grid_index),obj.grid.delta_q(grid_index),'step_size',obj.grid.q_wrap(grid_index));

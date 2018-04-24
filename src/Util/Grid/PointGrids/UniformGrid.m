@@ -11,7 +11,6 @@ classdef UniformGrid < PointGridBase
         delta_q     % The step size in generalised coordinates
         q_length    % The length of each index
         q_wrap      % A boolean vector to indicate if the coordinate wraps around at its limits
-        dim_disc_ia % array contains the index of dimensions to be discretized
     end
 
     methods
@@ -21,16 +20,18 @@ classdef UniformGrid < PointGridBase
             CASPR_log.Assert((size(q_begin,1)==size(q_end,1))&&(size(q_begin,1)==size(q_info,1)),'Inputs must be of the same dimension');
             CASPR_log.Assert(sum(q_begin - q_end > 0) == 0,'Invalid input range');
             CASPR_log.Assert(sum(q_info < 0) == 0,'q_info variable contain only non-negative terms');
+            CASPR_log.Assert(sum(isnan(q_info))==0,'q_info variable contain only non-NaN terms');
+            CASPR_log.Assert(sum(isinf(q_info))==0,'q_info variable contain only non-Inf terms');
             % Maybe add more checks to ensure
             id.q_begin  =   q_begin;
             id.q_end    =   q_end;
             id.setNDimensions(size(q_begin,1));
-            id.dim_disc_ia = find(q_info ~= 0);
             
             if((nargin==3)||strcmp(info_type,'step_size'))
                 id.delta_q = q_info;
                 for i = 1:id.n_dimensions
                     if(id.delta_q(i) == 0)
+                        CASPR_log.Assert(q_begin(i)==q_end(i),'Begin and end points must be equal if the step size is 0');
                         id.q_length(i) = 1;
                     else
                         id.q_length(i) = round((id.q_end(i) - id.q_begin(i))/id.delta_q(i))+1;
@@ -43,7 +44,7 @@ classdef UniformGrid < PointGridBase
                         id.delta_q(i) = (id.q_end(i) - id.q_begin(i))/(id.q_length(i) - 1);
                     else
                         CASPR_log.Assert(q_begin(i)==q_end(i),'Begin and end points must be equal if the number of steps is 1');
-                        id.delta_q(i) = 1;
+                        id.delta_q(i) = 0;
                     end
                 end
             else
