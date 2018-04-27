@@ -10,7 +10,7 @@ classdef GSK_EightAxisStaticCASPRInterface < CableActuatorInterfaceBase
         MIN_TO_S = 60;
         MM_DECIMAL_PLACE = -3;
                        
-        CABLE_LENGTH_OFFSET_MM = [4.295; 4.752; 12.207; 11.460; 5.538; 5.987; 6.427; 4.007]; % NOTE: UNITS IN MM
+        CABLE_LENGTH_OFFSET_MM = [1.1293; 0.8382; 0.9429; 1.0143; 1.1150; 2.0500; 1.2591; 1.1561]; % NOTE: UNITS IN MM
         
         MACHINE_LOW_F_SPEED = 5000;
     end
@@ -53,6 +53,18 @@ classdef GSK_EightAxisStaticCASPRInterface < CableActuatorInterfaceBase
         % Always true for this interface as there is no physical device
         function [success] = detectDevice(~)
             success = 1;
+        end
+        
+        function forceFeedbackRead(~)
+        end
+        
+        function forceCommandSend(~,~)
+        end
+        
+        function switchOperatingMode(~,~)
+        end
+        
+        function initialise(~)
         end
         
         % All length commands are to be sent to hardware in terms of [mm]
