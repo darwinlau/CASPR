@@ -24,6 +24,10 @@ classdef CASPR_configuration
         function global_model_mode = LoadGlobalModelMode()
             model_config = load('CASPR_environment.mat', 'global_model_mode');
             global_model_mode = model_config.global_model_mode;
+            if ~isa(global_model_mode, 'ModelModeType')
+                CASPR_configuration.SetGlobalModelMode(ModelModeType.DEFAULT, false);
+                global_model_mode = ModelModeType.DEFAULT;
+            end
         end
         % Load reuse_compiled flag
         function reuse_compiled = LoadReuseCompiled()
