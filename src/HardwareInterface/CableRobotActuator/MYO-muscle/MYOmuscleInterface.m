@@ -102,8 +102,10 @@ classdef MYOmuscleInterface < CableActuatorInterfaceBase
         end          
         
         % publish force commands
-        function forceCommandSend(obj, f_cmd)
+        function forceCommandSend(obj, f_cmd, q, q_d)
             obj.cmd_msg.Effort = f_cmd;
+            obj.cmd_msg.Position = q;
+            obj.cmd_msg.Velocity = q_d;
             send(obj.cmd_pub, obj.cmd_msg);
         end
         
