@@ -1,4 +1,4 @@
-function Y = ode1(odefun,tspan,y0,varargin)
+function [fake_output, Y] = ode1(odefun,tspan,y0,varargin)
 %ODE1  Solve differential equations with a non-adaptive method of order 1.
 %   Y = ODE1(ODEFUN,TSPAN,Y0) with TSPAN = [T1, T2, T3, ... TN] integrates 
 %   the system of differential equations y' = f(t,y) by stepping from T0 to 
@@ -54,3 +54,4 @@ for i = 1:N-1
   Y(:,i+1) = Y(:,i) + h(i)*feval(odefun,tspan(i),Y(:,i),varargin{:});
 end
 Y = Y.';
+fake_output = [];

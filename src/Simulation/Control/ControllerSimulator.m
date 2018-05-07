@@ -69,6 +69,7 @@ classdef ControllerSimulator < DynamicsSimulator
         l_0_ctrl            % initial cabel lengths in the environment (used to restore the absolute lengths when relative encoder is used)
     
         rounding_error_guard % used to cut the effect of rounding error
+        
     end
 
     methods
@@ -343,8 +344,10 @@ classdef ControllerSimulator < DynamicsSimulator
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             first_cycle = true;
             for t = 1:length(obj.timeVector)
-                CASPR_log.Info(sprintf('Time : %f', obj.timeVector(t)));
-                CASPR_log.Info(sprintf('Completion Percentage: %3.2f%%',100*t/length(obj.timeVector)));
+                if (~obj.simopt.is_silent_mode)
+                    CASPR_log.Info(sprintf('Time : %f', obj.timeVector(t)));
+                    CASPR_log.Info(sprintf('Completion Percentage: %3.2f%%',100*t/length(obj.timeVector)));
+                end
                                 
                 % extract current time to make component update decisions
                 current_time = obj.timeVector(t);
@@ -550,11 +553,11 @@ classdef ControllerSimulator < DynamicsSimulator
                 % compiled mode
                 if (obj.model.modelMode ~= ModelModeType.COMPILED)
                     obj.stiffness{obj.sim_counter + 1}     	 =   obj.model.K;
-                    obj.stiffness{obj.sim_counter + 1}
                 end
             else
                 % update sim_trajectory with new state from FD
                 % algorithm
+                if (obj.dyn)
                 [obj.trajectory.q{obj.sim_counter + 1}, obj.trajectory.q_dot{obj.sim_counter + 1}, obj.trajectory.q_ddot{obj.sim_counter + 1}, obj.true_model] = ...
                     obj.fdSolver.compute(obj.trajectory.q{obj.sim_counter}, obj.trajectory.q_dot{obj.sim_counter}, obj.cableForces{obj.ctrl_counter}, obj.true_model.cableModel.cableIndicesActive, obj.w_ext, obj.timeVector(obj.sim_counter + 1) - obj.timeVector(obj.sim_counter), obj.true_model);
                 obj.trajectory.q_ddot{obj.sim_counter + 1}	=   obj.trajectory.q_ddot{obj.sim_counter};
@@ -567,7 +570,6 @@ classdef ControllerSimulator < DynamicsSimulator
                 % compiled mode
                 if (obj.model.modelMode ~= ModelModeType.COMPILED)
                     obj.stiffness{obj.sim_counter + 1}     	 =   obj.model.K;
-                    obj.stiffness{obj.sim_counter + 1}
                 end
             end
             obj.sim_counter = obj.sim_counter + 1;

@@ -323,5 +323,44 @@
           </point> 
         </points>
       </quintic_spline_trajectory>
+      <quintic_spline_trajectory id="star_m" time_step="0.005" time_definition="relative">
+        <points>
+          <point>
+            <y>0 0.575 0.0</y>
+            <y_dot>0.0 0.0 0.0</y_dot>
+            <y_ddot>0.0 0.0 0.0</y_ddot>
+          </point>            
+          <point time="0.5">
+            <y>0.075 0.575 0.0</y>
+            <y_dot>0.0 0.0 0.0</y_dot>
+            <y_ddot>0.0 0.0 0.0</y_ddot>
+          </point>  
+          <point time="1.0">
+            <y>-0.046 0.575 -0.088</y>
+            <y_dot>0.0 0.0 0.0</y_dot>
+            <y_ddot>0.0 0.0 0.0</y_ddot>
+          </point> 
+          <point time="1.0">
+            <y>0.0 0.575 0.054</y>
+            <y_dot>0.0 0.0 0.0</y_dot>
+            <y_ddot>0.0 0.0 0.0</y_ddot>
+          </point> 
+          <point time="1.0">
+            <y>0.046 0.575 -0.088</y>
+            <y_dot>0.0 0.0 0.0</y_dot>
+            <y_ddot>0.0 0.0 0.0</y_ddot>
+          </point> 
+          <point time="1.0">
+            <y>-0.075 0.575 0.0</y>
+            <y_dot>0.0 0.0 0.0</y_dot>
+            <y_ddot>0.0 0.0 0.0</y_ddot>
+          </point> 
+          <point time="0.5">
+            <y>0 0.575 0.00</y>
+            <y_dot>0.0 0.0 0.0</y_dot>
+            <y_ddot>0.0 0.0 0.0</y_ddot>
+          </point> 
+        </points>
+      </quintic_spline_trajectory>
     </operational_trajectories>
 </trajectories>
