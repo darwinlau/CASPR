@@ -30,9 +30,9 @@ classdef LyapunovStaticCompensation < ControllerBase
         
         % The implementation of the abstract executeFunction for the
         % controller class.
-        function [cable_force_active, result_model] = executeFunction(obj, q, q_d, ~, q_ref, q_ref_d, ~, ~)
+        function [f_active, result_model] = executeFunction(obj, q, q_d, ~, q_ref, q_ref_d, ~, ~)
             error_comp = obj.Kp * (q_ref - q) + obj.Kd * (q_ref_d - q_d);
-            [cable_force_active, result_model] = obj.id_solver.resolve(q, zeros(obj.dynModel.numDofs,1), zeros(obj.dynModel.numDofs,1), error_comp);
+            [f_active, result_model] = obj.id_solver.resolve(q, zeros(obj.dynModel.numDofs,1), zeros(obj.dynModel.numDofs,1), error_comp);
         end
         
     end
