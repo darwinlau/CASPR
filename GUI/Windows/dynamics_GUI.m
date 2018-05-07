@@ -662,7 +662,9 @@ function file_copy(handles,output_file)
         new_s = regexprep(new_s,'Example planar XY',model_str);
         new_s = regexprep(new_s,'basic',cable_str);
         new_s = regexprep(new_s,'example_quintic',trajectory_str);
-        fprintf(w_fid,[new_s,'\n']);
+%         fprintf(w_fid,[new_s,'\n']);
+        fprintf(w_fid, new_s);
+        fprintf(w_fid, '\n');
     end
     fclose(r_fid);
     fclose(w_fid);

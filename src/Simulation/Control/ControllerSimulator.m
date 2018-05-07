@@ -442,7 +442,7 @@ classdef ControllerSimulator < DynamicsSimulator
             end
             obj.compTime(obj.ctrl_counter)              =   toc;
             % save the data
-            obj.cableForces{obj.ctrl_counter}           =   obj.f_cmd;
+            obj.cableForces{obj.ctrl_counter}           =   obj.f_cmd(1:obj.model.numCables);
         end
         
         % update state feedback for controller and save the data into
