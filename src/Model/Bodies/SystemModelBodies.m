@@ -379,7 +379,10 @@ classdef SystemModelBodies < handle
                     % Simplifying internal elements of big rotation
                     % matrices
                     parent_R_0k = simplify(parent_R_0k, 'Step', k*20);
-                    R_pe = simplify(R_pe, 'Step', k*20);
+                    try
+                        R_pe = simplify(R_pe, 'Step', k*20);
+                    catch
+                    end
                     obj.bodies{k}.R_0k = parent_R_0k*R_pe;                     
                     obj.bodies{k}.R_0k = simplify(obj.bodies{k}.R_0k, 'Step', k*20);
                     obj.bodies{k}.r_OP = R_pe.'*(obj.bodies{parent_link_num}.r_OP + obj.bodies{k}.r_Parent + obj.bodies{k}.joint.r_rel);
@@ -1231,6 +1234,66 @@ classdef SystemModelBodies < handle
                 index_vars = index_vars + obj.bodies{k}.joint.numVars;
             end
         end
+        
+        function J = get.J(obj)
+            if(~obj.occupied.operational_space)
+                obj.occupied.operational_space = true;
+                if (obj.modelMode == ModelModeType.COMPILED)
+                    obj.update(obj.q, obj.q_dot, obj.q_ddot, obj.W_e);
+                else
+                    obj.updateOperationalSpace(); 
+                end
+            end
+            J = obj.J;
+        end
+        
+        function J_dot = get.J_dot(obj)
+            if(~obj.occupied.operational_space)
+                obj.occupied.operational_space = true;
+                if (obj.modelMode == ModelModeType.COMPILED)
+                    obj.update(obj.q, obj.q_dot, obj.q_ddot, obj.W_e);
+                else
+                    obj.updateOperationalSpace(); 
+                end
+            end
+            J_dot = obj.J_dot;
+        end
+        
+        function y = get.y(obj)
+            if(~obj.occupied.operational_space)
+                obj.occupied.operational_space = true;
+                if (obj.modelMode == ModelModeType.COMPILED)
+                    obj.update(obj.q, obj.q_dot, obj.q_ddot, obj.W_e);
+                else
+                    obj.updateOperationalSpace(); 
+                end
+            end
+            y = obj.y;
+        end
+        
+        function y_dot = get.y_dot(obj)
+            if(~obj.occupied.operational_space)
+                obj.occupied.operational_space = true;
+                if (obj.modelMode == ModelModeType.COMPILED)
+                    obj.update(obj.q, obj.q_dot, obj.q_ddot, obj.W_e);
+                else
+                    obj.updateOperationalSpace(); 
+                end
+            end
+            y_dot = obj.y_dot;
+        end
+        
+        function y_ddot = get.y_ddot(obj)
+            if(~obj.occupied.operational_space)
+                obj.occupied.operational_space = true;
+                if (obj.modelMode == ModelModeType.COMPILED)
+                    obj.update(obj.q, obj.q_dot, obj.q_ddot, obj.W_e);
+                else
+                    obj.updateOperationalSpace(); 
+                end
+            end
+            y_ddot = obj.y_ddot;
+        end
 
         function M_y = get.M_y(obj)
             if obj.modelMode==ModelModeType.COMPILED
@@ -1436,11 +1499,7 @@ classdef SystemModelBodies < handle
             end
         end
         
-        function val = get.tau(obj)
-            if obj.modelMode==ModelModeType.COMPILED
-                CASPR_log.Warn('You are not allowed to assess this variable under COMPILED mode');
-                return;
-            end
+        function val = get.tau(obj)            
             val = zeros(obj.numDofsActuated, 1);
             count = 0;
             for k = 1:obj.numLinks

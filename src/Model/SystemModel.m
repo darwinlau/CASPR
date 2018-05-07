@@ -320,39 +320,15 @@ classdef SystemModel < handle
             value = obj.bodyModel.J_dot;
         end
         
-        function value = get.y(obj)
-            if(~obj.bodyModel.occupied.operational_space)
-                obj.bodyModel.occupied.operational_space = true;
-                if (obj.modelMode == ModelModeType.COMPILED)
-                    obj.bodyModel.update(obj.q, obj.q_dot, obj.q_ddot, obj.W_e);
-                else
-                    obj.bodyModel.updateOperationalSpace(); 
-                end
-            end
+        function value = get.y(obj)            
             value = obj.bodyModel.y;
         end
         
-        function value = get.y_dot(obj)
-            if(~obj.bodyModel.occupied.operational_space)
-                obj.bodyModel.occupied.operational_space = true;
-                if (obj.modelMode == ModelModeType.COMPILED)
-                    obj.bodyModel.update(obj.q, obj.q_dot, obj.q_ddot, obj.W_e);
-                else
-                    obj.bodyModel.updateOperationalSpace(); 
-                end
-            end
+        function value = get.y_dot(obj)            
             value = obj.bodyModel.y_dot;
         end
         
-        function value = get.y_ddot(obj)
-            if(~obj.bodyModel.occupied.operational_space)
-                obj.bodyModel.occupied.operational_space = true;
-                if (obj.modelMode == ModelModeType.COMPILED)
-                    obj.bodyModel.update(obj.q, obj.q_dot, obj.q_ddot, obj.W_e);
-                else
-                    obj.bodyModel.updateOperationalSpace(); 
-                end
-            end
+        function value = get.y_ddot(obj)            
             value = obj.bodyModel.y_ddot;
         end
         
