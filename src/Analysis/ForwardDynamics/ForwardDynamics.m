@@ -56,7 +56,7 @@ classdef ForwardDynamics < handle
             q_dot = y_out(s_end, n_vars+1:length(y0))';
             % Update the model with q, q_dot and f so that q_ddot can be determined
             model.update(q, q_dot, zeros(n_dofs, 1), w_ext);
-            model.cableModel.forces = cable_forces_active;
+            model.actuationForces = cable_forces_active;
             % Determine this using the dynamics of the system and the
             % cable forces
             q_ddot = model.q_ddot_dynamics;
@@ -76,7 +76,7 @@ classdef ForwardDynamics < handle
 
             model.update(q, q_dot, zeros(n_dofs, 1), w_ext);
             assert(isequal(model.cableModel.cableIndicesActive, f_indices_active), 'The cable forces that should be active do not match that of the input');
-            model.cableModel.forces = f_active;
+            model.actuationForces = f_active;
 
             y_dot(1:n_vars) = model.q_deriv;
             y_dot(n_vars+1:length(y)) = model.q_ddot_dynamics;
