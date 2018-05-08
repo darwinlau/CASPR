@@ -602,6 +602,17 @@ classdef ControllerSimulator < DynamicsSimulator
                 end
             end
         end
+                
+        % Getters
+        function controller = getController(obj)            
+            controller = obj.controller;
+        end
+        
+        % Setters
+        function setController(obj, controller)
+            CASPR_log.Assert(isa(controller, 'ControllerBase'), 'Input argument is not a valid controller.');
+            obj.controller = controller;            
+        end
         
         % Assign data to matlab workspace
         function [output_data]     =   extractData(obj)
