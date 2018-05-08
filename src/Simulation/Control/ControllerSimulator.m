@@ -69,6 +69,7 @@ classdef ControllerSimulator < DynamicsSimulator
         l_0_ctrl            % initial cabel lengths in the environment (used to restore the absolute lengths when relative encoder is used)
     
         rounding_error_guard % used to cut the effect of rounding error
+        controlForces       % controlling forces including cable forces and active joint torques
         
     end
 
@@ -198,7 +199,7 @@ classdef ControllerSimulator < DynamicsSimulator
             % controller related variables
             obj.ctrl_trajectory             =   JointTrajectory;
             obj.ctrl_trajectory.timeVector  =   obj.refTrajectory.timeVector;
-            obj.cableForces                 =   cell(1, length(obj.ctrl_trajectory.timeVector));
+            obj.controlForces              	=   cell(1, length(obj.ctrl_trajectory.timeVector));
             obj.ctrl_trajectory.q           =   cell(1, length(obj.ctrl_trajectory.timeVector));
             obj.ctrl_trajectory.q_dot       =   cell(1, length(obj.ctrl_trajectory.timeVector));
             obj.ctrl_trajectory.q_ddot      =   cell(1, length(obj.ctrl_trajectory.timeVector));
@@ -442,7 +443,8 @@ classdef ControllerSimulator < DynamicsSimulator
             end
             obj.compTime(obj.ctrl_counter)              =   toc;
             % save the data
-            obj.cableForces{obj.ctrl_counter}           =   obj.f_cmd(1:obj.model.numCables);
+            obj.controlForces{obj.ctrl_counter}        	=   obj.f_cmd;
+            obj.cableForces{obj.ctrl_counter}        	=   obj.f_cmd(1:obj.model.numCables);
         end
         
         % update state feedback for controller and save the data into
@@ -491,7 +493,7 @@ classdef ControllerSimulator < DynamicsSimulator
             
             % update the observer estimation
             [q_est, q_dot_est, q_ddot_disturbance_est, wrench_disturbance_est]    =   ...
-                obj.observer.executeFunction(obj.ob_trajectory.q{obj.ob_counter}, obj.ob_trajectory.q_dot{obj.ob_counter}, obj.cableForces{obj.ctrl_counter}, zeros(obj.model.numDofs, 1), obj.ob_counter);
+                obj.observer.executeFunction(obj.ob_trajectory.q{obj.ob_counter}, obj.ob_trajectory.q_dot{obj.ob_counter}, obj.controlForces{obj.ctrl_counter}, zeros(obj.model.numDofs, 1), obj.ob_counter);
             obj.w_ext_est           =   wrench_disturbance_est;
             obj.q_ddot_ext_est      =   q_ddot_disturbance_est;
             
@@ -558,7 +560,7 @@ classdef ControllerSimulator < DynamicsSimulator
                 % update sim_trajectory with new state from FD
                 % algorithm                
                 [obj.trajectory.q{obj.sim_counter + 1}, obj.trajectory.q_dot{obj.sim_counter + 1}, obj.trajectory.q_ddot{obj.sim_counter + 1}, obj.true_model] = ...
-                    obj.fdSolver.compute(obj.trajectory.q{obj.sim_counter}, obj.trajectory.q_dot{obj.sim_counter}, obj.cableForces{obj.ctrl_counter}, obj.true_model.cableModel.cableIndicesActive, obj.w_ext, obj.timeVector(obj.sim_counter + 1) - obj.timeVector(obj.sim_counter), obj.true_model);
+                    obj.fdSolver.compute(obj.trajectory.q{obj.sim_counter}, obj.trajectory.q_dot{obj.sim_counter}, obj.controlForces{obj.ctrl_counter}, obj.true_model.cableModel.cableIndicesActive, obj.w_ext, obj.timeVector(obj.sim_counter + 1) - obj.timeVector(obj.sim_counter), obj.true_model);
                 obj.trajectory.q_ddot{obj.sim_counter + 1}	=   obj.trajectory.q_ddot{obj.sim_counter};
                 if (obj.simopt.is_operational_space_control)
                     obj.trajectory_op.y{obj.sim_counter + 1}        =   obj.true_model.y;
@@ -657,7 +659,7 @@ classdef ControllerSimulator < DynamicsSimulator
             ctrl_timevec   	=   obj.ctrl_trajectory.timeVector';
             ctrl_q         	=   cell2mat(obj.ctrl_trajectory.q)';
             ctrl_q_dot     	=   cell2mat(obj.ctrl_trajectory.q_dot)';
-            ctrl_f_cmd    	=   cell2mat(obj.cableForces)';
+            ctrl_f_cmd    	=   cell2mat(obj.controlForces)';
             len_ctrl = min([ size(ctrl_timevec, 1), ...
                         size(ctrl_q, 1), ...
                         size(ctrl_q_dot, 1), ...
