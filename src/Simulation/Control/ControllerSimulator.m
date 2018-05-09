@@ -10,67 +10,78 @@ classdef ControllerSimulator < DynamicsSimulator
     properties (SetAccess = protected)
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % results
-        compTime            % computational time for each time step
-        refTrajectory       % The reference trajectory
-        ctrl_trajectory     % The trajectory containing state variables used in the control command update
-        ob_trajectory       % The observer trajectory containing estimated variables (state and/or disturbance)
-        ctrl_fk_trajectory  % The forward kinematics (used with controller) trajectory containing estimated state variables (probably will only be used in debugging)
-        ob_fk_trajectory    % The forward kinematics (used with observer) trajectory containing estimated state variables (probably will only be used in debugging)
-        stiffness           % The stiffness matrices of the CDPR along the whole trajectory
+        compTime                % computational time for each time step
+        refTrajectory           % The reference trajectory
+        ctrl_trajectory         % The trajectory containing state variables used in the control command update
+        ob_trajectory           % The observer trajectory containing estimated variables (state and/or disturbance)
+        ctrl_fk_trajectory      % The forward kinematics (used with controller) trajectory containing estimated state variables (probably will only be used in debugging)
+        ob_fk_trajectory        % The forward kinematics (used with observer) trajectory containing estimated state variables (probably will only be used in debugging)
+        stiffness               % The stiffness matrices of the CDPR along the whole trajectory
         
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % simulator components
-        fdSolver            % The forward dynamics solver
-        fkSolver            % the forward kinematics solver, optional to use
-        controller          % The controller for the system
-        observer            % The disturbance observer for the system (if applicable)
-        uncertainties       % A list of uncertainties
-        true_model          % The true model for the system
+        fdSolver                % The forward dynamics solver
+        fkSolver                % the forward kinematics solver, optional to use
+        controller              % The controller for the system
+        observer                % The disturbance observer for the system (if applicable)
+        uncertainties           % A list of uncertainties
+        true_model              % The true model for the system
         
         
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % simulator configurations
-        simopt              % a ControllerSimulatorOptions object with all related options
-        FK_solver_available % if true an FK solver is passed to the simulator
-        observer_available  % if true an observer is passed to the simulator
-        sim_vec_length      % total number of points run in simulation
-        ctrl_vec_length     % total number of points run in command update
-        ob_vec_length       % total number of points run in observer
+        simopt                  % a ControllerSimulatorOptions object with all related options
+        FK_solver_available     % if true an FK solver is passed to the simulator
+        observer_available      % if true an observer is passed to the simulator
+        sim_vec_length          % total number of points run in simulation
+        ctrl_vec_length         % total number of points run in command update
+        ob_vec_length           % total number of points run in observer
                             
                             
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % intermediate variables (SHOULD BE UPDATED in corresponding cycles)
         % trajectory management
-        sim_counter         % counts the number of points run in simulation
-        ctrl_counter        % counts the number of points run in command update
-        ob_counter          % counts the number of points run in observer
+        sim_counter             % counts the number of points run in simulation
+        ctrl_counter            % counts the number of points run in command update
+        ob_counter              % counts the number of points run in observer
         % component communications
         % reference trajectory related
-        q_ref               % the current reference point
-        q_dot_ref           % the current reference velocity
-        q_ddot_ref          % the current refernece acceleration
+        q_ref                   % the current reference point
+        q_dot_ref               % the current reference velocity
+        q_ddot_ref              % the current refernece acceleration
         % uncertainty related
-        w_ext               % external wrench currently used to store disturbances
-        w_ext_est           % the estimated external wrench
-        q_ddot_ext          % external wrench currently used to store disturbances
-        q_ddot_ext_est      % the equivalent acceleration of the estimated external wrench
+        w_ext                   % external wrench currently used to store disturbances
+        w_ext_est               % the estimated external wrench
+        q_ddot_ext              % external wrench currently used to store disturbances
+        q_ddot_ext_est          % the equivalent acceleration of the estimated external wrench
         % controller related
-        f_cmd               % force command in the current control cycle
+        f_cmd                   % force command in the current control cycle
         % FK related
-        l                   % current cable lengths vector
-        l_fk_prev_ctrl      % previous cable lengths vector for FK in controller
-        q_fk_prev_ctrl      % previous joint pose for FK in controller
-        q_d_fk_prev_ctrl    % previous joint velocity for FK in controller
-        l_fk_prev_ob        % previous cable lengths vector for FK in observer
-        q_fk_prev_ob        % previous joint pose for FK in observer
-        q_d_fk_prev_ob      % previous joint velocity for FK in observer
+        l                       % current cable lengths vector
+        l_fk_prev_ctrl          % previous cable lengths vector for FK in controller
+        q_fk_prev_ctrl          % previous joint pose for FK in controller
+        q_d_fk_prev_ctrl        % previous joint velocity for FK in controller
+        l_fk_prev_ob            % previous cable lengths vector for FK in observer
+        q_fk_prev_ob            % previous joint pose for FK in observer
+        q_d_fk_prev_ob          % previous joint velocity for FK in observer
         % FK related - relative encoder
-        l_0_env             % initial cabel lengths in the environment (used to generate relative lengths when relative encoder is used)
-        l_0_ctrl            % initial cabel lengths in the environment (used to restore the absolute lengths when relative encoder is used)
+        l_0_env                 % initial cabel lengths in the environment (used to generate relative lengths when relative encoder is used)
+        l_0_ctrl                % initial cabel lengths in the environment (used to restore the absolute lengths when relative encoder is used)
     
-        rounding_error_guard % used to cut the effect of rounding error
-        controlForces       % controlling forces including cable forces and active joint torques
+        rounding_error_guard    % used to cut the effect of rounding error
+        controlForces           % controlling forces including cable forces and active joint torques
         
+        % simulation ending scenarios
+        pre_mature_termination  % flag shows that the simulation needs to be terminated pre-maturely
+        compeletion_percentage 	% how much of the trajectory the controller finished tracking
+        trajectory_duration     % how long the trajectory lasts
+
+        % tackling infeasibility
+        controller_exit_type    % exit type that indicates the how the controller runs
+        infeasibility_flag      % a flag suggests whether infeasibility happens
+                
+        % tackling singularity in M
+        singular_M_flag         % indicating that M in the EoM is singular
     end
 
     methods
@@ -129,6 +140,16 @@ classdef ControllerSimulator < DynamicsSimulator
             end
             ctrl_sim.rounding_error_guard = 1e-5;
             ctrl_sim.optionConsistencyCheck();
+            % initialize the pre_mature_termination flag as not doing it
+            ctrl_sim.pre_mature_termination = 0;
+            % initialize the singular_M_flag flag as not singular
+            ctrl_sim.singular_M_flag = 0;
+            % initialize the infeasibility flag as problem feasible
+            ctrl_sim.infeasibility_flag = 0;
+            % initialize the controller exit flag
+            ctrl_sim.controller_exit_type = ControllerExitType.NO_ERROR;
+            % initialize the compeletion percentage as invalid value
+            ctrl_sim.compeletion_percentage = -1;
         end
         
         % simulator option consistency check
@@ -182,6 +203,8 @@ classdef ControllerSimulator < DynamicsSimulator
             % starting time and ending time
             t0 = ref_trajectory.timeVector(1);
             tf = ref_trajectory.timeVector(length(ref_trajectory.timeVector));
+            % initialize the trajectory duration
+            obj.trajectory_duration = tf;
             % controller is assumed to run with the same frequency defined
             % in the reference trajectory
             obj.ctrl_vec_length	=   length(ref_trajectory.timeVector);
@@ -344,7 +367,10 @@ classdef ControllerSimulator < DynamicsSimulator
             % START THE MAIN LOOP
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             first_cycle = true;
-            for t = 1:length(obj.timeVector)
+            % initialize the loop counter
+            t = 1;
+            while (1 <= t && t <= length(obj.timeVector) && ~obj.pre_mature_termination)
+                
                 if (~obj.simopt.is_silent_mode)
                     CASPR_log.Info(sprintf('Time : %f', obj.timeVector(t)));
                     CASPR_log.Info(sprintf('Completion Percentage: %3.2f%%',100*t/length(obj.timeVector)));
@@ -356,11 +382,13 @@ classdef ControllerSimulator < DynamicsSimulator
                 % update model
                 obj.true_model.update(obj.trajectory.q{obj.sim_counter}, obj.trajectory.q_dot{obj.sim_counter}, zeros(obj.model.numDofs, 1), zeros(obj.model.numDofs,1));
                 
+                obj.preMatureTerminationCheck();
+                
                 % control command (and FK, if applicable) update
                 if (first_cycle)
                     obj.ctrl_counter = 0;
                 end
-                if (current_time >= obj.ctrl_trajectory.timeVector(obj.ctrl_counter + 1) - obj.rounding_error_guard)
+                if (current_time >= obj.ctrl_trajectory.timeVector(obj.ctrl_counter + 1) - obj.rounding_error_guard && ~obj.pre_mature_termination)
                     % update the counter
                     obj.ctrl_counter = obj.ctrl_counter + 1;
                     % update time profile
@@ -375,7 +403,7 @@ classdef ControllerSimulator < DynamicsSimulator
                     % update the counter
                     obj.ob_counter = 0;
                 end
-                if (current_time >= obj.ob_trajectory.timeVector(obj.ob_counter + 1) - obj.rounding_error_guard)
+                if (current_time >= obj.ob_trajectory.timeVector(obj.ob_counter + 1) - obj.rounding_error_guard && ~obj.pre_mature_termination)
                     if (obj.simopt.enable_observer)
                         % update the counter
                         obj.ob_counter = obj.ob_counter + 1;
@@ -388,7 +416,7 @@ classdef ControllerSimulator < DynamicsSimulator
                 
                 
                 % FD update
-                if (current_time < tf)
+                if (current_time < tf && ~obj.pre_mature_termination)
                     % pre-update uncertainty update
                     skip_FD     =   obj.preUpdateUncertainyUpdate(current_time);
                     % do forward dynamic update
@@ -401,9 +429,17 @@ classdef ControllerSimulator < DynamicsSimulator
                     if (t ~= obj.sim_counter)
                         CASPR_log.Error(sprintf('Something does not add up in FD update.'));
                     end
+                    if (obj.pre_mature_termination)
+                        CASPR_log.Info(sprintf('Simulation is pre-maturely terminated.'));
+                    end
                 end
                 
                 first_cycle = false;
+                % update the loop counter
+                t = t + 1;
+            end
+            if (obj.pre_mature_termination)
+                obj.compeletion_percentage = (t - 1)/length(obj.timeVector);
             end
         end
         
@@ -435,16 +471,17 @@ classdef ControllerSimulator < DynamicsSimulator
 
             % run control command update
             if (obj.simopt.is_operational_space_control)
-                [obj.f_cmd, ~, ~]  = ...
+                [obj.f_cmd, ~, ~, obj.controller_exit_type]  = ...
                     obj.controller.execute(obj.ctrl_trajectory.q{obj.ctrl_counter}, obj.ctrl_trajectory.q_dot{obj.ctrl_counter}, zeros(obj.model.numDofs,1), obj.refTrajectory.y{obj.ctrl_counter}, obj.refTrajectory.y_dot{obj.ctrl_counter}, obj.refTrajectory.y_ddot{obj.ctrl_counter}, obj.q_ddot_ext_est, obj.ctrl_counter);
             else
-                [obj.f_cmd, ~, ~]  = ...
+                [obj.f_cmd, ~, ~, obj.controller_exit_type]  = ...
                     obj.controller.execute(obj.ctrl_trajectory.q{obj.ctrl_counter}, obj.ctrl_trajectory.q_dot{obj.ctrl_counter}, zeros(obj.model.numDofs,1), obj.refTrajectory.q{obj.ctrl_counter}, obj.refTrajectory.q_dot{obj.ctrl_counter}, obj.refTrajectory.q_ddot{obj.ctrl_counter}, obj.q_ddot_ext_est, obj.ctrl_counter);
             end
             obj.compTime(obj.ctrl_counter)              =   toc;
             % save the data
             obj.controlForces{obj.ctrl_counter}        	=   obj.f_cmd;
             obj.cableForces{obj.ctrl_counter}        	=   obj.f_cmd(1:obj.model.numCables);
+            
         end
         
         % update state feedback for controller and save the data into
@@ -808,6 +845,47 @@ classdef ControllerSimulator < DynamicsSimulator
             end
             output_data.DataAvgCtrlForceCommand = average_force_command;
             output_data.DataAvgComputationalTime = norm(output_data.compTime, 1)/length(output_data.compTime);
+        end
+        
+        % function that gives information on how the simulation ends (normally or out of infeasibility)
+        function [premature_termination_flag, compeletion_percentage] = simulationTerminationStatus(obj)
+            premature_termination_flag = obj.pre_mature_termination;
+            compeletion_percentage = obj.compeletion_percentage;
+        end
+        
+        % function that checks possible pre-mature stop of the simulation
+        function preMatureTerminationCheck(obj)
+            
+            % generate the infeasibility flag to determine whether or not
+            % the simulation should continue according to the feasibility
+            if (obj.controller_exit_type ~= ControllerExitType.NO_ERROR && obj.controller_exit_type ~= ControllerExitType.ITERATION_LIMIT_REACHED)
+                % indicates control problem infeasible
+                obj.infeasibility_flag = 1;
+            else
+                % indicates control problem feasible
+                obj.infeasibility_flag = 0;
+            end
+%             inf_tmp = sum(sum(isinf(obj.true_model.M)))
+%             nan_tmp = sum(sum(isnan(obj.true_model.M)))
+            if (sum(sum(isinf(obj.true_model.M))) || sum(sum(isnan(obj.true_model.M))))
+                obj.singular_M_flag = 1;
+            else
+%                 cond_num_M = cond(obj.true_model.M)
+%                 svd_M = svd(obj.true_model.M)
+                smallest_singular_value = min(svd(obj.true_model.M));
+                if abs(smallest_singular_value) < 1e-8
+                    obj.singular_M_flag = 1;
+                else
+                    obj.singular_M_flag = 0;
+                end
+
+            end
+            
+            if (obj.infeasibility_flag || obj.singular_M_flag)
+                obj.pre_mature_termination = 1;
+            else
+                obj.pre_mature_termination = 0;
+            end
         end
         
 %         % Plots the tracking error in generalised coordinates
