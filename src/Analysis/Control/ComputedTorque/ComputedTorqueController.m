@@ -27,7 +27,7 @@ classdef ComputedTorqueController < ControllerBase
 
         % The implementation of the abstract executeFunction for the
         % controller class.
-        function [f_active, result_model] = executeFunction(obj, q, q_d, ~, q_ref, q_ref_d, q_ref_dd, ~)
+        function [f_active, result_model, exit_flag] = executeFunction(obj, q, q_d, ~, q_ref, q_ref_d, q_ref_dd, ~)
             q_ddot_cmd = q_ref_dd + obj.Kp * (q_ref - q) + obj.Kd * (q_ref_d - q_d);
             % ID solver is also responsible for generating the combined
             % actuating forces and updating the model with the forces
@@ -38,6 +38,8 @@ classdef ComputedTorqueController < ControllerBase
             else
                 obj.f_prev = f_active;
             end
+            
+            exit_flag = obj.exitTypeConversion(id_exit_type);
         end    
     end
 end
