@@ -46,12 +46,18 @@ classdef PoCaBotExperiment < ExperimentBase
         q_feedback_traj         % Temporary variable to store things for now
         q_d_feedback_traj       % Temporary variable to store things for now
         q_cmd_traj
+        
+        % the real time adjustment of the generalised coordinate which
+        % could be considered as an interface for real time tuning. This
+        % variable could be useful when the input trajectory is not
+        % accurate. Generally, this variable is a zero vector.
+        q_offset_tuned
     end
     
     methods
         function exp = PoCaBotExperiment(numMotor,strCableID,timestep, server)
             % Create the config
-            model_config = DevModelConfig('XL-Laser');
+            model_config = DevModelConfig('DrainageServiceBot');
             % Load the SystemKinematics object from the XML
             modelObj = model_config.getModel(strCableID);
             % Create the hardware interface
@@ -63,7 +69,7 @@ classdef PoCaBotExperiment < ExperimentBase
             
             %            eb.forwardKin = FKDifferential(modelObj);
             exp.q_present = NaN;
-            
+            exp.q_offset_tuned = zeros(modelObj.numDofVars,1);
             %             id_objective = IDObjectiveMinLinCableForce(ones(modelObj.numActuatorsActive,1));
             %             id_solver = IDSolverLinProg(modelObj, id_objective, ID_LP_SolverType.MATLAB);
             
@@ -436,6 +442,7 @@ classdef PoCaBotExperiment < ExperimentBase
                 % Print time for debugging
                 % time = trajectory.timeVector(t);
                 obj.q_present = trajectory.q(:,t);
+                trajectory.q(:,t) = obj.q_present + obj.q_offset_tuned;
                 tic;
                 % update cable lengths for next command from trajectory
                 obj.model.update(trajectory.q(:,t), trajectory.q_dot(:,t), trajectory.q_ddot(:,t),zeros(size(trajectory.q_dot(:,t))));

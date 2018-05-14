@@ -10,3 +10,4 @@ AirQBot,/CUHK/PoCaBot_family/AirQBot/,AirQBot_bodies.xml,AirQBot_cables.xml,AirQ
 MickMultiIFW,/CUHK/ray_workspace_testing/MickMultiIFW/,MickMultiIFW_bodies.xml,MickMultiIFW_cables.xml,MickMultiIFW_trajectories.xml
 IFW_ghostModel,/CUHK/ray_workspace_testing/IFW_ghostModel/,IFW_ghostModel_bodies.xml,IFW_ghostModel_cables.xml,IFW_ghostModel_trajectories.xml
 Delta_planar,/CUHK/ray_workspace_testing/Delta_planar/,Delta_planar_bodies.xml,Delta_planar_cables.xml,Delta_planar_trajectories.xml
+DrainageServiceBot,/CUHK/PoCaBot_family/DrainageService/,DrainageServiceBot_bodies.xml,DrainageServiceBot_cables.xml,DrainageServiceBot_trajectories.xml
