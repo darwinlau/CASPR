@@ -80,6 +80,8 @@ classdef DynamixelActuatorParaBase < handle
         PROFILE_VEL
         MAX_WORK_CURRENT
         KpP
+        KpI
+        KpD
     end
     
     methods

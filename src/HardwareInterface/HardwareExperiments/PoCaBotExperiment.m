@@ -409,6 +409,8 @@ classdef PoCaBotExperiment < ExperimentBase
             
             obj.hardwareInterface.switchOperatingMode2POSITION_LIMITEDCURRENT();
             obj.hardwareInterface.setKpP(ones(obj.numMotor,1)*obj.hardwareInterface.ActuatorParas.KpP);
+            obj.hardwareInterface.setKpI(ones(obj.numMotor,1)*obj.hardwareInterface.ActuatorParas.KpI);
+            obj.hardwareInterface.setKpD(ones(obj.numMotor,1)*obj.hardwareInterface.ActuatorParas.KpD);
             % Get the system ready to work
             obj.hardwareInterface.systemOnSend();
             current = ones(obj.numMotor,1)*obj.hardwareInterface.ActuatorParas.MAX_WORK_CURRENT;
@@ -448,7 +450,8 @@ classdef PoCaBotExperiment < ExperimentBase
                 obj.model.update(trajectory.q(:,t), trajectory.q_dot(:,t), trajectory.q_ddot(:,t),zeros(size(trajectory.q_dot(:,t))));
                 
                 [~, model_temp, ~, ~, ~] = obj.idsim.IDSolver.resolve(trajectory.q(:,t), trajectory.q_dot(:,t), trajectory.q_ddot(:,t), zeros(obj.idsim.model.numDofs,1));
-                [offset] = obj.hardwareInterface.getCableOffsetByTension(model_temp.cableForces);
+                %[offset] = obj.hardwareInterface.getCableOffsetByTension(model_temp.cableForces);
+                offset = 0;
 %                 if(any(model_temp.cableForces<0))
 %                     fprintf('The force solved from ID gets beyond the limit!!!\n');
 %                 end
