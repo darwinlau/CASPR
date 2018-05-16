@@ -320,15 +320,15 @@ classdef SystemModel < handle
             value = obj.bodyModel.J_dot;
         end
         
-        function value = get.y(obj)
+        function value = get.y(obj)            
             value = obj.bodyModel.y;
         end
         
-        function value = get.y_dot(obj)
+        function value = get.y_dot(obj)            
             value = obj.bodyModel.y_dot;
         end
         
-        function value = get.y_ddot(obj)
+        function value = get.y_ddot(obj)            
             value = obj.bodyModel.y_ddot;
         end
         
@@ -367,7 +367,11 @@ classdef SystemModel < handle
 %         end
 
         function value = get.q_ddot_dynamics(obj)
-            value = obj.M\(-obj.L.'*obj.cableForces + obj.A*obj.jointTau - obj.C - obj.G - obj.W_e);
+            if isempty(obj.A)
+                value = obj.M\(-obj.L.'*obj.cableForces - obj.C - obj.G - obj.W_e);
+            else
+                value = obj.M\(-obj.L.'*obj.cableForces + obj.A*obj.jointTau - obj.C - obj.G - obj.W_e);
+            end
             % Should we have a function that updates the variable too??
 %             obj.bodyModel.q_ddot = obj.M\(-obj.L.'*obj.cableForces + obj.A*obj.jointTau - obj.C - obj.G - obj.W_e);
 %             value = obj.q_ddot;

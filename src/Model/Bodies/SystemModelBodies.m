@@ -379,7 +379,10 @@ classdef SystemModelBodies < handle
                     % Simplifying internal elements of big rotation
                     % matrices
                     parent_R_0k = simplify(parent_R_0k, 'Step', k*20);
-                    R_pe = simplify(R_pe, 'Step', k*20);
+                    try
+                        R_pe = simplify(R_pe, 'Step', k*20);
+                    catch
+                    end
                     obj.bodies{k}.R_0k = parent_R_0k*R_pe;                     
                     obj.bodies{k}.R_0k = simplify(obj.bodies{k}.R_0k, 'Step', k*20);
                     obj.bodies{k}.r_OP = R_pe.'*(obj.bodies{parent_link_num}.r_OP + obj.bodies{k}.r_Parent + obj.bodies{k}.joint.r_rel);
@@ -529,17 +532,18 @@ classdef SystemModelBodies < handle
             obj.q_ddot = q_ddot;
             obj.W_e = w_ext;
             
+            obj.W = compile_W(q, q_dot, q_ddot, w_ext);
+            obj.x_ddot = compile_x_ddot(q, q_dot, q_ddot, w_ext);
+            obj.x_dot = compile_x_dot(q, q_dot, q_ddot, w_ext);
+            
             % Update class properties by calling the compiled functions
-            if obj.occupied.dynamics
-                obj.C = compile_C(q, q_dot, q_ddot, w_ext);   
-                obj.G = compile_G(q, q_dot, q_ddot, w_ext);           
-                obj.M = compile_M(q, q_dot, q_ddot, w_ext);    
+            if obj.occupied.dynamics                   
                 obj.C_b = compile_C_b(q, q_dot, q_ddot, w_ext);   
                 obj.G_b = compile_G_b(q, q_dot, q_ddot, w_ext);           
                 obj.M_b = compile_M_b(q, q_dot, q_ddot, w_ext);
-                obj.W = compile_W(q, q_dot, q_ddot, w_ext);
-                obj.x_ddot = compile_x_ddot(q, q_dot, q_ddot, w_ext);
-                obj.x_dot = compile_x_dot(q, q_dot, q_ddot, w_ext);
+                obj.M =   obj.W.' * obj.M_b;
+                obj.C =   obj.W.' * obj.C_b;
+                obj.G = - obj.W.' * obj.G_b;
             end
             
             % Update operational space variables
@@ -737,10 +741,7 @@ classdef SystemModelBodies < handle
                 obj.G_b = simplify(obj.G_b);
             end
            
-            % Joint space equation of motion terms 
-            if is_preparation
-               CASPR_log.Info('Calculating MCG...');
-            end
+            % Joint space equation of motion terms             
             obj.M =   obj.W.' * obj.M_b;
             obj.C =   obj.W.' * obj.C_b;
             obj.G = - obj.W.' * obj.G_b;            
@@ -1215,15 +1216,15 @@ classdef SystemModelBodies < handle
         
         function q_deriv = get.q_deriv(obj)
             if obj.modelMode==ModelModeType.COMPILED
-                CASPR_log.Warn('You are not allowed to assess this variable under COMPILED mode');
-                return;
-            end
-            q_deriv = zeros(obj.numDofVars, 1);
-            index_vars = 1;
-            for k = 1:obj.numLinks
-                q_deriv(index_vars:index_vars+obj.bodies{k}.joint.numVars-1) = obj.bodies{k}.joint.q_deriv;
-                index_vars = index_vars + obj.bodies{k}.joint.numVars;
-            end
+                q_deriv = obj.q_dot;
+            else
+                q_deriv = zeros(obj.numDofVars, 1);
+                index_vars = 1;
+                for k = 1:obj.numLinks
+                    q_deriv(index_vars:index_vars+obj.bodies{k}.joint.numVars-1) = obj.bodies{k}.joint.q_deriv;
+                    index_vars = index_vars + obj.bodies{k}.joint.numVars;
+                end
+            end            
         end
         
         function q_dofType = get.q_dofType(obj)           
@@ -1232,6 +1233,66 @@ classdef SystemModelBodies < handle
                 q_dofType(index_vars:index_vars+obj.bodies{k}.joint.numVars-1) = obj.bodies{k}.joint.q_dofType;
                 index_vars = index_vars + obj.bodies{k}.joint.numVars;
             end
+        end
+        
+        function J = get.J(obj)
+            if(~obj.occupied.operational_space)
+                obj.occupied.operational_space = true;
+                if (obj.modelMode == ModelModeType.COMPILED)
+                    obj.update(obj.q, obj.q_dot, obj.q_ddot, obj.W_e);
+                else
+                    obj.updateOperationalSpace(); 
+                end
+            end
+            J = obj.J;
+        end
+        
+        function J_dot = get.J_dot(obj)
+            if(~obj.occupied.operational_space)
+                obj.occupied.operational_space = true;
+                if (obj.modelMode == ModelModeType.COMPILED)
+                    obj.update(obj.q, obj.q_dot, obj.q_ddot, obj.W_e);
+                else
+                    obj.updateOperationalSpace(); 
+                end
+            end
+            J_dot = obj.J_dot;
+        end
+        
+        function y = get.y(obj)
+            if(~obj.occupied.operational_space)
+                obj.occupied.operational_space = true;
+                if (obj.modelMode == ModelModeType.COMPILED)
+                    obj.update(obj.q, obj.q_dot, obj.q_ddot, obj.W_e);
+                else
+                    obj.updateOperationalSpace(); 
+                end
+            end
+            y = obj.y;
+        end
+        
+        function y_dot = get.y_dot(obj)
+            if(~obj.occupied.operational_space)
+                obj.occupied.operational_space = true;
+                if (obj.modelMode == ModelModeType.COMPILED)
+                    obj.update(obj.q, obj.q_dot, obj.q_ddot, obj.W_e);
+                else
+                    obj.updateOperationalSpace(); 
+                end
+            end
+            y_dot = obj.y_dot;
+        end
+        
+        function y_ddot = get.y_ddot(obj)
+            if(~obj.occupied.operational_space)
+                obj.occupied.operational_space = true;
+                if (obj.modelMode == ModelModeType.COMPILED)
+                    obj.update(obj.q, obj.q_dot, obj.q_ddot, obj.W_e);
+                else
+                    obj.updateOperationalSpace(); 
+                end
+            end
+            y_ddot = obj.y_ddot;
         end
 
         function M_y = get.M_y(obj)
@@ -1290,54 +1351,78 @@ classdef SystemModelBodies < handle
 
         function M_b = get.M_b(obj)            
             if(~obj.occupied.dynamics)
-                obj.createMassInertiaMatrix();
                 obj.occupied.dynamics = true;
-                obj.updateDynamics();
+                if (obj.modelMode == ModelModeType.COMPILED)
+                    obj.update(obj.q, obj.q_dot, obj.q_ddot, obj.W_e);
+                else
+                    obj.createMassInertiaMatrix();                    
+                    obj.updateDynamics();
+                end
             end
             M_b = obj.M_b;
         end
 
         function C_b = get.C_b(obj)            
             if(~obj.occupied.dynamics)
-                obj.createMassInertiaMatrix();
                 obj.occupied.dynamics = true;
-                obj.updateDynamics();
+                if (obj.modelMode == ModelModeType.COMPILED)
+                    obj.update(obj.q, obj.q_dot, obj.q_ddot, obj.W_e);
+                else
+                    obj.createMassInertiaMatrix();                    
+                    obj.updateDynamics();
+                end
             end
             C_b = obj.C_b;
         end
 
         function G_b = get.G_b(obj)            
             if(~obj.occupied.dynamics)
-                obj.createMassInertiaMatrix();
                 obj.occupied.dynamics = true;
-                obj.updateDynamics();
+                if (obj.modelMode == ModelModeType.COMPILED)
+                    obj.update(obj.q, obj.q_dot, obj.q_ddot, obj.W_e);
+                else
+                    obj.createMassInertiaMatrix();                    
+                    obj.updateDynamics();
+                end
             end
             G_b = obj.G_b;
         end
 
         function M = get.M(obj)
             if(~obj.occupied.dynamics)
-                obj.createMassInertiaMatrix();
                 obj.occupied.dynamics = true;
-                obj.updateDynamics();
+                if (obj.modelMode == ModelModeType.COMPILED)
+                    obj.update(obj.q, obj.q_dot, obj.q_ddot, obj.W_e);
+                else
+                    obj.createMassInertiaMatrix();                    
+                    obj.updateDynamics();
+                end
             end
             M = obj.M;
         end
 
         function C = get.C(obj)
             if(~obj.occupied.dynamics)
-                obj.createMassInertiaMatrix();
                 obj.occupied.dynamics = true;
-                obj.updateDynamics();
+                if (obj.modelMode == ModelModeType.COMPILED)
+                    obj.update(obj.q, obj.q_dot, obj.q_ddot, obj.W_e);
+                else
+                    obj.createMassInertiaMatrix();                    
+                    obj.updateDynamics();
+                end
             end
             C = obj.C;
         end
 
         function G = get.G(obj)
             if(~obj.occupied.dynamics)
-                obj.createMassInertiaMatrix();
                 obj.occupied.dynamics = true;
-                obj.updateDynamics();
+                if (obj.modelMode == ModelModeType.COMPILED)
+                    obj.update(obj.q, obj.q_dot, obj.q_ddot, obj.W_e);
+                else
+                    obj.createMassInertiaMatrix();                    
+                    obj.updateDynamics();
+                end
             end
             G = obj.G;
         end
@@ -1414,11 +1499,7 @@ classdef SystemModelBodies < handle
             end
         end
         
-        function val = get.tau(obj)
-            if obj.modelMode==ModelModeType.COMPILED
-                CASPR_log.Warn('You are not allowed to assess this variable under COMPILED mode');
-                return;
-            end
+        function val = get.tau(obj)            
             val = zeros(obj.numDofsActuated, 1);
             count = 0;
             for k = 1:obj.numLinks
@@ -1535,10 +1616,7 @@ classdef SystemModelBodies < handle
             
             % Dynamics
             if(obj.occupied.dynamics)
-                CASPR_log.Info('- Compiling Dynamics Variables...');               
-                matlabFunction(obj.M, 'File', strcat(path, '/compile_M'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
-                matlabFunction(obj.C, 'File', strcat(path, '/compile_C'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
-                matlabFunction(obj.G, 'File', strcat(path, '/compile_G'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
+                CASPR_log.Info('- Compiling Dynamics Variables...'); 
                 matlabFunction(obj.M_b, 'File', strcat(path, '/compile_M_b'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
                 matlabFunction(obj.C_b, 'File', strcat(path, '/compile_C_b'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
                 matlabFunction(obj.G_b, 'File', strcat(path, '/compile_G_b'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
