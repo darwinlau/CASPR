@@ -147,10 +147,8 @@ classdef RayWorkspaceSimulator < SimulatorBase
                     % logical values to present free_deg_candidate(1) and
                     % con_deg(i.e., specific deg.)(0) (e.g. [0 1 1]^T for a 3D translation CDPR)
                     deg_lgc =true(obj.grid.n_dimensions,1);
-                    CASPR_log.Assert(size(obj.options.slices,2)== 2,'Invalid Slices Given by Users');
                     for i = 1:size(obj.options.slices,1)
                         CASPR_log.Assert(obj.options.slices{i,1}<=obj.grid.n_dimensions,'Invlaid Degrees Specified by Users');
-                        CASPR_log.Assert(~isempty(obj.options.slices{i,2}),'Empty Slice');
                         CASPR_log.Assert(size(obj.options.slices{i,2},1)==1,'The Slices to be Investigated Are in the Wrong Form');
                         CASPR_log.Assert(max(obj.options.slices{i,2})<=obj.grid.q_length(obj.options.slices{i,1}),'At Least One of the Specified Slices is Invalid');
                         con_deg_indices(i) = obj.options.slices{i,1};
