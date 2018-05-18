@@ -80,7 +80,7 @@ classdef XM540_W150 < DynamixelActuatorParaBase
         PROFILE_VEL = 300;
         MAX_WORK_CURRENT = 1000;
         KpP = 600;%600%2800
-        KpI = 200;
-        KpD = 650;%6500
+        KpI = 0;
+        KpD = 6500;%6500
     end
 end
