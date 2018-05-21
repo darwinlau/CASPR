@@ -61,77 +61,214 @@ classdef RayWorkspaceSimulator < SimulatorBase
                 % Create a cell array for workspace
                 % Firstly determine the number of points -- AT THE MOMENT THIS
                 % IS ASSUMING UNIFORM GRIDS
-                n_grid_points = 0; 
-%                 for i =1:obj.grid.n_dimensions
-%                     grid_index = true(obj.grid.n_dimensions,1); grid_index(i) = false;
-                for i =1:length(obj.grid.dim_disc_ia)
-                    grid_index = true(obj.grid.n_dimensions,1); grid_index(obj.grid.dim_disc_ia(i)) = false;
-                    obj.free_variable_length(i) = prod(obj.grid.q_length(grid_index));
-                    n_grid_points = n_grid_points + obj.free_variable_length(i);
-                end 
-                obj.workspace = cell(n_grid_points,1);
-                workspace_count = 0;
-                n_metrics       = length(obj.metrics);
-                n_conditions    = length(obj.conditions);
-                % Determine translation from workspace_in to current metrics
-                % list            
+                if isempty(obj.options.slices) % all elements in q would be discretized
+                    n_grid_points = 0; 
+                    for i =1:obj.grid.n_dimensions
+                        grid_index = true(obj.grid.n_dimensions,1); grid_index(i) = false;
+%                     for i =1:length(obj.dim_disc_ia)
+%                         grid_index = true(obj.grid.n_dimensions,1); grid_index(obj.(i)) = false;
+                        obj.free_variable_length(i) = prod(obj.grid.q_length(grid_index));
+                        n_grid_points = n_grid_points + obj.free_variable_length(i);
+                    end 
+                    obj.workspace = cell(n_grid_points,1);
+                    workspace_count = 0;
+                    n_metrics       = length(obj.metrics);
+                    n_conditions    = length(obj.conditions);
+                    % Determine translation from workspace_in to current metrics
+                    % list            
 
-                % Runs over each dimension and construct the rays for that
-                % dimension
-                % each point
-                k = 1;
-                ray_t_in = tic;
-                total_t_in = tic;
-%                 for i = 1:obj.grid.n_dimensions
-%                     grid_index = true(obj.grid.n_dimensions,1); grid_index(i) = false;
-                for i = 1:length(obj.grid.dim_disc_ia)
-                    free_var_i = obj.grid.dim_disc_ia(i);
-                    grid_index = true(obj.grid.n_dimensions,1); grid_index(free_var_i) = false;
-                    % Create a subgrid
-                    sub_grid = UniformGrid(obj.grid.q_begin(grid_index),obj.grid.q_end(grid_index),obj.grid.delta_q(grid_index),'step_size',obj.grid.q_wrap(grid_index));
-                    for j = 1:sub_grid.n_points
-%                         CASPR_log.Info([sprintf('Workspace ray %d. ',k),sprintf('Completion Percentage: %3.2f',100*k/n_grid_points)]);
-                        % Load the current fixed grid coordinates
-                        q_fixed = sub_grid.getGridPoint(j);
-                        % Construct the workspace ray
-%                         wr = WorkspaceRay(q_fixed,n_metrics,n_conditions,i,[obj.grid.q_begin(i),obj.grid.q_end(i)]);
-                        wr = WorkspaceRay(q_fixed,n_metrics,n_conditions,free_var_i,[obj.grid.q_begin(free_var_i),obj.grid.q_end(free_var_i)]);
-   
-                        % For each metric compute the value of the ray
-                        for j_m=1:n_metrics
-                            %% THIS NEEDS TO BE FILLED IN
-                        end
-                        % For each condition
-                        for j_c=1:n_conditions
-                            %% THIS NEEDS TO BE FILLED IN
-                            if(j_c < n_conditions_prev)
-    %                            if((~isempty(workspace_prev{k}))&&(~isempty(workspace_prev{k}.conditions{j_c})))
-    %                                % The metric is at valid value
-    %                                wr.addCondition(workspace_prev{i}.conditions{j_c,1},j_c);
-    %                            end
-                            else
-                                % New condition
-                                [condition_type, condition_intervals, comp_time] = obj.conditions{j_c}.evaluate(obj.model,wr);
-                                if(~isempty(condition_intervals))
-                                    wr.addCondition(condition_type,condition_intervals,j_c);
+                    % Runs over each dimension and construct the rays for that
+                    % dimension
+                    % each point
+                    k = 1;
+                    ray_t_in = tic;
+                    total_t_in = tic;
+                    for i = 1:obj.grid.n_dimensions
+                        grid_index = true(obj.grid.n_dimensions,1); grid_index(i) = false;
+                        % Create a subgrid
+                        sub_grid = UniformGrid(obj.grid.q_begin(grid_index),obj.grid.q_end(grid_index),obj.grid.delta_q(grid_index),'step_size',obj.grid.q_wrap(grid_index));
+                        for j = 1:sub_grid.n_points
+    %                         CASPR_log.Info([sprintf('Workspace ray %d. ',k),sprintf('Completion Percentage: %3.2f',100*k/n_grid_points)]);
+                            % Load the current fixed grid coordinates
+                            q_fixed = sub_grid.getGridPoint(j);
+                            % Construct the workspace ray
+                            wr = WorkspaceRay(q_fixed,n_metrics,n_conditions,i,[obj.grid.q_begin(i),obj.grid.q_end(i)]);
+                            
+                            % For each metric compute the value of the ray
+                            for j_m=1:n_metrics
+                                %% THIS NEEDS TO BE FILLED IN
+                            end
+                            % For each condition
+                            for j_c=1:n_conditions
+                                %% THIS NEEDS TO BE FILLED IN
+                                if(j_c < n_conditions_prev)
+        %                            if((~isempty(workspace_prev{k}))&&(~isempty(workspace_prev{k}.conditions{j_c})))
+        %                                % The metric is at valid value
+        %                                wr.addCondition(workspace_prev{i}.conditions{j_c,1},j_c);
+        %                            end
+                                else
+                                    % New condition
+                                    [condition_type, condition_intervals, comp_time] = obj.conditions{j_c}.evaluate(obj.model,wr);
+                                    if(~isempty(condition_intervals))
+                                        wr.addCondition(condition_type,condition_intervals,j_c);
+                                    end
                                 end
                             end
+                            % Determine whether to add the condition to the workspace
+                            test_conditions = cellfun(@isempty,wr.conditions);
+                            % Determine whether to add to workspace
+                            if(obj.options.union)
+                                entry_condition = (~isempty(obj.metrics)||(sum(test_conditions(:,1))~=n_conditions));
+                            else
+                                entry_condition = (sum(test_conditions(:,1))==0);
+                            end
+                            if(entry_condition)
+                                % Add the workspace point to the 
+                                obj.workspace{k} = wr;
+                                workspace_count = workspace_count + 1;
+                            end
+                            % Note that another ray has been constructed
+                            k = k+1;
                         end
-                        % Determine whether to add the condition to the workspace
-                        test_conditions = cellfun(@isempty,wr.conditions);
-                        % Determine whether to add to workspace
-                        if(obj.options.union)
-                            entry_condition = (~isempty(obj.metrics)||(sum(test_conditions(:,1))~=n_conditions));
-                        else
-                            entry_condition = (sum(test_conditions(:,1))==0);
+                    end
+                else % users have specified the slices to be investigated
+                    % NOTE the deg. specified by users, then they cannot be
+                    % selected as free variable of poly. eqs. in Ray-Based method
+                    % NOTE the deg. that are not specified are called free_deg_candidate
+                    
+                    % indices of the degs. specified by users (A.K.A. con_deg) (e.g. x i.e., index=[1]) 
+                    con_deg_indices = zeros(size(obj.options.slices,1),1);
+                    % indices of the slices. specified by users (e.g. [4]th slices w.r.t. x)
+                    con_slc_indices=cell(size(obj.options.slices,1),1);
+                    % values of the specific slices (e.g. x=0+0.2*(4-1)=[0.6])
+                    con_slc_val=cell(size(obj.options.slices,1),1);
+                    % num. of the slices of EACH specific degree (e.g. num=[1] one slice for x)
+                    num_slc_perDeg = zeros(size(obj.options.slices,1),1);
+                    % logical values to present free_deg_candidate(1) and
+                    % con_deg(i.e., specific deg.)(0) (e.g. [0 1 1]^T for a 3D translation CDPR)
+                    deg_lgc =true(obj.grid.n_dimensions,1);
+                    for i = 1:size(obj.options.slices,1)
+                        CASPR_log.Assert(obj.options.slices{i,1}<=obj.grid.n_dimensions,'Invlaid Degrees Specified by Users');
+                        CASPR_log.Assert(size(obj.options.slices{i,2},1)==1,'The Slices to be Investigated Are in the Wrong Form');
+                        CASPR_log.Assert(max(obj.options.slices{i,2})<=obj.grid.q_length(obj.options.slices{i,1}),'At Least One of the Specified Slices is Invalid');
+                        con_deg_indices(i) = obj.options.slices{i,1};
+                        deg_lgc(con_deg_indices(i)) = false; %1 for free_var; 0 for con_var
+                        con_slc_indices{i} = obj.options.slices{i,2};
+                        con_slc_val{i} = obj.grid.q_begin(con_deg_indices(i))*ones(size(con_slc_indices{i}))+...
+                                            obj.grid.delta_q(con_deg_indices(i))*(con_slc_indices{i}-1);
+                        num_slc_perDeg(i) = length(obj.options.slices{i,2});
+                    end
+                    
+                    % To calculate the num. of grid pts
+                    % - the num_pt from con_deg (product of the num. of slices per con_deg)
+                    num_slices = prod(num_slc_perDeg);
+                    % the num_pt w.r.t all free_deg_candidate
+                    num_freeVar = 0;
+                    % the num_pt w.r.t one of free_deg_candidate
+                    free_var_q_length = obj.grid.q_length(deg_lgc);
+%                     for i =1:obj.grid.n_dimensions
+%                         grid_index = true(obj.grid.n_dimensions,1); grid_index(i) = false;
+%                     for i =1:length(obj.dim_disc_ia)
+%                         grid_index = true(obj.grid.n_dimensions,1); grid_index(obj.dim_disc_ia(i)) = false;
+                    % - num_pt from free_deg_candidate
+                    for i = 1: sum(deg_lgc) % up to all free_deg_candidate
+                        grid_index = true(sum(deg_lgc),1);
+                        grid_index(i) = false;
+                        obj.free_variable_length(i) = prod(free_var_q_length(grid_index));
+                        num_freeVar = num_freeVar + obj.free_variable_length(i);
+                    end 
+                    % n_grid_points = (num_pt from free_deg_candidate)*(num_pt from con_deg)
+                    n_grid_points = num_freeVar*num_slices;
+                    
+                    obj.workspace = cell(n_grid_points,1);
+                    workspace_count = 0; % num. of non-null ws/grid_points
+                    n_metrics       = length(obj.metrics);
+                    n_conditions    = length(obj.conditions);
+                    % Determine translation from workspace_in to current metrics
+                    % list            
+
+                    % Runs over each dimension and construct the rays for that
+                    % dimension
+                    % each point
+                    k = 1;
+                    ray_t_in = tic;
+                    total_t_in = tic;
+                    
+                    % For each combination of these specific slices
+    %                 for i = 1:obj.grid.n_dimensions
+    %                     grid_index = true(obj.grid.n_dimensions,1); grid_index(i) = false;
+                    for cnnt = 1:num_slices
+                        % Determine values of one of combinations between these con_slc
+                        con_slc_val_a = zeros(size(con_deg_indices));
+                        remainder = cnnt;
+                        for k = 1:length(con_slc_val_a)
+                            if remainder~=0
+                                pp = ceil(remainder/prod(num_slc_perDeg(k+1:end)));
+                                con_slc_val_a(k)= con_slc_val{k}(pp);
+                            else
+                                con_slc_val_a(k)= con_slc_val{k}(end);
+                            end                            
+                            remainder = rem(remainder,prod(num_slc_perDeg(k+1:end)));
                         end
-                        if(entry_condition)
-                            % Add the workspace point to the 
-                            obj.workspace{k} = wr;
-                            workspace_count = workspace_count + 1;
+                        % NOTE the degs. whose min=max would not be discretized by UniformGrid
+                        % (i.e., q_length=1 for the degs. whose min=max by UniformGrid)
+                        % To set min=max of con_deg
+                        llower = obj.grid.q_begin; uuper = obj.grid.q_end;
+                        llower(con_deg_indices) = con_slc_val_a;
+                        uuper(con_deg_indices) = con_slc_val_a;
+                        % indices of free_deg_candidate 
+                        % (i.e., indices of the dims to be discretized)
+                        dim_disc_ia = find(deg_lgc==1);
+                        for i = 1:length(dim_disc_ia)
+                            free_var_i = dim_disc_ia(i);
+                            grid_index = true(obj.grid.n_dimensions,1); grid_index(free_var_i) = false;
+                            % Create a subgrid 
+                            sub_grid = UniformGrid(llower(grid_index),uuper(grid_index),obj.grid.delta_q(grid_index),'step_size',obj.grid.q_wrap(grid_index));
+                            for j = 1:sub_grid.n_points
+        %                         CASPR_log.Info([sprintf('Workspace ray %d. ',k),sprintf('Completion Percentage: %3.2f',100*k/n_grid_points)]);
+                                % Load the current fixed grid coordinates
+                                q_fixed = sub_grid.getGridPoint(j);
+                                % Construct the workspace ray
+        %                         wr = WorkspaceRay(q_fixed,n_metrics,n_conditions,i,[obj.grid.q_begin(i),obj.grid.q_end(i)]);
+                                wr = WorkspaceRay(q_fixed,n_metrics,n_conditions,free_var_i,[obj.grid.q_begin(free_var_i),obj.grid.q_end(free_var_i)]);
+
+                                % For each metric compute the value of the ray
+                                for j_m=1:n_metrics
+                                    %% THIS NEEDS TO BE FILLED IN
+                                end
+                                % For each condition
+                                for j_c=1:n_conditions
+                                    %% THIS NEEDS TO BE FILLED IN
+                                    if(j_c < n_conditions_prev)
+            %                            if((~isempty(workspace_prev{k}))&&(~isempty(workspace_prev{k}.conditions{j_c})))
+            %                                % The metric is at valid value
+            %                                wr.addCondition(workspace_prev{i}.conditions{j_c,1},j_c);
+            %                            end
+                                    else
+                                        % New condition
+                                        [condition_type, condition_intervals, comp_time] = obj.conditions{j_c}.evaluate(obj.model,wr);
+                                        if(~isempty(condition_intervals))
+                                            wr.addCondition(condition_type,condition_intervals,j_c);
+                                        end
+                                    end
+                                end
+                                % Determine whether to add the condition to the workspace
+                                test_conditions = cellfun(@isempty,wr.conditions);
+                                % Determine whether to add to workspace
+                                if(obj.options.union)
+                                    entry_condition = (~isempty(obj.metrics)||(sum(test_conditions(:,1))~=n_conditions));
+                                else
+                                    entry_condition = (sum(test_conditions(:,1))==0);
+                                end
+                                if(entry_condition)
+                                    % Add the workspace point to the 
+                                    obj.workspace{k} = wr;
+                                    workspace_count = workspace_count + 1;
+                                end
+                                % Note that another ray has been constructed
+                                k = k+1;
+                            end
                         end
-                        % Note that another ray has been constructed
-                        k = k+1;
                     end
                 end
                 obj.comp_time.ray_construction = toc(ray_t_in);
