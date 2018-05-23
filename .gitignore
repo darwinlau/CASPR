@@ -5,6 +5,7 @@ data/config
 data/logs
 data/videos/
 data/trajectories/
+data/model_config/tmp_compilations
 GUI/config
 scripts/local/*
 logs/

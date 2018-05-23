@@ -281,23 +281,23 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
         % Method to send some "off" state to the hardware (optional)
         function systemOffSend(obj)
             %[current] = obj.forceFeedbackRead();
-            cur_release = 100;
-            current = ones(obj.numMotor,1)*cur_release;
-            obj.forceCommandSend(current);
-            obj.tightenCablesWithinPositionMode();%if it is not in current based position operating mode, it should be fine. Because in this case, this statement shall not work by any means.
-            cnt = 50;
-            for i = 1:cnt
-                current(1:2:obj.numMotor) = cur_release*(1-i/cnt);
-                obj.forceCommandSend(current);
-                pause(0.1);
-            end
-            
-            for i = 1:cnt
-                current(2:2:obj.numMotor) = cur_release*(1-i/cnt);
-                obj.forceCommandSend(current);
-                pause(0.1);
-            end
-            pause(1);
+%             cur_release = 100;
+%             current = ones(obj.numMotor,1)*cur_release;
+%             obj.forceCommandSend(current);
+%             obj.tightenCablesWithinPositionMode();%if it is not in current based position operating mode, it should be fine. Because in this case, this statement shall not work by any means.
+%             cnt = 50;
+%             for i = 1:cnt
+%                 current(1:2:obj.numMotor) = cur_release*(1-i/cnt);
+%                 obj.forceCommandSend(current);
+%                 pause(0.1);
+%             end
+%             
+%             for i = 1:cnt
+%                 current(2:2:obj.numMotor) = cur_release*(1-i/cnt);
+%                 obj.forceCommandSend(current);
+%                 pause(0.1);
+%             end
+%             pause(1);
             obj.toggleEnableAllDynamixel(obj.TORQUE_DISABLE);
         end
         

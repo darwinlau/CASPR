@@ -80,5 +80,7 @@ classdef XH430_W210 < DynamixelActuatorParaBase
         PROFILE_VEL = 300;
         MAX_WORK_CURRENT = 400;
         KpP = 900;
+        KpI = 0;
+        KpD = 0;
     end
 end
