@@ -450,8 +450,7 @@ classdef PoCaBotExperiment < ExperimentBase
                 obj.model.update(trajectory.q(:,t), trajectory.q_dot(:,t), trajectory.q_ddot(:,t),zeros(size(trajectory.q_dot(:,t))));
                 
                 [~, model_temp, ~, ~, ~] = obj.idsim.IDSolver.resolve(trajectory.q(:,t), trajectory.q_dot(:,t), trajectory.q_ddot(:,t), zeros(obj.idsim.model.numDofs,1));
-                %[offset] = obj.hardwareInterface.getCableOffsetByTension(model_temp.cableForces);
-                offset = 0;
+                [offset] = obj.hardwareInterface.getCableOffsetByTension(model_temp.cableForces);
 %                 if(any(model_temp.cableForces<0))
 %                     fprintf('The force solved from ID gets beyond the limit!!!\n');
 %                 end
@@ -510,9 +509,11 @@ classdef PoCaBotExperiment < ExperimentBase
                 
                 elapsed = toc;
                 if(elapsed < obj.timestep)
-                    java.lang.Thread.sleep((obj.timestep - elapsed)*1000);
+                    %java.lang.Thread.sleep((obj.timestep - elapsed)*1000);
+                    pause(obj.timestep - elapsed);
                 else
                     toc
+                    pause(0.001);
                 end
             end
 %             data = [obj.time_abs_traj obj.time_rel_traj obj.q_cmd_traj obj.q_feedback_traj obj.l_cmd_traj obj.l_feedback_traj];
