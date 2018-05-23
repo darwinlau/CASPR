@@ -55,17 +55,17 @@ classdef PoCaBotExperiment < ExperimentBase
     end
     
     methods
-        function exp = PoCaBotExperiment(numMotor,strCableID,timestep, server)
+        function exp = PoCaBotExperiment(~,strCableID,timestep, server)
             % Create the config
             model_config = DevModelConfig('DrainageServiceBot');
             % Load the SystemKinematics object from the XML
             modelObj = model_config.getModel(strCableID);
             % Create the hardware interface
             strCOMPort = {'COM3','COM5'};
-            hw_interface = PoCaBotCASPRInterface(strCOMPort, DynamixelType.XM540_W150, numMotor,false);  %1
+            hw_interface = PoCaBotCASPRInterface(strCOMPort, DynamixelType.XM540_W150, modelObj.numActuators,false);  %1
             exp@ExperimentBase(hw_interface, modelObj);
             exp.modelConfig = model_config;
-            exp.numMotor = numMotor;
+            exp.numMotor = modelObj.numActuators;
             
             %            eb.forwardKin = FKDifferential(modelObj);
             exp.q_present = NaN;
