@@ -79,9 +79,12 @@ classdef ControllerSimulator < DynamicsSimulator
         % tackling infeasibility
         controller_exit_type    % exit type that indicates the how the controller runs
         infeasibility_flag      % a flag suggests whether infeasibility happens
-                
+        
         % tackling singularity in M
         singular_M_flag         % indicating that M in the EoM is singular
+        
+        % tackling joint pose limit
+        out_of_workspace_flag  	% indicating that joint pose is out of limit
     end
 
     methods
@@ -146,10 +149,12 @@ classdef ControllerSimulator < DynamicsSimulator
             ctrl_sim.singular_M_flag = 0;
             % initialize the infeasibility flag as problem feasible
             ctrl_sim.infeasibility_flag = 0;
+            % initialize the out of workspace flag as false
+            ctrl_sim.out_of_workspace_flag = 0;
             % initialize the controller exit flag
             ctrl_sim.controller_exit_type = ControllerExitType.NO_ERROR;
             % initialize the compeletion percentage as invalid value
-            ctrl_sim.compeletion_percentage = -1;
+            ctrl_sim.compeletion_percentage = 1;
         end
         
         % simulator option consistency check
@@ -620,7 +625,7 @@ classdef ControllerSimulator < DynamicsSimulator
             for i = 1:length(obj.uncertainties)
                 if(isa(obj.uncertainties{i},'ExternalWrenchUncertaintyBase'))
                     [obj.w_ext] = obj.uncertainties{i}.applyWrechDisturbance(current_time);
-%                     obj.w_ext
+                    tmp_d = obj.w_ext
                     obj.q_ddot_ext = obj.true_model.M\obj.w_ext;
                 end
                 if(isa(obj.uncertainties{i},'PoseLockUncertaintyBase'))
@@ -881,7 +886,11 @@ classdef ControllerSimulator < DynamicsSimulator
 
             end
             
-            if (obj.infeasibility_flag || obj.singular_M_flag)
+            if (sum(obj.true_model.q > 2*obj.true_model.bodyModel.q_ub) + sum(obj.true_model.q < 2*obj.true_model.bodyModel.q_lb) >= 1)
+                obj.out_of_workspace_flag = 1;
+            end
+            
+            if (obj.infeasibility_flag || obj.singular_M_flag || obj.out_of_workspace_flag)
                 obj.pre_mature_termination = 1;
             else
                 obj.pre_mature_termination = 0;
