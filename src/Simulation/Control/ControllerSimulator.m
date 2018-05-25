@@ -73,7 +73,7 @@ classdef ControllerSimulator < DynamicsSimulator
         
         % simulation ending scenarios
         pre_mature_termination  % flag shows that the simulation needs to be terminated pre-maturely
-        compeletion_percentage 	% how much of the trajectory the controller finished tracking
+        completion_percentage 	% how much of the trajectory the controller finished tracking
         trajectory_duration     % how long the trajectory lasts
 
         % tackling infeasibility
@@ -153,8 +153,9 @@ classdef ControllerSimulator < DynamicsSimulator
             ctrl_sim.out_of_workspace_flag = 0;
             % initialize the controller exit flag
             ctrl_sim.controller_exit_type = ControllerExitType.NO_ERROR;
-            % initialize the compeletion percentage as invalid value
-            ctrl_sim.compeletion_percentage = 1;
+            % initialize the completion percentage as 1 indicating
+            % completed trajectory
+            ctrl_sim.completion_percentage = 1;
         end
         
         % simulator option consistency check
@@ -444,7 +445,7 @@ classdef ControllerSimulator < DynamicsSimulator
                 t = t + 1;
             end
             if (obj.pre_mature_termination)
-                obj.compeletion_percentage = (t - 1)/length(obj.timeVector);
+                obj.completion_percentage = (t - 1)/length(obj.timeVector);
             end
         end
         
@@ -853,9 +854,9 @@ classdef ControllerSimulator < DynamicsSimulator
         end
         
         % function that gives information on how the simulation ends (normally or out of infeasibility)
-        function [premature_termination_flag, compeletion_percentage] = simulationTerminationStatus(obj)
+        function [premature_termination_flag, completion_percentage] = simulationTerminationStatus(obj)
             premature_termination_flag = obj.pre_mature_termination;
-            compeletion_percentage = obj.compeletion_percentage;
+            completion_percentage = obj.completion_percentage;
         end
         
         % function that checks possible pre-mature stop of the simulation

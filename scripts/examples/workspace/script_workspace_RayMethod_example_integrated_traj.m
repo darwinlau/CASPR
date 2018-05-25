@@ -10,9 +10,9 @@ clc;  close all; warning off; clear all;
 % 'spatial7cable' 
 % segment_number = 11;
 % model_config    =   DevModelConfig('spatial7cable'); nsegvar= [11, 11, 11, 11, 11, 11]';
-% '4_4_CDPR_planar'
+% '4_4_CDPR_planar' x,y,theta
 segment_number = 11;
-model_config    =   DevModelConfig('4_4_CDPR_planar'); nsegvar = [segment_number segment_number+1 13]';
+model_config    =   DevModelConfig('4_4_CDPR_planar'); nsegvar = [segment_number segment_number 0]';
 % BM arm
 % segment_number = 20;
 % model_config    =    DevModelConfig('BMArm_paper'); nsegvar = [20 20 20 20]';
@@ -28,19 +28,21 @@ q_begin         =   modelObj.bodyModel.q_min; q_end = modelObj.bodyModel.q_max;
 % q_begin         =   [0.4;0;0;0;0;0]; q_end = [0.5;1;1;5*pi/180;5*pi/180;5*pi/180]; 
 uGrid           =   UniformGrid(q_begin,q_end,(q_end-q_begin)./(nsegvar-1),'step_size');
 % Workspace settings and conditions
-w_condition     =   {WorkspaceRayConditionBase.CreateWorkspaceRayCondition(WorkspaceRayConditionType.WRENCH_CLOSURE,100/(segment_number-1),modelObj)};
-w_metrics       =   {WorkspaceMetricBase.CreateWorkspaceMetric(WorkspaceMetricType.TENSION_FACTOR)};
-% w_condition     =   {WorkspaceRayConditionBase.CreateWorkspaceRayCondition(WorkspaceRayConditionType.INTERFERENCE,0,modelObj)};
-slices = {3, [2 4 6]; 2, [1 2 6 9 10]};
-% opt             =   RayWorkspaceSimulatorOptions(false,false);
-opt             =   RayWorkspaceSimulatorOptions(false,false,slices);
+% w_condition     =   {WorkspaceRayConditionBase.CreateWorkspaceRayCondition(WorkspaceRayConditionType.WRENCH_CLOSURE,100/(segment_number-1),modelObj)};
+% w_metrics       =   {WorkspaceMetricBase.CreateWorkspaceMetric(WorkspaceMetricType.TENSION_FACTOR)};
+traj = [1 3 0.4; 0 2 0.8; 0 0 0]; % traj: x=fx(t), y=fy(t)
+range_t = [0 2]; % range of t
+oppt = {traj; range_t};
+w_condition     =   {WorkspaceRayConditionBase.CreateWorkspaceRayCondition(WorkspaceRayConditionType.INTERFERENCE_Free_TRAJ,0,oppt)};
+opt             =   TrajWorkspaceSimulatorOptions(false,false);
 % Start the simulation
 disp('Start Setup Simulation');
-wsim            =   RayWorkspaceSimulator(modelObj,uGrid,opt);
+wsim            =   TrajWorkspaceSimulator(modelObj,uGrid,opt);
 
 % Run the simulation
 disp('Start Running Simulation');
 wsim.run(w_condition,[])
 % wsim.run(w_condition,w_metrics)
 % wsim.plotGraph();
-wsim.plotRayWorkspace([1,2,3])
+% wsim.plotRayWorkspace([1,2,3])
+wsim.plotTrajWorkspace(traj) 
