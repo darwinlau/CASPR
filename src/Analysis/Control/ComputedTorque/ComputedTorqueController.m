@@ -40,6 +40,14 @@ classdef ComputedTorqueController < ControllerBase
             end
             
             exit_flag = obj.exitTypeConversion(id_exit_type);
-        end    
+        end
+        
+        
+        
+        % Function that accepts a vector of cable stiffness and produce a
+        % vector of length offsets to produced the force commands
+        function delta_l_vec = offsetGeneration(obj, stiffness_vec)
+            delta_l_vec = -obj.f_prev./stiffness_vec;
+        end
     end
 end
