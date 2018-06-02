@@ -167,6 +167,7 @@ classdef ModelConfigTest < matlab.unittest.TestCase
             [mSet] = ModelConfigManager.GetDevModelConfigListNames();
             for i = 1:length(mSet)
                 m = DevModelConfig(mSet{i});
+                CASPR_log.Debug(['Testing model: ', mSet{i}]);
                 trajs_joint = m.getJointTrajectoriesList();
                 for j = 1:length(trajs_joint)
                     CASPR_log.Debug(['Testing model: ', mSet{i}, ', trajectory: ', trajs_joint{j}]);
