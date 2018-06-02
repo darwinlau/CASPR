@@ -6,7 +6,7 @@
 classdef ModelModeType
     enumeration 
         DEFAULT         % Standard model updating
-        SYMBOLIC       % Symbolic model
+        SYMBOLIC        % Symbolic model
         COMPILED        % Model is to use compiled functions
     end
 end

@@ -31,7 +31,7 @@ function varargout = control_GUI(varargin)
 
     % Edit the above text to modify the response to help control_GUI
 
-    % Last Modified by GUIDE v2.5 24-Jul-2017 17:10:04
+    % Last Modified by GUIDE v2.5 07-May-2018 18:38:09
 
     % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
@@ -219,21 +219,21 @@ function control_class_popup_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
     set(hObject, 'String', solver_str);
 end
 
-% --- Executes on selection change in solver_class_popup.
-function solver_class_popup_Callback(~, ~, ~) 
-    % hObject    handle to solver_class_popup (see GCBO)
+% --- Executes on selection change in id_solver_class_popup.
+function id_solver_class_popup_Callback(~, ~, ~) 
+    % hObject    handle to id_solver_class_popup (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
 
-    % Hints: contents = cellstr(get(hObject,'String')) returns solver_class_popup contents as cell array
-    %        contents{get(hObject,'Value')} returns selected item from solver_class_popup
+    % Hints: contents = cellstr(get(hObject,'String')) returns id_solver_class_popup contents as cell array
+    %        contents{get(hObject,'Value')} returns selected item from id_solver_class_popup
     % First update then apply callback
     % Updates
 end
 
 % --- Executes during object creation, after setting all properties.
-function solver_class_popup_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
-    % hObject    handle to solver_class_popup (see GCBO)
+function id_solver_class_popup_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
+    % hObject    handle to id_solver_class_popup (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    empty - handles not created until after all CreateFcns called
 
@@ -244,7 +244,34 @@ function solver_class_popup_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
     end
     settingsXMLObj = GUIOperations.GetSettings('/GUI/XML/controlXML.xml');
     setappdata(hObject,'settings',settingsXMLObj);
-    solver_str = GUIOperations.XmlObj2StringCellArray(settingsXMLObj.getElementsByTagName('simulator').item(0).getElementsByTagName('solver_class'),'id');
+    solver_str = GUIOperations.XmlObj2StringCellArray(settingsXMLObj.getElementsByTagName('simulator').item(0).getElementsByTagName('id_solver_class'),'id');
+    set(hObject, 'String', solver_str);
+end
+% --- Executes on selection change in fd_solver_class_popup.
+function fd_solver_class_popup_Callback(~, ~, ~)
+    % hObject    handle to fd_solver_class_popup (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    structure with handles and user data (see GUIDATA)
+
+    % Hints: contents = cellstr(get(hObject,'String')) returns fd_solver_class_popup contents as cell array
+    %        contents{get(hObject,'Value')} returns selected item from fd_solver_class_popup
+end
+
+
+% --- Executes during object creation, after setting all properties.
+function fd_solver_class_popup_CreateFcn(hObject, ~, ~)
+    % hObject    handle to fd_solver_class_popup (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    empty - handles not created until after all CreateFcns called
+
+    % Hint: popupmenu controls usually have a white background on Windows.
+    %       See ISPC and COMPUTER.
+    if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+        set(hObject,'BackgroundColor','white');
+    end
+    settingsXMLObj = GUIOperations.GetSettings('/GUI/XML/controlXML.xml');
+    setappdata(hObject,'settings',settingsXMLObj);
+    solver_str = GUIOperations.XmlObj2StringCellArray(settingsXMLObj.getElementsByTagName('simulator').item(0).getElementsByTagName('fd_solver_class'),'id');
     set(hObject, 'String', solver_str);
 end
 
@@ -296,62 +323,64 @@ function run_button_Callback(~, ~, handles) %#ok<DEFNU>
     model_config = getappdata(handles.trajectory_popup,'model_config');
     % Then read the form of dynamics
     modObj = getappdata(handles.cable_text,'modObj');
-    % Get the inverse dynamics object
-    id_solver = load_idsolver(handles,modObj);
     
-    % Get the controller
-    control_class_contents = cellstr(get(handles.control_class_popup,'String'));
-    control_class_id = control_class_contents{get(handles.control_class_popup,'Value')};
-    if(strcmp(control_class_id,'ComputedTorqueController'))
-        Kp_computedtorque = 50*eye(modObj.numDofs);
-        Kd_computedtorque = 15*eye(modObj.numDofs);
-        controller = ComputedTorqueController(modObj, id_solver, Kp_computedtorque, Kd_computedtorque);
-    elseif(strcmp(control_class_id,'LyapunovStaticCompensation'))
-        Kp_computedtorque = 50*eye(modObj.numDofs);
-        Kd_computedtorque = 15*eye(modObj.numDofs);
-        controller = LyapunovStaticCompensation(modObj, id_solver, Kp_computedtorque, Kd_computedtorque);
-    else
-        CASPR_log.Print(CASPR_log.Error,'Unknown control solver used');
-    end
-    
-    % Setup the inverse dynamics simulator with the SystemKinematicsDynamics
-    % object and the inverse dynamics solver
-    disp('Start Setup Simulation');
-    set(handles.status_text,'String','Setting up simulation');
-    drawnow;
-    start_tic = tic;
-    fdSolver = ForwardDynamics(FDSolverType.ODE113);
-    control_sim = ControllerSimulator(modObj, controller,fdSolver);
-    trajectory_ref = model_config.getJointTrajectory(trajectory_id);
-    time_elapsed = toc(start_tic);
-    fprintf('End Setup Simulation : %f seconds\n', time_elapsed);
-
-    % Run the solver on the desired trajectory
-    disp('Start Running Simulation');
-    set(handles.status_text,'String','Simulation running');
-    drawnow;
-    start_tic = tic;
-    % THIS WILL BE CHANGED AT A LATER TIME
-    n_q     =   modObj.numDofs;
-    initial_pose_error = 0.2*rand(n_q,1) - 0.1*ones(n_q,1);
-    control_sim.run(trajectory_ref, trajectory_ref.q{1} + initial_pose_error, trajectory_ref.q_dot{1}, trajectory_ref.q_ddot{1});
-    time_elapsed = toc(start_tic);
-    fprintf('End Running Simulation : %f seconds\n', time_elapsed);
-    
-    figure;
-%     control_sim.plotTrackingError();
-    assignin('base','control_simulator',control_sim);
-    % To be uncommented after discussions with Darwin
-    % Plot the data
-%     disp('Start Plotting Simulation');
-%     set(handles.status_text,'String','Simulation plotting');
+    run_control(handles,modObj,model_config,trajectory_id)
+%     % Get the inverse dynamics object
+%     id_solver = load_idsolver(handles,modObj);
+%     
+%     % Get the controller
+%     control_class_contents = cellstr(get(handles.control_class_popup,'String'));
+%     control_class_id = control_class_contents{get(handles.control_class_popup,'Value')};
+%     if(strcmp(control_class_id,'ComputedTorqueController'))
+%         Kp_computedtorque = 50*eye(modObj.numDofs);
+%         Kd_computedtorque = 15*eye(modObj.numDofs);
+%         controller = ComputedTorqueController(modObj, id_solver, Kp_computedtorque, Kd_computedtorque);
+%     elseif(strcmp(control_class_id,'LyapunovStaticCompensation'))
+%         Kp_computedtorque = 50*eye(modObj.numDofs);
+%         Kd_computedtorque = 15*eye(modObj.numDofs);
+%         controller = LyapunovStaticCompensation(modObj, id_solver, Kp_computedtorque, Kd_computedtorque);
+%     else
+%         CASPR_log.Print(CASPR_log.Error,'Unknown control solver used');
+%     end
+%     
+%     % Setup the inverse dynamics simulator with the SystemKinematicsDynamics
+%     % object and the inverse dynamics solver
+%     disp('Start Setup Simulation');
+%     set(handles.status_text,'String','Setting up simulation');
 %     drawnow;
 %     start_tic = tic;
-%     plot_for_GUI(plot_type,idsim,handles,str2double(getappdata(handles.plot_type_popup,'num_plots')));
+%     fdSolver = ForwardDynamics(FDSolverType.ODE113);
+%     control_sim = ControllerSimulator(modObj, controller, fdSolver, [], [], [], [], []);
+%     trajectory_ref = model_config.getJointTrajectory(trajectory_id);
 %     time_elapsed = toc(start_tic);
-%     fprintf('End Plotting Simulation : %f seconds\n', time_elapsed);
-%     set(handles.status_text,'String','No simulation running');
-%     setappdata(handles.figure1,'sim',idsim);
+%     fprintf('End Setup Simulation : %f seconds\n', time_elapsed);
+% 
+%     % Run the solver on the desired trajectory
+%     disp('Start Running Simulation');
+%     set(handles.status_text,'String','Simulation running');
+%     drawnow;
+%     start_tic = tic;
+%     % THIS WILL BE CHANGED AT A LATER TIME
+%     n_q     =   modObj.numDofs;
+%     initial_pose_error = 0.2*rand(n_q,1) - 0.1*ones(n_q,1);
+%     control_sim.run(trajectory_ref, trajectory_ref.q{1} + initial_pose_error, trajectory_ref.q_dot{1}, trajectory_ref.q_ddot{1});
+%     time_elapsed = toc(start_tic);
+%     fprintf('End Running Simulation : %f seconds\n', time_elapsed);
+%     
+% %     figure;
+% %     control_sim.plotTrackingError();
+%     assignin('base','control_simulator',control_sim);
+%     % To be uncommented after discussions with Darwin
+%     % Plot the data
+% %     disp('Start Plotting Simulation');
+% %     set(handles.status_text,'String','Simulation plotting');
+% %     drawnow;
+% %     start_tic = tic;
+% %     plot_for_GUI(plot_type,idsim,handles,str2double(getappdata(handles.plot_type_popup,'num_plots')));
+% %     time_elapsed = toc(start_tic);
+% %     fprintf('End Plotting Simulation : %f seconds\n', time_elapsed);
+% %     set(handles.status_text,'String','No simulation running');
+% %     setappdata(handles.figure1,'sim',idsim);
 end
 
 % --- Executes on button press in plot_button.
@@ -447,9 +476,71 @@ end
 %--------------------------------------------------------------------------
 % Additional Functions
 %--------------------------------------------------------------------------
+function run_control(handles,modObj,model_config,trajectory_id)
+    % Get the inverse dynamics object
+    id_solver = load_idsolver(handles,modObj);
+    
+    % Get the controller
+    control_class_contents = cellstr(get(handles.control_class_popup,'String'));
+    control_class_id = control_class_contents{get(handles.control_class_popup,'Value')};
+    if(strcmp(control_class_id,'ComputedTorqueController'))
+        Kp_computedtorque = 50*eye(modObj.numDofs);
+        Kd_computedtorque = 15*eye(modObj.numDofs);
+        controller = ComputedTorqueController(modObj, id_solver, Kp_computedtorque, Kd_computedtorque);
+    elseif(strcmp(control_class_id,'LyapunovStaticCompensation'))
+        Kp_computedtorque = 50*eye(modObj.numDofs);
+        Kd_computedtorque = 15*eye(modObj.numDofs);
+        controller = LyapunovStaticCompensation(modObj, id_solver, Kp_computedtorque, Kd_computedtorque);
+    else
+        CASPR_log.Print(CASPR_log.Error,'Unknown control solver used');
+    end
+    
+    
+    % Read the type of plot
+    contents = cellstr(get(handles.plot_type_popup,'String'));
+    plot_type = contents{get(handles.plot_type_popup,'Value')};
+    
+    % Setup the inverse dynamics simulator with the SystemKinematicsDynamics
+    % object and the inverse dynamics solver
+    disp('Start Setup Simulation');
+    set(handles.status_text,'String','Setting up simulation');
+    drawnow;
+    start_tic = tic;
+    fdSolver = ForwardDynamics(FDSolverType.ODE113);
+    control_sim = ControllerSimulator(modObj, controller, fdSolver, [], [], [], [], []);
+    trajectory_ref = model_config.getJointTrajectory(trajectory_id);
+    time_elapsed = toc(start_tic);
+    fprintf('End Setup Simulation : %f seconds\n', time_elapsed);
+
+    % Run the solver on the desired trajectory
+    disp('Start Running Simulation');
+    set(handles.status_text,'String','Simulation running');
+    drawnow;
+    start_tic = tic;
+    % THIS WILL BE CHANGED AT A LATER TIME
+    n_q     =   modObj.numDofs;
+    initial_pose_error = 0.2*rand(n_q,1) - 0.1*ones(n_q,1);
+    control_sim.run(trajectory_ref, trajectory_ref.q{1} + initial_pose_error, trajectory_ref.q_dot{1}, trajectory_ref.q_ddot{1});
+    time_elapsed = toc(start_tic);
+    fprintf('End Running Simulation : %f seconds\n', time_elapsed);
+    
+    
+    % Plot the data
+    disp('Start Plotting Simulation');
+    set(handles.status_text,'String','Simulation plotting');
+    drawnow;
+    start_tic = tic;
+    GUIOperations.GUIPlot(plot_type,control_sim,handles,str2double(getappdata(handles.plot_type_popup,'num_plots')),get(handles.undock_box,'Value'));
+    time_elapsed = toc(start_tic);
+    fprintf('End Plotting Simulation : %f seconds\n', time_elapsed);
+    set(handles.status_text,'String','No simulation running');
+    setappdata(handles.figure1,'sim',control_sim);
+    assignin('base','controller_simulator',control_sim);
+    
+end
 function id_solver = load_idsolver(handles,modelObj)
-    solver_class_contents = cellstr(get(handles.solver_class_popup,'String'));
-    solver_class_id = solver_class_contents{get(handles.solver_class_popup,'Value')};
+    solver_class_contents = cellstr(get(handles.id_solver_class_popup,'String'));
+    solver_class_id = solver_class_contents{get(handles.id_solver_class_popup,'Value')};
     if(strcmp(solver_class_id,'IDSolverLinProg'))
         id_objective = IDObjectiveMinLinCableForce(ones(modelObj.numActuatorsActive,1));
         id_solver = IDSolverLinProg(modelObj, id_objective, ID_LP_SolverType.MATLAB);
@@ -490,8 +581,9 @@ function loadState(handles)
             if(strcmp(mp_text,state.model_text)&&strcmp(cs_text,state.cable_text))
                 set(handles.trajectory_popup,'value',state.trajectory_popup);
                 set(handles.control_class_popup,'value',state.control_class_popup);
-                set(handles.solver_class_popup,'value',state.solver_class_popup);
-                solver_class_popup_Callback(handles.solver_class_popup,[],handles);
+                set(handles.id_solver_class_popup,'value',state.id_solver_class_popup);
+                set(handles.fd_solver_class_popup,'value',state.fd_solver_class_popup);
+                id_solver_class_popup_Callback(handles.id_solver_class_popup,[],handles);
                 set(handles.plot_type_popup,'value',state.plot_type_popup);
                 % Callback
                 plot_type_popup_Callback(handles.plot_type_popup,[],handles);
@@ -513,7 +605,8 @@ function saveState(handles,file_path)
     % Popups
     state.control_class_popup               =   get(handles.control_class_popup,'value');
     state.trajectory_popup                  =   get(handles.trajectory_popup,'value');
-    state.solver_class_popup                =   get(handles.solver_class_popup,'value');
+    state.id_solver_class_popup            	=   get(handles.id_solver_class_popup,'value');
+    state.fd_solver_class_popup            	=   get(handles.fd_solver_class_popup,'value');
     state.plot_type_popup                   =   get(handles.plot_type_popup,'value');
     % Arguments
     if(nargin>1)
@@ -550,7 +643,7 @@ function plot_movie_button_Callback(~, ~, handles) %#ok<DEFNU>
         model_config = getappdata(handles.trajectory_popup,'model_config');
         file_name = [path_string,'/data/videos/control_gui_output.avi'];
         [file,path] = uiputfile(file_name,'Save file name');
-        sim.plotMovie(model_config.displayRange, model_config.viewAngle, [path,file], sim.timeVector(length(sim.timeVector)), 700, 700);
+        sim.plotMovie(model_config.displayRange, model_config.viewAngle, [path,file], sim.timeVector(length(sim.timeVector)), false, 700, 700);
     end
 end
 
@@ -568,28 +661,92 @@ function script_button_Callback(~, ~, handles)
     % Control
     contents = cellstr(get(handles.control_class_popup,'String'));
     control_class_id = contents{get(handles.control_class_popup,'Value')};
+    % Inverse Dynamics
+    contents = cellstr(get(handles.id_solver_class_popup,'String'));
+    id_solver_class_id = contents{get(handles.id_solver_class_popup,'Value')};
+    % Forward Dynamics
+    contents = cellstr(get(handles.fd_solver_class_popup,'String'));
+    fd_solver_class_id = contents{get(handles.fd_solver_class_popup,'Value')};
+    
     base_folder = CASPR_configuration.LoadHomePath();
     if(strcmp(control_class_id,'ComputedTorqueController'))
         r_string = [base_folder,'/scripts/examples/control/script_control_CTC_example.m'];
     elseif(strcmp(control_class_id,'LyapunovStaticCompensation'))
         r_string = [base_folder,'/scripts/examples/control/script_control_Lyapunov_example.m'];
     end
-    contents = cellstr(get(handles.solver_class_popup,'String'));
-    solver_class_id = contents{get(handles.solver_class_popup,'Value')};
-    if(strcmp(solver_class_id,'IDSolverLinProg'))
+    
+    if(strcmp(id_solver_class_id,'IDSolverLinProg'))
         r_id_string = [base_folder,'/scripts/examples/dynamics/script_ID_linprog_example.m'];
-    elseif(strcmp(solver_class_id,'IDSolverQuadProg'))
+    elseif(strcmp(id_solver_class_id,'IDSolverQuadProg'))
         r_id_string = [base_folder,'/scripts/examples/dynamics/script_ID_quadprog_example.m'];
-    elseif(strcmp(solver_class_id,'IDSolverFeasiblePolygon'))
+    elseif(strcmp(id_solver_class_id,'IDSolverFeasiblePolygon'))
         r_id_string = [base_folder,'/scripts/examples/dynamics/script_ID_feasible_polygon_example.m'];
-    elseif(strcmp(solver_class_id,'IDSolverOptimallySafe'))
+    elseif(strcmp(id_solver_class_id,'IDSolverOptimallySafe'))
         r_id_string = [base_folder,'/scripts/examples/dynamics/script_ID_optimally_safe_example.m'];
-    elseif(strcmp(solver_class_id,'IDSolverClosedForm'))
+    elseif(strcmp(id_solver_class_id,'IDSolverClosedForm'))
         r_id_string = [base_folder,'/scripts/examples/dynamics/script_ID_closed_form_example.m'];
-    elseif(strcmp(solver_class_id,'IDSolverMinInfNorm'))
+    elseif(strcmp(id_solver_class_id,'IDSolverMinInfNorm'))
         r_id_string = [base_folder,'/scripts/examples/dynamics/script_ID_min_inf_norm_example.m'];
     end
+    
     w_string = [base_folder,'/scripts/local/GUI_script_autogenerated.m'];
+    r_fid = fopen(r_string,'r');
+    w_fid = fopen(w_string,'w');
+    while(~feof(r_fid))
+        s = fgetl(r_fid);
+        % Determine if comment
+        new_s = regexprep(s,'%','%%');
+        % Replace all references to the model
+        new_s = regexprep(new_s,'BMArm',model_str);
+        new_s = regexprep(new_s,'WORKING',cable_str);
+        new_s = regexprep(new_s,'traj_test',trajectory_str);
+        new_s = regexprep(new_s,'ODE4',fd_solver_class_id);
+        if(~isempty(strfind(new_s,'id_objective = ')))
+            new_s = extractDynamics(r_id_string);
+            % Remove the second line
+            fgetl(r_fid);
+        elseif (~isempty(strfind(new_s,'id_solver = ')))
+            new_s = extractDynamics(r_id_string);
+        end
+        fprintf(w_fid,[new_s,'\n']);
+    end
+    fclose(r_fid);
+    fclose(w_fid);
+    edit(w_string)
+end
+
+
+function file_copy(handles,output_file)
+        % Determine if forward or inverse kinematics
+    contents = cellstr(get(handles.dynamics_popup,'String'));
+    dynamics_id = contents{get(handles.dynamics_popup,'Value')};
+    % Strings for model editing
+    model_str = cellstr(get(handles.model_text,'String'));
+    cable_str = cellstr(get(handles.cable_text,'String'));
+    contents = cellstr(get(handles.trajectory_popup,'String'));
+    trajectory_str = contents{get(handles.trajectory_popup,'Value')};
+    if(strcmp(dynamics_id,'Forward Dynamics'))
+        base_folder = CASPR_configuration.LoadHomePath();
+        r_string = [base_folder,'/scripts/examples/dynamics/script_FD_example.m'];
+    else
+        contents = cellstr(get(handles.id_solver_class_popup,'String'));
+        solver_class_id = contents{get(handles.id_solver_class_popup,'Value')};
+        base_folder = CASPR_configuration.LoadHomePath();
+        if(strcmp(solver_class_id,'IDSolverLinProg'))
+            r_string = [base_folder,'/scripts/examples/dynamics/script_ID_linprog_example.m'];
+        elseif(strcmp(solver_class_id,'IDSolverQuadProg'))
+            r_string = [base_folder,'/scripts/examples/dynamics/script_ID_quadprog_example.m'];
+        elseif(strcmp(solver_class_id,'IDSolverFeasiblePolygon'))
+            r_string = [base_folder,'/scripts/examples/dynamics/script_ID_feasible_polygon_example.m'];
+        elseif(strcmp(solver_class_id,'IDSolverOptimallySafe'))
+            r_string = [base_folder,'/scripts/examples/dynamics/script_ID_optimally_safe_example.m'];
+        elseif(strcmp(solver_class_id,'IDSolverClosedForm'))
+            r_string = [base_folder,'/scripts/examples/dynamics/script_ID_closed_form_example.m'];
+        elseif(strcmp(solver_class_id,'IDSolverMinInfNorm'))
+            r_string = [base_folder,'/scripts/examples/dynamics/script_ID_min_inf_norm_example.m'];
+        end        
+    end
+    w_string = [base_folder,output_file];
     r_fid = fopen(r_string,'r');
     w_fid = fopen(w_string,'w');
     while(~feof(r_fid))
@@ -600,16 +757,12 @@ function script_button_Callback(~, ~, handles)
         new_s = regexprep(new_s,'Example planar XY',model_str);
         new_s = regexprep(new_s,'basic',cable_str);
         new_s = regexprep(new_s,'example_quintic',trajectory_str);
-        if(~isempty(strfind(new_s,'id_objective')))
-            new_s = extractDynamics(r_id_string);
-            % Remove the second line
-            fgetl(r_fid);
-        end
-        fprintf(w_fid,[new_s,'\n']);
+%         fprintf(w_fid,[new_s,'\n']);
+        fprintf(w_fid, new_s);
+        fprintf(w_fid, '\n');
     end
     fclose(r_fid);
     fclose(w_fid);
-    edit(w_string)
 end
 
 function new_s = extractDynamics(r_id_string)

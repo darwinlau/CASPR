@@ -343,7 +343,7 @@ classdef WorkspaceSimulator < SimulatorBase
                     q = obj.grid.getGridPoint(i);
                     plot_x_out = [plot_x_out,q(pose_index(1))];
                     plot_y_out = [plot_y_out,q(pose_index(2))];
-                    plot_z_out = [plot_y_out,q(pose_index(3))];
+                    plot_z_out = [plot_z_out,q(pose_index(3))];
                 end
             end
             % If this doesn't work replace in_list with direct storage

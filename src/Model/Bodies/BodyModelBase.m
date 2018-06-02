@@ -21,9 +21,16 @@ classdef (Abstract) BodyModelBase < handle
         w_dot = zeros(3,1);     % Absolute angular acceleration vector in {k}        
     end
     
+    % make these properties public (originally set protected) to achieve easy property change
+    properties
+        r_G                     % Position vector from joint to COG
+        % Inertia
+        m                       % Mass of body
+        I_G                     % Inertia of body about its centre of mass
+    end
+    
     properties (SetAccess = protected)
         % Relative positions
-        r_G                     % Position vector from joint to COG
         r_Pe                    % Position vector from joint to end point (only for display purpose)
         r_y = zeros(3,1)        % Position vector from joint to OP space reference point
 
@@ -33,9 +40,6 @@ classdef (Abstract) BodyModelBase < handle
         parentLink = [];        % Parent link of type BodyKinematics
         childLinks = {};        % Cell array of child links
         
-        % Inertia
-        m                       % Mass of body
-        I_G                     % Inertia of body about its centre of mass
     end
 
     properties (SetAccess = private)

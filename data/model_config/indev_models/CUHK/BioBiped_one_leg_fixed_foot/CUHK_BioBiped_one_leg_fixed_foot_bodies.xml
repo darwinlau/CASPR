@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE bodies_system SYSTEM "../../../templates/bodies.dtd">
+<!-- Template generated XML file for rigid bodies in CASPR -->
+<bodies_system>
+    <links display_range="-0.1 0.1 -1.0 1.0 0.0 2.0" view_angle="90 0">
+        <link_rigid num="1" name="Lower leg">
+            <joint type="R_X" q_initial="-0.3" q_min="-3.1416" q_max="3.1416"/>
+            <physical>
+                <mass>1.2</mass>
+                <com_location>0.0 0.0 0.165</com_location>
+                <end_location>0.0 0.0 0.33</end_location>
+                <inertia ref="com">
+                    <Ixx>0.01089</Ixx>
+                    <Iyy>0.01089</Iyy>
+                    <Izz>0.1</Izz>
+                    <Ixy>0.0</Ixy>
+                    <Ixz>0.0</Ixz>
+                    <Iyz>0.0</Iyz>
+                </inertia>
+            </physical>
+            <parent>
+                <num>0</num>
+                <location>0.0 0.0 0</location>
+            </parent>
+        </link_rigid>
+        <link_rigid num="2" name="Thigh">
+            <joint type="R_X" q_initial="0.6" q_min="-3.1416" q_max="3.1416"/>
+            <physical>
+                <mass>2</mass>
+                <com_location>0.0 0.0 0.165</com_location>
+                <end_location>0.0 0.0 0.33</end_location>
+                <inertia ref="com">
+                    <Ixx>0.01815</Ixx>
+                    <Iyy>0.01815</Iyy>
+                    <Izz>0.1</Izz>
+                    <Ixy>0.0</Ixy>
+                    <Ixz>0.0</Ixz>
+                    <Iyz>0.0</Iyz>
+                </inertia>
+            </physical>
+            <parent>
+                <num>1</num>
+                <location>0.0 0.0 0.33</location>
+            </parent>
+        </link_rigid>
+        <link_rigid num="3" name="Torso">
+            <joint type="R_X" q_initial="-0.6" q_min="-3.1416" q_max="3.1416"/>
+            <physical>
+                <mass>8.7</mass>
+                <com_location>0.0 0.0 0.185</com_location>
+                <end_location>0.0 0.0 0.37</end_location>
+                <inertia ref="com">
+                    <Ixx>0.0993</Ixx>
+                    <Iyy>0.0993</Iyy>
+                    <Izz>0.1</Izz>
+                    <Ixy>0.0</Ixy>
+                    <Ixz>0.0</Ixz>
+                    <Iyz>0.0</Iyz>
+                </inertia>
+            </physical>
+            <parent>
+                <num>2</num>
+                <location>0.0 0.0 0.33</location>
+            </parent>
+        </link_rigid>
+    </links>
+</bodies_system>

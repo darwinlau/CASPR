@@ -34,6 +34,7 @@ classdef (Abstract) CableModelBase < handle
         % Minimum and maximum allowable cable force
         forceMin
         forceMax
+        diameter    = 0;            % diameter/thickness of cable (default value 0)
     end    
     
     properties (SetAccess = private)

@@ -36,16 +36,17 @@ classdef VaryingGainCTCLsqnonneg < ControllerBase
 
         % The implementation of the abstract executeFunction for the
         % controller class.
-        function [cable_force_active, result_model] = executeFunction(obj, q, q_d, ~, q_ref, q_ref_d, q_ref_dd, ~)
+        function [f_active, result_model, exit_type] = executeFunction(obj, q, q_d, ~, q_ref, q_ref_d, q_ref_dd, ~)
             % following terms are (joint to cable) Jacobian transpose
             % inertia matrix, Coriolis and centrifugal, gravitational (all in joint space)
             L_T = (obj.dynModel.L)';
-            M = obj.dynModel.M;
-            C = obj.dynModel.C;
-            G = obj.dynModel.G;
+            A   =   obj.dynModel.A;
+            M   = obj.dynModel.M;
+            C   = obj.dynModel.C;
+            G   = obj.dynModel.G;
             % minimum values for cable forces, proportional gains,
             % differential gains as well as the decision variables
-            fmin = obj.dynModel.cableForcesActiveMin;
+            fmin = obj.dynModel.actuationForcesMin;
             kpmin = obj.kp_min;
             kdmin = obj.kd_min;
             x_min = [fmin;
@@ -60,19 +61,30 @@ classdef VaryingGainCTCLsqnonneg < ControllerBase
             % s.t. x >= 0
             % where decision variable x = [delta_f' delta_kp' delta_kd']'
             
-            C_ = [-L_T M*Eq M*Eq_dot];
+            C_ = [-L_T A M*Eq M*Eq_dot];
             d_ = G + C + M*q_ref_dd - C_*x_min;
             
             % use least square non-negtive algorithm provided by matlab
-            x = lsqnonneg(C_,d_);
+            [x, ~, ~, exitflag] = lsqnonneg(C_,d_);
             
             % extract actual control force
-            Cable_num = obj.dynModel.numCables;
-            cable_force_active = x(1:Cable_num) + fmin;
+            actuator_num = obj.dynModel.numActuatorsActive;
+            f_active = x(1:actuator_num) + fmin;
             
             
-            obj.dynModel.cableForces = cable_force_active;
+            obj.dynModel.actuationForces = f_active;
             result_model = obj.dynModel;
+            
+            switch exitflag
+                case 1
+                    exit_type = ControllerExitType.NO_ERROR;
+                case 0
+                    CASPR_log.Info('Controller - Max iteration limit reached');
+                    exit_type = ControllerExitType.ITERATION_LIMIT_REACHED;
+                otherwise
+                    CASPR_log.Info('Controller - This is not expected, need further investigation');
+                    exit_type = ControllerExitType.SOLVER_SPECIFIC_ERROR;
+            end
         end
     end
 end

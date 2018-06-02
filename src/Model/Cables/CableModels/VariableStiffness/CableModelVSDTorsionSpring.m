@@ -80,7 +80,6 @@ classdef CableModelVSDTorsionSpring < CableModelBase
             springStiffness = str2double(propertiesObj.getElementsByTagName('torsion_spring_stiffness').item(0).getFirstChild.getData);
             % <torsion_spring_length>
             springLength = str2double(propertiesObj.getElementsByTagName('torsion_spring_length').item(0).getFirstChild.getData);
-            
             % Generate an ideal cable object
             c = CableModelVSDTorsionSpring(name, bodiesModel.numLinks, K_cable, numSprings, springStiffness, springLength);
             
@@ -88,6 +87,11 @@ classdef CableModelVSDTorsionSpring < CableModelBase
             c.forceMin = str2double(propertiesObj.getElementsByTagName('force_min').item(0).getFirstChild.getData);
             % <force_max>
             c.forceMax = str2double(propertiesObj.getElementsByTagName('force_max').item(0).getFirstChild.getData);
+            % <diameter>
+            lol = propertiesObj.getElementsByTagName('diameter');
+            if (lol.getLength() ~= 0) % exist
+                c.diameter = str2double(propertiesObj.getElementsByTagName('diameter').item(0).getFirstChild.getData);
+            end
             
             % <attachments> tag
             attachmentObjs = xmlobj.getElementsByTagName('attachments').item(0).getChildNodes();

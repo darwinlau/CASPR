@@ -5,12 +5,21 @@
 <simulator>
     <control_class id="ComputedTorqueController"/>
     <control_class id="LyapunovStaticCompensation"/>
-	<solver_class id="IDSolverLinProg"/>
-	<solver_class id="IDSolverQuadProg"/>
-	<solver_class id="IDSolverFeasiblePolygon"/>
-    <solver_class id="IDSolverOptimallySafe"/>
-    <solver_class id="IDSolverClosedForm"/>
-    <solver_class id="IDSolverMinInfNorm"/>
+	<id_solver_class id="IDSolverLinProg"/>
+	<id_solver_class id="IDSolverQuadProg"/>
+	<id_solver_class id="IDSolverFeasiblePolygon"/>
+    <id_solver_class id="IDSolverOptimallySafe"/>
+    <id_solver_class id="IDSolverClosedForm"/>
+    <id_solver_class id="IDSolverMinInfNorm"/>
+	<fd_solver_class id="ODE45"/>
+	<fd_solver_class id="ODE23"/>
+	<fd_solver_class id="ODE113"/>
+	<fd_solver_class id="ODE15S"/>
+	<fd_solver_class id="ODE23S"/>
+	<fd_solver_class id="ODE23T"/>
+	<fd_solver_class id="ODE23TB"/>
+	<fd_solver_class id="ODE4"/>
+	<fd_solver_class id="ODE1"/>
 	<plot_functions>
         <plot_function type="plotCableForces">
             <figure_quantity>1</figure_quantity>

@@ -11,6 +11,110 @@ classdef JointTrajectory < TrajectoryBase
     end
     
     methods
+        % Function that samples the reference trajectory for frequency analysis later.
+        % Should be called after the generation of the joint space
+        % trajectory. Several options can be considered:
+        %   1. Keep constant until the next trajectory point (ZOH)
+        %       mode == 1
+        %   2. Linearly interpolate two adjacent points
+        %       mode == 2
+        %   3. Keep the sampling rate the same as the trajectory's original
+        %   sampling rate
+        %       mode == 3
+        function output_data = trajectorySampling(obj, working_mode, sampling_rate_ratio)
+            % initialize the working mode and sampling frequency ratio
+            mode    =   -1;
+            sampling_frequency_ratio = 1;
+            if (nargin < 3)
+                disp('Default frequency analysis will be applied (use the original trajectory frequency as the sampling rate).');
+                mode = 3;
+            else
+                if working_mode == 1
+                    mode = 1;
+                    sampling_frequency_ratio = floor(sampling_rate_ratio);
+                    if sampling_frequency_ratio < 1
+                        sampling_frequency_ratio = 1;
+                    end
+                elseif working_mode == 2
+                    mode = 2;
+                    sampling_frequency_ratio = floor(sampling_rate_ratio);
+                    if sampling_frequency_ratio < 1
+                        sampling_frequency_ratio = 1;
+                    end
+                else
+                    mode = 3;
+                end
+            end
+            
+            % generate the source signal for different modes
+            traj_len = length(obj.q);
+            traj_dim = length(obj.q{1});
+            % Fs being the sampling frequency
+            Fs      =   1/(obj.timeVector(2)-obj.timeVector(1));
+            if mode == 1
+                % ZOH approach
+                q_source_sig        =   zeros(sampling_frequency_ratio*traj_len, traj_dim);
+                q_dot_source_sig    =   zeros(sampling_frequency_ratio*traj_len, traj_dim);
+                q_ddot_source_sig   =   zeros(sampling_frequency_ratio*traj_len, traj_dim);
+                for i = 1:traj_len-1
+                    for j = 1:sampling_frequency_ratio
+                        q_source_sig(sampling_frequency_ratio*(i-1)+j, :) = obj.q{i}';
+                        q_dot_source_sig(sampling_frequency_ratio*(i-1)+j, :) = obj.q_dot{i}';
+                        q_ddot_source_sig(sampling_frequency_ratio*(i-1)+j, :) = obj.q_ddot{i}';
+                    end
+                end
+                q_source_sig(sampling_frequency_ratio*(traj_len-1)+1, :) = obj.q{traj_len}';
+                q_dot_source_sig(sampling_frequency_ratio*(traj_len-1)+1, :) = obj.q_dot{itraj_len}';
+                q_ddot_source_sig(sampling_frequency_ratio*(traj_len-1)+1, :) = obj.q_ddot{traj_len}';
+                time_vec_source_sig = obj.timeVector(1):sampling_frequency_ratio*(traj_len-1):obj.timeVector(length(obj.timeVector));
+                % update the sampling frequency when necessary
+                Fs = Fs*sampling_frequency_ratio;
+            elseif mode == 2
+                % linear interpolation approach
+                q_source_sig        =   zeros(sampling_frequency_ratio*traj_len, traj_dim);
+                q_dot_source_sig    =   zeros(sampling_frequency_ratio*traj_len, traj_dim);
+                q_ddot_source_sig   =   zeros(sampling_frequency_ratio*traj_len, traj_dim);
+                for i = 1:traj_len-1
+                    q_interval      =   obj.q{i+1}' - obj.q{i}';
+                    q_dot_interval  =   obj.q_dot{i+1}' - obj.q_dot{i}';
+                    q_ddot_interval =   obj.q_ddot{i+1}' - obj.q_ddot{i}';
+                    q_step          =   q_interval/sampling_frequency_ratio;
+                    q_dot_step      =   q_dot_interval/sampling_frequency_ratio;
+                    q_ddot_step     =   q_ddot_interval/sampling_frequency_ratio;
+                    for j = 1:sampling_frequency_ratio
+                        q_source_sig(sampling_frequency_ratio*(i-1)+j, :) = obj.q{i}' + (j-1)*q_step;
+                        q_dot_source_sig(sampling_frequency_ratio*(i-1)+j, :) = obj.q_dot{i}' + (j-1)*q_dot_step;
+                        q_ddot_source_sig(sampling_frequency_ratio*(i-1)+j, :) = obj.q_ddot{i}' + (j-1)*q_ddot_step;
+                    end
+                end
+                q_source_sig(sampling_frequency_ratio*(traj_len-1)+1, :) = obj.q{traj_len}';
+                q_dot_source_sig(sampling_frequency_ratio*(traj_len-1)+1, :) = obj.q_dot{itraj_len}';
+                q_ddot_source_sig(sampling_frequency_ratio*(traj_len-1)+1, :) = obj.q_ddot{traj_len}';
+                time_vec_source_sig = obj.timeVector(1):sampling_frequency_ratio*(traj_len-1):obj.timeVector(length(obj.timeVector));
+                % update the sampling frequency when necessary
+                Fs = Fs*sampling_frequency_ratio;
+            elseif mode == 3
+                q_source_sig        =   cell2mat(obj.q)';
+                q_dot_source_sig    =   cell2mat(obj.q_dot)';
+                q_ddot_source_sig   =   cell2mat(obj.q_ddot)';
+                time_vec_source_sig =   obj.timeVector;
+            else
+                q_source_sig        =   cell2mat(obj.q)';
+                q_dot_source_sig    =   cell2mat(obj.q_dot)';
+                q_ddot_source_sig   =   cell2mat(obj.q_ddot)';
+                time_vec_source_sig =   obj.timeVector;
+            end
+            
+            output_data.q_sampled_data = q_source_sig;
+            output_data.q_dot_sampled_data = q_dot_source_sig;
+            output_data.q_ddot_sampled_data = q_ddot_source_sig;
+            output_data.t_sampled_data = time_vec_source_sig;
+            
+            [output_data.q_fs_1, output_data.f] = fftAnalysis(output_data.t_sampled_data, output_data.q_sampled_data);
+            [output_data.q_dot_fs_1, ~] = fftAnalysis(output_data.t_sampled_data, output_data.q_dot_sampled_data);
+            [output_data.q_ddot_fs_1, ~] = fftAnalysis(output_data.t_sampled_data, output_data.q_ddot_sampled_data);
+            
+        end
         % Function plots the joint trajectory, velocity and acceleration
         function plotJointSpace(obj, states_to_plot)
             n_dof = length(obj.q{1});
@@ -60,8 +164,7 @@ classdef JointTrajectory < TrajectoryBase
                 
         % Perform linear trajectory spline to produce trajectory
         function [trajectory] = LinearTrajectoryLoadXmlObj(xmlObj, bodiesObj)
-            CASPR_log.Assert(strcmp(xmlObj.getNodeName, 'linear_spline_trajectory'), 'Element should be <linear_spline_trajectory>');
-            trajectory = JointTrajectory;
+            CASPR_log.Assert(strcmp(xmlObj.getNodeName, 'linear_spline_trajectory'), 'Element should be <linear_spline_trajectory>');            
             points_node = xmlObj.getElementsByTagName('points').item(0);
             point_nodes = points_node.getChildNodes;
             num_points = point_nodes.getLength;
@@ -71,11 +174,7 @@ classdef JointTrajectory < TrajectoryBase
                   
             % Cell of points of joints coordinates
             q_pj = cell(num_points,1); 
-            time_points_abs = zeros(1, num_points);
-            
-            q_trajectory = [];
-            q_d_trajectory = [];
-            q_dd_trajectory = [];
+            time_points_abs = zeros(1, num_points);          
             
             % First process the data and save it to variables
             for p = 1:num_points
@@ -95,6 +194,18 @@ classdef JointTrajectory < TrajectoryBase
                 end
             end
                                    
+            % Call the create function                 
+            trajectory = JointTrajectory.LinearTrajectoryCreate(q_pj, time_points_abs, time_step, bodiesObj);
+        end
+        
+        % Create the linear spline trajectory with given information
+        function [trajectory] = LinearTrajectoryCreate(q_pj, time_points_abs, time_step, bodiesObj)
+            trajectory = JointTrajectory;
+            num_points = length(q_pj);
+            q_trajectory = [];
+            q_d_trajectory = [];
+            q_dd_trajectory = [];
+            
             % Generate the trajectory between the points
             for p = 1:num_points-1
                 q_section = [];
@@ -124,10 +235,10 @@ classdef JointTrajectory < TrajectoryBase
             trajectory.q_ddot = mat2cell(q_dd_trajectory, size(q_dd_trajectory,1), ones(size(q_dd_trajectory,2),1));
         end
         
-        % Perform quintic trajectory spline to produce trajectory
+        % Perform cubic trajectory spline to produce trajectory
         function [trajectory] = CubicTrajectoryLoadXmlObj(xmlObj, bodiesObj)
             CASPR_log.Assert(strcmp(xmlObj.getNodeName, 'cubic_spline_trajectory'), 'Element should be <cubic_spline_trajectory>');
-            trajectory = JointTrajectory;
+            
             points_node = xmlObj.getElementsByTagName('points').item(0);
             point_nodes = points_node.getChildNodes;
             num_points = point_nodes.getLength;
@@ -138,11 +249,7 @@ classdef JointTrajectory < TrajectoryBase
             % Cell of points of joints coordinates
             q_pj = cell(num_points,1); 
             q_d_pj = cell(num_points,1);
-            time_points_abs = zeros(1, num_points);
-            
-            q_trajectory = [];
-            q_d_trajectory = [];
-            q_dd_trajectory = [];
+            time_points_abs = zeros(1, num_points);            
             
             % First process the data and save it to variables
             for p = 1:num_points
@@ -165,6 +272,17 @@ classdef JointTrajectory < TrajectoryBase
                 end
             end
                                    
+            % Call the create function                 
+            trajectory = JointTrajectory.CubicTrajectoryCreate(q_pj, q_d_pj, time_points_abs, time_step, bodiesObj);
+        end
+        
+        % Create the cubic spline trajectory with given information
+        function [trajectory] = CubicTrajectoryCreate(q_pj, q_d_pj, time_points_abs, time_step, bodiesObj)
+            trajectory = JointTrajectory;
+            num_points = length(q_pj);
+            q_trajectory = [];
+            q_d_trajectory = [];
+            q_dd_trajectory = [];
             % Generate the trajectory between the points
             for p = 1:num_points-1
                 q_section = [];
@@ -198,7 +316,7 @@ classdef JointTrajectory < TrajectoryBase
         % Perform quintic trajectory spline to produce trajectory
         function [trajectory] = QuinticTrajectoryLoadXmlObj(xmlObj, bodiesObj)
             CASPR_log.Assert(strcmp(xmlObj.getNodeName, 'quintic_spline_trajectory'), 'Element should be <quintic_spline_trajectory>');
-            trajectory = JointTrajectory;
+            
             points_node = xmlObj.getElementsByTagName('points').item(0);
             point_nodes = points_node.getChildNodes;
             num_points = point_nodes.getLength;
@@ -210,11 +328,7 @@ classdef JointTrajectory < TrajectoryBase
             q_pj = cell(num_points,1); 
             q_d_pj = cell(num_points,1);
             q_dd_pj = cell(num_points,1);
-            time_points_abs = zeros(1, num_points);
-            
-            q_trajectory = [];
-            q_d_trajectory = [];
-            q_dd_trajectory = [];
+            time_points_abs = zeros(1, num_points);            
             
             % First process the data and save it to variables
             for p = 1:num_points
@@ -240,6 +354,19 @@ classdef JointTrajectory < TrajectoryBase
                 end
             end
                                    
+            % Call the create function                 
+            trajectory = JointTrajectory.QuinticTrajectoryCreate(q_pj, q_d_pj, q_dd_pj, ...
+                time_points_abs, time_step, bodiesObj);
+        end        
+        
+        % Create the quintic spline trajectory with given information
+        function [trajectory] = QuinticTrajectoryCreate(q_pj, q_d_pj, q_dd_pj, time_points_abs, time_step, bodiesObj)
+            trajectory = JointTrajectory;
+            num_points = length(q_pj);
+            q_trajectory = [];
+            q_d_trajectory = [];
+            q_dd_trajectory = [];
+            
             % Generate the trajectory between the points
             for p = 1:num_points-1
                 q_section = [];
@@ -268,11 +395,11 @@ classdef JointTrajectory < TrajectoryBase
             trajectory.q = mat2cell(q_trajectory, size(q_trajectory,1), ones(size(q_trajectory,2),1));
             trajectory.q_dot = mat2cell(q_d_trajectory, size(q_d_trajectory,1), ones(size(q_d_trajectory,2),1));
             trajectory.q_ddot = mat2cell(q_dd_trajectory, size(q_dd_trajectory,1), ones(size(q_dd_trajectory,2),1));
-        end        
+        end
         
         function [trajectory] = CubicTrajectoryAverageVelocityLoadXmlObj(xmlObj, bodiesObj)
             CASPR_log.Assert(strcmp(xmlObj.getNodeName, 'cubic_spline_average_velocity_trajectory'), 'Element should be <cubic_spline_average_velocity_trajectory>');
-            trajectory = JointTrajectory;
+            
             points_node = xmlObj.getElementsByTagName('points').item(0);
             point_nodes = points_node.getChildNodes;
             num_points = point_nodes.getLength;
@@ -283,11 +410,7 @@ classdef JointTrajectory < TrajectoryBase
             % Cell of points of joints coordinates
             q_pj = cell(num_points,1); 
             q_d_pj = cell(num_points,1);
-            time_points_abs = zeros(1, num_points);
-            
-            q_trajectory = [];
-            q_d_trajectory = [];
-            q_dd_trajectory = [];
+            time_points_abs = zeros(1, num_points);            
             
             % First process the data and save it to variables
             for p = 1:num_points
@@ -322,6 +445,18 @@ classdef JointTrajectory < TrajectoryBase
                 q_d_pj{p} = mat2cell(q_d, bodiesObj.jointsNumDofs);       
             end
             
+            % Call the create function                 
+            trajectory = JointTrajectory.CubicTrajectoryAverageVelocityCreate(q_pj, q_d_pj, time_points_abs, time_step, bodiesObj);
+        end       
+        
+        % Create the cubic trajectory (average velocity) with given information
+        function [trajectory] = CubicTrajectoryAverageVelocityCreate(q_pj, q_d_pj, time_points_abs, time_step, bodiesObj)
+            trajectory = JointTrajectory;
+            num_points = length(q_pj);
+            q_trajectory = [];
+            q_d_trajectory = [];
+            q_dd_trajectory = [];
+            
             % Generate the trajectory between the points
             for p = 1:num_points-1
                 q_section = [];
@@ -351,11 +486,11 @@ classdef JointTrajectory < TrajectoryBase
             trajectory.q = mat2cell(q_trajectory, size(q_trajectory,1), ones(size(q_trajectory,2),1));
             trajectory.q_dot = mat2cell(q_d_trajectory, size(q_d_trajectory,1), ones(size(q_d_trajectory,2),1));
             trajectory.q_ddot = mat2cell(q_dd_trajectory, size(q_dd_trajectory,1), ones(size(q_dd_trajectory,2),1));
-        end       
+        end
         
         function [trajectory] = ParabolicBlendTrajectoryLoadXmlObj(xmlObj, bodiesObj)
             CASPR_log.Assert(strcmp(xmlObj.getNodeName, 'parabolic_blend_trajectory'), 'Element should be <parabolic_blend_trajectory>');
-            trajectory = JointTrajectory;
+           
             points_node = xmlObj.getElementsByTagName('points').item(0);
             point_nodes = points_node.getChildNodes;
             num_points = point_nodes.getLength;
@@ -365,14 +500,9 @@ classdef JointTrajectory < TrajectoryBase
             time_abs = TrajectoryBase.get_xml_absolute_tag(xmlObj);
                   
             % Cell of points of joints coordinates
-            q_pj = cell(num_points,1); 
-            q_d_pj = cell(num_points,1);
+            q_pj = cell(num_points,1);         
             time_points_abs = zeros(1, num_points);
-            time_blend = time_blend_default*ones(1, num_points-1);
-            
-            q_trajectory = [];
-            q_d_trajectory = [];
-            q_dd_trajectory = [];
+            time_blend = time_blend_default*ones(1, num_points-1);           
             
             % First process the data and save it to variables
             for p = 1:num_points
@@ -396,6 +526,19 @@ classdef JointTrajectory < TrajectoryBase
                 end
             end
                                    
+            % Call the create function                 
+            trajectory = JointTrajectory.ParabolicBlendTrajectoryCreate(q_pj, ...
+                time_points_abs, time_step, time_blend, bodiesObj);
+        end       
+        
+        % Create the parabolic blend trajectory with given information
+        function [trajectory] = ParabolicBlendTrajectoryCreate(q_pj, time_points_abs, time_step, time_blend, bodiesObj)
+            trajectory = JointTrajectory;
+            num_points = length(q_pj);
+            q_trajectory = [];
+            q_d_trajectory = [];
+            q_dd_trajectory = [];
+            
             % Generate the trajectory between the points
             for p = 1:num_points-1
                 t_rel = time_points_abs(p+1)-time_points_abs(p);
@@ -426,7 +569,7 @@ classdef JointTrajectory < TrajectoryBase
             trajectory.q = mat2cell(q_trajectory, size(q_trajectory,1), ones(size(q_trajectory,2),1));
             trajectory.q_dot = mat2cell(q_d_trajectory, size(q_d_trajectory,1), ones(size(q_d_trajectory,2),1));
             trajectory.q_ddot = mat2cell(q_dd_trajectory, size(q_dd_trajectory,1), ones(size(q_dd_trajectory,2),1));
-        end       
+        end
         
         % Loads a complete trajectory by reading a .traj file
         function [trajectory_all, force_trajectory] = LoadCompleteTrajectory(traj_file,model)

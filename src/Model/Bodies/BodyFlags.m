@@ -27,7 +27,7 @@ classdef BodyFlags < handle
            obj.operational_space        =   false;
            obj.hessian                  =   false;
            obj.linearisation            =   false;
-        end
+        end        
     end
 end
 

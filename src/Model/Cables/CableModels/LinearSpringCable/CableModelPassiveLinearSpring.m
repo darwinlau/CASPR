@@ -47,16 +47,21 @@ classdef CableModelPassiveLinearSpring < CableModelBase
             else
                 CASPR_log.Print(sprintf('Unknown cableAttachmentReference type: %s', attachRefString),CASPRLogLevel.ERROR);
             end
-            
+                        
+            % <properties> tag
+            propertiesObj = xmlobj.getElementsByTagName('properties').item(0);
             % Generate an object
             c = CableModelPassiveLinearSpring(name, bodiesModel.numLinks);
             
-            % <properties> tag
-            propertiesObj = xmlobj.getElementsByTagName('properties').item(0);
             % <K>
             c.K_cable = str2double(propertiesObj.getElementsByTagName('K').item(0).getFirstChild.getData);
             % <l0>
             c.l_0 = str2double(propertiesObj.getElementsByTagName('l0').item(0).getFirstChild.getData);
+            % <diameter>
+            lol = propertiesObj.getElementsByTagName('diameter');
+            if (lol.getLength() ~= 0) % exist
+                c.diameter = str2double(propertiesObj.getElementsByTagName('diameter').item(0).getFirstChild.getData);
+            end
             
             % <attachments> tag
             attachmentObjs = xmlobj.getElementsByTagName('attachments').item(0).getChildNodes();

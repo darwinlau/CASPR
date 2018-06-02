@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE cables SYSTEM "../../../templates/cables.dtd">
+<!-- Template generated XML file for cables in CASPR -->
+<cables default_cable_set="original">
+  <cable_set id="original">
+      <cable_ideal name="1" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>100000000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.0 -0.2699 -0.52721</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>0.0 -0.11556 -0.02101</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+      <cable_ideal name="2" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>100000000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.0 -0.1089 -0.40871</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0.0 -0.11556 -0.02101</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="3" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>100000000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.0 0.1099 -0.40521</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0.0 0.07449 0.0901</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="4" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>10000000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.0 0.2699 -0.43421</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>0.0 0.07449 0.0901</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+  </cable_set>
+</cables>

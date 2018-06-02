@@ -16,6 +16,8 @@ function initialise_CASPR()
     CASPR_version = 20171030;
     CASPR_model_config_path = [CASPR_homepath,'/data/model_config'];
     CASPR_GUI_dev_model_config = 0; % Developmental models are not shown
+    global_model_mode = 0;      % Global model mode
+    reuse_compiled = 0;     % Flag for reusing compiled files
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Determine if setup needs to be executed
@@ -23,7 +25,7 @@ function initialise_CASPR()
     if(~exist([CASPR_homepath,'/data/config'],'dir'))
         mkdir([CASPR_homepath,'/data/config'])
         save([CASPR_homepath,'/data/config/CASPR_environment.mat'],...
-                                    'CASPR_homepath','CASPR_version','CASPR_model_config_path','CASPR_GUI_dev_model_config');
+                                    'CASPR_homepath','CASPR_version','CASPR_model_config_path','CASPR_GUI_dev_model_config','global_model_mode','reuse_compiled');
         setup_CASPR;
     else
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -31,18 +33,18 @@ function initialise_CASPR()
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % load the previous version information
         if(~exist([CASPR_homepath,'/data/config/CASPR_environment.mat'],'file'))
-            save([CASPR_homepath,'/data/config/CASPR_environment.mat'],'CASPR_homepath','CASPR_version','CASPR_model_config_path','CASPR_GUI_dev_model_config');
+            save([CASPR_homepath,'/data/config/CASPR_environment.mat'],'CASPR_homepath','CASPR_version','CASPR_model_config_path','CASPR_GUI_dev_model_config','global_model_mode','reuse_compiled');
             update_CASPR;
         else
             previous_version = load([CASPR_homepath,'/data/config/CASPR_environment.mat'],'CASPR_version');
             if(isempty(fieldnames(previous_version))||(CASPR_version>previous_version.CASPR_version))
-                save([CASPR_homepath,'/data/config/CASPR_environment.mat'],'CASPR_homepath','CASPR_version','CASPR_model_config_path','CASPR_GUI_dev_model_config');
+                save([CASPR_homepath,'/data/config/CASPR_environment.mat'],'CASPR_homepath','CASPR_version','CASPR_model_config_path','CASPR_GUI_dev_model_config','global_model_mode','reuse_compiled');
                 update_CASPR;
             else
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 % Add the libraries
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                save([CASPR_homepath,'/data/config/CASPR_environment.mat'],'CASPR_homepath','CASPR_version','CASPR_model_config_path','CASPR_GUI_dev_model_config','-append');
+                save([CASPR_homepath,'/data/config/CASPR_environment.mat'],'CASPR_homepath','CASPR_version','CASPR_model_config_path','CASPR_GUI_dev_model_config','global_model_mode','reuse_compiled','-append');
                 set_CASPR_environment;
                 fprintf('CASPR initialisation complete. Enjoy !\n')
             end

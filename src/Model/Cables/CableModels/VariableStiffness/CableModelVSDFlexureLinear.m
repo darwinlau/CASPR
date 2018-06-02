@@ -75,7 +75,6 @@ classdef CableModelVSDFlexureLinear < CableModelBase
             % <vsd_force_deformation_relation>: quadratic relationship
             % between force and deformation [a b c]
             forceDeformationRelationCoeff = XmlOperations.StringToVector3(char(propertiesObj.getElementsByTagName('vsd_force_deformation_relation').item(0).getFirstChild.getData));
-            
             % Generate an ideal cable object
             c = CableModelVSDFlexureLinear(name, bodiesModel.numLinks, K_cable, forceDeformationRelationCoeff);
             
@@ -83,6 +82,11 @@ classdef CableModelVSDFlexureLinear < CableModelBase
             c.forceMin = str2double(propertiesObj.getElementsByTagName('force_min').item(0).getFirstChild.getData);
             % <force_max>
             c.forceMax = str2double(propertiesObj.getElementsByTagName('force_max').item(0).getFirstChild.getData);
+            % <diameter>
+            lol = propertiesObj.getElementsByTagName('diameter');
+            if (lol.getLength() ~= 0) % exist
+                c.diameter = str2double(propertiesObj.getElementsByTagName('diameter').item(0).getFirstChild.getData);
+            end
             
             % <attachments> tag
             attachmentObjs = xmlobj.getElementsByTagName('attachments').item(0).getChildNodes();
