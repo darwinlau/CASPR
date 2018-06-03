@@ -1,5 +1,5 @@
 % Will make abstract later
-classdef LargeCableRobotExperiment < ExperimentBase
+classdef CUCableRobotExperiment < ExperimentBase
     properties (Constant)
         ZERO_CABLE_LENGTHS = [1.80548719; 1.80548719; 1.80548719; 1.80548719; 1.80548719; 1.80548719; 1.80548719; 1.80548719];
     end
@@ -13,7 +13,7 @@ classdef LargeCableRobotExperiment < ExperimentBase
     end
         
     methods
-        function eb = LargeCableRobotExperiment(hw_interface, model_config, model_obj)
+        function eb = CUCableRobotExperiment(hw_interface, model_config, model_obj)
             % Create the hardware interface          
             eb@ExperimentBase(hw_interface, model_obj);
             eb.modelConfig = model_config;
