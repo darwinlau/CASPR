@@ -143,19 +143,24 @@ classdef ControllerSimulator < DynamicsSimulator
             end
             ctrl_sim.rounding_error_guard = 1e-5;
             ctrl_sim.optionConsistencyCheck();
+            ctrl_sim.taskRelatedInitialization();
+        end
+        
+        % task related initialization
+        function taskRelatedInitialization(obj)
             % initialize the pre_mature_termination flag as not doing it
-            ctrl_sim.pre_mature_termination = 0;
+            obj.pre_mature_termination = 0;
             % initialize the singular_M_flag flag as not singular
-            ctrl_sim.singular_M_flag = 0;
+            obj.singular_M_flag = 0;
             % initialize the infeasibility flag as problem feasible
-            ctrl_sim.infeasibility_flag = 0;
+            obj.infeasibility_flag = 0;
             % initialize the out of workspace flag as false
-            ctrl_sim.out_of_workspace_flag = 0;
+            obj.out_of_workspace_flag = 0;
             % initialize the controller exit flag
-            ctrl_sim.controller_exit_type = ControllerExitType.NO_ERROR;
+            obj.controller_exit_type = ControllerExitType.NO_ERROR;
             % initialize the completion percentage as 1 indicating
             % completed trajectory
-            ctrl_sim.completion_percentage = 1;
+            obj.completion_percentage = 1;
         end
         
         % simulator option consistency check
@@ -203,6 +208,10 @@ classdef ControllerSimulator < DynamicsSimulator
         % Implementation of the run function. Converts the dynamics
         % information into a controller
         function run(obj, ref_trajectory, q0, q0_dot, q0_ddot)
+            
+            % perform task related initialization before running the loop
+            obj.taskRelatedInitialization();
+            
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             % SIMULATION FREQUENCY SETTINGS
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

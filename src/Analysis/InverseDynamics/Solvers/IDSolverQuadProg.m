@@ -59,6 +59,12 @@ classdef IDSolverQuadProg < IDSolverBase
                         obj.options = optimoptions('quadprog', 'Display', 'off', 'MaxIter', 100);
                     end
                     [actuation_forces, id_exit_type] = id_qp_matlab(obj.objective.A, obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);                    
+                % Basic version that uses MATLAB's solver
+                case ID_QP_SolverType.MATLAB_INTERIOR_POINT
+                    if(isempty(obj.options))
+                        obj.options = optimoptions('quadprog','Algorithm','interior-point-convex', 'ConstraintTolerance', 1e-1, 'Display', 'off', 'MaxIter', 100);
+                    end
+                    [actuation_forces, id_exit_type] = id_qp_matlab(obj.objective.A, obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);                    
                 % Uses MATLAB solver with a warm start strategy on the
                 % active set
                 case ID_QP_SolverType.MATLAB_ACTIVE_SET_WARM_START
