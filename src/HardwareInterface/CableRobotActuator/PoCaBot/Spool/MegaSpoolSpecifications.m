@@ -1,7 +1,7 @@
 % UNITS:
 % LEN: METER
 % ANGLE: RADIAN
-classdef MegaMotorAccessories < MotorAccessoriesBase
+classdef MegaSpoolSpecifications < SpoolSpecificationsBase
     % Parameterize the spool used with Dynamixel
     properties (Constant = true)
         % Spool
@@ -12,13 +12,13 @@ classdef MegaMotorAccessories < MotorAccessoriesBase
         %  l = 2*pi*(r+r_cable)*27
         cableLength_full_load = 10.2464;
         numCircles_full_load = 27;
-        len_per_circle = MegaMotorAccessories.cableLength_full_load/MegaMotorAccessories.numCircles_full_load;
-        width_per_circle = 0.054/MegaMotorAccessories.numCircles_full_load; % the width of one circular coil
-        radius = sqrt(MegaMotorAccessories.len_per_circle^2-MegaMotorAccessories.width_per_circle^2)/2/pi;
+        len_per_circle = MegaSpoolSpecifications.cableLength_full_load/MegaSpoolSpecifications.numCircles_full_load;
+        width_per_circle = 0.054/MegaSpoolSpecifications.numCircles_full_load; % the width of one circular coil
+        radius = sqrt(MegaSpoolSpecifications.len_per_circle^2-MegaSpoolSpecifications.width_per_circle^2)/2/pi;
         % another way to initialize the spool model
         % width_per_circle = 0.002;
         % radius = 0.03;
-        % len_per_circle = sqrt(MegaMotorAccessories.width_per_circle^2 + (MegaMotorAccessories.radius*2*pi)^2);
+        % len_per_circle = sqrt(MegaSpoolSpecifications.width_per_circle^2 + (MegaSpoolSpecifications.radius*2*pi)^2);
         
         % Dynamixel Holder
         lenCoS2Outlet = 0.50; % distance from cetre of the spool to the cable outlet
@@ -28,14 +28,14 @@ classdef MegaMotorAccessories < MotorAccessoriesBase
     
     
     methods
-%         function accessories = MegaMotorAccessories(radius, width_per_circle, lenCoS2Outlet)
+%         function accessories = MegaSpoolSpecifications(radius, width_per_circle, lenCoS2Outlet)
 %             accessories.radius = radius;
 %             accessories.width_per_circle = width_per_circle;
 %             accessories.lenCoS2Outlet = lenCoS2Outlet;
 %             accessories.len_per_circle  = sqrt(width_per_circle^2 + (radius*2*pi)^2);
 %         end
-        function megaaccessories = MegaMotorAccessories()
-            megaaccessories@MotorAccessoriesBase();
+        function megaaccessories = MegaSpoolSpecifications()
+            megaaccessories@SpoolSpecificationsBase();
         end
         
         

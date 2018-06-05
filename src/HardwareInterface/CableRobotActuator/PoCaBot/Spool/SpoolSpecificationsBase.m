@@ -1,4 +1,4 @@
-classdef MotorAccessoriesBase < handle
+classdef SpoolSpecificationsBase < handle
     properties(Abstract, Constant = true)
         % Spool
         % one way to initialize the spool model
@@ -10,7 +10,7 @@ classdef MotorAccessoriesBase < handle
         % another way to initialize the spool model
         % width_per_circle = 0.002;
         % radius = 0.03;
-        % len_per_circle = sqrt(MotorAccessories.width_per_circle^2 + (MotorAccessories.radius*2*pi)^2);
+        % len_per_circle = sqrt(SpoolSpecifications.width_per_circle^2 + (SpoolSpecifications.radius*2*pi)^2);
         
         % Dynamixel Holder
         lenCoS2Outlet % distance from cetre of the spool to the cable outlet
@@ -29,7 +29,7 @@ classdef MotorAccessoriesBase < handle
     end
     
     methods
-        function accessories = MotorAccessoriesBase()
+        function accessories = SpoolSpecificationsBase()
         end
     end
     

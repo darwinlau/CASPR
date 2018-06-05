@@ -76,7 +76,7 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
             end
             
             for i = 1: numMotor
-                accessories_temp(i) = MegaMotorAccessories;
+                accessories_temp(i) = MegaSpoolSpecifications;
             end
             interface.accessories = accessories_temp;
             interface.cableLengths_full = accessories_temp(1).cableLengths_full;
