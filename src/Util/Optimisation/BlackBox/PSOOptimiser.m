@@ -61,8 +61,10 @@ classdef PSOOptimiser < BBOptimiserBase
                 end  
                 n_workers = poolObj.NumWorkers;
                 isParallel = true;
+                CASPR_log.Info('Starting PSO with parallel computing...');   
             catch
                 isParallel = false;
+                CASPR_log.Info('Starting PSO...');
                 CASPR_log.Info('The optimisation process can be slow without parallel computing.');
             end
             
@@ -76,9 +78,8 @@ classdef PSOOptimiser < BBOptimiserBase
             % Initialise the initial random particles
             w_init = obj.w_vel;
             
-            if isParallel
-                CASPR_log.Info('Performing PSO with parallel computing...');
-                CASPR_log.SetLoggingDetails(CASPRLogLevel.ERROR);
+            CASPR_log.SetLoggingDetails(CASPRLogLevel.ERROR);
+            if isParallel                             
                 % Evaluate cost for each particle
                 spmd         
                     for p = labindex:n_workers:obj.numParticles
@@ -91,11 +92,10 @@ classdef PSOOptimiser < BBOptimiserBase
                         if (Q <= Q_particles_opt(p))
                             pBest(:, p) = x_particles(:, p);
                             Q_particles_opt(p) = Q;                            
-                        end
-                        % fprintf('Initialisation stage. Particle: %d, Q: %.4f\n', p, Q);
+                        end                        
                     end  
                 end
-                CASPR_log.SetLoggingDetails(CASPRLogLevel.INFO);
+                
                 % Rebuild Q_particles_opt
                 tmp_Q_particles_opt = zeros(obj.numParticles,1);
                 tmp_pBest = zeros(obj.numVars, obj.numParticles);
@@ -128,10 +128,10 @@ classdef PSOOptimiser < BBOptimiserBase
                     if (Q <= Q_particles_opt(p))
                         pBest(:, p) = x_particles(:, p);
                         Q_particles_opt(p) = Q;                            
-                    end
-                    % CASPR_log.Info(sprintf('Initialisation stage. Particle: %d, Q: %.4f\n', p, Q));
+                    end                    
                 end  
-            end    
+            end             
+            CASPR_log.SetLoggingDetails(CASPRLogLevel.INFO);
             
             % Save results
             obj.input_array{end+1} = x_particles;     
@@ -151,8 +151,8 @@ classdef PSOOptimiser < BBOptimiserBase
             
             % Run for the iterations            
             for it = 1:obj.maxIterations  
-                if isParallel
-                    CASPR_log.SetLoggingDetails(CASPRLogLevel.ERROR);
+                CASPR_log.SetLoggingDetails(CASPRLogLevel.ERROR);
+                if isParallel                    
                     spmd
                         for p = labindex:n_workers:obj.numParticles
                             rp = PSOOptimiser.random_vector(zeros(obj.numVars, 1), ones(obj.numVars, 1));
@@ -167,11 +167,10 @@ classdef PSOOptimiser < BBOptimiserBase
                             if (Q <= Q_particles_opt(p))
                                 pBest(:, p) = x_particles(:, p);
                                 Q_particles_opt(p) = Q;                                
-                            end
-                            % fprintf('Iteration: %d, particle: %d, Q: %.4f\n', it, p, Q);
+                            end                            
                         end   
                     end
-                    CASPR_log.SetLoggingDetails(CASPRLogLevel.INFO);
+                    
                     % Rebuild Q_particles_opt
                     tmp_Q_particles_opt = zeros(obj.numParticles,1);
                     tmp_pBest = zeros(obj.numVars, obj.numParticles);
@@ -207,10 +206,10 @@ classdef PSOOptimiser < BBOptimiserBase
                         if (Q <= Q_particles_opt(p))
                             pBest(:, p) = x_particles(:, p);
                             Q_particles_opt(p) = Q;                                
-                        end
-                        % CASPR_log.Info(sprintf('Iteration: %d, particle: %d, Q: %.4f\n', it, p, Q));
+                        end                        
                     end   
-                end
+                end                
+                CASPR_log.SetLoggingDetails(CASPRLogLevel.INFO);
                 
                 % Save results
                 obj.input_array{end+1} = x_particles;

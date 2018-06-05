@@ -124,56 +124,48 @@ classdef BFGS < BBOptimiserBase
         %%%%%%%%%%%%%%%%%%%%%
         % Optimise function %
         %%%%%%%%%%%%%%%%%%%%%
-        function [input_opt, output_opt] = optimise(obj)
-            
+        function [input_opt, output_opt] = optimise(obj)            
             % Start parallel pool   
             try 
                 obj.poolObj = gcp('nocreate');
                 if isempty(obj.poolObj)
                     obj.poolObj = parpool('local');
-                end                  
+                end   
+                CASPR_log.Info('Starting BFGS with parallel computing...'); 
             catch
                 obj.poolObj = [];
+                CASPR_log.Info('Starting BFGS...'); 
+                CASPR_log.Info('The optimisation process can be slow without parallel computing.');
             end
             
             % Init
-            convergence_flag = false;            
+            convergence_flag = false;           
             start_tic = tic;
             % Optimisation loop
             while obj.current_update <= obj.n_update
                 CASPR_log.Info('');
                 CASPR_log.Info(sprintf('*** Update: %d ***', obj.current_update));
-                % Find Gradient
-                CASPR_log.Info('Finding gradient...');
+                % Find Gradient                
                 obj.findGradient();
                 % Check convergence
                 if obj.isConvergence()
                     convergence_flag = true;
                     break;
                 end
-                % Line Search
-                CASPR_log.Info('Performing line search...');
+                % Line Search                
                 obj.lineSearch();                
                 obj.current_update = obj.current_update + 1;
             end      
             input_opt = obj.input_results{end};
             output_opt = obj.output_results{end};
-            CASPR_log.Info('');
-            CASPR_log.Info(repmat('*', 1, 40));
-            CASPR_log.Info(sprintf('Optimisation Ended in %.2f seconds.', toc(start_tic)));
-            CASPR_log.Info(sprintf('%d Updates have been performed.', obj.current_update-1));
-            cost_improvement = (obj.output_results{end} - obj.output_results{1})/obj.output_results{1};
-            CASPR_log.Info(sprintf('Improvements of %.2f %s has been achieved.', -cost_improvement*100, '%%'));
-            if convergence_flag
-                CASPR_log.Info('Optimal solution found.'); 
-            else
-                CASPR_log.Info('The optimisation has not yet met the convergence conditions.'); 
-                CASPR_log.Info('Larger number of updates is suggested.');
-            end
+            
+            % Finish message
+            obj.finishMessage(start_tic, convergence_flag);            
         end       
         
         % Line search
         function lineSearch(obj)
+            CASPR_log.Info('Performing line search...');
             if ~isempty(obj.poolObj)
                 isParallel = true;
                 n_workers = obj.poolObj.NumWorkers;
@@ -193,10 +185,9 @@ classdef BFGS < BBOptimiserBase
             while ~isArmijo
                 % Array that saves searching outputs
                 search_output_array = zeros(1, n_searches);
-                if isParallel
-                    % Prevent warning from unaccessible variables in compiled 
-                    % mode    
-                    CASPR_log.SetLoggingDetails(CASPRLogLevel.ERROR);
+                
+                CASPR_log.SetLoggingDetails(CASPRLogLevel.ERROR);
+                if isParallel         
                     % Search
                     spmd                               
                         a = obj.r^(labindex-1)*a_0;
@@ -204,7 +195,7 @@ classdef BFGS < BBOptimiserBase
                         % Get output
                         current_output = obj.objectiveFn(current_input); 
                     end                
-                    CASPR_log.SetLoggingDetails(CASPRLogLevel.INFO);
+                    
                     % Reconstruct output                    
                     for i=1:length(search_output_array)
                         search_output_array(i) = current_output{i};
@@ -218,6 +209,8 @@ classdef BFGS < BBOptimiserBase
                         search_output_array(i) = obj.objectiveFn(current_input); 
                     end  
                 end
+                CASPR_log.SetLoggingDetails(CASPRLogLevel.INFO);
+                
                 % Optain min ouput
                 [minval, minindex] = min(search_output_array);
                 minindex = minindex - 1;
@@ -280,6 +273,7 @@ classdef BFGS < BBOptimiserBase
         
         % Find Gradient
         function findGradient(obj)
+            CASPR_log.Info('Finding gradient...');
             % Check parallel
             if ~isempty(obj.poolObj)
                 isParallel = true;
@@ -290,12 +284,10 @@ classdef BFGS < BBOptimiserBase
             
             ioarray = cell(2, obj.m+1);
             
+            CASPR_log.SetLoggingDetails(CASPRLogLevel.ERROR);
             if isParallel
                 % Calculate output for current point and each deviated input channel
                 for j = 1:ceil((obj.m+1)/obj.poolObj.NumWorkers) 
-                    % Prevent warning from unaccessible variables in compiled
-                    % mode                
-                    CASPR_log.SetLoggingDetails(CASPRLogLevel.ERROR);
                     spmd
                         index = n_workers*(j-1) + labindex; 
                         if index <= obj.m+1
@@ -307,7 +299,7 @@ classdef BFGS < BBOptimiserBase
                             current_output = obj.objectiveFn(current_input);                       
                         end
                     end 
-                    CASPR_log.SetLoggingDetails(CASPRLogLevel.INFO);
+                    
                     % Load input and cost array to ioarray
                     for k = 1:n_workers
                         if index{k} <= length(ioarray)
@@ -330,7 +322,8 @@ classdef BFGS < BBOptimiserBase
                     ioarray{1, j} = current_input;
                     ioarray{2, j} = current_output;
                 end
-            end            
+            end   
+            CASPR_log.SetLoggingDetails(CASPRLogLevel.INFO);
             
             % Update ILC with ioarray
             for i = 1:length(ioarray)
@@ -475,6 +468,24 @@ classdef BFGS < BBOptimiserBase
                     flag = true;
                 end                                
             end   
+        end
+        
+        function finishMessage(obj, start_tic, convergence_flag)
+            CASPR_log.Info('');
+            CASPR_log.Info(repmat('*', 1, 40));   
+            CASPR_log.Info(sprintf('BFGS Optimisation is finished in %.2f seconds', toc(start_tic)));
+            CASPR_log.Info(sprintf('%d Updates have been performed.', obj.current_update-1));
+            cost_improvement = (obj.output_results{end} - obj.output_results{1})/obj.output_results{1};
+            CASPR_log.Info(sprintf('Improvements of %.2f %s has been achieved.', -cost_improvement*100, '%%'));
+            
+            if convergence_flag
+                CASPR_log.Info('Optimal solution found.'); 
+            else
+                CASPR_log.Info('The optimisation has not yet met the convergence conditions.'); 
+                CASPR_log.Info('Larger number of updates is suggested.');
+            end
+            CASPR_log.Info(repmat('*', 1, 40));
+            CASPR_log.Info('');
         end
     end    
 end

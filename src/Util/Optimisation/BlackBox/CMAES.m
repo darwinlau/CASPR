@@ -70,6 +70,7 @@ classdef CMAES < BBOptimiserBase
                 CASPR_log.Info('Starting CMA-ES with parallel computing...');
             catch
                 isParallel = false;
+                CASPR_log.Info('Starting CMA-ES...');
                 CASPR_log.Info('The optimisation process can be slow without parallel computing.');
             end
             
@@ -89,18 +90,17 @@ classdef CMAES < BBOptimiserBase
                 arx = zeros(obj.numVars, obj.lambda);
                 arfitness = zeros(1, obj.lambda);
                 
-                if isParallel
-                    CASPR_log.SetLoggingDetails(CASPRLogLevel.ERROR);
+                CASPR_log.SetLoggingDetails(CASPRLogLevel.ERROR);
+                if isParallel                    
                     spmd         
                         for k = labindex:n_workers:obj.lambda
                             % m + sig * Normal(0,C)
                             arx(:,k) = obj.xmean + obj.sigma * obj.B * (obj.D .* randn(obj.numVars,1));  
                             % objective function call
-                            arfitness(k) = obj.objectiveFn(arx(:,k));  
-                            % fprintf('Cost: %.4f\n', arfitness(k));
+                            arfitness(k) = obj.objectiveFn(arx(:,k));                              
                         end
                     end
-                    CASPR_log.SetLoggingDetails(CASPRLogLevel.INFO);
+                    
                     % Reconstruct arx and arfitness
                     tmp_arx = zeros(length(obj.xmean), obj.lambda);
                     tmp_arfitness = zeros(1, obj.lambda);
@@ -119,10 +119,10 @@ classdef CMAES < BBOptimiserBase
                         % m + sig * Normal(0,C)
                         arx(:,k) = obj.xmean + obj.sigma * obj.B * (obj.D .* randn(obj.numVars,1));  
                         % objective function call
-                        arfitness(k) = obj.objectiveFn(arx(:,k));  
-                        % CASPR_log.Info(sprintf('Cost: %.4f\n', arfitness(k)));
+                        arfitness(k) = obj.objectiveFn(arx(:,k));                          
                     end
                 end
+                CASPR_log.SetLoggingDetails(CASPRLogLevel.INFO);
                 
                 counteval = counteval+obj.lambda;
                 
@@ -330,7 +330,7 @@ classdef CMAES < BBOptimiserBase
             CASPR_log.Info('');
             CASPR_log.Info(repmat('*', 1, 40));
             CASPR_log.Info('CMA-ES is finished.');
-            CASPR_log.Info(sprintf('Fittest value: %.4f', Q_opt));
+            CASPR_log.Info(sprintf('- Fittest value: %.4f', Q_opt));
             CASPR_log.Info(repmat('*', 1, 40));
             CASPR_log.Info('');
         end
