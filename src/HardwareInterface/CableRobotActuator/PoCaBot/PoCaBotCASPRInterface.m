@@ -58,6 +58,8 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
                     interface.ActuatorParas = XH430_W210;
                 case DynamixelType.XM540_W150
                     interface.ActuatorParas = XM540_W150;
+                case DynamixelType.PRO_M54_60_S250
+                    interface.ActuatorParas = PRO_M54_60_S250;
                 otherwise
                     CASPR_Log.Error('ActuatorType has not been implemented');
             end
