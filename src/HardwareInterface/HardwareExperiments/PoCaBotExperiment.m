@@ -3,7 +3,6 @@ classdef PoCaBotExperiment < ExperimentBase
     %   Detailed explanation goes here
     
     properties (SetAccess = private)
-        modelConfig
         idsim              % Inverse dynamics simulator
         fksolver           % Forward kinematics solver
         forwardKin
@@ -55,18 +54,12 @@ classdef PoCaBotExperiment < ExperimentBase
     end
     
     methods
-        function exp = PoCaBotExperiment(~,strCableID,timestep, server)
-            % Create the config
-            model_config = DevModelConfig('DrainageServiceBot');
-            % Load the SystemKinematics object from the XML
-            modelObj = model_config.getModel(strCableID);
-            % Create the hardware interface
-            strCOMPort = {'COM3','COM5'};
+        % strCOMPort should be an array of cells, each one of which
+        % indicate a COM port with a string format. e.g. strCOMPort = {'COM3','COM5'};
+        function exp = PoCaBotExperiment(modelObj,strCOMPort, timestep, server)
             hw_interface = PoCaBotCASPRInterface(strCOMPort, DynamixelType.XM540_W150, modelObj.numActuators,false);  %1
             exp@ExperimentBase(hw_interface, modelObj);
-            exp.modelConfig = model_config;
             exp.numMotor = modelObj.numActuators;
-            
             %            eb.forwardKin = FKDifferential(modelObj);
             exp.q_present = NaN;
             exp.q_offset_tuned = zeros(modelObj.numDofVars,1);
