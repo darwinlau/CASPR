@@ -548,7 +548,7 @@ classdef JointTrajectory < TrajectoryBase
                 q_dd_section = [];
                 time_section = time_points_abs(p):time_step:time_points_abs(p+1);
                 for j = 1:bodiesObj.numLinks
-                    [q_body, q_d_body, q_dd_body] = bodiesObj.bodies{j}.joint.generateTrajectoryParabolicBlend(q_pj{p}{j}, q_pj{p+1}{j}, ...
+                    [q_body, q_d_body, q_dd_body] = bodiesObj.bodies{j}.joint.ParabolicBlendTrajectoryGenerate(q_pj{p}{j}, q_pj{p+1}{j}, ...
                         time_section, time_blend(p));
                     q_section = [q_section; q_body];
                     q_d_section = [q_d_section; q_d_body];
@@ -679,7 +679,7 @@ classdef JointTrajectory < TrajectoryBase
                     time_const_speed = ceil(distance_const_speed/vmax/time_step)*time_step;
                 end
             end
-            time_vector = time_step : time_step : time_acc_s+time_acc_e+time_const_speed;
+            time_vector = 0 : time_step : time_acc_s+time_acc_e+time_const_speed;
             
             q = zeros(n_dof, length(time_vector));
             q_dot = zeros(n_dof, length(time_vector));
@@ -704,10 +704,21 @@ classdef JointTrajectory < TrajectoryBase
                     q_ddot(:,t_ind) = -acc_true_e;
                 end
             end
-            trajectory.q = q;
-            trajectory.q_dot = q_dot;
-            trajectory.q_ddot = q_ddot;
-            trajectory.timeVector = time_vector;
+%             trajectory.q = q;
+%             trajectory.q_dot = q_dot;
+%             trajectory.q_ddot = q_ddot;
+%             trajectory.timeVector = time_vector;
+            
+            % The purpose to add the start and end points without velocity
+            % and acceleration is to make sure the end effector is still
+            % when it is ready to go or stops.
+            % Doing this is a little unreasonable, especially for the start
+            % point due to the replicated time 0, however, we can use this
+            % to debug, and anyway, the added end point is worth keeping.
+            trajectory.q = [q_s,q,q_e];
+            trajectory.q_dot = [q_s*0,q_dot,q_e*0];
+            trajectory.q_ddot = [q_s*0,q_ddot,q_e*0];
+            trajectory.timeVector = [-time_step, time_vector, time_vector(end)+time_step];
         end
     end
 end

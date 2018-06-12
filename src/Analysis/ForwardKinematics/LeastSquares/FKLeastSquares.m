@@ -124,7 +124,9 @@ classdef FKLeastSquares < FKAnalysisBase
 
             % Extract the resulting l0 from X
             l0 = X(1:numCables);
-            q = vec2mat(X(numCables+1:length(X)), numDofs)';
+            %%q = vec2mat(X(numCables+1:length(X)), numDofs)'; The function
+            %%'vec2mat' is not supported in old-versioned matlab.
+            q = reshape(X(numCables+1:length(X)),numDofs,[]);
         end
 
         % Responsible for computing the error vector for the nonlinear
