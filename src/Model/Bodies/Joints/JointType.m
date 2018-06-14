@@ -8,6 +8,7 @@ classdef JointType
         R_X                     % Revolute in X
         R_Y                     % Revolute in Y
         R_Z                     % Revolute in Z
+        R_Axis                  % Revolute in defined axis of rotation
         U_XY                    % Universal with xy-euler
         U_YZ                    % Universal with yz-euler %%
         P_X                     % Translational X
