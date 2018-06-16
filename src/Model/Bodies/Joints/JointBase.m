@@ -154,6 +154,7 @@ classdef (Abstract) JointBase < handle
     methods (Static)
         % Create a new joint
         function j = CreateJoint(jointType, q_initial, q_min, q_max, isActuated, axis)
+            CASPR_log.Assert(nargin >= 5, 'Not enough input arguments');
             switch jointType
                 case JointType.R_X
                     j = RevoluteX;
@@ -161,9 +162,10 @@ classdef (Abstract) JointBase < handle
                     j = RevoluteY;
                 case JointType.R_Z
                     j = RevoluteZ;
-                case JointType.R_Axis
+                case JointType.R_AXIS
                     j = RevoluteAxis;
-                    CASPR_log.Assert(nargin>5, 'Rotation Axis must be defined.');
+                    CASPR_log.Assert(nargin >= 6, 'Rotation Axis must be defined.');
+                    j.axis = axis;
                 case JointType.U_XY
                     j = UniversalXY;
                 case JointType.U_YZ
@@ -195,33 +197,24 @@ classdef (Abstract) JointBase < handle
             end
             j.type = jointType;
             
-            if (nargin < 2)
-                j.q_initial = j.q_default;
-                j.q_min     = j.q_lb;
-                j.q_max     = j.q_ub;
-                j.isActuated = 0;
-            elseif(nargin <3) 
+            % Initialise the values
+            if (~isempty(q_initial))
                 j.q_initial = q_initial;
-                j.q_min     = j.q_lb;
-                j.q_max     = j.q_ub;
-                j.isActuated = 0;
-            elseif(nargin <5)
-                j.q_initial = q_initial;
-                j.q_min     = q_min;
-                j.q_max     = q_max;
-                j.isActuated = 0;
-            elseif(nargin <6)
-                j.q_initial = q_initial;
-                j.q_min     = q_min;
-                j.q_max     = q_max;
-                j.isActuated = isActuated;
             else
-                j.q_initial = q_initial;
-                j.q_min     = q_min;
-                j.q_max     = q_max;
-                j.isActuated = isActuated;
-                j.axis      = axis;
+                j.q_initial = j.q_default;
+            end            
+            if (~isempty(q_min))
+                j.q_min = q_min;
+            else
+                j.q_min = j.q_lb;
+            end            
+            if (~isempty(q_max))
+                j.q_max = q_max;
+            else
+                j.q_max = j.q_ub;
             end
+            j.isActuated = isActuated;
+            
             j.update(j.q_initial, j.q_dot_default, j.q_ddot_default);
             
             if j.isActuated
