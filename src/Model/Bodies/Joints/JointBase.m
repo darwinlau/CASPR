@@ -245,7 +245,7 @@ classdef (Abstract) JointBase < handle
             
             % Rotation axis 
             if (~isempty(xmlObj.getAttribute('axis') == ''))
-                CASPR_log.Assert(jointType==JointType.R_Axis,'Axis definition is only allowed for R_Axis joints.'); 
+                CASPR_log.Assert(jointType==JointType.R_AXIS,'Axis definition is only allowed for R_AXIS joints.'); 
                 axis = XmlOperations.StringToVector(char(xmlObj.getAttribute('axis')));
                 CASPR_log.Assert(length(axis)==3,'Dimension of rotation axis must be 3.'); 
                 j = JointBase.CreateJoint(jointType, q_initial, q_min, q_max, isActuated, axis);
