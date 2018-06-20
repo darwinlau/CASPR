@@ -363,6 +363,12 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
             current = current*obj.dynamixel_direction_factor_current;
         end
         
+        % Method to read the goal current from the hardware (if available)
+        function [current] = goalForceFeedbackRead(obj)
+            [~, current] = obj.sync_read(obj.ActuatorParas.ADDR_GOAL_CURRENT, obj.ActuatorParas.LEN_GOAL_CURRENT);
+            current = current*obj.dynamixel_direction_factor_current;
+        end
+        
         function setProfileAcceleration(obj,profile)
             obj.sync_write(obj.ActuatorParas.ADDR_PROFILE_ACCELERATION, obj.ActuatorParas.LEN_PROFILE_ACCELERATION, profile);
         end
@@ -464,7 +470,7 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
         end
     end
     
-    methods (Access = private)
+    methods (Access = public)
         % This function has built in the math model of the spool and the
         % dynamixel holder. the input argument relLen is a column vector
         % with size numMotor X 1, specifying the absolute length we need
