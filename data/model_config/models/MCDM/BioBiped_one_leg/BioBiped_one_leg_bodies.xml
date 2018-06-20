@@ -6,13 +6,13 @@
         <link_rigid num="1" name="Torso">
             <joint type="PLANAR_YZ" q_initial="0.0 1.2 -0.3" q_min="-1.0 0.0 -3.1416" q_max="1.0 2.0 3.1416"/>
             <physical>
-                <mass>23.8</mass>
-                <com_location>0.0 0.0 0.20</com_location>
-                <end_location>0.0 0.0 0.40</end_location>
+                <mass>8.7</mass>
+                <com_location>0.0 0.0 0.185</com_location>
+                <end_location>0.0 0.0 0.37</end_location>
                 <inertia ref="com">
-                    <Ixx>1.0</Ixx>
-                    <Iyy>1.0</Iyy>
-                    <Izz>1.0</Izz>
+                    <Ixx>0.0993</Ixx>
+                    <Iyy>0.0993</Iyy>
+                    <Izz>0.1</Izz>
                     <Ixy>0.0</Ixy>
                     <Ixz>0.0</Ixz>
                     <Iyz>0.0</Iyz>
@@ -26,13 +26,13 @@
         <link_rigid num="2" name="Thigh">
             <joint type="R_X" q_initial="0.6" q_min="-3.1416" q_max="3.1416"/>
             <physical>
-                <mass>8.16</mass>
-                <com_location>0.0 0.0 -0.29</com_location>
-                <end_location>0.0 0.0 -0.58</end_location>
+                <mass>2</mass>
+                <com_location>0.0 0.0 -0.165</com_location>
+                <end_location>0.0 0.0 -0.33</end_location>
                 <inertia ref="com">
-                    <Ixx>1.0</Ixx>
-                    <Iyy>1.0</Iyy>
-                    <Izz>1.0</Izz>
+                    <Ixx>0.01815</Ixx>
+                    <Iyy>0.01815</Iyy>
+                    <Izz>0.1</Izz>
                     <Ixy>0.0</Ixy>
                     <Ixz>0.0</Ixz>
                     <Iyz>0.0</Iyz>
@@ -46,13 +46,13 @@
         <link_rigid num="3" name="Lower leg">
             <joint type="R_X" q_initial="-0.6" q_min="-3.1416" q_max="3.1416"/>
             <physical>
-                <mass>2.33</mass>
-                <com_location>0.0 0.0 -0.2</com_location>
-                <end_location>0.0 0.0 -0.4</end_location>
+                <mass>1.2</mass>
+                <com_location>0.0 0.0 -0.165</com_location>
+                <end_location>0.0 0.0 -0.33</end_location>
                 <inertia ref="com">
-                    <Ixx>1.0</Ixx>
-                    <Iyy>1.0</Iyy>
-                    <Izz>1.0</Izz>
+                    <Ixx>0.01089</Ixx>
+                    <Iyy>0.01089</Iyy>
+                    <Izz>0.1</Izz>
                     <Ixy>0.0</Ixy>
                     <Ixz>0.0</Ixz>
                     <Iyz>0.0</Iyz>
@@ -60,19 +60,19 @@
             </physical>
             <parent>
                 <num>2</num>
-                <location>0.0 0.0 -0.58</location>
+                <location>0.0 0.0 -0.33</location>
             </parent>
         </link_rigid>
         <link_rigid num="4" name="Foot">
             <joint type="R_X" q_initial="-0.3" q_min="-3.1416" q_max="3.1416"/>
             <physical>
-                <mass>0.87</mass>
-                <com_location>0.0 0.125 0.0</com_location>
-                <end_location>0.0 0.25 0.0</end_location>
+                <mass>0.4</mass>
+                <com_location>0.0 0.08 0.0</com_location>
+                <end_location>0.0 0.16 0.0</end_location>
                 <inertia ref="com">
-                    <Ixx>1.0</Ixx>
-                    <Iyy>1.0</Iyy>
-                    <Izz>1.0</Izz>
+                    <Ixx>0.000853</Ixx>
+                    <Iyy>0.1</Iyy>
+                    <Izz>0.000853</Izz>
                     <Ixy>0.0</Ixy>
                     <Ixz>0.0</Ixz>
                     <Iyz>0.0</Iyz>
@@ -80,7 +80,7 @@
             </physical>
             <parent>
                 <num>3</num>
-                <location>0.0 0.0 -0.4</location>
+                <location>0.0 0.0 -0.33</location>
             </parent>
         </link_rigid>
     </links>

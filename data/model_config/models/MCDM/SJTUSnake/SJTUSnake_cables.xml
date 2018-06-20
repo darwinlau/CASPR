@@ -1,0 +1,2769 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE cables SYSTEM "../../../templates/cables.dtd">
+<cables default_cable_set="base to link cable connection">
+  <cable_set id="link to link cable connection">
+    <cable_ideal name="cable 1 (link 1)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 -3.49024337756996e-18 -0.0190000000000000</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>6.5e-3 -3.49024337756996e-18 -0.0190000000000000</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 2 (link 1)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 0.0164544826719043 0.00949999999999999</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>6.5e-3 0.0164544826719043 0.00949999999999999</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 3 (link 1)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 -0.0164544826719043 0.00950000000000000</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>6.5e-3 -0.0164544826719043 0.00950000000000000</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    
+    <cable_ideal name="cable 1 (link 2)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>1</link>
+          <location>8.45e-2 0.00329931537567167 -0.0187113473072320</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>6.5e-3 0.00329931537567167 -0.0187113473072320</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 2 (link 2)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>1</link>
+          <location>8.45e-2 0.0145548444192606 0.0122129645840442</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>6.5e-3 0.0145548444192606 0.0122129645840442</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 3 (link 2)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>1</link>
+          <location>8.45e-2 -0.0178541597949323 0.00649838272318771</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>6.5e-3 -0.0178541597949323 0.00649838272318771</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    
+    <cable_ideal name="cable 1 (link 3)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>2</link>
+          <location>8.45e-2 0.00649838272318770 -0.0178541597949323</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>6.5e-3 0.00649838272318770 -0.0178541597949323</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 2 (link 3)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>2</link>
+          <location>8.45e-2 0.0122129645840443 0.0145548444192606</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>6.5e-3 0.0122129645840443 0.0145548444192606</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 3 (link 3)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>2</link>
+          <location>8.45e-2 -0.0187113473072320 0.00329931537567168</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>6.5e-3 -0.0187113473072320 0.00329931537567168</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    
+    <cable_ideal name="cable 1 (link 4)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>3</link>
+          <location>8.45e-2 0.00950000000000000 -0.0164544826719043</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>6.5e-3 0.00950000000000000 -0.0164544826719043</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 2 (link 4)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>3</link>
+          <location>8.45e-2 0.00950000000000000 0.0164544826719043</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>6.5e-3 0.00950000000000000 0.0164544826719043</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 3 (link 4)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>3</link>
+          <location>8.45e-2 -0.0190000000000000 -6.11086606877122e-18</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>6.5e-3 -0.0190000000000000 -6.11086606877122e-18</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    
+    <cable_ideal name="cable 1 (link 5)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>4</link>
+          <location>8.45e-2 0.0122129645840442 -0.0145548444192606</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>6.5e-3 0.0122129645840442 -0.0145548444192606</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 2 (link 5)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>4</link>
+          <location>8.45e-2 0.00649838272318771 0.0178541597949323</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>6.5e-3 0.00649838272318771 0.0178541597949323</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 3 (link 5)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>4</link>
+          <location>8.45e-2 -0.0187113473072320 -0.00329931537567168</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>6.5e-3 -0.0187113473072320 -0.00329931537567168</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    
+    <cable_ideal name="cable 1 (link 6)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>5</link>
+          <location>8.45e-2 0.0145548444192606 -0.0122129645840443</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>6.5e-3 0.0145548444192606 -0.0122129645840443</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 2 (link 6)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>5</link>
+          <location>8.45e-2 0.00329931537567168 0.0187113473072320</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>6.5e-3 0.00329931537567168 0.0187113473072320</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 3 (link 6)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>5</link>
+          <location>8.45e-2 -0.0178541597949323 -0.00649838272318771</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>6.5e-3 -0.0178541597949323 -0.00649838272318771</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    
+    <cable_ideal name="cable 1 (link 7)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>6</link>
+          <location>8.45e-2 0.0164544826719043 -0.00950000000000001</location>
+        </attachment>
+        <attachment>
+          <link>7</link>
+          <location>6.5e-3 0.0164544826719043 -0.00950000000000001</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 2 (link 7)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>6</link>
+          <location>8.45e-2 5.81707229594993e-18 0.0190000000000000</location>
+        </attachment>
+        <attachment>
+          <link>7</link>
+          <location>6.5e-3 5.81707229594993e-18 0.0190000000000000</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 3 (link 7)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>6</link>
+          <location>8.45e-2 -0.0164544826719043 -0.00950000000000000</location>
+        </attachment>
+        <attachment>
+          <link>7</link>
+          <location>6.5e-3 -0.0164544826719043 -0.00950000000000000</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    
+    <cable_ideal name="cable 1 (link 8)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>7</link>
+          <location>8.45e-2 0.0178541597949323 -0.00649838272318770</location>
+        </attachment>
+        <attachment>
+          <link>8</link>
+          <location>6.5e-3 0.0178541597949323 -0.00649838272318770</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 2 (link 8)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>7</link>
+          <location>8.45e-2 -0.00329931537567167 0.0187113473072320</location>
+        </attachment>
+        <attachment>
+          <link>8</link>
+          <location>6.5e-3 -0.00329931537567167 0.0187113473072320</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 3 (link 8)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>7</link>
+          <location>8.45e-2 -0.0145548444192606 -0.0122129645840443</location>
+        </attachment>
+        <attachment>
+          <link>8</link>
+          <location>6.5e-3 -0.0145548444192606 -0.0122129645840443</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    
+    <cable_ideal name="cable 1 (link 9)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>8</link>
+          <location>8.45e-2 0.0187113473072320 -0.00329931537567168</location>
+        </attachment>
+        <attachment>
+          <link>9</link>
+          <location>6.5e-3 0.0187113473072320 -0.00329931537567168</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 2 (link 9)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>8</link>
+          <location>8.45e-2 -0.00649838272318769 0.0178541597949323</location>
+        </attachment>
+        <attachment>
+          <link>9</link>
+          <location>6.5e-3 -0.00649838272318769 0.0178541597949323</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 3 (link 9)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>8</link>
+          <location>8.45e-2 -0.0122129645840442 -0.0145548444192606</location>
+        </attachment>
+        <attachment>
+          <link>9</link>
+          <location>6.5e-3 -0.0122129645840442 -0.0145548444192606</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    
+    <cable_ideal name="cable 1 (link 10)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>9</link>
+          <location>8.45e-2 0.0190000000000000 -4.65365783675994e-18</location>
+        </attachment>
+        <attachment>
+          <link>10</link>
+          <location>6.5e-3 0.0190000000000000 -4.65365783675994e-18</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 2 (link 10)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>9</link>
+          <location>8.45e-2 -0.00949999999999998 0.0164544826719043</location>
+        </attachment>
+        <attachment>
+          <link>10</link>
+          <location>6.5e-3 -0.00949999999999998 0.0164544826719043</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 3 (link 10)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>9</link>
+          <location>8.45e-2 -0.00949999999999999 -0.0164544826719043</location>
+        </attachment>
+        <attachment>
+          <link>10</link>
+          <location>6.5e-3 -0.00949999999999999 -0.0164544826719043</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    
+    <cable_ideal name="cable 1 (link 11)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>10</link>
+          <location>8.45e-2 0.0187113473072320 0.00329931537567167</location>
+        </attachment>
+        <attachment>
+          <link>11</link>
+          <location>6.5e-3 0.0187113473072320 0.00329931537567167</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 2 (link 11)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>10</link>
+          <location>8.45e-2 -0.0122129645840442 0.0145548444192606</location>
+        </attachment>
+        <attachment>
+          <link>11</link>
+          <location>6.5e-3 -0.0122129645840442 0.0145548444192606</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 3 (link 11)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>10</link>
+          <location>8.45e-2 -0.00649838272318770 -0.0178541597949323</location>
+        </attachment>
+        <attachment>
+          <link>11</link>
+          <location>6.5e-3 -0.00649838272318770 -0.0178541597949323</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    
+    <cable_ideal name="cable 1 (link 12)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>11</link>
+          <location>8.45e-2 0.0178541597949323 0.00649838272318769</location>
+        </attachment>
+        <attachment>
+          <link>12</link>
+          <location>6.5e-3 0.0178541597949323 0.00649838272318769</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 2 (link 12)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>11</link>
+          <location>8.45e-2 -0.0145548444192606 0.0122129645840443</location>
+        </attachment>
+        <attachment>
+          <link>12</link>
+          <location>6.5e-3 -0.0145548444192606 0.0122129645840443</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 3 (link 12)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>11</link>
+          <location>8.45e-2 -0.00329931537567168 -0.0187113473072320</location>
+        </attachment>
+        <attachment>
+          <link>12</link>
+          <location>6.5e-3 -0.00329931537567168 -0.0187113473072320</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    
+  </cable_set>
+  
+  <cable_set id="base to link cable connection">
+    <cable_ideal name="cable 1 (link 1)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 -3.49024337756996e-18 -0.0190000000000000</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>6.5e-3 -3.49024337756996e-18 -0.0190000000000000</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 2 (link 1)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 0.0164544826719043 0.00949999999999999</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>6.5e-3 0.0164544826719043 0.00949999999999999</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 3 (link 1)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 -0.0164544826719043 0.00950000000000000</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>6.5e-3 -0.0164544826719043 0.00950000000000000</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    
+    <cable_ideal name="cable 1 (link 2)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 0.00329931537567167 -0.0187113473072320</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>6.5e-3 0.00329931537567167 -0.0187113473072320</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>8.45e-2 0.00329931537567167 -0.0187113473072320</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>6.5e-3 0.00329931537567167 -0.0187113473072320</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 2 (link 2)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 0.0145548444192606 0.0122129645840442</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>6.5e-3 0.0145548444192606 0.0122129645840442</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>8.45e-2 0.0145548444192606 0.0122129645840442</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>6.5e-3 0.0145548444192606 0.0122129645840442</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 3 (link 2)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 -0.0178541597949323 0.00649838272318771</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>6.5e-3 -0.0178541597949323 0.00649838272318771</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>8.45e-2 -0.0178541597949323 0.00649838272318771</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>6.5e-3 -0.0178541597949323 0.00649838272318771</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    
+    <cable_ideal name="cable 1 (link 3)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 0.00649838272318770 -0.0178541597949323</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>6.5e-3 0.00649838272318770 -0.0178541597949323</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>8.45e-2 0.00649838272318770 -0.0178541597949323</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>6.5e-3 0.00649838272318770 -0.0178541597949323</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>8.45e-2 0.00649838272318770 -0.0178541597949323</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>6.5e-3 0.00649838272318770 -0.0178541597949323</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 2 (link 3)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 0.0122129645840443 0.0145548444192606</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>6.5e-3 0.0122129645840443 0.0145548444192606</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>8.45e-2 0.0122129645840443 0.0145548444192606</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>6.5e-3 0.0122129645840443 0.0145548444192606</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>8.45e-2 0.0122129645840443 0.0145548444192606</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>6.5e-3 0.0122129645840443 0.0145548444192606</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 3 (link 3)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 -0.0187113473072320 0.00329931537567168</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>6.5e-3 -0.0187113473072320 0.00329931537567168</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>8.45e-2 -0.0187113473072320 0.00329931537567168</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>6.5e-3 -0.0187113473072320 0.00329931537567168</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>8.45e-2 -0.0187113473072320 0.00329931537567168</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>6.5e-3 -0.0187113473072320 0.00329931537567168</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    
+    <cable_ideal name="cable 1 (link 4)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 0.00950000000000000 -0.0164544826719043</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>6.5e-3 0.00950000000000000 -0.0164544826719043</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>8.45e-2 0.00950000000000000 -0.0164544826719043</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>6.5e-3 0.00950000000000000 -0.0164544826719043</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>8.45e-2 0.00950000000000000 -0.0164544826719043</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>6.5e-3 0.00950000000000000 -0.0164544826719043</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>8.45e-2 0.00950000000000000 -0.0164544826719043</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>6.5e-3 0.00950000000000000 -0.0164544826719043</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 2 (link 4)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 0.00950000000000000 0.0164544826719043</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>6.5e-3 0.00950000000000000 0.0164544826719043</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>8.45e-2 0.00950000000000000 0.0164544826719043</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>6.5e-3 0.00950000000000000 0.0164544826719043</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>8.45e-2 0.00950000000000000 0.0164544826719043</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>6.5e-3 0.00950000000000000 0.0164544826719043</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>8.45e-2 0.00950000000000000 0.0164544826719043</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>6.5e-3 0.00950000000000000 0.0164544826719043</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 3 (link 4)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 -0.0190000000000000 -6.11086606877122e-18</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>6.5e-3 -0.0190000000000000 -6.11086606877122e-18</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>8.45e-2 -0.0190000000000000 -6.11086606877122e-18</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>6.5e-3 -0.0190000000000000 -6.11086606877122e-18</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>8.45e-2 -0.0190000000000000 -6.11086606877122e-18</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>6.5e-3 -0.0190000000000000 -6.11086606877122e-18</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>8.45e-2 -0.0190000000000000 -6.11086606877122e-18</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>6.5e-3 -0.0190000000000000 -6.11086606877122e-18</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    
+    <cable_ideal name="cable 1 (link 5)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 0.0122129645840442 -0.0145548444192606</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>6.5e-3 0.0122129645840442 -0.0145548444192606</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>8.45e-2 0.0122129645840442 -0.0145548444192606</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>6.5e-3 0.0122129645840442 -0.0145548444192606</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>8.45e-2 0.0122129645840442 -0.0145548444192606</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>6.5e-3 0.0122129645840442 -0.0145548444192606</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>8.45e-2 0.0122129645840442 -0.0145548444192606</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>6.5e-3 0.0122129645840442 -0.0145548444192606</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>8.45e-2 0.0122129645840442 -0.0145548444192606</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>6.5e-3 0.0122129645840442 -0.0145548444192606</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 2 (link 5)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 0.00649838272318771 0.0178541597949323</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>6.5e-3 0.00649838272318771 0.0178541597949323</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>8.45e-2 0.00649838272318771 0.0178541597949323</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>6.5e-3 0.00649838272318771 0.0178541597949323</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>8.45e-2 0.00649838272318771 0.0178541597949323</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>6.5e-3 0.00649838272318771 0.0178541597949323</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>8.45e-2 0.00649838272318771 0.0178541597949323</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>6.5e-3 0.00649838272318771 0.0178541597949323</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>8.45e-2 0.00649838272318771 0.0178541597949323</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>6.5e-3 0.00649838272318771 0.0178541597949323</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 3 (link 5)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 -0.0187113473072320 -0.00329931537567168</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>6.5e-3 -0.0187113473072320 -0.00329931537567168</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>8.45e-2 -0.0187113473072320 -0.00329931537567168</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>6.5e-3 -0.0187113473072320 -0.00329931537567168</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>8.45e-2 -0.0187113473072320 -0.00329931537567168</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>6.5e-3 -0.0187113473072320 -0.00329931537567168</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>8.45e-2 -0.0187113473072320 -0.00329931537567168</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>6.5e-3 -0.0187113473072320 -0.00329931537567168</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>8.45e-2 -0.0187113473072320 -0.00329931537567168</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>6.5e-3 -0.0187113473072320 -0.00329931537567168</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    
+    <cable_ideal name="cable 1 (link 6)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 0.0145548444192606 -0.0122129645840443</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>6.5e-3 0.0145548444192606 -0.0122129645840443</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>8.45e-2 0.0145548444192606 -0.0122129645840443</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>6.5e-3 0.0145548444192606 -0.0122129645840443</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>8.45e-2 0.0145548444192606 -0.0122129645840443</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>6.5e-3 0.0145548444192606 -0.0122129645840443</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>8.45e-2 0.0145548444192606 -0.0122129645840443</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>6.5e-3 0.0145548444192606 -0.0122129645840443</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>8.45e-2 0.0145548444192606 -0.0122129645840443</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>6.5e-3 0.0145548444192606 -0.0122129645840443</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>8.45e-2 0.0145548444192606 -0.0122129645840443</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>6.5e-3 0.0145548444192606 -0.0122129645840443</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 2 (link 6)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 0.00329931537567168 0.0187113473072320</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>6.5e-3 0.00329931537567168 0.0187113473072320</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>8.45e-2 0.00329931537567168 0.0187113473072320</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>6.5e-3 0.00329931537567168 0.0187113473072320</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>8.45e-2 0.00329931537567168 0.0187113473072320</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>6.5e-3 0.00329931537567168 0.0187113473072320</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>8.45e-2 0.00329931537567168 0.0187113473072320</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>6.5e-3 0.00329931537567168 0.0187113473072320</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>8.45e-2 0.00329931537567168 0.0187113473072320</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>6.5e-3 0.00329931537567168 0.0187113473072320</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>8.45e-2 0.00329931537567168 0.0187113473072320</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>6.5e-3 0.00329931537567168 0.0187113473072320</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 3 (link 6)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 -0.0178541597949323 -0.00649838272318771</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>6.5e-3 -0.0178541597949323 -0.00649838272318771</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>8.45e-2 -0.0178541597949323 -0.00649838272318771</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>6.5e-3 -0.0178541597949323 -0.00649838272318771</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>8.45e-2 -0.0178541597949323 -0.00649838272318771</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>6.5e-3 -0.0178541597949323 -0.00649838272318771</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>8.45e-2 -0.0178541597949323 -0.00649838272318771</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>6.5e-3 -0.0178541597949323 -0.00649838272318771</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>8.45e-2 -0.0178541597949323 -0.00649838272318771</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>6.5e-3 -0.0178541597949323 -0.00649838272318771</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>8.45e-2 -0.0178541597949323 -0.00649838272318771</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>6.5e-3 -0.0178541597949323 -0.00649838272318771</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    
+    <cable_ideal name="cable 1 (link 7)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 0.0164544826719043 -0.00950000000000001</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>6.5e-3 0.0164544826719043 -0.00950000000000001</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>8.45e-2 0.0164544826719043 -0.00950000000000001</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>6.5e-3 0.0164544826719043 -0.00950000000000001</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>8.45e-2 0.0164544826719043 -0.00950000000000001</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>6.5e-3 0.0164544826719043 -0.00950000000000001</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>8.45e-2 0.0164544826719043 -0.00950000000000001</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>6.5e-3 0.0164544826719043 -0.00950000000000001</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>8.45e-2 0.0164544826719043 -0.00950000000000001</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>6.5e-3 0.0164544826719043 -0.00950000000000001</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>8.45e-2 0.0164544826719043 -0.00950000000000001</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>6.5e-3 0.0164544826719043 -0.00950000000000001</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>8.45e-2 0.0164544826719043 -0.00950000000000001</location>
+        </attachment>
+        <attachment>
+          <link>7</link>
+          <location>6.5e-3 0.0164544826719043 -0.00950000000000001</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 2 (link 7)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 5.81707229594993e-18 0.0190000000000000</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>6.5e-3 5.81707229594993e-18 0.0190000000000000</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>8.45e-2 5.81707229594993e-18 0.0190000000000000</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>6.5e-3 5.81707229594993e-18 0.0190000000000000</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>8.45e-2 5.81707229594993e-18 0.0190000000000000</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>6.5e-3 5.81707229594993e-18 0.0190000000000000</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>8.45e-2 5.81707229594993e-18 0.0190000000000000</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>6.5e-3 5.81707229594993e-18 0.0190000000000000</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>8.45e-2 5.81707229594993e-18 0.0190000000000000</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>6.5e-3 5.81707229594993e-18 0.0190000000000000</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>8.45e-2 5.81707229594993e-18 0.0190000000000000</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>6.5e-3 5.81707229594993e-18 0.0190000000000000</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>8.45e-2 5.81707229594993e-18 0.0190000000000000</location>
+        </attachment>
+        <attachment>
+          <link>7</link>
+          <location>6.5e-3 5.81707229594993e-18 0.0190000000000000</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 3 (link 7)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 -0.0164544826719043 -0.00950000000000000</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>6.5e-3 -0.0164544826719043 -0.00950000000000000</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>8.45e-2 -0.0164544826719043 -0.00950000000000000</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>6.5e-3 -0.0164544826719043 -0.00950000000000000</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>8.45e-2 -0.0164544826719043 -0.00950000000000000</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>6.5e-3 -0.0164544826719043 -0.00950000000000000</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>8.45e-2 -0.0164544826719043 -0.00950000000000000</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>6.5e-3 -0.0164544826719043 -0.00950000000000000</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>8.45e-2 -0.0164544826719043 -0.00950000000000000</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>6.5e-3 -0.0164544826719043 -0.00950000000000000</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>8.45e-2 -0.0164544826719043 -0.00950000000000000</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>6.5e-3 -0.0164544826719043 -0.00950000000000000</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>8.45e-2 -0.0164544826719043 -0.00950000000000000</location>
+        </attachment>
+        <attachment>
+          <link>7</link>
+          <location>6.5e-3 -0.0164544826719043 -0.00950000000000000</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    
+    <cable_ideal name="cable 1 (link 8)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 0.0178541597949323 -0.00649838272318770</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>6.5e-3 0.0178541597949323 -0.00649838272318770</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>8.45e-2 0.0178541597949323 -0.00649838272318770</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>6.5e-3 0.0178541597949323 -0.00649838272318770</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>8.45e-2 0.0178541597949323 -0.00649838272318770</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>6.5e-3 0.0178541597949323 -0.00649838272318770</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>8.45e-2 0.0178541597949323 -0.00649838272318770</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>6.5e-3 0.0178541597949323 -0.00649838272318770</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>8.45e-2 0.0178541597949323 -0.00649838272318770</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>6.5e-3 0.0178541597949323 -0.00649838272318770</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>8.45e-2 0.0178541597949323 -0.00649838272318770</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>6.5e-3 0.0178541597949323 -0.00649838272318770</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>8.45e-2 0.0178541597949323 -0.00649838272318770</location>
+        </attachment>
+        <attachment>
+          <link>7</link>
+          <location>6.5e-3 0.0178541597949323 -0.00649838272318770</location>
+        </attachment>
+        <attachment>
+          <link>7</link>
+          <location>8.45e-2 0.0178541597949323 -0.00649838272318770</location>
+        </attachment>
+        <attachment>
+          <link>8</link>
+          <location>6.5e-3 0.0178541597949323 -0.00649838272318770</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 2 (link 8)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 -0.00329931537567167 0.0187113473072320</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>6.5e-3 -0.00329931537567167 0.0187113473072320</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>8.45e-2 -0.00329931537567167 0.0187113473072320</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>6.5e-3 -0.00329931537567167 0.0187113473072320</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>8.45e-2 -0.00329931537567167 0.0187113473072320</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>6.5e-3 -0.00329931537567167 0.0187113473072320</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>8.45e-2 -0.00329931537567167 0.0187113473072320</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>6.5e-3 -0.00329931537567167 0.0187113473072320</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>8.45e-2 -0.00329931537567167 0.0187113473072320</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>6.5e-3 -0.00329931537567167 0.0187113473072320</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>8.45e-2 -0.00329931537567167 0.0187113473072320</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>6.5e-3 -0.00329931537567167 0.0187113473072320</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>8.45e-2 -0.00329931537567167 0.0187113473072320</location>
+        </attachment>
+        <attachment>
+          <link>7</link>
+          <location>6.5e-3 -0.00329931537567167 0.0187113473072320</location>
+        </attachment>
+        <attachment>
+          <link>7</link>
+          <location>8.45e-2 -0.00329931537567167 0.0187113473072320</location>
+        </attachment>
+        <attachment>
+          <link>8</link>
+          <location>6.5e-3 -0.00329931537567167 0.0187113473072320</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 3 (link 8)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 -0.0145548444192606 -0.0122129645840443</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>6.5e-3 -0.0145548444192606 -0.0122129645840443</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>8.45e-2 -0.0145548444192606 -0.0122129645840443</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>6.5e-3 -0.0145548444192606 -0.0122129645840443</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>8.45e-2 -0.0145548444192606 -0.0122129645840443</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>6.5e-3 -0.0145548444192606 -0.0122129645840443</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>8.45e-2 -0.0145548444192606 -0.0122129645840443</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>6.5e-3 -0.0145548444192606 -0.0122129645840443</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>8.45e-2 -0.0145548444192606 -0.0122129645840443</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>6.5e-3 -0.0145548444192606 -0.0122129645840443</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>8.45e-2 -0.0145548444192606 -0.0122129645840443</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>6.5e-3 -0.0145548444192606 -0.0122129645840443</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>8.45e-2 -0.0145548444192606 -0.0122129645840443</location>
+        </attachment>
+        <attachment>
+          <link>7</link>
+          <location>6.5e-3 -0.0145548444192606 -0.0122129645840443</location>
+        </attachment>
+        <attachment>
+          <link>7</link>
+          <location>8.45e-2 -0.0145548444192606 -0.0122129645840443</location>
+        </attachment>
+        <attachment>
+          <link>8</link>
+          <location>6.5e-3 -0.0145548444192606 -0.0122129645840443</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    
+    <cable_ideal name="cable 1 (link 9)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 0.0187113473072320 -0.00329931537567168</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>6.5e-3 0.0187113473072320 -0.00329931537567168</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>8.45e-2 0.0187113473072320 -0.00329931537567168</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>6.5e-3 0.0187113473072320 -0.00329931537567168</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>8.45e-2 0.0187113473072320 -0.00329931537567168</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>6.5e-3 0.0187113473072320 -0.00329931537567168</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>8.45e-2 0.0187113473072320 -0.00329931537567168</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>6.5e-3 0.0187113473072320 -0.00329931537567168</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>8.45e-2 0.0187113473072320 -0.00329931537567168</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>6.5e-3 0.0187113473072320 -0.00329931537567168</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>8.45e-2 0.0187113473072320 -0.00329931537567168</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>6.5e-3 0.0187113473072320 -0.00329931537567168</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>8.45e-2 0.0187113473072320 -0.00329931537567168</location>
+        </attachment>
+        <attachment>
+          <link>7</link>
+          <location>6.5e-3 0.0187113473072320 -0.00329931537567168</location>
+        </attachment>
+        <attachment>
+          <link>7</link>
+          <location>8.45e-2 0.0187113473072320 -0.00329931537567168</location>
+        </attachment>
+        <attachment>
+          <link>8</link>
+          <location>6.5e-3 0.0187113473072320 -0.00329931537567168</location>
+        </attachment>
+        <attachment>
+          <link>8</link>
+          <location>8.45e-2 0.0187113473072320 -0.00329931537567168</location>
+        </attachment>
+        <attachment>
+          <link>9</link>
+          <location>6.5e-3 0.0187113473072320 -0.00329931537567168</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 2 (link 9)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 -0.00649838272318769 0.0178541597949323</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>6.5e-3 -0.00649838272318769 0.0178541597949323</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>8.45e-2 -0.00649838272318769 0.0178541597949323</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>6.5e-3 -0.00649838272318769 0.0178541597949323</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>8.45e-2 -0.00649838272318769 0.0178541597949323</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>6.5e-3 -0.00649838272318769 0.0178541597949323</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>8.45e-2 -0.00649838272318769 0.0178541597949323</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>6.5e-3 -0.00649838272318769 0.0178541597949323</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>8.45e-2 -0.00649838272318769 0.0178541597949323</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>6.5e-3 -0.00649838272318769 0.0178541597949323</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>8.45e-2 -0.00649838272318769 0.0178541597949323</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>6.5e-3 -0.00649838272318769 0.0178541597949323</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>8.45e-2 -0.00649838272318769 0.0178541597949323</location>
+        </attachment>
+        <attachment>
+          <link>7</link>
+          <location>6.5e-3 -0.00649838272318769 0.0178541597949323</location>
+        </attachment>
+        <attachment>
+          <link>7</link>
+          <location>8.45e-2 -0.00649838272318769 0.0178541597949323</location>
+        </attachment>
+        <attachment>
+          <link>8</link>
+          <location>6.5e-3 -0.00649838272318769 0.0178541597949323</location>
+        </attachment>
+        <attachment>
+          <link>8</link>
+          <location>8.45e-2 -0.00649838272318769 0.0178541597949323</location>
+        </attachment>
+        <attachment>
+          <link>9</link>
+          <location>6.5e-3 -0.00649838272318769 0.0178541597949323</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 3 (link 9)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 -0.0122129645840442 -0.0145548444192606</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>6.5e-3 -0.0122129645840442 -0.0145548444192606</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>8.45e-2 -0.0122129645840442 -0.0145548444192606</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>6.5e-3 -0.0122129645840442 -0.0145548444192606</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>8.45e-2 -0.0122129645840442 -0.0145548444192606</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>6.5e-3 -0.0122129645840442 -0.0145548444192606</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>8.45e-2 -0.0122129645840442 -0.0145548444192606</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>6.5e-3 -0.0122129645840442 -0.0145548444192606</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>8.45e-2 -0.0122129645840442 -0.0145548444192606</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>6.5e-3 -0.0122129645840442 -0.0145548444192606</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>8.45e-2 -0.0122129645840442 -0.0145548444192606</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>6.5e-3 -0.0122129645840442 -0.0145548444192606</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>8.45e-2 -0.0122129645840442 -0.0145548444192606</location>
+        </attachment>
+        <attachment>
+          <link>7</link>
+          <location>6.5e-3 -0.0122129645840442 -0.0145548444192606</location>
+        </attachment>
+        <attachment>
+          <link>7</link>
+          <location>8.45e-2 -0.0122129645840442 -0.0145548444192606</location>
+        </attachment>
+        <attachment>
+          <link>8</link>
+          <location>6.5e-3 -0.0122129645840442 -0.0145548444192606</location>
+        </attachment>
+        <attachment>
+          <link>8</link>
+          <location>8.45e-2 -0.0122129645840442 -0.0145548444192606</location>
+        </attachment>
+        <attachment>
+          <link>9</link>
+          <location>6.5e-3 -0.0122129645840442 -0.0145548444192606</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    
+    <cable_ideal name="cable 1 (link 10)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 0.0190000000000000 -4.65365783675994e-18</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>6.5e-3 0.0190000000000000 -4.65365783675994e-18</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>8.45e-2 0.0190000000000000 -4.65365783675994e-18</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>6.5e-3 0.0190000000000000 -4.65365783675994e-18</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>8.45e-2 0.0190000000000000 -4.65365783675994e-18</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>6.5e-3 0.0190000000000000 -4.65365783675994e-18</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>8.45e-2 0.0190000000000000 -4.65365783675994e-18</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>6.5e-3 0.0190000000000000 -4.65365783675994e-18</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>8.45e-2 0.0190000000000000 -4.65365783675994e-18</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>6.5e-3 0.0190000000000000 -4.65365783675994e-18</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>8.45e-2 0.0190000000000000 -4.65365783675994e-18</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>6.5e-3 0.0190000000000000 -4.65365783675994e-18</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>8.45e-2 0.0190000000000000 -4.65365783675994e-18</location>
+        </attachment>
+        <attachment>
+          <link>7</link>
+          <location>6.5e-3 0.0190000000000000 -4.65365783675994e-18</location>
+        </attachment>
+        <attachment>
+          <link>7</link>
+          <location>8.45e-2 0.0190000000000000 -4.65365783675994e-18</location>
+        </attachment>
+        <attachment>
+          <link>8</link>
+          <location>6.5e-3 0.0190000000000000 -4.65365783675994e-18</location>
+        </attachment>
+        <attachment>
+          <link>8</link>
+          <location>8.45e-2 0.0190000000000000 -4.65365783675994e-18</location>
+        </attachment>
+        <attachment>
+          <link>9</link>
+          <location>6.5e-3 0.0190000000000000 -4.65365783675994e-18</location>
+        </attachment>
+        <attachment>
+          <link>9</link>
+          <location>8.45e-2 0.0190000000000000 -4.65365783675994e-18</location>
+        </attachment>
+        <attachment>
+          <link>10</link>
+          <location>6.5e-3 0.0190000000000000 -4.65365783675994e-180</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 2 (link 10)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 -0.00949999999999998 0.0164544826719043</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>6.5e-3 -0.00949999999999998 0.0164544826719043</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>8.45e-2 -0.00949999999999998 0.0164544826719043</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>6.5e-3 -0.00949999999999998 0.0164544826719043</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>8.45e-2 -0.00949999999999998 0.0164544826719043</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>6.5e-3 -0.00949999999999998 0.0164544826719043</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>8.45e-2 -0.00949999999999998 0.0164544826719043</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>6.5e-3 -0.00949999999999998 0.0164544826719043</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>8.45e-2 -0.00949999999999998 0.0164544826719043</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>6.5e-3 -0.00949999999999998 0.0164544826719043</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>8.45e-2 -0.00949999999999998 0.0164544826719043</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>6.5e-3 -0.00949999999999998 0.0164544826719043</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>8.45e-2 -0.00949999999999998 0.0164544826719043</location>
+        </attachment>
+        <attachment>
+          <link>7</link>
+          <location>6.5e-3 -0.00949999999999998 0.0164544826719043</location>
+        </attachment>
+        <attachment>
+          <link>7</link>
+          <location>8.45e-2 -0.00949999999999998 0.0164544826719043</location>
+        </attachment>
+        <attachment>
+          <link>8</link>
+          <location>6.5e-3 -0.00949999999999998 0.0164544826719043</location>
+        </attachment>
+        <attachment>
+          <link>8</link>
+          <location>8.45e-2 -0.00949999999999998 0.0164544826719043</location>
+        </attachment>
+        <attachment>
+          <link>9</link>
+          <location>6.5e-3 -0.00949999999999998 0.0164544826719043</location>
+        </attachment>
+        <attachment>
+          <link>9</link>
+          <location>8.45e-2 -0.00949999999999998 0.0164544826719043</location>
+        </attachment>
+        <attachment>
+          <link>10</link>
+          <location>6.5e-3 -0.00949999999999998 0.0164544826719043</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 3 (link 10)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 -0.00949999999999999 -0.0164544826719043</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>6.5e-3 -0.00949999999999999 -0.0164544826719043</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>8.45e-2 -0.00949999999999999 -0.0164544826719043</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>6.5e-3 -0.00949999999999999 -0.0164544826719043</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>8.45e-2 -0.00949999999999999 -0.0164544826719043</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>6.5e-3 -0.00949999999999999 -0.0164544826719043</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>8.45e-2 -0.00949999999999999 -0.0164544826719043</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>6.5e-3 -0.00949999999999999 -0.0164544826719043</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>8.45e-2 -0.00949999999999999 -0.0164544826719043</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>6.5e-3 -0.00949999999999999 -0.0164544826719043</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>8.45e-2 -0.00949999999999999 -0.0164544826719043</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>6.5e-3 -0.00949999999999999 -0.0164544826719043</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>8.45e-2 -0.00949999999999999 -0.0164544826719043</location>
+        </attachment>
+        <attachment>
+          <link>7</link>
+          <location>6.5e-3 -0.00949999999999999 -0.0164544826719043</location>
+        </attachment>
+        <attachment>
+          <link>7</link>
+          <location>8.45e-2 -0.00949999999999999 -0.0164544826719043</location>
+        </attachment>
+        <attachment>
+          <link>8</link>
+          <location>6.5e-3 -0.00949999999999999 -0.0164544826719043</location>
+        </attachment>
+        <attachment>
+          <link>8</link>
+          <location>8.45e-2 -0.00949999999999999 -0.0164544826719043</location>
+        </attachment>
+        <attachment>
+          <link>9</link>
+          <location>6.5e-3 -0.00949999999999999 -0.0164544826719043</location>
+        </attachment>
+        <attachment>
+          <link>9</link>
+          <location>8.45e-2 -0.00949999999999999 -0.0164544826719043</location>
+        </attachment>
+        <attachment>
+          <link>10</link>
+          <location>6.5e-3 -0.00949999999999999 -0.0164544826719043</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    
+    <cable_ideal name="cable 1 (link 11)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 0.0187113473072320 0.00329931537567167</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>6.5e-3 0.0187113473072320 0.00329931537567167</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>8.45e-2 0.0187113473072320 0.00329931537567167</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>6.5e-3 0.0187113473072320 0.00329931537567167</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>8.45e-2 0.0187113473072320 0.00329931537567167</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>6.5e-3 0.0187113473072320 0.00329931537567167</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>8.45e-2 0.0187113473072320 0.00329931537567167</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>6.5e-3 0.0187113473072320 0.00329931537567167</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>8.45e-2 0.0187113473072320 0.00329931537567167</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>6.5e-3 0.0187113473072320 0.00329931537567167</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>8.45e-2 0.0187113473072320 0.00329931537567167</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>6.5e-3 0.0187113473072320 0.00329931537567167</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>8.45e-2 0.0187113473072320 0.00329931537567167</location>
+        </attachment>
+        <attachment>
+          <link>7</link>
+          <location>6.5e-3 0.0187113473072320 0.00329931537567167</location>
+        </attachment>
+        <attachment>
+          <link>7</link>
+          <location>8.45e-2 0.0187113473072320 0.00329931537567167</location>
+        </attachment>
+        <attachment>
+          <link>8</link>
+          <location>6.5e-3 0.0187113473072320 0.00329931537567167</location>
+        </attachment>
+        <attachment>
+          <link>8</link>
+          <location>8.45e-2 0.0187113473072320 0.00329931537567167</location>
+        </attachment>
+        <attachment>
+          <link>9</link>
+          <location>6.5e-3 0.0187113473072320 0.00329931537567167</location>
+        </attachment>
+        <attachment>
+          <link>9</link>
+          <location>8.45e-2 0.0187113473072320 0.00329931537567167</location>
+        </attachment>
+        <attachment>
+          <link>10</link>
+          <location>6.5e-3 0.0187113473072320 0.00329931537567167</location>
+        </attachment>
+        <attachment>
+          <link>10</link>
+          <location>8.45e-2 0.0187113473072320 0.00329931537567167</location>
+        </attachment>
+        <attachment>
+          <link>11</link>
+          <location>6.5e-3 0.0187113473072320 0.00329931537567167</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 2 (link 11)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 -0.0122129645840442 0.0145548444192606</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>6.5e-3 -0.0122129645840442 0.0145548444192606</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>8.45e-2 -0.0122129645840442 0.0145548444192606</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>6.5e-3 -0.0122129645840442 0.0145548444192606</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>8.45e-2 -0.0122129645840442 0.0145548444192606</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>6.5e-3 -0.0122129645840442 0.0145548444192606</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>8.45e-2 -0.0122129645840442 0.0145548444192606</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>6.5e-3 -0.0122129645840442 0.0145548444192606</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>8.45e-2 -0.0122129645840442 0.0145548444192606</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>6.5e-3 -0.0122129645840442 0.0145548444192606</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>8.45e-2 -0.0122129645840442 0.0145548444192606</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>6.5e-3 -0.0122129645840442 0.0145548444192606</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>8.45e-2 -0.0122129645840442 0.0145548444192606</location>
+        </attachment>
+        <attachment>
+          <link>7</link>
+          <location>6.5e-3 -0.0122129645840442 0.0145548444192606</location>
+        </attachment>
+        <attachment>
+          <link>7</link>
+          <location>8.45e-2 -0.0122129645840442 0.0145548444192606</location>
+        </attachment>
+        <attachment>
+          <link>8</link>
+          <location>6.5e-3 -0.0122129645840442 0.0145548444192606</location>
+        </attachment>
+        <attachment>
+          <link>8</link>
+          <location>8.45e-2 -0.0122129645840442 0.0145548444192606</location>
+        </attachment>
+        <attachment>
+          <link>9</link>
+          <location>6.5e-3 -0.0122129645840442 0.0145548444192606</location>
+        </attachment>
+        <attachment>
+          <link>9</link>
+          <location>8.45e-2 -0.0122129645840442 0.0145548444192606</location>
+        </attachment>
+        <attachment>
+          <link>10</link>
+          <location>6.5e-3 -0.0122129645840442 0.0145548444192606</location>
+        </attachment>
+        <attachment>
+          <link>10</link>
+          <location>8.45e-2 -0.0122129645840442 0.0145548444192606</location>
+        </attachment>
+        <attachment>
+          <link>11</link>
+          <location>6.5e-3 -0.0122129645840442 0.0145548444192606</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 3 (link 11)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 -0.00649838272318770 -0.0178541597949323</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>6.5e-3 -0.00649838272318770 -0.0178541597949323</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>8.45e-2 -0.00649838272318770 -0.0178541597949323</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>6.5e-3 -0.00649838272318770 -0.0178541597949323</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>8.45e-2 -0.00649838272318770 -0.0178541597949323</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>6.5e-3 -0.00649838272318770 -0.0178541597949323</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>8.45e-2 -0.00649838272318770 -0.0178541597949323</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>6.5e-3 -0.00649838272318770 -0.0178541597949323</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>8.45e-2 -0.00649838272318770 -0.0178541597949323</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>6.5e-3 -0.00649838272318770 -0.0178541597949323</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>8.45e-2 -0.00649838272318770 -0.0178541597949323</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>6.5e-3 -0.00649838272318770 -0.0178541597949323</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>8.45e-2 -0.00649838272318770 -0.0178541597949323</location>
+        </attachment>
+        <attachment>
+          <link>7</link>
+          <location>6.5e-3 -0.00649838272318770 -0.0178541597949323</location>
+        </attachment>
+        <attachment>
+          <link>7</link>
+          <location>8.45e-2 -0.00649838272318770 -0.0178541597949323</location>
+        </attachment>
+        <attachment>
+          <link>8</link>
+          <location>6.5e-3 -0.00649838272318770 -0.0178541597949323</location>
+        </attachment>
+        <attachment>
+          <link>8</link>
+          <location>8.45e-2 -0.00649838272318770 -0.0178541597949323</location>
+        </attachment>
+        <attachment>
+          <link>9</link>
+          <location>6.5e-3 -0.00649838272318770 -0.0178541597949323</location>
+        </attachment>
+        <attachment>
+          <link>9</link>
+          <location>8.45e-2 -0.00649838272318770 -0.0178541597949323</location>
+        </attachment>
+        <attachment>
+          <link>10</link>
+          <location>6.5e-3 -0.00649838272318770 -0.0178541597949323</location>
+        </attachment>
+        <attachment>
+          <link>10</link>
+          <location>8.45e-2 -0.00649838272318770 -0.0178541597949323</location>
+        </attachment>
+        <attachment>
+          <link>11</link>
+          <location>6.5e-3 -0.00649838272318770 -0.0178541597949323</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    
+    <cable_ideal name="cable 1 (link 12)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 0.0178541597949323 0.00649838272318769</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>6.5e-3 0.0178541597949323 0.00649838272318769</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>8.45e-2 0.0178541597949323 0.00649838272318769</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>6.5e-3 0.0178541597949323 0.00649838272318769</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>8.45e-2 0.0178541597949323 0.00649838272318769</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>6.5e-3 0.0178541597949323 0.00649838272318769</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>8.45e-2 0.0178541597949323 0.00649838272318769</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>6.5e-3 0.0178541597949323 0.00649838272318769</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>8.45e-2 0.0178541597949323 0.00649838272318769</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>6.5e-3 0.0178541597949323 0.00649838272318769</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>8.45e-2 0.0178541597949323 0.00649838272318769</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>6.5e-3 0.0178541597949323 0.00649838272318769</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>8.45e-2 0.0178541597949323 0.00649838272318769</location>
+        </attachment>
+        <attachment>
+          <link>7</link>
+          <location>6.5e-3 0.0178541597949323 0.00649838272318769</location>
+        </attachment>
+        <attachment>
+          <link>7</link>
+          <location>8.45e-2 0.0178541597949323 0.00649838272318769</location>
+        </attachment>
+        <attachment>
+          <link>8</link>
+          <location>6.5e-3 0.0178541597949323 0.00649838272318769</location>
+        </attachment>
+        <attachment>
+          <link>8</link>
+          <location>8.45e-2 0.0178541597949323 0.00649838272318769</location>
+        </attachment>
+        <attachment>
+          <link>9</link>
+          <location>6.5e-3 0.0178541597949323 0.00649838272318769</location>
+        </attachment>
+        <attachment>
+          <link>9</link>
+          <location>8.45e-2 0.0178541597949323 0.00649838272318769</location>
+        </attachment>
+        <attachment>
+          <link>10</link>
+          <location>6.5e-3 0.0178541597949323 0.00649838272318769</location>
+        </attachment>
+        <attachment>
+          <link>10</link>
+          <location>8.45e-2 0.0178541597949323 0.00649838272318769</location>
+        </attachment>
+        <attachment>
+          <link>11</link>
+          <location>6.5e-3 0.0178541597949323 0.00649838272318769</location>
+        </attachment>
+        <attachment>
+          <link>11</link>
+          <location>8.45e-2 0.0178541597949323 0.00649838272318769</location>
+        </attachment>
+        <attachment>
+          <link>12</link>
+          <location>6.5e-3 0.0178541597949323 0.00649838272318769</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 2 (link 12)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 -0.0145548444192606 0.0122129645840443</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>6.5e-3 -0.0145548444192606 0.0122129645840443</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>8.45e-2 -0.0145548444192606 0.0122129645840443</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>6.5e-3 -0.0145548444192606 0.0122129645840443</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>8.45e-2 -0.0145548444192606 0.0122129645840443</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>6.5e-3 -0.0145548444192606 0.0122129645840443</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>8.45e-2 -0.0145548444192606 0.0122129645840443</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>6.5e-3 -0.0145548444192606 0.0122129645840443</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>8.45e-2 -0.0145548444192606 0.0122129645840443</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>6.5e-3 -0.0145548444192606 0.0122129645840443</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>8.45e-2 -0.0145548444192606 0.0122129645840443</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>6.5e-3 -0.0145548444192606 0.0122129645840443</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>8.45e-2 -0.0145548444192606 0.0122129645840443</location>
+        </attachment>
+        <attachment>
+          <link>7</link>
+          <location>6.5e-3 -0.0145548444192606 0.0122129645840443</location>
+        </attachment>
+        <attachment>
+          <link>7</link>
+          <location>8.45e-2 -0.0145548444192606 0.0122129645840443</location>
+        </attachment>
+        <attachment>
+          <link>8</link>
+          <location>6.5e-3 -0.0145548444192606 0.0122129645840443</location>
+        </attachment>
+        <attachment>
+          <link>8</link>
+          <location>8.45e-2 -0.0145548444192606 0.0122129645840443</location>
+        </attachment>
+        <attachment>
+          <link>9</link>
+          <location>6.5e-3 -0.0145548444192606 0.0122129645840443</location>
+        </attachment>
+        <attachment>
+          <link>9</link>
+          <location>8.45e-2 -0.0145548444192606 0.0122129645840443</location>
+        </attachment>
+        <attachment>
+          <link>10</link>
+          <location>6.5e-3 -0.0145548444192606 0.0122129645840443</location>
+        </attachment>
+        <attachment>
+          <link>10</link>
+          <location>8.45e-2 -0.0145548444192606 0.0122129645840443</location>
+        </attachment>
+        <attachment>
+          <link>11</link>
+          <location>6.5e-3 -0.0145548444192606 0.0122129645840443</location>
+        </attachment>
+        <attachment>
+          <link>11</link>
+          <location>8.45e-2 -0.0145548444192606 0.0122129645840443</location>
+        </attachment>
+        <attachment>
+          <link>12</link>
+          <location>6.5e-3 -0.0145548444192606 0.0122129645840443</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 3 (link 12)" attachment_reference="joint">
+      <properties>
+        <force_min>0</force_min>
+        <force_max>800000</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 -0.00329931537567168 -0.0187113473072320</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>6.5e-3 -0.00329931537567168 -0.0187113473072320</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>8.45e-2 -0.00329931537567168 -0.0187113473072320</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>6.5e-3 -0.00329931537567168 -0.0187113473072320</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>8.45e-2 -0.00329931537567168 -0.0187113473072320</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>6.5e-3 -0.00329931537567168 -0.0187113473072320</location>
+        </attachment>
+        <attachment>
+          <link>3</link>
+          <location>8.45e-2 -0.00329931537567168 -0.0187113473072320</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>6.5e-3 -0.00329931537567168 -0.0187113473072320</location>
+        </attachment>
+        <attachment>
+          <link>4</link>
+          <location>8.45e-2 -0.00329931537567168 -0.0187113473072320</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>6.5e-3 -0.00329931537567168 -0.0187113473072320</location>
+        </attachment>
+        <attachment>
+          <link>5</link>
+          <location>8.45e-2 -0.00329931537567168 -0.0187113473072320</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>6.5e-3 -0.00329931537567168 -0.0187113473072320</location>
+        </attachment>
+        <attachment>
+          <link>6</link>
+          <location>8.45e-2 -0.00329931537567168 -0.0187113473072320</location>
+        </attachment>
+        <attachment>
+          <link>7</link>
+          <location>6.5e-3 -0.00329931537567168 -0.0187113473072320</location>
+        </attachment>
+        <attachment>
+          <link>7</link>
+          <location>8.45e-2 -0.00329931537567168 -0.0187113473072320</location>
+        </attachment>
+        <attachment>
+          <link>8</link>
+          <location>6.5e-3 -0.00329931537567168 -0.0187113473072320</location>
+        </attachment>
+        <attachment>
+          <link>8</link>
+          <location>8.45e-2 -0.00329931537567168 -0.0187113473072320</location>
+        </attachment>
+        <attachment>
+          <link>9</link>
+          <location>6.5e-3 -0.00329931537567168 -0.0187113473072320</location>
+        </attachment>
+        <attachment>
+          <link>9</link>
+          <location>8.45e-2 -0.00329931537567168 -0.0187113473072320</location>
+        </attachment>
+        <attachment>
+          <link>10</link>
+          <location>6.5e-3 -0.00329931537567168 -0.0187113473072320</location>
+        </attachment>
+        <attachment>
+          <link>10</link>
+          <location>8.45e-2 -0.00329931537567168 -0.0187113473072320</location>
+        </attachment>
+        <attachment>
+          <link>11</link>
+          <location>6.5e-3 -0.00329931537567168 -0.0187113473072320</location>
+        </attachment>
+        <attachment>
+          <link>11</link>
+          <location>8.45e-2 -0.00329931537567168 -0.0187113473072320</location>
+        </attachment>
+        <attachment>
+          <link>12</link>
+          <location>6.5e-3 -0.00329931537567168 -0.0187113473072320</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    
+  </cable_set>
+</cables>

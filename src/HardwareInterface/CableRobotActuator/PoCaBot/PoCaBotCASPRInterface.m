@@ -58,6 +58,8 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
                     interface.ActuatorParas = XH430_W210;
                 case DynamixelType.XM540_W150
                     interface.ActuatorParas = XM540_W150;
+                case DynamixelType.PRO_M54_60_S250
+                    interface.ActuatorParas = PRO_M54_60_S250;
                 otherwise
                     CASPR_Log.Error('ActuatorType has not been implemented');
             end
@@ -76,7 +78,7 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
             end
             
             for i = 1: numMotor
-                accessories_temp(i) = MegaMotorAccessories;
+                accessories_temp(i) = MegaSpoolSpecifications;
             end
             interface.accessories = accessories_temp;
             interface.cableLengths_full = accessories_temp(1).cableLengths_full;
@@ -361,6 +363,12 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
             current = current*obj.dynamixel_direction_factor_current;
         end
         
+        % Method to read the goal current from the hardware (if available)
+        function [current] = goalForceFeedbackRead(obj)
+            [~, current] = obj.sync_read(obj.ActuatorParas.ADDR_GOAL_CURRENT, obj.ActuatorParas.LEN_GOAL_CURRENT);
+            current = current*obj.dynamixel_direction_factor_current;
+        end
+        
         function setProfileAcceleration(obj,profile)
             obj.sync_write(obj.ActuatorParas.ADDR_PROFILE_ACCELERATION, obj.ActuatorParas.LEN_PROFILE_ACCELERATION, profile);
         end
@@ -462,7 +470,7 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
         end
     end
     
-    methods (Access = private)
+    methods (Access = public)
         % This function has built in the math model of the spool and the
         % dynamixel holder. the input argument relLen is a column vector
         % with size numMotor X 1, specifying the absolute length we need

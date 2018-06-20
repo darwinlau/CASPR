@@ -64,7 +64,7 @@ classdef UniversalYZ < JointBase
         % Generate the S gradient tensor
         function [S_grad] = RelVelocityMatrixGradient(q)
             g = UniversalYZ.GetGamma(q);
-            S_grad          =   zeros(6,2,2);
+            S_grad = MatrixOperations.Initialise([6,2,2], isa(g, 'sym'));
             S_grad(:,:,2)   =   [zeros(3,2); cos(g) 0; -sin(g) 0; 0 0];    
         end
         
@@ -74,7 +74,7 @@ classdef UniversalYZ < JointBase
 %             c_d = SphericalEulerXYZ.GetGamma(q_dot); % since
 %             SphericalEulerXYZ.GetGamma(q) gets q(3)
             g_d = UniversalYZ.GetGamma(q_dot);
-            S_dot_grad          =   zeros(6,2,2);
+            S_dot_grad = MatrixOperations.Initialise([6,2,2], isa(g, 'sym'));
             S_dot_grad(:,:,2)   =   [zeros(3,2); -g_d*sin(g) 0; -g_d*cos(g) 0; 0 0];    
         end   
         

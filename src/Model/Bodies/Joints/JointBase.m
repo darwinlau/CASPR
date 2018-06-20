@@ -19,6 +19,7 @@ classdef (Abstract) JointBase < handle
     
     properties
         tau                 % Actuator effort for joint (if actuated)
+        axis                % Rotation axis for revolute joints
     end
    
     properties (SetAccess = private)
@@ -96,6 +97,11 @@ classdef (Abstract) JointBase < handle
             end
         end
         
+        function set.axis(obj, value)
+            % Normalize the axis
+            obj.axis = value/norm(value);            
+        end
+        
         % These functions generate trajectory spline for a joint
         % By default it assumes that the interpolation is done on all
         % joints independently. If not, override it in your own joint
@@ -147,7 +153,8 @@ classdef (Abstract) JointBase < handle
         
     methods (Static)
         % Create a new joint
-        function j = CreateJoint(jointType, q_initial, q_min, q_max)
+        function j = CreateJoint(jointType, q_initial, q_min, q_max, isActuated, axis)
+            CASPR_log.Assert(nargin >= 5, 'Not enough input arguments');
             switch jointType
                 case JointType.R_X
                     j = RevoluteX;
@@ -155,10 +162,16 @@ classdef (Abstract) JointBase < handle
                     j = RevoluteY;
                 case JointType.R_Z
                     j = RevoluteZ;
+                case JointType.R_AXIS
+                    j = RevoluteAxis;
+                    CASPR_log.Assert(nargin >= 6, 'Rotation Axis must be defined.');
+                    j.axis = axis;
                 case JointType.U_XY
                     j = UniversalXY;
                 case JointType.U_YZ
                     j = UniversalYZ;
+                case JointType.P_X
+                    j = PrismaticX;
                 case JointType.P_XY
                     j = PrismaticXY;
                 case JointType.PLANAR_XY
@@ -178,29 +191,37 @@ classdef (Abstract) JointBase < handle
 %                 case JointType.SPATIAL_QUATERNION
 %                     j = SpatialQuaternion;
                 case JointType.SPATIAL_EULER_XYZ
-                    j = SpatialEulerXYZ;
+                    j = SpatialEulerXYZ;                
                 otherwise
                     CASPR_log.Print('Joint type is not defined', CASPRLogLevel.ERROR);
             end
             j.type = jointType;
             
-            
-            if (nargin < 2)
-                j.q_initial = j.q_default;
-                j.q_min     = j.q_lb;
-                j.q_max     = j.q_ub;
-            elseif(nargin <3) 
+            % Initialise the values
+            if (~isempty(q_initial))
                 j.q_initial = q_initial;
-                j.q_min     = j.q_lb;
-                j.q_max     = j.q_ub;
             else
-                j.q_initial = q_initial;
-                j.q_min     = q_min;
-                j.q_max     = q_max;
+                j.q_initial = j.q_default;
+            end            
+            if (~isempty(q_min))
+                j.q_min = q_min;
+            else
+                j.q_min = j.q_lb;
+            end            
+            if (~isempty(q_max))
+                j.q_max = q_max;
+            else
+                j.q_max = j.q_ub;
             end
+            j.isActuated = isActuated;
+            
             j.update(j.q_initial, j.q_dot_default, j.q_ddot_default);
             
-            j.tau = [];
+            if j.isActuated
+                j.tau = zeros(j.numDofs, 1);
+            else       
+                j.tau = [];
+            end
             j.tau_min = -Inf*ones(j.numDofs, 1);
             j.tau_max = Inf*ones(j.numDofs, 1);
         end
@@ -209,15 +230,27 @@ classdef (Abstract) JointBase < handle
         function j = LoadXmlObj(xmlObj)
             jointType = JointType.(char(xmlObj.getAttribute('type')));
             q_initial = XmlOperations.StringToVector(char(xmlObj.getAttribute('q_initial')));
-            assert(sum(isnan(q_initial))==0,'q_initial must be defined in the xml file');
+            CASPR_log.Assert(sum(isnan(q_initial))==0,'q_initial must be defined in the xml file');
             q_min = XmlOperations.StringToVector(char(xmlObj.getAttribute('q_min')));
-            assert(sum(isnan(q_min))==0,'q_min must be defined in the xml file');
+            CASPR_log.Assert(sum(isnan(q_min))==0,'q_min must be defined in the xml file');
             q_max = XmlOperations.StringToVector(char(xmlObj.getAttribute('q_max')));
-            assert(sum(isnan(q_max))==0,'q_max must be defined in the xml file');
-            j = JointBase.CreateJoint(jointType, q_initial, q_min, q_max);
+            CASPR_log.Assert(sum(isnan(q_max))==0,'q_max must be defined in the xml file'); 
+            
+            % Actuated joints
             if (~isempty(xmlObj.getAttribute('actuated') == '') && strcmp(xmlObj.getAttribute('actuated'), 'true'))
-                j.isActuated = 1;
-                j.tau = zeros(j.numDofs, 1);
+                isActuated = 1;        
+            else
+                isActuated = 0;
+            end
+            
+            % Rotation axis 
+            if (~isempty(xmlObj.getAttribute('axis') == ''))
+                CASPR_log.Assert(jointType==JointType.R_Axis,'Axis definition is only allowed for R_Axis joints.'); 
+                axis = XmlOperations.StringToVector(char(xmlObj.getAttribute('axis')));
+                CASPR_log.Assert(length(axis)==3,'Dimension of rotation axis must be 3.'); 
+                j = JointBase.CreateJoint(jointType, q_initial, q_min, q_max, isActuated, axis);
+            else
+                j = JointBase.CreateJoint(jointType, q_initial, q_min, q_max, isActuated);
             end
         end
         

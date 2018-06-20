@@ -26,15 +26,19 @@ classdef (Abstract) InitialPoseUncertaintyBase < PreUpdateUncertaintyBase
             ipu.cable_indices   =   1:ipu.model.numCables;
         end
         
-        % Implementation of applyPreUpdateUncertainty
-        function [update_q,update_q_dot,update_q_ddot] = applyPreUpdateUncertainty(obj,q,q_dot,q_ddot,dt)
-            obj.model.update(q,q_dot,q_ddot,zeros(obj.model.numDofs));
-            l = obj.model.cableLengths;
-            [update_q, update_q_dot] = obj.fk_solver.compute(l,obj.l_prev,obj.cable_indices,obj.q_prev,obj.q_d_prev,dt);
-            obj.q_prev   =   q;
-            obj.q_d_prev =   q_dot;
-            update_q_ddot = q_ddot; 
-        end
+%         % Implementation of applyPreUpdateUncertainty
+%         function [update_q,update_q_dot,update_q_ddot] = applyPreUpdateUncertainty(obj,q,q_dot,q_ddot,dt)
+%             obj.model.update(q,q_dot,q_ddot,zeros(obj.model.numDofs));
+%             l = obj.model.cableLengths;
+%             [update_q, update_q_dot] = obj.fk_solver.compute(l,obj.l_prev,obj.cable_indices,obj.q_prev,obj.q_d_prev,dt);
+%             obj.q_prev   =   q;
+%             obj.q_d_prev =   q_dot;
+%             update_q_ddot = q_ddot; 
+%         end
+    end
+    methods(Abstract)
+        % Apply initial length uncertainty before the update
+        [update_q,update_q_dot] = applyInitialOffset(obj,q,q_dot);
     end
 end
 

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE bodies_system SYSTEM "../../../../templates/bodies.dtd">
+<bodies_system>
+    <links display_range="-1 6 -1 6 0 6" view_angle="-37 32">
+        <link_rigid num="1" name="END_EFFECTOR">
+            <joint type="SPATIAL_EULER_XYZ" q_initial="1 2 1 0 0 0" q_min="0.2 2.5 4.8 0 0 0" q_max="4.8 2.5 4.8 0 0 0"/>
+            <physical>
+                <mass>1</mass>
+                <com_location>0 0 0</com_location>
+                <end_location>0 0 0</end_location>
+                <inertia ref="com">
+                    <Ixx>1.0</Ixx>
+                    <Iyy>1.0</Iyy>
+                    <Izz>1.0</Izz>
+                    <Ixy>0.0</Ixy>
+                    <Ixz>0.0</Ixz>
+                    <Iyz>0.0</Iyz>
+                </inertia>
+            </physical>
+            <parent>
+                <num>0</num>
+                <location>0 0 0</location>
+            </parent>
+        </link_rigid>
+        <link_rigid num="2" name="Tree">
+            <joint type="R_X" q_initial="0" q_min="0" q_max="0"/>
+            <physical>
+                <mass>1</mass>
+                <com_location>0 0 1</com_location>
+                <end_location>0 0 2</end_location>
+                <inertia ref="com">
+                    <Ixx>1.0</Ixx>
+                    <Iyy>1.0</Iyy>
+                    <Izz>1.0</Izz>
+                    <Ixy>0.0</Ixy>
+                    <Ixz>0.0</Ixz>
+                    <Iyz>0.0</Iyz>
+                </inertia>
+            </physical>
+            <parent>
+                <num>0</num>
+                <location>2.5 2.5 0</location>
+            </parent>
+        </link_rigid>
+    </links>
+</bodies_system>

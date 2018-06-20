@@ -87,21 +87,80 @@ classdef (Abstract) ModelConfigBase < handle
             c.viewAngle = XmlOperations.StringToVector(char(bodies_xmlobj.getAttribute('view_angle')))';
         end
                 
-        function [sysModel] = getModel(obj, cable_set_id, operational_space_id, model_mode)
+        function [sysModel] = getModel(obj, cable_set_id, operational_space_id)
             bodies_xmlobj = obj.getBodiesPropertiesXmlObj();
             cableset_xmlobj = obj.getCableSetXmlObj(cable_set_id);
-            if (nargin == 4)
-                % Model mode has been specified
-                sysModel = SystemModel.LoadXmlObj(bodies_xmlobj, cableset_xmlobj,model_mode);
-            else
-                sysModel = SystemModel.LoadXmlObj(bodies_xmlobj, cableset_xmlobj,ModelModeType.DEFAULT);
+
+            % Decide action according to the global_model_mode
+            switch CASPR_configuration.LoadGlobalModelMode()
+                % DEFAULT
+                case ModelModeType.DEFAULT
+                    sysModel = SystemModel.LoadXmlObj(bodies_xmlobj, cableset_xmlobj,ModelModeType.DEFAULT);
+                    % Operational
+                    if nargin > 2
+                        operationalset_xmlobj = obj.getOperationalSetXmlObj(obj.defaultOperationalSetId);
+                        sysModel.loadOperationalXmlObj(operationalset_xmlobj);
+                    end
+                % SYMBOLIC
+                case ModelModeType.SYMBOLIC                                
+                    sysModel = SystemModel.LoadXmlObj(bodies_xmlobj, cableset_xmlobj,ModelModeType.SYMBOLIC);
+                    % Operational
+                    if nargin > 2
+                        operationalset_xmlobj = obj.getOperationalSetXmlObj(obj.defaultOperationalSetId);
+                        sysModel.loadOperationalXmlObj(operationalset_xmlobj);
+                        sysModel.bodyModel.updateOperationalSpace();
+                    end
+                % COMPILED
+                case ModelModeType.COMPILED
+                    % Check the reuse_compiled flag in
+                    % CASPR_environment variables
+                    is_reuse = false;                                
+                    reuse_compiled = CASPR_configuration.LoadReuseCompiled();
+                    % If the flag is turned on, warn the user
+                    if reuse_compiled
+                        warning('off','all');  
+                        CASPR_log.Warn('Flag: reuse_compiled is turned on.');
+                        CASPR_log.Warn('Are you sure you want to reuse compiled files? Y/N [Y]');
+                        str = input('', 's');
+                        if str == 'y' || str == 'Y'
+                            is_reuse = true;
+                        else
+                            % Turn the flag off if the user
+                            % chose 'no'
+                            CASPR_configuration.SetReuseCompiled(0);
+                        end
+                        warning('on','all');  
+                    end       
+                    % If the flag is on, also the user chose
+                    % 'y', then reuse previously compiled
+                    % files.
+                    if is_reuse                                        
+                        sysModel = SystemModel.LoadXmlObj(bodies_xmlobj, cableset_xmlobj,ModelModeType.DEFAULT);   
+                        % Operational
+                        if nargin > 2
+                            operationalset_xmlobj = obj.getOperationalSetXmlObj(obj.defaultOperationalSetId);
+                            sysModel.loadOperationalXmlObj(operationalset_xmlobj);                                                             
+                            sysModel.bodyModel.updateOperationalSpace();  
+                        end
+                    else
+                        % Start Compilations...
+                        warning('off','all');  
+                        CASPR_log.Warn('Current version of compiled mode does not support changes in active <-> passive cables.');
+                        CASPR_log.Warn('Compilation needs a long time. Please wait...');                        
+                        warning('on','all');  
+                        CASPR_log.Info('Preparation work...');
+                        sysModel = SystemModel.LoadXmlObj(bodies_xmlobj, cableset_xmlobj,ModelModeType.COMPILED);
+                        % Operational
+                        if nargin > 2
+                            operationalset_xmlobj = obj.getOperationalSetXmlObj(obj.defaultOperationalSetId);
+                            sysModel.loadOperationalXmlObj(operationalset_xmlobj);
+                            sysModel.bodyModel.updateOperationalSpace();
+                        end
+                        sysModel.compile();                                    
+                    end     
+                    sysModel.setFilesCompiled(true); 
+                    sysModel.setModelMode(ModelModeType.COMPILED);
             end
-            
-            if (nargin == 3 && ~isempty(operational_space_id))
-                operationalset_xmlobj = obj.getOperationalSetXmlObj(obj.defaultOperationalSetId);
-                sysModel.loadOperationalXmlObj(operationalset_xmlobj);
-            end
-            
         end
         
         % Getting the joint and operational space trajectories

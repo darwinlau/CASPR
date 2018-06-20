@@ -4,7 +4,7 @@
 % robots:
 % D. Lau, D. Oetomo, and S. K. Halgamuge, "Generalized Modeling of
 % Multilink Cable-Driven Manipulators with Arbitrary Routing Using the
-% Cable-Routing Matrix," IEEE Trans. Robot., vol. 29, no. 5, pp. 1102�1113,
+% Cable-Routing Matrix," IEEE Trans. Robot., vol. 29, no. 5, pp. 1102-1113,
 % Oct. 2013.
 % 
 % Author        : Darwin LAU
@@ -34,6 +34,7 @@ classdef (Abstract) CableModelBase < handle
         % Minimum and maximum allowable cable force
         forceMin
         forceMax
+        diameter    = 0;            % diameter/thickness of cable (default value 0)
     end    
     
     properties (SetAccess = private)
@@ -44,6 +45,7 @@ classdef (Abstract) CableModelBase < handle
     properties (Dependent)
         length                      % Length of the cable
         numSegments                 % Total number of segments
+        CRM                         % Cable routing matrix of the cable
     end
     
     properties (Abstract, Dependent)
@@ -91,6 +93,13 @@ classdef (Abstract) CableModelBase < handle
             value = length(obj.segments);
         end
         
+        function value = get.CRM(obj)
+            value = [];
+            for j = 1:obj.numSegments
+                value = [value; obj.segments{j}.CRM];
+            end
+        end
+        
         function c_jk = getCRMTerm(obj, j, k)
             CASPR_log.Assert(j <= obj.numSegments, 'Invalid segment number.');
             % This is checked in segments.getCRMTerm
@@ -100,15 +109,15 @@ classdef (Abstract) CableModelBase < handle
         
         function plotCable(obj, axis)
             for j = 1:obj.numSegments
-                for k = 1:obj.numLinks+1
-                    if obj.getCRMTerm(j,k) == -1
-                        r_OAa0 = obj.segments{j}.attachments{1}.r_OA;
-                    elseif obj.getCRMTerm(j,k) == 1
-                        r_OAb0 = obj.segments{j}.attachments{2}.r_OA;
-                    end
-                end
+                r_OAa0 = obj.segments{j}.attachments{1}.r_OA;
+                r_OAb0 = obj.segments{j}.attachments{2}.r_OA;
+
                 if (obj.isActive)
-                    plot3(axis,[r_OAa0(1) r_OAb0(1)], [r_OAa0(2) r_OAb0(2)], [r_OAa0(3) r_OAb0(3)], 'Color', 'r', 'LineWidth', 1);
+                    if obj.segments{j}.attached_links(1)==obj.segments{j}.attached_links(2)
+                        plot3(axis,[r_OAa0(1) r_OAb0(1)], [r_OAa0(2) r_OAb0(2)], [r_OAa0(3) r_OAb0(3)], 'Color', [1.0, 0, 1.0], 'LineWidth', 1);
+                    else
+                        plot3(axis,[r_OAa0(1) r_OAb0(1)], [r_OAa0(2) r_OAb0(2)], [r_OAa0(3) r_OAb0(3)], 'Color', 'r', 'LineWidth', 1);
+                    end
                 else
                     plot3(axis,[r_OAa0(1) r_OAb0(1)], [r_OAa0(2) r_OAb0(2)], [r_OAa0(3) r_OAb0(3)], 'Color', [0.7, 0.7, 0.7], 'LineWidth', 1);
                 end

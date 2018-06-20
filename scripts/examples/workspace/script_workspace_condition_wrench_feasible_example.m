@@ -16,7 +16,7 @@ q_begin         =   modelObj.bodyModel.q_min; q_end = modelObj.bodyModel.q_max;
 q_step          =   (modelObj.bodyModel.q_max - modelObj.bodyModel.q_min)/10;
 % Set up the workspace simulator
 % First the grid
-uGrid           =   UniformGrid(q_begin,q_end,q_step);
+uGrid           =   UniformGrid(q_begin,q_end,q_step,'step_size');
 % Define the workspace condition and metrics
 i_max     = 2^(modelObj.numDofs)-1;
 w_set     = zeros(modelObj.numDofs,i_max+1);

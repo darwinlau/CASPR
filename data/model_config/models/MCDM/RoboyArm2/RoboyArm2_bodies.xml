@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE bodies_system SYSTEM "../../../templates/bodies.dtd">
+<bodies_system>
+    <links display_range="-1.0 1.0 -1.0 1.0 -1.0 1.0" view_angle="-37 32">
+      <link_rigid num="1" name="Upper Arm">
+        <joint type="S_EULER_XYZ" q_initial="0.0 0 0" q_min="-3.1416 -3.1416 -3.1416" q_max="3.1416 3.1416 3.1416"/>
+        <physical>
+          <mass>0.169626</mass>
+          <com_location>0.00041451 -0.0885361 -6.8047307e-07</com_location>
+          <end_location>0.00041451 -0.12 -6.8047307e-07</end_location>
+          <inertia ref="com">
+            <Ixx>0.00221695786587873</Ixx>
+            <Iyy>2.98122429567762e-05</Iyy>
+            <Izz>0.00221564558225491</Izz>
+            <Ixy>3.77051761658273e-06</Ixy>
+            <Ixz>-5.54167493160002e-10</Ixz>
+            <Iyz>-5.79873704795501e-09</Iyz>
+          </inertia>
+        </physical>
+        <parent>
+          <num>0</num>
+          <location>0.292 0.018049 -1.15118e-04</location>
+        </parent>
+      </link_rigid>
+    </links>
+</bodies_system>

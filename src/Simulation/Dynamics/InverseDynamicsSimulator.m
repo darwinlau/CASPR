@@ -13,6 +13,7 @@ classdef InverseDynamicsSimulator < DynamicsSimulator
         IDFunctionCost      % Cost value for optimisation at each point in time
         IDExitType          % Exit type at each point in time (IDSolverExitType)
         IDSolver
+        stiffness           % Cell array of the stiffness matrices at each time instant
     end
 
     methods
@@ -31,6 +32,8 @@ classdef InverseDynamicsSimulator < DynamicsSimulator
             % Runs the simulation over the specified trajectory
             obj.cableForces = cell(1, length(obj.trajectory.timeVector));
             obj.cableIndicesActive = cell(1, length(obj.trajectory.timeVector));
+            % record the stiffness
+            obj.stiffness = cell(1, length(obj.trajectory.timeVector));
 
             obj.IDFunctionCost = zeros(length(obj.timeVector), 1);
             obj.IDExitType = cell(length(obj.timeVector), 1);
@@ -44,12 +47,17 @@ classdef InverseDynamicsSimulator < DynamicsSimulator
                 CASPR_log.Info(sprintf('Time : %f', obj.timeVector(t)));
                 % The model is already updated within the resolve function
                 [forces_active, obj.model, obj.IDFunctionCost(t), obj.IDExitType{t}, obj.compTime(t)] = obj.IDSolver.resolve(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t}, zeros(obj.model.numDofs,1));
-                obj.cableForcesActive{t} = forces_active;
-                obj.cableForces{t} = obj.model.cableForces;
-                obj.cableIndicesActive{t} = obj.model.cableModel.cableIndicesActive;
-                obj.interactionWrench{t} = obj.model.interactionWrench;
-                obj.cableLengths{t} = obj.model.cableLengths;
-                obj.cableLengthsDot{t} = obj.model.cableLengthsDot;
+                obj.cableForcesActive{t}	=   forces_active;
+                obj.cableForces{t}          =   obj.model.cableForces;
+                obj.cableIndicesActive{t}   =   obj.model.cableModel.cableIndicesActive;
+                obj.interactionWrench{t}    =   obj.model.interactionWrench;
+                obj.cableLengths{t}         =   obj.model.cableLengths;
+                obj.cableLengthsDot{t}      =   obj.model.cableLengthsDot;
+                % record the stiffness when the system is not in the
+                % compiled mode
+                if (obj.model.modelMode ~= ModelModeType.COMPILED)
+                    obj.stiffness{t}            =   obj.model.K;
+                end
                 
                 if (obj.IDExitType{t} ~= IDSolverExitType.NO_ERROR)
                     CASPR_log.Print('No feasible solution for the ID',CASPRLogLevel.WARNING);
@@ -72,6 +80,13 @@ classdef InverseDynamicsSimulator < DynamicsSimulator
             else
                 plot(plot_axis,obj.timeVector, obj.IDFunctionCost, 'LineWidth', 1.5, 'Color', 'k');
             end
+        end
+
+        % Plots the cost associated with the ID solver (for solvers that
+        % aim to minimise some objective cost).
+        function output_data = extractData(obj)
+            output_data.K           =   obj.stiffness;
+            output_data.cableForces	=   obj.cableForces;
         end
 
         % Plots the left and right sides of the EoM to show whether the

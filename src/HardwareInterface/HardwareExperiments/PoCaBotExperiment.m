@@ -3,7 +3,6 @@ classdef PoCaBotExperiment < ExperimentBase
     %   Detailed explanation goes here
     
     properties (SetAccess = private)
-        modelConfig
         idsim              % Inverse dynamics simulator
         fksolver           % Forward kinematics solver
         forwardKin
@@ -55,6 +54,7 @@ classdef PoCaBotExperiment < ExperimentBase
     end
     
     methods
+<<<<<<< HEAD
         function exp = PoCaBotExperiment(~,strCableID,timestep, server)
             % Create the config
             model_config = DevModelConfig('XL-Laser');
@@ -62,11 +62,14 @@ classdef PoCaBotExperiment < ExperimentBase
             modelObj = model_config.getModel(strCableID);
             % Create the hardware interface
             strCOMPort = {'COM3','COM5'};
+=======
+        % strCOMPort should be an array of cells, each one of which
+        % indicate a COM port with a string format. e.g. strCOMPort = {'COM3','COM5'};
+        function exp = PoCaBotExperiment(modelObj,strCOMPort, timestep, server)
+>>>>>>> dd777cf55a8f1e19d8cac718b8925f4b7941c910
             hw_interface = PoCaBotCASPRInterface(strCOMPort, DynamixelType.XM540_W150, modelObj.numActuators,false);  %1
             exp@ExperimentBase(hw_interface, modelObj);
-            exp.modelConfig = model_config;
             exp.numMotor = modelObj.numActuators;
-            
             %            eb.forwardKin = FKDifferential(modelObj);
             exp.q_present = NaN;
             exp.q_offset_tuned = zeros(modelObj.numDofVars,1);
@@ -114,221 +117,220 @@ classdef PoCaBotExperiment < ExperimentBase
             end
         end
         
-        function motorTest(obj)
-            % Open the hardware interface
-            obj.openHardwareInterface();
-            
-            % Just detect the device to see if it is correct (should change
-            % it later to exit cleanly and throw an error in the future
-            obj.hardwareInterface.detectDevice();
-            obj.hardwareInterface.switchOperatingMode2CURRENT();
-            pause(0.5);
-            current = ones(obj.numMotor,1)*20;
-            obj.hardwareInterface.systemOnSend();
-            input('Ready to go? [Y]:','s');
-            index = 1;
-            while(index < 500)
-                tic;
-                current = current*(1);
-                obj.hardwareInterface.forceCommandSend(current);
-                obj.hardwareInterface.forceFeedbackRead();
-                
-                index = index + 1;
-                elapsed = toc * 1000;
-                if(elapsed < 50)
-                    java.lang.Thread.sleep(50 - elapsed);
-                else
-                    elapsed
-                end
-            end
-            % Stop the feedback
-            obj.hardwareInterface.systemOffSend();
-            % Close the hardware interface
-            obj.closeHardwareInterface();
-            disp('Application terminated correctly!');
-        end
+%         function motorTest(obj)
+%             % Open the hardware interface
+%             obj.openHardwareInterface();
+%             
+%             % Just detect the device to see if it is correct (should change
+%             % it later to exit cleanly and throw an error in the future
+%             obj.hardwareInterface.detectDevice();
+%             obj.hardwareInterface.switchOperatingMode2CURRENT();
+%             pause(0.5);
+%             current = ones(obj.numMotor,1)*20;
+%             obj.hardwareInterface.systemOnSend();
+%             input('Ready to go? [Y]:','s');
+%             index = 1;
+%             while(index < 500)
+%                 tic;
+%                 current = current*(1);
+%                 obj.hardwareInterface.forceCommandSend(current);
+%                 obj.hardwareInterface.forceFeedbackRead();
+%                 
+%                 index = index + 1;
+%                 elapsed = toc * 1000;
+%                 if(elapsed < 50)
+%                     java.lang.Thread.sleep(50 - elapsed);
+%                 else
+%                     elapsed
+%                 end
+%             end
+%             % Stop the feedback
+%             obj.hardwareInterface.systemOffSend();
+%             % Close the hardware interface
+%             obj.closeHardwareInterface();
+%             disp('Application terminated correctly!');
+%         end
+%         
+%         function [q_initial] = initialLenQCalibration(obj, l0_guess, sample_duration)
+%             % Open the hardware interface
+%             obj.openHardwareInterface();
+%             % Just detect the device to see if it is correct (should change
+%             % it later to exit cleanly and throw an error in the future
+%             obj.hardwareInterface.detectDevice();
+%             % this procedure is to regulate the pose of the endeffector and
+%             % make sure that the cable is under the tension.
+%             obj.hardwareInterface.switchOperatingMode2CURRENT();
+%             obj.hardwareInterface.systemOnSend();
+%             current = ones(obj.numMotor,1)*20;
+%             obj.hardwareInterface.forceCommandSend(current);
+%             
+%             input('Ready to sample the relative length? Press enter to get started.');
+%             obj.hardwareInterface.lengthInitialSend(l0_guess);
+%             samples_r = [];
+%             tic;
+%             sample_time = 0; % seconds
+%             fprintf('Sampling begins! This will last for %.1f seconds\n',sample_duration);
+%             length_r_pre = zeros(obj.numMotor,1);
+%             while(1)
+%                 timestamp = toc;
+%                 [length] = obj.hardwareInterface.lengthFeedbackRead();
+%                 length_r = length - l0_guess;
+%                 
+%                 rotating_direction = (length_r - length_r_pre)>0;
+%                 obj.hardwareInterface.switchEnable(~rotating_direction);
+%                 obj.hardwareInterface.forceCommandSend((~rotating_direction).*current);
+%                 length_r_pre = length_r;
+%                 
+%                 sample_present_r = [timestamp length_r'];
+%                 samples_r = [samples_r;sample_present_r];
+%                 % output the time
+%                 if(floor(timestamp)>sample_time)
+%                     sample_time = floor(timestamp);
+%                     fprintf('%ds ',sample_time);
+%                 end
+%                 if(timestamp>=sample_duration)
+%                     break;
+%                 end
+%             end
+%             obj.hardwareInterface.systemOnSend();
+%             obj.hardwareInterface.forceCommandSend(current);
+%             fprintf('\nSampling ends!\n');
+%             fprintf('%d data have been collected within %0.1f seconds!\n',size(samples_r,1),sample_duration);
+%             
+%             % Read time data (first column)
+%             time = samples_r(:,1);
+%             % Read the lengths (all other columns)
+%             lengths_r = num2cell(samples_r(:, 2:size(samples_r,2))', 1);
+%             
+%             % Sample num reduce the number of data points (select every X data point)
+%             sample_num = 10;
+%             % Recompute the time and length data by sampling
+%             time_sampled = time(1:sample_num:numel(time));
+%             lengths_r_sampled = lengths_r(1:sample_num:numel(lengths_r));
+%             
+%             % Some random joint space trajectory guess
+%             q_guess = cell(1,numel(time_sampled));
+%             q_guess(:) = {ones(obj.model.numDofs,1)*0.3};
+%             
+%             % Now we are ready to solve for the initial lengths
+%             disp('Start Running Solver for Initial Lengths:');
+%             start_tic = tic;
+%             % IMPORTANT LINE HERE
+%             [l0_solved, q_solved] = FKLeastSquares.ComputeInitialLengths(obj.model, lengths_r_sampled, l0_guess, 1:obj.model.numCables, q_guess);
+%             time_elapsed = toc(start_tic);
+%             fprintf('Finished. It took %.1fs for the computation.\n',time_elapsed);
+%             q_initial = q_solved(:,1);
+%             for i=1:numel(lengths_r)
+%                 lengths_solved{i} = l0_solved + lengths_r{i};
+%             end
+%             
+%             % Get the present length and set the hardware accordingly.
+%             [length_present] = obj.hardwareInterface.lengthFeedbackRead();
+%             length_present_r = length_present - l0_guess;
+%             length_present_solved = l0_solved + length_present_r;
+%             
+%             % Initialize the hardware and the initial state
+%             obj.hardwareInterface.lengthInitialSend(length_present_solved);
+%             obj.hardwareInterface.switchOperatingMode2POSITION_LIMITEDCURRENT();
+%             % Start the system to get feedback
+%             obj.hardwareInterface.systemOnSend();
+%             current = ones(obj.numMotor,1)*400;%400
+%             obj.hardwareInterface.forceCommandSend(current);
+%             obj.hardwareInterface.lengthCommandSend(length_present_solved);
+%             
+%             profileAcc = ones(obj.numMotor,1)*150;
+%             profileAcc = profileAcc/(obj.timestep/0.05);
+%             obj.hardwareInterface.setProfileAcceleration(profileAcc);
+%             profileVel = ones(obj.numMotor,1)*360;
+%             obj.hardwareInterface.setProfileVelocity(profileVel);
+%             
+%             
+%             disp('Start Running FK Solver for Present Q:');
+%             % Get the present q_present by Foward Kinematics
+%             %             % Initialise the three inverse/forward kinematics solvers
+%             %             iksim_actual = InverseKinematicsSimulator(obj.model);
+%             %             fksim_guess = ForwardKinematicsSimulator(obj.model, fksolver);
+%             %             fksim_corrected = ForwardKinematicsSimulator(obj.model, fksolver);
+%             q_guess = ones(obj.model.numDofs,1)*0.2;
+%             [q_present_solved, q_dot_present, compTime] = obj.fksolver.compute(length_present_solved, length_present_solved, 1:obj.model.numCables, q_guess, zeros(size(q_guess)), 1);
+%             fprintf('FK has been done which cost %.3f seconds.\n',compTime);
+%             fprintf('The present q is solved which is [');
+%             fprintf('%.3f  ',q_present_solved);
+%             fprintf(']\n');
+%             fprintf('The according cable length is [');
+%             fprintf('%.3f  ',length_present_solved);
+%             fprintf(']\n');
+%             
+%             obj.q_present = q_present_solved;
+%             
+%             
+%             % disp('Start Running Forward Kinematics Simulation for Solved l0 Lengths');
+%             % start_tic = tic;
+%             % fksim_corrected.run(lengths_solved, iksim_actual.cableLengthsDot, iksim_actual.timeVector, q0_guess, iksim_actual.trajectory.q_dot{1});
+%             % time_elapsed = toc(start_tic);
+%             % fprintf('End Running Forward Kinematics Simulation for Solved l0 Lengths : %f seconds\n', time_elapsed);
+%             
+%             %             q0_capture = [20.264; 0.350; 17.593; 0.0]*pi/180;
+%             %             obj.model.update(q0_capture, [0; 0; 0; 0], [0; 0; 0; 0], [0; 0; 0; 0]);
+%             %
+%             %             l0_solved
+%             %             obj.model.cableLengths
+%             %             l0_solved(1:4) - obj.model.cableLengths(1:4)
+%             %             norm(l0_solved(1:4) - obj.model.cableLengths(1:4))
+%             %             q0_capture
+%             %             q_solved(:,1)
+%         end
+%         
+%         function rehabilitation_preparation(obj)
+%             % Open the hardware interface
+%             obj.openHardwareInterface();
+%             
+%             % Just detect the device to see if it is correct (should change
+%             % it later to exit cleanly and throw an error in the future
+%             obj.hardwareInterface.detectDevice();
+%             
+%             % this procedure is to regulate the pose of the endeffector and
+%             % make sure that the cable is under the tension.
+%             obj.hardwareInterface.switchOperatingMode2CURRENT();
+%             obj.hardwareInterface.systemOnSend();
+%             current = ones(obj.numMotor,1)*20;
+%             obj.hardwareInterface.forceCommandSend(current);
+%         end
+%         
+%         function rehabilitation_run(obj, duration)
+%             fac = [8 1 3 2;4 5 7 6;2 3 5 4;6 7 1 8;1 7 5 3;6 8 2 4];
+%             maxCurrent = 20;
+%             omega = pi*4;%ran/s
+%             tstart = tic;
+%             current = ones(8,1);
+%             while(1)
+%                 timestamp = toc(tstart);
+%                 if(timestamp>=duration)
+%                     break;
+%                 end
+%                 tloop = tic;
+%                 
+%                 direction = 1;%random('unid',6);
+%                 if(floor(direction/2) == direction/2)
+%                     direction_counterpart = direction - 1;
+%                 else
+%                     direction_counterpart = direction + 1;
+%                 end
+%                 
+% %                 current(fac(direction,:))             = (maxCurrent-20)*(sin(omega*timestamp)>0)+20;
+% %                 current(fac(direction_counterpart,:)) = (maxCurrent-20)*(sin(omega*timestamp)<=0)+20;
+%                 current = ones(8,1)*15;
+%                 obj.hardwareInterface.forceCommandSend(current);
+%                 
+%                 elapsed = toc(tloop);
+%                 if(elapsed < 0.05)
+%                     java.lang.Thread.sleep((0.05 - elapsed)*1000);
+%                 else
+%                     toc
+%                 end
+%             end
+%         end
         
-        function [q_initial] = initialLenQCalibration(obj, l0_guess, sample_duration)
-            % Open the hardware interface
-            obj.openHardwareInterface();
-            % Just detect the device to see if it is correct (should change
-            % it later to exit cleanly and throw an error in the future
-            obj.hardwareInterface.detectDevice();
-            % this procedure is to regulate the pose of the endeffector and
-            % make sure that the cable is under the tension.
-            obj.hardwareInterface.switchOperatingMode2CURRENT();
-            obj.hardwareInterface.systemOnSend();
-            current = ones(obj.numMotor,1)*20;
-            obj.hardwareInterface.forceCommandSend(current);
-            
-            input('Ready to sample the relative length? Press enter to get started.');
-            obj.hardwareInterface.lengthInitialSend(l0_guess);
-            samples_r = [];
-            tic;
-            sample_time = 0; % seconds
-            fprintf('Sampling begins! This will last for %.1f seconds\n',sample_duration);
-            length_r_pre = zeros(obj.numMotor,1);
-            while(1)
-                timestamp = toc;
-                [length] = obj.hardwareInterface.lengthFeedbackRead();
-                length_r = length - l0_guess;
-                
-                rotating_direction = (length_r - length_r_pre)>0;
-                obj.hardwareInterface.switchEnable(~rotating_direction);
-                obj.hardwareInterface.forceCommandSend((~rotating_direction).*current);
-                length_r_pre = length_r;
-                
-                sample_present_r = [timestamp length_r'];
-                samples_r = [samples_r;sample_present_r];
-                % output the time
-                if(floor(timestamp)>sample_time)
-                    sample_time = floor(timestamp);
-                    fprintf('%ds ',sample_time);
-                end
-                if(timestamp>=sample_duration)
-                    break;
-                end
-            end
-            obj.hardwareInterface.systemOnSend();
-            obj.hardwareInterface.forceCommandSend(current);
-            fprintf('\nSampling ends!\n');
-            fprintf('%d data have been collected within %0.1f seconds!\n',size(samples_r,1),sample_duration);
-            
-            % Read time data (first column)
-            time = samples_r(:,1);
-            % Read the lengths (all other columns)
-            lengths_r = num2cell(samples_r(:, 2:size(samples_r,2))', 1);
-            
-            % Sample num reduce the number of data points (select every X data point)
-            sample_num = 10;
-            % Recompute the time and length data by sampling
-            time_sampled = time(1:sample_num:numel(time));
-            lengths_r_sampled = lengths_r(1:sample_num:numel(lengths_r));
-            
-            % Some random joint space trajectory guess
-            q_guess = cell(1,numel(time_sampled));
-            q_guess(:) = {ones(obj.model.numDofs,1)*0.3};
-            
-            % Now we are ready to solve for the initial lengths
-            disp('Start Running Solver for Initial Lengths:');
-            start_tic = tic;
-            % IMPORTANT LINE HERE
-            [l0_solved, q_solved] = FKLeastSquares.ComputeInitialLengths(obj.model, lengths_r_sampled, l0_guess, 1:obj.model.numCables, q_guess);
-            time_elapsed = toc(start_tic);
-            fprintf('Finished. It took %.1fs for the computation.\n',time_elapsed);
-            q_initial = q_solved(:,1);
-            for i=1:numel(lengths_r)
-                lengths_solved{i} = l0_solved + lengths_r{i};
-            end
-            
-            % Get the present length and set the hardware accordingly.
-            [length_present] = obj.hardwareInterface.lengthFeedbackRead();
-            length_present_r = length_present - l0_guess;
-            length_present_solved = l0_solved + length_present_r;
-            
-            % Initialize the hardware and the initial state
-            obj.hardwareInterface.lengthInitialSend(length_present_solved);
-            obj.hardwareInterface.switchOperatingMode2POSITION_LIMITEDCURRENT();
-            % Start the system to get feedback
-            obj.hardwareInterface.systemOnSend();
-            current = ones(obj.numMotor,1)*400;%400
-            obj.hardwareInterface.forceCommandSend(current);
-            obj.hardwareInterface.lengthCommandSend(length_present_solved);
-            
-            profileAcc = ones(obj.numMotor,1)*150;
-            profileAcc = profileAcc/(obj.timestep/0.05);
-            obj.hardwareInterface.setProfileAcceleration(profileAcc);
-            profileVel = ones(obj.numMotor,1)*360;
-            obj.hardwareInterface.setProfileVelocity(profileVel);
-            
-            
-            disp('Start Running FK Solver for Present Q:');
-            % Get the present q_present by Foward Kinematics
-            %             % Initialise the three inverse/forward kinematics solvers
-            %             iksim_actual = InverseKinematicsSimulator(obj.model);
-            %             fksim_guess = ForwardKinematicsSimulator(obj.model, fksolver);
-            %             fksim_corrected = ForwardKinematicsSimulator(obj.model, fksolver);
-            q_guess = ones(obj.model.numDofs,1)*0.2;
-            [q_present_solved, q_dot_present, compTime] = obj.fksolver.compute(length_present_solved, length_present_solved, 1:obj.model.numCables, q_guess, zeros(size(q_guess)), 1);
-            fprintf('FK has been done which cost %.3f seconds.\n',compTime);
-            fprintf('The present q is solved which is [');
-            fprintf('%.3f  ',q_present_solved);
-            fprintf(']\n');
-            fprintf('The according cable length is [');
-            fprintf('%.3f  ',length_present_solved);
-            fprintf(']\n');
-            
-            obj.q_present = q_present_solved;
-            
-            
-            % disp('Start Running Forward Kinematics Simulation for Solved l0 Lengths');
-            % start_tic = tic;
-            % fksim_corrected.run(lengths_solved, iksim_actual.cableLengthsDot, iksim_actual.timeVector, q0_guess, iksim_actual.trajectory.q_dot{1});
-            % time_elapsed = toc(start_tic);
-            % fprintf('End Running Forward Kinematics Simulation for Solved l0 Lengths : %f seconds\n', time_elapsed);
-            
-            %             q0_capture = [20.264; 0.350; 17.593; 0.0]*pi/180;
-            %             obj.model.update(q0_capture, [0; 0; 0; 0], [0; 0; 0; 0], [0; 0; 0; 0]);
-            %
-            %             l0_solved
-            %             obj.model.cableLengths
-            %             l0_solved(1:4) - obj.model.cableLengths(1:4)
-            %             norm(l0_solved(1:4) - obj.model.cableLengths(1:4))
-            %             q0_capture
-            %             q_solved(:,1)
-        end
-        
-        function rehabilitation_preparation(obj)
-            % Open the hardware interface
-            obj.openHardwareInterface();
-            
-            % Just detect the device to see if it is correct (should change
-            % it later to exit cleanly and throw an error in the future
-            obj.hardwareInterface.detectDevice();
-            
-            % this procedure is to regulate the pose of the endeffector and
-            % make sure that the cable is under the tension.
-            obj.hardwareInterface.switchOperatingMode2CURRENT();
-            obj.hardwareInterface.systemOnSend();
-            current = ones(obj.numMotor,1)*20;
-            obj.hardwareInterface.forceCommandSend(current);
-        end
-        
-        function rehabilitation_run(obj, duration)
-            fac = [8 1 3 2;4 5 7 6;2 3 5 4;6 7 1 8;1 7 5 3;6 8 2 4];
-            maxCurrent = 20;
-            omega = pi*4;%ran/s
-            tstart = tic;
-            current = ones(8,1);
-            while(1)
-                timestamp = toc(tstart);
-                if(timestamp>=duration)
-                    break;
-                end
-                tloop = tic;
-                
-                direction = 1;%random('unid',6);
-                if(floor(direction/2) == direction/2)
-                    direction_counterpart = direction - 1;
-                else
-                    direction_counterpart = direction + 1;
-                end
-                
-%                 current(fac(direction,:))             = (maxCurrent-20)*(sin(omega*timestamp)>0)+20;
-%                 current(fac(direction_counterpart,:)) = (maxCurrent-20)*(sin(omega*timestamp)<=0)+20;
-                current = ones(8,1)*15;
-                obj.hardwareInterface.forceCommandSend(current);
-                
-                elapsed = toc(tloop);
-                if(elapsed < 0.05)
-                    java.lang.Thread.sleep((0.05 - elapsed)*1000);
-                else
-                    toc
-                end
-            end
-        end
-        
-        %% BELOW METHODS ARE FOR THE LONG TIME CONSTRUCTING TASK
         % init_pos is a vector with a size of 8 by 1 which is the initial
         % position of the motors. q0 is also a vetor with the same size but
         % it is the initial state of the end effector.

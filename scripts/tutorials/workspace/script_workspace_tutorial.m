@@ -15,7 +15,7 @@ modelObj = model_config.getModel(cable_set_id);
 % Set up the workspace simulator
 % First the grid
 q_step          =   0.1; n_dim           =   2;
-uGrid           =   UniformGrid(0.1*ones(n_dim,1),0.9*ones(n_dim,1),q_step*ones(n_dim,1));
+uGrid           =   UniformGrid(0.1*ones(n_dim,1),0.9*ones(n_dim,1),q_step*ones(n_dim,1),'step_size');
 % Define the workspace condition and metrics
 % w_condition  =   {WorkspaceCondition.CreateWorkspaceCondition(WorkspaceConditionType.WRENCH_CLOSURE,WrenchClosureMethods.M_COMBINATORIC_NULL_SPACE,[])};
 w_condition  =   {WorkspaceConditionBase.CreateWorkspaceCondition(WorkspaceConditionType.WRENCH_CLOSURE,[],[])};
