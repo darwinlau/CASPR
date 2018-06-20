@@ -173,17 +173,13 @@ classdef JointTrajectory < TrajectoryBase
             time_abs = TrajectoryBase.get_xml_absolute_tag(xmlObj);
             
             % Cell of points of joints coordinates
-<<<<<<< HEAD
             q_pj = cell(num_points,1);
             time_points_abs = zeros(1, num_points);
             
             q_trajectory = [];
             q_d_trajectory = [];
             q_dd_trajectory = [];
-=======
-            q_pj = cell(num_points,1); 
-            time_points_abs = zeros(1, num_points);          
->>>>>>> dd777cf55a8f1e19d8cac718b8925f4b7941c910
+
             
             % First process the data and save it to variables
             for p = 1:num_points
@@ -202,8 +198,6 @@ classdef JointTrajectory < TrajectoryBase
                     time_points_abs(p) = time_points_abs(p-1) + str2double(point_node.getAttribute('time'));
                 end
             end
-<<<<<<< HEAD
-=======
                                    
             % Call the create function                 
             trajectory = JointTrajectory.LinearTrajectoryCreate(q_pj, time_points_abs, time_step, bodiesObj);
@@ -216,8 +210,6 @@ classdef JointTrajectory < TrajectoryBase
             q_trajectory = [];
             q_d_trajectory = [];
             q_dd_trajectory = [];
->>>>>>> dd777cf55a8f1e19d8cac718b8925f4b7941c910
-            
             % Generate the trajectory between the points
             for p = 1:num_points-1
                 q_section = [];
@@ -283,9 +275,6 @@ classdef JointTrajectory < TrajectoryBase
                     time_points_abs(p) = time_points_abs(p-1) + str2double(point_node.getAttribute('time'));
                 end
             end
-<<<<<<< HEAD
-            
-=======
                                    
             % Call the create function                 
             trajectory = JointTrajectory.CubicTrajectoryCreate(q_pj, q_d_pj, time_points_abs, time_step, bodiesObj);
@@ -298,7 +287,6 @@ classdef JointTrajectory < TrajectoryBase
             q_trajectory = [];
             q_d_trajectory = [];
             q_dd_trajectory = [];
->>>>>>> dd777cf55a8f1e19d8cac718b8925f4b7941c910
             % Generate the trajectory between the points
             for p = 1:num_points-1
                 q_section = [];
@@ -369,8 +357,6 @@ classdef JointTrajectory < TrajectoryBase
                     time_points_abs(p) = time_points_abs(p-1) + str2double(point_node.getAttribute('time'));
                 end
             end
-<<<<<<< HEAD
-=======
                                    
             % Call the create function                 
             trajectory = JointTrajectory.QuinticTrajectoryCreate(q_pj, q_d_pj, q_dd_pj, ...
@@ -384,7 +370,6 @@ classdef JointTrajectory < TrajectoryBase
             q_trajectory = [];
             q_d_trajectory = [];
             q_dd_trajectory = [];
->>>>>>> dd777cf55a8f1e19d8cac718b8925f4b7941c910
             
             % Generate the trajectory between the points
             for p = 1:num_points-1
@@ -519,12 +504,8 @@ classdef JointTrajectory < TrajectoryBase
             time_abs = TrajectoryBase.get_xml_absolute_tag(xmlObj);
             
             % Cell of points of joints coordinates
-<<<<<<< HEAD
             q_pj = cell(num_points,1);
-            q_d_pj = cell(num_points,1);
-=======
-            q_pj = cell(num_points,1);         
->>>>>>> dd777cf55a8f1e19d8cac718b8925f4b7941c910
+            q_d_pj = cell(num_points,1);       
             time_points_abs = zeros(1, num_points);
             time_blend = time_blend_default*ones(1, num_points-1);           
             
@@ -549,8 +530,7 @@ classdef JointTrajectory < TrajectoryBase
                     time_points_abs(p) = time_points_abs(p-1) + str2double(point_node.getAttribute('time'));
                 end
             end
-<<<<<<< HEAD
-=======
+
                                    
             % Call the create function                 
             trajectory = JointTrajectory.ParabolicBlendTrajectoryCreate(q_pj, ...
@@ -564,7 +544,6 @@ classdef JointTrajectory < TrajectoryBase
             q_trajectory = [];
             q_d_trajectory = [];
             q_dd_trajectory = [];
->>>>>>> dd777cf55a8f1e19d8cac718b8925f4b7941c910
             
             % Generate the trajectory between the points
             for p = 1:num_points-1
