@@ -57,7 +57,7 @@ classdef PoCaBotExperiment < ExperimentBase
     methods
         function exp = PoCaBotExperiment(~,strCableID,timestep, server)
             % Create the config
-            model_config = DevModelConfig('DrainageServiceBot');
+            model_config = DevModelConfig('XL-Laser');
             % Load the SystemKinematics object from the XML
             modelObj = model_config.getModel(strCableID);
             % Create the hardware interface
