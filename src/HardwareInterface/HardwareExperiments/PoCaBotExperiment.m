@@ -54,19 +54,9 @@ classdef PoCaBotExperiment < ExperimentBase
     end
     
     methods
-<<<<<<< HEAD
-        function exp = PoCaBotExperiment(~,strCableID,timestep, server)
-            % Create the config
-            model_config = DevModelConfig('XL-Laser');
-            % Load the SystemKinematics object from the XML
-            modelObj = model_config.getModel(strCableID);
-            % Create the hardware interface
-            strCOMPort = {'COM3','COM5'};
-=======
         % strCOMPort should be an array of cells, each one of which
         % indicate a COM port with a string format. e.g. strCOMPort = {'COM3','COM5'};
         function exp = PoCaBotExperiment(modelObj,strCOMPort, timestep, server)
->>>>>>> dd777cf55a8f1e19d8cac718b8925f4b7941c910
             hw_interface = PoCaBotCASPRInterface(strCOMPort, DynamixelType.XM540_W150, modelObj.numActuators,false);  %1
             exp@ExperimentBase(hw_interface, modelObj);
             exp.numMotor = modelObj.numActuators;
