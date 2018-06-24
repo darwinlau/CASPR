@@ -63,21 +63,21 @@ classdef CUCableRobotExperiment < ExperimentBase
     
     methods (Static)
         % A sample experiment to run a trajectory and plot some data
-        function ExperimentRunTrajectory()
+        % cable_set_id: The cable set ID to use 'H_frame' for example
+        % trajectory_id: The ID of trajectory that would also affect the
+        % file names on the hardware machine. Suggest to follow convention
+        % 'O00XX' where XX is the trajectory number, such as 01. Additional
+        % codes would be added, such as O00010, O00018 and O00019 for
+        % different purposes
+        function ExperimentRunTrajectory(cable_set_id, trajectory_id)
             clc;
             clear;
             close all;
             
-%             % Create the config properties
-            model_config = DevModelConfig('CUCableRobot');
-            cable_set_id = 'H_frame';
-            trajectory_id = 'O0008';
-            
             % Create the config properties
-%             model_config = DevModelConfig(DevModelConfigType.D_CUHK_CUCABLEROBOT_PLANAR);
-%             cable_set_id = 'vertical_XZ';
-%             trajectory_id = 'O1005';
-            
+            model_config = DevModelConfig('CUCableRobot');
+            %cable_set_id = 'H_frame';
+            %trajectory_id = 'O0008';
             
             % Load the SystemKinematics object from the XML
             model_obj = model_config.getModel(cable_set_id);
