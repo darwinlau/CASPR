@@ -38,7 +38,7 @@ classdef CASPR_configuration
         function SetGlobalModelMode(value, msg) 
             % Check input value
             if ~isa(value,'ModelModeType')
-                CASPR_log.Warn("Invalid ModelModeType!");
+                CASPR_log.Warn('Invalid ModelModeType!');
             end            
             load('CASPR_environment.mat');
             config_details = whos(matfile('CASPR_environment.mat'));            

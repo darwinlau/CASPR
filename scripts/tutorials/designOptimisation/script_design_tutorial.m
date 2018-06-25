@@ -25,7 +25,7 @@ cableAttachmentOptimisation = CableAttachmentOptimisationMinID(modelObj, ap_syst
 optimiser = PSOOptimiser(ap_system.x_min, ap_system.x_max, @(x) cableAttachmentOptimisation.evaluate(x, idsolver, trajectory));
 [x_opt, Q_opt] = optimiser.optimise();
 
-ap_system.updateCableAttachments(x_opt, modelObj.cableModel, modelObj.bodyModel);
+ap_system.updateCableAttachments(x_opt);
 modelObj.update(zeros(modelObj.numDofs,1), zeros(modelObj.numDofs,1), zeros(modelObj.numDofs,1), zeros(modelObj.numDofs,1));
 MotionSimulatorBase.PlotFrame(modelObj, [-3 3 -3 3 0 5], [-37, 32]);
 

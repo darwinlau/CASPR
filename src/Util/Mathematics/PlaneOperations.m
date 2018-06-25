@@ -111,9 +111,15 @@ classdef PlaneOperations
             N12 = dot(n1,n2);
             h1 = dot(n1,A1);
             h2 = dot(n2,A2);
+<<<<<<< HEAD
             c1 = (h1 - h2*N12);
             c2 = (h2 - h1*N12);
             P = (c1 * n1 + c2 * n2)/(1 - N12^2);
+=======
+            c1 = h1 - h2*N12;
+            c2 = h2 - h1*N12;
+            P = (c1 * n1 + c2 * n2)/(1 - N12^2); 
+>>>>>>> 99db2cbb14c4e4c49f59009a619938e636b0f4d0
         end
     end
 end

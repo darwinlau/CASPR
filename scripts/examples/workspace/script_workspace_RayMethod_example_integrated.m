@@ -12,7 +12,7 @@ clc;  close all; warning off; clear all;
 % model_config    =   DevModelConfig('spatial7cable'); nsegvar= [11, 11, 11, 11, 11, 11]';
 % '4_4_CDPR_planar'
 segment_number = 11;
-model_config    =   DevModelConfig('4_4_CDPR_planar'); nsegvar = [segment_number segment_number 0]';
+model_config    =   DevModelConfig('4_4_CDPR_planar'); nsegvar = [segment_number segment_number+1 13]';
 % BM arm
 % segment_number = 20;
 % model_config    =    DevModelConfig('BMArm_paper'); nsegvar = [20 20 20 20]';
@@ -31,7 +31,9 @@ uGrid           =   UniformGrid(q_begin,q_end,(q_end-q_begin)./(nsegvar-1),'step
 w_condition     =   {WorkspaceRayConditionBase.CreateWorkspaceRayCondition(WorkspaceRayConditionType.WRENCH_CLOSURE,100/(segment_number-1),modelObj)};
 w_metrics       =   {WorkspaceMetricBase.CreateWorkspaceMetric(WorkspaceMetricType.TENSION_FACTOR)};
 % w_condition     =   {WorkspaceRayConditionBase.CreateWorkspaceRayCondition(WorkspaceRayConditionType.INTERFERENCE,0,modelObj)};
-opt             =   RayWorkspaceSimulatorOptions(false,false);
+slices = {3, [2 4 6]; 2, [1 2 6 9 10]};
+% opt             =   RayWorkspaceSimulatorOptions(false,false);
+opt             =   RayWorkspaceSimulatorOptions(false,false,slices);
 % Start the simulation
 disp('Start Setup Simulation');
 wsim            =   RayWorkspaceSimulator(modelObj,uGrid,opt);

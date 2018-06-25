@@ -73,15 +73,18 @@ classdef ControllerSimulator < DynamicsSimulator
         
         % simulation ending scenarios
         pre_mature_termination  % flag shows that the simulation needs to be terminated pre-maturely
-        compeletion_percentage 	% how much of the trajectory the controller finished tracking
+        completion_percentage 	% how much of the trajectory the controller finished tracking
         trajectory_duration     % how long the trajectory lasts
 
         % tackling infeasibility
         controller_exit_type    % exit type that indicates the how the controller runs
         infeasibility_flag      % a flag suggests whether infeasibility happens
-                
+        
         % tackling singularity in M
         singular_M_flag         % indicating that M in the EoM is singular
+        
+        % tackling joint pose limit
+        out_of_workspace_flag  	% indicating that joint pose is out of limit
     end
 
     methods
@@ -140,16 +143,24 @@ classdef ControllerSimulator < DynamicsSimulator
             end
             ctrl_sim.rounding_error_guard = 1e-5;
             ctrl_sim.optionConsistencyCheck();
+            ctrl_sim.taskRelatedInitialization();
+        end
+        
+        % task related initialization
+        function taskRelatedInitialization(obj)
             % initialize the pre_mature_termination flag as not doing it
-            ctrl_sim.pre_mature_termination = 0;
+            obj.pre_mature_termination = 0;
             % initialize the singular_M_flag flag as not singular
-            ctrl_sim.singular_M_flag = 0;
+            obj.singular_M_flag = 0;
             % initialize the infeasibility flag as problem feasible
-            ctrl_sim.infeasibility_flag = 0;
+            obj.infeasibility_flag = 0;
+            % initialize the out of workspace flag as false
+            obj.out_of_workspace_flag = 0;
             % initialize the controller exit flag
-            ctrl_sim.controller_exit_type = ControllerExitType.NO_ERROR;
-            % initialize the compeletion percentage as invalid value
-            ctrl_sim.compeletion_percentage = -1;
+            obj.controller_exit_type = ControllerExitType.NO_ERROR;
+            % initialize the completion percentage as 1 indicating
+            % completed trajectory
+            obj.completion_percentage = 1;
         end
         
         % simulator option consistency check
@@ -197,6 +208,10 @@ classdef ControllerSimulator < DynamicsSimulator
         % Implementation of the run function. Converts the dynamics
         % information into a controller
         function run(obj, ref_trajectory, q0, q0_dot, q0_ddot)
+            
+            % perform task related initialization before running the loop
+            obj.taskRelatedInitialization();
+            
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             % SIMULATION FREQUENCY SETTINGS
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -439,7 +454,7 @@ classdef ControllerSimulator < DynamicsSimulator
                 t = t + 1;
             end
             if (obj.pre_mature_termination)
-                obj.compeletion_percentage = (t - 1)/length(obj.timeVector);
+                obj.completion_percentage = (t - 1)/length(obj.timeVector);
             end
         end
         
@@ -620,7 +635,7 @@ classdef ControllerSimulator < DynamicsSimulator
             for i = 1:length(obj.uncertainties)
                 if(isa(obj.uncertainties{i},'ExternalWrenchUncertaintyBase'))
                     [obj.w_ext] = obj.uncertainties{i}.applyWrechDisturbance(current_time);
-%                     obj.w_ext
+                    tmp_d = obj.w_ext
                     obj.q_ddot_ext = obj.true_model.M\obj.w_ext;
                 end
                 if(isa(obj.uncertainties{i},'PoseLockUncertaintyBase'))
@@ -848,9 +863,9 @@ classdef ControllerSimulator < DynamicsSimulator
         end
         
         % function that gives information on how the simulation ends (normally or out of infeasibility)
-        function [premature_termination_flag, compeletion_percentage] = simulationTerminationStatus(obj)
+        function [premature_termination_flag, completion_percentage] = simulationTerminationStatus(obj)
             premature_termination_flag = obj.pre_mature_termination;
-            compeletion_percentage = obj.compeletion_percentage;
+            completion_percentage = obj.completion_percentage;
         end
         
         % function that checks possible pre-mature stop of the simulation
@@ -881,7 +896,11 @@ classdef ControllerSimulator < DynamicsSimulator
 
             end
             
-            if (obj.infeasibility_flag || obj.singular_M_flag)
+            if (sum(obj.true_model.q > 2*obj.true_model.bodyModel.q_ub) + sum(obj.true_model.q < 2*obj.true_model.bodyModel.q_lb) >= 1)
+                obj.out_of_workspace_flag = 1;
+            end
+            
+            if (obj.infeasibility_flag || obj.singular_M_flag || obj.out_of_workspace_flag)
                 obj.pre_mature_termination = 1;
             else
                 obj.pre_mature_termination = 0;
