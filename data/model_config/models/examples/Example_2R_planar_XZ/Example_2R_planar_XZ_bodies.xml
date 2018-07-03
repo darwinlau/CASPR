@@ -3,9 +3,9 @@
 <bodies_system>
     <links display_range="-3.0 3.0 -3.0 3.0 -3.0 3.0" view_angle="0 0">
       <link_rigid num="1" name="R_Y 1">
-        <joint type="R_Y" q_initial="0" q_min="-3.1416" q_max="3.1416"/>
+        <joint type="R_Y" q_initial="0.0" q_min="-3.1416" q_max="3.1416"/>
         <physical>
-          <mass>1</mass>
+          <mass>0.1</mass>
           <com_location>0.0 0.0 0.5</com_location>
           <end_location>0.0 0.0 1.0</end_location>
           <inertia ref="com">
@@ -23,9 +23,9 @@
         </parent>
       </link_rigid>
       <link_rigid num="2" name="R_Y 2">
-        <joint type="R_Y" q_initial="0" q_min="-3.1416" q_max="3.1416"/>
+        <joint type="R_Y" q_initial="0.0" q_min="-3.1416" q_max="3.1416"/>
         <physical>
-          <mass>1</mass>
+          <mass>0.1</mass>
           <com_location>0.0 0.0 0.5</com_location>
           <end_location>0.0 0.0 1.0</end_location>
           <inertia ref="com">
@@ -48,7 +48,7 @@
             <position marker_id="1" name="test1">
                 <link>2</link>
                 <offset>0.0 0.0 1.0</offset>
-                <axes active_axes="x"/>
+                <axes active_axes="xyz"/>
             </position>
         </operational_set>    
     </operational_spaces>

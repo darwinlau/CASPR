@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!DOCTYPE cables
+  PUBLIC "" "../../../templates/cables.dtd">
+<cables default_cable_set="DEFAULT">
+   <cable_set id="DEFAULT">
+      <cable_ideal attachment_reference="com" name="motor0">
+         <properties>
+            <force_min>10</force_min>
+            <force_max>5000</force_max>
+         </properties>
+         <attachments>
+            <attachment>
+               <link>0</link>
+               <location>0.2889 -0.01069 0.5763</location>
+            </attachment>
+            <attachment>
+               <link>3</link>
+               <location>0.05492 -0.01783 0.1084</location>
+            </attachment>
+         </attachments>
+      </cable_ideal>
+      <cable_ideal attachment_reference="com" name="motor1">
+         <properties>
+            <force_min>10</force_min>
+            <force_max>5000</force_max>
+         </properties>
+         <attachments>
+            <attachment>
+               <link>0</link>
+               <location>0.24 -0.02551 0.4673</location>
+            </attachment>
+            <attachment>
+               <link>3</link>
+               <location>0.0205 -0.01411 0.1232</location>
+            </attachment>
+         </attachments>
+      </cable_ideal>
+      <cable_ideal attachment_reference="com" name="motor2">
+         <properties>
+            <force_min>10</force_min>
+            <force_max>5000</force_max>
+         </properties>
+         <attachments>
+            <attachment>
+               <link>0</link>
+               <location>0.2512 -0.02867 0.5146</location>
+            </attachment>
+            <attachment>
+               <link>3</link>
+               <location>0.04424 -0.01015 0.1094</location>
+            </attachment>
+         </attachments>
+      </cable_ideal>
+      <cable_ideal attachment_reference="com" name="motor3">
+         <properties>
+            <force_min>10</force_min>
+            <force_max>5000</force_max>
+         </properties>
+         <attachments>
+            <attachment>
+               <link>0</link>
+               <location>0.2806 -0.02853 0.558</location>
+            </attachment>
+            <attachment>
+               <link>3</link>
+               <location>0.04607 -0.01201 0.1274</location>
+            </attachment>
+         </attachments>
+      </cable_ideal>
+      <cable_ideal attachment_reference="com" name="motor4">
+         <properties>
+            <force_min>10</force_min>
+            <force_max>5000</force_max>
+         </properties>
+         <attachments>
+            <attachment>
+               <link>0</link>
+               <location>0.3034 7.361e-16 0.5961</location>
+            </attachment>
+            <attachment>
+               <link>3</link>
+               <location>0.06348 0.005441 0.1036</location>
+            </attachment>
+         </attachments>
+      </cable_ideal>
+      <cable_ideal attachment_reference="com" name="motor5">
+         <properties>
+            <force_min>10</force_min>
+            <force_max>5000</force_max>
+         </properties>
+         <attachments>
+            <attachment>
+               <link>0</link>
+               <location>0.277 0.0429 0.5564</location>
+            </attachment>
+            <attachment>
+               <link>3</link>
+               <location>0.04433 0.02206 0.1266</location>
+            </attachment>
+         </attachments>
+      </cable_ideal>
+      <cable_ideal attachment_reference="com" name="motor6">
+         <properties>
+            <force_min>10</force_min>
+            <force_max>5000</force_max>
+         </properties>
+         <attachments>
+            <attachment>
+               <link>0</link>
+               <location>0.2476 0.04291 0.513</location>
+            </attachment>
+            <attachment>
+               <link>3</link>
+               <location>0.04274 0.01923 0.1088</location>
+            </attachment>
+         </attachments>
+      </cable_ideal>
+      <cable_ideal attachment_reference="com" name="motor7">
+         <properties>
+            <force_min>10</force_min>
+            <force_max>5000</force_max>
+         </properties>
+         <attachments>
+            <attachment>
+               <link>0</link>
+               <location>0.2362 0.05006 0.4656</location>
+            </attachment>
+            <attachment>
+               <link>3</link>
+               <location>0.01999 0.02368 0.1228</location>
+            </attachment>
+         </attachments>
+      </cable_ideal>
+      <cable_ideal attachment_reference="com" name="motor8">
+         <properties>
+            <force_min>10</force_min>
+            <force_max>5000</force_max>
+         </properties>
+         <attachments>
+            <attachment>
+               <link>0</link>
+               <location>0.2865 0.02608 0.5761</location>
+            </attachment>
+            <attachment>
+               <link>3</link>
+               <location>0.05329 0.02726 0.1071</location>
+            </attachment>
+         </attachments>
+      </cable_ideal>   
+      <cable_ideal attachment_reference="com" name="motor10">
+         <properties>
+            <force_min>10</force_min>
+            <force_max>5000</force_max>
+         </properties>
+         <attachments>
+            <attachment>
+               <link>3</link>
+               <location>-0.04628 -0.04114 -0.06775</location>
+            </attachment>
+            <attachment>
+               <link>4</link>
+               <location>0.03859 -0.02109 0.1267</location>
+            </attachment>
+         </attachments>
+      </cable_ideal>
+      <cable_ideal attachment_reference="com" name="motor9">
+         <properties>
+            <force_min>10</force_min>
+            <force_max>5000</force_max>
+         </properties>
+         <attachments>
+            <attachment>
+               <link>3</link>
+               <location>-0.05341 0.02757 -0.09094</location>
+            </attachment>
+            <attachment>
+               <link>4</link>
+               <location>0.0406 0.03544 0.1295</location>
+            </attachment>
+         </attachments>
+      </cable_ideal>      
+   </cable_set>
+</cables>
