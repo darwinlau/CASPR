@@ -2,77 +2,64 @@
 <!DOCTYPE trajectories SYSTEM "../../../templates/trajectories.dtd">
 <trajectories>
     <joint_trajectories/>
-    <operational_trajectories>
-      <quintic_spline_trajectory id="up_down" time_step="0.02" time_definition="relative">
+    <operational_trajectories>      
+      <quintic_spline_trajectory id="xylo_1" time_step="0.02" time_definition="relative">
         <points>
           <point>
-            <y>0.7654 -0.0920 0.137</y>
-            <y_dot>0.0 0.0 0.0</y_dot>
-            <y_ddot>0.0 0.0 0.0</y_ddot>
-          </point>
-          <point time="6.0">
-            <y>0.7654 -0.0920 0.3</y>
-            <y_dot>0.0 0.0 0.0</y_dot>
-            <y_ddot>0.0 0.0 0.0</y_ddot>
-          </point> 
-          <point time="6.0">
-            <y>0.7654 -0.0920 0.137</y>
-            <y_dot>0.0 0.0 0.0</y_dot>
-            <y_ddot>0.0 0.0 0.0</y_ddot>
-          </point> 
-        </points>
-      </quintic_spline_trajectory>
-      <quintic_spline_trajectory id="to_fro" time_step="0.02" time_definition="relative">
-        <points>
-          <point>
-            <y>0.7654 -0.0920 0.137</y>
-            <y_dot>0.0 0.0 0.0</y_dot>
-            <y_ddot>0.0 0.0 0.0</y_ddot>
-          </point>
-          <point time="10.0">
-            <y>0.7654 -0.20 0.2</y>
-            <y_dot>0.0 0.0 0.0</y_dot>
-            <y_ddot>0.0 0.0 0.0</y_ddot>
-          </point>
-          <point time="10.0">
-            <y>0.7654 -0.0920 0.2</y>
-            <y_dot>0.0 0.0 0.0</y_dot>
-            <y_ddot>0.0 0.0 0.0</y_ddot>
-          </point>
-          <point time="10.0">
-            <y>0.7654 -0.0920 0.2</y>
-            <y_dot>0.0 0.0 0.0</y_dot>
-            <y_ddot>0.0 0.0 0.0</y_ddot>
-          </point>
-        </points>
-      </quintic_spline_trajectory>
-      <quintic_spline_trajectory id="square" time_step="0.02" time_definition="relative">
-        <points>
-          <point>
-            <y>0.6676 -0.1196 0.0685</y>
-            <y_dot>0.0 0.0 0.0</y_dot>
-            <y_ddot>0.0 0.0 0.0</y_ddot>
-          </point>
-          <point time="6.0">
-            <y>0.6676 0.05 0.0685</y>
-            <y_dot>0.0 0.0 0.0</y_dot>
-            <y_ddot>0.0 0.0 0.0</y_ddot>
-          </point>
-          <point time="6.0">
-            <y>0.50 0.05 0.0685</y>
-            <y_dot>0.0 0.0 0.0</y_dot>
-            <y_ddot>0.0 0.0 0.0</y_ddot>
-          </point>
-          <point time="6.0">
-            <y>0.50 -0.1196 0.0685</y>
-            <y_dot>0.0 0.0 0.0</y_dot>
-            <y_ddot>0.0 0.0 0.0</y_ddot>
-          </point>
-          <point time="6.0">
-            <y>0.6676 -0.1196 0.0685</y>
+            <y>0.65 -0.45 0.2</y>
             <y_dot>0.0 0.0 0.0</y_dot>
             <y_ddot>0.0 0.0 0.0</y_ddot>
           </point>          
+          <point time="5.0">
+            <y>0.65 -0.45 0.50</y>
+            <y_dot>0.0 0.0 0.0</y_dot>
+            <y_ddot>0.0 0.0 0.0</y_ddot>
+          </point>
+          <point time="5.0">
+            <y>0.65 -0.45 0.38</y>
+            <y_dot>0.0 0.0 0.0</y_dot>
+            <y_ddot>0.0 0.0 0.0</y_ddot>
+          </point>
+          <point time="5.0">
+            <y>0.55 -0.45 0.50</y>
+            <y_dot>0.0 0.0 0.0</y_dot>
+            <y_ddot>0.0 0.0 0.0</y_ddot>
+          </point>
+          <point time="5.0">
+            <y>0.55 -0.45 0.38</y>
+            <y_dot>0.0 0.0 0.0</y_dot>
+            <y_ddot>0.0 0.0 0.0</y_ddot>
+          </point>
+          <point time="5.0">
+            <y>0.45 -0.45 0.50</y>
+            <y_dot>0.0 0.0 0.0</y_dot>
+            <y_ddot>0.0 0.0 0.0</y_ddot>
+          </point>
+          <point time="5.0">
+            <y>0.45 -0.45 0.38</y>
+            <y_dot>0.0 0.0 0.0</y_dot>
+            <y_ddot>0.0 0.0 0.0</y_ddot>
+          </point>   
+          <point time="5.0">
+            <y>0.35 -0.45 0.50</y>
+            <y_dot>0.0 0.0 0.0</y_dot>
+            <y_ddot>0.0 0.0 0.0</y_ddot>
+          </point>
+          <point time="5.0">
+            <y>0.35 -0.45 0.38</y>
+            <y_dot>0.0 0.0 0.0</y_dot>
+            <y_ddot>0.0 0.0 0.0</y_ddot>
+          </point>  
+          <point time="5.0">
+            <y>0.25 -0.45 0.50</y>
+            <y_dot>0.0 0.0 0.0</y_dot>
+            <y_ddot>0.0 0.0 0.0</y_ddot>
+          </point>
+          <point time="5.0">
+            <y>0.25 -0.45 0.38</y>
+            <y_dot>0.0 0.0 0.0</y_dot>
+            <y_ddot>0.0 0.0 0.0</y_ddot>
+          </point>  
         </points>
       </quintic_spline_trajectory>
     </operational_trajectories>
