@@ -63,7 +63,7 @@ classdef PlaneOperations
             P=[0; 0; 0];
             N=cross(N1,N2);
             
-            %  test if the two planes are parallel
+%              test if the two planes are parallel
             if norm(N) < 10^-7                % Plane 1 and Plane 2 are near parallel
                 V=A1-A2;
                 if (dot(N1,V) == 0)
@@ -77,13 +77,13 @@ classdef PlaneOperations
             
             check=2;
             
-            % Plane 1 and Plane 2 intersect in a line
-            %first determine max abs coordinate of cross product
+%             Plane 1 and Plane 2 intersect in a line
+%             first determine max abs coordinate of cross product
             maxc=find(abs(N)==max(abs(N)));
             
             
-            %next, to get a point on the intersection line and
-            %zero the max coord, and solve for the other two
+%             next, to get a point on the intersection line and
+%             zero the max coord, and solve for the other two
             
             d1 = -dot(N1,A1);   %the constants in the Plane 1 equations
             d2 = -dot(N2, A2);  %the constants in the Plane 2 equations
@@ -103,6 +103,23 @@ classdef PlaneOperations
                     P(2) = (d1*N2(1) - d2*N1(1))/ N(3);
                     P(3) = 0;
             end
+        end
+        function [P,N] = PlaneIntersectionSpiderarm(N1,A1,N2,A2)   
+            N = cross(N1, N2);
+            n1 = N1/norm(N1);
+            n2 = N2/norm(N2);
+            N12 = dot(n1,n2);
+            h1 = dot(n1,A1);
+            h2 = dot(n2,A2);
+<<<<<<< HEAD
+            c1 = (h1 - h2*N12);
+            c2 = (h2 - h1*N12);
+            P = (c1 * n1 + c2 * n2)/(1 - N12^2);
+=======
+            c1 = h1 - h2*N12;
+            c2 = h2 - h1*N12;
+            P = (c1 * n1 + c2 * n2)/(1 - N12^2); 
+>>>>>>> 99db2cbb14c4e4c49f59009a619938e636b0f4d0
         end
     end
 end

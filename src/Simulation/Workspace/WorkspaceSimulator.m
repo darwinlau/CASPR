@@ -334,21 +334,24 @@ classdef WorkspaceSimulator < SimulatorBase
             plot_x_in = []; plot_y_in = []; plot_z_in = [];
             plot_x_out = []; plot_y_out = []; plot_z_out = [];
             for i =1:size(plotting_workspace,1)
-                if(~isempty(plotting_workspace{i}.conditions{c_i,1}))
-                    % The point is in the workspace
-                    plot_x_in = [plot_x_in,plotting_workspace{i}.pose(pose_index(1))];
-                    plot_y_in = [plot_y_in,plotting_workspace{i}.pose(pose_index(2))];
-                    plot_z_in = [plot_z_in,plotting_workspace{i}.pose(pose_index(3))];
-                else
+                if(isempty(plotting_workspace{i})||isempty(plotting_workspace{i}.conditions{c_i,1}))
                     q = obj.grid.getGridPoint(i);
                     plot_x_out = [plot_x_out,q(pose_index(1))];
                     plot_y_out = [plot_y_out,q(pose_index(2))];
                     plot_z_out = [plot_z_out,q(pose_index(3))];
+                    
+                else
+                    % The point is in the workspace
+                    plot_x_in = [plot_x_in,plotting_workspace{i}.pose(pose_index(1))];
+                    plot_y_in = [plot_y_in,plotting_workspace{i}.pose(pose_index(2))];
+                    plot_z_in = [plot_z_in,plotting_workspace{i}.pose(pose_index(3))];
                 end
             end
             % If this doesn't work replace in_list with direct storage
-            plot3(plot_axis,plot_x_in,plot_y_in,plot_z_in,'Color',[0,0,0],'Marker','.')
-            plot3(plot_axis,plot_x_out,plot_y_out,plot_z_out,'Color',[1,1,1],'Marker','.')
+            % Plot the workspace points in black color
+            plot3(plot_axis,plot_x_in,plot_y_in,plot_z_in,'Color',[0,0,0],'Marker','.','LineStyle','none')
+            % Plot other grid points in white color. This will 
+            % plot3(plot_axis,plot_x_out,plot_y_out,plot_z_out,'Color',[1,1,1],'Marker','.','LineStyle','none')
         end
         
         % Plot the workspace metric for 2 and 3 dimensional objects

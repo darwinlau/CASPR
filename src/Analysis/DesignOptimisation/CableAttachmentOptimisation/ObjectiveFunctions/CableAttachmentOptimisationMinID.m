@@ -30,7 +30,7 @@ classdef CableAttachmentOptimisationMinID < CableAttachmentOptimisationFnBase
         function Q = evaluate(obj, x, idsolver, trajectory)
             Q = 0;
 
-            obj.parameters.updateCableAttachments(x, obj.model.cableModel, obj.model.bodyModel);
+            obj.parameters.updateCableAttachments(x);
 
             for t = 1:length(trajectory.timeVector)
                 % The model is already updated within the resolve function

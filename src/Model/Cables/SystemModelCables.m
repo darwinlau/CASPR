@@ -89,38 +89,47 @@ classdef SystemModelCables < handle
             % and segment vectors) and Determine V
             obj.V = MatrixOperations.Initialise([obj.numCables,6*obj.numLinks],is_symbolic);
             obj.K = MatrixOperations.Initialise([obj.numCables,obj.numCables],is_symbolic);
-       
+            
             obj.numCablesActive = 0;
             for i = 1:obj.numCables
                 obj.cables{i}.update(bodyModel);
                 cable = obj.cables{i};
                 num_cable_segments = cable.numSegments;
-                for k = 1:obj.numLinks
-                    % linkNum = k - 1
-                    V_ixk_T = [0; 0; 0];
-                    V_itk_T = [0; 0; 0];
-                    body = bodyModel.bodies{k};
-                    R_0k = body.R_0k;
-
-                    for j = 1:num_cable_segments
-                        segment = cable.segments{j};
-                        V_ijk_T = obj.getCRMTerm(i,j,k+1)*R_0k.'*segment.segmentVector/segment.length;
-                        V_ixk_T = V_ixk_T + V_ijk_T;
-                        if obj.getCRMTerm(i,j,k+1) == -1
-                            V_itk_T = V_itk_T + cross(segment.attachments{1}.r_GA, V_ijk_T);
-                        elseif obj.getCRMTerm(i,j,k+1) == 1
-                            V_itk_T = V_itk_T + cross(segment.attachments{2}.r_GA, V_ijk_T);
-                        end  
+                
+                for j = 1:num_cable_segments
+                    segment = cable.segments{j};
+                    % Update V elements only when segments are on different
+                    % links
+                    if segment.attached_links(1)~=segment.attached_links(2)
+                        % Starting point
+                        k = segment.attached_links(1);
+                        if k > 0
+                            V_ijk_T = -bodyModel.bodies{k}.R_0k.'*segment.segmentVector/segment.length;
+                            % - Translation
+                            obj.V(i, 6*k-5:6*k-3) = obj.V(i, 6*k-5:6*k-3) + V_ijk_T.';
+                            % - Orientation
+                            obj.V(i, 6*k-2:6*k) = obj.V(i, 6*k-2:6*k) + ...
+                                cross(segment.attachments{1}.r_GA, V_ijk_T).';
+                        end
+                        
+                        % Ending point
+                        k = segment.attached_links(2);
+                        if k > 0
+                            V_ijk_T = bodyModel.bodies{k}.R_0k.'*segment.segmentVector/segment.length;
+                            % - Translation
+                            obj.V(i, 6*k-5:6*k-3) = obj.V(i, 6*k-5:6*k-3) + V_ijk_T.';
+                            % - Orientation
+                            obj.V(i, 6*k-2:6*k) = obj.V(i, 6*k-2:6*k) + ...
+                                cross(segment.attachments{2}.r_GA, V_ijk_T).';
+                        end
                     end
-                    V_element = [V_ixk_T.' V_itk_T.'];
-                    obj.V(i, 6*k-5:6*k) = V_element;
                 end
                 obj.K(i,i) = obj.cables{i}.K;
 
                 if (cable.isActive)
                     obj.numCablesActive = obj.numCablesActive + 1;
-                end   
-            end   
+                end 
+            end  
                        
             ind_active = 1;
             obj.cableIndicesActive = zeros(obj.numCablesActive, 1);            
@@ -151,47 +160,53 @@ classdef SystemModelCables < handle
             % and segment vectors) and Determine V
             obj.V = MatrixOperations.Initialise([obj.numCables,6*obj.numLinks],is_symbolic);
             obj.K = MatrixOperations.Initialise([obj.numCables,obj.numCables],is_symbolic);
-           
-            CASPR_log.Info('Calculating V...');
+            
+            CASPR_log.Info('Calculating V...');            
             obj.numCablesActive = 0;
             for i = 1:obj.numCables
                 obj.cables{i}.update(bodyModel);
                 cable = obj.cables{i};
                 num_cable_segments = cable.numSegments;
-                for k = 1:obj.numLinks
-                    % linkNum = k - 1
-                    V_ixk_T = [0; 0; 0];
-                    V_itk_T = [0; 0; 0];
-                    body = bodyModel.bodies{k};
-                    R_0k = body.R_0k;
-
-                    for j = 1:num_cable_segments
-                        CASPR_log.Info(['- Cable: ',num2str(i),' Link: ',num2str(k),...
-                                ' Segment: ',num2str(j)]);
-                        segment = cable.segments{j}; 
-                        V_ijk_T = obj.getCRMTerm(i,j,k+1)*R_0k.'*segment.segmentVector/segment.length;
-                        V_ijk_T = simplify(V_ijk_T, 'Step', k*20);     
-                        V_ixk_T = V_ixk_T + V_ijk_T;
-                        if obj.getCRMTerm(i,j,k+1) == -1
-                            V_itk_T = V_itk_T + cross(segment.attachments{1}.r_GA, V_ijk_T);
-                        elseif obj.getCRMTerm(i,j,k+1) == 1
-                            V_itk_T = V_itk_T + cross(segment.attachments{2}.r_GA, V_ijk_T);
-                        end  
+                
+                for j = 1:num_cable_segments
+                    CASPR_log.Info(sprintf('Cable: %d\tSegment: %d', i, j));
+                    segment = cable.segments{j};
+                    % Update V elements only when segments are on different
+                    % links
+                    if segment.attached_links(1)~=segment.attached_links(2)
+                        % Starting point
+                        k = segment.attached_links(1);
+                        if k > 0
+                            V_ijk_T = -bodyModel.bodies{k}.R_0k.'*segment.segmentVector/segment.length;
+                            V_ijk_T = simplify(V_ijk_T, 'Step', k*20);
+                            % - Translation
+                            obj.V(i, 6*k-5:6*k-3) = obj.V(i, 6*k-5:6*k-3) + V_ijk_T.';
+                            % - Orientation
+                            obj.V(i, 6*k-2:6*k) = obj.V(i, 6*k-2:6*k) + ...
+                                cross(segment.attachments{1}.r_GA, V_ijk_T).';                          
+                        end
+                        
+                        % Ending point
+                        k = segment.attached_links(2);
+                        if k > 0
+                            V_ijk_T = bodyModel.bodies{k}.R_0k.'*segment.segmentVector/segment.length;
+                            V_ijk_T = simplify(V_ijk_T, 'Step', k*20);
+                            % - Translation
+                            obj.V(i, 6*k-5:6*k-3) = obj.V(i, 6*k-5:6*k-3) + V_ijk_T.';
+                            % - Orientation
+                            obj.V(i, 6*k-2:6*k) = obj.V(i, 6*k-2:6*k) + ...
+                                cross(segment.attachments{2}.r_GA, V_ijk_T).';                           
+                        end
                     end
-                    V_element = [V_ixk_T.' V_itk_T.'];                    
-                    V_element = simplify(V_element, 'Step', k*20);                    
-                    obj.V(i, 6*k-5:6*k) = V_element;
                 end
                 obj.K(i,i) = obj.cables{i}.K;
 
                 if (cable.isActive)
                     obj.numCablesActive = obj.numCablesActive + 1;
-                end                
-                
+                end 
             end 
-            
             CASPR_log.Info('Simplifying V...');
-            obj.V = simplify(obj.V, 'Step', 20);
+            obj.V = simplify(obj.V, 'Step', 20);           
                        
             ind_active = 1;
             obj.cableIndicesActive = zeros(obj.numCablesActive, 1);            
