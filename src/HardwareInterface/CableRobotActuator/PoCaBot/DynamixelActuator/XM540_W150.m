@@ -76,8 +76,8 @@ classdef XM540_W150 < DynamixelActuatorParaBase
         KpD_SCALE_FACTOR = 16;
         
         % Below paras are based on experiences.
-        PROFILE_ACC = 40;%20
-        PROFILE_VEL = 300;
+        PROFILE_ACC = 60;%40
+        PROFILE_VEL = 600;%300
         MAX_WORK_CURRENT = 1000;
         KpP = 1200;%600%2800
         KpI = 0;

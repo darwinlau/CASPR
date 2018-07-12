@@ -21,7 +21,7 @@ classdef MegaSpoolSpecifications < SpoolSpecificationsBase
         % len_per_circle = sqrt(MegaSpoolSpecifications.width_per_circle^2 + (MegaSpoolSpecifications.radius*2*pi)^2);
         
         % Dynamixel Holder
-        lenCoS2Outlet = 0.50; % distance from cetre of the spool to the cable outlet
+        lenCoS2Outlet = 0.56; % distance from cetre of the spool to the cable outlet
         cableLengths_full = ones(8,1)*(10.2464+0.5);
     end
     

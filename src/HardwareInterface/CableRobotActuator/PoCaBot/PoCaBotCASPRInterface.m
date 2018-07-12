@@ -14,7 +14,7 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
         
         cableLengths_initial       % size: numMotor X 1
         cableLengths_full          % size: numMotor X 1
-        dynamixel_position_initial % size: numMotor X 1
+%         dynamixel_position_initial % size: numMotor X 1
         
         dynamixel_direction_factor_position
         dynamixel_direction_factor_current
@@ -40,7 +40,8 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
         % The default KpD, KpI and KpP
         KpD;% KPD = KPD(TBL) / 16
         KpI;% KPI = KPI(TBL) / 65536
-        KpP;% KPP = KPP(TBL) / 128
+        KpP;%   = KPP(TBL) / 128
+        dynamixel_position_initial % TEMPORARILY in public
         
         ActuatorParas
     end
@@ -260,6 +261,19 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
         end
         
         % Method to read the cable lengths from the hardware (if available)
+        function [length] = relativelengthFeedbackRead(obj, initial)
+            [bState, ret] = obj.sync_read(obj.ActuatorParas.ADDR_PRESENT_POSITION, obj.ActuatorParas.LEN_PRESENT_POSITION);
+            if(bState)
+                deltaAngle = (ret - initial)/obj.ActuatorParas.ENCODER_COUNT_PER_TURN*2*pi;
+                deltalength = zeros(size(deltaAngle));
+                for i = 1:obj.numMotor
+                    deltalength(i) = obj.dynamixel_direction_factor_position * obj.accessories(i).getDeltaLength(deltaAngle(i));
+                end
+                    length = deltalength();
+            else
+                length = ones(size(ret))*(-1);
+            end            
+        end
         function [length] = lengthFeedbackRead(obj)
             [bState, ret] = obj.sync_read(obj.ActuatorParas.ADDR_PRESENT_POSITION, obj.ActuatorParas.LEN_PRESENT_POSITION);
             if(bState)
@@ -339,6 +353,15 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
             if(~all(mode == obj.ActuatorParas.OPERATING_MODE_CURRENT_BASED_POSITION))
                 obj.toggleEnableAllDynamixel(obj.TORQUE_DISABLE);
                 obj.sync_write(obj.ActuatorParas.ADDR_OPERATING_MODE, obj.ActuatorParas.LEN_OPERATING_MODE, ones(obj.numMotor,1)*obj.ActuatorParas.OPERATING_MODE_CURRENT_BASED_POSITION);
+            end
+        end
+        function switchOperatingMode2POSITION_LIMITEDCURRENT_ByMotor(obj,motor)
+            [~, mode] = obj.sync_read(obj.ActuatorParas.ADDR_OPERATING_MODE, obj.ActuatorParas.LEN_OPERATING_MODE);
+            if(mode(motor) ~= obj.ActuatorParas.OPERATING_MODE_CURRENT_BASED_POSITION) || range(mode)==0 % check for condition that should change the op mode of motor
+                obj.toggleEnableAllDynamixel(obj.TORQUE_DISABLE);
+                operatingModeVector = ones(obj.numMotor,1)*obj.ActuatorParas.OPERATING_MODE_CURRENT;
+                operatingModeVector(motor) = obj.ActuatorParas.OPERATING_MODE_CURRENT_BASED_POSITION
+                obj.sync_write(obj.ActuatorParas.ADDR_OPERATING_MODE, obj.ActuatorParas.LEN_OPERATING_MODE, operatingModeVector);
             end
         end
         
@@ -486,6 +509,14 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
             end
             dynamixel_position_delta = obj.dynamixel_direction_factor_position * angle_delta/2/pi*obj.ActuatorParas.ENCODER_COUNT_PER_TURN;
             dynamixel_position_cmd = obj.dynamixel_position_initial + dynamixel_position_delta';
+        end
+        function [dynamixel_position_cmd] = relLen2anglecmd(obj, delta_lengths)
+            angle_delta = zeros(obj.numMotor,1);
+            for i = 1:obj.numMotor
+                angle_delta(i) = obj.accessories(i).getDeltaAngle(delta_lengths(i));
+            end
+            dynamixel_position_delta = obj.dynamixel_direction_factor_position * angle_delta/2/pi*obj.ActuatorParas.ENCODER_COUNT_PER_TURN;
+            dynamixel_position_cmd = obj.dynamixel_position_initial + dynamixel_position_delta;
         end
         
         function [pos] = radian2dynamixelposition(obj, angle)
