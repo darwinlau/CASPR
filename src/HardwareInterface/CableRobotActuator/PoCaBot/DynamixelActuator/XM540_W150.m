@@ -58,7 +58,7 @@ classdef XM540_W150 < DynamixelActuatorParaBase
         % 
         ADDR_KpD = 80;% KPD = KPD(TBL) / 16
         ADDR_KpI = 82;% KPI = KPI(TBL) / 65536
-        ADDR_KpP = 84;% KPP = KPP(TBL) / 128
+        ADDR_KpP = 84;% KPP = KPP(TBL) / 128 %84
         
         LEN_KpD = 2;
         LEN_KpI = 2;
@@ -79,7 +79,7 @@ classdef XM540_W150 < DynamixelActuatorParaBase
         PROFILE_ACC = 60;%40
         PROFILE_VEL = 600;%300
         MAX_WORK_CURRENT = 1000;
-        KpP = 1200;%600%2800
+        KpP = 400;%600%2800%1200
         KpI = 0;
         KpD = 6500;%6500
     end
