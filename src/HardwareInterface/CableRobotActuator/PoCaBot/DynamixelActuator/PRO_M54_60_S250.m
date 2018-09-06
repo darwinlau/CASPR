@@ -52,9 +52,9 @@ classdef PRO_M54_60_S250 < DynamixelActuatorParaBase
         
         % The PID parameters of Position Control Loop
         % 
-        ADDR_KpD = 594;% KPD = KPD(TBL) / 16
+        ADDR_KpD = -1;% KPD = KPD(TBL) / 16
         ADDR_KpI = -1;% KPI = KPI(TBL) / 65536
-        ADDR_KpP = -1;% KPP = KPP(TBL) / 128
+        ADDR_KpP = 594;% KPP = KPP(TBL) / 128
         
         LEN_KpD = 2;
         LEN_KpI = 2;
@@ -77,11 +77,11 @@ classdef PRO_M54_60_S250 < DynamixelActuatorParaBase
         KpD_SCALE_FACTOR = 16;
         
         % Below paras are based on experiences.
-        PROFILE_ACC = 150;
-        PROFILE_VEL = 300;
+        PROFILE_ACC = 150; %150
+        PROFILE_VEL = 8000; %300
         MAX_WORK_CURRENT = 100;
-        KpP = 900;
+        KpP = 25; %900
         KpI = 0;
-        KpD = 0;
+        KpD = 1000;
     end
 end
