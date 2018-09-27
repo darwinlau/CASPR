@@ -390,6 +390,7 @@ classdef PoCaBotExperiment < ExperimentBase
                 % Try to get the motor position in case of no tension or
                 % tension is zero.
                 [motorPosOffset] = obj.hardwareInterface.getMotorPosInitOffset(obj.model.cableLengths - originalLength);
+                motorPosOffset = motorPosOffset.*0; %%%%%%% zero offset for initial pos??
                 init_pos = present_position + motorPosOffset;
                 
                 fo.writeInitPos_Motors(init_pos);
