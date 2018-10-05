@@ -2,6 +2,7 @@ Example planar XY,/examples/Example_planar_XY/,Example_planar_XY_bodies.xml,Exam
 Example spatial,/examples/Example_spatial/,Example_spatial_bodies.xml,Example_spatial_cables.xml,Example_spatial_trajectories.xml
 Example spherical,/examples/Example_spherical/,Example_spherical_bodies.xml,Example_spherical_cables.xml,Example_spherical_trajectories.xml
 Example 2R planar XZ,/examples/Example_2R_planar_XZ/,Example_2R_planar_XZ_bodies.xml,Example_2R_planar_XZ_cables.xml,Example_2R_planar_XZ_trajectories.xml
+Example 2S,/examples/Example_2S/,Example_2S_bodies.xml,Example_2S_cables.xml,Example_2S_trajectories.xml
 2 DoF VSD,/SCDM/planar_manipulators/2_DoF_VSD/,2_DoF_VSD_bodies.xml,2_DoF_VSD_cables.xml,2_DoF_VSD_trajectories.xml
 KNTU planar,/SCDM/planar_manipulators/KNTU_planar/,KNTU_planar_bodies.xml,KNTU_planar_cables.xml,KNTU_planar_trajectories.xml
 Passive springs planar,/SCDM/planar_manipulators/Passive_springs_planar/,Passive_springs_planar_bodies.xml,Passive_springs_planar_cables.xml,Passive_springs_planar_trajectories.xml
@@ -26,8 +27,6 @@ BioBiped one-leg,/MCDM/BioBiped_one_leg/,BioBiped_one_leg_bodies.xml,BioBiped_on
 BioBiped,/MCDM/BioBiped/,BioBiped_bodies.xml,BioBiped_cables.xml,BioBiped_trajectories.xml
 CAROCA,/SCDM/spatial_manipulators/CAROCA/,CAROCA_bodies.xml,CAROCA_cables.xml,CAROCA_trajectories.xml
 FASTKIT Planar,/HCDM/FASTKIT_Planar/,FASTKIT_Planar_bodies.xml,FASTKIT_Planar_cables.xml,FASTKIT_Planar_trajectories.xml
-Example 2S,/MCDM/Example_2S/,Example_2S_bodies.xml,Example_2S_cables.xml,Example_2S_trajectories.xml
 RoboyLeftArm,/MCDM/RoboyLeftArm/,RoboyLeftArm_bodies.xml,RoboyLeftArm_cables.xml,RoboyLeftArm_trajectories.xml
 RoboyArm2,/MCDM/RoboyArm2/,RoboyArm2_bodies.xml,RoboyArm2_cables.xml,RoboyArm2_trajectories.xml
-Cubic_Spatial,/SCDM/spatial_manipulators/Cubic_Spatial/,Cubic_Spatial_bodies.xml,Cubic_Spatial_cables.xml,Cubic_Spatial_trajectories.xml
 SJTUSnake,/MCDM/SJTUSnake/,SJTUSnake_bodies.xml,SJTUSnake_cables.xml,SJTUSnake_trajectories.xml

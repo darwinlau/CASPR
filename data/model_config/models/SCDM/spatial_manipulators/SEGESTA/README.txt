@@ -1,7 +1,3 @@
 Please cite the following paper when using this model for your studies:
 
-Reichert, Christopher;Bruckman, Tobias:
-Unified contact force control approach for cable-driven parallel robots using an
-impedance/admittance control strategy.
-In: Proceedings of the 14th IFToMM World CongressL Taipei, Taiwan,
-October 25-30, 2015 S. 645-654.
+C. Reichert and T. Bruckman, "Unified Contact Force Control Approach for Cable-Driven Parallel Robots using an Impedance/Admittance control strategy", in Proc. 14th IFToMM World Congress, pp. 645-654, 2015.
