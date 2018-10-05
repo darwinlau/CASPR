@@ -2,7 +2,7 @@
 %
 % Author        : Jonathan EDEN
 % Created       : 2016
-% Description    :
+% Description   :
 %   Workspace simulator generates the workspace over a defined set of space
 %   (currently only a grid of states is accepted). The workspace simulation
 %   performs essentially a numerical brute force approach over the set of
@@ -122,38 +122,84 @@ classdef WorkspaceSimulator < SimulatorBase
         end
         
         % Plotting function to plot a two dimensional (subset of the) workspace plot
-        function plotWorkspace2(obj,plot_axis,capability_measure,slices)
+        function plotWorkspace2(obj,plot_axis,capability_measure,slices,fixed_dim_cor)
             CASPR_log.Assert((isempty(slices)||(numel(slices)==2)),'Only 2 dimensional slices can be plotted in this function');
+			CASPR_log.Assert((obj.model.numDofs-numel(fixed_dim_cor))==2,'The number of elements of fixed dimension are not equal to remaining dimension.');
             if(isempty(plot_axis))
-                figure; plot_axis = axes; 
+                f = figure(); plot_axis = axes;
             end
             hold(plot_axis,'on');
             if(isa(capability_measure,'WorkspaceMetricType'))
                 plot_workspace_metric_2(obj,plot_axis,capability_measure,slices);
             elseif(isa(capability_measure,'WorkspaceConditionType'))
-                plot_workspace_condition_2(obj,plot_axis,capability_measure,slices);
+                plot_workspace_condition_2(obj,plot_axis,capability_measure,slices,fixed_dim_cor,[],[]);
             else
                 CASPR_log.Print('The capability measure must either be a workspace metric or a workspace condition',CASPRLogLevel.ERROR);
             end
             hold(plot_axis,'off');
         end
         
-        % Plotting function to plot a three dimensional (subset of the)
-        % workspace plot
-        function plotWorkspace3(obj,plot_axis,capability_measure,slices)
-            CASPR_log.Assert((isempty(slices)||(numel(slices)==3)),'Only 3 dimensional slices can be plotted in this function');
+        % Plotting function to plot a two dimensional (subset of the) workspace plot with slider
+        function plotWorkspaceSlide2(obj,plot_axis,capability_measure,slices,fixed_dim_cor,slide_dim_index)
+            CASPR_log.Assert((isempty(slices)||(numel(slices)==2)),'Only 2 dimensional slices can be plotted in this function');
+            CASPR_log.Assert((obj.model.numDofs-numel(fixed_dim_cor)-numel(slide_dim_index))==2,'The number of fixed dimension are not equal to remaining dimension.');
+            CASPR_log.Assert(numel(slide_dim_index)==1,'Only one axis can be slided.');
             if(isempty(plot_axis))
-                figure; plot_axis = axes; 
+                f = figure; plot_axis = axes;
+            end
+             hold(plot_axis,'on');
+            if(isa(capability_measure,'WorkspaceMetricType'))
+                plot_workspace_metric_2(obj,plot_axis,capability_measure,slices);
+            elseif(isa(capability_measure,'WorkspaceConditionType'))
+                % create a slider with bounds [-1,1]
+                b = uicontrol('Parent',f,'Style','slider','Position',[0,0,400,20],'value',0.5, 'min',0, 'max',1);
+                b.Callback = @(es,ed) refreshdata(f,plot_workspace_condition_2(obj,plot_axis,capability_measure,slices,fixed_dim_cor,slide_dim_index,...
+                floor(es.Value*(obj.grid.q_length(slide_dim_index)-1))*obj.grid.delta_q(slide_dim_index)+obj.grid.q_begin(slide_dim_index)));
+
+            else
+                CASPR_log.Print('The capability measure must either be a workspace metric or a workspace condition',CASPRLogLevel.ERROR);
+            end
+             hold(plot_axis,'off');
+        end
+        
+        % Plotting function to plot a three dimensional (subset of the) workspace plot
+        function plotWorkspace3(obj,plot_axis,capability_measure,slices,fixed_dim_cor)
+            CASPR_log.Assert((isempty(slices)||(numel(slices)==3)),'Only 3 dimensional slices can be plotted in this function');
+			CASPR_log.Assert((obj.model.numDofs-numel(fixed_dim_cor))==3,'The number of elements of fixed dimension are not equal to remaining dimension.');
+            if(isempty(plot_axis))
+                f = figure; plot_axis = axes; 
             end
             hold(plot_axis,'on');
             if(isa(capability_measure,'WorkspaceMetricType'))
                 plot_workspace_metric_3(obj,plot_axis,capability_measure,slices);
             elseif(isa(capability_measure,'WorkspaceConditionType'))
-                plot_workspace_condition_3(obj,plot_axis,capability_measure,slices);
+                plot_workspace_condition_3(obj,plot_axis,capability_measure,slices,fixed_dim_cor,[],[]);
             else
                 CASPR_log.Print('The capability measure must either be a workspace metric or a workspace condition',CASPRLogLevel.ERROR);
             end
             hold(plot_axis,'off');
+        end
+    
+        % Plotting function to plot a three dimensional (subset of the) workspace plot with slider
+        function plotWorkspaceSlide3(obj,plot_axis,capability_measure,slices,fixed_dim_cor,slide_dim_index)
+            CASPR_log.Assert((isempty(slices)||(numel(slices)==3)),'Only 3 dimensional slices can be plotted in this function');
+			CASPR_log.Assert((obj.model.numDofs-numel(fixed_dim_cor)-numel(slide_dim_index))==3,'The number of elements of fixed dimension are not equal to remaining dimension.');
+            CASPR_log.Assert(numel(slide_dim_index)==1,'Only one axis can be slided.');
+
+            if(isempty(plot_axis))
+                f = figure; plot_axis = axes; 
+            end
+            hold(plot_axis,'on');
+            if(isa(capability_measure,'WorkspaceMetricType'))
+                plot_workspace_metric_3(obj,plot_axis,capability_measure,slices);
+            elseif(isa(capability_measure,'WorkspaceConditionType'))
+                b = uicontrol('Parent',f,'Style','slider','Position',[0,0,400,20],'value',0.5, 'min',0, 'max',1);
+                b.Callback = @(es,ed) refreshdata(f,plot_workspace_condition_3(obj,plot_axis,capability_measure,slices,fixed_dim_cor,slide_dim_index,...
+                floor(es.Value*(obj.grid.q_length(slide_dim_index)-1))*obj.grid.delta_q(slide_dim_index)+obj.grid.q_begin(slide_dim_index)));
+            else
+                CASPR_log.Print('The capability measure must either be a workspace metric or a workspace condition',CASPRLogLevel.ERROR);
+            end
+%             hold(plot_axis,'off');
         end
         
         function plotWorkspaceGraph(obj,plot_axis,~,~)
@@ -298,59 +344,119 @@ classdef WorkspaceSimulator < SimulatorBase
         end
         
         % Plot the workspace for condition 2 objects
-        function plot_workspace_condition_2(obj,plot_axis,w_condition,pose_index)
+        function f = plot_workspace_condition_2(obj,plot_axis,w_condition,pose_index,fixed_dim_cor,slide_dim_index,slide_dim_cor)
             CASPR_log.Assert(~isempty(obj.conditions),'There are no conditions to plot');
             % Find the position of the condition in the workspace list
             c_i = obj.find_capability_index(w_condition);            
             CASPR_log.Assert(c_i~=0,'Workspace condition must be a workspace simulator condition');
             % Place the workspace information into vectors for plotting
+            fixed_dim_index = 1:obj.model.numDofs;
+            fixed_dim_index = setdiff(fixed_dim_index,pose_index);
+            fixed_dim_index = setdiff(fixed_dim_index,slide_dim_index);
             plotting_workspace = obj.workspace;
             plot_x_in = []; plot_y_in = [];
             plot_x_out = []; plot_y_out = [];
             for i =1:size(plotting_workspace,1)
-                if(isempty(plotting_workspace{i})||isempty(plotting_workspace{i}.conditions{c_i,1}))
-                    q = obj.grid.getGridPoint(i);
-                    plot_x_out = [plot_x_out,q(pose_index(1))]; %#ok<*AGROW>
-                    plot_y_out = [plot_y_out,q(pose_index(2))];
-                else
-                    % The point is in the workspace
-                    plot_x_in = [plot_x_in,plotting_workspace{i}.pose(pose_index(1))];
-                    plot_y_in = [plot_y_in,plotting_workspace{i}.pose(pose_index(2))];
+                % Search for suitable workspace point in specific coordinate
+                if(~isempty(plotting_workspace{i}) && all(abs(plotting_workspace{i}.pose(fixed_dim_index)-fixed_dim_cor)<1e-6)...
+                        && all(abs(plotting_workspace{i}.pose(slide_dim_index)-slide_dim_cor)<1e-6))
+                    if(isempty(plotting_workspace{i}.conditions{c_i,1}))
+                        q = obj.grid.getGridPoint(i);
+                        plot_x_out = [plot_x_out,q(pose_index(1))]; %#ok<*AGROW>
+                        plot_y_out = [plot_y_out,q(pose_index(2))];
+                    else
+                        % The point is in the workspace
+                        plot_x_in = [plot_x_in,plotting_workspace{i}.pose(pose_index(1))];
+                        plot_y_in = [plot_y_in,plotting_workspace{i}.pose(pose_index(2))];
+                    end
                 end
             end
             % If this doesn't work replace in_list with direct storage
-            plot(plot_axis,plot_x_in,plot_y_in,'Color',[0,0,0],'Marker','.','LineStyle','none')
-            plot(plot_axis,plot_x_out,plot_y_out,'Color',[1,1,1],'Marker','.','LineStyle','none')
+            % Delete the previous figure data
+            delete(findall(plot_axis,'type','Line'));
+
+            % Plot the workspace points in black color
+            f = plot(plot_axis,plot_x_in,plot_y_in,'Color',[0,0,0],'Marker','.','LineStyle','none');
+            
+            %Set the limit and annotation
+            plot_axis.XLim = [obj.grid.q_begin(pose_index(1)) obj.grid.q_end(pose_index(1))];
+            plot_axis.YLim = [obj.grid.q_begin(pose_index(2)) obj.grid.q_end(pose_index(2))];
+            xlabel(sprintf('Axis %.0f', pose_index(1))); ylabel(sprintf('Axis %.0f', pose_index(2)));
+            plot_axis.OuterPosition = [0.1 0.1 0.9 0.9];
+            
+            % Delete the previous annotaion
+            delete(findall(gcf,'type','annotation'));
+            % Print the axis information
+            annotation_height = 0.9;
+            for i = 1: numel(fixed_dim_index)
+                annotation('textbox',[0 annotation_height .2 .05],'String',sprintf('Axis %.0f = %.2f',fixed_dim_index(i), fixed_dim_cor(i)),'FontSize',8,'LineStyle','none');
+                annotation_height = annotation_height-0.05;
+            end
+            for i = 1: numel(slide_dim_index)
+                annotation('textbox',[0 annotation_height .2 .05],'String',sprintf('Axis %.0f = %.2f',slide_dim_index(i), slide_dim_cor(i)),'FontSize',8,'LineStyle','none');
+                annotation_height = annotation_height-0.05;
+            end
+%   
+            % Plot other grid points in white color. This will block the actual workspace point, is suggested to be turned off.
+            % plot(plot_axis,plot_x_out,plot_y_out,'Color',[1,1,1],'Marker','.','LineStyle','none')
         end
         
         % Plot the workspace for condition 2 objects
-        function plot_workspace_condition_3(obj,plot_axis,w_condition,pose_index)
+        function f = plot_workspace_condition_3(obj,plot_axis,w_condition,pose_index,fixed_dim_cor,slide_dim_index,slide_dim_cor)
             CASPR_log.Assert(~isempty(obj.conditions),'There are no conditions to plot')
             % Find the position of the condition in the workspace list
             c_i = obj.find_capability_index(w_condition);            
             CASPR_log.Assert(c_i~=0,'Workspace condition must be a workspace simulator condition');
             % Place the workspace information into vectors for plotting
+            fixed_dim_index = 1:obj.model.numDofs;
+            fixed_dim_index = setdiff(fixed_dim_index,pose_index);
+            fixed_dim_index = setdiff(fixed_dim_index,slide_dim_index);
             plotting_workspace = obj.workspace;
             plot_x_in = []; plot_y_in = []; plot_z_in = [];
             plot_x_out = []; plot_y_out = []; plot_z_out = [];
             for i =1:size(plotting_workspace,1)
-                if(isempty(plotting_workspace{i})||isempty(plotting_workspace{i}.conditions{c_i,1}))
-                    q = obj.grid.getGridPoint(i);
-                    plot_x_out = [plot_x_out,q(pose_index(1))];
-                    plot_y_out = [plot_y_out,q(pose_index(2))];
-                    plot_z_out = [plot_z_out,q(pose_index(3))];
-                    
-                else
-                    % The point is in the workspace
-                    plot_x_in = [plot_x_in,plotting_workspace{i}.pose(pose_index(1))];
-                    plot_y_in = [plot_y_in,plotting_workspace{i}.pose(pose_index(2))];
-                    plot_z_in = [plot_z_in,plotting_workspace{i}.pose(pose_index(3))];
+                if(~isempty(plotting_workspace{i}) && all(abs(plotting_workspace{i}.pose(fixed_dim_index)-fixed_dim_cor)<1e-10)...
+                        && all(abs(plotting_workspace{i}.pose(slide_dim_index)-slide_dim_cor)<1e-10))
+                    if(isempty(plotting_workspace{i}.conditions{c_i,1}))
+                        q = obj.grid.getGridPoint(i);
+                        plot_x_out = [plot_x_out,q(pose_index(1))];
+                        plot_y_out = [plot_y_out,q(pose_index(2))];
+                        plot_z_out = [plot_z_out,q(pose_index(3))];
+                        
+                    else
+                        % The point is in the workspace
+                        plot_x_in = [plot_x_in,plotting_workspace{i}.pose(pose_index(1))];
+                        plot_y_in = [plot_y_in,plotting_workspace{i}.pose(pose_index(2))];
+                        plot_z_in = [plot_z_in,plotting_workspace{i}.pose(pose_index(3))];
+                    end
                 end
             end
             % If this doesn't work replace in_list with direct storage
+            % Delete the previous figure data
+            delete(findall(plot_axis,'type','Line'));
             % Plot the workspace points in black color
-            plot3(plot_axis,plot_x_in,plot_y_in,plot_z_in,'Color',[0,0,0],'Marker','.','LineStyle','none')
-            % Plot other grid points in white color. This will 
+            f = plot3(plot_axis,plot_x_in,plot_y_in,plot_z_in,'Color',[0,0,0],'Marker','.','LineStyle','none');
+            
+            %Set the limit and annotation
+            plot_axis.XLim = [obj.grid.q_begin(pose_index(1)) obj.grid.q_end(pose_index(1))];
+            plot_axis.YLim = [obj.grid.q_begin(pose_index(2)) obj.grid.q_end(pose_index(2))];
+            plot_axis.ZLim = [obj.grid.q_begin(pose_index(3)) obj.grid.q_end(pose_index(3))];
+            xlabel(sprintf('Axis %.0f', pose_index(1))); ylabel(sprintf('Axis %.0f', pose_index(2))); zlabel(sprintf('Axis %.0f', pose_index(3)));
+            plot_axis.OuterPosition = [0.1 0.1 0.9 0.9];
+
+            % Delete the previous annotaion
+            delete(findall(gcf,'type','annotation'));
+            % Print the axis information
+            annotation_height = 0.9;
+            for i = 1: numel(fixed_dim_index)
+                annotation('textbox',[0 annotation_height .2 .05],'String',sprintf('Axis %.0f = %.2f',fixed_dim_index(i), fixed_dim_cor(i)),'FontSize',8,'LineStyle','none');
+                annotation_height = annotation_height-0.05;
+            end
+            for i = 1: numel(slide_dim_index)
+                annotation('textbox',[0 annotation_height .2 .05],'String',sprintf('Axis %.0f = %.2f',slide_dim_index(i), slide_dim_cor(i)),'FontSize',8,'LineStyle','none');
+                annotation_height = annotation_height-0.05;
+            end
+            % Plot other grid points in white color. This will block the actual workspace point, is suggested to be turned off.
             % plot3(plot_axis,plot_x_out,plot_y_out,plot_z_out,'Color',[1,1,1],'Marker','.','LineStyle','none')
         end
         
@@ -381,8 +487,8 @@ classdef WorkspaceSimulator < SimulatorBase
                     % Find which metric entry to use
                     if(wp.metrics{m_i,2} == obj.metrics{m_i}.metricMin)
                         plot(plot_axis,wp.pose(pose_index(1)),wp.pose(pose_index(2)),'r.')
-                    elseif(wp.metrics{m_i,2} == obj.metrics{m_i}.metricMin)
-                        plot(plot_axis,wp.pose(pose_index(1)),wp.pose(pose_index(2)),'r.')
+%                     elseif(wp.metrics{m_i,2} == obj.metrics{m_i}.metricMin)
+%                         plot(plot_axis,wp.pose(pose_index(1)),wp.pose(pose_index(2)),'r.')
                     else
                         c = c_map(floor(scale_factor*(wp.metrics{m_i,2} - obj.metrics{m_i}.metricMin))+1,:);
                         plot(plot_axis,wp.pose(pose_index(1)),wp.pose(pose_index(2)),'Color',c,'Marker','.')
