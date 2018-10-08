@@ -1,9 +1,7 @@
 classdef RobotiqGripper < handle
     properties (Access = public)
-        hand_angle_cmd = Gripper.LOOSE_HAND_ANGLE;
-        arm_angle_cmd = 90;
-        current_servo_angle
-        current_gripper_state
+        current_servo_angle = 90
+        current_gripper_state = 1
         
         strComPort
         comPort
@@ -11,23 +9,23 @@ classdef RobotiqGripper < handle
     end
     
     properties (Access = public, Constant = true)
-        BAUDRATE       = 115200;
+        BAUDRATE       = 38400;
         SERIAL_TIMEOUT = 2;%s Waiting time to complete a read or write operation
         Gripper_activateRequest = 1;
         Gripper_activate = 2;
         Gripper_CLOSE = 3;
         Gripper_OPEN = 4;
 
-        MAX_ARM_ANGLE  = 180;
-        MIN_ARM_ANGLE  = 0;
-        INI_ARM_ANGLE  = 90;
+        max_servo_angle  = 180;
+        min_servo_angle  = 0;
+        ini_servo_angle  = 90;
 
     end
     
     methods (Access = public)
-        function gripper = Gripper(strComPort)
-            gripper.strComPort = strComPort;
-            gripper.arm_angle_cmd  = gripper.INI_ARM_ANGLE;
+        function robotiqgripper = RobotiqGripper(strComPort)
+            robotiqgripper.strComPort = strComPort;
+            robotiqgripper.current_servo_angle  = robotiqgripper.ini_servo_angle;
         end
         
         function initialize(obj)
@@ -36,6 +34,12 @@ classdef RobotiqGripper < handle
             obj.comPort.timeout = obj.SERIAL_TIMEOUT;
             obj.comPort.ReadAsyncMode = 'continuous';
             obj.openserial();
+
+            cmd = sprintf('(%d,%d)',obj.current_servo_angle,obj.Gripper_activateRequest);
+            fwrite(obj.comPort,cmd);
+            pause(1);
+            cmd = sprintf('(%d,%d)',obj.current_servo_angle,obj.Gripper_activate);
+            fwrite(obj.comPort,cmd);
         end
 
 
@@ -43,16 +47,16 @@ classdef RobotiqGripper < handle
             obj.closeserial();
         end
         
-        function setGripper(obj,hand_angle_cmd)
+        function setGripper(obj,gripperState)
             %             CASPR_log.Assert(hand_angle_cmd<= obj.MAX_HAND_ANGLE && hand_angle_cmd>=obj.MIN_HAND_ANGLE,'The argument is out of range!');
-            obj.hand_angle_cmd = hand_angle_cmd;
-            cmd = [obj.CMD_MOTOR_HEADER obj.hand_angle_cmd obj.arm_angle_cmd];
+            obj.current_gripper_state = gripperState;
+            cmd = sprintf('(%d,%d)',obj.current_servo_angle,obj.current_gripper_state);
             fwrite(obj.comPort,cmd);
         end
         
-        function setServo(obj,arm_angle_needed)
-            obj.arm_angle_cmd = obj.armAngleConvert(arm_angle_needed);
-            cmd = [obj.CMD_MOTOR_HEADER obj.hand_angle_cmd obj.arm_angle_cmd];
+        function setServo(obj,servoAngle)
+            obj.current_servo_angle = servoAngle;
+            cmd = sprintf('(%d,%d)',obj.current_servo_angle,obj.current_gripper_state);
             fwrite(obj.comPort,cmd);
         end
       end
