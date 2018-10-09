@@ -29,3 +29,4 @@ CAROCA,/SCDM/spatial_manipulators/CAROCA/,CAROCA_bodies.xml,CAROCA_cables.xml,CA
 FASTKIT Planar,/HCDM/FASTKIT_Planar/,FASTKIT_Planar_bodies.xml,FASTKIT_Planar_cables.xml,FASTKIT_Planar_trajectories.xml
 RoboyLeftArm,/MCDM/RoboyLeftArm/,RoboyLeftArm_bodies.xml,RoboyLeftArm_cables.xml,RoboyLeftArm_trajectories.xml
 SJTUSnake,/MCDM/SJTUSnake/,SJTUSnake_bodies.xml,SJTUSnake_cables.xml,SJTUSnake_trajectories.xml
+BMArm_X4_2,/MCDM/BMArm_X4_2/,BMArm_X4_2_bodies.xml,BMArm_X4_2_cables.xml,BMArm_X4_2_trajectories.xml,

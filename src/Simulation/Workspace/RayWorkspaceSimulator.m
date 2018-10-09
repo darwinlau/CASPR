@@ -394,7 +394,7 @@ classdef RayWorkspaceSimulator < SimulatorBase
                     G.Nodes.NodeColours = zeros(G.numnodes,1);
                     for j = 1:G.numnodes
                         if(obj.node_list(j,3+obj.grid.n_dimensions)==i)
-                            G.Nodes.NodeColours(j) = -edge_range/(max_list-min_list)*(centroid_list(j) - min_list) + min(G.Edges.EdgeColours) - edge_range/128;
+                            G.Nodes.NodeColours(j) = -edge_range/(max_list-min_list)*(centroid_list(j) - min_list) + min(G.Edges.EdgeColours) - edge_range/127.99;
                         else
                             G.Nodes.NodeColours(j) = zero_colour;
                         end
