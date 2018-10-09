@@ -22,7 +22,7 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
         
         % Protocol version
         PROTOCOL_VERSION            = 2.0;          % See which protocol version is used in the Dynamixel
-        BAUDRATE                    = 115200;
+        BAUDRATE                    = 115200
         
         TORQUE_ENABLE               = 1;            % Value for enabling the torque
         TORQUE_DISABLE              = 0;            % Value for disabling the torque
@@ -42,7 +42,7 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
         KpI;% KPI = KPI(TBL) / 65536
         KpP;%   = KPP(TBL) / 128
         dynamixel_position_initial % TEMPORARILY in public
-        
+        loosenFactor
         ActuatorParas
     end
     
@@ -357,15 +357,32 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
             end
         end
         
-        function switchOperatingMode2POSITION_LIMITEDCURRENT_ByMotor(obj,motor)
-            [~, mode] = obj.sync_read(obj.ActuatorParas.ADDR_OPERATING_MODE, obj.ActuatorParas.LEN_OPERATING_MODE);
-            if(mode(motor) ~= obj.ActuatorParas.OPERATING_MODE_EXTENDED_POSITION) || range(mode)==0 % check for condition that should change the op mode of motor
-                obj.toggleEnableAllDynamixel(obj.TORQUE_DISABLE);
-                operatingModeVector = ones(obj.numMotor,1)*obj.ActuatorParas.OPERATING_MODE_CURRENT;
-%                 operatingModeVector(motor) = obj.ActuatorParas.OPERATING_MODE_CURRENT_BASED_POSITION
-                operatingModeVector(motor) = obj.ActuatorParas.OPERATING_MODE_EXTENDED_POSITION; % Using extended position mode for better stiffness
-                obj.sync_write(obj.ActuatorParas.ADDR_OPERATING_MODE, obj.ActuatorParas.LEN_OPERATING_MODE, operatingModeVector);
+%         function switchOperatingMode2POSITION_LIMITEDCURRENT_ByMotor(obj,motor)
+%             [~, mode] = obj.sync_read(obj.ActuatorParas.ADDR_OPERATING_MODE, obj.ActuatorParas.LEN_OPERATING_MODE);
+%             if(mode(motor) ~= obj.ActuatorParas.OPERATING_MODE_EXTENDED_POSITION) || range(mode)==0 % check for condition that should change the op mode of motor
+%                 obj.toggleEnableAllDynamixel(obj.TORQUE_DISABLE);
+%                 operatingModeVector = ones(obj.numMotor,1)*obj.ActuatorParas.OPERATING_MODE_CURRENT;
+% %                 operatingModeVector(motor) = obj.ActuatorParas.OPERATING_MODE_CURRENT_BASED_POSITION
+%                 operatingModeVector(motor) = obj.ActuatorParas.OPERATING_MODE_EXTENDED_POSITION; % Using extended position mode for better stiffness
+%                 obj.sync_write(obj.ActuatorParas.ADDR_OPERATING_MODE, obj.ActuatorParas.LEN_OPERATING_MODE, operatingModeVector);
+%             end
+%         end
+        
+        % This function assign motors with different mode running at the
+        % same time. Input motorMode should be a numMotor x1 vector,
+        % indicating the targeting operating mode, and current is ranging
+        % from 0 to 2047, normally we have 67 as default current
+        function hybridOperatingMode(obj,motorMode,current)
+            if nargin < 3
+                current = ones(obj.numMotor,1)*obj.ActuatorParas.MAX_WORK_CURRENT/15;
+            else
+                current = ones(obj.numMotor,1)*current;
             end
+            currentOperatingMode = obj.getOperatingMode;
+            obj.toggleEnableSomeDynamixel(obj.TORQUE_DISABLE, currentOperatingMode ~= motorMode);
+            obj.sync_write(obj.ActuatorParas.ADDR_OPERATING_MODE, obj.ActuatorParas.LEN_OPERATING_MODE, motorMode);
+            obj.systemOnSend();
+            obj.forceCommandSend(current);
         end
         
         function [mode] = getOperatingMode(obj)
@@ -455,9 +472,36 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
             current = tension/maxTension*obj.ActuatorParas.MAX_CURRENT;
             Kp = obj.KpP/obj.ActuatorParas.KpP_SCALE_FACTOR;% KPP = KPP(TBL) / 128
             errAngle = current./Kp;
-            offset = -1 * errAngle/obj.ActuatorParas.ENCODER_COUNT_PER_TURN.*[obj.accessories(:).len_per_circle]';
+            offset = -2 * errAngle/obj.ActuatorParas.ENCODER_COUNT_PER_TURN.*[obj.accessories(:).len_per_circle]';
         end
-        
+
+        % This function is used to find out which cables in loosed during
+        % current mode
+        function detectLoosenCables(obj)
+            loosenIndex = [];
+            obj.loosenFactor = 0.3;
+            loosenTension = obj.goalForceFeedbackRead()* obj.loosenFactor;
+            cableForceDiff = obj.goalForceFeedbackRead() - obj.forceFeedbackRead();
+            currentOM = obj.getOperatingMode;
+            if any(abs(cableForceDiff) > loosenTension)
+                for i = 1:obj.numMotor
+                    if ((abs(cableForceDiff(i))>loosenTension(i)) && currentOM(i)==obj.ActuatorParas.OPERATING_MODE_CURRENT)
+                        loosenIndex =[loosenIndex; i];
+                    end
+                end
+                if ~isempty(loosenIndex)
+                    if length(loosenIndex) < 2
+                        fprintf('Cable %d is loose\n',loosenIndex);
+                    else
+                        fprintf('Cable')
+                        for j = 1:length(loosenIndex)-1
+                            fprintf(' %d,', loosenIndex(j));
+                        end
+                       fprintf('%d are loose',loosenIndex(end))
+                    end
+                end
+            end
+        end
         % This function is used when the motor is working in current mode
         % Tension: The approximating force derived from the nominal
         % current.
@@ -551,6 +595,21 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
                     write1ByteTxRx(obj.port_num(i), obj.PROTOCOL_VERSION, currentID_group(dxl), obj.ActuatorParas.ADDR_TORQUE_ENABLE, cmd);
                     if( getLastTxRxResult(obj.port_num(i), obj.PROTOCOL_VERSION) == obj.COMM_SUCCESS && getLastRxPacketError(obj.port_num(i), obj.PROTOCOL_VERSION) == 0 )
                         CASPR_log.Debug(sprintf('Dynamixel #%d has been successfully controlled \n', currentID_group(dxl)));
+                    end
+                end
+            end
+        end
+        % This function is a variation of the All enabling function, which
+        % used to disable or enable the torque on selected motors, motor is
+        % of size obj.numMotor x 1, as a boolean object that selecting the
+        % motors in operation
+        function toggleEnableSomeDynamixel(obj, cmd, motor)
+            for i = 1:obj.numPort
+                currentID_group = cell2mat(obj.DXL_ID(i));
+                for dxl = 1:obj.DXL_NUM(i)
+                    if motor(currentID_group(dxl))
+                        write1ByteTxRx(obj.port_num(i), obj.PROTOCOL_VERSION, currentID_group(dxl), obj.ActuatorParas.ADDR_TORQUE_ENABLE, cmd);
+                    else
                     end
                 end
             end
@@ -689,6 +748,31 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
                     end
                 end
                 groupSyncReadClearParam(groupread_num);
+            end
+        end
+
+        function CheckCablesInTension(obj, motorInPosMode)
+            loosenIndex = [];
+            obj.loosenFactor = 0.3;
+            loosenTension = obj.goalForceFeedbackRead()* obj.loosenFactor;
+            cableForceDiff = obj.goalForceFeedbackRead() - obj.forceFeedbackRead();
+            if any(abs(cableForceDiff) > loosenTension)
+                for i = 1:obj.model.numCables
+                    if ((abs(cableForceDiff(i))>loosenTension(i)) && i~=motorInPosMode)
+                        loosenIndex =[loosenIndex; i];
+                    end
+                end
+                if ~isempty(loosenIndex)
+                    if length(loosenIndex) < 2
+                        fprintf('Cable %d is loose\n',loosenIndex);
+                    else
+                        fprintf('Cable')
+                        for j = 1:length(loosenIndex)-1
+                            fprintf(' %d,', loosenIndex(j));
+                        end
+                       fprintf('%d are loose',loosenIndex(end))
+                    end
+                end
             end
         end
     end

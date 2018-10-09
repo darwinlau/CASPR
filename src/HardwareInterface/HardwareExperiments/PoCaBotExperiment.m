@@ -36,7 +36,8 @@ classdef PoCaBotExperiment < ExperimentBase
         % For the orange PE fiber cable with diameter 0.8mm, its elongation is 4.1478e-4/N,
         % For the orange PE fiber cable with diameter 1.2mm, its elongation is 4.7847e-4/N,
         % for the STEALTH-BRAID cable, its elongation is 3.2825e-5/N
-        elongation_per_Newton = [1;0;1;0;1;0;1;0]*3.2825e-5 + [0;1;0;1;0;1;0;1]*4.1478e-4; 
+%         elongation_per_Newton = [1;0;1;0;1;0;1;0]*3.2825e-5 + [0;1;0;1;0;1;0;1]*4.1478e-4; 
+        elongation_per_Newton = ones(8,1)*3.2825e-5;
         
         l_feedback_traj    % Temporary variable to store things for now
         l_cmd_traj         % Temporary variable to store things for now
@@ -56,8 +57,8 @@ classdef PoCaBotExperiment < ExperimentBase
     methods
         % strCOMPort should be an array of cells, each one of which
         % indicate a COM port with a string format. e.g. strCOMPort = {'COM3','COM5'};
-        function exp = PoCaBotExperiment(modelObj,strCOMPort, timestep, server)
-            hw_interface = PoCaBotCASPRInterface(strCOMPort, DynamixelType.XM540_W150, modelObj.numActuators,false);  %1
+        function exp = PoCaBotExperiment(modelObj,strCOMPort, actuatorMotor, timestep, server)
+            hw_interface = PoCaBotCASPRInterface(strCOMPort, actuatorMotor, modelObj.numActuators,false);  %1
             exp@ExperimentBase(hw_interface, modelObj);
             exp.numMotor = modelObj.numActuators;
             %            eb.forwardKin = FKDifferential(modelObj);
@@ -389,6 +390,7 @@ classdef PoCaBotExperiment < ExperimentBase
                 % Try to get the motor position in case of no tension or
                 % tension is zero.
                 [motorPosOffset] = obj.hardwareInterface.getMotorPosInitOffset(obj.model.cableLengths - originalLength);
+                motorPosOffset = motorPosOffset.*0; %%%%%%% zero offset for initial pos??
                 init_pos = present_position + motorPosOffset;
                 
                 fo.writeInitPos_Motors(init_pos);
@@ -419,6 +421,80 @@ classdef PoCaBotExperiment < ExperimentBase
             [KpP] = obj.hardwareInterface.getKpP()
         end
         
+        % This function initialize the hardware directly from its guess
+        % pose
+        
+        function initialisingPocabot(obj, q0)
+            obj.q_present = q0;
+            obj.model.update(q0, zeros(size(q0)), zeros(size(q0)),zeros(size(q0)));
+            profileVel = ones(obj.numMotor,1)*obj.hardwareInterface.ActuatorParas.PROFILE_VEL;
+            profileAcc = ones(obj.numMotor,1)*obj.hardwareInterface.ActuatorParas.PROFILE_ACC;
+            present_position = obj.hardwareInterface.motorPositionFeedbackRead();
+            initialCurrent = obj.hardwareInterface.ActuatorParas.MAX_WORK_CURRENT/15;
+            [tension] = obj.hardwareInterface.getCableTensionByCurrent(initialCurrent);
+            originalLength = obj.model.cableLengths ./(1+obj.elongation_per_Newton.*tension);
+
+            [motorPosOffset] = obj.hardwareInterface.getMotorPosInitOffset(obj.model.cableLengths - originalLength);
+            init_pos = present_position + motorPosOffset; % in motor encoder measurement
+            
+            % Send the initial commands to the hardware
+            obj.initialLength = obj.model.cableLengths;
+            obj.hardwareInterface.lengthInitialSend(obj.model.cableLengths);
+            obj.hardwareInterface.motorPosInitialSend(init_pos);
+            
+            obj.hardwareInterface.switchOperatingMode2POSITION_LIMITEDCURRENT();
+            obj.hardwareInterface.setKpP(ones(obj.numMotor,1)*obj.hardwareInterface.ActuatorParas.KpP);
+            try
+                obj.hardwareInterface.setKpI(ones(obj.numMotor,1)*obj.hardwareInterface.ActuatorParas.KpI);
+                obj.hardwareInterface.setKpD(ones(obj.numMotor,1)*obj.hardwareInterface.ActuatorParas.KpD);
+            catch
+            end
+            % Get the system ready to work
+            obj.hardwareInterface.systemOnSend();
+            current = ones(obj.numMotor,1)*obj.hardwareInterface.ActuatorParas.MAX_WORK_CURRENT;
+            obj.hardwareInterface.forceCommandSend(current);
+            
+            profileAcc = profileAcc/(obj.timestep/0.05)/2;
+            obj.hardwareInterface.setProfileAcceleration(profileAcc);
+            obj.hardwareInterface.setProfileVelocity(profileVel/2);        
+        end
+        
+        function preparePosLimitedCurrent(obj,currentsize)
+            if nargin < 2
+                posLimitedCurrent = obj.hardwareInterface.ActuatorParas.MAX_WORK_CURRENT;
+            else
+                posLimitedCurrent = currentsize;
+            end
+            step_current = 10;
+            present_position = obj.hardwareInterface.motorPositionFeedbackRead();
+            initialCurrent = obj.hardwareInterface.ActuatorParas.MAX_WORK_CURRENT/15;
+            [tension] = obj.hardwareInterface.getCableTensionByCurrent(initialCurrent);
+            originalLength = obj.model.cableLengths ./(1+obj.elongation_per_Newton.*tension);
+
+            [motorPosOffset] = obj.hardwareInterface.getMotorPosInitOffset(obj.model.cableLengths - originalLength);
+            init_pos = present_position + motorPosOffset; % in motor encoder measurement
+            obj.initialLength = obj.model.cableLengths;
+            obj.hardwareInterface.lengthInitialSend(obj.model.cableLengths);
+            obj.hardwareInterface.motorPosInitialSend(init_pos);
+  
+            obj.hardwareInterface.systemOnSend();
+            current = ones(obj.numMotor,1)*obj.hardwareInterface.ActuatorParas.MAX_WORK_CURRENT;
+            motorMode = obj.hardwareInterface.getOperatingMode;
+            motorCurrentTarget = obj.hardwareInterface.goalForceFeedbackRead;
+            index = [];
+            for j = 1: length(motorCurrentTarget)
+                if motorMode(j) == obj.hardwareInterface.ActuatorParas.OPERATING_MODE_CURRENT_BASED_POSITION
+                    index = [index;j];
+                end
+            end
+            for i = 1: sum(motorMode(:)==obj.hardwareInterface.ActuatorParas.OPERATING_MODE_CURRENT_BASED_POSITION)
+                motorCurrentTarget(index(i)) = posLimitedCurrent;
+            end
+%             for i = 1: round(max(abs(obj.hardwareInterface.goalForceFeedbackRead) - abs(motorCurrentTarget))/step_current,-1)
+%             end
+            obj.hardwareInterface.forceCommandSend(motorCurrentTarget);
+        end
+        
         % run the trajectory directly no need to inilize the hardware which
         % has been done beforehand.
         function runTrajectoryDirectly(obj, trajectory)
@@ -446,6 +522,7 @@ classdef PoCaBotExperiment < ExperimentBase
 %                 if(any(model_temp.cableForces<0))
 %                     fprintf('The force solved from ID gets beyond the limit!!!\n');
 %                 end
+                offset = zeros(size(offset,1),size(offset,2)); %%TEMP
                 lengthCommand = model_temp.cableLengths ./(1+obj.elongation_per_Newton.*model_temp.cableForces) + offset;
 %                 lengthModifiedElongation = lengthCommand - obj.initialLength;
 %                 if(lengthModifiedElongation > 0)
@@ -510,6 +587,46 @@ classdef PoCaBotExperiment < ExperimentBase
             end
 %             data = [obj.time_abs_traj obj.time_rel_traj obj.q_cmd_traj obj.q_feedback_traj obj.l_cmd_traj obj.l_feedback_traj];
 %             FileOperation.recordData(data);
+        end
+
+        function [lengthfeedback] = runTrajectoryForCalibration(obj, trajectory)
+            obj.l_cmd_traj = zeros(length(trajectory.timeVector),obj.numMotor);
+            obj.l_feedback_traj = zeros(length(trajectory.timeVector),obj.numMotor);
+            obj.time_abs_traj = zeros(length(trajectory.timeVector),1);
+            obj.q_feedback_traj = zeros(length(trajectory.timeVector),obj.model.numDofs);
+            obj.time_rel_traj = trajectory.timeVector';
+            obj.q_cmd_traj = trajectory.q';
+            lengthfeedback = cell(1,length(trajectory.timeVector));
+            if(isrow(obj.time_rel_traj))
+                obj.time_rel_traj = trajectory.timeVector;
+            end
+            offsetLength = obj.hardwareInterface.lengthFeedbackRead;
+            for t = 1:1:length(trajectory.timeVector)
+                obj.q_present = trajectory.q(:,t);
+                trajectory.q(:,t) = obj.q_present + obj.q_offset_tuned;
+                tic;
+                % update cable lengths for next command from trajectory
+                obj.model.update(trajectory.q(:,t), trajectory.q_dot(:,t), trajectory.q_ddot(:,t),zeros(size(trajectory.q_dot(:,t))));
+                
+                [~, model_temp, ~, ~, ~] = obj.idsim.IDSolver.resolve(trajectory.q(:,t), trajectory.q_dot(:,t), trajectory.q_ddot(:,t), zeros(obj.idsim.model.numDofs,1));
+                [offset] = obj.hardwareInterface.getCableOffsetByTension(model_temp.cableForces);
+%                 if(any(model_temp.cableForces<0))
+%                     fprintf('The force solved from ID gets beyond the limit!!!\n');
+%                 end
+                lengthCommand = model_temp.cableLengths ./(1+obj.elongation_per_Newton.*model_temp.cableForces) + offset;
+                obj.hardwareInterface.lengthCommandSend(lengthCommand);
+%                 obj.hardwareInterface.detectLoosenCables();
+%                 lengthfeedback{t} = obj.hardwareInterface.lengthFeedbackRead - obj.initialLength;
+                lengthfeedback{t} = obj.hardwareInterface.lengthFeedbackRead - offsetLength;
+                elapsed = toc;
+                if(elapsed < obj.timestep)
+                    %java.lang.Thread.sleep((obj.timestep - elapsed)*1000);
+                    pause(obj.timestep - elapsed);
+                else
+%                     toc
+%                     pause(0.001);
+                end
+            end
         end
         
         function updateServer(obj, server)
