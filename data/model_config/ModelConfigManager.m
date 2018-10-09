@@ -138,6 +138,7 @@ classdef ModelConfigManager
             % Clean up file structure, delete folder and files inside
             dir_folder = [root_folder,remove_line{2}]; % The second entry is the folder string
             CASPR_log.Assert(isdir(dir_folder),'No Directory exists');
+            rmpath(dir_folder);
             rmdir(dir_folder,'s');
         end
         
