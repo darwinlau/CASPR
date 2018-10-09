@@ -156,7 +156,7 @@
           </point>
         </points>
       </quintic_spline_trajectory>      
-      <quintic_spline_trajectory id="star" time_step="0.005" time_definition="relative">
+      <quintic_spline_trajectory id="star" time_step="0.05" time_definition="relative">
         <points>
           <point>
             <y>1.5969 1.3343 1.06655</y>
