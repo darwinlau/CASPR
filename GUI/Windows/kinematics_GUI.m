@@ -31,7 +31,7 @@ function varargout = kinematics_GUI(varargin)
 
     % Edit the above text to modify the response to help kinematics_GUI
 
-    % Last Modified by GUIDE v2.5 01-Jun-2017 13:29:18
+    % Last Modified by GUIDE v2.5 16-Oct-2018 11:32:22
 
     % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
@@ -399,6 +399,19 @@ function script_button_Callback(~, ~, handles) %#ok<DEFNU>
     edit(w_string)
 end
 
+function Rviz_pushbutton_Callback(~, ~, handles) %#ok<DEFNU>
+    % hObject    handle to Rviz_pushbutton (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    structure with handles and user data (see GUIDATA)
+    sim = getappdata(handles.figure1,'sim');
+    modObj = getappdata(handles.cable_text,'modObj');
+    if(isempty(sim))
+        warning('No simulator has been generated. Please press run first'); %#ok<WNTAG>
+    else
+        MotionSimulatorBase.plotRviz(modObj, sim.trajectory);
+    end
+end
+
 
 % --- Executes on button press in update_button.
 function update_button_Callback(hObject, ~, handles) %#ok<DEFNU>
@@ -579,6 +592,8 @@ function run_forward_kinematics(handles,modObj,trajectory_id)
     fprintf('End Plotting Simulation : %f seconds\n', time_elapsed);
     set(handles.status_text,'String','No simulation running');
     assignin('base','forward_kinematic_simulator',fksim);
+    % Save the sim
+    setappdata(handles.figure1,'sim',fksim);
 end
 
 function loadState(handles)
@@ -657,3 +672,5 @@ function initialise_popups(handles)
     % Needed callbacks
     plot_type_popup_Callback(handles.plot_type_popup,[],handles);
 end
+
+

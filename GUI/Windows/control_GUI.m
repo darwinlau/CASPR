@@ -31,7 +31,7 @@ function varargout = control_GUI(varargin)
 
     % Edit the above text to modify the response to help control_GUI
 
-    % Last Modified by GUIDE v2.5 07-May-2018 18:38:09
+    % Last Modified by GUIDE v2.5 24-Oct-2018 08:00:11
 
     % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
@@ -715,6 +715,20 @@ function script_button_Callback(~, ~, handles)
     edit(w_string)
 end
 
+% --- Executes on button press in Rviz_pushbutton.
+function Rviz_pushbutton_Callback(~, ~, handles) %#ok<DEFNU>
+    % hObject    handle to Rviz_pushbutton (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    structure with handles and user data (see GUIDATA)
+    sim = getappdata(handles.figure1,'sim');
+    modObj = getappdata(handles.cable_text,'modObj');
+    if(isempty(sim))
+        warning('No simulator has been generated. Please press run first'); %#ok<WNTAG>
+    else
+        MotionSimulatorBase.plotRviz(modObj, sim.trajectory);
+    end
+end
+
 
 function file_copy(handles,output_file)
         % Determine if forward or inverse kinematics
@@ -780,3 +794,5 @@ function new_s = extractDynamics(r_id_string)
     end
     fclose(r_fid);
 end
+
+
