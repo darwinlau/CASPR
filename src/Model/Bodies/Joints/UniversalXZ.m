@@ -1,9 +1,9 @@
-% Universal joint in the XY axes
+% Universal joint in the XZ axes
 %
-% Author        : Darwin LAU
-% Created       : 2016
+% Author        : Chen SONG
+% Created       : 2018
 % Description   :
-classdef UniversalXY < JointBase      
+classdef UniversalXZ < JointBase      
     properties (Constant = true)
         numDofs = 2;
         numVars = 2;
@@ -17,9 +17,9 @@ classdef UniversalXY < JointBase
     
     properties (Dependent)
         alpha
-        beta
+        gamma
         alpha_dot
-        beta_dot
+        gamma_dot
     end
     
     methods
@@ -32,21 +32,21 @@ classdef UniversalXY < JointBase
         function value = get.alpha_dot(obj)
             value = obj.GetAlpha(obj.q_dot);
         end
-        function value = get.beta(obj)
-            value = obj.GetBeta(obj.q);
+        function value = get.gamma(obj)
+            value = obj.GetGamma(obj.q);
         end
-        function value = get.beta_dot(obj)
-            value = obj.GetBeta(obj.q_dot);
+        function value = get.gamma_dot(obj)
+            value = obj.GetGamma(obj.q_dot);
         end
     end
     
     methods (Static)
         % Get the relative rotation matrix
         function R_pe = RelRotationMatrix(q)
-            alpha   =   UniversalXY.GetAlpha(q);
-            beta    =   UniversalXY.GetBeta(q);
+            alpha   =   UniversalXZ.GetAlpha(q);
+            gamma   =   UniversalXZ.GetGamma(q);
             R_01    =   RevoluteX.RelRotationMatrix(alpha);
-            R_12    =   RevoluteY.RelRotationMatrix(beta);
+            R_12    =   RevoluteZ.RelRotationMatrix(gamma);
             R_pe    =   R_01*R_12;
         end
 
@@ -57,38 +57,41 @@ classdef UniversalXY < JointBase
         
         % Generate the S matrix
         function S = RelVelocityMatrix(q)
-            b = UniversalXY.GetBeta(q);
-            S = [zeros(3,2); cos(b) 0; 0 1; sin(b) 0];    
+            g = UniversalXY.GetGamma(q);
+            S = [zeros(3,2); cos(g) 0; -sin(g) 0; 0 1];
         end
         
         % Generate the S gradient tensor
         function [S_grad] = RelVelocityMatrixGradient(q)
-            b = UniversalXY.GetBeta(q);
-            S_grad = MatrixOperations.Initialise([6,2,2], isa(b, 'sym'));
-            S_grad(:,:,2)   =   [zeros(3,2); -sin(b) 0; 0 0; cos(b) 0];    
+            g = UniversalXZ.GetGamma(q);
+            S_grad = MatrixOperations.Initialise([6,2,2], isa(g, 'sym'));
+            S_grad(:,:,2)   =   [zeros(3,2); -sin(g) 0; -cos(g) 0; 0 0];
         end
         
         % Generate the \dot{S} gradient tensor
         function [S_dot_grad] = RelVelocityMatrixDerivGradient(q,q_dot)
-            b = UniversalXY.GetBeta(q);
-            b_d = UniversalXY.GetBeta(q_dot);
-            S_dot_grad = MatrixOperations.Initialise([6,2,2], isa(b, 'sym'));
-            S_dot_grad(:,:,2)   =   [zeros(3,2); -b_d*cos(b) 0; 0 0; -b_d*sin(b) 0];    
+            g = UniversalXZ.GetGamma(q);
+            g_d = UniversalXZ.GetGamma(q_dot);
+            S_dot_grad = MatrixOperations.Initialise([6,2,2], isa(g, 'sym'));
+            S_dot_grad(:,:,2)   =   [zeros(3,2); g_d*cos(g) 0; g_d*sin(g) 0; 0 0];
         end
         
         % Generate the N matrix for the joint
         function [N_j,A] = QuadMatrix(q)
-            b = SphericalEulerXYZ.GetBeta(q);
-            N_j = [0,-0.5*sin(b),0,0.5*cos(b);-0.5*sin(b),0,0.5*cos(b),0];
-            A = [zeros(3,2);1,0;0,0;0,1];
+            N_j = [];
+            A = [];
+            CASPR_log.Error("N matrix calculation currently not supported in Universal XZ joint");
+%             b = SphericalEulerXYZ.GetBeta(q);
+%             N_j = [0,-0.5*sin(b),0,0.5*cos(b);-0.5*sin(b),0,0.5*cos(b),0];
+%             A = [zeros(3,2);1,0;0,0;0,1];
         end
         
         % Get variables from the gen coordinates
         function alpha = GetAlpha(q)
             alpha = q(1);
         end
-        function beta = GetBeta(q)
-            beta = q(2);
+        function gamma = GetGamma(q)
+            gamma = q(3);
         end
     end
 end
