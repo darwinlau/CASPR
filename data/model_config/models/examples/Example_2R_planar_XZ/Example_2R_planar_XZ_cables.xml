@@ -6,7 +6,7 @@
     <cable_ideal name="cable 1" attachment_reference="com">
       <properties>
         <force_min>10.0</force_min>
-        <force_max>250</force_max>
+        <force_max>5000</force_max>
       </properties>
       <attachments>
         <attachment>
@@ -15,14 +15,14 @@
         </attachment>
         <attachment>
           <link>1</link>
-          <location>0.1 0.05 0.3</location>
+          <location>0.02 0.0 0.3</location>
         </attachment>
       </attachments>
     </cable_ideal>
     <cable_ideal name="cable 2" attachment_reference="com">
       <properties>
         <force_min>10.0</force_min>
-        <force_max>250</force_max>
+        <force_max>5000</force_max>
       </properties>
       <attachments>
         <attachment>
@@ -31,14 +31,14 @@
         </attachment>
         <attachment>
           <link>2</link>
-          <location>0.1 0.05 0.3</location>
+          <location>0.02 0.0 0.3</location>
         </attachment>
       </attachments>
     </cable_ideal>
     <cable_ideal name="cable 3" attachment_reference="com">
       <properties>
         <force_min>10.0</force_min>
-        <force_max>250</force_max>
+        <force_max>5000</force_max>
       </properties>
       <attachments>
         <attachment>
@@ -47,14 +47,14 @@
         </attachment>
         <attachment>
           <link>1</link>
-          <location>-0.1 -0.05 0.3</location>
+          <location>-0.02 -0.0 0.3</location>
         </attachment>
       </attachments>
     </cable_ideal>
     <cable_ideal name="cable 4" attachment_reference="com">
       <properties>
         <force_min>10.0</force_min>
-        <force_max>250</force_max>
+        <force_max>5000</force_max>
       </properties>
       <attachments>
         <attachment>
@@ -63,7 +63,7 @@
         </attachment>
         <attachment>
           <link>2</link>
-          <location>-0.1 -0.05 0.3</location>
+          <location>-0.02 -0.0 0.3</location>
         </attachment>
       </attachments>
     </cable_ideal>

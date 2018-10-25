@@ -2,7 +2,7 @@
 <!DOCTYPE bodies_system SYSTEM "../../../templates/bodies.dtd">
 <bodies_system>
     <links display_range="-3.0 3.0 -3.0 3.0 -3.0 3.0" view_angle="0 0">
-      <link_rigid num="1" name="R_Y 1">
+      <link_rigid num="1" name="link_1">
         <joint type="R_Y" q_initial="0.0" q_min="-3.1416" q_max="3.1416"/>
         <physical>
           <mass>0.1</mass>
@@ -22,7 +22,7 @@
           <location>0.0 0.0 0.0</location>
         </parent>
       </link_rigid>
-      <link_rigid num="2" name="R_Y 2">
+      <link_rigid num="2" name="link_2">
         <joint type="R_Y" q_initial="0.0" q_min="-3.1416" q_max="3.1416"/>
         <physical>
           <mass>0.1</mass>
