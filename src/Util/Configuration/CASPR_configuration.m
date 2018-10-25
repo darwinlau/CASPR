@@ -65,7 +65,11 @@ classdef CASPR_configuration
             CASPR_GUI_dev_model_config = value;
             home_path = CASPR_configuration.LoadHomePath();
             save([home_path,'/data/config/CASPR_environment.mat'], config_details.name);
-            CASPR_log.Info(['Reuse_compiled flag set to ',num2str(value)]);
+            if value
+                CASPR_log.Info('Entering Dev Mode...');
+            else
+                CASPR_log.Info('Leaving Dev Mode...');
+            end            
         end
         
     end
