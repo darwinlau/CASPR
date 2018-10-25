@@ -57,7 +57,7 @@ classdef UniversalXZ < JointBase
         
         % Generate the S matrix
         function S = RelVelocityMatrix(q)
-            g = UniversalXY.GetGamma(q);
+            g = UniversalXZ.GetGamma(q);
             S = [zeros(3,2); cos(g) 0; -sin(g) 0; 0 1];
         end
         
@@ -80,7 +80,7 @@ classdef UniversalXZ < JointBase
         function [N_j,A] = QuadMatrix(q)
             N_j = [];
             A = [];
-            CASPR_log.Error("N matrix calculation currently not supported in Universal XZ joint");
+            CASPR_log.Error('N matrix calculation currently not supported in Universal XZ joint');
 %             b = SphericalEulerXYZ.GetBeta(q);
 %             N_j = [0,-0.5*sin(b),0,0.5*cos(b);-0.5*sin(b),0,0.5*cos(b),0];
 %             A = [zeros(3,2);1,0;0,0;0,1];
@@ -91,7 +91,7 @@ classdef UniversalXZ < JointBase
             alpha = q(1);
         end
         function gamma = GetGamma(q)
-            gamma = q(3);
+            gamma = q(2);
         end
     end
 end
