@@ -100,7 +100,8 @@ classdef (Abstract) ModelConfigBase < handle
                     sysModel = SystemModel.LoadXmlObj(bodies_xmlobj, cableset_xmlobj,ModelModeType.DEFAULT);
                     % Operational
                     if nargin > 2
-                        operationalset_xmlobj = obj.getOperationalSetXmlObj(obj.defaultOperationalSetId);
+                        operationalset_xmlobj = obj.getOperationalSetXmlObj(operational_space_id);
+%                         operationalset_xmlobj = obj.getOperationalSetXmlObj(obj.defaultOperationalSetId);
                         sysModel.loadOperationalXmlObj(operationalset_xmlobj);
                     end
                 % SYMBOLIC
@@ -108,7 +109,8 @@ classdef (Abstract) ModelConfigBase < handle
                     sysModel = SystemModel.LoadXmlObj(bodies_xmlobj, cableset_xmlobj,ModelModeType.SYMBOLIC);
                     % Operational
                     if nargin > 2
-                        operationalset_xmlobj = obj.getOperationalSetXmlObj(obj.defaultOperationalSetId);
+                        operationalset_xmlobj = obj.getOperationalSetXmlObj(operational_space_id);
+%                         operationalset_xmlobj = obj.getOperationalSetXmlObj(obj.defaultOperationalSetId);
                         sysModel.loadOperationalXmlObj(operationalset_xmlobj);
                         sysModel.bodyModel.updateOperationalSpace();
                     end
@@ -140,7 +142,8 @@ classdef (Abstract) ModelConfigBase < handle
                         sysModel = SystemModel.LoadXmlObj(bodies_xmlobj, cableset_xmlobj,ModelModeType.DEFAULT);   
                         % Operational
                         if nargin > 2
-                            operationalset_xmlobj = obj.getOperationalSetXmlObj(obj.defaultOperationalSetId);
+                            operationalset_xmlobj = obj.getOperationalSetXmlObj(operational_space_id);
+%                             operationalset_xmlobj = obj.getOperationalSetXmlObj(obj.defaultOperationalSetId);
                             sysModel.loadOperationalXmlObj(operationalset_xmlobj);                                                             
                             sysModel.bodyModel.updateOperationalSpace();  
                         end

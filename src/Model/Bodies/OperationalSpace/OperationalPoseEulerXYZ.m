@@ -13,21 +13,65 @@ classdef OperationalPoseEulerXYZ < OperationalSpaceBase
             o.offset            =   offset;
             o.numOperationalDofs         =   size(selection_matrix,1);
             % Determine the selection matrix assuming 6 DoF
-            temp_selection_matrix = eye(6);
-            o.selection_matrix  =   temp_selection_matrix(logical(diag(selection_matrix)),:);
+%             temp_selection_matrix = eye(6);
+%             o.selection_matrix  =   temp_selection_matrix(logical(diag(selection_matrix)),:);
+            o.selection_matrix  =   selection_matrix;
         end
         
         % Implementation of the abstract function
         function y = extractOperationalSpace(obj,x,R)
-            y_x = obj.selection_matrix(:,1:3)*R*x;
+%             y_x = obj.selection_matrix(:,1:3)*R*x;
+%             b   = asin(R(1,3));
+%             g   = -atan2(R(1,2), R(1,1));
+%             a   = -atan2(R(2,3), R(3,3));
+% %             a   = round(a, 10);
+% %             b   = round(b, 10);
+% %             g   = round(g, 10);
+%             y_r = obj.selection_matrix(:,4:6)*[a;b;g];
+%             y   = [y_x;y_r];
+
             b   = asin(R(1,3));
             g   = -atan2(R(1,2), R(1,1));
             a   = -atan2(R(2,3), R(3,3));
 %             a   = round(a, 10);
 %             b   = round(b, 10);
 %             g   = round(g, 10);
-            y_r = obj.selection_matrix(:,4:6)*[a;b;g];
-            y   = [y_x;y_r];
+            y = obj.selection_matrix*[R*x; [a;b;g]];
+        end
+        
+        function [y, y_dot, y_ddot] = generateTrajectoryLinearSpline(obj, y_s, y_e, time_vector)
+            n_dof = obj.numOperationalDofs;
+            CASPR_log.Assert(n_dof == length(y_s) && n_dof == length(y_e), 'Length of input states are different to the number of operational space DoFs');
+            y = zeros(n_dof, length(time_vector)); 
+            y_dot = zeros(n_dof, length(time_vector));
+            y_ddot = zeros(n_dof, length(time_vector));
+            for i = 1:n_dof
+                [y(i,:), y_dot(i,:), y_ddot(i,:)] = Spline.LinearInterpolation(y_s(i), y_e(i), time_vector);
+            end
+        end
+        
+        function [y, y_dot, y_ddot] = generateTrajectoryCubicSpline(obj, y_s, y_s_d, y_e, y_e_d, time_vector)
+            n_dof = obj.numOperationalDofs;
+            CASPR_log.Assert(n_dof == length(y_s) && n_dof == length(y_e) && n_dof == length(y_s_d) && n_dof == length(y_e_d), 'Length of input states are different to the number of operational space DoFs');
+            y = zeros(n_dof, length(time_vector)); 
+            y_dot = zeros(n_dof, length(time_vector));
+            y_ddot = zeros(n_dof, length(time_vector));
+            for i = 1:n_dof
+                [y(i,:), y_dot(i,:), y_ddot(i,:)] = Spline.CubicInterpolation(y_s(i), y_s_d(i), y_e(i), y_e_d(i), time_vector);
+            end
+        end
+        
+        function [y, y_dot, y_ddot] = generateTrajectoryQuinticSpline(obj, y_s, y_s_d, y_s_dd, y_e, y_e_d, y_e_dd, time_vector)
+            n_dof = obj.numOperationalDofs;
+            CASPR_log.Assert(n_dof == length(y_s) && n_dof == length(y_e) ...
+                && n_dof == length(y_s_d) && n_dof == length(y_e_d) ...
+                && n_dof == length(y_s_dd) && n_dof == length(y_e_dd), 'Length of input states are different to the number of operational space DoFs');
+            y = zeros(n_dof, length(time_vector)); 
+            y_dot = zeros(n_dof, length(time_vector));
+            y_ddot = zeros(n_dof, length(time_vector));
+            for i = 1:n_dof
+                [y(i,:), y_dot(i,:), y_ddot(i,:)] = Spline.QuinticInterpolation(y_s(i), y_s_d(i), y_s_dd(i), y_e(i), y_e_d(i), y_e_dd(i), time_vector);
+            end
         end
     end
     
@@ -58,15 +102,15 @@ classdef OperationalPoseEulerXYZ < OperationalSpaceBase
                     CASPR_log.Print('Unknown character string',CASPRLogLevel.ERROR);
                 end
             end
-            selectionObj = xmlobj.getElementsByTagName('selection_matrix').item(0);
-            s_x = str2double(selectionObj.getElementsByTagName('sx').item(0).getFirstChild.getData);
-            s_y = str2double(selectionObj.getElementsByTagName('sy').item(0).getFirstChild.getData);
-            s_z = str2double(selectionObj.getElementsByTagName('sz').item(0).getFirstChild.getData);
-            s_a = str2double(selectionObj.getElementsByTagName('sa').item(0).getFirstChild.getData);
-            s_b = str2double(selectionObj.getElementsByTagName('sb').item(0).getFirstChild.getData);
-            s_g = str2double(selectionObj.getElementsByTagName('sg').item(0).getFirstChild.getData);
-            selection_matrix = diag([s_x,s_y,s_z,s_a,s_b,s_g]);
-            % obtain selection matrix
+%             selectionObj = xmlobj.getElementsByTagName('selection_matrix').item(0);
+%             s_x = str2double(selectionObj.getElementsByTagName('sx').item(0).getFirstChild.getData);
+%             s_y = str2double(selectionObj.getElementsByTagName('sy').item(0).getFirstChild.getData);
+%             s_z = str2double(selectionObj.getElementsByTagName('sz').item(0).getFirstChild.getData);
+%             s_a = str2double(selectionObj.getElementsByTagName('sa').item(0).getFirstChild.getData);
+%             s_b = str2double(selectionObj.getElementsByTagName('sb').item(0).getFirstChild.getData);
+%             s_g = str2double(selectionObj.getElementsByTagName('sg').item(0).getFirstChild.getData);
+%             selection_matrix = diag([s_x,s_y,s_z,s_a,s_b,s_g]);
+%             % obtain selection matrix
             o = OperationalPoseEulerXYZ(id,name,link,link_offset,selection_matrix);
         end
     end
