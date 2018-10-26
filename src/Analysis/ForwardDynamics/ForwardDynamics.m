@@ -46,10 +46,6 @@ classdef ForwardDynamics < handle
                     solverFn = @(f,t,y0) ode4(f,t,y0);
                 case FDSolverType.ODE1
                     solverFn = @(f,t,y0) ode1(f,t,y0);
-                case FDSolverType.EULER
-                    solverFn = @(f,t,y0) ode_euler(f,t,y0);
-                case FDSolverType.RK4
-                    solverFn = @(f,t,y0) ode_rk4(f,t,y0);
             end
             [~, y_out] = solverFn(@(~,y) ForwardDynamics.eom(0, y, model, f_active, cable_indices_active, w_ext), [0 dt], y0);
             % The output of the ODE is the solution and y0 for the next iteration
