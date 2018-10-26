@@ -20,6 +20,7 @@
 % magnitudes are available.
 classdef SystemModel < handle
     properties (SetAccess = protected)
+        robotName               % Name of the robot
         bodyModel               % SystemModelBodies object
         cableModel              % SystemModelCables object
         modelMode               % The mode of the model
@@ -446,6 +447,16 @@ classdef SystemModel < handle
                 obj.bodyModel.addInertiaUncertainty(m_bounds,I_bounds);
             end
         end
+        
+        % RobotName getter
+        function value = get.robotName(obj)
+            value = obj.robotName;
+        end
+        % RobotName setter
+        function setRobotName(obj, robotName)
+            obj.robotName = robotName;
+        end
+        
         
         % Model Mode Related Functions %        
         

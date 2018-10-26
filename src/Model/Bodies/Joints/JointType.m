@@ -10,7 +10,8 @@ classdef JointType
         R_Z                     % Revolute in Z
         R_AXIS                  % Revolute in defined axis of rotation
         U_XY                    % Universal with xy-euler
-        U_YZ                    % Universal with yz-euler %%
+        U_YZ                    % Universal with yz-euler
+        U_XZ                    % Universal with xz-euler
         P_X                     % Translational X
         P_XY                    % Translational joint in XY plane
         PLANAR_XY               % Planar in XY plane

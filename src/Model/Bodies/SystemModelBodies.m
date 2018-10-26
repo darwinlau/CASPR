@@ -1134,6 +1134,7 @@ classdef SystemModelBodies < handle
             for k = 1:length(obj.operationalSpaceBodyIndices)
                 index = obj.operationalSpaceBodyIndices(k);
                 n_y = obj.bodies{index}.numOperationalDofs;
+                tmp = obj.bodies{index}.operationalSpace.getSelectionMatrix();
                 obj.T(l:l+n_y-1,6*index-5:6*index) = obj.bodies{index}.operationalSpace.getSelectionMatrix();
                 l = l + n_y;
             end

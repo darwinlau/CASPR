@@ -447,5 +447,45 @@ classdef (Abstract) MotionSimulatorBase < SimulatorBase
             writerObj.close();
             close(plot_handle);
         end
+        
+        % Plots a model running a joint trajectory in Rviz through the
+        % CARDSFlow interface. The model and the joint trajectory have to
+        % be provided, together with the ROS_MASTER_URI and local ROS_IP
+        % for the CARDSFlow interface.
+        function plotRviz(modelObj, trajectory)
+            % Create CARDSFlow Interface Object
+            rviz_in = CASPRRVizInterface();
+            % Set robot name rosparam
+            rosparam('set','/robot_name',modelObj.robotName);
+            rosparam('set','/deleteall',1);
+            % Ensure the model mode is default            
+            modelObj.setModelMode(ModelModeType.DEFAULT);
+            % Use the period in trajectory
+            period = (trajectory.timeVector(2) - trajectory.timeVector(1));
+            % Plot initial pose and wait
+            modelObj.update(trajectory.q{1}, trajectory.q_dot{1}, trajectory.q_ddot{1}, ...
+                zeros(modelObj.numDofs,1));
+            rviz_in.visualize(modelObj);
+            pause(1);
+            for t = 1:length(trajectory.timeVector)
+                freq_tic = tic;
+                q = trajectory.q{t};
+                q_d = trajectory.q_dot{t};
+                q_dd = trajectory.q_ddot{t};
+                % Update cdpr
+                modelObj.update(q, q_d, zeros(modelObj.numDofs,1), zeros(modelObj.numDofs,1));
+                % Print info without affecting the frequency regulation
+                if t ~= 1
+                    CASPR_log.Info(sprintf('t: %d Freq: %.2f', t, 1/elapsed));
+                end
+                % Send to RViz
+                rviz_in.visualize(modelObj);
+                % Wait until meeting the period 
+                elapsed = toc(freq_tic);
+                while elapsed < period
+                    elapsed = toc(freq_tic);            
+                end 
+            end
+        end
     end
 end

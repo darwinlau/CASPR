@@ -34,7 +34,7 @@ function varargout = CASPR_GUI(varargin)
 
     % Edit the above text to modify the response to help CASPR_GUI
 
-    % Last Modified by GUIDE v2.5 30-May-2017 01:26:05
+    % Last Modified by GUIDE v2.5 15-Oct-2018 18:19:56
 
     % Begin initialization code - DO NOT EDIT
     warning('off','MATLAB:uitabgroup:OldVersion')
@@ -448,4 +448,16 @@ function format_q_table(numDofs,qtable,q_data)
         column_name{i} = ['q',num2str(i)];
     end
     set(qtable,'ColumnName',column_name);
+end
+
+% --- Executes on button press in Rviz_pushbutton.
+function Rviz_pushbutton_Callback(~,~, handles)    
+    modObj = getappdata(handles.cable_popup,'modObj');
+    rviz_in = CASPRRVizInterface();
+    % Set robot name rosparam
+    rosparam('set','/robot_name',modObj.robotName);
+    rosparam('set','/deleteall',1);
+    for i = 1:500
+        rviz_in.visualize(modObj);
+    end
 end

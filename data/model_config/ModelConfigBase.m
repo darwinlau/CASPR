@@ -23,6 +23,7 @@ classdef (Abstract) ModelConfigBase < handle
     properties (Access = private)
         root_folder                 % The root folder for the CASPR build
         
+        robotName                   % Name of the robot
         bodiesXmlObj                % The DOMNode object for body props
         cablesXmlObj                % The DOMNode object for cable props
         trajectoriesXmlObj          % The DOMNode for trajectory props
@@ -33,6 +34,7 @@ classdef (Abstract) ModelConfigBase < handle
         % objects.
         function c = ModelConfigBase(type_string, folder, list_file)
             c.root_folder = [CASPR_configuration.LoadModelConfigPath(), folder];
+            c.robotName = type_string;
             
             % Check the type of enum and open the master list
             fid = fopen([c.root_folder, list_file]);
@@ -76,7 +78,7 @@ classdef (Abstract) ModelConfigBase < handle
             bodies_xmlobj = c.getBodiesPropertiesXmlObj();
             c.defaultCableSetId = char(c.cablesXmlObj.getDocumentElement.getAttribute('default_cable_set'));
             cableset_xmlobj = c.getCableSetXmlObj(c.defaultCableSetId);
-            sysModel = SystemModel.LoadXmlObj(bodies_xmlobj, cableset_xmlobj);
+            sysModel = SystemModel.LoadXmlObj(bodies_xmlobj, cableset_xmlobj);            
             if(c.bodiesXmlObj.getElementsByTagName('operational_spaces').getLength~=0)
                 c.defaultOperationalSetId = char(c.bodiesXmlObj.getElementsByTagName('operational_spaces').item(0).getAttribute('default_operational_set'));
                 operationalset_xmlobj = c.getOperationalSetXmlObj(c.defaultOperationalSetId);
@@ -98,7 +100,8 @@ classdef (Abstract) ModelConfigBase < handle
                     sysModel = SystemModel.LoadXmlObj(bodies_xmlobj, cableset_xmlobj,ModelModeType.DEFAULT);
                     % Operational
                     if nargin > 2
-                        operationalset_xmlobj = obj.getOperationalSetXmlObj(obj.defaultOperationalSetId);
+                        operationalset_xmlobj = obj.getOperationalSetXmlObj(operational_space_id);
+%                         operationalset_xmlobj = obj.getOperationalSetXmlObj(obj.defaultOperationalSetId);
                         sysModel.loadOperationalXmlObj(operationalset_xmlobj);
                     end
                 % SYMBOLIC
@@ -106,7 +109,8 @@ classdef (Abstract) ModelConfigBase < handle
                     sysModel = SystemModel.LoadXmlObj(bodies_xmlobj, cableset_xmlobj,ModelModeType.SYMBOLIC);
                     % Operational
                     if nargin > 2
-                        operationalset_xmlobj = obj.getOperationalSetXmlObj(obj.defaultOperationalSetId);
+                        operationalset_xmlobj = obj.getOperationalSetXmlObj(operational_space_id);
+%                         operationalset_xmlobj = obj.getOperationalSetXmlObj(obj.defaultOperationalSetId);
                         sysModel.loadOperationalXmlObj(operationalset_xmlobj);
                         sysModel.bodyModel.updateOperationalSpace();
                     end
@@ -138,7 +142,8 @@ classdef (Abstract) ModelConfigBase < handle
                         sysModel = SystemModel.LoadXmlObj(bodies_xmlobj, cableset_xmlobj,ModelModeType.DEFAULT);   
                         % Operational
                         if nargin > 2
-                            operationalset_xmlobj = obj.getOperationalSetXmlObj(obj.defaultOperationalSetId);
+                            operationalset_xmlobj = obj.getOperationalSetXmlObj(operational_space_id);
+%                             operationalset_xmlobj = obj.getOperationalSetXmlObj(obj.defaultOperationalSetId);
                             sysModel.loadOperationalXmlObj(operationalset_xmlobj);                                                             
                             sysModel.bodyModel.updateOperationalSpace();  
                         end
@@ -161,6 +166,7 @@ classdef (Abstract) ModelConfigBase < handle
                     sysModel.setFilesCompiled(true); 
                     sysModel.setModelMode(ModelModeType.COMPILED);
             end
+            sysModel.setRobotName(obj.robotName);
         end
         
         % Getting the joint and operational space trajectories

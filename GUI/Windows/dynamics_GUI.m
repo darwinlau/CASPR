@@ -31,7 +31,7 @@ function varargout = dynamics_GUI(varargin)
 
     % Edit the above text to modify the response to help dynamics_GUI
 
-    % Last Modified by GUIDE v2.5 01-Jun-2017 13:29:27
+    % Last Modified by GUIDE v2.5 16-Oct-2018 11:33:55
 
     % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
@@ -348,6 +348,19 @@ function plot_movie_button_Callback(~, ~, handles) %#ok<DEFNU>
         file_name = [path_string,'/data/videos/dynamics_gui_output.avi'];
         [file,path] = uiputfile(file_name,'Save file name');
         sim.plotMovie(model_config.displayRange, model_config.viewAngle, [path,file], sim.timeVector(length(sim.timeVector)), false, 700, 700);
+    end
+end
+
+function Rviz_pushbutton_Callback(~, ~, handles) %#ok<DEFNU>
+    % hObject    handle to Rviz_pushbutton (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    structure with handles and user data (see GUIDATA)
+    sim = getappdata(handles.figure1,'sim');
+    modObj = getappdata(handles.cable_text,'modObj');
+    if(isempty(sim))
+        warning('No simulator has been generated. Please press run first'); %#ok<WNTAG>
+    else
+        MotionSimulatorBase.plotRviz(modObj, sim.trajectory);
     end
 end
 
@@ -669,3 +682,5 @@ function file_copy(handles,output_file)
     fclose(r_fid);
     fclose(w_fid);
 end
+
+
