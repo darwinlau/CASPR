@@ -14,5 +14,7 @@ classdef FDSolverType
         ODE23TB
         ODE4
         ODE1
+        EULER
+        RK4
     end
 end
