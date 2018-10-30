@@ -449,11 +449,11 @@ classdef (Abstract) MotionSimulatorBase < SimulatorBase
         end
         
         % Plots a model running a joint trajectory in Rviz through the
-        % CARDSFlow interface. The model and the joint trajectory have to
+        % CASPR-RViz interface. The model and the joint trajectory have to
         % be provided, together with the ROS_MASTER_URI and local ROS_IP
-        % for the CARDSFlow interface.
+        % for the CASPR-RViz interface.
         function plotRviz(modelObj, trajectory)
-            % Create CARDSFlow Interface Object
+            % Create CASPR-RViz Interface Object
             rviz_in = CASPRRVizInterface();
             % Set robot name rosparam
             rosparam('set','/robot_name',modelObj.robotName);
