@@ -462,9 +462,10 @@ classdef (Abstract) MotionSimulatorBase < SimulatorBase
             end
             % Create CASPR-RViz Interface Object
             rviz_in = CASPRRVizInterface();
-            % Set robot name rosparam
+            % Set robot name rosparam            
             rosparam('set','/robot_name',modelObj.robotName);
-            rosparam('set','/deleteall',1);
+            rosparam('set','/deleteall', true);            
+            pause(1);
             % Ensure the model mode is default            
             modelObj.setModelMode(ModelModeType.DEFAULT);  
             modelObj.bodyModel.occupied.dynamics = false;
