@@ -470,8 +470,7 @@ classdef (Abstract) MotionSimulatorBase < SimulatorBase
             for t = 1:length(trajectory.timeVector)
                 freq_tic = tic;
                 q = trajectory.q{t};
-                q_d = trajectory.q_dot{t};
-                q_dd = trajectory.q_ddot{t};
+                q_d = trajectory.q_dot{t};                
                 % Update cdpr
                 modelObj.update(q, q_d, zeros(modelObj.numDofs,1), zeros(modelObj.numDofs,1));
                 % Print info without affecting the frequency regulation
@@ -480,6 +479,40 @@ classdef (Abstract) MotionSimulatorBase < SimulatorBase
                 end
                 % Send to RViz
                 rviz_in.visualize(modelObj);
+                % Wait until meeting the period 
+                elapsed = toc(freq_tic);
+                while elapsed < period
+                    elapsed = toc(freq_tic);            
+                end 
+            end
+        end
+        
+        % Plots a model running a joint trajectory in Rviz through the
+        % CARDSFlow interface. The model and the joint trajectory have to
+        % be provided, together with the ROS_MASTER_URI and local ROS_IP
+        % for the CARDSFlow interface.
+        function plotCARDSFlow(modelObj, trajectory)
+            % Create CARDSFlow Interface Object
+            card_in = CARDSFlowInterface();
+            % Set robot name rosparam
+            rosparam('set','/robot_name',modelObj.robotName);            
+            % Ensure the model mode is default            
+            modelObj.setModelMode(ModelModeType.DEFAULT);
+            % Use the period in trajectory
+            period = (trajectory.timeVector(2) - trajectory.timeVector(1));
+            % Loop through the trajectory
+            for t = 1:length(trajectory.timeVector)
+                freq_tic = tic;
+                q = trajectory.q{t};
+                q_d = trajectory.q_dot{t};                
+                % Update cdpr
+                modelObj.update(q, q_d, zeros(modelObj.numDofs,1), zeros(modelObj.numDofs,1));
+                % Print info without affecting the frequency regulation
+                if t ~= 1
+                    CASPR_log.Info(sprintf('t: %d Freq: %.2f', t, 1/elapsed));
+                end
+                % Send to CARDSFlow
+                card_in.visualize(modelObj);
                 % Wait until meeting the period 
                 elapsed = toc(freq_tic);
                 while elapsed < period
