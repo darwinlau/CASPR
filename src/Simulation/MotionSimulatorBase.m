@@ -452,25 +452,35 @@ classdef (Abstract) MotionSimulatorBase < SimulatorBase
         % CASPR-RViz interface. The model and the joint trajectory have to
         % be provided, together with the ROS_MASTER_URI and local ROS_IP
         % for the CASPR-RViz interface.
-        function plotRviz(modelObj, trajectory)
+        % As an optional argument, a trajectory of cable forces can also be
+        % used to visualize cable forces in RViz as arrows
+        function plotRviz(modelObj, joint_trajectory, force_trajectory)
+            % Assert the size of force_trajectory
+            if nargin > 2
+                CASPR_log.Assert(size(joint_trajectory.timeVector,2)==size(force_trajectory, 2), ...
+                    'Size of joint_trajectory and force trajectory do not match.');
+            end
             % Create CASPR-RViz Interface Object
             rviz_in = CASPRRVizInterface();
             % Set robot name rosparam
             rosparam('set','/robot_name',modelObj.robotName);
             rosparam('set','/deleteall',1);
             % Ensure the model mode is default            
-            modelObj.setModelMode(ModelModeType.DEFAULT);
+            modelObj.setModelMode(ModelModeType.DEFAULT);  
+            modelObj.bodyModel.occupied.dynamics = false;
+            modelObj.bodyModel.occupied.hessian = false;
+            modelObj.bodyModel.occupied.linearisation = false;
             % Use the period in trajectory
-            period = (trajectory.timeVector(2) - trajectory.timeVector(1));
+            period = (joint_trajectory.timeVector(2) - joint_trajectory.timeVector(1));
             % Plot initial pose and wait
-            modelObj.update(trajectory.q{1}, trajectory.q_dot{1}, trajectory.q_ddot{1}, ...
+            modelObj.update(joint_trajectory.q{1}, joint_trajectory.q_dot{1}, joint_trajectory.q_ddot{1}, ...
                 zeros(modelObj.numDofs,1));
             rviz_in.visualize(modelObj);
             pause(1);
-            for t = 1:length(trajectory.timeVector)
+            for t = 1:length(joint_trajectory.timeVector)
                 freq_tic = tic;
-                q = trajectory.q{t};
-                q_d = trajectory.q_dot{t};                
+                q = joint_trajectory.q{t};
+                q_d = joint_trajectory.q_dot{t};                
                 % Update cdpr
                 modelObj.update(q, q_d, zeros(modelObj.numDofs,1), zeros(modelObj.numDofs,1));
                 % Print info without affecting the frequency regulation
@@ -478,7 +488,14 @@ classdef (Abstract) MotionSimulatorBase < SimulatorBase
                     CASPR_log.Info(sprintf('t: %d Freq: %.2f', t, 1/elapsed));
                 end
                 % Send to RViz
-                rviz_in.visualize(modelObj);
+                if nargin > 2
+                    % Visualize also force                    
+                    rviz_in.visualize(modelObj, force_trajectory{t});
+                else
+                    % Only visualize kinematics
+                    rviz_in.visualize(modelObj);
+                end
+                
                 % Wait until meeting the period 
                 elapsed = toc(freq_tic);
                 while elapsed < period

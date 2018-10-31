@@ -23,6 +23,8 @@ classdef CASPRRVizInterface < CableActuatorInterfaceBase
         cable_msg;                  % Message type for cables
         ee_pub;                     % Publisher for end-effector
         ee_msg;                     % Message type for end-effector
+        f_pub;                      % Publisher for cable forces
+        f_msg;                      % Message type for cable forces
     end
    
     properties (Access = private, Constant = true)  
@@ -43,7 +45,10 @@ classdef CASPRRVizInterface < CableActuatorInterfaceBase
         cable_msg_type = 'std_msgs/Float32MultiArray';
         % End-effector pos
         ee_topic = '/ee';   
-        ee_msg_type = 'std_msgs/Float32MultiArray';          
+        ee_msg_type = 'std_msgs/Float32MultiArray';
+        % Cable Force
+        f_topic = '/force';
+        f_msg_type = 'std_msgs/Float32MultiArray';
     end
     
     methods (Access = public)
@@ -95,12 +100,17 @@ classdef CASPRRVizInterface < CableActuatorInterfaceBase
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % Visualization
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%         
-        function visualize(obj, cdpr)
+        function visualize(obj, cdpr, f)            
             obj.linkInfoSend(cdpr);
             obj.cableInfoSend(cdpr);
             if ~isempty(cdpr.y)
                 obj.eeInfoSend(cdpr);
-            end
+            end          
+            if nargin > 2
+                CASPR_log.Assert(cdpr.numCables==length(f), ...
+                    'Size of force vectors does not match the number of cables of the cdpr.');
+                obj.forceInfoSend(cdpr, f);
+            end           
         end
         
         function createStaticObj(obj, name, pos, quat)
@@ -163,6 +173,30 @@ classdef CASPRRVizInterface < CableActuatorInterfaceBase
             send(obj.ee_pub, obj.ee_msg);
         end
         
+        % publish cable force
+        function forceInfoSend(obj, cdpr, f)
+            % Create an array to hold the force for every segment          
+            f_seg = zeros(cdpr.cableModel.numSegments, 1);
+            seg_count = 1;
+            % Assign the corresponding force to the segment
+            for c = 1:cdpr.numCables
+                for s = 1:length(cdpr.cableModel.cables{c}.segments)
+                    % Only send a valid force mag for start and end segment
+                    if s == 1 || s == length(cdpr.cableModel.cables{c}.segments)
+                        f_seg(seg_count) = f(c);
+                    else
+                        % Otherwise, set it to -1 and CASPR-RViz will
+                        % handle this special case
+                        f_seg(seg_count) = -1;
+                    end
+                    seg_count = seg_count + 1;
+                end
+            end
+            % Send the message out
+            obj.f_msg.Data = f_seg;
+            send(obj.f_pub, obj.f_msg);
+        end
+        
         % terminating function
         function terminate(obj, n_cables)
             % send '-1's if wanting to terminate
@@ -208,6 +242,7 @@ classdef CASPRRVizInterface < CableActuatorInterfaceBase
                 [obj.link_tf_pub, obj.link_tf_msg] = rospublisher(obj.link_tf_topic, obj.link_tf_msg_type);
                 [obj.cable_pub, obj.cable_msg] = rospublisher(obj.cable_topic, obj.cable_msg_type);
                 [obj.ee_pub, obj.ee_msg] = rospublisher(obj.ee_topic, obj.ee_msg_type);
+                [obj.f_pub, obj.f_msg] = rospublisher(obj.f_topic, obj.f_msg_type);
             catch
                 CASPR_log.Error('Failed to create publisher!');
             end
