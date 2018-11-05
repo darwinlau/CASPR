@@ -119,14 +119,20 @@ classdef CARDSFlowInterface < CableActuatorInterfaceBase
         end
         
         % publish tendon state
-        function tendonStateSend(obj, cdpr)               
+        function tendonStateSend(obj, cdpr)  
+            cable_Names = cell(cdpr.cableModel.numCables,1);
+            n_Viapoints = zeros(cdpr.cableModel.numCables,1);           
+            
+            % No use for now            
+            f = zeros(cdpr.cableModel.numCables,1);
+            obj.tendon_state_msg.ViaPoints = [];
             % Cables
-            for c = 1:cdpr.cableModel.numCables
-                obj.tendon_state_msg.ViaPoints = [];
+            for c = 1:cdpr.cableModel.numCables                
                 % Cable name
                 cable_name = sprintf('cable_%d', c);
-                obj.tendon_state_msg.Name = cable_name; 
+                cable_Names{c} = cable_name;                 
                 this_cable = cdpr.cableModel.cables{c};
+                n_Viapoints(c) = 2*length(this_cable.segments);                 
                 % Load all viapoints to cable_vec
                 for s = 1:length(this_cable.segments)
                     this_segment = this_cable.segments{s};     
@@ -144,11 +150,15 @@ classdef CARDSFlowInterface < CableActuatorInterfaceBase
                     viapoints_msg_2.Y = via_point_2(2);
                     viapoints_msg_2.Z = via_point_2(3);
                     obj.tendon_state_msg.ViaPoints = [obj.tendon_state_msg.ViaPoints; viapoints_msg_2];
-                end     
-                               
-                % Publish
-                send(obj.tendon_state_pub, obj.tendon_state_msg);
-            end
+                end                     
+            end       
+            obj.tendon_state_msg.Name = cable_Names;
+            obj.tendon_state_msg.NumberOfViapoints = n_Viapoints;
+            obj.tendon_state_msg.L = cdpr.cableLengths;
+            obj.tendon_state_msg.Force = f;
+            obj.tendon_state_msg.Ld = cdpr.cableLengthsDot;            
+            % Publish
+            send(obj.tendon_state_pub, obj.tendon_state_msg);
         end
         
         % publish end-effector
