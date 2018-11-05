@@ -30,20 +30,25 @@
                     <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
                 </point>
                 <point time="1.0">
-                    <q>5.9 7.5 4.3 0.0 0.5 0.0</q>
+                    <q>5.9 7.5 4.3 0.0 0.3 0.0</q>
+                    <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
+                    <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
+                </point>                   
+                <point time="1.0">
+                    <q>4.9 7.5 4.3 0.0 0.0 0.0</q>
                     <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
                     <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
                 </point>
                 <point time="1.0">
-                    <q>5.9 7.5 4.3 0.0 0.0 0.5</q>
+                    <q>5.9 5.5 4.3 0.0 0.0 0.0</q>
                     <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
                     <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
                 </point>
                 <point time="1.0">
-                    <q>5.9 7.5 4.3 0.0 0.0 0.0</q>
+                    <q>6.9 7.5 4.3 0.0 0.0 0.0</q>
                     <q_dot>0.0 0.0 0.0 0.0 0.0 0.0</q_dot>
                     <q_ddot>0.0 0.0 0.0 0.0 0.0 0.0</q_ddot>
-                </point>
+                </point>                                
             </points>
         </quintic_spline_trajectory>
     </joint_trajectories>

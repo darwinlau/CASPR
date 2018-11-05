@@ -360,7 +360,7 @@ function Rviz_pushbutton_Callback(~, ~, handles) %#ok<DEFNU>
     if(isempty(sim))
         warning('No simulator has been generated. Please press run first'); %#ok<WNTAG>
     else
-        MotionSimulatorBase.plotRviz(modObj, sim.trajectory);
+        MotionSimulatorBase.plotRviz(modObj, sim.trajectory, sim.cableForces);
     end
 end
 
