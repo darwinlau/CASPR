@@ -56,7 +56,7 @@ classdef IDSolverQuadProg < IDSolverBase
                 % Basic version that uses MATLAB's solver
                 case ID_QP_SolverType.MATLAB
                     if(isempty(obj.options))
-                        obj.options = optimoptions('quadprog', 'Display', 'off', 'MaxIter', 100);
+                        obj.options = optimoptions('quadprog', 'StepTolerance', 1e-17, 'Display', 'off', 'MaxIter', 100);
                     end
                     [actuation_forces, id_exit_type] = id_qp_matlab(obj.objective.A, obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);                    
                 % Basic version that uses MATLAB's solver
