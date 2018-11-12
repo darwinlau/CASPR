@@ -32,7 +32,7 @@
                 </point>
             </points>
         </quintic_spline_trajectory>
-        <quintic_spline_trajectory id="jointspace_traj_2" time_definition="relative" time_step="0.005">
+        <quintic_spline_trajectory id="jointspace_traj_2" time_definition="relative" time_step="0.1">
             <!--Simple left and right trajectory-->
             <points>
                 <point>
@@ -72,7 +72,7 @@
                 </point>
             </points>
         </quintic_spline_trajectory>
-        <quintic_spline_trajectory id="jointspace_traj_3" time_definition="relative" time_step="0.005">
+        <quintic_spline_trajectory id="jointspace_traj_3" time_definition="relative" time_step="0.1">
             <!--Simple left and right trajectory-->
             <points>
                 <point>

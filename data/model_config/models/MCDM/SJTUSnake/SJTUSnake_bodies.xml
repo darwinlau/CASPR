@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE bodies_system SYSTEM "../../../templates/bodies.dtd">
 <bodies_system>
-    <links display_range="-0.5 0.5 -0.5 0.5 -0.5 0.5" view_angle="45 45">
+    <links display_range="-0.5 0.5 -0.01 1.5 -0.5 0.5" view_angle="45 45">
       <link_rigid num="1" name="link 1">
-        <joint type="U_XZ" q_initial="0.0 0.0" q_min="-0.35 -0.35" q_max="0.35 0.35"/>
+        <joint type="U_XZ" q_initial="0.6 0.0" q_min="-0.35 -0.35" q_max="0.35 0.35"/>
         <physical>
           <mass>0.061973305</mass>
           <com_location>-6.31098e-08 0.0477162 2.0009e-09</com_location>
@@ -23,7 +23,7 @@
         </parent>
       </link_rigid>
       <link_rigid num="2" name="link 2">
-        <joint type="U_XZ" q_initial="0.0 0.0" q_min="-0.35 -0.35" q_max="0.35 0.35"/>
+        <joint type="U_XZ" q_initial="-0.6 0.0" q_min="-0.35 -0.35" q_max="0.35 0.35"/>
         <physical>
           <mass>0.061973305</mass>
           <com_location>-6.31098e-08 0.0477162 2.0009e-09</com_location>
@@ -43,7 +43,7 @@
         </parent>
       </link_rigid>
       <link_rigid num="3" name="link 3">
-        <joint type="U_XZ" q_initial="0.0 0.0" q_min="-0.35 -0.35" q_max="0.35 0.35"/>
+        <joint type="U_XZ" q_initial="-0.6 0.0" q_min="-0.35 -0.35" q_max="0.35 0.35"/>
         <physical>
           <mass>0.061973305</mass>
           <com_location>-6.31098e-08 0.0477162 2.0009e-09</com_location>
@@ -83,7 +83,7 @@
         </parent>
       </link_rigid>
       <link_rigid num="5" name="link 5">
-        <joint type="U_XZ" q_initial="0.0 0.0" q_min="-0.35 -0.35" q_max="0.35 0.35"/>
+        <joint type="U_XZ" q_initial="0.6 0.0" q_min="-0.35 -0.35" q_max="0.35 0.35"/>
         <physical>
           <mass>0.061973305</mass>
           <com_location>-6.31098e-08 0.0477162 2.0009e-09</com_location>
@@ -103,7 +103,7 @@
         </parent>
       </link_rigid>
       <link_rigid num="6" name="link 6">
-        <joint type="U_XZ" q_initial="0.0 0.0" q_min="-0.35 -0.35" q_max="0.35 0.35"/>
+        <joint type="U_XZ" q_initial="0.6 0.0" q_min="-0.35 -0.35" q_max="0.35 0.35"/>
         <physical>
           <mass>0.061973305</mass>
           <com_location>-6.31098e-08 0.0477162 2.0009e-09</com_location>
@@ -143,7 +143,7 @@
         </parent>
       </link_rigid>
       <link_rigid num="8" name="link 8">
-        <joint type="U_XZ" q_initial="0.0 0.0" q_min="-0.35 -0.35" q_max="0.35 0.35"/>
+        <joint type="U_XZ" q_initial="-0.6 0.0" q_min="-0.35 -0.35" q_max="0.35 0.35"/>
         <physical>
           <mass>0.061973305</mass>
           <com_location>-6.31098e-08 0.0477162 2.0009e-09</com_location>
@@ -163,7 +163,7 @@
         </parent>
       </link_rigid>
       <link_rigid num="9" name="link 9">
-        <joint type="U_XZ" q_initial="0.0 0.0" q_min="-0.35 -0.35" q_max="0.35 0.35"/>
+        <joint type="U_XZ" q_initial="-0.6 0.0" q_min="-0.35 -0.35" q_max="0.35 0.35"/>
         <physical>
           <mass>0.061973305</mass>
           <com_location>-6.31098e-08 0.0477162 2.0009e-09</com_location>
@@ -203,7 +203,7 @@
         </parent>
       </link_rigid>
       <link_rigid num="11" name="link 11">
-        <joint type="U_XZ" q_initial="0.0 0.0" q_min="-0.35 -0.35" q_max="0.35 0.35"/>
+        <joint type="U_XZ" q_initial="0.6 0.0" q_min="-0.35 -0.35" q_max="0.35 0.35"/>
         <physical>
           <mass>0.061973305</mass>
           <com_location>-6.31098e-08 0.0477162 2.0009e-09</com_location>
@@ -223,7 +223,7 @@
         </parent>
       </link_rigid>
       <link_rigid num="12" name="link 12">
-        <joint type="U_XZ" q_initial="0.0 0.0" q_min="-0.35 -0.35" q_max="0.35 0.35"/>
+        <joint type="U_XZ" q_initial="0.6 0.0" q_min="-0.35 -0.35" q_max="0.35 0.35"/>
         <physical>
           <mass>0.061973305</mass>
           <com_location>-6.31098e-08 0.0477162 2.0009e-09</com_location>
@@ -282,6 +282,33 @@
                 <axes active_axes="abg"/>
             </orientation_euler_xyz>
         </operational_set>    
+        
+        
+        <operational_set id="tip_position_x">
+            <position marker_id="1" name="tip_position_x">
+                <link>12</link>
+                <offset>0 0.09921 0</offset>
+                <axes active_axes="x"/>
+            </position>
+        </operational_set>
+        
+        
+        <operational_set id="tip_position_y">
+            <position marker_id="1" name="tip_position_y">
+                <link>12</link>
+                <offset>0 0.09921 0</offset>
+                <axes active_axes="y"/>
+            </position>
+        </operational_set>
+        
+        
+        <operational_set id="tip_position_z">
+            <position marker_id="1" name="tip_position_z">
+                <link>12</link>
+                <offset>0 0.09921 0</offset>
+                <axes active_axes="z"/>
+            </position>
+        </operational_set>
         
     </operational_spaces>
 </bodies_system>
