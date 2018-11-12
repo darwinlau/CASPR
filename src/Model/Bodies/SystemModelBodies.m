@@ -272,8 +272,7 @@ classdef SystemModelBodies < handle
                         zeros(3,3) R_ka];                     
                     obj.P(6*k-5:6*k, 6*a-5:6*a) = Pak;                    
                 end
-            end        
-            
+            end
             % W = P*S              
             obj.W = obj.P*obj.S;                      
        

@@ -169,7 +169,7 @@ classdef (Abstract) JointBase < handle
                 case JointType.U_XY
                     j = UniversalXY;
                 case JointType.U_YZ
-                    j = UniversalXY;
+                    j = UniversalYZ;
                 case JointType.U_XZ
                     j = UniversalXZ;
                 case JointType.P_X
