@@ -289,7 +289,11 @@ function missing_term_error = model_update_button_Callback(~, ~, handles) %#ok<D
     % hObject    handle to model_update_button (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
-    model_popup_update(handles);
+    try 
+        model_popup_update(handles, get(handles.model_popup,'Value'));
+    catch
+        model_popup_update(handles);
+    end
     % Update the cable set list
     % Generate the model_config object
     contents = cellstr(get(handles.model_popup,'String'));
@@ -357,14 +361,18 @@ function generate_model_object(handles)
     format_q_table(modObj.numDofs,handles.qtable,modObj.q');
 end
 
-function model_popup_update(handles)
+function model_popup_update(handles, model_popup_value)
     % Determine the state of the toggle
     if(CASPR_configuration.LoadDevModelConfig())
         e_list_str      =   sort(ModelConfigManager.GetDevModelConfigListNames());
     else
     	e_list_str      =   sort(ModelConfigManager.GetModelConfigListNames());
     end
-    set(handles.model_popup, 'Value', 1);
+    if nargin > 1
+        set(handles.model_popup, 'Value', model_popup_value);
+    else
+        set(handles.model_popup, 'Value', 1);
+    end
     set(handles.model_popup, 'String', e_list_str);
 end
 
