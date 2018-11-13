@@ -19,7 +19,7 @@ classdef (Abstract) JointBase < handle
     
     properties
         tau                 % Actuator effort for joint (if actuated)
-        axis                % Rotation axis for revolute joints
+        axis                % Rotation axis for revolute joints / Translation axis for prismatic joints
     end
    
     properties (SetAccess = private)
@@ -176,6 +176,10 @@ classdef (Abstract) JointBase < handle
                     j = PrismaticX;
                 case JointType.P_XY
                     j = PrismaticXY;
+                case JointType.P_AXIS
+                    j = PrismaticAxis;
+                    CASPR_log.Assert(nargin >= 6, 'Translation Axis must be defined.');
+                    j.axis = axis;
                 case JointType.PLANAR_XY
                     j = PlanarXY;
                 case JointType.PLANAR_YZ
@@ -247,9 +251,11 @@ classdef (Abstract) JointBase < handle
             
             % Rotation axis 
             if (~isempty(xmlObj.getAttribute('axis') == ''))
-                CASPR_log.Assert(jointType==JointType.R_AXIS,'Axis definition is only allowed for R_AXIS joints.'); 
+                CASPR_log.Assert(jointType==JointType.R_AXIS || jointType==JointType.P_AXIS, ...
+                    'Axis definition is only allowed for R_AXIS/P_AXIS joints.'); 
                 axis = XmlOperations.StringToVector(char(xmlObj.getAttribute('axis')));
                 CASPR_log.Assert(length(axis)==3,'Dimension of rotation axis must be 3.'); 
+                CASPR_log.Assert(norm(axis)~=0,'Axis must not be a zero vector.');
                 j = JointBase.CreateJoint(jointType, q_initial, q_min, q_max, isActuated, axis);
             else
                 j = JointBase.CreateJoint(jointType, q_initial, q_min, q_max, isActuated);
