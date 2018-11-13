@@ -34,7 +34,7 @@ function varargout = CASPR_GUI(varargin)
 
     % Edit the above text to modify the response to help CASPR_GUI
 
-    % Last Modified by GUIDE v2.5 15-Oct-2018 18:19:56
+    % Last Modified by GUIDE v2.5 13-Nov-2018 13:01:30
 
     % Begin initialization code - DO NOT EDIT
     warning('off','MATLAB:uitabgroup:OldVersion')
@@ -289,7 +289,7 @@ function missing_term_error = model_update_button_Callback(~, ~, handles) %#ok<D
     % hObject    handle to model_update_button (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
-    
+    model_popup_update(handles);
     % Update the cable set list
     % Generate the model_config object
     contents = cellstr(get(handles.model_popup,'String'));
@@ -460,4 +460,9 @@ function Rviz_pushbutton_Callback(~,~, handles)
     for i = 1:500
         rviz_in.visualize(modObj);
     end
+end
+
+% --- Executes on button press in model_manager_button.
+function model_manager_button_Callback(~, ~, ~) %#ok<DEFNU>
+    CASPR_Model_Manager;
 end

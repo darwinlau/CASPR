@@ -60,7 +60,7 @@ classdef SDF2model < handle
             obj.f_max = f_max;
             
             % Whether the rotation matrix is needed or not
-            if nargin > 1                
+            if nargin > 5               
                 obj.isRotate = isRotate;            
             else               
                 obj.isRotate = false;
