@@ -3,22 +3,18 @@
 % Author        : Dominic Chan
 % Created       : 2018
 % Description    :
-%    This class is a class for the convertion from sdf files to the model
-%    files and cables files used in CASPR
+%    This class is a class for the convertion from SDF files to the model
+%    files used in CASPR
 % 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                       WARNING                       %
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% The current version only supports kinematic chains with ONLY revolute
-% joints and no branches. Spatial objects with floating joints are also not
-% supported.
-% 
-% ********          VERY IMPORTANT           **********
+% The current version only supports kinematic chains with only revolute and
+% prismatic joints. (NO spatial joints/free joints) Fixed joints are
+% ignored.
 %
-% Before converting, please make sure the sequence of the links and joints
-% in the SDF files are placed in the same way as the kinematic chain.
-%
-% ********          VERY IMPORTANT           **********
+% Please make sure every link except the base, must only have one parent
+% (no. of links = no. of joints + 1)
 
 classdef SDF2model < handle  
     
@@ -76,6 +72,9 @@ classdef SDF2model < handle
             obj.createCablesXml();
             % Create traj.xml
             obj.createTrajXml();
+            
+            % Finish message
+            obj.finishMessage();
         end
         
         % set model folder
@@ -106,10 +105,7 @@ classdef SDF2model < handle
             
             % Find model name            
             obj.model_name = obj.findAttribute(model_str, 'model', 'name');             
-            
-            % Identify joints
-            obj.identifyJoints(model_str);
-            
+   
             % Identify links
             obj.identifyLinks(model_str);          
         end
@@ -217,46 +213,62 @@ classdef SDF2model < handle
                 text = [text; convertCharsToStrings(text_char_array(text_start_idx(1)+1:text_end_idx(1)-1))]; 
             end            
         end  
-        
-        % Identify joints
-        function identifyJoints(obj, str)
-            obj.joints.Names = unique(obj.findAttribute(str, 'joint', 'name'), 'stable');            
-            obj.joints.n_joints = length(obj.joints.Names);
+                
+        % Identify links
+        function identifyLinks(obj, str)
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+            % Basic info - Joints
+            % - Parents & Children
+            parents = obj.findText(str, 'parent');            
+            children = obj.findText(str, 'child');    
             
-            pose_vec = obj.findText(str, 'pose');
-            joint_pos = cell(1, obj.joints.n_joints);
+            obj.joints.Names = unique(obj.findAttribute(str, 'joint', 'name'), 'stable');   
+            obj.joints.Types = obj.findAttribute(str,'joint','type');
+            original_n_joints = length(obj.joints.Names);
+            % Discard all fixed joints            
+            fixed_joint_logic = ~or(strcmp(obj.joints.Types,'revolute'), ...
+                strcmp(obj.joints.Types,'prismatic'));
+            obj.joints.Names(fixed_joint_logic) = [];
+            obj.joints.Types(fixed_joint_logic) = [];            
+            obj.joints.n_joints = length(obj.joints.Names);   
+            obj.joints.n_fixed_joints = original_n_joints - obj.joints.n_joints;
             
+            % Record fixed links and discard later
+            obj.links.fixed_links = children(fixed_joint_logic);
+            obj.links.n_links = obj.joints.n_joints+1;
+            parents(fixed_joint_logic) = [];
+            children(fixed_joint_logic) = [];    
+            obj.joints.parents = parents;
+            obj.joints.children = children;            
+            
+            % Joint infos
+            % - Filter out valid joint poses
+            pose_vec = obj.findText(str, 'pose');            
+            joint_pose_vec = pose_vec(obj.links.n_links+...
+                obj.joints.n_fixed_joints+1 : obj.links.n_links+obj.joints.n_joints+2*obj.joints.n_fixed_joints);
+            joint_pose_vec(fixed_joint_logic) = [];
+            joint_pos = cell(1, obj.joints.n_joints);            
+            % - Other joint infos
             axes = cell(1, obj.joints.n_joints);
-            axes_vec = obj.findText(str, 'xyz');
-            
+            axes_vec = obj.findText(str, 'xyz');            
             q_min = cell(1, obj.joints.n_joints);
             q_min_vec = obj.findText(str, 'lower');
             q_max = cell(1, obj.joints.n_joints);
             q_max_vec = obj.findText(str, 'upper');
-          
-            for i=1:obj.joints.n_joints
-                child_com = XmlOperations.StringToVector(pose_vec(1+i));
-                joint_offset = XmlOperations.StringToVector(pose_vec(obj.joints.n_joints+1+i));
-                joint_pos{i} = child_com + joint_offset;
-                axes{i} = XmlOperations.StringToVector(axes_vec(i));
-                q_min{i} = XmlOperations.StringToVector(q_min_vec(i));
-                q_max{i} = XmlOperations.StringToVector(q_max_vec(i));
-            end
-            obj.joints.Position = joint_pos;
-            obj.joints.Axes = axes;
-            obj.joints.q_min = q_min;
-            obj.joints.q_max = q_max;
-        end
-        
-        % Identify links
-        function identifyLinks(obj, str)
-            % Basic info
-            parents = obj.findText(str, 'parent');
-            children = obj.findText(str, 'child');            
-            obj.links.Names = union(parents, children, 'stable');
-            obj.links.Names = obj.links.Names(2:end);
-            obj.links.n_links = length(obj.links.Names);
-            obj.links.Index = 1:1:obj.links.n_links;
+            
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+            % Basic Info - Links
+            % - COM info
+            com_vec = pose_vec(1:obj.links.n_links+obj.joints.n_fixed_joints);
+            obj.links.Names = unique(obj.findAttribute(str,'link','name'),'stable');
+            % Filter out fixed links
+            for i = 1:length(obj.links.fixed_links)
+                fixed_link_index = find(obj.links.Names==obj.links.fixed_links(i));
+                obj.links.Names(fixed_link_index) = [];
+                com_vec(fixed_link_index) = [];
+            end            
+            obj.links.Index = -1*ones(obj.links.n_links,1);
+            obj.links.parentIndex = zeros(obj.links.n_links,1);  
             
             % Mass and Inertia
             mass = cell(1, obj.links.n_links);
@@ -272,35 +284,145 @@ classdef SDF2model < handle
             % Locations
             com_pos = cell(1, obj.links.n_links);
             end_pos = cell(1, obj.links.n_links);
-            parent_pos = cell(1, obj.links.n_links);
-            com_vec = obj.findText(str, 'pose');
+            parent_pos = cell(1, obj.links.n_links); 
             
-            % Loop through the links to get info
-            for i=1:obj.links.n_links
-                mass{i} = XmlOperations.StringToVector(mass_vec(i+1));
-                inertia{i} = [XmlOperations.StringToVector(ixx_vec(i+1));
-                    XmlOperations.StringToVector(iyy_vec(i+1));
-                    XmlOperations.StringToVector(izz_vec(i+1));
-                    XmlOperations.StringToVector(ixy_vec(i+1));
-                    XmlOperations.StringToVector(ixz_vec(i+1));
-                    XmlOperations.StringToVector(iyz_vec(i+1))];
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%            
+            % Define link num by kinematic tree
+            isFirst = 1;
+            link_count = 0;
+            while ~isempty(parents) 
+                if isFirst
+                    % Fixed joint
+                    roots = setdiff(parents, children);
+                    isFirst = 0;
+                else
+                    % Find the set difference, which means the root of tree
+                    roots = setdiff(parents, children);                    
+                end
+                root = roots(1);
+                % Define link index
+                obj.links.Index(obj.links.Names == root) = link_count;
                 
-                abs_com = XmlOperations.StringToVector(com_vec(i+1));
-                com_pos{i} = abs_com - obj.joints.Position{i};
-                if i ~= obj.links.n_links
-                    end_pos{i} = obj.joints.Position{i+1} - obj.joints.Position{i};
-                else
-                    end_pos{i} = 2*com_pos{i};
+                % Update parent indices
+                root_logic = parents == root;                
+                children_names = children(root_logic);                   
+                for j = 1:length(children_names)          
+                    children_link_index = find(obj.links.Names == children_names(j));
+                    obj.links.parentIndex(children_link_index) = link_count;
                 end
-                if i ~= 1
-                    % Use the previous end position as the parent
-                    parent_pos{i} = end_pos{i-1};
-                else
-                    fixed_com = XmlOperations.StringToVector(com_vec(1));
-                    parent_pos{i} = obj.joints.Position{1} - fixed_com;
-                end
+                                
+                % Update array
+                parents(root_logic) = [];
+                children(root_logic) = [];
+                link_count = link_count + 1;              
             end
             
+            % Fill up smallest children
+            children_count = max(obj.links.Index) + 1;
+            for i = 1:length(obj.links.Index)
+                if obj.links.Index(i) == -1
+                    obj.links.Index(i) = children_count;
+                    children_count = children_count + 1;
+                end                
+            end            
+            
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                        
+            % Looping through links by link_num          
+            link_num = 1;
+            % 1. Loop through the links to get info (joint)
+            for i=1:obj.links.n_links - 1              
+                % Find link corresponding to link_num
+                link_index = find(obj.links.Index == link_num);                
+                current_link_name = obj.links.Names(link_index);
+                current_parent_name = obj.links.Names(obj.links.Index == obj.links.parentIndex(link_index));                
+                % Find corresponding joint 
+                parent_logic = obj.joints.parents == current_parent_name;
+                children_logic = obj.joints.children == current_link_name;
+                joint_index = find(and(parent_logic, children_logic) == 1);
+                    
+                % Find corresponding joint info                
+                child_com = XmlOperations.StringToVector(com_vec(link_index));
+                joint_offset = XmlOperations.StringToVector(joint_pose_vec(joint_index));
+                joint_pos{joint_index} = child_com + joint_offset;
+                axes{joint_index} = XmlOperations.StringToVector(axes_vec(joint_index));
+                q_min{joint_index} = XmlOperations.StringToVector(q_min_vec(joint_index));
+                q_max{joint_index} = XmlOperations.StringToVector(q_max_vec(joint_index));
+                                
+                % Find corresponding pose info
+                mass{link_index} = XmlOperations.StringToVector(mass_vec(link_index));
+                inertia{link_index} = [XmlOperations.StringToVector(ixx_vec(link_index));
+                    XmlOperations.StringToVector(iyy_vec(link_index));
+                    XmlOperations.StringToVector(izz_vec(link_index));
+                    XmlOperations.StringToVector(ixy_vec(link_index));
+                    XmlOperations.StringToVector(ixz_vec(link_index));
+                    XmlOperations.StringToVector(iyz_vec(link_index))];                
+                
+                link_num = link_num + 1;
+            end    
+            obj.joints.Position = joint_pos;
+            obj.joints.Axes = axes;
+            obj.joints.q_min = q_min;
+            obj.joints.q_max = q_max;
+            
+            % 2. Loop through the links based on joint positions
+            link_num = 1;
+            % Loop through the links to get info
+            for i=1:obj.links.n_links - 1                
+                % Find link corresponding to link_num
+                link_index = find(obj.links.Index == link_num);                
+                current_link_name = obj.links.Names(link_index);
+                current_parent_name = obj.links.Names(obj.links.Index == obj.links.parentIndex(link_index));                
+                % Find corresponding joint 
+                parent_logic = obj.joints.parents == current_parent_name;
+                children_logic = obj.joints.children == current_link_name;
+                joint_index = find(and(parent_logic, children_logic) == 1);
+                
+                % Get the absolute COM position 
+                abs_com = XmlOperations.StringToVector(com_vec(link_index));                 
+                com_pos{link_index} = abs_com - obj.joints.Position{joint_index};
+                children_link_index = find(obj.joints.parents==current_link_name);
+                
+                % Select the joint position of one of the children as the
+                % end_position
+                % If no children, then double the COM position to fake an
+                % ending point
+                if ~isempty(children_link_index)     
+                    children_joint_index = find(obj.joints.children == obj.joints.children(children_link_index(1)),1);
+                    end_pos{link_index} = obj.joints.Position{children_joint_index} - obj.joints.Position{joint_index};
+                else
+                    end_pos{link_index} = 2*com_pos{link_index};
+                end
+                
+                link_num = link_num + 1;
+            end
+            
+            % 3. Loop through the links to define the frame position with
+            % respect to the parent link
+            base_i = find(cellfun('isempty', end_pos));
+            for i = 1:obj.links.n_links                 
+                parent_num = obj.links.parentIndex(i);
+                if i ~= base_i % Not the base
+                    current_link_name = obj.links.Names(i);
+                    current_parent_name = obj.links.Names(obj.links.Index == obj.links.parentIndex(i));                
+                    % Find corresponding joint 
+                    parent_logic = obj.joints.parents == current_parent_name;
+                    children_logic = obj.joints.children == current_link_name;
+                    joint_index = find(and(parent_logic, children_logic) == 1);
+                    if parent_num == 0 % Parent is base                        
+                        base_com = XmlOperations.StringToVector(com_vec(base_i));
+                        parent_pos{i} = obj.joints.Position{joint_index} - base_com;
+                    else % Otherwise
+                        % Find parent's joint position
+                        grand_parent_name = obj.joints.parents(obj.joints.children==current_parent_name);
+                        grand_parent_logic = obj.joints.parents == grand_parent_name;
+                        parent_child_logic = obj.joints.children == current_parent_name;
+                        parent_joint_index = find(and(parent_child_logic, grand_parent_logic) == 1);
+                        parent_pos{i} = obj.joints.Position{joint_index} - obj.joints.Position{parent_joint_index};
+                    end      
+                end                
+            end
+            
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%      
             % End-effector Position
             % Check if ee pos defined in the sdf
             ee_relative_pos = obj.findText(str, 'endEffector');
@@ -312,11 +434,13 @@ classdef SDF2model < handle
                 ee_com = ee_com(1:size(ee_relative_pos,1));
                 obj.links.ee = ee_com + ee_relative_pos;
             else
-                % Default ee
-                ee_pos = end_pos{end};
+                % Default define ee to smallest child
+                smallest_child_logic = obj.links.Index == max(obj.links.Index);
+                ee_pos = end_pos{smallest_child_logic};
                 obj.links.ee = ee_pos(1:3);
             end
             
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%      
             % Save to struct
             obj.links.Mass = mass;
             obj.links.Inertia = inertia;
@@ -330,6 +454,7 @@ classdef SDF2model < handle
             % Number of cables
             obj.cables.Names = obj.findAttribute(str, 'myoMuscle', 'name');
             obj.cables.n_cables = length(obj.cables.Names);
+            obj.cables.n_invalid_cables = 0;
             
             % Find the starting and ending positions of the myomuscle
             % element
@@ -344,18 +469,22 @@ classdef SDF2model < handle
                 cable_str = str(starting_row:ending_row,:);
                 [start_link_idx, end_link_idx] = obj.findElement(cable_str, 'link');
                 
+                if length(start_link_idx) <= 1
+                    obj.cables.n_invalid_cables = obj.cables.n_invalid_cables + 1;
+                    continue;
+                end
+                
                 current_cable = cell(1,0);
                 % Loop through each link
                 for j=1:length(start_link_idx)                    
                     starting_link_row = mod(start_link_idx(j), size(cable_str,1));
                     ending_link_row = mod(end_link_idx(j), size(cable_str,1));
                     link_str = cable_str(starting_link_row:ending_link_row,:);
-                    % Name
+                    % Link num from name
                     link_name = obj.findAttribute(link_str, 'link', 'name'); 
-                    link_num = find(contains(obj.links.Names, link_name));
-                    if isempty(link_num)
-                        link_num = 0;
-                    end
+                    link_index = find(obj.links.Names==link_name);
+                    link_num = obj.links.Index(link_index);
+                    
                     % Via points
                     via_points_for_link = obj.findText(link_str, 'viaPoint');
                     % Add via points to cable via points
@@ -393,22 +522,37 @@ classdef SDF2model < handle
                 R = eye(3);
             end     
             
-            for i=1:obj.links.n_links
+            link_num = 1;
+            for i=1:obj.links.n_links - 1
+                % Find link corresponding to link_num
+                link_index = find(obj.links.Index == link_num);
+                % Find joint index
+                current_link_name = obj.links.Names(link_index);
+                current_parent_name = obj.links.Names(obj.links.Index == obj.links.parentIndex(link_index));                
+                % Find corresponding joint                 
+                parent_logic = obj.joints.parents == current_parent_name;
+                children_logic = obj.joints.children == current_link_name;
+                joint_index = find(and(parent_logic, children_logic) == 1);
+                                
                 % Basic info
                 current_link_node = docNode.createElement('link_rigid');
-                current_link_node.setAttribute('num', num2str(obj.links.Index(i)));
-                current_link_node.setAttribute('name', obj.links.Names(i));
+                current_link_node.setAttribute('num', num2str(link_num));
+                current_link_node.setAttribute('name', obj.links.Names(link_index));
                 links_node.appendChild(current_link_node);
                 
                 % Joint
                 current_joint_node = docNode.createElement('joint');
-                current_joint_node.setAttribute('type', 'R_AXIS');
+                if strcmp(obj.joints.Types{joint_index}, 'revolute')
+                    current_joint_node.setAttribute('type', 'R_AXIS');
+                elseif strcmp(obj.joints.Types{joint_index},'prismatic')
+                    current_joint_node.setAttribute('type', 'P_AXIS');
+                end                
                 current_joint_node.setAttribute('q_initial', '0.0');
-                q_min_vec = cell2mat(obj.joints.q_min(i));
+                q_min_vec = cell2mat(obj.joints.q_min(joint_index));
                 current_joint_node.setAttribute('q_min', obj.vec2chr(q_min_vec));
-                q_max_vec = cell2mat(obj.joints.q_max(i));
+                q_max_vec = cell2mat(obj.joints.q_max(joint_index));
                 current_joint_node.setAttribute('q_max', obj.vec2chr(q_max_vec));
-                axis_vec = cell2mat(obj.joints.Axes(i)); 
+                axis_vec = cell2mat(obj.joints.Axes(joint_index)); 
                 current_joint_node.setAttribute('axis', obj.vec2chr(R*axis_vec));
                 current_link_node.appendChild(current_joint_node);
                 
@@ -418,19 +562,19 @@ classdef SDF2model < handle
                 
                 % Mass
                 current_mass_node = docNode.createElement('mass');                
-                mass_vec = cell2mat(obj.links.Mass(i));
+                mass_vec = cell2mat(obj.links.Mass(link_index));
                 current_mass_node.appendChild(docNode.createTextNode(obj.vec2chr(mass_vec)));
                 current_physical_node.appendChild(current_mass_node);
                 
                 % COM
                 current_com_node = docNode.createElement('com_location');
-                com_vec = cell2mat(obj.links.com(i));
+                com_vec = cell2mat(obj.links.com(link_index));
                 current_com_node.appendChild(docNode.createTextNode(obj.vec2chr(R*com_vec(1:3))));
                 current_physical_node.appendChild(current_com_node);
                 
                 % END
                 current_end_node = docNode.createElement('end_location');
-                end_vec = cell2mat(obj.links.end(i));
+                end_vec = cell2mat(obj.links.end(link_index));
                 current_end_node.appendChild(docNode.createTextNode(obj.vec2chr(R*end_vec(1:3))));
                 current_physical_node.appendChild(current_end_node);
                 
@@ -439,7 +583,7 @@ classdef SDF2model < handle
                 current_inertia_node.setAttribute('ref', 'com');
                 current_physical_node.appendChild(current_inertia_node);
                 
-                inertia_vec = cell2mat(obj.links.Inertia(i));                
+                inertia_vec = cell2mat(obj.links.Inertia(link_index));                
                 ixx_node = docNode.createElement('Ixx');                
                 ixx_node.appendChild(docNode.createTextNode(obj.vec2chr(inertia_vec(1))));
                 current_inertia_node.appendChild(ixx_node);
@@ -464,13 +608,16 @@ classdef SDF2model < handle
                 current_link_node.appendChild(current_parent_node);
                 % parent num
                 current_parent_num_node = docNode.createElement('num');                
-                current_parent_num_node.appendChild(docNode.createTextNode(num2str(i-1)));
+                current_parent_num_node.appendChild(docNode.createTextNode(num2str(obj.links.parentIndex(link_index))));
                 current_parent_node.appendChild(current_parent_num_node);
                 % location
                 current_parent_location_node = docNode.createElement('location');    
-                location_vec = cell2mat(obj.links.parent(i));
+                location_vec = cell2mat(obj.links.parent(link_index));
                 current_parent_location_node.appendChild(docNode.createTextNode(obj.vec2chr(R*location_vec(1:3))));
                 current_parent_node.appendChild(current_parent_location_node);
+                
+                % Update link_num
+                link_num = link_num + 1;
             end       
             
             % Operational space
@@ -486,8 +633,9 @@ classdef SDF2model < handle
             position_node.setAttribute('name', 'ee_default');
             operational_set_node.appendChild(position_node);
             % link
-            link_node = docNode.createElement('link');               
-            link_node.appendChild(docNode.createTextNode(obj.vec2chr(obj.links.n_links)));
+            link_node = docNode.createElement('link');           
+            smallest_child_index = obj.links.Index(obj.links.Index == max(obj.links.Index));
+            link_node.appendChild(docNode.createTextNode(obj.vec2chr(smallest_child_index)));
             position_node.appendChild(link_node);
             % offset
             offset_node = docNode.createElement('offset');       
@@ -500,7 +648,6 @@ classdef SDF2model < handle
             
             filename = sprintf('%s_bodies.xml', obj.model_name);
             xmlwrite(sprintf('%s/%s', obj.model_folder, filename), docNode);
-%             type(sprintf('%s/%s', obj.model_folder, filename));
         end
         
         % Create cables xml
@@ -525,7 +672,7 @@ classdef SDF2model < handle
             end   
             
             % Each cables
-            for i = 1:obj.cables.n_cables   
+            for i = 1:obj.cables.n_cables - obj.cables.n_invalid_cables  
                 % Basic info
                 cable_ideal_node = docNode.createElement('cable_ideal');
                 cable_ideal_node.setAttribute('attachment_reference', 'com');
@@ -564,8 +711,7 @@ classdef SDF2model < handle
             end                
             
             filename = sprintf('%s_cables.xml', obj.model_name);
-            xmlwrite(sprintf('%s/%s', obj.model_folder, filename), docNode);
-%             type(sprintf('%s/%s', obj.model_folder, filename));            
+            xmlwrite(sprintf('%s/%s', obj.model_folder, filename), docNode);           
         end
         
         % Create traj xml
@@ -586,8 +732,17 @@ classdef SDF2model < handle
             trajectories_node.appendChild(operational_trajectories_node); 
             
             filename = sprintf('%s_trajectories.xml', obj.model_name);
-            xmlwrite(sprintf('%s/%s', obj.model_folder, filename), docNode);
-%             type(sprintf('%s/%s', obj.model_folder, filename));            
+            xmlwrite(sprintf('%s/%s', obj.model_folder, filename), docNode);          
+        end
+        
+        % Displaying finish message
+        function finishMessage(obj)
+            CASPR_log.Info('**************************');
+            CASPR_log.Info('Conversion completed.');
+            CASPR_log.Info(sprintf('Robot Name: %s', obj.model_name));
+            CASPR_log.Info('1. Add this model through: CASPR_Model_Manager');
+            CASPR_log.Info('2. Overwrite the XML files in the corresponding folder.');
+            CASPR_log.Info('**************************');
         end
         
         % Convert vectors to character arrays
