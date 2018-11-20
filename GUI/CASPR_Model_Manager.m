@@ -126,6 +126,7 @@ function add_button_Callback(~, ~, handles) %#ok<DEFNU>
         ModelConfigManager.AddModelConfig(name,folder,bodies,cables,trajectories);
     end
     set_robotlist(handles)
+    addpath(genpath(CASPR_configuration.LoadModelConfigPath()));
 end
 
 % --- Executes on button press in remove_button.
