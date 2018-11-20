@@ -88,12 +88,12 @@ classdef CARDSFlowInterface < CableActuatorInterfaceBase
         end      
                 
         % publish robot state
-        function robotStateSend(obj, cdpr)   
+        function robotStateSend(obj, cdpr)  
             pose_msg = rosmessage('geometry_msgs/Pose');
             position_msg = rosmessage('geometry_msgs/Point');
-            orientation_msg = rosmessage('geometry_msgs/Quaternion');
+            orientation_msg = rosmessage('geometry_msgs/Quaternion');            
             for i = 1:cdpr.numLinks     
-                % Link name
+                % Link name                
                 obj.robot_state_msg.Header.FrameId = cdpr.bodyModel.bodies{i}.name;
                 % TF
                 rot = cdpr.bodyModel.bodies{i}.R_0k;
@@ -112,53 +112,57 @@ classdef CARDSFlowInterface < CableActuatorInterfaceBase
                 pose_msg.Position = position_msg;
                 pose_msg.Orientation = orientation_msg;
                 % Load to robot_state_msg
-                obj.robot_state_msg.Pose = pose_msg;
-                % Publish
-                send(obj.robot_state_pub, obj.robot_state_msg);
-            end            
+                obj.robot_state_msg.Pose = pose_msg;                
+                % Publish                
+                send(obj.robot_state_pub, obj.robot_state_msg);                
+            end   
         end
         
         % publish tendon state
         function tendonStateSend(obj, cdpr)  
             cable_Names = cell(cdpr.cableModel.numCables,1);
-            n_Viapoints = zeros(cdpr.cableModel.numCables,1);           
-            
+            n_Viapoints = zeros(cdpr.cableModel.numCables,1); 
+            via_array = robotics.ros.msggen.geometry_msgs.Vector3.empty(2*cdpr.cableModel.numSegments,0);
             % No use for now            
-            f = zeros(cdpr.cableModel.numCables,1);
-            obj.tendon_state_msg.ViaPoints = [];
+            f = zeros(cdpr.cableModel.numCables,1);            
             % Cables
+            v_count = 1; 
+            
             for c = 1:cdpr.cableModel.numCables                
-                % Cable name
+                % Cable name               
                 cable_name = sprintf('cable_%d', c);
                 cable_Names{c} = cable_name;                 
                 this_cable = cdpr.cableModel.cables{c};
-                n_Viapoints(c) = 2*length(this_cable.segments);                 
-                % Load all viapoints to cable_vec
+                n_Viapoints(c) = 2*length(this_cable.segments); 
+                % Load all viapoints to cable_vec               
                 for s = 1:length(this_cable.segments)
                     this_segment = this_cable.segments{s};     
-                    % 1st attachment point
-                    viapoints_msg_1 = rosmessage('geometry_msgs/Vector3');
+                    % 1st attachment point                        
+                    viapoints_msg_1 = rosmessage('geometry_msgs/Vector3');                    
                     via_point_1 = this_segment.attachments{1}.r_OA;
                     viapoints_msg_1.X = via_point_1(1);
                     viapoints_msg_1.Y = via_point_1(2);
-                    viapoints_msg_1.Z = via_point_1(3);
-                    obj.tendon_state_msg.ViaPoints = [obj.tendon_state_msg.ViaPoints; viapoints_msg_1];
-                    % 2nd attachment point
-                    viapoints_msg_2 = rosmessage('geometry_msgs/Vector3');
+                    viapoints_msg_1.Z = via_point_1(3);                    
+                    via_array(v_count) = viapoints_msg_1;                    
+                    v_count = v_count + 1;
+                    % 2nd attachment point                    
+                    viapoints_msg_2 = rosmessage('geometry_msgs/Vector3');                    
                     via_point_2 = this_segment.attachments{2}.r_OA;
                     viapoints_msg_2.X = via_point_2(1);
                     viapoints_msg_2.Y = via_point_2(2);
-                    viapoints_msg_2.Z = via_point_2(3);
-                    obj.tendon_state_msg.ViaPoints = [obj.tendon_state_msg.ViaPoints; viapoints_msg_2];
+                    viapoints_msg_2.Z = via_point_2(3);                    
+                    via_array(v_count) = viapoints_msg_2;                   
+                    v_count = v_count + 1;
                 end                     
-            end       
+            end              
+            obj.tendon_state_msg.ViaPoints = via_array;
             obj.tendon_state_msg.Name = cable_Names;
             obj.tendon_state_msg.NumberOfViapoints = n_Viapoints;
             obj.tendon_state_msg.L = cdpr.cableLengths;
             obj.tendon_state_msg.Force = f;
             obj.tendon_state_msg.Ld = cdpr.cableLengthsDot;            
             % Publish
-            send(obj.tendon_state_pub, obj.tendon_state_msg);
+            send(obj.tendon_state_pub, obj.tendon_state_msg);  
         end
         
         % publish end-effector

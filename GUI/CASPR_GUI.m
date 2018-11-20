@@ -459,14 +459,20 @@ function format_q_table(numDofs,qtable,q_data)
 end
 
 % --- Executes on button press in Rviz_pushbutton.
-function Rviz_pushbutton_Callback(~,~, handles)    
-    modObj = getappdata(handles.cable_popup,'modObj');
-    rviz_in = CASPRRVizInterface();
+function Rviz_pushbutton_Callback(~,~, handles) %#ok<DEFNU>
+    modObj = getappdata(handles.cable_popup,'modObj');    
+    try 
+        load('CARDSFlowConfig.mat');
+        interface = CARDSFlowInterface();        
+    catch 
+        interface = CASPRRVizInterface();        
+    end    
     % Set robot name rosparam
     rosparam('set','/robot_name',modObj.robotName);
     rosparam('set','/deleteall',1);
-    for i = 1:500
-        rviz_in.visualize(modObj);
+    start_tic = tic;
+    while toc(start_tic) < 5       
+        interface.visualize(modObj);
     end
 end
 
