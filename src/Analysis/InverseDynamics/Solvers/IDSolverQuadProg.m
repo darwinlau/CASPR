@@ -56,7 +56,16 @@ classdef IDSolverQuadProg < IDSolverBase
                 % Basic version that uses MATLAB's solver
                 case ID_QP_SolverType.MATLAB
                     if(isempty(obj.options))
-                        obj.options = optimoptions('quadprog', 'StepTolerance', 1e-17, 'Display', 'off', 'MaxIter', 100);
+                        % solve the potential naming issues in matlab
+                        [~, d] = version;
+                        % derive the publish year of the Matlab being used
+                        year = str2double(d(length(d)-3:length(d)));
+                        if year >= 2016
+                            tol_string = 'StepTolerance';
+                        else
+                            tol_string = 'TolX';
+                        end
+                        obj.options = optimoptions('quadprog', tol_string, 1e-17, 'Display', 'off', 'MaxIter', 100);
                     end
                     [actuation_forces, id_exit_type] = id_qp_matlab(obj.objective.A, obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);                    
                 % Basic version that uses MATLAB's solver
