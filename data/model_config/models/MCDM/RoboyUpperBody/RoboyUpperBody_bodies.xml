@@ -4,52 +4,212 @@
   PUBLIC "" "../../../templates/bodies.dtd">
 <bodies_system>
    <links display_range="-1.0 1.0 -1.0 1.0 -1.0 1.0" view_angle="45 32">
-      <link_rigid name="torso" num="1">
-         <joint axis="7.618e-15 7.291e-15 1" q_initial="0.0" q_max="1.047" q_min="-1.047" type="R_AXIS"/>
+      <link_rigid name="spine_v0_sphere_link1" num="1">
+         <joint axis="1 -1.015e-45 -5.349e-60" q_initial="0.0" q_max="0.08727" q_min="-0.08727" type="R_AXIS"/>
          <physical>
-            <mass>12.85</mass>
-            <com_location>-5.551e-18 -0.001522 -0.2993</com_location>
-            <end_location>0.2922 0.007688 0.2493</end_location>
+            <mass>0.02394</mass>
+            <com_location>-6.82e-19 -0.001522 -0.08424</com_location>
+            <end_location>0 2.884e-17 0</end_location>
             <inertia ref="com">
-               <Ixx>3.814</Ixx>
-               <Iyy>4.067</Iyy>
-               <Izz>0.3406</Izz>
-               <Ixy>-0.001084</Ixy>
-               <Ixz>0.05806</Ixz>
-               <Iyz>-0.0132</Iyz>
+               <Ixx>0.01211</Ixx>
+               <Iyy>0.01211</Iyy>
+               <Izz>2.013e-06</Izz>
+               <Ixy>7.508e-19</Ixy>
+               <Ixz>-2.59e-05</Ixz>
+               <Iyz>3.505e-16</Iyz>
             </inertia>
          </physical>
          <parent>
             <num>0</num>
-            <location>5.551e-18 0.001522 0.2993</location>
+            <location>6.82e-19 0.001522 0.1647</location>
          </parent>
       </link_rigid>
-      <link_rigid name="sphere_head_link1" num="2">
-         <joint axis="0 1 0" q_initial="0.0" q_max="0.5236" q_min="-0.5236" type="R_AXIS"/>
+      <link_rigid name="spine_v0_sphere_link2" num="2">
+         <joint axis="-1.015e-45 -1 -5.149e-15" q_initial="0.0" q_max="0.08727" q_min="-0.08727" type="R_AXIS"/>
+         <physical>
+            <mass>0.01605</mass>
+            <com_location>-6.82e-19 -0.001522 -0.08424</com_location>
+            <end_location>-6.82e-19 -1.995e-17 0</end_location>
+            <inertia ref="com">
+               <Ixx>0.008115</Ixx>
+               <Iyy>0.008115</Iyy>
+               <Izz>9.214e-07</Izz>
+               <Ixy>5.029e-19</Ixy>
+               <Ixz>-1.736e-05</Ixz>
+               <Iyz>2.349e-16</Iyz>
+            </inertia>
+         </physical>
+         <parent>
+            <num>1</num>
+            <location>0 2.884e-17 0</location>
+         </parent>
+      </link_rigid>
+      <link_rigid name="spine_link1" num="3">
+         <joint axis="1.207e-61 -5.149e-15 1" q_initial="0.0" q_max="0.08727" q_min="-0.08727" type="R_AXIS"/>
+         <physical>
+            <mass>0.004604</mass>
+            <com_location>0 -0.001522 -0.0637</com_location>
+            <end_location>6.82e-19 -2.147e-16 0.039</end_location>
+            <inertia ref="com">
+               <Ixx>0.000125</Ixx>
+               <Iyy>0.000125</Iyy>
+               <Izz>1.21e-07</Izz>
+               <Ixy>1.694e-24</Ixy>
+               <Ixz>-1.154e-06</Ixz>
+               <Iyz>-4.684e-21</Iyz>
+            </inertia>
+         </physical>
+         <parent>
+            <num>2</num>
+            <location>-6.82e-19 -1.995e-17 0</location>
+         </parent>
+      </link_rigid>
+      <link_rigid name="spine_v1_sphere_link1" num="4">
+         <joint axis="1 -1.015e-45 -5.349e-60" q_initial="0.0" q_max="0.08727" q_min="-0.08727" type="R_AXIS"/>
+         <physical>
+            <mass>2.066</mass>
+            <com_location>-6.82e-19 -0.001522 -0.08424</com_location>
+            <end_location>0 2.884e-17 -5.551e-17</end_location>
+            <inertia ref="com">
+               <Ixx>1.585</Ixx>
+               <Iyy>1.579</Iyy>
+               <Izz>0.02555</Izz>
+               <Ixy>-2.883e-05</Ixy>
+               <Ixz>-0.02944</Ixz>
+               <Iyz>-0.001288</Iyz>
+            </inertia>
+         </physical>
+         <parent>
+            <num>3</num>
+            <location>6.82e-19 -2.147e-16 0.039</location>
+         </parent>
+      </link_rigid>
+      <link_rigid name="spine_v1_sphere_link2" num="5">
+         <joint axis="-1.015e-45 -1 -5.149e-15" q_initial="0.0" q_max="0.08727" q_min="-0.08727" type="R_AXIS"/>
+         <physical>
+            <mass>0.02602</mass>
+            <com_location>-6.82e-19 -0.001522 -0.08424</com_location>
+            <end_location>-6.82e-19 -1.995e-17 5.551e-17</end_location>
+            <inertia ref="com">
+               <Ixx>0.003056</Ixx>
+               <Iyy>0.002963</Iyy>
+               <Izz>0.003866</Izz>
+               <Ixy>0.001932</Ixy>
+               <Ixz>-0.001459</Ixz>
+               <Iyz>0.001424</Iyz>
+            </inertia>
+         </physical>
+         <parent>
+            <num>4</num>
+            <location>0 2.884e-17 -5.551e-17</location>
+         </parent>
+      </link_rigid>
+      <link_rigid name="spine_link2" num="6">
+         <joint axis="1.207e-61 -5.149e-15 1" q_initial="0.0" q_max="0.08727" q_min="-0.08727" type="R_AXIS"/>
+         <physical>
+            <mass>0.006869</mass>
+            <com_location>0 -0.001522 -0.0637</com_location>
+            <end_location>6.82e-19 -2.142e-16 0.039</end_location>
+            <inertia ref="com">
+               <Ixx>0.0002852</Ixx>
+               <Iyy>0.0002852</Iyy>
+               <Izz>2.603e-07</Izz>
+               <Ixy>-8.132e-24</Ixy>
+               <Ixz>-2.129e-06</Ixz>
+               <Iyz>-9.454e-21</Iyz>
+            </inertia>
+         </physical>
+         <parent>
+            <num>5</num>
+            <location>-6.82e-19 -1.995e-17 5.551e-17</location>
+         </parent>
+      </link_rigid>
+      <link_rigid name="spine_v2_sphere_link1" num="7">
+         <joint axis="1 -1.015e-45 -5.349e-60" q_initial="0.0" q_max="0.08727" q_min="-0.08727" type="R_AXIS"/>
+         <physical>
+            <mass>0.02602</mass>
+            <com_location>-6.82e-19 -0.001522 -0.08424</com_location>
+            <end_location>0 2.906e-17 0</end_location>
+            <inertia ref="com">
+               <Ixx>0.003055</Ixx>
+               <Iyy>0.003005</Iyy>
+               <Izz>0.003906</Izz>
+               <Ixy>-0.001952</Ixy>
+               <Ixz>-0.001459</Ixz>
+               <Iyz>-0.00144</Iyz>
+            </inertia>
+         </physical>
+         <parent>
+            <num>6</num>
+            <location>6.82e-19 -2.142e-16 0.039</location>
+         </parent>
+      </link_rigid>
+      <link_rigid name="spine_v2_sphere_link2" num="8">
+         <joint axis="-1.015e-45 -1 -5.149e-15" q_initial="0.0" q_max="0.08727" q_min="-0.08727" type="R_AXIS"/>
+         <physical>
+            <mass>0.006869</mass>
+            <com_location>-6.82e-19 -0.001522 -0.08424</com_location>
+            <end_location>-6.82e-19 -2.017e-17 0</end_location>
+            <inertia ref="com">
+               <Ixx>0.0001866</Ixx>
+               <Iyy>0.0001865</Iyy>
+               <Izz>2.603e-07</Izz>
+               <Ixy>-7.318e-23</Ixy>
+               <Ixz>-1.721e-06</Ixz>
+               <Iyz>-5.985e-21</Iyz>
+            </inertia>
+         </physical>
+         <parent>
+            <num>7</num>
+            <location>0 2.906e-17 0</location>
+         </parent>
+      </link_rigid>
+      <link_rigid name="torso" num="9">
+         <joint axis="1.207e-61 -5.149e-15 1" q_initial="0.0" q_max="0.08727" q_min="-0.08727" type="R_AXIS"/>
+         <physical>
+            <mass>19.44</mass>
+            <com_location>0 -0.001522 -0.2427</com_location>
+            <end_location>-2.059e-14 3.453e-15 0.4684</end_location>
+            <inertia ref="com">
+               <Ixx>4.25</Ixx>
+               <Iyy>4.522</Iyy>
+               <Izz>0.3683</Izz>
+               <Ixy>-0.001084</Ixy>
+               <Ixz>0.06759</Ixz>
+               <Iyz>-0.0132</Iyz>
+            </inertia>
+         </physical>
+         <parent>
+            <num>8</num>
+            <location>-6.82e-19 -2.017e-17 0</location>
+         </parent>
+      </link_rigid>
+      <link_rigid name="sphere_head_link1" num="10">
+         <joint axis="2.507e-16 -1 8.243e-15" q_initial="0.0" q_max="0.5236" q_min="-0.5236" type="R_AXIS"/>
          <physical>
             <mass>0.005755</mass>
-            <com_location>1.616e-17 -6.939e-18 -1.11e-16</com_location>
-            <end_location>-9.466e-30 -4.337e-19 0</end_location>
+            <com_location>3.08e-18 3.686e-18 1.11e-16</com_location>
+            <end_location>-1.578e-29 -6.505e-19 0</end_location>
             <inertia ref="com">
                <Ixx>0.004846</Ixx>
                <Iyy>0.004794</Iyy>
                <Izz>9.383e-05</Izz>
-               <Ixy>3.881e-05</Ixy>
+               <Ixy>3.882e-05</Ixy>
                <Ixz>0.0005891</Ixz>
                <Iyz>-0.0003145</Iyz>
             </inertia>
          </physical>
          <parent>
-            <num>1</num>
-            <location>-2.059e-14 2.943e-15 0.4118</location>
+            <num>9</num>
+            <location>-2.059e-14 3.453e-15 0.4684</location>
          </parent>
       </link_rigid>
-      <link_rigid name="sphere_head_link2" num="3">
-         <joint axis="1 0 0" q_initial="0.0" q_max="0.5236" q_min="-0.5236" type="R_AXIS"/>
+      <link_rigid name="shere_head_link2" num="11">
+         <joint axis="-1 -2.507e-16 -2.413e-14" q_initial="0.0" q_max="0.5236" q_min="-0.5236" type="R_AXIS"/>
          <physical>
             <mass>0.005755</mass>
-            <com_location>1.521e-18 6.505e-19 0</com_location>
-            <end_location>1.698e-19 -9.975e-18 0</end_location>
+            <com_location>1.729e-17 1.323e-17 -3.331e-16</com_location>
+            <end_location>3.511e-19 -7.589e-18 -3.331e-16</end_location>
             <inertia ref="com">
                <Ixx>0.004846</Ixx>
                <Iyy>0.004794</Iyy>
@@ -60,32 +220,32 @@
             </inertia>
          </physical>
          <parent>
-            <num>2</num>
-            <location>-9.466e-30 -4.337e-19 0</location>
+            <num>10</num>
+            <location>-1.578e-29 -6.505e-19 0</location>
          </parent>
       </link_rigid>
-      <link_rigid name="sphere_left_link1" num="4">
-         <joint axis="0 1 0" q_initial="0.0" q_max="0" q_min="-1.57" type="R_AXIS"/>
+      <link_rigid name="sphere_left_link1" num="12">
+         <joint axis="0.9986 0.05074 -0.01234" q_initial="0.0" q_max="3.142" q_min="-3.142" type="R_AXIS"/>
          <physical>
             <mass>0.04676</mass>
             <com_location>-3.928e-09 1.67e-07 3.766e-08</com_location>
-            <end_location>-2.22e-16 -8.674e-18 1.11e-16</end_location>
+            <end_location>-1.11e-16 -1.388e-17 0</end_location>
             <inertia ref="com">
                <Ixx>0.01408</Ixx>
                <Iyy>0.01807</Iyy>
                <Izz>0.004001</Izz>
                <Ixy>-0.0001258</Ixy>
-               <Ixz>-0.0002363</Ixz>
+               <Ixz>-0.0002362</Ixz>
                <Iyz>-0.007495</Iyz>
             </inertia>
          </physical>
          <parent>
-            <num>1</num>
-            <location>0.2922 0.007688 0.2493</location>
+            <num>9</num>
+            <location>0.2922 0.007688 0.3059</location>
          </parent>
       </link_rigid>
-      <link_rigid name="sphere_left_link2" num="5">
-         <joint axis="1 0 0" q_initial="0.0" q_max="0" q_min="-1.57" type="R_AXIS"/>
+      <link_rigid name="sphere_left_link2" num="13">
+         <joint axis="-0.05101 0.9984 -0.02231" q_initial="0.0" q_max="3.142" q_min="-3.142" type="R_AXIS"/>
          <physical>
             <mass>0.03134</mass>
             <com_location>9.873e-09 -1.392e-07 2.591e-08</com_location>
@@ -94,22 +254,22 @@
                <Ixx>0.009438</Ixx>
                <Iyy>0.01211</Iyy>
                <Izz>0.002681</Izz>
-               <Ixy>-8.434e-05</Ixy>
+               <Ixy>-8.433e-05</Ixy>
                <Ixz>-0.0001584</Ixz>
                <Iyz>-0.005024</Iyz>
             </inertia>
          </physical>
          <parent>
-            <num>4</num>
-            <location>-2.22e-16 -8.674e-18 1.11e-16</location>
+            <num>12</num>
+            <location>-1.11e-16 -1.388e-17 0</location>
          </parent>
       </link_rigid>
-      <link_rigid name="sphere_right_link1" num="6">
-         <joint axis="0 1 0" q_initial="0.0" q_max="3.142" q_min="-3.142" type="R_AXIS"/>
+      <link_rigid name="sphere_right_link1" num="14">
+         <joint axis="0.05101 0.9984 -0.02231" q_initial="0.0" q_max="3.142" q_min="-3.142" type="R_AXIS"/>
          <physical>
             <mass>0.04676</mass>
             <com_location>8.959e-08 1.681e-07 1.296e-08</com_location>
-            <end_location>0 -3.469e-18 -1.11e-16</end_location>
+            <end_location>1.11e-16 -1.388e-17 -3.331e-16</end_location>
             <inertia ref="com">
                <Ixx>0.01408</Ixx>
                <Iyy>0.01807</Iyy>
@@ -120,32 +280,32 @@
             </inertia>
          </physical>
          <parent>
-            <num>1</num>
-            <location>-0.2922 0.007688 0.2493</location>
+            <num>9</num>
+            <location>-0.2922 0.007688 0.3059</location>
          </parent>
       </link_rigid>
-      <link_rigid name="sphere_right_link2" num="7">
-         <joint axis="0 0 1" q_initial="0.0" q_max="3.142" q_min="-3.142" type="R_AXIS"/>
+      <link_rigid name="sphere_right_link2" num="15">
+         <joint axis="-0.9986 0.05074 -0.01234" q_initial="0.0" q_max="3.142" q_min="-3.142" type="R_AXIS"/>
          <physical>
             <mass>0.03134</mass>
             <com_location>-1.163e-07 -1.273e-07 1.033e-08</com_location>
-            <end_location>0 2.429e-17 2.22e-16</end_location>
+            <end_location>5.551e-17 -1.388e-17 2.22e-16</end_location>
             <inertia ref="com">
                <Ixx>0.009438</Ixx>
                <Iyy>0.01211</Iyy>
                <Izz>0.002681</Izz>
-               <Ixy>8.434e-05</Ixy>
-               <Ixz>-0.0001584</Ixz>
+               <Ixy>8.433e-05</Ixy>
+               <Ixz>-0.0001583</Ixz>
                <Iyz>0.005024</Iyz>
             </inertia>
          </physical>
          <parent>
-            <num>6</num>
-            <location>0 -3.469e-18 -1.11e-16</location>
+            <num>14</num>
+            <location>1.11e-16 -1.388e-17 -3.331e-16</location>
          </parent>
       </link_rigid>
-      <link_rigid name="upper_arm_left" num="8">
-         <joint axis="0 0 1" q_initial="0.0" q_max="0.3" q_min="-0.3" type="R_AXIS"/>
+      <link_rigid name="upper_arm_left" num="16">
+         <joint axis="-0.01119 -0.02291 -0.9997" q_initial="0.0" q_max="3.142" q_min="-3.142" type="R_AXIS"/>
          <physical>
             <mass>1.181</mass>
             <com_location>0.01098 -0.002601 -0.1515</com_location>
@@ -154,17 +314,17 @@
                <Ixx>0.1925</Ixx>
                <Iyy>0.2997</Iyy>
                <Izz>0.111</Izz>
-               <Ixy>-0.002307</Ixy>
-               <Ixz>-0.00309</Ixz>
+               <Ixy>-0.002306</Ixy>
+               <Ixz>-0.003089</Ixz>
                <Iyz>-0.1419</Iyz>
             </inertia>
          </physical>
          <parent>
-            <num>5</num>
+            <num>13</num>
             <location>5.701e-11 -1.116e-09 2.493e-11</location>
          </parent>
       </link_rigid>
-      <link_rigid name="elbow_left" num="9">
+      <link_rigid name="elbow_left" num="17">
          <joint axis="-0.9986 -0.05074 0.01234" q_initial="0.0" q_max="1.571" q_min="0" type="R_AXIS"/>
          <physical>
             <mass>0.1568</mass>
@@ -175,16 +335,16 @@
                <Iyy>0.02287</Iyy>
                <Izz>0.01354</Izz>
                <Ixy>-0.0001252</Ixy>
-               <Ixz>-9.891e-05</Ixz>
+               <Ixz>-9.888e-05</Ixz>
                <Iyz>-0.01116</Iyz>
             </inertia>
          </physical>
          <parent>
-            <num>8</num>
+            <num>16</num>
             <location>0.01494 -0.01022 -0.2675</location>
          </parent>
       </link_rigid>
-      <link_rigid name="lower_arm_left" num="10">
+      <link_rigid name="lower_arm_left" num="18">
          <joint axis="-0.01119 -0.02291 -0.9997" q_initial="0.0" q_max="1.571" q_min="-1.571" type="R_AXIS"/>
          <physical>
             <mass>1.416</mass>
@@ -194,18 +354,18 @@
                <Ixx>0.01972</Ixx>
                <Iyy>0.1362</Iyy>
                <Izz>0.1177</Izz>
-               <Ixy>0.0004869</Ixy>
-               <Ixz>3.178e-05</Ixz>
+               <Ixy>0.0004871</Ixy>
+               <Ixz>3.185e-05</Ixz>
                <Iyz>-0.03856</Iyz>
             </inertia>
          </physical>
          <parent>
-            <num>9</num>
+            <num>17</num>
             <location>-0.01877 0.002571 -0.06612</location>
          </parent>
       </link_rigid>
-      <link_rigid name="upper_arm_right" num="11">
-         <joint axis="1 0 0" q_initial="0.0" q_max="3.142" q_min="-3.142" type="R_AXIS"/>
+      <link_rigid name="upper_arm_right" num="19">
+         <joint axis="0.01119 -0.02291 -0.9997" q_initial="0.0" q_max="3.142" q_min="-3.142" type="R_AXIS"/>
          <physical>
             <mass>1.096</mass>
             <com_location>-0.01036 -0.004968 -0.151</com_location>
@@ -220,11 +380,11 @@
             </inertia>
          </physical>
          <parent>
-            <num>7</num>
-            <location>0 2.429e-17 2.22e-16</location>
+            <num>15</num>
+            <location>5.551e-17 -1.388e-17 2.22e-16</location>
          </parent>
       </link_rigid>
-      <link_rigid name="elbow_right" num="12">
+      <link_rigid name="elbow_right" num="20">
          <joint axis="-0.9986 0.05074 -0.01234" q_initial="0.0" q_max="1.571" q_min="0" type="R_AXIS"/>
          <physical>
             <mass>0.1738</mass>
@@ -240,11 +400,11 @@
             </inertia>
          </physical>
          <parent>
-            <num>11</num>
+            <num>19</num>
             <location>-0.01493 -0.01025 -0.2685</location>
          </parent>
       </link_rigid>
-      <link_rigid name="lower_arm_right" num="13">
+      <link_rigid name="lower_arm_right" num="21">
          <joint axis="-0.01119 0.02291 0.9997" q_initial="0.0" q_max="1.571" q_min="-1.571" type="R_AXIS"/>
          <physical>
             <mass>1.399</mass>
@@ -254,17 +414,17 @@
                <Ixx>0.01811</Ixx>
                <Iyy>0.1333</Iyy>
                <Izz>0.1165</Izz>
-               <Ixy>-0.0005189</Ixy>
-               <Ixz>3.998e-05</Ixz>
+               <Ixy>-0.0005191</Ixy>
+               <Ixz>4.005e-05</Ixz>
                <Iyz>0.03631</Iyz>
             </inertia>
          </physical>
          <parent>
-            <num>12</num>
+            <num>20</num>
             <location>0.01877 0.002571 -0.06612</location>
          </parent>
       </link_rigid>
-      <link_rigid name="wrist_left_1" num="14">
+      <link_rigid name="wrist_left_1" num="22">
          <joint axis="-0.9974 -0.06113 0.03722" q_initial="0.0" q_max="0.5236" q_min="-0.5236" type="R_AXIS"/>
          <physical>
             <mass>0.01276</mass>
@@ -280,331 +440,11 @@
             </inertia>
          </physical>
          <parent>
-            <num>10</num>
+            <num>18</num>
             <location>-0.01442 -0.006716 -0.2621</location>
          </parent>
       </link_rigid>
-      <link_rigid name="palm" num="15">
-         <joint axis="-0.06198 0.9978 -0.02217" q_initial="0.0" q_max="0.5236" q_min="-0.5236" type="R_AXIS"/>
-         <physical>
-            <mass>0.05105</mass>
-            <com_location>-0.005005 0.01716 -0.05249</com_location>
-            <end_location>-0.00541 0.02707 -0.1005</end_location>
-            <inertia ref="com">
-               <Ixx>0.0005643</Ixx>
-               <Iyy>0.004562</Iyy>
-               <Izz>0.004039</Izz>
-               <Ixy>6.974e-05</Ixy>
-               <Ixz>-2.214e-05</Ixz>
-               <Iyz>0.001426</Iyz>
-            </inertia>
-         </physical>
-         <parent>
-            <num>14</num>
-            <location>0.01156 -0.01682 -2.808e-06</location>
-         </parent>
-      </link_rigid>
-      <link_rigid name="left_index_limb0" num="16">
-         <joint axis="0.06913 -0.9575 0.28" q_initial="0.0" q_max="0.3491" q_min="-1.222" type="R_AXIS"/>
-         <physical>
-            <mass>0.000427</mass>
-            <com_location>-0.0006415 0.007373 -0.001417</com_location>
-            <end_location>0.002101 0.007763 -0.0007577</end_location>
-            <inertia ref="com">
-               <Ixx>9.199e-06</Ixx>
-               <Iyy>4.286e-05</Iyy>
-               <Izz>3.427e-05</Izz>
-               <Ixy>3.19e-06</Ixy>
-               <Ixz>-1.632e-06</Ixz>
-               <Iyz>1.738e-05</Iyz>
-            </inertia>
-         </physical>
-         <parent>
-            <num>15</num>
-            <location>-0.002846 -0.01189 -0.09578</location>
-         </parent>
-      </link_rigid>
-      <link_rigid name="left_index_limb1" num="17">
-         <joint axis="0.8731 0.1939 0.4474" q_initial="0.0" q_max="0.3142" q_min="-0.3142" type="R_AXIS"/>
-         <physical>
-            <mass>0.003829</mass>
-            <com_location>-0.002307 -0.00729 -0.02436</com_location>
-            <end_location>-0.003253 -0.02026 -0.04884</end_location>
-            <inertia ref="com">
-               <Ixx>0.0001133</Ixx>
-               <Iyy>0.0004144</Iyy>
-               <Izz>0.0003099</Izz>
-               <Ixy>3.612e-05</Ixy>
-               <Ixz>-2.172e-05</Ixz>
-               <Iyz>0.0001817</Iyz>
-            </inertia>
-         </physical>
-         <parent>
-            <num>16</num>
-            <location>0.002101 0.007763 -0.0007577</location>
-         </parent>
-      </link_rigid>
-      <link_rigid name="left_index_limb2" num="18">
-         <joint axis="-0.06913 0.9575 -0.28" q_initial="0.0" q_max="1.92" q_min="0" type="R_AXIS"/>
-         <physical>
-            <mass>0.001625</mass>
-            <com_location>0.0009793 0.001816 -0.01367</com_location>
-            <end_location>0.0008043 -0.007421 -0.03093</end_location>
-            <inertia ref="com">
-               <Ixx>7.245e-05</Ixx>
-               <Iyy>0.0001988</Iyy>
-               <Izz>0.0001329</Izz>
-               <Ixy>2.045e-05</Ixy>
-               <Ixz>-1.496e-05</Ixz>
-               <Iyz>9.462e-05</Iyz>
-            </inertia>
-         </physical>
-         <parent>
-            <num>17</num>
-            <location>-0.003253 -0.02026 -0.04884</location>
-         </parent>
-      </link_rigid>
-      <link_rigid name="left_little_limb0" num="19">
-         <joint axis="-0.03578 0.8764 0.4803" q_initial="0.0" q_max="0" q_min="0" type="R_AXIS"/>
-         <physical>
-            <mass>0.000427</mass>
-            <com_location>-0.000422 0.006231 0.004216</com_location>
-            <end_location>0.002289 0.005901 0.005019</end_location>
-            <inertia ref="com">
-               <Ixx>7.646e-06</Ixx>
-               <Iyy>4.06e-05</Iyy>
-               <Izz>3.359e-05</Izz>
-               <Ixy>-3.229e-06</Ixy>
-               <Ixz>1.514e-06</Ixz>
-               <Iyz>1.561e-05</Iyz>
-            </inertia>
-         </physical>
-         <parent>
-            <num>15</num>
-            <location>-0.005913 0.04284 -0.0881</location>
-         </parent>
-      </link_rigid>
-      <link_rigid name="left_little_limb1" num="20">
-         <joint axis="0.8526 -0.224 0.4721" q_initial="0.0" q_max="0.3142" q_min="-0.3142" type="R_AXIS"/>
-         <physical>
-            <mass>0.003829</mass>
-            <com_location>-0.001196 0.01222 -0.02239</com_location>
-            <end_location>-0.00114 0.02046 -0.04886</end_location>
-            <inertia ref="com">
-               <Ixx>9.592e-05</Ixx>
-               <Iyy>0.0003915</Iyy>
-               <Izz>0.0003077</Izz>
-               <Ixy>-4.193e-05</Ixy>
-               <Ixz>2.315e-05</Ixz>
-               <Iyz>0.000164</Iyz>
-            </inertia>
-         </physical>
-         <parent>
-            <num>19</num>
-            <location>0.002289 0.005901 0.005019</location>
-         </parent>
-      </link_rigid>
-      <link_rigid name="left_little_limb2" num="21">
-         <joint axis="-0.03578 0.8764 0.4803" q_initial="0.0" q_max="1.92" q_min="0" type="R_AXIS"/>
-         <physical>
-            <mass>0.001625</mass>
-            <com_location>0.001715 0.01091 -0.008324</com_location>
-            <end_location>0.002245 0.01662 -0.02704</end_location>
-            <inertia ref="com">
-               <Ixx>6.27e-05</Ixx>
-               <Iyy>0.0001868</Iyy>
-               <Izz>0.0001352</Izz>
-               <Ixy>-2.668e-05</Ixy>
-               <Ixz>1.776e-05</Ixz>
-               <Iyz>8.599e-05</Iyz>
-            </inertia>
-         </physical>
-         <parent>
-            <num>20</num>
-            <location>-0.00114 0.02046 -0.04886</location>
-         </parent>
-      </link_rigid>
-      <link_rigid name="left_middle_limb0" num="22">
-         <joint axis="0.06198 -0.9978 0.02217" q_initial="0.0" q_max="0.3491" q_min="-1.222" type="R_AXIS"/>
-         <physical>
-            <mass>0.000427</mass>
-            <com_location>0.0001994 -0.004979 0.0008217</com_location>
-            <end_location>0.002955 -0.004794 0.001513</end_location>
-            <inertia ref="com">
-               <Ixx>9.628e-06</Ixx>
-               <Iyy>4.322e-05</Iyy>
-               <Izz>3.364e-05</Izz>
-               <Ixy>8.121e-07</Ixy>
-               <Ixz>-4.339e-07</Ixz>
-               <Iyz>1.796e-05</Iyz>
-            </inertia>
-         </physical>
-         <parent>
-            <num>15</num>
-            <location>-0.005106 0.02018 -0.1037</location>
-         </parent>
-      </link_rigid>
-      <link_rigid name="left_middle_limb1" num="23">
-         <joint axis="0.8817 0.06515 0.4673" q_initial="0.0" q_max="0.6109" q_min="-0.6109" type="R_AXIS"/>
-         <physical>
-            <mass>0.003829</mass>
-            <com_location>-0.002746 -0.0007344 -0.02537</com_location>
-            <end_location>-0.004201 -0.006936 -0.05235</end_location>
-            <inertia ref="com">
-               <Ixx>0.000118</Ixx>
-               <Iyy>0.0004192</Iyy>
-               <Izz>0.0003018</Izz>
-               <Ixy>7.871e-06</Ixy>
-               <Ixz>-4.919e-06</Ixz>
-               <Iyz>0.0001876</Iyz>
-            </inertia>
-         </physical>
-         <parent>
-            <num>22</num>
-            <location>0.002955 -0.004794 0.001513</location>
-         </parent>
-      </link_rigid>
-      <link_rigid name="left_middle_limb2" num="24">
-         <joint axis="-0.06198 0.9978 -0.02217" q_initial="0.0" q_max="1.92" q_min="0" type="R_AXIS"/>
-         <physical>
-            <mass>0.001625</mass>
-            <com_location>0.0008014 0.005278 -0.01276</com_location>
-            <end_location>0.000267 0.000813 -0.03181</end_location>
-            <inertia ref="com">
-               <Ixx>7.495e-05</Ixx>
-               <Iyy>0.0002022</Iyy>
-               <Izz>0.0001275</Izz>
-               <Ixy>3.752e-06</Ixy>
-               <Ixz>-2.876e-06</Ixz>
-               <Iyz>9.751e-05</Iyz>
-            </inertia>
-         </physical>
-         <parent>
-            <num>23</num>
-            <location>-0.004201 -0.006936 -0.05235</location>
-         </parent>
-      </link_rigid>
-      <link_rigid name="left_ring_limb0" num="25">
-         <joint axis="0.0506 -0.9702 -0.2372" q_initial="0.0" q_max="0.3491" q_min="-1.222" type="R_AXIS"/>
-         <physical>
-            <mass>0.000427</mass>
-            <com_location>-0.0004795 0.007103 0.00247</com_location>
-            <end_location>0.002288 0.007083 0.003138</end_location>
-            <inertia ref="com">
-               <Ixx>9.068e-06</Ixx>
-               <Iyy>4.238e-05</Iyy>
-               <Izz>3.345e-05</Izz>
-               <Ixy>-1.456e-06</Ixy>
-               <Ixz>7.552e-07</Ixz>
-               <Iyz>1.733e-05</Iyz>
-            </inertia>
-         </physical>
-         <parent>
-            <num>15</num>
-            <location>-0.00541 0.02707 -0.1005</location>
-         </parent>
-      </link_rigid>
-      <link_rigid name="left_ring_limb1" num="26">
-         <joint axis="0.8891 -0.0644 0.4531" q_initial="0.0" q_max="0.3142" q_min="-0.3142" type="R_AXIS"/>
-         <physical>
-            <mass>0.003829</mass>
-            <com_location>-0.003124 0.005864 -0.02465</com_location>
-            <end_location>-0.005043 0.006851 -0.05229</end_location>
-            <inertia ref="com">
-               <Ixx>0.0001118</Ixx>
-               <Iyy>0.0004091</Iyy>
-               <Izz>0.0003</Izz>
-               <Ixy>-1.928e-05</Ixy>
-               <Ixz>1.189e-05</Ixz>
-               <Iyz>0.0001808</Iyz>
-            </inertia>
-         </physical>
-         <parent>
-            <num>25</num>
-            <location>0.002288 0.007083 0.003138</location>
-         </parent>
-      </link_rigid>
-      <link_rigid name="left_ring_limb2" num="27">
-         <joint axis="-0.0506 0.9702 0.2372" q_initial="0.0" q_max="1.92" q_min="0" type="R_AXIS"/>
-         <physical>
-            <mass>0.001625</mass>
-            <com_location>0.0006774 0.008387 -0.01097</com_location>
-            <end_location>-0.0001866 0.008998 -0.03052</end_location>
-            <inertia ref="com">
-               <Ixx>7.152e-05</Ixx>
-               <Iyy>0.0001959</Iyy>
-               <Izz>0.0001268</Izz>
-               <Ixy>-1.238e-05</Ixy>
-               <Ixz>9.289e-06</Ixz>
-               <Iyz>9.384e-05</Iyz>
-            </inertia>
-         </physical>
-         <parent>
-            <num>26</num>
-            <location>-0.005043 0.006851 -0.05229</location>
-         </parent>
-      </link_rigid>
-      <link_rigid name="left_thumb_limb0" num="28">
-         <joint axis="-0.8731 0.3085 0.3776" q_initial="0.0" q_max="0.8727" q_min="-1.222" type="R_AXIS"/>
-         <physical>
-            <mass>0.0004271</mass>
-            <com_location>0.006829 -0.002329 -0.00217</com_location>
-            <end_location>0.006102 -0.005031 -0.001643</end_location>
-            <inertia ref="com">
-               <Ixx>4.295e-06</Ixx>
-               <Iyy>3.373e-05</Iyy>
-               <Izz>3.03e-05</Izz>
-               <Ixy>3.586e-06</Ixy>
-               <Ixz>-1.289e-06</Ixz>
-               <Iyz>1.074e-05</Iyz>
-            </inertia>
-         </physical>
-         <parent>
-            <num>15</num>
-            <location>-0.02789 -0.007438 -0.04579</location>
-         </parent>
-      </link_rigid>
-      <link_rigid name="left_thumb_limb1" num="29">
-         <joint axis="-0.1486 -0.9059 0.3965" q_initial="0.0" q_max="0.3142" q_min="-0.3142" type="R_AXIS"/>
-         <physical>
-            <mass>0.003829</mass>
-            <com_location>-0.007686 0.006848 -0.02336</com_location>
-            <end_location>-0.0211 0.01479 -0.04629</end_location>
-            <inertia ref="com">
-               <Ixx>5.701e-05</Ixx>
-               <Iyy>0.0003052</Iyy>
-               <Izz>0.0002541</Izz>
-               <Ixy>2.711e-05</Ixy>
-               <Ixz>-1.232e-05</Ixz>
-               <Iyz>0.0001153</Iyz>
-            </inertia>
-         </physical>
-         <parent>
-            <num>28</num>
-            <location>0.006102 -0.005031 -0.001643</location>
-         </parent>
-      </link_rigid>
-      <link_rigid name="left_thumb_limb2" num="30">
-         <joint axis="0.8731 -0.3085 -0.3776" q_initial="0.0" q_max="1.92" q_min="0" type="R_AXIS"/>
-         <physical>
-            <mass>0.001625</mass>
-            <com_location>0.01019 0.00924 0.001439</com_location>
-            <end_location>0.01536 0.02584 0.01043</end_location>
-            <inertia ref="com">
-               <Ixx>3.189e-05</Ixx>
-               <Iyy>0.0001355</Iyy>
-               <Izz>0.0001042</Izz>
-               <Ixy>4.22e-06</Ixy>
-               <Ixz>-2.4e-06</Ixz>
-               <Iyz>5.723e-05</Iyz>
-            </inertia>
-         </physical>
-         <parent>
-            <num>29</num>
-            <location>-0.0211 0.01479 -0.04629</location>
-         </parent>
-      </link_rigid>
-      <link_rigid name="wrist_right_1" num="31">
+      <link_rigid name="wrist_right_1" num="23">
          <joint axis="0.9991 -0.04032 -0.01255" q_initial="0.0" q_max="0.5236" q_min="-0.5236" type="R_AXIS"/>
          <physical>
             <mass>0.01276</mass>
@@ -614,538 +454,58 @@
                <Ixx>3.36e-05</Ixx>
                <Iyy>0.001083</Iyy>
                <Izz>0.001055</Izz>
-               <Ixy>-1.62e-05</Ixy>
+               <Ixy>-1.621e-05</Ixy>
                <Ixz>-2.738e-06</Ixz>
                <Iyz>-0.0001795</Iyz>
             </inertia>
          </physical>
          <parent>
-            <num>13</num>
+            <num>21</num>
             <location>0.01274 -0.006456 -0.2646</location>
          </parent>
       </link_rigid>
-      <link_rigid name="right_palm" num="32">
+      <link_rigid name="right_hand" num="24">
          <joint axis="0.04004 0.9989 -0.02244" q_initial="0.0" q_max="0.5236" q_min="-0.5236" type="R_AXIS"/>
          <physical>
-            <mass>0.05104</mass>
-            <com_location>0.0006073 -0.01811 -0.05182</com_location>
-            <end_location>0.0243 -0.04224 -0.04634</end_location>
+            <mass>0.2081</mass>
+            <com_location>0.01553 -0.01473 -0.07935</com_location>
+            <end_location>0.03106 -0.02947 -0.1587</end_location>
             <inertia ref="com">
-               <Ixx>0.0005968</Ixx>
-               <Iyy>0.004718</Iyy>
-               <Izz>0.004163</Izz>
-               <Ixy>-7.482e-05</Ixy>
-               <Ixz>-2.448e-05</Ixz>
-               <Iyz>-0.001495</Iyz>
+               <Ixx>0.007557</Ixx>
+               <Iyy>0.01991</Iyy>
+               <Izz>0.01897</Izz>
+               <Ixy>-0.003871</Ixy>
+               <Ixz>-0.002702</Ixz>
+               <Iyz>-0.007626</Iyz>
             </inertia>
          </physical>
          <parent>
-            <num>31</num>
+            <num>23</num>
             <location>-0.00979 0.0179 -0.000261</location>
          </parent>
       </link_rigid>
-      <link_rigid name="right_index_limb0" num="33">
-         <joint axis="-0.04215 -0.9706 -0.2371" q_initial="0.0" q_max="0.5236" q_min="-0.5236" type="R_AXIS"/>
+      <link_rigid name="left_hand" num="25">
+         <joint axis="-0.06198 0.9978 -0.02217" q_initial="0.0" q_max="0.5236" q_min="-0.5236" type="R_AXIS"/>
          <physical>
-            <mass>0.000427</mass>
-            <com_location>-0.0001784 -0.007452 -0.001093</com_location>
-            <end_location>-0.002908 -0.007531 -0.0002882</end_location>
+            <mass>0.1865</mass>
+            <com_location>-0.01573 0.01518 -0.08435</com_location>
+            <end_location>-0.03145 0.03037 -0.1687</end_location>
             <inertia ref="com">
-               <Ixx>9.452e-06</Ixx>
-               <Iyy>4.444e-05</Iyy>
-               <Izz>3.512e-05</Izz>
-               <Ixy>1.466e-06</Ixy>
-               <Ixz>7.578e-07</Ixz>
-               <Iyz>-1.813e-05</Iyz>
+               <Ixx>0.007424</Ixx>
+               <Iyy>0.01768</Iyy>
+               <Izz>0.01687</Izz>
+               <Ixy>0.003802</Ixy>
+               <Ixz>-0.002694</Ixz>
+               <Iyz>0.007164</Iyz>
             </inertia>
          </physical>
          <parent>
-            <num>32</num>
-            <location>-0.000949 0.006446 -0.09624</location>
+            <num>22</num>
+            <location>0.01156 -0.01682 -2.808e-06</location>
          </parent>
       </link_rigid>
-      <link_rigid name="right_index_limb1" num="34">
-         <joint axis="-0.8639 -0.08376 0.4966" q_initial="0.0" q_max="0.3142" q_min="-0.3142" type="R_AXIS"/>
-         <physical>
-            <mass>0.00383</mass>
-            <com_location>0.001771 0.00597 -0.02476</com_location>
-            <end_location>0.002756 0.01772 -0.04985</end_location>
-            <inertia ref="com">
-               <Ixx>0.0001157</Ixx>
-               <Iyy>0.0004309</Iyy>
-               <Izz>0.0003178</Izz>
-               <Ixy>1.968e-05</Ixy>
-               <Ixz>1.199e-05</Ixz>
-               <Iyz>-0.0001896</Iyz>
-            </inertia>
-         </physical>
-         <parent>
-            <num>33</num>
-            <location>-0.002908 -0.007531 -0.0002882</location>
-         </parent>
-      </link_rigid>
-      <link_rigid name="right_index_limb2" num="35">
-         <joint axis="-0.04215 -0.9706 -0.2371" q_initial="0.0" q_max="1.92" q_min="0" type="R_AXIS"/>
-         <physical>
-            <mass>0.001625</mass>
-            <com_location>-0.00186 -0.002286 -0.01351</com_location>
-            <end_location>-0.001645 0.006141 -0.03118</end_location>
-            <inertia ref="com">
-               <Ixx>7.358e-05</Ixx>
-               <Iyy>0.0002074</Iyy>
-               <Izz>0.0001363</Izz>
-               <Ixy>1.281e-05</Ixy>
-               <Ixz>9.399e-06</Ixz>
-               <Iyz>-9.877e-05</Iyz>
-            </inertia>
-         </physical>
-         <parent>
-            <num>34</num>
-            <location>0.002756 0.01772 -0.04985</location>
-         </parent>
-      </link_rigid>
-      <link_rigid name="right_little_limb0" num="36">
-         <joint axis="-0.04139 -0.8761 -0.4804" q_initial="0.0" q_max="0.5236" q_min="-0.5236" type="R_AXIS"/>
-         <physical>
-            <mass>0.000427</mass>
-            <com_location>-0.0001805 -0.006915 -0.002985</com_location>
-            <end_location>-0.002919 -0.007187 -0.002255</end_location>
-            <inertia ref="com">
-               <Ixx>8.005e-06</Ixx>
-               <Iyy>4.257e-05</Iyy>
-               <Izz>3.517e-05</Izz>
-               <Ixy>3.223e-06</Ixy>
-               <Ixz>1.514e-06</Ixz>
-               <Iyz>-1.638e-05</Iyz>
-            </inertia>
-         </physical>
-         <parent>
-            <num>32</num>
-            <location>-0.0001889 0.02035 -0.0804</location>
-         </parent>
-      </link_rigid>
-      <link_rigid name="right_little_limb1" num="37">
-         <joint axis="-0.8694 -0.2053 0.4494" q_initial="0.0" q_max="0.3142" q_min="-0.3142" type="R_AXIS"/>
-         <physical>
-            <mass>0.003829</mass>
-            <com_location>0.002051 0.01216 -0.02235</com_location>
-            <end_location>0.003331 0.03 -0.04354</end_location>
-            <inertia ref="com">
-               <Ixx>9.968e-05</Ixx>
-               <Iyy>0.000408</Iyy>
-               <Izz>0.0003201</Izz>
-               <Ixy>4.203e-05</Ixy>
-               <Ixz>2.325e-05</Ixz>
-               <Iyz>-0.000171</Iyz>
-            </inertia>
-         </physical>
-         <parent>
-            <num>36</num>
-            <location>-0.002919 -0.007187 -0.002255</location>
-         </parent>
-      </link_rigid>
-      <link_rigid name="right_little_limb2" num="38">
-         <joint axis="-0.04139 -0.8761 -0.4804" q_initial="0.0" q_max="1.92" q_min="0" type="R_AXIS"/>
-         <physical>
-            <mass>0.001625</mass>
-            <com_location>-0.001718 0.001294 -0.01366</com_location>
-            <end_location>-0.001295 0.014 -0.02855</end_location>
-            <inertia ref="com">
-               <Ixx>6.466e-05</Ixx>
-               <Iyy>0.000193</Iyy>
-               <Izz>0.0001391</Izz>
-               <Ixy>2.678e-05</Ixy>
-               <Ixz>1.787e-05</Ixz>
-               <Iyz>-8.892e-05</Iyz>
-            </inertia>
-         </physical>
-         <parent>
-            <num>37</num>
-            <location>0.003331 0.03 -0.04354</location>
-         </parent>
-      </link_rigid>
-      <link_rigid name="right_middle_limb0" num="39">
-         <joint axis="-0.04004 -0.9989 0.02244" q_initial="0.0" q_max="0.5236" q_min="-0.5236" type="R_AXIS"/>
-         <physical>
-            <mass>0.000427</mass>
-            <com_location>-0.0001547 -0.007481 0.0008728</com_location>
-            <end_location>-0.002876 -0.007354 0.0017</end_location>
-            <inertia ref="com">
-               <Ixx>1.003e-05</Ixx>
-               <Iyy>4.526e-05</Iyy>
-               <Izz>3.529e-05</Izz>
-               <Ixy>-9.201e-07</Ixy>
-               <Ixz>-4.898e-07</Ixz>
-               <Iyz>-1.878e-05</Iyz>
-            </inertia>
-         </physical>
-         <parent>
-            <num>32</num>
-            <location>-0.001819 -0.013 -0.103</location>
-         </parent>
-      </link_rigid>
-      <link_rigid name="right_middle_limb1" num="40">
-         <joint axis="-0.8585 0.04588 0.5107" q_initial="0.0" q_max="0.6109" q_min="-0.6109" type="R_AXIS"/>
-         <physical>
-            <mass>0.003829</mass>
-            <com_location>0.001496 -0.0006325 -0.02548</com_location>
-            <end_location>0.002175 0.004233 -0.05276</end_location>
-            <inertia ref="com">
-               <Ixx>0.0001221</Ixx>
-               <Iyy>0.0004408</Iyy>
-               <Izz>0.0003192</Izz>
-               <Ixy>-8.846e-06</Ixy>
-               <Ixz>-5.464e-06</Ixz>
-               <Iyz>-0.0001964</Iyz>
-            </inertia>
-         </physical>
-         <parent>
-            <num>39</num>
-            <location>-0.002876 -0.007354 0.0017</location>
-         </parent>
-      </link_rigid>
-      <link_rigid name="right_middle_limb2" num="41">
-         <joint axis="-0.04004 -0.9989 0.02244" q_initial="0.0" q_max="1.92" q_min="0" type="R_AXIS"/>
-         <physical>
-            <mass>0.001625</mass>
-            <com_location>-0.001985 -0.005706 -0.01244</com_location>
-            <end_location>-0.001986 -0.002134 -0.03169</end_location>
-            <inertia ref="com">
-               <Ixx>7.709e-05</Ixx>
-               <Iyy>0.0002135</Iyy>
-               <Izz>0.0001367</Izz>
-               <Ixy>-4.166e-06</Ixy>
-               <Ixz>-3.127e-06</Ixz>
-               <Iyz>-0.0001024</Iyz>
-            </inertia>
-         </physical>
-         <parent>
-            <num>40</num>
-            <location>0.002175 0.004233 -0.05276</location>
-         </parent>
-      </link_rigid>
-      <link_rigid name="right_ring_limb0" num="42">
-         <joint axis="-0.03519 -0.9592 0.2804" q_initial="0.0" q_max="0.5236" q_min="-0.5236" type="R_AXIS"/>
-         <physical>
-            <mass>0.000427</mass>
-            <com_location>-0.0001111 -0.007002 0.002779</com_location>
-            <end_location>-0.002825 -0.00667 0.003575</end_location>
-            <inertia ref="com">
-               <Ixx>9.587e-06</Ixx>
-               <Iyy>4.472e-05</Iyy>
-               <Izz>3.575e-05</Izz>
-               <Ixy>-3.291e-06</Ixy>
-               <Ixz>-1.683e-06</Ixz>
-               <Iyz>-1.813e-05</Iyz>
-            </inertia>
-         </physical>
-         <parent>
-            <num>32</num>
-            <location>-0.002568 -0.03273 -0.09925</location>
-         </parent>
-      </link_rigid>
-      <link_rigid name="right_ring_limb1" num="43">
-         <joint axis="-0.8536 0.1748 0.4908" q_initial="0.0" q_max="0.3142" q_min="-0.3142" type="R_AXIS"/>
-         <physical>
-            <mass>0.003829</mass>
-            <com_location>0.001243 -0.007197 -0.02446</com_location>
-            <end_location>0.001628 -0.009552 -0.05209</end_location>
-            <inertia ref="com">
-               <Ixx>0.0001173</Ixx>
-               <Iyy>0.0004339</Iyy>
-               <Izz>0.0003255</Izz>
-               <Ixy>-3.728e-05</Ixy>
-               <Ixz>-2.226e-05</Ixz>
-               <Iyz>-0.0001897</Iyz>
-            </inertia>
-         </physical>
-         <parent>
-            <num>42</num>
-            <location>-0.002825 -0.00667 0.003575</location>
-         </parent>
-      </link_rigid>
-      <link_rigid name="right_ring_limb2" num="44">
-         <joint axis="-0.03519 -0.9592 0.2804" q_initial="0.0" q_max="1.92" q_min="0" type="R_AXIS"/>
-         <physical>
-            <mass>0.001625</mass>
-            <com_location>-0.002083 -0.008732 -0.01052</com_location>
-            <end_location>-0.002293 -0.01026 -0.03003</end_location>
-            <inertia ref="com">
-               <Ixx>7.451e-05</Ixx>
-               <Iyy>0.0002091</Iyy>
-               <Izz>0.0001411</Izz>
-               <Ixy>-2.116e-05</Ixy>
-               <Ixz>-1.523e-05</Ixz>
-               <Iyz>-9.899e-05</Iyz>
-            </inertia>
-         </physical>
-         <parent>
-            <num>43</num>
-            <location>0.001628 -0.009552 -0.05209</location>
-         </parent>
-      </link_rigid>
-      <link_rigid name="right_thumb_limb0" num="45">
-         <joint axis="-0.8842 -0.326 -0.3346" q_initial="0.0" q_max="0.7854" q_min="-1.047" type="R_AXIS"/>
-         <physical>
-            <mass>0.000427</mass>
-            <com_location>-0.006914 -0.00235 -0.001855</com_location>
-            <end_location>-0.006302 -0.004969 -0.0009212</end_location>
-            <inertia ref="com">
-               <Ixx>4.625e-06</Ixx>
-               <Iyy>3.487e-05</Iyy>
-               <Izz>3.11e-05</Izz>
-               <Ixy>-3.617e-06</Ixy>
-               <Ixz>-1.338e-06</Ixz>
-               <Iyz>-1.134e-05</Iyz>
-            </inertia>
-         </physical>
-         <parent>
-            <num>32</num>
-            <location>0.0243 -0.04224 -0.04634</location>
-         </parent>
-      </link_rigid>
-      <link_rigid name="right_thumb_limb1" num="46">
-         <joint axis="0.1097 -0.8412 0.5295" q_initial="0.0" q_max="0.3142" q_min="-0.3142" type="R_AXIS"/>
-         <physical>
-            <mass>0.003829</mass>
-            <com_location>0.001781 0.001249 -0.02544</com_location>
-            <end_location>-0.001518 0.0004915 -0.05295</end_location>
-            <inertia ref="com">
-               <Ixx>6.364e-05</Ixx>
-               <Iyy>0.0003296</Iyy>
-               <Izz>0.0002744</Izz>
-               <Ixy>-3.353e-05</Ixy>
-               <Ixz>-1.566e-05</Ixz>
-               <Iyz>-0.0001256</Iyz>
-            </inertia>
-         </physical>
-         <parent>
-            <num>45</num>
-            <location>-0.006302 -0.004969 -0.0009212</location>
-         </parent>
-      </link_rigid>
-      <link_rigid name="right_thumb_limb2" num="47">
-         <joint axis="0.9812 0.1767 0.07737" q_initial="0.0" q_max="1.92" q_min="0" type="R_AXIS"/>
-         <physical>
-            <mass>0.001625</mass>
-            <com_location>0.003007 0.01321 0.002772</com_location>
-            <end_location>-0.0046 0.03034 0.008433</end_location>
-            <inertia ref="com">
-               <Ixx>3.661e-05</Ixx>
-               <Iyy>0.0001507</Iyy>
-               <Izz>0.0001157</Izz>
-               <Ixy>-8.836e-06</Ixy>
-               <Ixz>-4.98e-06</Ixz>
-               <Iyz>-6.408e-05</Iyz>
-            </inertia>
-         </physical>
-         <parent>
-            <num>46</num>
-            <location>-0.001518 0.0004915 -0.05295</location>
-         </parent>
-      </link_rigid>
-      <link_rigid name="left_ring_limb3" num="48">
-         <joint axis="-0.0506 0.9702 0.2372" q_initial="0.0" q_max="1.222" q_min="0" type="R_AXIS"/>
-         <physical>
-            <mass>0.0006944</mass>
-            <com_location>0.000224 0.005801 -0.006815</com_location>
-            <end_location>0.0004481 0.0116 -0.01363</end_location>
-            <inertia ref="com">
-               <Ixx>3.888e-05</Ixx>
-               <Iyy>9.15e-05</Iyy>
-               <Izz>5.422e-05</Izz>
-               <Ixy>-6.514e-06</Ixy>
-               <Ixz>5.504e-06</Ixz>
-               <Iyz>4.509e-05</Iyz>
-            </inertia>
-         </physical>
-         <parent>
-            <num>27</num>
-            <location>-0.0001866 0.008998 -0.03052</location>
-         </parent>
-      </link_rigid>
-      <link_rigid name="left_little_limb3" num="49">
-         <joint axis="-0.03578 0.8764 0.4803" q_initial="0.0" q_max="1.222" q_min="0" type="R_AXIS"/>
-         <physical>
-            <mass>0.0006944</mass>
-            <com_location>0.0008884 0.007355 -0.005025</com_location>
-            <end_location>0.001777 0.01471 -0.01005</end_location>
-            <inertia ref="com">
-               <Ixx>3.449e-05</Ixx>
-               <Iyy>8.692e-05</Iyy>
-               <Izz>5.948e-05</Izz>
-               <Ixy>-1.403e-05</Ixy>
-               <Ixz>1.045e-05</Ixz>
-               <Iyz>4.161e-05</Iyz>
-            </inertia>
-         </physical>
-         <parent>
-            <num>21</num>
-            <location>0.002245 0.01662 -0.02704</location>
-         </parent>
-      </link_rigid>
-      <link_rigid name="left_thumb_limb3" num="50">
-         <joint axis="0.8731 -0.3085 -0.3776" q_initial="0.0" q_max="1.222" q_min="0" type="R_AXIS"/>
-         <physical>
-            <mass>0.0006944</mass>
-            <com_location>0.006404 -0.002068 0.005903</com_location>
-            <end_location>0.01281 -0.004136 0.01181</end_location>
-            <inertia ref="com">
-               <Ixx>1.08e-05</Ixx>
-               <Iyy>5.932e-05</Iyy>
-               <Izz>4.855e-05</Izz>
-               <Ixy>-7.554e-07</Ixy>
-               <Ixz>3.584e-07</Ixz>
-               <Iyz>2.284e-05</Iyz>
-            </inertia>
-         </physical>
-         <parent>
-            <num>30</num>
-            <location>0.01536 0.02584 0.01043</location>
-         </parent>
-      </link_rigid>
-      <link_rigid name="left_index_limb3" num="51">
-         <joint axis="-0.06913 0.9575 -0.28" q_initial="0.0" q_max="1.222" q_min="0" type="R_AXIS"/>
-         <physical>
-            <mass>0.0006944</mass>
-            <com_location>0.0004055 0.001636 -0.008792</com_location>
-            <end_location>0.000811 0.003272 -0.01758</end_location>
-            <inertia ref="com">
-               <Ixx>3.936e-05</Ixx>
-               <Iyy>9.296e-05</Iyy>
-               <Izz>5.739e-05</Izz>
-               <Ixy>1.024e-05</Ixy>
-               <Ixz>-8.415e-06</Ixz>
-               <Iyz>4.558e-05</Iyz>
-            </inertia>
-         </physical>
-         <parent>
-            <num>18</num>
-            <location>0.0008043 -0.007421 -0.03093</location>
-         </parent>
-      </link_rigid>
-      <link_rigid name="left_middle_limb3" num="52">
-         <joint axis="-0.06198 0.9978 -0.02217" q_initial="0.0" q_max="1.222" q_min="0" type="R_AXIS"/>
-         <physical>
-            <mass>0.0006944</mass>
-            <com_location>0.0002966 0.003848 -0.008078</com_location>
-            <end_location>0.0005932 0.007695 -0.01616</end_location>
-            <inertia ref="com">
-               <Ixx>4.058e-05</Ixx>
-               <Iyy>9.485e-05</Iyy>
-               <Izz>5.438e-05</Izz>
-               <Ixy>1.722e-06</Ixy>
-               <Ixz>-1.487e-06</Ixz>
-               <Iyz>4.69e-05</Iyz>
-            </inertia>
-         </physical>
-         <parent>
-            <num>24</num>
-            <location>0.000267 0.000813 -0.03181</location>
-         </parent>
-      </link_rigid>
-      <link_rigid name="right_ring_limb3" num="53">
-         <joint axis="-0.03519 -0.9592 0.2804" q_initial="0.0" q_max="1.222" q_min="0" type="R_AXIS"/>
-         <physical>
-            <mass>0.0006944</mass>
-            <com_location>-0.001158 -0.006031 -0.006513</com_location>
-            <end_location>-0.002315 -0.01206 -0.01303</end_location>
-            <inertia ref="com">
-               <Ixx>4.034e-05</Ixx>
-               <Iyy>9.789e-05</Iyy>
-               <Izz>6.135e-05</Izz>
-               <Ixy>-1.062e-05</Ixy>
-               <Ixz>-8.541e-06</Ixz>
-               <Iyz>-4.779e-05</Iyz>
-            </inertia>
-         </physical>
-         <parent>
-            <num>44</num>
-            <location>-0.002293 -0.01026 -0.03003</location>
-         </parent>
-      </link_rigid>
-      <link_rigid name="right_little_limb3" num="54">
-         <joint axis="-0.04139 -0.8761 -0.4804" q_initial="0.0" q_max="1.222" q_min="0" type="R_AXIS"/>
-         <physical>
-            <mass>0.0006944</mass>
-            <com_location>-0.0009298 0.0003566 -0.008896</com_location>
-            <end_location>-0.00186 0.0007132 -0.01779</end_location>
-            <inertia ref="com">
-               <Ixx>3.544e-05</Ixx>
-               <Iyy>8.933e-05</Iyy>
-               <Izz>6.081e-05</Izz>
-               <Ixy>1.407e-05</Ixy>
-               <Ixz>1.051e-05</Ixz>
-               <Iyz>-4.281e-05</Iyz>
-            </inertia>
-         </physical>
-         <parent>
-            <num>38</num>
-            <location>-0.001295 0.014 -0.02855</location>
-         </parent>
-      </link_rigid>
-      <link_rigid name="right_thumb_limb3" num="55">
-         <joint axis="0.9812 0.1767 0.07737" q_initial="0.0" q_max="1.222" q_min="0" type="R_AXIS"/>
-         <physical>
-            <mass>0.0006944</mass>
-            <com_location>0.00301 0.002378 0.008088</com_location>
-            <end_location>0.006021 0.004757 0.01618</end_location>
-            <inertia ref="com">
-               <Ixx>1.261e-05</Ixx>
-               <Iyy>6.341e-05</Iyy>
-               <Izz>5.081e-05</Izz>
-               <Ixy>-1.895e-07</Ixy>
-               <Ixz>-9.989e-08</Ixz>
-               <Iyz>-2.528e-05</Iyz>
-            </inertia>
-         </physical>
-         <parent>
-            <num>47</num>
-            <location>-0.0046 0.03034 0.008433</location>
-         </parent>
-      </link_rigid>
-      <link_rigid name="right_index_limb3" num="56">
-         <joint axis="-0.04215 -0.9706 -0.2371" q_initial="0.0" q_max="1.222" q_min="0" type="R_AXIS"/>
-         <physical>
-            <mass>0.0006944</mass>
-            <com_location>-0.00102 -0.001958 -0.008675</com_location>
-            <end_location>-0.002041 -0.003916 -0.01735</end_location>
-            <inertia ref="com">
-               <Ixx>3.987e-05</Ixx>
-               <Iyy>9.713e-05</Iyy>
-               <Izz>5.885e-05</Izz>
-               <Ixy>6.788e-06</Ixy>
-               <Ixz>5.572e-06</Ixz>
-               <Iyz>-4.761e-05</Iyz>
-            </inertia>
-         </physical>
-         <parent>
-            <num>35</num>
-            <location>-0.001645 0.006141 -0.03118</location>
-         </parent>
-      </link_rigid>
-      <link_rigid name="right_middle_limb3" num="57">
-         <joint axis="-0.04004 -0.9989 0.02244" q_initial="0.0" q_max="1.222" q_min="0" type="R_AXIS"/>
-         <physical>
-            <mass>0.0006944</mass>
-            <com_location>-0.001098 -0.004137 -0.007863</com_location>
-            <end_location>-0.002196 -0.008274 -0.01573</end_location>
-            <inertia ref="com">
-               <Ixx>4.16e-05</Ixx>
-               <Iyy>0.0001003</Iyy>
-               <Izz>5.886e-05</Izz>
-               <Ixy>-1.901e-06</Ixy>
-               <Ixz>-1.598e-06</Ixz>
-               <Iyz>-4.941e-05</Iyz>
-            </inertia>
-         </physical>
-         <parent>
-            <num>41</num>
-            <location>-0.001986 -0.002134 -0.03169</location>
-         </parent>
-      </link_rigid>
-      <link_rigid name="head" num="58">
-         <joint axis="0 0 1" q_initial="0.0" q_max="0.5236" q_min="-0.5236" type="R_AXIS"/>
+      <link_rigid name="head" num="26">
+         <joint axis="-2.413e-14 8.243e-15 1" q_initial="0.0" q_max="0.5236" q_min="-0.5236" type="R_AXIS"/>
          <physical>
             <mass>0.009634</mass>
             <com_location>0.0006492 0.01352 0.1554</com_location>
@@ -1155,20 +515,20 @@
                <Iyy>0.008002</Iyy>
                <Izz>0.0001126</Izz>
                <Ixy>4.053e-06</Ixy>
-               <Ixz>0.0008835</Ixz>
+               <Ixz>0.0008836</Ixz>
                <Iyz>-3.559e-05</Iyz>
             </inertia>
          </physical>
          <parent>
-            <num>3</num>
-            <location>1.698e-19 -9.975e-18 0</location>
+            <num>11</num>
+            <location>3.511e-19 -7.589e-18 -3.331e-16</location>
          </parent>
       </link_rigid>
    </links>
    <operational_spaces default_operational_set="ee_default">
       <operational_set id="ee_default">
          <position marker_id="1" name="ee_default">
-            <link>58</link>
+            <link>26</link>
             <offset>0.001298 0.02705 0.3108</offset>
             <axes active_axes="xyz"/>
          </position>
