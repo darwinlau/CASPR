@@ -30,7 +30,7 @@ classdef CARDSFlowInterface < CableActuatorInterfaceBase
         robot_state_msg_type = 'geometry_msgs/PoseStamped';        
         % Tendon state
         tendon_state_topic = '/tendon_state';   
-        tendon_state_msg_type = 'roboy_communication_simulation/Tendon';               
+        tendon_state_msg_type = 'roboy_simulation_msgs/Tendon';               
     end
     
     methods (Access = public)
@@ -155,7 +155,7 @@ classdef CARDSFlowInterface < CableActuatorInterfaceBase
                     v_count = v_count + 1;
                 end                     
             end              
-            obj.tendon_state_msg.ViaPoints = via_array;
+            obj.tendon_state_msg.Viapoints = via_array;
             obj.tendon_state_msg.Name = cable_Names;
             obj.tendon_state_msg.NumberOfViapoints = n_Viapoints;
             obj.tendon_state_msg.L = cdpr.cableLengths;
