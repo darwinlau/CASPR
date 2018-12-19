@@ -1619,7 +1619,10 @@ classdef SystemModelBodies < handle
                 CASPR_log.Info('- Compiling Dynamics Variables...'); 
                 matlabFunction(obj.M_b, 'File', strcat(path, '/compile_M_b'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
                 matlabFunction(obj.C_b, 'File', strcat(path, '/compile_C_b'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
-                matlabFunction(obj.G_b, 'File', strcat(path, '/compile_G_b'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
+                matlabFunction(obj.G_b, 'File', strcat(path, '/compile_G_b'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});  
+                matlabFunction(obj.M, 'File', strcat(path, '/compile_M'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
+                matlabFunction(obj.C, 'File', strcat(path, '/compile_C'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
+                matlabFunction(obj.G, 'File', strcat(path, '/compile_G'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
                 obj.compiled.dynamics = true;               
             end            
         end
