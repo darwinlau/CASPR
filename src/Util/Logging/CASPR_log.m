@@ -55,14 +55,18 @@ classdef CASPR_log
             if (log_level >= set_log_level)
                 switch (log_level)
                     case CASPRLogLevel.DEBUG
-                        fprintf(fid,['[DEBUG] ', str, carrage_return]);
+                        fprintf(fid,['[DEBUG] ', str]);
+                        fprintf(fid,newline);
                     case CASPRLogLevel.INFO
-                        fprintf(fid,['[INFO] ', str, carrage_return]);
+                        fprintf(fid,['[INFO] ', str]);
+                        fprintf(fid,newline);
                     case CASPRLogLevel.WARNING
-                        fprintf(fid,['[WARNING] ', str, carrage_return]);
+                        fprintf(fid,['[WARNING] ', str]);
+                        fprintf(fid,newline);
                         warning(str);
                     case CASPRLogLevel.ERROR
-                        fprintf(fid,['[ERROR] ', str, carrage_return]);
+                        fprintf(fid,['[ERROR] ', str]);
+                        fprintf(fid,newline);
                         error(str);
                     otherwise
                         error('The specified log level is not valid');
@@ -81,14 +85,16 @@ classdef CASPR_log
             % Determine the what to print to
             if(isempty(log_path))
                 fid = 1;
-                carrage_return = '\n';
+%                 carrage_return = '\n';
+                carrage_return = '\n\r';
             else
                 fid = fopen(log_path,'a');
-                if(isunix||ismac)
-                    carrage_return = '\n';
-                else
-                    carrage_return = '\r\n';
-                end
+                carrage_return = '\n\r';
+%                 if(isunix||ismac)
+%                     carrage_return = '\n';
+%                 else
+%                     carrage_return = '\r\n';
+%                 end
             end
         end
     end
