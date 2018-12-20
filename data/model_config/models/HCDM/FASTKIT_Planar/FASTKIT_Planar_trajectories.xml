@@ -91,5 +91,39 @@
           </point>  
         </points>
       </quintic_spline_trajectory>
+      <quintic_spline_trajectory id="star_fast" time_step="0.01" time_definition="relative">
+        <points>
+          <point>
+            <y>1.5 0.0 1.5</y>
+            <y_dot>0.0 0.0 0.0</y_dot>
+            <y_ddot>0.0 0.0 0.0</y_ddot>
+          </point>
+          <point time="2">
+            <y>-0.92 -1.77 1.5</y>
+            <y_dot>0.0 0.0 0.0</y_dot>
+            <y_ddot>0.0 0.0 0.0</y_ddot>
+          </point>  
+          <point time="2">
+            <y>0 1.08 1.5</y>
+            <y_dot>0.0 0.0 0.0</y_dot>
+            <y_ddot>0.0 0.0 0.0</y_ddot>
+          </point>
+          <point time="2">
+            <y>0.92 -1.77 1.5</y>
+            <y_dot>0.0 0.0 0.0</y_dot>
+            <y_ddot>0.0 0.0 0.0</y_ddot>
+          </point>   
+          <point time="2">
+            <y>-1.5 0 1.5</y>
+            <y_dot>0.0 0.0 0.0</y_dot>
+            <y_ddot>0.0 0.0 0.0</y_ddot>
+          </point> 
+          <point time="2">
+            <y>1.5 0 1.5</y>
+            <y_dot>0.0 0.0 0.0</y_dot>
+            <y_ddot>0.0 0.0 0.0</y_ddot>
+          </point>  
+        </points>
+      </quintic_spline_trajectory>
     </operational_trajectories>
 </trajectories>
