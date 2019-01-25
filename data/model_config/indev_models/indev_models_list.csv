@@ -17,3 +17,5 @@ Spatial_Tree,/CUHK/ray_workspace_testing/Spatial_Tree/,Spatial_Tree_bodies.xml,S
 Planar_leg_prototype,/CUHK/Planar_leg_prototype/,CUHK_Planar_leg_prototype_bodies.xml,CUHK_Planar_leg_prototype_cables.xml,CUHK_Planar_leg_prototype_trajectories.xml
 DrainageServiceBot,/CUHK/PoCaBot_family/DrainageService/,DrainageServiceBot_bodies.xml,DrainageServiceBot_cables.xml,DrainageServiceBot_trajectories.xml
 PoCaBoss,/CUHK/PoCaBot_family/PoCaBoss/,PoCaBoss_bodies.xml,PoCaBoss_cables.xml,PoCaBoss_trajectories.xml
+fyplightpaint,/CUHK/PoCaBot_family/fyplightpaint/,fyplightpaint_bodies.xml,fyplightpaint_cables.xml,fyplightpaint_trajectories.xml,
+legacyDingbot,/CUHK/PoCaBot_family/legacyDingbot/,legacyDingbot_bodies.xml,legacyDingbot_cables.xml,legacyDingbot_trajectories.xml,
