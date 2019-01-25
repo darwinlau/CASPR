@@ -15,6 +15,7 @@ classdef PoCaBotExperiment < ExperimentBase
         ee_real
         hText
         ax_plot
+        gripper
         
         server
         % This variable is for recording the initial original length for 
@@ -57,8 +58,8 @@ classdef PoCaBotExperiment < ExperimentBase
     methods
         % strCOMPort should be an array of cells, each one of which
         % indicate a COM port with a string format. e.g. strCOMPort = {'COM3','COM5'};
-        function exp = PoCaBotExperiment(modelObj,strCOMPort, actuatorMotor, timestep, server)
-            hw_interface = PoCaBotCASPRInterface(strCOMPort, actuatorMotor, modelObj.numActuators,false);  %1
+        function exp = PoCaBotExperiment(modelObj, strCOMPort, actuatorMotor, timestep, gripperOn, server)
+            hw_interface = PoCaBotCASPRInterface(strCOMPort, actuatorMotor, modelObj.numActuators,false, gripperOn);  %1
             exp@ExperimentBase(hw_interface, modelObj);
             exp.numMotor = modelObj.numActuators;
             %            eb.forwardKin = FKDifferential(modelObj);
@@ -103,9 +104,13 @@ classdef PoCaBotExperiment < ExperimentBase
                 
                 axes(exp.ax_plot);
             end
-            if(nargin >=4 && exist('server','var'))
+            if(nargin >=3 && exist('server','var'))
                 exp.server = server;
             end
+            if(nargin >=3 && exist('gripperOn','var'))
+                exp.gripper = gripperOn;
+            end
+
         end
         
 %         function motorTest(obj)
@@ -443,7 +448,10 @@ classdef PoCaBotExperiment < ExperimentBase
             obj.hardwareInterface.motorPosInitialSend(init_pos);
             
             obj.hardwareInterface.switchOperatingMode2POSITION_LIMITEDCURRENT();
-            obj.hardwareInterface.setKpP(ones(obj.numMotor,1)*obj.hardwareInterface.ActuatorParas.KpP);
+            % %%%%
+%             obj.hardwareInterface.setKpP(ones(obj.numMotor,1)*obj.hardwareInterface.ActuatorParas.KpP);
+            obj.hardwareInterface.setKpP([2000;1000;2000;1000;2000;1000;2000;1000;]);
+            % %%%%
             try
                 obj.hardwareInterface.setKpI(ones(obj.numMotor,1)*obj.hardwareInterface.ActuatorParas.KpI);
                 obj.hardwareInterface.setKpD(ones(obj.numMotor,1)*obj.hardwareInterface.ActuatorParas.KpD);
@@ -518,12 +526,15 @@ classdef PoCaBotExperiment < ExperimentBase
                 obj.model.update(trajectory.q(:,t), trajectory.q_dot(:,t), trajectory.q_ddot(:,t),zeros(size(trajectory.q_dot(:,t))));
                 
                 [~, model_temp, ~, ~, ~] = obj.idsim.IDSolver.resolve(trajectory.q(:,t), trajectory.q_dot(:,t), trajectory.q_ddot(:,t), zeros(obj.idsim.model.numDofs,1));
-                [offset] = obj.hardwareInterface.getCableOffsetByTension(model_temp.cableForces);
+%                 [~] = obj.hardwareInterface.getCableOffsetByTension(model_temp.cableForces);
+                [offset] = obj.hardwareInterface.IDcableOffset(model_temp.cableForces,model_temp.cableLengths);
 %                 if(any(model_temp.cableForces<0))
 %                     fprintf('The force solved from ID gets beyond the limit!!!\n');
 %                 end
-                offset = zeros(size(offset,1),size(offset,2)); %%TEMP
-                lengthCommand = model_temp.cableLengths ./(1+obj.elongation_per_Newton.*model_temp.cableForces) + offset;
+%                 offset = zeros(size(offset,1),size(offset,2)); %%TEMP
+%                 offset = [0.004;0.002;0.004;0.002;0.004;0.002;0.004;0.002;];
+%                 lengthCommand = model_temp.cableLengths ./(1+obj.elongation_per_Newton.*model_temp.cableForces);
+                lengthCommand = model_temp.cableLengths ./(1+obj.elongation_per_Newton.*model_temp.cableForces) - offset;
 %                 lengthModifiedElongation = lengthCommand - obj.initialLength;
 %                 if(lengthModifiedElongation > 0)
 %                     lengthTuned
@@ -589,44 +600,54 @@ classdef PoCaBotExperiment < ExperimentBase
 %             FileOperation.recordData(data);
         end
 
-        function [lengthfeedback] = runTrajectoryForCalibration(obj, trajectory)
+        function [data] = runTrajectoryForCalibration(obj, trajectory, A, b)
+            if nargin < 4
+                b = zeros(8,1);
+                A = zeros(8,34);
+            end
             obj.l_cmd_traj = zeros(length(trajectory.timeVector),obj.numMotor);
             obj.l_feedback_traj = zeros(length(trajectory.timeVector),obj.numMotor);
             obj.time_abs_traj = zeros(length(trajectory.timeVector),1);
             obj.q_feedback_traj = zeros(length(trajectory.timeVector),obj.model.numDofs);
             obj.time_rel_traj = trajectory.timeVector';
             obj.q_cmd_traj = trajectory.q';
-            lengthfeedback = cell(1,length(trajectory.timeVector));
+            data.lengthfeedback = cell(1,length(trajectory.timeVector));
+            data.lengthTarget = cell(1,length(trajectory.timeVector));
+            data.currentTarget = cell(1,length(trajectory.timeVector));
+            data.currentfeedback = cell(1,length(trajectory.timeVector));
             if(isrow(obj.time_rel_traj))
                 obj.time_rel_traj = trajectory.timeVector;
             end
             offsetLength = obj.hardwareInterface.lengthFeedbackRead;
+            
+            %running trajectory
             for t = 1:1:length(trajectory.timeVector)
+                data.lengthfeedback{t} = obj.hardwareInterface.lengthFeedbackRead;% - offsetLength;
+                data.lengthTarget{t} = obj.model.cableLengths;
+                data.currentTarget{t} = obj.hardwareInterface.goalForceFeedbackRead();
+                data.currentfeedback{t} = obj.hardwareInterface.forceFeedbackRead();
+                x = [trajectory.q(:,t);trajectory.q_dot(:,t);trajectory.q_ddot(:,t); data.currentfeedback{t}; data.lengthTarget{t}];
+                runloop = tic;
                 obj.q_present = trajectory.q(:,t);
                 trajectory.q(:,t) = obj.q_present + obj.q_offset_tuned;
-                tic;
                 % update cable lengths for next command from trajectory
                 obj.model.update(trajectory.q(:,t), trajectory.q_dot(:,t), trajectory.q_ddot(:,t),zeros(size(trajectory.q_dot(:,t))));
+%                 [~, model_temp, ~, ~, ~] = obj.idsim.IDSolver.resolve(trajectory.q(:,t), trajectory.q_dot(:,t), trajectory.q_ddot(:,t), zeros(obj.idsim.model.numDofs,1));
+%                 lengthCommand = model_temp.cableLengths ./(1+obj.elongation_per_Newton.*model_temp.cableForces);
+                lengthOffset = A*x + b;
+                obj.hardwareInterface.lengthCommandSend(obj.model.cableLengths + lengthOffset);
                 
-                [~, model_temp, ~, ~, ~] = obj.idsim.IDSolver.resolve(trajectory.q(:,t), trajectory.q_dot(:,t), trajectory.q_ddot(:,t), zeros(obj.idsim.model.numDofs,1));
-                [offset] = obj.hardwareInterface.getCableOffsetByTension(model_temp.cableForces);
-%                 if(any(model_temp.cableForces<0))
-%                     fprintf('The force solved from ID gets beyond the limit!!!\n');
-%                 end
-                lengthCommand = model_temp.cableLengths ./(1+obj.elongation_per_Newton.*model_temp.cableForces) + offset;
-                obj.hardwareInterface.lengthCommandSend(lengthCommand);
-%                 obj.hardwareInterface.detectLoosenCables();
-%                 lengthfeedback{t} = obj.hardwareInterface.lengthFeedbackRead - obj.initialLength;
-                lengthfeedback{t} = obj.hardwareInterface.lengthFeedbackRead - offsetLength;
-                elapsed = toc;
+                %Getting required data
+                elapsed = toc(runloop);
                 if(elapsed < obj.timestep)
-                    %java.lang.Thread.sleep((obj.timestep - elapsed)*1000);
                     pause(obj.timestep - elapsed);
                 else
-%                     toc
-%                     pause(0.001);
+                    CASPR_log.Info(sprintf('inaccurate frequency, over running %2dms\n',(elapsed - obj.timestep)*1000));
                 end
             end
+            data.q = trajectory.q;
+            data.q_dot = trajectory.q_dot;
+            data.q_ddot = trajectory.q_ddot;
         end
         
         function updateServer(obj, server)

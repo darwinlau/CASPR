@@ -7,7 +7,7 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
         
         
         lib_name
-        port_num            % The generated ID for each COM Port
+        
         
         % including every set of the spool and the dynamixel holders
         accessories
@@ -32,6 +32,7 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
     end
     
     properties (Access = public)
+        port_num            % The generated ID for each COM Port
         % DXL_ID is a column vector including the IDs of all motors
         DXL_ID;
         % The number of the motors found
@@ -44,32 +45,40 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
         dynamixel_position_initial % TEMPORARILY in public
         loosenFactor
         ActuatorParas
+        gripper
     end
     
     methods (Access = public)
         % e.g. comPort = 'COM3'
         % cableLengths_full: SIZE: numMotor x 1
-        function interface = PoCaBotCASPRInterface(comPort, actuatorType, numMotor,dynamixel_direction_reversed)
+        function interface = PoCaBotCASPRInterface(comPort, actuatorType, numMotor, dynamixel_direction_reversed, gripperOn)
             interface@CableActuatorInterfaceBase();
             if(~iscellstr(comPort))
                 CASPR_Log.Error('The argument ''comport'' should be a cell array of character arrays!');
             end
-            switch actuatorType
-                case DynamixelType.XH430_W210
-                    interface.ActuatorParas = XH430_W210;
-                case DynamixelType.XM540_W150
-                    interface.ActuatorParas = XM540_W150;
-                case DynamixelType.PRO_M54_60_S250
-                    interface.ActuatorParas = PRO_M54_60_S250;
-                otherwise
-                    CASPR_Log.Error('ActuatorType has not been implemented');
-            end
+                switch actuatorType
+                    case DynamixelType.XH430_W210
+                        interface.ActuatorParas = XH430_W210;
+                    case DynamixelType.XM540_W150
+                        interface.ActuatorParas = XM540_W150;
+                    case DynamixelType.PRO_M54_60_S250
+                        interface.ActuatorParas = PRO_M54_60_S250;
+                    case DynamixelType.RH_P12_RN
+                        interface.ActuatorParas = RH_P12_RN;
+                    otherwise
+                        CASPR_Log.Error('ActuatorType has not been implemented');
+                end
             interface.numPort = length(comPort);
             interface.DXL_ID = cell(interface.numPort,1);
             interface.DXL_NUM = zeros(interface.numPort,1);
             interface.comPort = comPort;
             interface.numMotor = numMotor;
             interface.dynamixel_direction_reversed = dynamixel_direction_reversed;
+            if(nargin >=3 && exist('gripperOn','var'))
+                interface.gripper = gripperOn;
+            else
+                interface.gripper = 0;
+            end
             if(dynamixel_direction_reversed)
                 interface.dynamixel_direction_factor_position = -1;
                 interface.dynamixel_direction_factor_current  = 1;
@@ -78,7 +87,7 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
                 interface.dynamixel_direction_factor_current  =-1;
             end
             
-            for i = 1: numMotor
+            for i = 1:numMotor
                 accessories_temp(i) = MegaSpoolSpecifications;
             end
             interface.accessories = accessories_temp;
@@ -127,7 +136,7 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
             
             % Initialize PortHandler Structs
             obj.port_num = [];
-            for i = 1:obj.numPort
+            for i = 1:obj.numPort                
                 obj.port_num(i) = portHandler(char(obj.comPort(i)));
             end
             
@@ -183,7 +192,7 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
         function [success] =detectDevice(obj)
             success = 0;
             % Try to broadcast ping the Dynamixels
-            for i = 1:obj.numPort
+            for i = 1:obj.numPort-obj.gripper
                 broadcastPing(obj.port_num(i), obj.PROTOCOL_VERSION);
                 for id = 0 : obj.MAX_ID
                     if getBroadcastPingResult(obj.port_num(i), obj.PROTOCOL_VERSION, id)
@@ -192,9 +201,13 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
                     end
                 end
             end
+%             obj.DXL_NUM = [4;4;2];
+%             obj.DXL_ID{1} = [1,6,7,8];
+%             obj.DXL_ID{2} = [2,3,4,5];
             if(obj.numMotor ~= sum(obj.DXL_NUM))
-                obj.close();
-                CASPR_log.Error('The number of the motors detected does not match the number you specified');
+%                 obj.close();
+%                 CASPR_log.INFO('The number of the motors detected does not match the number you specified');
+            disp('The number of the motors detected does not match the number you specified');
             end
             
             if(sum(obj.DXL_NUM) > 0)
@@ -379,7 +392,7 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
                 current = ones(obj.numMotor,1)*current;
             end
             currentOperatingMode = obj.getOperatingMode;
-            obj.toggleEnableSomeDynamixel(obj.TORQUE_DISABLE, currentOperatingMode ~= motorMode);
+            obj.toggleEnableSomeDynamixel(obj.TORQUE_DISABLE, currentOperatingMode(1:obj.numMotor) ~= motorMode);
             obj.sync_write(obj.ActuatorParas.ADDR_OPERATING_MODE, obj.ActuatorParas.LEN_OPERATING_MODE, motorMode);
             obj.systemOnSend();
             obj.forceCommandSend(current);
@@ -473,6 +486,37 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
             Kp = obj.KpP/obj.ActuatorParas.KpP_SCALE_FACTOR;% KPP = KPP(TBL) / 128
             errAngle = current./Kp;
             offset = -2 * errAngle/obj.ActuatorParas.ENCODER_COUNT_PER_TURN.*[obj.accessories(:).len_per_circle]';
+        end
+        
+        % Below function is written by Ding and designed for AEI CU-Brick
+        % model
+        function [offset] = IDcableOffset(obj,cableForces, cableLength)
+            forceOffsetConstant = 0.001;
+            lengthOffset = zeros(length(cableLength),1);
+            for i = 1:length(cableLength)
+                if cableLength(i) < 1.5
+                    lengthOffsetConstant = 0.003;
+                    lengthOffset(i) = cableLength(i)*lengthOffsetConstant;
+                elseif cableLength(i) > 1.5
+                    lengthOffsetConstant = 0.005;
+                    lengthOffset(i) = cableLength(i)*lengthOffsetConstant;
+                end
+            end
+
+            forceOffset = cableForces.*forceOffsetConstant;
+            offset = forceOffset + lengthOffset        
+            maxOffset = ones(obj.numMotor,1)*0.015;
+            minOffset = [0.004;0.002;0.004;0.002;0.004;0.002;0.004;0.002;];
+            for i = 1:length(offset)
+                if(offset(i)>maxOffset(i))
+%                     fprintf('maxOffset is occured at %d, with size of %3d\n', i, maxOffset(i));
+                    offset(i) = maxOffset(i);
+                end
+                if(offset(i)<minOffset(i))
+%                     fprintf('minOffset is occured at %d, with size of %3d\n', i,minOffset(i));
+                    offset(i) = minOffset(i);
+                end
+            end      
         end
 
         % This function is used to find out which cables in loosed during
@@ -589,7 +633,7 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
         
         % cmd could be TORQUE_ENABLE or TORQUE_DISABLE
         function toggleEnableAllDynamixel(obj, cmd)
-            for i = 1:obj.numPort
+            for i = 1:obj.numPort-obj.gripper
                 currentID_group = cell2mat(obj.DXL_ID(i));
                 for dxl = 1:obj.DXL_NUM(i)
                     write1ByteTxRx(obj.port_num(i), obj.PROTOCOL_VERSION, currentID_group(dxl), obj.ActuatorParas.ADDR_TORQUE_ENABLE, cmd);
@@ -604,7 +648,7 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
         % of size obj.numMotor x 1, as a boolean object that selecting the
         % motors in operation
         function toggleEnableSomeDynamixel(obj, cmd, motor)
-            for i = 1:obj.numPort
+            for i = 1:obj.numPort-obj.gripper
                 currentID_group = cell2mat(obj.DXL_ID(i));
                 for dxl = 1:obj.DXL_NUM(i)
                     if motor(currentID_group(dxl))
@@ -687,7 +731,7 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
                 obj.close();
                 CASPR_log.Error('Please input matched data length and data!');
             end
-            for i = 1:obj.numPort
+            for i = 1:obj.numPort-obj.gripper
                 currentID_group = cell2mat(obj.DXL_ID(i));
                 % Initialize Groupsyncwrite Structs
                 groupwrite_num = groupSyncWrite(obj.port_num(i), obj.PROTOCOL_VERSION, start_address, data_length);
@@ -711,7 +755,7 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
         % bState = true means successful
         function [bState, ret] = sync_read(obj, start_address, data_length)
             ret = zeros(obj.numMotor,1);
-            for i = 1:obj.numPort
+            for i = 1:obj.numPort-obj.gripper
                 currentID_group = cell2mat(obj.DXL_ID(i));
                 % Prepare the parameters
                 groupread_num = groupSyncRead(obj.port_num(i), obj.PROTOCOL_VERSION, start_address, data_length);
