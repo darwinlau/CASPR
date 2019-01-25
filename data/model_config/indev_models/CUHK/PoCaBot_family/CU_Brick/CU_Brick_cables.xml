@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE cables SYSTEM "../../../../templates/cables.dtd">
-<cables default_cable_set="demo_causewaybay">
-    
-    <cable_set id="demo_causewaybay">
+<cables default_cable_set="AEI_demo">
+    <cable_set id="AEI_demo">
         <cable_ideal name="cable 1" attachment_reference="joint">
             <properties>
                 <force_min>10.0</force_min>
@@ -11,11 +10,11 @@
             <attachments>
                 <attachment>
                     <link>0</link>
-                    <location>0.076 2.417 2.786</location>
+                    <location>0.064 0.641 2.028</location>
                 </attachment>
                 <attachment>
                     <link>1</link>
-                    <location>-0.115 0.115 -0.0655</location>
+                    <location>-0.06221 0.047215 -0.018</location>
                 </attachment>
             </attachments>
         </cable_ideal>
@@ -27,11 +26,11 @@
             <attachments>
                 <attachment>
                     <link>0</link>
-                    <location>3.024 2.417 0.094</location>
+                    <location>1.925 0.5170 0.094</location>
                 </attachment>
                 <attachment>
                     <link>1</link>
-                    <location>0.0615 0.115 0.0655</location>
+                    <location>0.06221 0.047215 0.018</location>
                 </attachment>
             </attachments>
         </cable_ideal>
@@ -43,11 +42,11 @@
             <attachments>
                 <attachment>
                     <link>0</link>
-                    <location>3.024 2.417 2.786</location>
+                    <location>1.921 0.642 2.042</location>
                 </attachment>
                 <attachment>
                     <link>1</link>
-                    <location>0.115 0.115 -0.0655</location>
+                    <location>0.06221 0.047215 -0.018</location>
                 </attachment>
             </attachments>
         </cable_ideal>
@@ -59,11 +58,11 @@
             <attachments>
                 <attachment>
                     <link>0</link>
-                    <location>3.024 0.083 0.094</location>
+                    <location>1.927 0.084 0.094</location>
                 </attachment>
                 <attachment>
                     <link>1</link>
-                    <location>0.0615 -0.115 0.0655</location>
+                    <location>0.06221 -0.047215 0.018</location>
                 </attachment>
             </attachments>
         </cable_ideal>
@@ -75,11 +74,11 @@
             <attachments>
                 <attachment>
                     <link>0</link>
-                    <location>3.024 0.083 2.786</location>
+                    <location>1.932 -0.042 2.027</location>
                 </attachment>
                 <attachment>
                     <link>1</link>
-                    <location>0.115 -0.115 -0.0655</location>
+                    <location>0.06221 -0.047215 -0.018</location>
                 </attachment>
             </attachments>
         </cable_ideal>
@@ -91,11 +90,11 @@
             <attachments>
                 <attachment>
                     <link>0</link>
-                    <location>0.076 0.083 0.094</location>
+                    <location>0.076 0.0835 0.096</location>
                 </attachment>
                 <attachment>
                     <link>1</link>
-                    <location>-0.0615 -0.115 0.0655</location>
+                    <location>-0.06221 -0.047215 0.018</location>
                 </attachment>
             </attachments>
         </cable_ideal>
@@ -107,11 +106,11 @@
             <attachments>
                 <attachment>
                     <link>0</link>
-                    <location>0.076 0.083 2.786</location>
+                    <location>0.073 -0.042 2.03</location>
                 </attachment>
                 <attachment>
                     <link>1</link>
-                    <location>-0.115 -0.115 -0.0655</location>
+                    <location>-0.06221 -0.047215 -0.018</location>
                 </attachment>
             </attachments>
         </cable_ideal>
@@ -123,11 +122,271 @@
             <attachments>
                 <attachment>
                     <link>0</link>
-                    <location>0.076 2.417 0.094</location>
+                    <location>0.075 0.5165 0.094</location>
                 </attachment>
                 <attachment>
                     <link>1</link>
-                    <location>-0.0615 0.115 0.0655</location>
+                    <location>-0.06221 0.047215 0.018</location>
+                </attachment>
+            </attachments>
+        </cable_ideal>
+    </cable_set>
+    <cable_set id="AEI_demo_90">
+        <cable_ideal name="cable 1" attachment_reference="joint">
+            <properties>
+                <force_min>10.0</force_min>
+                <force_max>100.0</force_max>
+            </properties>
+            <attachments>
+                <attachment>
+                    <link>0</link>
+                    <location>0.072 0.642 2.021</location>
+                </attachment>
+                <attachment>
+                    <link>1</link>
+                    <location>-0.06221 0.047215 -0.018</location>
+                </attachment>
+            </attachments>
+        </cable_ideal>
+        <cable_ideal name="cable 2" attachment_reference="joint">
+            <properties>
+                <force_min>1.0</force_min>
+                <force_max>100.0</force_max>
+            </properties>
+            <attachments>
+                <attachment>
+                    <link>0</link>
+                    <location>1.9199 0.52 0.092</location>
+                </attachment>
+                <attachment>
+                    <link>1</link>
+                    <location>0.06221 0.047215 0.018</location>
+                </attachment>
+            </attachments>
+        </cable_ideal>
+        <cable_ideal name="cable 3" attachment_reference="joint">
+            <properties>
+                <force_min>10.0</force_min>
+                <force_max>100.0</force_max>
+            </properties>
+            <attachments>
+                <attachment>
+                    <link>0</link>
+                    <location>1.921 0.642 2.02</location>
+                </attachment>
+                <attachment>
+                    <link>1</link>
+                    <location>0.06221 0.047215 -0.018</location>
+                </attachment>
+            </attachments>
+        </cable_ideal>
+        <cable_ideal name="cable 4" attachment_reference="joint">
+            <properties>
+                <force_min>1.0</force_min>
+                <force_max>100.0</force_max>
+            </properties>
+            <attachments>
+                <attachment>
+                    <link>0</link>
+                    <location>1.921 0.084 0.095</location>
+                </attachment>
+                <attachment>
+                    <link>1</link>
+                    <location>0.06221 -0.047215 0.018</location>
+                </attachment>
+            </attachments>
+        </cable_ideal>
+        <cable_ideal name="cable 5" attachment_reference="joint">
+            <properties>
+                <force_min>10.0</force_min>
+                <force_max>100.0</force_max>
+            </properties>
+            <attachments>
+                <attachment>
+                    <link>0</link>
+                    <location>1.923 -0.042 2.017</location>
+                </attachment>
+                <attachment>
+                    <link>1</link>
+                    <location>0.06221 -0.047215 -0.018</location>
+                </attachment>
+            </attachments>
+        </cable_ideal>
+        <cable_ideal name="cable 6" attachment_reference="joint">
+            <properties>
+                <force_min>1.0</force_min>
+                <force_max>100.0</force_max>
+            </properties>
+            <attachments>
+                <attachment>
+                    <link>0</link>
+                    <location>0.076 0.081 0.098</location>
+                </attachment>
+                <attachment>
+                    <link>1</link>
+                    <location>-0.06221 -0.047215 0.018</location>
+                </attachment>
+            </attachments>
+        </cable_ideal>
+        <cable_ideal name="cable 7" attachment_reference="joint">
+            <properties>
+                <force_min>10.0</force_min>
+                <force_max>100.0</force_max>
+            </properties>
+            <attachments>
+                <attachment>
+                    <link>0</link>
+                    <location>0.075 -0.042 2.023</location>
+                </attachment>
+                <attachment>
+                    <link>1</link>
+                    <location>-0.06221 -0.047215 -0.018</location>
+                </attachment>
+            </attachments>
+        </cable_ideal>
+        <cable_ideal name="cable 8" attachment_reference="joint">
+            <properties>s
+                <force_min>1.0</force_min>
+                <force_max>100.0</force_max>
+            </properties>
+            <attachments>
+                <attachment>
+                    <link>0</link>
+                    <location>0.076 0.523 0.096</location>
+                </attachment>
+                <attachment>
+                    <link>1</link>
+                    <location>-0.06221 0.047215 0.018</location>
+                </attachment>
+            </attachments>
+        </cable_ideal>
+    </cable_set>
+    <cable_set id="AEI_demo_90_AB1">
+        <cable_ideal name="cable 1" attachment_reference="joint">
+            <properties>
+                <force_min>10.0</force_min>
+                <force_max>100.0</force_max>
+            </properties>
+            <attachments>
+                <attachment>
+                    <link>0</link>
+                    <location>-0.1168 2.7330 2.216</location>
+                </attachment>
+                <attachment>
+                    <link>1</link>
+                    <location>-0.06221 0.047215 -0.018</location>
+                </attachment>
+            </attachments>
+        </cable_ideal>
+        <cable_ideal name="cable 2" attachment_reference="joint">
+            <properties>
+                <force_min>1.0</force_min>
+                <force_max>100.0</force_max>
+            </properties>
+            <attachments>
+                <attachment>
+                    <link>0</link>
+                    <location>4.0142 2.7450 0.136</location>
+                </attachment>
+                <attachment>
+                    <link>1</link>
+                    <location>0.06221 0.047215 0.018</location>
+                </attachment>
+            </attachments>
+        </cable_ideal>
+        <cable_ideal name="cable 3" attachment_reference="joint">
+            <properties>
+                <force_min>10.0</force_min>
+                <force_max>100.0</force_max>
+            </properties>
+            <attachments>
+                <attachment>
+                    <link>0</link>
+                    <location>4.0142 2.7450 2.295</location>
+                </attachment>
+                <attachment>
+                    <link>1</link>
+                    <location>0.06221 0.047215 -0.018</location>
+                </attachment>
+            </attachments>
+        </cable_ideal>
+        <cable_ideal name="cable 4" attachment_reference="joint">
+            <properties>
+                <force_min>1.0</force_min>
+                <force_max>100.0</force_max>
+            </properties>
+            <attachments>
+                <attachment>
+                    <link>0</link>
+                    <location>4.0155 0.039 0.136</location>
+                </attachment>
+                <attachment>
+                    <link>1</link>
+                    <location>0.06221 -0.047215 0.018</location>
+                </attachment>
+            </attachments>
+        </cable_ideal>
+        <cable_ideal name="cable 5" attachment_reference="joint">
+            <properties>
+                <force_min>10.0</force_min>
+                <force_max>100.0</force_max>
+            </properties>
+            <attachments>
+                <attachment>
+                    <link>0</link>
+                    <location>4.0155 0.039 2.225</location>
+                </attachment>
+                <attachment>
+                    <link>1</link>
+                    <location>0.06221 -0.047215 -0.018</location>
+                </attachment>
+            </attachments>
+        </cable_ideal>
+        <cable_ideal name="cable 6" attachment_reference="joint">
+            <properties>
+                <force_min>1.0</force_min>
+                <force_max>100.0</force_max>
+            </properties>
+            <attachments>
+                <attachment>
+                    <link>0</link>
+                    <location>-0.1225 0.039 0.136</location>
+                </attachment>
+                <attachment>
+                    <link>1</link>
+                    <location>-0.06221 -0.047215 0.018</location>
+                </attachment>
+            </attachments>
+        </cable_ideal>
+        <cable_ideal name="cable 7" attachment_reference="joint">
+            <properties>
+                <force_min>10.0</force_min>
+                <force_max>100.0</force_max>
+            </properties>
+            <attachments>
+                <attachment>
+                    <link>0</link>
+                    <location>-0.1225 0.039 2.199</location>
+                </attachment>
+                <attachment>
+                    <link>1</link>
+                    <location>-0.06221 -0.047215 -0.018</location>
+                </attachment>
+            </attachments>
+        </cable_ideal>
+        <cable_ideal name="cable 8" attachment_reference="joint">
+            <properties>s
+                <force_min>1.0</force_min>
+                <force_max>100.0</force_max>
+            </properties>
+            <attachments>
+                <attachment>
+                    <link>0</link>
+                    <location>-0.1168 2.7330 0.136</location>
+                </attachment>
+                <attachment>
+                    <link>1</link>
+                    <location>-0.06221 0.047215 0.018</location>
                 </attachment>
             </attachments>
         </cable_ideal>

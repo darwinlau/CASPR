@@ -148,7 +148,7 @@
         <position marker_id="1" name="ee_pos">
           <link>7</link>
           <offset>0.0 0.0819 0.0</offset>
-          <axes active_axes="xyz"/>
+          <axes active_axes="xyzab"/>
         </position>
 	  </operational_set>    
     </operational_spaces>
