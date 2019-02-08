@@ -7,7 +7,7 @@
 %   (currently only a grid of states is accepted). The workspace simulation
 %   performs essentially a numerical brute force approach over the set of
 %   poses for a given workspace condition and/or metric.
-classdef WorkspaceSimulator < SimulatorBase
+classdef PointWorkspaceSimulator < SimulatorBase
     
     properties
         grid            % Grid object for brute force workspace (input)
@@ -20,7 +20,7 @@ classdef WorkspaceSimulator < SimulatorBase
     
     methods
         % The constructor for the workspace simulator class.
-        function w = WorkspaceSimulator(model,grid,options)
+        function w = PointWorkspaceSimulator(model,grid,options)
             w@SimulatorBase(model);
             w.grid          = grid;
             w.options       = options;
@@ -69,7 +69,7 @@ classdef WorkspaceSimulator < SimulatorBase
                 % Get the grid point
                 q = obj.grid.getGridPoint(i);
                 % Construct the workspace point
-                wp = WorkspacePoint(q,n_metrics,n_conditions);
+                wp = PointWorkspaceElement(q,n_metrics,n_conditions);
                 % Update the system dynamics
                 obj.model.update(q, zeros(obj.model.numDofs,1), zeros(obj.model.numDofs,1),zeros(obj.model.numDofs,1));
                 % For each metric compute the value of the point
@@ -270,7 +270,7 @@ classdef WorkspaceSimulator < SimulatorBase
                         i_comp = mod(i_comp,factor);
                     end
                     index_vec(1) = i_comp;
-                    obj.workspace{k} = WorkspacePoint(obj.grid.q_begin + index_vec*obj.grid.delta_q,point_flag,~point_flag);
+                    obj.workspace{k} = PointWorkspaceElement(obj.grid.q_begin + index_vec*obj.grid.delta_q,point_flag,~point_flag);
                     if(isa(capability,'WorkspaceMetricType'))
                         obj.workspace{k}.addMetric({capability,wsim_matrix(i)})
                     else

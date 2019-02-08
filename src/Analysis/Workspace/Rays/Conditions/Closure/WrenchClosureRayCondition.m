@@ -4,7 +4,7 @@
 % Author        : Jonathan EDEN
 % Created       : 2015
 % Description    : 
-classdef WrenchClosureRay < WorkspaceRayConditionBase
+classdef WrenchClosureRayCondition < WorkspaceRayConditionBase
     properties (SetAccess = protected, GetAccess = protected)
         % Fixed constants
         TOLERANCE = 1e-8;
@@ -21,7 +21,7 @@ classdef WrenchClosureRay < WorkspaceRayConditionBase
     
     methods
         % Constructor for wrench closure workspace
-        function w = WrenchClosureRay(min_ray_percent,model)
+        function w = WrenchClosureRayCondition(min_ray_percent,model)
             w.min_ray_percentage = min_ray_percent;
             w.joint_type = model.bodyModel.q_dofType ==DoFType.TRANSLATION;
             w.number_dofs = model.numDofs;

@@ -19,11 +19,11 @@ uGrid           =   UniformGrid([-0.5; -0.5; 0], [0.5; 0.5; pi], [0.1; 0.1; pi/1
 
 % Define the workspace condition and metrics
 w_metric = {WorkspaceMetricBase.CreateWorkspaceMetric(WorkspaceMetricType.MIN_CABLE_CABLE_DISTANCE,[])};
-opt = WorkspaceSimulatorOptions(false,optimset('Display','on'));
+opt = PointWorkspaceSimulatorOptions(false,optimset('Display','on'));
 
 % Start the simulation
 disp('Start Setup Simulation');
-wsim            =   WorkspaceSimulator(modelObj,uGrid,opt);
+wsim            =   PointWorkspaceSimulator(modelObj,uGrid,opt);
 
 % Run the simulation
 disp('Start Running Simulation');

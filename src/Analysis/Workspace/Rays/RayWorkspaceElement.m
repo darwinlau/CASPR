@@ -1,5 +1,5 @@
-% A container class to hold workspace analysis information for ray based
-% generation. NOTE: For the moment this class will assume that the ray is
+% A container class to hold workspace analysis information for a single
+% workspace ray. NOTE: This class assumes that the ray is
 % generated about one of the principle axes.
 %
 % Author        : Jonathan EDEN
@@ -7,7 +7,7 @@
 % Description    : This class contains the known information obtained
 % through workspace analysis.  That is the pose and any metrics/workspace
 % conditions that have been evalauted at that ray.
-classdef WorkspaceRay < handle
+classdef RayWorkspaceElement < handle
     properties(SetAccess = protected)
         fixed_variables         % The pose for the workspace condition to be evaluated at
         metrics                 % A cell array of different metrics (enum and value)
@@ -26,7 +26,7 @@ classdef WorkspaceRay < handle
     
     methods
         % Constructor for the class
-        function wp = WorkspaceRay(fixed_variables,n_metrics,n_constraints,free_variable_index,free_variable_range)
+        function wp = RayWorkspaceElement(fixed_variables,n_metrics,n_constraints,free_variable_index,free_variable_range)
             wp.fixed_variables      =   fixed_variables;
             wp.metrics              =   cell(n_metrics,2);
             wp.conditions           =   cell(n_constraints,2);

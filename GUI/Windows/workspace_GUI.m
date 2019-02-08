@@ -256,8 +256,8 @@ function generate_button_Callback(~, ~, handles) %#ok<DEFNU>
     drawnow;
     start_tic       =   tic;
     
-    opt = WorkspaceSimulatorOptions(true,optimset('Display','off')); % This should be made into an object
-    wsim            =   WorkspaceSimulator(modObj,uGrid,opt);
+    opt = PointWorkspaceSimulatorOptions(true,optimset('Display','off')); % This should be made into an object
+    wsim            =   PointWorkspaceSimulator(modObj,uGrid,opt);
     time_elapsed    =   toc(start_tic);
     fprintf('End Setup Simulation : %f seconds\n', time_elapsed);
     

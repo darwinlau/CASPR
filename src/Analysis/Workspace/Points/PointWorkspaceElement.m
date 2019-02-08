@@ -1,11 +1,11 @@
-% A container class to hold workspace analysis information
+% A container class to hold workspace analysis information for a point pose
 %
 % Author        : Jonathan EDEN
 % Created       : 2016
 % Description    : This class contains the known information obtained
 % through workspace analysis.  That is the pose and any metrics/workspace
 % conditions that have been evalauted at that point.
-classdef WorkspacePoint < handle
+classdef PointWorkspaceElement < handle
     properties(SetAccess = protected)
         pose        % The pose for the workspace condition to be evaluated at
         metrics     % A cell array of different metrics (enum and value)
@@ -14,7 +14,7 @@ classdef WorkspacePoint < handle
     
     methods
         % Constructor for the class
-        function wp = WorkspacePoint(pose,n_metrics,n_constraints)
+        function wp = PointWorkspaceElement(pose,n_metrics,n_constraints)
             wp.pose         = pose;
             wp.metrics      = cell(n_metrics,2);
             wp.conditions   = cell(n_constraints,2);

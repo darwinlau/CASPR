@@ -37,9 +37,9 @@ classdef WorkspaceRayConditionBase < handle
         function wc = CreateWorkspaceRayCondition(conditionType,min_ray_percentage,q_dof_type)
             switch conditionType
                 case WorkspaceRayConditionType.WRENCH_CLOSURE
-                    wc = WrenchClosureRay(min_ray_percentage,q_dof_type);
+                    wc = WrenchClosureRayCondition(min_ray_percentage,q_dof_type);
                 case WorkspaceRayConditionType.INTERFERENCE
-                    wc = InterferenceFreeRay(min_ray_percentage,q_dof_type);
+                    wc = InterferenceFreeRayCondition(min_ray_percentage,q_dof_type);
                 case WorkspaceRayConditionType.INTERFERENCE_C_E
                     wc = InterferenceFreeRay_C_E(min_ray_percentage,q_dof_type);
                 case WorkspaceRayConditionType.INTERFERENCE_C_O

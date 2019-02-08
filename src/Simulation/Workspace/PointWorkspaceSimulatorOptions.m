@@ -5,14 +5,14 @@
 % Description    :
 % Workspace simulator options.  To be modified over time
 
-classdef WorkspaceSimulatorOptions
+classdef PointWorkspaceSimulatorOptions
     properties
         union           % Determines if the workspace should take a union of the conditions or the intersection
         solver_options  % An options object for different solvers
     end
     
     methods
-        function opt = WorkspaceSimulatorOptions(union,solver_options)
+        function opt = PointWorkspaceSimulatorOptions(union,solver_options)
             opt.union = union;
             opt.solver_options = solver_options;
         end

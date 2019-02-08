@@ -92,7 +92,7 @@ classdef RayWorkspaceSimulator < SimulatorBase
                             % Load the current fixed grid coordinates
                             q_fixed = sub_grid.getGridPoint(j);
                             % Construct the workspace ray
-                            wr = WorkspaceRay(q_fixed,n_metrics,n_conditions,i,[obj.grid.q_begin(i),obj.grid.q_end(i)]);
+                            wr = RayWorkspaceElement(q_fixed,n_metrics,n_conditions,i,[obj.grid.q_begin(i),obj.grid.q_end(i)]);
                             
                             % For each metric compute the value of the ray
                             for j_m=1:n_metrics
@@ -229,8 +229,8 @@ classdef RayWorkspaceSimulator < SimulatorBase
                                 % Load the current fixed grid coordinates
                                 q_fixed = sub_grid.getGridPoint(j);
                                 % Construct the workspace ray
-        %                         wr = WorkspaceRay(q_fixed,n_metrics,n_conditions,i,[obj.grid.q_begin(i),obj.grid.q_end(i)]);
-                                wr = WorkspaceRay(q_fixed,n_metrics,n_conditions,free_var_i,[obj.grid.q_begin(free_var_i),obj.grid.q_end(free_var_i)]);
+        %                         wr = RayWorkspaceElement(q_fixed,n_metrics,n_conditions,i,[obj.grid.q_begin(i),obj.grid.q_end(i)]);
+                                wr = RayWorkspaceElement(q_fixed,n_metrics,n_conditions,free_var_i,[obj.grid.q_begin(free_var_i),obj.grid.q_end(free_var_i)]);
 
                                 % For each metric compute the value of the ray
                                 for j_m=1:n_metrics

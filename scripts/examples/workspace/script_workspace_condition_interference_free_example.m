@@ -20,11 +20,11 @@ uGrid           =   UniformGrid([0.5; 0.5; 0], [0.5; 0.5; pi], [0; 0; pi/10],'st
 % Define the workspace condition and metrics
 w_condition =   {WorkspaceConditionBase.CreateWorkspaceCondition(WorkspaceConditionType.INTERFERENCE,[],[])};
 w_connectivity  =   WorkspaceConnectivityBase.CreateWorkspaceConnectivityCondition(WorkspaceConnectivityType.GRID,uGrid);
-opt = WorkspaceSimulatorOptions(false,optimset('Display','off'));
+opt = PointWorkspaceSimulatorOptions(false,optimset('Display','off'));
 
 % Start the simulation
 disp('Start Setup Simulation');
-wsim            =   WorkspaceSimulator(modelObj,uGrid,opt);
+wsim            =   PointWorkspaceSimulator(modelObj,uGrid,opt);
 
 % Run the simulation
 disp('Start Running Simulation');

@@ -21,11 +21,11 @@ uGrid           =   UniformGrid(q_begin,q_end,q_step,'step_size');
 w_condition     =   {WorkspaceConditionBase.CreateWorkspaceCondition(WorkspaceConditionType.WRENCH_CLOSURE,[],[])};
 w_metrics       =   {WorkspaceMetricBase.CreateWorkspaceMetric(WorkspaceMetricType.CONDITION_NUMBER,[])};
 w_connectivity  =   WorkspaceConnectivityBase.CreateWorkspaceConnectivityCondition(WorkspaceConnectivityType.GRID,uGrid);
-opt             =   WorkspaceSimulatorOptions(false,optimset('Display','off'));
+opt             =   PointWorkspaceSimulatorOptions(false,optimset('Display','off'));
 
 % Start the simulation
 disp('Start Setup Simulation');
-wsim            =   WorkspaceSimulator(modelObj,uGrid,opt);
+wsim            =   PointWorkspaceSimulator(modelObj,uGrid,opt);
 
 % Run the simulation
 disp('Start Running Simulation');
