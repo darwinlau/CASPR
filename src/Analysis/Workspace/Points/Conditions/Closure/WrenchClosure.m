@@ -22,7 +22,7 @@ classdef WrenchClosure < WorkspaceConditionBase
         
         % Evaluate the wrench closure condition return true if satisfied 
         function inWorkspace = evaluateFunction(obj,dynamics,workspace_point)
-            dynamics.update(workspace_point, zeros(dynamics.numDofs, 1), zeros(dynamics.numDofs, 1), zeros(dynamics.numDofs, 1));
+            dynamics.update(workspace_point.pose, zeros(dynamics.numDofs, 1), zeros(dynamics.numDofs, 1), zeros(dynamics.numDofs, 1));
             if(isempty(obj.method))
                 inWorkspace = obj.metrics_evaluation(dynamics,workspace_point);
             else

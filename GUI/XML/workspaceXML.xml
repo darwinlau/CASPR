@@ -6,6 +6,7 @@
     <workspace_condition id="WRENCH_CLOSURE"/>
     <workspace_condition id="WRENCH_FEASIBLE"/>
     <workspace_condition id="STATIC"/>
+    <workspace_condition id="INTERFERENCE_FREE"/>
     <workspace_metrics>
         <workspace_metric>TENSION_FACTOR</workspace_metric>
         <workspace_metric>TENSION_FACTOR_MODIFIED</workspace_metric>

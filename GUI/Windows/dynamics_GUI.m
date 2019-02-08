@@ -650,23 +650,23 @@ function file_copy(handles,output_file)
     trajectory_str = contents{get(handles.trajectory_popup,'Value')};
     if(strcmp(dynamics_id,'Forward Dynamics'))
         base_folder = CASPR_configuration.LoadHomePath();
-        r_string = [base_folder,'/scripts/examples/dynamics/script_FD_example.m'];
+        r_string = [base_folder,'/GUI/template_scripts/dynamics/script_FD_template.m'];
     else
         contents = cellstr(get(handles.solver_class_popup,'String'));
         solver_class_id = contents{get(handles.solver_class_popup,'Value')};
         base_folder = CASPR_configuration.LoadHomePath();
         if(strcmp(solver_class_id,'IDSolverLinProg'))
-            r_string = [base_folder,'/scripts/examples/dynamics/script_ID_linprog_example.m'];
+            r_string = [base_folder,'/GUI/template_scripts/dynamics/script_ID_linprog_template.m'];
         elseif(strcmp(solver_class_id,'IDSolverQuadProg'))
-            r_string = [base_folder,'/scripts/examples/dynamics/script_ID_quadprog_example.m'];
+            r_string = [base_folder,'/GUI/template_scripts/dynamics/script_ID_quadprog_template.m'];
         elseif(strcmp(solver_class_id,'IDSolverFeasiblePolygon'))
-            r_string = [base_folder,'/scripts/examples/dynamics/script_ID_feasible_polygon_example.m'];
+            r_string = [base_folder,'/GUI/template_scripts/dynamics/script_ID_feasible_polygon_template.m'];
         elseif(strcmp(solver_class_id,'IDSolverOptimallySafe'))
-            r_string = [base_folder,'/scripts/examples/dynamics/script_ID_optimally_safe_example.m'];
+            r_string = [base_folder,'/GUI/template_scripts/dynamics/script_ID_optimally_safe_template.m'];
         elseif(strcmp(solver_class_id,'IDSolverClosedForm'))
-            r_string = [base_folder,'/scripts/examples/dynamics/script_ID_closed_form_example.m'];
+            r_string = [base_folder,'/GUI/template_scripts/dynamics/script_ID_closed_form_template.m'];
         elseif(strcmp(solver_class_id,'IDSolverMinInfNorm'))
-            r_string = [base_folder,'/scripts/examples/dynamics/script_ID_min_inf_norm_example.m'];
+            r_string = [base_folder,'/GUI/template_scripts/dynamics/script_ID_min_inf_norm_template.m'];
         end        
     end
     w_string = [base_folder,output_file];
@@ -687,5 +687,3 @@ function file_copy(handles,output_file)
     fclose(r_fid);
     fclose(w_fid);
 end
-
-

@@ -367,17 +367,17 @@ function script_button_Callback(~, ~, handles) %#ok<DEFNU>
     trajectory_str = contents{get(handles.trajectory_popup,'Value')};
     if(strcmp(kinematics_id,'Inverse Kinematics'))
         base_folder = CASPR_configuration.LoadHomePath();
-        r_string = [base_folder,'/scripts/examples/kinematics/script_IK_example.m'];
+        r_string = [base_folder,'/GUI/template_scripts/kinematics/script_IK_template.m'];
     else
         contents = cellstr(get(handles.solver_class_popup,'String'));
         solver_class_id = contents{get(handles.solver_class_popup,'Value')};
         base_folder = CASPR_configuration.LoadHomePath();
         if(strcmp(solver_class_id,'FKLeastSquares'))
-            r_string = [base_folder,'/scripts/examples/kinematics/script_FK_least_squares_example.m'];
+            r_string = [base_folder,'/GUI/template_scripts/kinematics/script_FK_least_squares_template.m'];
         elseif(strcmp(solver_class_id,'FKDifferential'))
-            r_string = [base_folder,'/scripts/examples/kinematics/script_FK_differential_example.m'];
+            r_string = [base_folder,'/GUI/template_scripts/kinematics/script_FK_differential_template.m'];
         elseif(strcmp(solver_class_id,'FKHybridLeastSquaresDifferential'))
-            r_string = [base_folder,'/scripts/examples/kinematics/script_FK_hybrid_leastsquares_differential_example.m'];
+            r_string = [base_folder,'/GUI/template_scripts/kinematics/script_FK_hybrid_leastsquares_differential_template.m'];
         end
         
     end
