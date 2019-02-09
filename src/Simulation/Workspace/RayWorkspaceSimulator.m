@@ -391,6 +391,15 @@ classdef RayWorkspaceSimulator < SimulatorBase
                     centroid_list = mean(obj.node_list(:,2:3),2);
                     max_list = max(centroid_list(obj.node_list(:,3+obj.grid.n_dimensions)==i));
                     min_list = min(centroid_list(obj.node_list(:,3+obj.grid.n_dimensions)==i));
+                    if(min_list == max_list)
+                        if(min_list>0)
+                            min_list = 0.99*min_list;
+                        elseif(min_list == 0)
+                            min_list = -0.001;
+                        else
+                            min_list = 1.01*min_list;
+                        end
+                    end
                     G.Nodes.NodeColours = zeros(G.numnodes,1);
                     for j = 1:G.numnodes
                         if(obj.node_list(j,3+obj.grid.n_dimensions)==i)
@@ -407,6 +416,15 @@ classdef RayWorkspaceSimulator < SimulatorBase
                     end
                     max_list = max(ray_distance_list);
                     min_list = min(ray_distance_list);
+                    if(min_list == max_list)
+                        if(min_list>0)
+                            min_list = 0.99*min_list;
+                        elseif(min_list == 0)
+                            min_list = -0.001;
+                        else
+                            min_list = 1.01*min_list;
+                        end
+                    end
                     G.Nodes.NodeColours = zeros(G.numnodes,1);
                     for j = 1:G.numnodes
                         G.Nodes.NodeColours(j) = -edge_range/(max_list-min_list)*(ray_distance_list(j) - min_list) + min(G.Edges.EdgeColours) - edge_range/128;

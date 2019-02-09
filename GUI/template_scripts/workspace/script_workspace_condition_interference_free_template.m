@@ -1,4 +1,4 @@
-% Script file for wrench closure workspace
+% Script file for wrench feasible workspace
 %
 % Author        : Autogenerate
 % Created       : 20XX
@@ -18,14 +18,14 @@ q_step          =   (modelObj.bodyModel.q_max - modelObj.bodyModel.q_min)/5;
 % First the grid
 uGrid           =   UniformGrid(q_begin,q_end,q_step,'step_size');
 % Define the workspace condition and metrics
-w_condition     =   {WorkspaceConditionBase.CreateWorkspaceCondition(WorkspaceConditionType.STATIC,[],[])};
+w_condition     =   {WorkspaceConditionBase.CreateWorkspaceCondition(WorkspaceConditionType.INTERFERENCE,[],[])};
 w_metrics       =   {WorkspaceMetricBase.CreateWorkspaceMetric(WorkspaceMetricType.CONDITION_NUMBER,[])};
 w_connectivity  =   WorkspaceConnectivityBase.CreateWorkspaceConnectivityCondition(WorkspaceConnectivityType.GRID,uGrid);
-opt             =   WorkspaceSimulatorOptions(false,optimset('Display','off'));
+opt             =   PointWorkspaceSimulatorOptions(false,optimset('Display','off'));
 
 % Start the simulation
 disp('Start Setup Simulation');
-wsim            =   WorkspaceSimulator(modelObj,uGrid,opt);
+wsim            =   PointWorkspaceSimulator(modelObj,uGrid,opt);
 
 % Run the simulation
 disp('Start Running Simulation');

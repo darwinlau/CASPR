@@ -31,7 +31,7 @@ function varargout = workspace_GUI(varargin)
 
     % Edit the above text to modify the response to help workspace_GUI
 
-    % Last Modified by GUIDE v2.5 07-Jul-2017 17:37:00
+    % Last Modified by GUIDE v2.5 09-Feb-2019 07:24:01
 
     % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
@@ -131,6 +131,36 @@ function workspace_condition_popup_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
     set(hObject, 'String', workspace_str);
 end
 
+% --- Executes on selection change in workspace_type_popup.
+function workspace_type_popup_Callback(~, ~, ~) %#ok<DEFNU>
+    % hObject    handle to workspace_type_popup (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    structure with handles and user data (see GUIDATA)
+
+    % Hints: contents = cellstr(get(hObject,'String')) returns workspace_type_popup contents as cell array
+    %        contents{get(hObject,'Value')} returns selected item from workspace_type_popup
+end
+
+% --- Executes during object creation, after setting all properties.
+function workspace_type_popup_CreateFcn(hObject, ~, ~)%#ok<DEFNU>
+    % hObject    handle to workspace_type_popup (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    empty - handles not created until after all CreateFcns called
+
+    % Hint: popupmenu controls usually have a white background on Windows.
+    %       See ISPC and COMPUTER.
+    if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+        set(hObject,'BackgroundColor','white');
+    end
+    settingsXMLObj =  GUIOperations.GetSettings('/GUI/XML/workspaceXML.xml');
+    setappdata(hObject,'settings',settingsXMLObj);
+    workspace_str = GUIOperations.XmlObj2StringCellArray(settingsXMLObj.getElementsByTagName('simulator').item(0).getElementsByTagName('workspace_type')...
+                    ,'id');
+    workspace_str = lower(workspace_str);
+    workspace_str = strrep(workspace_str,'_',' ');
+    set(hObject, 'String', workspace_str);
+end
+
 % % Workspace Metric
 % % --- Executes on selection change in workspace_metric_popup.
 % function workspace_metric_popup_Callback(~, ~, ~) %#ok<DEFNU>
@@ -215,7 +245,7 @@ function generate_button_Callback(~, ~, handles) %#ok<DEFNU>
     % Set up the workspace simulator
     % First the grid
     q_begin         =   modObj.bodyModel.q_min; q_end = modObj.bodyModel.q_max;
-    q_step          =   (modObj.bodyModel.q_max - modObj.bodyModel.q_min)/10;
+    q_step          =   (modObj.bodyModel.q_max - modObj.bodyModel.q_min)/5;
     uGrid           =   UniformGrid(q_begin,q_end,q_step,'step_size');
     % First the condition
     contents = cellstr(get(handles.workspace_condition_popup,'String'));
@@ -300,14 +330,28 @@ function generate_script_button_Callback(~, ~, handles) %#ok<DEFNU>
     model_str = cellstr(get(handles.model_text,'String'));
     cable_str = cellstr(get(handles.cable_text,'String'));
     wc_string = contents{get(handles.workspace_condition_popup,'Value')};
-    if(strcmp(wc_string,'wrench closure'))
-        r_string = [base_folder,'/GUI/template_scripts/workspace/script_workspace_condition_wrench_closure_template.m'];
-    elseif(strcmp(wc_string,'wrench feasible'))
-        r_string = [base_folder,'/GUI/template_scripts/workspace/script_workspace_condition_wrench_feasible_template.m'];
-    elseif(strcmp(wc_string,'static'))
-        r_string = [base_folder,'/GUI/template_scripts/workspace/script_workspace_condition_static_template.m'];
-    elseif(strcmp(wc_string,'interference_free'))
-        r_string = [base_folder,'/GUI/template_scripts/workspace/script_workspace_condition_interference_free_template.m'];
+    contents = cellstr(get(handles.workspace_type_popup,'String'));
+    wt_string = contents{get(handles.workspace_type_popup,'Value')};
+    if(strcmp(wt_string,'point'))
+        if(strcmp(wc_string,'wrench closure'))
+            r_string = [base_folder,'/GUI/template_scripts/workspace/script_workspace_condition_wrench_closure_template.m'];
+        elseif(strcmp(wc_string,'wrench feasible'))
+            r_string = [base_folder,'/GUI/template_scripts/workspace/script_workspace_condition_wrench_feasible_template.m'];
+        elseif(strcmp(wc_string,'static'))
+            r_string = [base_folder,'/GUI/template_scripts/workspace/script_workspace_condition_static_template.m'];
+        elseif(strcmp(wc_string,'interference_free'))
+            r_string = [base_folder,'/GUI/template_scripts/workspace/script_workspace_condition_interference_free_template.m'];
+        end
+    else
+        if(strcmp(wc_string,'wrench closure'))
+            r_string = [base_folder,'/GUI/template_scripts/workspace/script_workspace_condition_wrench_closure_ray_template.m'];
+        elseif(strcmp(wc_string,'wrench feasible'))
+            CASPR_log.Error('Wrench feasible workspace is currently not supported in ray mode')
+        elseif(strcmp(wc_string,'static'))
+            CASPR_log.Error('Static workspace is currently not supported in ray mode')
+        elseif(strcmp(wc_string,'interference_free'))
+            r_string = [base_folder,'/GUI/template_scripts/workspace/script_workspace_condition_interference_free_ray_template.m'];
+        end
     end
     w_string = [base_folder,'/scripts/local/GUI_script_autogenerated.m'];
     r_fid = fopen(r_string,'r');
@@ -431,6 +475,7 @@ function saveState(handles,file_path)
     state.model_text                        =   get(handles.model_text,'String');
     state.cable_text                        =   get(handles.cable_text,'String');
     state.workspace_condition_popup_value   =   get(handles.workspace_condition_popup,'value');
+    state.workspace_type_popup_value        =   get(handles.workspace_type_popup,'value');
 %     state.workspace_metric_popup_value      =   get(handles.workspace_metric_popup,'value');
     state.plot_type_popup                   =   get(handles.plot_type_popup,'value');
     if(nargin>1)
@@ -460,6 +505,7 @@ function loadState(handles)
             cs_text = get(handles.cable_text,'String');
             if(strcmp(mp_text,state.model_text)&&strcmp(cs_text,state.cable_text))
                 set(handles.workspace_condition_popup,'value',state.workspace_condition_popup_value);
+                set(handles.workspace_type_popup,'value',state.workspace_type_popup_value);
 %                 set(handles.workspace_metric_popup,'value',state.workspace_metric_popup_value);
                 set(handles.plot_type_popup,'value',state.plot_type_popup);
                 plot_type_popup_Callback(handles.plot_type_popup,[],handles);
