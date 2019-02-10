@@ -1,4 +1,4 @@
-% Script file for wrench closure workspace
+% Script file for generating the interference free workspace (ray-based)
 %
 % Author        : Autogenerate
 % Created       : 20XX
@@ -8,7 +8,7 @@
 clc; clear; warning off; close all;
 
 % Set up the model 
-model_config    =   ModelConfig('2 DoF VSD');
+model_config    =   ModelConfig('Example planar XY');
 cable_set_id    =   'basic';
 modelObj        =   model_config.getModel(cable_set_id);
 
@@ -23,15 +23,15 @@ w_condition     =   {WorkspaceRayConditionBase.CreateWorkspaceRayCondition(Works
 opt             =   RayWorkspaceSimulatorOptions(false,false);
 
 % Start the simulation
-disp('Start Setup Simulation');
+CASPR_log.Info('Start Setup Simulation');
 wsim            =   RayWorkspaceSimulator(modelObj,uGrid,opt);
 
 % Run the simulation
-disp('Start Running Simulation');
+CASPR_log.Info('Start Running Simulation');
 wsim.run(w_condition,[])
 
 % Plot the simulation
-disp('Start Plotting Simulation');
+CASPR_log.Info('Start Plotting Simulation');
 wsim.plotGraph();
 
 

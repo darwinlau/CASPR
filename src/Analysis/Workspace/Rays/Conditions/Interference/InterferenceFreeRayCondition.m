@@ -502,7 +502,7 @@ classdef InterferenceFreeRayCondition < WorkspaceRayConditionBase
                         end
                     % ----
                     else
-                        CASPR_log.Print('Invalid Sign or solution is zero',CASPRLogLevel.ERROR);
+                        CASPR_log.Error('Invalid Sign or solution is zero');
                     end
                 end
             end
@@ -526,7 +526,7 @@ classdef InterferenceFreeRayCondition < WorkspaceRayConditionBase
                     end
                 end
                 if min>= max
-                    CASPR_log.Print('Invalid limits of flexible variable',CASPRLogLevel.ERROR);
+                    CASPR_log.Error('Invalid limits of flexible variable');
                 end
                 Rel_root_pts = real_root_pts((real_root_pts > min) & (real_root_pts < max));
 
@@ -562,7 +562,7 @@ classdef InterferenceFreeRayCondition < WorkspaceRayConditionBase
                         polyval_temp_ind = (polyval_temp>0);                            
                         % -----
                     else
-                        CASPR_log.Print('Invaid inequality',CASPRLogLevel.ERROR);
+                        CASPR_log.Error('Invaid inequality');
                     end
                     PolyVal(:, i) = polyval_temp_ind;
                 end
@@ -585,11 +585,11 @@ classdef InterferenceFreeRayCondition < WorkspaceRayConditionBase
         
         function [L_or, R_or] = Or_interval(obj, L, R)
             if length(L) ~= length(R)
-                CASPR_log.Print('Invaid Input',CASPRLogLevel.ERROR);
+                CASPR_log.Error('Invaid Input');
             elseif max(L > R)                
-                CASPR_log.Print('Plz make sure L <= R',CASPRLogLevel.ERROR);
+                CASPR_log.Error('Please ensure that L <= R');
             elseif isempty(L) % the input is one null interval
-                disp('[WARNING] Empty Input') % union(a null space)
+                CASPR_log.Warn('Empty Input'); % union(a null space)
                 L_or = [];
                 R_or = [];
             else  % the input is not one null interval so Note-3 holds
@@ -629,11 +629,11 @@ classdef InterferenceFreeRayCondition < WorkspaceRayConditionBase
 
         function [L_or, R_or] = Or_interval_2(~, L, R)
             if length(L) ~= length(R)
-                CASPR_log.Print('Invaid Input',CASPRLogLevel.ERROR);
+                CASPR_log.Errer('Invaid Input');
             elseif max(L > R)
-                CASPR_log.Print('Plz make sure L <= R',CASPRLogLevel.ERROR);
+                CASPR_log.Error('Please ensure that L <= R');
             elseif isempty(L) % both L and R are empty could happen; one of them is empty would get error from the condition 'length(L) ~= length(R)'
-                disp('[WARNING] Empty Input') % union(null space)
+                CASPR_log.Warn('Empty Input'); % union(a null space)
                 L_or = [];
                 R_or = [];
             else 
@@ -662,12 +662,12 @@ classdef InterferenceFreeRayCondition < WorkspaceRayConditionBase
 
         function [L_and, R_and] = And_interval(~, L, R)
             if length(L) ~= length(R)
-                CASPR_log.Print('Invaid Input',CASPRLogLevel.ERROR);
+                CASPR_log.Errer('Invaid Input');
             elseif max(L > R)
-                CASPR_log.Print('Plz make sure L <= R',CASPRLogLevel.ERROR);
+                CASPR_log.Error('Please ensure that L <= R');
             % elseif isempty(option) || strcmp(option, 'and') % default of option is 'and'
             elseif isempty(L) % One null set could happen; one of them is empty would get error from the condition 'length(L) ~= length(R)'
-                    disp('[WARNING] Empty Input') % inters(one null set); see Input-2)
+                    CASPR_log.Warn('Empty Input'); % inters(one null set); see Input-2)
                     L_and = [];
                     R_and = [];
             else % the input is not one null interval
@@ -734,7 +734,7 @@ classdef InterferenceFreeRayCondition < WorkspaceRayConditionBase
                 case 1 % ti>1
                     pt1 = SegEndpt{1,1}; pt2 = SegEndpt{1,2};
                 otherwise
-                    CASPR_log.Print('Invalid ti_flag',CASPRLogLevel.ERROR);
+                    CASPR_log.Error('Invalid ti_flag');
             end
             switch tflag(2)
                 case -1 % tj<0
@@ -742,7 +742,7 @@ classdef InterferenceFreeRayCondition < WorkspaceRayConditionBase
                 case 1 % tj>1
                     pt3 = SegEndpt{2,1}; pt4 = SegEndpt{2,2};
                 otherwise
-                    CASPR_log.Print('Invalid tj_flag',CASPRLogLevel.ERROR);
+                    CASPR_log.Error('Invalid tj_flag');
             end
             % P1 = dot(AiBj, li)/norm(li)
             pt1pt4 = pt4 - pt1;
@@ -991,11 +991,11 @@ classdef InterferenceFreeRayCondition < WorkspaceRayConditionBase
 
         function [L_comp, R_comp] = Comp_interval(obj, L, R)
             if length(L) ~= length(R)
-                CASPR_log.Print('Invaid Input',CASPRLogLevel.ERROR);
+                CASPR_log.Error('Invaid Input');
             elseif max(L > R)
-                CASPR_log.Print('Plz make sure L <= R',CASPRLogLevel.ERROR);
+                CASPR_log.Error('Please ensure that L <= R');
             elseif isempty(L) % both L and R are empty could happen; one of them is empty would get error from the condition 'length(L) ~= length(R)'
-                disp('[WARNING] Empty Input')  % comp(null)
+                CASPR_log.Warn('Empty input')  % comp(null)
                 L_comp = -inf;
                 R_comp = +inf;
             else % the input is not one null interval, then Note 4 holds
@@ -1035,11 +1035,11 @@ classdef InterferenceFreeRayCondition < WorkspaceRayConditionBase
 
         function [L_comp, R_comp] = Comp_interval_12(obj, L, R)
             if length(L) ~= length(R)
-                CASPR_log.Print('Invaid Input',CASPRLogLevel.ERROR);
+                CASPR_log.Error('Invaid Input');
             elseif max(L > R)
-                CASPR_log.Print('Plz make sure L <= R',CASPRLogLevel.ERROR);
+                CASPR_log.Error('Please ensure that L <= R');
             elseif isempty(L) % both L and R are empty could happen; one of them is empty would get error from the condition 'length(L) ~= length(R)'
-                disp('[WARNING] Empty Input')  % comp(null set)
+                CASPR_log.Warn('Empty input');  % comp(null set)
                 L_comp = -inf;
                 R_comp = +inf;
             elseif length(L) == 1
@@ -1095,10 +1095,10 @@ classdef InterferenceFreeRayCondition < WorkspaceRayConditionBase
 
                     end    
                 else
-                    CASPR_log.Print('Make sure 2 non-intersecting intervals',CASPRLogLevel.ERROR);
+                    CASPR_log.Error('Make sure 2 non-intersecting intervals');
                 end
             else
-                CASPR_log.Print('Make sure the number of inputs <= 2',CASPRLogLevel.ERROR);
+                CASPR_log.Error('Make sure the number of inputs <= 2');
             end
         end
 

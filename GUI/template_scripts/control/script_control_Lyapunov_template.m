@@ -1,20 +1,17 @@
-% Script file for control using CTC
+% Script file for control using Lyapunov-based controller
 %
-% Author        : Chen SONG
-% Created       : 2017
+% Author        : Autogenerate
+% Created       : 20xx
 % Description   : 
-%     Script file for control using CTC. Currently GUI doesn't work with
-%     the new controller simulator, this will be a template for the
-%     simulator use.
 
 % Clear the variables, command window, and all windows, set environment
 clc; clear; close all;
 
-disp('Start Setup Simulation');
+CASPR_log.Info('Start Setup Simulation');
 % Set up the type of model, trajectory and the set of cables:
-model_config = ModelConfig('BMArm');
-trajectory_id = 'traj_test';
-cable_set_id = 'WORKING';
+model_config = ModelConfig('Example planar XY');
+trajectory_id = 'basic';
+cable_set_id = 'example_linear';
 
 % Construct SystemModel objects
 modelObj     =   model_config.getModel(cable_set_id);
@@ -42,8 +39,8 @@ controller = LyapunovStaticCompensation(modelObj, id_solver, kp_tar*eye(modelObj
 
 ctrl_sim = ControllerSimulator(modelObj, controller, fd_solver, [], [], modelObj, [], []);
 
-disp('Finished Setup Simulation');
+CASPR_log.Info('Finished Setup Simulation');
 
 % Run the solver on the desired trajectory
-disp('Start Running Simulation');
+CASPR_log.Info('Start Running Simulation');
 ctrl_sim.run(trajectory_ref, trajectory_ref.q{1}, trajectory_ref.q_dot{1}, zeros(modelObj.numDofs, 1));

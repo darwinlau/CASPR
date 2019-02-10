@@ -16,19 +16,19 @@ trajectory_id = 'example_linear';
 modelObj = model_config.getModel(cable_set_id);
 
 % Setup the inverse kinematics simulator with the SystemKinematics object
-disp('Start Setup Simulation');
+CASPR_log.Info('Start Setup Simulation');
 sim = InverseKinematicsSimulator(modelObj);
 trajectory = model_config.getJointTrajectory(trajectory_id);
-disp('Finished Setup Simulation');
+CASPR_log.Info('Finished Setup Simulation');
 
 % Run the kinematics on the desired trajectory
-disp('Start Running Simulation');
+CASPR_log.Info('Start Running Simulation');
 sim.run(trajectory);
-disp('Finished Running Simulation');
+CASPR_log.Info('Finished Running Simulation');
 
 % After running the simulator the data can be plotted
 % Refer to the simulator classes to see what can be plotted.
-disp('Start Plotting Simulation');
+CASPR_log.Info('Start Plotting Simulation');
 sim.plotJointSpace();
 sim.plotCableLengths();
-disp('Finished Plotting Simulation');
+CASPR_log.Info('Finished Plotting Simulation');
