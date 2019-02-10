@@ -507,14 +507,7 @@ classdef RayWorkspaceSimulator < SimulatorBase
             % Resize to the correct size
             obj.node_list = obj.node_list(1:number_node,:); 
             
-            % Computation for the maximum number of nodes
-%             max_edges = 0;
-%             for i = 1:obj.grid.n_dimensions
-%                 % Determine the number of nodes for a given free variable
-%                 % index
-%                 num_nodes_i = sum(obj.node_list(:,3+obj.grid.n_dimensions)==i);
-%                 max_edges = max_edges + num_nodes_i*(number_node-num_nodes_i);
-%             end
+            % Computation for the maximum number of edges
             max_edges = number_node*max(obj.grid.q_length)*obj.grid.n_dimensions;
 
             % Initialise an adjacency list

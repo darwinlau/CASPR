@@ -16,6 +16,9 @@ classdef PointWorkspaceSimulator < SimulatorBase
         metrics = []    % A list of metrics to be evaluated for
         options         % The workspace simulator options
         edge_matrix = []% The graph representation for the workspace
+        graph_rep = []  % The graph representation for the workspace
+        node_list = []  % A list of all nodes
+        comp_time       % Computational time structure
     end
     
     methods
@@ -24,6 +27,7 @@ classdef PointWorkspaceSimulator < SimulatorBase
             w@SimulatorBase(model);
             w.grid          = grid;
             w.options       = options;
+            w.comp_time     = struct('point_construction',0,'graph_construction',0,'total',0);
         end
         
         % Implementation of the run function
@@ -36,7 +40,7 @@ classdef PointWorkspaceSimulator < SimulatorBase
                 n_metrics_prev  = size(obj.metrics,2);
                 obj.metrics = [obj.metrics,w_metrics];
             end
-            
+            % Determine how big the conditions previously were
             if(isempty(obj.conditions))
                 n_conditions_prev = 0; 
                 obj.conditions = w_conditions;
@@ -61,6 +65,10 @@ classdef PointWorkspaceSimulator < SimulatorBase
             n_conditions    = length(obj.conditions);
             % Determine translation from workspace_in to current metrics
             % list            
+            
+            % Timing variables
+            point_t_in = tic;
+            total_t_in = tic;
             
             % Runs over the grid and evaluates the workspace condition at
             % each point
@@ -115,10 +123,16 @@ classdef PointWorkspaceSimulator < SimulatorBase
                     workspace_count = workspace_count + 1;
                 end
             end
+            obj.comp_time.point_construction = toc(point_t_in);
+            graph_t_in = tic;
             % If graph generation is set generate the graph
             if(nargin == 4)
-                obj.generateWorkspaceGraph(w_connectivity);
+%                 obj.generateWorkspaceGraph(w_connectivity);
+                obj.createWorkspaceGraph(w_conditions{1},[],w_connectivity);
+                % FOR THE MOMENT NO METRICS
             end
+            obj.comp_time.graph_construction = toc(graph_t_in);
+            obj.comp_time.total = toc(total_t_in);
         end
         
         % Plotting function to plot a two dimensional (subset of the) workspace plot
@@ -202,13 +216,103 @@ classdef PointWorkspaceSimulator < SimulatorBase
 %             hold(plot_axis,'off');
         end
         
-        function plotWorkspaceGraph(obj,plot_axis,~,~)
-            CASPR_log.Assert(~isempty(obj.edge_matrix),'Cannot plot without a valid graph object');
-            if(nargin == 1 || isempty(plot_axis))
-                figure; plot_axis = axes; 
+        % A function for plotting a graph
+        function plotGraph(obj)
+            % Shrink the graph to remove all nodes that are empty
+            G = graph(obj.graph_rep(:,1),obj.graph_rep(:,2));
+            if(isempty(obj.metrics))
+                metric_flag = 0;
+            else
+                metric_flag = 1;
             end
-            imagesc(plot_axis,obj.edge_matrix);            
+            cmap = 0.7*ones(257,3);
+            cmap(1:128,:) = winter(128);
+            cmap(130:257,:) = flipud(autumn(128));
+            number_edges = size(obj.graph_rep,1);
+            for i = 1:obj.grid.n_dimensions+metric_flag
+                figure;
+                edge_colour_matrix = nan(number_edges,1);
+                for ii = 1:number_edges
+                    if(obj.graph_rep(ii,2+i))
+                        edge_colour_matrix(ii) = obj.workspace{obj.node_list(obj.graph_rep(ii,1),1)}.pose(i);
+                    end
+                end
+                ax1 = axes;
+                p = plot(G,'MarkerSize',2);
+                layout(p,'auto')  
+                edge_range = (max(edge_colour_matrix)-min(edge_colour_matrix));
+                zero_colour = min(edge_colour_matrix) - edge_range/256;
+                for ii = 1:number_edges
+                    if(~obj.graph_rep(ii,2+i))
+                        edge_colour_matrix(ii) = zero_colour;
+                    end
+                end
+                G.Edges.EdgeColours = edge_colour_matrix; % INTERSECT NEEDS TO BE CHANGED TO INCLUDE THE POINT ITSELF
+                if(i <= obj.grid.n_dimensions)
+                    max_list = max(obj.node_list(:,1+i));
+                    min_list = min(obj.node_list(:,1+i));
+                    if(min_list == max_list)
+                        if(min_list>0)
+                            min_list = 0.99*min_list;
+                        elseif(min_list == 0)
+                            min_list = -0.001;
+                        else
+                            min_list = 1.01*min_list;
+                        end
+                    end
+                    G.Nodes.NodeColours = zeros(G.numnodes,1);
+                    for j = 1:G.numnodes
+                        G.Nodes.NodeColours(j) = -edge_range/(max_list-min_list)*(obj.node_list(j,1+i) - min_list) + min(G.Edges.EdgeColours) - edge_range/127.99;
+                    end
+                    p.NodeCData = G.Nodes.NodeColours;
+                else
+                    p.NodeCData = (zero_colour-0.1)*ones(G.numnodes,1);
+                end
+                if(i <= obj.grid.n_dimensions)
+                    p.EdgeCData = G.Edges.EdgeColours;
+                    p.LineWidth = 2;
+                    set(gca,'XTick',[]);set(gca,'YTick',[]);
+                    ax2 = axes;
+                    linkaxes([ax1,ax2]);
+                    %% Hide the top axes
+                    ax2.Visible = 'off';
+                    ax2.XTick = [];
+                    ax2.YTick = [];
+                    colormap(ax1,cmap);
+                    colormap(ax2,flipud(winter(128)));
+                    %                 colorbar
+                    set([ax1,ax2],'Position',[.15 .11 .685 .815]);
+                    cb1 = colorbar(ax1,'Position',[.07 .11 .0675 .815]);
+                    if(min(G.Edges.EdgeColours)==max(G.Edges.EdgeColours))
+                        set(cb1,'Limits',[min(G.Edges.EdgeColours),max(G.Edges.EdgeColours)+1e-4])
+                    else
+                        set(cb1,'Limits',[min(G.Edges.EdgeColours),max(G.Edges.EdgeColours)])
+                    end
+                    cb2 = colorbar(ax2,'Position',[.85 .11 .0675 .815]);
+                    caxis(ax2,[min_list,max_list]);
+                else
+                    p.EdgeCData = G.Edges.EdgeColours;
+                    p.LineWidth = 2;
+                    set(gca,'XTick',[]);set(gca,'YTick',[]);
+                    set(gca,'Position',[.15 .11 .685 .815]);
+                    colormap(cmap(129:257,:));
+                    cb1 = colorbar(gca,'Position',[.07 .11 .0675 .815]);
+                    if(min(G.Edges.EdgeColours)==max(G.Edges.EdgeColours))
+                        set(cb1,'Limits',[min(G.Edges.EdgeColours),max(G.Edges.EdgeColours)+1e-4])
+                    else
+                        set(cb1,'Limits',[min(G.Edges.EdgeColours),max(G.Edges.EdgeColours)])
+                    end
+                end
+            end
         end
+        
+%         function plotWorkspaceGraph(obj,plot_axis,~,~)
+%             CASPR_log.Assert(~isempty(obj.edge_matrix),'Cannot plot without a valid graph object');
+%             if(nargin == 1 || isempty(plot_axis))
+%                 figure; plot_axis = axes; 
+%             end
+%             imagesc(plot_axis,obj.edge_matrix);            
+%         end
         
         % Converts the workspace structure into an array
         function wsim_matrix = toMatrix(obj,capability_measure)
@@ -281,32 +385,32 @@ classdef PointWorkspaceSimulator < SimulatorBase
             end
         end
         
-        function generateWorkspaceGraph(obj,w_connectivity)
-            % Determine the number of nodes
-            number_nodes = length(obj.workspace) - sum(cellfun(@isempty,obj.workspace));
-            % Initialise a matrix based graph representation (THIS CAN BE
-            % CHANGED IF DESIRED)
-            obj.edge_matrix = eye(number_nodes); % Node a node is always connected to itself
-            i_counter = 1;
-            for i = 1:number_nodes
-                % Skip over the empty cell entries
-                while(isempty(obj.workspace{i_counter}))
-                    i_counter = i_counter + 1;
-                end
-                j_counter = i_counter+1;
-                for j= i+1:number_nodes
-                    % Skip over the empty cell entries
-                    while(isempty(obj.workspace{j_counter}))
-                        j_counter = j_counter + 1;
-                    end
-                    % Evaluate the connectivity between the two objects
-                    [~,obj.edge_matrix(i,j),~] = w_connectivity.evaluate(obj.model,obj.workspace{i_counter},obj.workspace{j_counter});
-                    obj.edge_matrix(j,i) = obj.edge_matrix(i,j); % Due to bi-directional edges being assumed for the moment
-                    j_counter = j_counter+1;
-                end
-                i_counter = i_counter + 1;
-            end
-        end
+%         function generateWorkspaceGraph(obj,w_connectivity)
+%             % Determine the number of nodes
+%             number_nodes = length(obj.workspace) - sum(cellfun(@isempty,obj.workspace));
+%             % Initialise a matrix based graph representation (THIS CAN BE
+%             % CHANGED IF DESIRED)
+%             obj.edge_matrix = eye(number_nodes); % Node a node is always connected to itself
+%             i_counter = 1;
+%             for i = 1:number_nodes
+%                 % Skip over the empty cell entries
+%                 while(isempty(obj.workspace{i_counter}))
+%                     i_counter = i_counter + 1;
+%                 end
+%                 j_counter = i_counter+1;
+%                 for j= i+1:number_nodes
+%                     % Skip over the empty cell entries
+%                     while(isempty(obj.workspace{j_counter}))
+%                         j_counter = j_counter + 1;
+%                     end
+%                     % Evaluate the connectivity between the two objects
+%                     [~,obj.edge_matrix(i,j),~] = w_connectivity.evaluate(obj.model,obj.workspace{i_counter},obj.workspace{j_counter});
+%                     obj.edge_matrix(j,i) = obj.edge_matrix(i,j); % Due to bi-directional edges being assumed for the moment
+%                     j_counter = j_counter+1;
+%                 end
+%                 i_counter = i_counter + 1;
+%             end
+%         end
         
         
         % Filters the workspace metric to set new limits.
@@ -327,6 +431,60 @@ classdef PointWorkspaceSimulator < SimulatorBase
     end
     
     methods (Access=private)
+        function createWorkspaceGraph(obj,condition,metric,w_connectivity)
+            if(isempty(metric))
+                metric_flag = 0;
+            else
+                metric_flag = 1;
+            end
+            
+            % For the moment this will be written as if there was only one
+            % condition I will subsequently modify
+            number_points = length(obj.workspace);
+            % Create list of nodes
+            obj.node_list = zeros(number_points,1+obj.grid.n_dimensions); 
+            number_node = 0;
+            % For each point
+            for i = 1:number_points
+                % Determine the number of the condition
+                % Determine the number of the condition
+                if(~isempty(obj.workspace{i}))
+                    n_constraints = size(obj.workspace{i}.conditions,1);
+                    for j = 1:n_constraints
+                        if(condition.type == obj.workspace{i}.conditions{j,1})
+                            number_node = number_node + 1;
+                            obj.node_list(number_node,:) = [i,obj.workspace{i}.pose'];
+                            break;
+                        end
+                    end
+                end
+            end
+            % Resize to the correct size
+            obj.node_list = obj.node_list(1:number_node,:); 
+            
+            % Computation for the maximum number of edges
+            max_edges = number_node*max(obj.grid.q_length)*obj.grid.n_dimensions;
+            
+            % Initialise an adjacency list
+            obj.graph_rep = zeros(max_edges,2+obj.grid.n_dimensions+metric_flag); % NEEDS TO BE CHANGED
+            number_intersects = 0;
+            for i = 1:number_node
+                for j = i+1:number_node
+                   % Check for connectivity
+                   [~,is_connected,~] = w_connectivity.evaluate(obj.model,obj.workspace{obj.node_list(i,1)},obj.workspace{obj.node_list(j,1)});
+                   if(is_connected)
+                       number_intersects = number_intersects+1;
+                       obj.graph_rep(number_intersects,1) = i;
+                       obj.graph_rep(number_intersects,2) = j;
+                       common_indices = obj.workspace{obj.node_list(i,1)}.pose == obj.workspace{obj.node_list(j,1)}.pose;
+                       obj.graph_rep(number_intersects,3:2++obj.grid.n_dimensions) = common_indices';
+                       % FOR THE MOMENT NO METRICS AND NO OTHER STUFF
+                   end
+                end
+            end
+            obj.graph_rep = obj.graph_rep(1:number_intersects,:);
+        end
+        
         % Finds the index at which a given condition or metric exists
         function c_i = find_capability_index(obj,capability)
             if(isa(capability,'WorkspaceMetricType'))
