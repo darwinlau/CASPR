@@ -449,8 +449,8 @@ classdef PoCaBotExperiment < ExperimentBase
             
             obj.hardwareInterface.switchOperatingMode2POSITION_LIMITEDCURRENT();
             % %%%%
-%             obj.hardwareInterface.setKpP(ones(obj.numMotor,1)*obj.hardwareInterface.ActuatorParas.KpP);
-            obj.hardwareInterface.setKpP([2000;1000;2000;1000;2000;1000;2000;1000;]);
+            obj.hardwareInterface.setKpP(ones(obj.numMotor,1)*obj.hardwareInterface.ActuatorParas.KpP);
+%             obj.hardwareInterface.setKpP([2000;1000;2000;1000;2000;1000;2000;1000;]);
             % %%%%
             try
                 obj.hardwareInterface.setKpI(ones(obj.numMotor,1)*obj.hardwareInterface.ActuatorParas.KpI);
@@ -519,6 +519,12 @@ classdef PoCaBotExperiment < ExperimentBase
             for t = 1:1:length(trajectory.timeVector)
                 % Print time for debugging
                 % time = trajectory.timeVector(t);
+                try
+                    trajectory.q = cell2mat(trajectory.q);
+                    trajectory.q_dot = cell2mat(trajectory.q_dot);
+                    trajectory.q_ddot = cell2mat(trajectory.q_ddot);
+                catch
+                end
                 obj.q_present = trajectory.q(:,t);
                 trajectory.q(:,t) = obj.q_present + obj.q_offset_tuned;
                 tic;
@@ -532,7 +538,7 @@ classdef PoCaBotExperiment < ExperimentBase
 %                     fprintf('The force solved from ID gets beyond the limit!!!\n');
 %                 end
 %                 offset = zeros(size(offset,1),size(offset,2)); %%TEMP
-%                 offset = [0.004;0.002;0.004;0.002;0.004;0.002;0.004;0.002;];
+%                 offset = [0.004;0.002;0.004;0.002;0.004;0.002;0.004;0.002;]*0.1;
 %                 lengthCommand = model_temp.cableLengths ./(1+obj.elongation_per_Newton.*model_temp.cableForces);
                 lengthCommand = model_temp.cableLengths ./(1+obj.elongation_per_Newton.*model_temp.cableForces) - offset;
 %                 lengthModifiedElongation = lengthCommand - obj.initialLength;

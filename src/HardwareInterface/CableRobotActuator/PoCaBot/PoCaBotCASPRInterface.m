@@ -86,9 +86,17 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
                 interface.dynamixel_direction_factor_position = 1;
                 interface.dynamixel_direction_factor_current  =-1;
             end
-            
-            for i = 1:numMotor
-                accessories_temp(i) = MegaSpoolSpecifications;
+            if actuatorType == DynamixelType.XH430_W210
+                for i = 1:numMotor
+                    accessories_temp(i) = SmallSpoolSpecifications;
+                end
+            elseif actuatorType == XM540_W150 || actuatorType == PRO_M54_60_S250
+                for i = 1:numMotor
+                    accessories_temp(i) = MegaSpoolSpecifications;
+                end
+            else
+                disp('Please specify spool type in PoCaBotCASPRInterface')
+                % TODO put the spool type into xml for spool types
             end
             interface.accessories = accessories_temp;
             interface.cableLengths_full = accessories_temp(1).cableLengths_full;
@@ -494,19 +502,21 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
             forceOffsetConstant = 0.001;
             lengthOffset = zeros(length(cableLength),1);
             for i = 1:length(cableLength)
-                if cableLength(i) < 1.5
-                    lengthOffsetConstant = 0.003;
+                if cableLength(i) < 0.3 %1.5
+                    lengthOffsetConstant = 0.001; %0.003
                     lengthOffset(i) = cableLength(i)*lengthOffsetConstant;
-                elseif cableLength(i) > 1.5
-                    lengthOffsetConstant = 0.005;
+                elseif cableLength(i) > 0.3 %1.5
+                    lengthOffsetConstant = 0.003;   %0.005
                     lengthOffset(i) = cableLength(i)*lengthOffsetConstant;
                 end
             end
 
             forceOffset = cableForces.*forceOffsetConstant;
-            offset = forceOffset + lengthOffset        
+            offset = forceOffset + lengthOffset;
+            offset = zeros(size(offset));
             maxOffset = ones(obj.numMotor,1)*0.015;
             minOffset = [0.004;0.002;0.004;0.002;0.004;0.002;0.004;0.002;];
+            minOffset = [0.004;0.002;0.004;0.002;0.004;0.002;0.004;0.002;]*0.25;
             for i = 1:length(offset)
                 if(offset(i)>maxOffset(i))
 %                     fprintf('maxOffset is occured at %d, with size of %3d\n', i, maxOffset(i));
