@@ -5,8 +5,8 @@
       <link_rigid num="1" name="X52 base">
         <joint type="SPATIAL_EULER_XYZ" q_initial="2 2 1 0.0 0.0 0.0" q_min="0.0 0.0 0.0 -3.1416 -3.1416 -3.1416" q_max="4.0 4.0 4.0 3.1416 3.1416 3.1416"/>
         <physical>
-          <mass>0.2</mass>
-          <com_location>0.0 0.0 0.0</com_location>
+          <mass>1.0</mass>
+          <com_location>0.0 0.0 0.03</com_location>
           <end_location>0.0 0.0 0.1290</end_location>
           <inertia ref="com">
             <Ixx>1.0</Ixx>
@@ -45,8 +45,8 @@
       <link_rigid num="3" name="X52 arm">
         <joint type="R_Y" actuated="true" q_initial="0.0" q_min="-3.1416" q_max="3.1416"/>
         <physical>
-          <mass>0.1</mass>
-          <com_location>0.0 0.0 0.0</com_location>
+          <mass>0.2</mass>
+          <com_location>0.012 0.0 0.064</com_location>
           <end_location>0.024 0.0 0.128</end_location>
           <inertia ref="com">
             <Ixx>1.0</Ixx>
@@ -65,8 +65,8 @@
       <link_rigid num="4" name="X52 forearm">
         <joint type="R_Y" actuated="true" q_initial="0.0" q_min="-3.1416" q_max="3.1416"/>
         <physical>
-          <mass>0.1</mass>
-          <com_location>0.0 0.0 0.0</com_location>
+          <mass>0.15</mass>
+          <com_location>0.062 0.0 0.0</com_location>
           <end_location>0.124 0.0 0.0</end_location>
           <inertia ref="com">
             <Ixx>1.0</Ixx>
@@ -85,8 +85,8 @@
       <link_rigid num="5" name="X52 wrist">
         <joint type="R_Y" actuated="true" q_initial="0.0" q_min="-3.1416" q_max="3.1416"/>
         <physical>
-          <mass>0.1</mass>
-          <com_location>0.0 0.0 0.0</com_location>
+          <mass>0.15</mass>
+          <com_location>0.0733 0.0 0.0</com_location>
           <end_location>0.1466 0.0 0.0</end_location>
           <inertia ref="com">
             <Ixx>1.0</Ixx>
