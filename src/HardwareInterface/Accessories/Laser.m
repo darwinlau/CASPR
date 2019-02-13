@@ -55,21 +55,19 @@ classdef Laser < handle
         function setLaser(obj, laser)
            obj.laser = laser;
            if 1 %obj.laser ~= obj.currentIntensity
-               %pause(0.5); 
                sendLaser(obj);
-               %pause(0.5);
-                obj.currentIntensity = obj.laser;
+               obj.currentIntensity = obj.laser;
            end
         end
         
         function sendLaser(obj)
             cmd = [obj.laser];
-            fprintf(obj.comPort, '%f', cmd);
+            fprintf(obj.comPort, num2str(cmd))
             obj.currentIntensity = cmd;
         end
         
         function laserOff(obj)
-            fprintf(obj.comPort, '1');
+            fprintf(obj.comPort, '0');
         end
         
         function update_us_state(obj)
