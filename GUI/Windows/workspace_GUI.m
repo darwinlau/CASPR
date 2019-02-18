@@ -300,7 +300,7 @@ function generate_button_Callback(~, ~, handles) %#ok<DEFNU>
     fprintf('End Running Simulation : %f seconds\n', time_elapsed);
     
     disp('Start Plotting Simulation');
-    wsim.plotWorkspaceGraph();
+    wsim.plotGraph();
     fprintf('End Plotting Simulation : %f seconds\n', time_elapsed);
     set(handles.status_text,'String','No simulation running');
     setappdata(handles.figure1,'sim',wsim);
