@@ -502,7 +502,7 @@ function run_inverse_kinematics(handles,modObj,trajectory_id)
     contents = cellstr(get(handles.plot_type_popup,'String'));
     plot_type = contents{get(handles.plot_type_popup,'Value')};
     % Setup the inverse kinematics simulator with the SystemKinematics object
-    disp('Start Setup Simulation');
+    CASPR_log.Info('Start Setup Simulation');
     set(handles.status_text,'String','Setting up simulation');
     drawnow;
     start_tic = tic;
@@ -510,26 +510,26 @@ function run_inverse_kinematics(handles,modObj,trajectory_id)
     model_config = getappdata(handles.trajectory_popup,'model_config');
     trajectory = model_config.getJointTrajectory(trajectory_id);
     time_elapsed = toc(start_tic);
-    fprintf('End Setup Simulation : %f seconds\n', time_elapsed);
+    CASPR_log.Info(sprintf('End Setup Simulation : %f seconds', time_elapsed));
 
     % Run the kinematics on the desired trajectory
-    disp('Start Running Simulation');
+    CASPR_log.Info('Start Running Simulation');
     set(handles.status_text,'String','Simulation running');
     drawnow;
     start_tic = tic;
     sim.run(trajectory);
     time_elapsed = toc(start_tic);
-    fprintf('End Running Simulation : %f seconds\n', time_elapsed);
+    CASPR_log.Info(sprintf('End Running Simulation : %f seconds', time_elapsed));
 
     % After running the simulator the data can be plotted
     % Refer to the simulator classes to see what can be plotted.
-    disp('Start Plotting Simulation');
+    CASPR_log.Info('Start Plotting Simulation');
     start_tic = tic;
     set(handles.status_text,'String','Simulation plotting');
     drawnow;
     GUIOperations.GUIPlot(plot_type,sim,handles,str2double(getappdata(handles.plot_type_popup,'num_plots')),get(handles.undock_box,'Value'));
     time_elapsed = toc(start_tic);
-    fprintf('End Plotting Simulation : %f seconds\n', time_elapsed);
+    CASPR_log.Info(sprintf('End Plotting Simulation : %f seconds', time_elapsed));
     set(handles.status_text,'String','No simulation running');
     setappdata(handles.figure1,'sim',sim);
     assignin('base','inverse_kinematic_simulator',sim);
@@ -542,7 +542,7 @@ function run_forward_kinematics(handles,modObj,trajectory_id)
     
     % An inverse kinematics and forward kinematics simulator will be run to
     % show that the results are consistent.
-    disp('Start Setup Simulation');
+    CASPR_log.Info('Start Setup Simulation');
     set(handles.status_text,'String','Setting up simulation');
     drawnow;
     start_tic = tic;
@@ -564,29 +564,29 @@ function run_forward_kinematics(handles,modObj,trajectory_id)
     model_config = getappdata(handles.trajectory_popup,'model_config');
     trajectory = model_config.getJointTrajectory(trajectory_id);
     time_elapsed = toc(start_tic);
-    fprintf('End Setup Simulation : %f seconds\n', time_elapsed);
+    CASPR_log.Info(sprintf('End Setup Simulation : %f seconds', time_elapsed));
 
     % Run inverse kinematics
-    disp('Start Running Inverse Kinematics Simulation');
+    CASPR_log.Info('Start Running Inverse Kinematics Simulation');
     set(handles.status_text,'String','Running inverse kinematics');
     drawnow;
     start_tic = tic;
     iksim.run(trajectory);
     time_elapsed = toc(start_tic);
-    fprintf('End Running Inverse Kinematics Simulation : %f seconds\n', time_elapsed);
+    CASPR_log.Info(sprintf('End Running Inverse Kinematics Simulation : %f seconds', time_elapsed));
 
     % Run forward kinematics
-    disp('Start Running Forward Kinematics Simulation');
+    CASPR_log.Info('Start Running Forward Kinematics Simulation');
     set(handles.status_text,'String','Running forward kinematics');
     drawnow;
     start_tic = tic;
     fksim.run(iksim.cableLengths, iksim.cableLengthsDot, iksim.timeVector, iksim.trajectory.q{1}, iksim.trajectory.q_dot{1});
     time_elapsed = toc(start_tic);
-    fprintf('End Running Forward Kinematics Simulation : %f seconds\n', time_elapsed);
+    CASPR_log.Info(sprintf('End Running Forward Kinematics Simulation : %f seconds', time_elapsed));
 
     % It is expected that iksim and fksim should have the same joint space (the
     % result of fksim)
-    disp('Start Plotting Simulation');
+    CASPR_log.Info('Start Plotting Simulation');
     set(handles.status_text,'String','Simulation plotting');
     drawnow;
     start_tic = tic;
@@ -594,7 +594,7 @@ function run_forward_kinematics(handles,modObj,trajectory_id)
     GUIOperations.GUIPlot('plotJointSpace',fksim,handles,1,get(handles.undock_box,'Value'));
     GUIOperations.GUIPlot('plotCableLengthError',fksim,handles,1,get(handles.undock_box,'Value'));
     time_elapsed = toc(start_tic);
-    fprintf('End Plotting Simulation : %f seconds\n', time_elapsed);
+    CASPR_log.Info(sprintf('End Plotting Simulation : %f seconds', time_elapsed));
     set(handles.status_text,'String','No simulation running');
     assignin('base','forward_kinematic_simulator',fksim);
     % Save the sim

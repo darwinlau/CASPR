@@ -26,7 +26,7 @@ classdef JointTrajectory < TrajectoryBase
             mode    =   -1;
             sampling_frequency_ratio = 1;
             if (nargin < 3)
-                disp('Default frequency analysis will be applied (use the original trajectory frequency as the sampling rate).');
+                CASPR_log.Info('Default frequency analysis will be applied (use the original trajectory frequency as the sampling rate).');
                 mode = 3;
             else
                 if working_mode == 1
