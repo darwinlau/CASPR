@@ -299,7 +299,7 @@ function generate_button_Callback(~, ~, handles) %#ok<DEFNU>
     time_elapsed    =   toc(start_tic);
     CASPR_log.Info(sprintf('End Running Simulation : %f seconds', time_elapsed));
     CASPR_log.Info('Start Plotting Simulation');
-    wsim.plotWorkspaceGraph();
+    wsim.plotGraph();
     CASPR_log.Info(sprintf('End Plotting Simulation : %f seconds\n', time_elapsed));
     set(handles.status_text,'String','No simulation running');
     setappdata(handles.figure1,'sim',wsim);
