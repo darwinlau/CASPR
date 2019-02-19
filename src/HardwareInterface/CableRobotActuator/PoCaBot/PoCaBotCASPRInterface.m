@@ -90,7 +90,7 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
                 for i = 1:numMotor
                     accessories_temp(i) = SmallSpoolSpecifications;
                 end
-            elseif actuatorType == XM540_W150 || actuatorType == PRO_M54_60_S250
+            elseif actuatorType == DynamixelType.XM540_W150 || actuatorType == DynamixelType.PRO_M54_60_S250
                 for i = 1:numMotor
                     accessories_temp(i) = MegaSpoolSpecifications;
                 end
