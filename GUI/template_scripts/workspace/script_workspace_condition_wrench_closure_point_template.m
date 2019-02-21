@@ -18,7 +18,7 @@ q_step          =   (modelObj.bodyModel.q_max - modelObj.bodyModel.q_min)/5;
 % First the grid
 uGrid           =   UniformGrid(q_begin,q_end,q_step,'step_size');
 % Define the workspace condition and metrics
-w_condition     =   {WorkspaceConditionBase.CreateWorkspaceCondition(WorkspaceConditionType.STATIC,[],[])};
+w_condition     =   {WorkspaceConditionBase.CreateWorkspaceCondition(WorkspaceConditionType.WRENCH_CLOSURE,[],[])};
 w_metrics       =   {WorkspaceMetricBase.CreateWorkspaceMetric(WorkspaceMetricType.CONDITION_NUMBER,[])};
 w_connectivity  =   WorkspaceConnectivityBase.CreateWorkspaceConnectivityCondition(WorkspaceConnectivityType.GRID,uGrid);
 opt             =   PointWorkspaceSimulatorOptions(false,optimset('Display','off'));
