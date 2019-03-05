@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE bodies_system SYSTEM "../../../templates/bodies.dtd">
+<bodies_system>
+  <links display_range="-0.2 4.1 -0.1 4.1 0 2.3" view_angle="-37 32">
+      <link_rigid num="1" name="X52 base">
+        <joint type="SPATIAL_EULER_XYZ" q_initial="2 2 1 0.0 0.0 0.0" q_min="0.0 0.0 0.0 -3.1416 -3.1416 -3.1416" q_max="4.0 4.0 4.0 3.1416 3.1416 3.1416"/>
+        <physical>
+          <mass>1.0</mass>
+          <com_location>0.0 0.0 0.03</com_location>
+          <end_location>0.0 0.0 0.087265</end_location>
+          <inertia ref="com">
+            <Ixx>1.0</Ixx>
+            <Iyy>1.0</Iyy>
+            <Izz>1.0</Izz>
+            <Ixy>0.0</Ixy>
+            <Ixz>0.0</Ixz>
+            <Iyz>0.0</Iyz>
+          </inertia>
+        </physical>
+        <parent>
+          <num>0</num>
+          <location>0.0 0.0 0.0</location>
+        </parent>
+      </link_rigid>
+      <link_rigid num="2" name="X52 shoulder">
+        <joint type="R_Z" actuated="true" q_initial="0.0" q_min="-3.1416" q_max="3.1416"/>
+        <physical>
+          <mass>0.1</mass>
+          <com_location>0.0 0.0 0.0203</com_location>
+          <end_location>0.0 0.0 0.0405</end_location>
+          <inertia ref="com">
+            <Ixx>1.0</Ixx>
+            <Iyy>1.0</Iyy>
+            <Izz>1.0</Izz>
+            <Ixy>0.0</Ixy>
+            <Ixz>0.0</Ixz>
+            <Iyz>0.0</Iyz>
+          </inertia>
+        </physical>
+        <parent>
+          <num>1</num>
+          <location>0.0 0.0 0.087265</location>
+        </parent>
+      </link_rigid>
+      <link_rigid num="3" name="X52 arm">
+        <joint type="R_Y" actuated="true" q_initial="0.0" q_min="-3.1416" q_max="3.1416"/>
+        <physical>
+          <mass>0.2</mass>
+          <com_location>0.012 0.0 0.064</com_location>
+          <end_location>0.024 0.0 0.128</end_location>
+          <inertia ref="com">
+            <Ixx>1.0</Ixx>
+            <Iyy>1.0</Iyy>
+            <Izz>1.0</Izz>
+            <Ixy>0.0</Ixy>
+            <Ixz>0.0</Ixz>
+            <Iyz>0.0</Iyz>
+          </inertia>
+        </physical>
+        <parent>
+          <num>2</num>
+          <location>0.0 0.0 0.0405</location>
+        </parent>
+      </link_rigid>
+      <link_rigid num="4" name="X52 forearm">
+        <joint type="R_Y" actuated="true" q_initial="0.0" q_min="-3.1416" q_max="3.1416"/>
+        <physical>
+          <mass>0.15</mass>
+          <com_location>0.062 0.0 0.0</com_location>
+          <end_location>0.124 0.0 0.0</end_location>
+          <inertia ref="com">
+            <Ixx>1.0</Ixx>
+            <Iyy>1.0</Iyy>
+            <Izz>1.0</Izz>
+            <Ixy>0.0</Ixy>
+            <Ixz>0.0</Ixz>
+            <Iyz>0.0</Iyz>
+          </inertia>
+        </physical>
+        <parent>
+          <num>3</num>
+          <location>0.024 0.0 0.128</location>
+        </parent>
+      </link_rigid>
+      <link_rigid num="5" name="X52 wrist">
+        <joint type="R_Y" actuated="true" q_initial="0.0" q_min="-3.1416" q_max="3.1416"/>
+        <physical>
+          <mass>0.15</mass>
+          <com_location>0.0733 0.0 0.0</com_location>
+          <end_location>0.1466 0.0 0.0</end_location>
+          <inertia ref="com">
+            <Ixx>1.0</Ixx>
+            <Iyy>1.0</Iyy>
+            <Izz>1.0</Izz>
+            <Ixy>0.0</Ixy>
+            <Ixz>0.0</Ixz>
+            <Iyz>0.0</Iyz>
+          </inertia>
+        </physical>
+        <parent>
+          <num>4</num>
+          <location>0.124 0.0 0.0</location>
+        </parent>
+      </link_rigid>
+    </links>
+    <operational_spaces default_operational_set="ee_position">
+	  <operational_set id="ee_position">
+        <position marker_id="1" name="ee_pos">
+          <link>5</link>
+          <offset>0.1466 0.0 0.0</offset>
+          <axes active_axes="xyz"/>
+        </position>
+	  </operational_set>    
+    </operational_spaces>
+</bodies_system>

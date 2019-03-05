@@ -30,3 +30,4 @@ Example 2S,/MCDM/Example_2S/,Example_2S_bodies.xml,Example_2S_cables.xml,Example
 RoboyArm2,/MCDM/RoboyArm2/,RoboyArm2_bodies.xml,RoboyArm2_cables.xml,RoboyArm2_trajectories.xml
 Cubic_Spatial,/SCDM/spatial_manipulators/Cubic_Spatial/,Cubic_Spatial_bodies.xml,Cubic_Spatial_cables.xml,Cubic_Spatial_trajectories.xml
 SJTUSnake,/MCDM/SJTUSnake/,SJTUSnake_bodies.xml,SJTUSnake_cables.xml,SJTUSnake_trajectories.xml
+SpiderBot_X52,/HCDM/SpiderBot_X52/,SpiderBot_X52_bodies.xml,SpiderBot_X52_cables.xml,SpiderBot_X52_trajectories.xml,
