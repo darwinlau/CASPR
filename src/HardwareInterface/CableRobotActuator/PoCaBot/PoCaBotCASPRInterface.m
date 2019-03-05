@@ -515,8 +515,8 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
             offset = forceOffset + lengthOffset;
             offset = zeros(size(offset));
             maxOffset = ones(obj.numMotor,1)*0.015;
-            minOffset = [0.004;0.002;0.004;0.002;0.004;0.002;0.004;0.002;];
-            minOffset = [0.004;0.002;0.004;0.002;0.004;0.002;0.004;0.002;]*0.25;
+            minOffset = [0.004;0.004;0.004;0.004;0.004;0.004;0.004;0.004;]*0.5;
+%             minOffset = [0.004;0.002;0.004;0.002;0.004;0.002;0.004;0.002;]*0.25;
             for i = 1:length(offset)
                 if(offset(i)>maxOffset(i))
 %                     fprintf('maxOffset is occured at %d, with size of %3d\n', i, maxOffset(i));
