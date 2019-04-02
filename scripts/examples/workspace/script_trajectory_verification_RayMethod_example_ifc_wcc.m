@@ -10,7 +10,7 @@ modelObj        =   model_config.getModel(cable_set_id);
 
 %% Quaternions
 degLow = 0;
-degUp = 10;
+degUp = 15;
 q0_given = [cos(degLow/360*pi) sin(degLow/360*pi) 0 0]; % x-axis
 q1_given = [cos(degUp/360*pi) sin(degUp/360*pi) 0 0];
 q0 = quatnormalize(q0_given);
@@ -46,6 +46,29 @@ for lambda = 0:pi/16:2*pi % circle
         cnt = cnt+1;
     end
 end
+%% random cubic trajecotry 
+for i = 1:15
+min_c = -10; max_c = 10;
+r = (max_c-min_c).*rand(1000,1) + min_c;
+
+q_0 = [1.5 2 0.8];
+v_0 = (max_c-min_c).*rand(1,3) + min_c;
+% v_0 = [ 0 0 0];
+q_e = [3 2 1.5];
+v_e = (max_c-min_c).*rand(1,3) + min_c;
+% v_e = [ 0 0 0];
+% cubic
+
+b = [q_0;v_0;q_e;v_e];
+M = [1 0 0 0;
+    0 1 0 0;
+    1 1 1 1;
+    0 1 2 3];
+a_cubic{i} = (flipud(inv(M)*b))';
+
+end
+%%
+translationPolynomial = a_cubic;
 rayTrajectory = {quaternionDoFs, translationPolynomial};
 DegofTranslation = size(startEndPts{1},1)-1;
 
@@ -67,9 +90,11 @@ disp('Start Running Simulation');
 wsim.run(w_condition,[])
 
 %% plot the trajectory-based workspace
-wsim.plotRayWorkspace2Cond(startEndPts,[1,2,3])
+% wsim.plotRayWorkspace2Cond(startEndPts,[1,2,3])
 % print the string 'Initial'
-text(position0(1)+0.2,position0(2),position0(3)+0.2,'Initial','FontSize',20)
+% text(position0(1)+0.2,position0(2),position0(3)+0.2,'Initial','FontSize',20)
 % print the string 'Terminal'
-text(position1(1)+0.2,position1(2),position1(3)+0.2,'Terminal','FontSize',20)
-                    
+% text(position1(1)+0.2,position1(2),position1(3)+0.2,'Terminal','FontSize',20)
+
+% wsim.plotCoeffWorkspaceinTranslation()               
+wsim.plotCurvedRayWorkspace()

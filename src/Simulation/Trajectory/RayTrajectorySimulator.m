@@ -110,7 +110,7 @@ classdef RayTrajectorySimulator < SimulatorBase
 
     
         function plotRayWorkspace2Cond(obj,startEndPts,plot_axis)
-% % %             numDofs=obj.grid.n_dimensions;
+            % % %             numDofs=obj.grid.n_dimensions;
             if(nargin<2)
                 plot_axis=[1,2,3];
             end
@@ -122,7 +122,7 @@ classdef RayTrajectorySimulator < SimulatorBase
             q1_given = obj.quaternionPts(2,:);
             cosAgl = sum(q0_given .* q1_given);
             theta = acos(cosAgl);
-             
+            
             for it=1:size_trajectory
                 if ~isempty(obj.trajectory{it})
                     %%% w.quaternionPts = traj{1};
@@ -146,8 +146,8 @@ classdef RayTrajectorySimulator < SimulatorBase
                         end
                     else
                         P_IFCWCC = [];
-                    end                    
-                                        
+                    end
+                    
                     minVal = 0;
                     maxVal = 1;
                     feasiblePath = P_IFCWCC;
@@ -172,7 +172,7 @@ classdef RayTrajectorySimulator < SimulatorBase
                     % ----intersecting set ----
                     %
                     
-                    %% plot resulting translational paths 
+                    %% plot resulting translational paths
                     k = 20;
                     feasiblePath_T = tan(feasiblePath*theta/2);
                     for part = 1:size(feasiblePath_T,1)
@@ -237,12 +237,57 @@ classdef RayTrajectorySimulator < SimulatorBase
             grid on
         end
         
+        function plotCoeffWorkspaceinTranslation(obj)
+            for i = 1: size(obj.trajectory,1)
+                if obj.trajectory{i, 1}.conditions{2,2}(2) == 1 && obj.trajectory{i, 1}.conditions{1,2}(2)  == 1
+                    t = linspace(obj.trajectory{i, 1}.conditions{2,2}(1),obj.trajectory{i, 1}.conditions{2,2}(2),100);
+                    for j = 1:size(obj.trajectory{i, 1}.translationTrajectory,1)
+                        var_t{i,:}(j,:) = polyval(obj.trajectory{i,1}.translationTrajectory(j,:),t);
+                    end
+                    graph_plot(i) = plot3(var_t{i,:}(1,:),var_t{i,:}(2,:),var_t{i,:}(3,:),'black','LineWidth',1.2);
+                    hold on
+                    grid on
+                else
+%                     i
+                end
+                
+                
+            end
+        end
+        
+        function plotCurvedRayWorkspace(obj)
+            
+            for i = 1: size(obj.trajectory,1)
+                total_time_range_ifc = unique([obj.trajectory{i, 1}.conditions{1,2},1]);
+                total_time_range_wcc = unique([obj.trajectory{i, 1}.conditions{2,2},1]);
+                time_range = sort(unique([total_time_range_ifc,total_time_range_wcc]));
+                
+                feasible_time_range = linspace(time_range(1),time_range(2),100);
+                if size(time_range,2) > 2
+                    infeasible_time_range = linspace(time_range(2),time_range(end),100);
+                end
+                for j = 1:size(obj.trajectory{i,1}.translationTrajectory,1)
+                    feasible_coord{i,:}(j,:) = polyval(obj.trajectory{i,1}.translationTrajectory(j,:),feasible_time_range);
+                    if exist('infeasible_time_range')
+                        infeasible_coord{i,:}(j,:) = polyval(obj.trajectory{i,1}.translationTrajectory(j,:),infeasible_time_range);
+                    end
+                end
+                graph_plot_f(i) = plot3(feasible_coord{i,:}(1,:),feasible_coord{i,:}(2,:),feasible_coord{i,:}(3,:),'g','LineWidth',1.2);
+                hold on
+                grid on
+                if exist('infeasible_time_range')
+                    graph_plot_i(i) = plot3(infeasible_coord{i,:}(1,:),infeasible_coord{i,:}(2,:),infeasible_coord{i,:}(3,:),'--','Color',[0.7 0.7 0.7],'LineWidth',1.2);
+                end               
+                clear infeasible_time_range feasible_time_range time_range total_time_range_wcc total_time_range_ifc
+            end
+            
+        end
         function [resultL, resultR] = or_and_or(obj, L_A, R_A, L_B, R_B)
             % make sure elements in A and B are non-intersecting
             [AL, AR] = Or_interval(obj, L_A, R_A); % Input of Or_interval fn is not bounded, see 'Or_interval'
             [BL, BR] = Or_interval(obj, L_B, R_B); % Output of Or_interval fn could be null sets, see 'Or_interval'
             % -- V.2.0 --
-            if ~isempty(AL) && ~isempty(BL) % if AL is not empty, then AR is not empty as well  
+            if ~isempty(AL) && ~isempty(BL) % if AL is not empty, then AR is not empty as well
                 t =1;
                 storeL = cell(1, length(AL)*length(BL));
                 storeR = cell(1, length(AL)*length(BL));
@@ -262,14 +307,14 @@ classdef RayTrajectorySimulator < SimulatorBase
         function [L_or, R_or] = Or_interval(obj, L, R)
             if length(L) ~= length(R)
                 CASPR_log.Print('Invaid Input',CASPRLogLevel.ERROR);
-            elseif max(L > R)                
+            elseif max(L > R)
                 CASPR_log.Print('Plz make sure L <= R',CASPRLogLevel.ERROR);
             elseif isempty(L) % the input is one null interval
                 disp('[WARNING] Empty Input') % union(a null space)
                 L_or = [];
                 R_or = [];
             else  % the input is not one null interval so Note-3 holds
-                % sort input in ascending order 
+                % sort input in ascending order
                 [L, I] = sort(L);
                 R_temp = zeros(1, length(L));
                 for i = 1: length(L)
@@ -277,7 +322,7 @@ classdef RayTrajectorySimulator < SimulatorBase
                     R_temp(i) = R(index);
                 end
                 R = R_temp;
-                % cal. union interval ONE by ONE 
+                % cal. union interval ONE by ONE
                 t = 1;
                 L_store(t) = L(1); % store the finial results
                 R_store(t) = R(1);
