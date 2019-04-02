@@ -96,5 +96,13 @@ wsim.run(w_condition,[])
 % print the string 'Terminal'
 % text(position1(1)+0.2,position1(2),position1(3)+0.2,'Terminal','FontSize',20)
 
-% wsim.plotCoeffWorkspaceinTranslation()               
+wsim.plotCoeffWorkspaceinTranslation() 
+xlim([0 4])
+ylim([0 4])
+zlim([0 4])
+figure
 wsim.plotCurvedRayWorkspace()
+xlim([0 4])
+ylim([0 4])
+zlim([0 4])
+

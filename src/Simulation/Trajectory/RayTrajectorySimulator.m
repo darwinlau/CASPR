@@ -249,10 +249,10 @@ classdef RayTrajectorySimulator < SimulatorBase
                     grid on
                 else
 %                     i
-                end
-                
+                end               
                 
             end
+            title('Coefficient Ray Workspace(Translation View)')
         end
         
         function plotCurvedRayWorkspace(obj)
@@ -280,7 +280,7 @@ classdef RayTrajectorySimulator < SimulatorBase
                 end               
                 clear infeasible_time_range feasible_time_range time_range total_time_range_wcc total_time_range_ifc
             end
-            
+            title('Curved Ray Workspace(Translation View)')
         end
         function [resultL, resultR] = or_and_or(obj, L_A, R_A, L_B, R_B)
             % make sure elements in A and B are non-intersecting
