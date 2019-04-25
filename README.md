@@ -88,3 +88,13 @@ Further information for setting up each of these toolboxes is contained below
 2. Extract the downloaded folder.
 3. Open MATLAB into the directory of the extracted folder.
 4. Run opti_Install.m to finalise the installation.
+
+## Extensions ##
+### Visualisation through CASPR-RViz ###
+* For ROS users, CDPR models in CASPR can be visualised in [rviz](http://wiki.ros.org/rviz) through CASPR-RViz.
+* Detailed setup procedures and guidelines can be found in the [CASPR-RViz repository](https://github.com/darwinlau/CASPR-RViz).
+
+### From CAD to CASPR - CARDSflow ###
+* CARDSflow provides a complete pipeline from CAD design of models to simulations in CASPR.
+* Detailed setup procedures and guidelines can be found in the [CARDSflow documentation](https://cardsflow.readthedocs.io/en/latest/Usage/0_installation.html).
+
