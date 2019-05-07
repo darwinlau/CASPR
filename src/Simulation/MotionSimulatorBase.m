@@ -332,13 +332,14 @@ classdef (Abstract) MotionSimulatorBase < SimulatorBase
             else
                 figure(fig_handle);
             end
-            
             if nargin < 5 || isempty(axis_handle)
+                clf;
                 ax = gca;
             else
                 ax = axis_handle;
+                axes(ax);
             end
-            axes(ax);
+            
             axis(plot_axis);
             view(view_angle); 
             hold on;
@@ -346,7 +347,7 @@ classdef (Abstract) MotionSimulatorBase < SimulatorBase
             xlabel('x');
             ylabel('y');
             zlabel('z');
-
+          
             body_model = kinematics.bodyModel;
             for k = 1:body_model.numLinks
                 r_OP0 = body_model.bodies{k}.R_0k*body_model.bodies{k}.r_OP;
@@ -442,7 +443,6 @@ classdef (Abstract) MotionSimulatorBase < SimulatorBase
                 end
                 frame = getframe(plot_handle);
                 writerObj.writeVideo(frame);
-                clf(plot_handle);                
             end
             writerObj.close();
             close(plot_handle);
