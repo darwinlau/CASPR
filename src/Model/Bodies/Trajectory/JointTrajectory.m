@@ -143,27 +143,29 @@ classdef JointTrajectory < TrajectoryBase
     
     methods (Static)
         % Loads all trajectories from XML configuration
-        function [trajectory] = LoadXmlObj(xmlObj, bodiesObj)
+        function [trajectory] = LoadXmlObj(xmlObj, bodiesObj, modelConfig)
             node_name = xmlObj.getNodeName;
             % First select the type of trajectory and then pass it to
             % individual functions
             if (strcmp(node_name, 'linear_spline_trajectory'))
-                trajectory = JointTrajectory.LinearTrajectoryLoadXmlObj(xmlObj, bodiesObj);
+                trajectory = JointTrajectory.LinearTrajectoryLoadXmlObj(xmlObj, bodiesObj, modelConfig);
             elseif (strcmp(node_name, 'cubic_spline_trajectory'))
-                trajectory = JointTrajectory.CubicTrajectoryLoadXmlObj(xmlObj, bodiesObj);
+                trajectory = JointTrajectory.CubicTrajectoryLoadXmlObj(xmlObj, bodiesObj, modelConfig);
             elseif (strcmp(node_name, 'quintic_spline_trajectory'))
-                trajectory = JointTrajectory.QuinticTrajectoryLoadXmlObj(xmlObj, bodiesObj);
+                trajectory = JointTrajectory.QuinticTrajectoryLoadXmlObj(xmlObj, bodiesObj, modelConfig);
             elseif (strcmp(node_name, 'cubic_spline_average_velocity_trajectory'))
-                trajectory = JointTrajectory.CubicTrajectoryAverageVelocityLoadXmlObj(xmlObj, bodiesObj);
+                trajectory = JointTrajectory.CubicTrajectoryAverageVelocityLoadXmlObj(xmlObj, bodiesObj, modelConfig);
             elseif (strcmp(node_name, 'parabolic_blend_trajectory'))
-                trajectory = JointTrajectory.ParabolicBlendTrajectoryLoadXmlObj(xmlObj, bodiesObj);
+                trajectory = JointTrajectory.ParabolicBlendTrajectoryLoadXmlObj(xmlObj, bodiesObj, modelConfig);
+            elseif (strcmp(node_name, 'file_trajectory'))
+                trajectory = JointTrajectory.FileTrajectoryLoadXmlObj(xmlObj, bodiesObj, modelConfig);
             else
                 CASPR_log.Error('Trajectory type in XML undefined');
             end
         end
         
         % Perform linear trajectory spline to produce trajectory
-        function [trajectory] = LinearTrajectoryLoadXmlObj(xmlObj, bodiesObj)
+        function [trajectory] = LinearTrajectoryLoadXmlObj(xmlObj, bodiesObj, ~)
             CASPR_log.Assert(strcmp(xmlObj.getNodeName, 'linear_spline_trajectory'), 'Element should be <linear_spline_trajectory>');            
             points_node = xmlObj.getElementsByTagName('points').item(0);
             point_nodes = points_node.getChildNodes;
@@ -240,7 +242,7 @@ classdef JointTrajectory < TrajectoryBase
         end
         
         % Perform cubic trajectory spline to produce trajectory
-        function [trajectory] = CubicTrajectoryLoadXmlObj(xmlObj, bodiesObj)
+        function [trajectory] = CubicTrajectoryLoadXmlObj(xmlObj, bodiesObj, ~)
             CASPR_log.Assert(strcmp(xmlObj.getNodeName, 'cubic_spline_trajectory'), 'Element should be <cubic_spline_trajectory>');
             
             points_node = xmlObj.getElementsByTagName('points').item(0);
@@ -318,7 +320,7 @@ classdef JointTrajectory < TrajectoryBase
         end
         
         % Perform quintic trajectory spline to produce trajectory
-        function [trajectory] = QuinticTrajectoryLoadXmlObj(xmlObj, bodiesObj)
+        function [trajectory] = QuinticTrajectoryLoadXmlObj(xmlObj, bodiesObj, ~)
             CASPR_log.Assert(strcmp(xmlObj.getNodeName, 'quintic_spline_trajectory'), 'Element should be <quintic_spline_trajectory>');
             
             points_node = xmlObj.getElementsByTagName('points').item(0);
@@ -401,7 +403,7 @@ classdef JointTrajectory < TrajectoryBase
             trajectory.q_ddot = mat2cell(q_dd_trajectory, size(q_dd_trajectory,1), ones(size(q_dd_trajectory,2),1));
         end
         
-        function [trajectory] = CubicTrajectoryAverageVelocityLoadXmlObj(xmlObj, bodiesObj)
+        function [trajectory] = CubicTrajectoryAverageVelocityLoadXmlObj(xmlObj, bodiesObj, ~)
             CASPR_log.Assert(strcmp(xmlObj.getNodeName, 'cubic_spline_average_velocity_trajectory'), 'Element should be <cubic_spline_average_velocity_trajectory>');
             
             points_node = xmlObj.getElementsByTagName('points').item(0);
@@ -492,7 +494,7 @@ classdef JointTrajectory < TrajectoryBase
             trajectory.q_ddot = mat2cell(q_dd_trajectory, size(q_dd_trajectory,1), ones(size(q_dd_trajectory,2),1));
         end
         
-        function [trajectory] = ParabolicBlendTrajectoryLoadXmlObj(xmlObj, bodiesObj)
+        function [trajectory] = ParabolicBlendTrajectoryLoadXmlObj(xmlObj, bodiesObj, ~)
             CASPR_log.Assert(strcmp(xmlObj.getNodeName, 'parabolic_blend_trajectory'), 'Element should be <parabolic_blend_trajectory>');
            
             points_node = xmlObj.getElementsByTagName('points').item(0);
@@ -575,6 +577,71 @@ classdef JointTrajectory < TrajectoryBase
             trajectory.q = mat2cell(q_trajectory, size(q_trajectory,1), ones(size(q_trajectory,2),1));
             trajectory.q_dot = mat2cell(q_d_trajectory, size(q_d_trajectory,1), ones(size(q_d_trajectory,2),1));
             trajectory.q_ddot = mat2cell(q_dd_trajectory, size(q_dd_trajectory,1), ones(size(q_dd_trajectory,2),1));
+        end
+        
+        
+        function [trajectory] = FileTrajectoryLoadXmlObj(xmlObj, bodiesObj, modelConfig)
+            CASPR_log.Assert(strcmp(xmlObj.getNodeName, 'file_trajectory'), 'Element should be <file_trajectory>');
+           
+            filename = char(xmlObj.getAttribute('filename'));
+            file_location = [modelConfig.modelFolderPath, filename];
+            
+            trajectory = JointTrajectory.FileTrajectoryCreate(file_location, bodiesObj);
+        end       
+        
+        % Loads a complete trajectory by reading a .traj file
+        function [trajectory] = FileTrajectoryCreate(traj_file, model)
+            % Initialise a new trajectry
+            trajectory = JointTrajectory;
+            
+            % Read through the trajectory file
+            % Open the file
+            fid = fopen(traj_file,'r');
+            % Read the first line
+            l0 = fgetl(fid);
+            % Split the line
+            l_split = strsplit(l0,'time_step,');
+            % extract the double values
+            timeStep = str2double(l_split{2});
+            
+            % For the remaining lines extract the data
+            num_points = 1;
+            % Initialise the trajectory vectors
+            n_q = model.numDofs;
+            while(~feof(fid))
+                l1 = fgetl(fid);
+                % Split up the components
+                l_split = strsplit(l1,{'q,',',v,',',a,'});
+                
+                % First the pose
+                l_split_q = strsplit(l_split{2},',');
+                q = zeros(n_q,1);
+                for k=1:length(l_split_q)
+                    q(k) = str2double(l_split_q{k});
+                end
+                trajectory.q{num_points} = q;
+                
+                % Then the velocity
+                l_split_v = strsplit(l_split{3},',');
+                v = zeros(n_q,1);
+                for k=1:length(l_split_v)
+                    v(k) = str2double(l_split_v{k});
+                end
+                trajectory.q_dot{num_points} = v;
+                
+                % Then the acceleration
+                l_split_a = strsplit(l_split{4},',');
+                a = zeros(n_q,1);
+                for k=1:length(l_split_a)
+                    a(k) = str2double(l_split_a{k});
+                end
+                trajectory.q_ddot{num_points} = a;
+                
+                num_points = num_points + 1;
+            end
+            totalTime = (num_points-2)*timeStep;
+            trajectory.timeVector = [0:timeStep:totalTime];
+            fclose(fid);
         end
         
         % Loads a complete trajectory by reading a .traj file

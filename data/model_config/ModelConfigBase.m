@@ -13,6 +13,8 @@ classdef (Abstract) ModelConfigBase < handle
         cablesPropertiesFilename    % Filename for the cable properties
         trajectoriesFilename        % Filename for the trajectories
         
+        modelFolderPath             % Path of folder for the model
+        
         bodiesModel                 % Stores the SystemModelBodies object for the robot model
         displayRange                % The axis range to display the robot
         viewAngle                   % The angle for which the model should be viewed at
@@ -21,7 +23,7 @@ classdef (Abstract) ModelConfigBase < handle
     end
     
     properties (Access = private)
-        root_folder                 % The root folder for the CASPR build
+        root_folder                 % The root folder for the models
         
         robotName                   % Name of the robot
         bodiesXmlObj                % The DOMNode object for body props
@@ -35,7 +37,7 @@ classdef (Abstract) ModelConfigBase < handle
         function c = ModelConfigBase(type_string, folder, list_file)
             c.root_folder = [CASPR_configuration.LoadModelConfigPath(), folder];
             c.robotName = type_string;
-            
+                        
             % Check the type of enum and open the master list
             fid = fopen([c.root_folder, list_file]);
             
@@ -48,9 +50,10 @@ classdef (Abstract) ModelConfigBase < handle
             for i = 1:i_length
                 if(strcmp(char(cell_array{1}{i}),type_string))
                     cdpr_folder                 = char(cell_array{2}{i});
-                    c.bodyPropertiesFilename    = [c.root_folder, cdpr_folder,char(cell_array{3}{i})];
-                    c.cablesPropertiesFilename  = [c.root_folder, cdpr_folder,char(cell_array{4}{i})];
-                    c.trajectoriesFilename      = [c.root_folder, cdpr_folder,char(cell_array{5}{i})];
+                    c.modelFolderPath           = [c.root_folder, cdpr_folder];
+                    c.bodyPropertiesFilename    = [c.root_folder, cdpr_folder, char(cell_array{3}{i})];
+                    c.cablesPropertiesFilename  = [c.root_folder, cdpr_folder, char(cell_array{4}{i})];
+                    c.trajectoriesFilename      = [c.root_folder, cdpr_folder, char(cell_array{5}{i})];
                     fclose(fid);
                     status_flag = 0;
                     break;
@@ -172,12 +175,12 @@ classdef (Abstract) ModelConfigBase < handle
         % Getting the joint and operational space trajectories
         function [traj] = getJointTrajectory(obj, trajectory_id)
             traj_xmlobj = obj.getJointTrajectoryXmlObj(trajectory_id);
-            traj = JointTrajectory.LoadXmlObj(traj_xmlobj, obj.bodiesModel);
+            traj = JointTrajectory.LoadXmlObj(traj_xmlobj, obj.bodiesModel, obj);
         end
         
         function [traj] = getOperationalTrajectory(obj, trajectory_id)
             traj_xmlobj = obj.getOperationalTrajectoryXmlObj(trajectory_id);
-            traj = OperationalTrajectory.LoadXmlObj(traj_xmlobj, obj.bodiesModel);
+            traj = OperationalTrajectory.LoadXmlObj(traj_xmlobj, obj.bodiesModel, obj);
         end
         
         function cableset_str = getCableSetList(obj)
