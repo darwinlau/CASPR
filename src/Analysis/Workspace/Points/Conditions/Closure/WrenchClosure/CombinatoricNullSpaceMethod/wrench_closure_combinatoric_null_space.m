@@ -9,7 +9,7 @@
 % Author        : Jonathan EDEN
 % Created       : 2016
 % Description   : 
-function inWorkspace = wrench_closure_combinatoric_null_space(dynamics,~)
+function inWorkspace = wrench_closure_combinatoric_null_space(dynamics)
     % Determine necessary variables for test
     A       =   -dynamics.L_active'; % Cable Jacobian
     [n,m] = size(A); % Size variables

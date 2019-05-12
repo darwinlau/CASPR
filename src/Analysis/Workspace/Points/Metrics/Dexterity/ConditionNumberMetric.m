@@ -6,7 +6,11 @@
 % Created       : 2016
 % Description   : 
 classdef ConditionNumberMetric < WorkspaceMetricBase
-    properties (SetAccess = protected, GetAccess = protected)
+    % Constants that needs to be defined from parent
+    properties (Constant)
+        type = WorkspaceMetricType.CONDITION_NUMBER;
+        metricMin = 0;
+        metricMax = Inf;
     end
     
     methods
@@ -15,7 +19,7 @@ classdef ConditionNumberMetric < WorkspaceMetricBase
         end
         
         % Evaluate function implementation
-        function v = evaluateFunction(~,dynamics,~)
+        function v = evaluateFunction(~, dynamics)
             % Determine the Jacobian Matrix
             L = dynamics.L_active;
             % Compute singular values of jacobian matrix

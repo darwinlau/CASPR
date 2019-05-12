@@ -10,23 +10,20 @@
 %   Any new types of metrics need to be added to the WorkspaceMetricType 
 %   enum and also added to the CreateWorkspaceMetric method.
 classdef (Abstract) WorkspaceMetricBase < handle
-    properties
-        type            % Type of joint from JointType enum
-    end
-    
-    properties (SetAccess = protected)
+    properties (Constant, Abstract)
+        % Type of workspace (WorkspaceMetricType enum)
+        type
         % Minimum and maximum allowable metric values
         metricMin
-        metricMax 
+        metricMax
     end
     
     methods
         % Evalute function returns a quantitative evaluation of a metric
         % given dynamics information
-        function [metric_type,metric_value, comp_time] = evaluate(obj,dynamics,options)
+        function [metric_value, comp_time] = evaluate(obj, dynamics)
             start_tic   =   tic;
-            metric_type =   obj.type;
-            f = obj.evaluateFunction(dynamics,options);
+            f = obj.evaluateFunction(dynamics);
             if(f<obj.metricMin)
                 metric_value = obj.metricMin;
             elseif(f>obj.metricMax)
@@ -45,36 +42,37 @@ classdef (Abstract) WorkspaceMetricBase < handle
         end
     end
     
+    % Comment this away for now, see if it is needed. If not, remove this
+    % in the future
+%     methods (Static)
+%         % Creates a new metric
+%         function wm = CreateWorkspaceMetric(metricType,desired_set)
+%             switch metricType
+%                 case WorkspaceMetricType.SEACM
+%                     wm = SEACM;
+%                 case WorkspaceMetricType.CAPACITY_MARGIN
+%                     wm = CapacityMarginMetric(desired_set);
+%                 case WorkspaceMetricType.CONDITION_NUMBER
+%                     wm = ConditionNumberMetric;
+%                 case WorkspaceMetricType.TENSION_FACTOR
+%                     wm = TensionFactorMetric;
+%                 case WorkspaceMetricType.TENSION_FACTOR_MODIFIED
+%                     wm = TensionFactorModifiedMetric;
+%                 case WorkspaceMetricType.UNILATERAL_DEXTERITY
+%                     wm = UnilateralDexterityMetric;
+%                 case WorkspaceMetricType.MIN_CABLE_CABLE_DISTANCE
+%                     wm = MinCableCableDistanceMetric;
+%                 case WorkspaceMetricType.UNILATERAL_MAXIMUM_FORCE_AMPLIFICATION
+%                     wm = UnilateralMaximumForceAmplificationMetric;
+%                 otherwise
+%                     CASPR_log.Print('Workspace metric type is not defined',CASPRLogLevel.ERROR);
+%             end
+%         end
+%     end
+    
     methods (Abstract)
         % evalute - This function takes in the workspace dynamics and
         % returns the metric value
-        f = evaluateFunction(obj,dynamics,options);        
-    end
-    
-    methods (Static)
-        % Creates a new metric
-        function wm = CreateWorkspaceMetric(metricType,desired_set)
-            switch metricType
-                case WorkspaceMetricType.SEACM
-                    wm = SEACM;
-                case WorkspaceMetricType.CAPACITY_MARGIN
-                    wm = CapacityMarginMetric(desired_set);
-                case WorkspaceMetricType.CONDITION_NUMBER
-                    wm = ConditionNumberMetric;
-                case WorkspaceMetricType.TENSION_FACTOR
-                    wm = TensionFactorMetric;
-                case WorkspaceMetricType.TENSION_FACTOR_MODIFIED
-                    wm = TensionFactorModifiedMetric;
-                case WorkspaceMetricType.UNILATERAL_DEXTERITY
-                    wm = UnilateralDexterityMetric;
-                case WorkspaceMetricType.MIN_CABLE_CABLE_DISTANCE
-                    wm = MinCableCableDistanceMetric;
-                case WorkspaceMetricType.UNILATERAL_MAXIMUM_FORCE_AMPLIFICATION
-                    wm = UnilateralMaximumForceAmplificationMetric;
-                otherwise
-                    CASPR_log.Print('Workspace metric type is not defined',CASPRLogLevel.ERROR);
-            end
-            wm.type = metricType;
-        end
+        f = evaluateFunction(obj, dynamics);        
     end
 end

@@ -12,18 +12,24 @@
 % Created       : 2016
 % Description   : 
 classdef UnilateralMaximumForceAmplificationMetric < WorkspaceMetricBase
-    properties (SetAccess = protected, GetAccess = protected)
+    % Constants that needs to be defined from parent
+    properties (Constant)
+        type = WorkspaceMetricType.UNILATERAL_MAXIMUM_FORCE_AMPLIFICATION;
+        metricMin = 0;
+        metricMax = Inf;
+    end
+    
+    properties (Access = protected)
+        options = [];               % Solver options for QP
     end
     
     methods
         % Constructor
         function m = UnilateralMaximumForceAmplificationMetric()
-            m.metricMin = 0;
-            m.metricMax = Inf;
         end
         
         % Evaluate function implementation
-        function v = evaluateFunction(~,dynamics,options)
+        function v = evaluateFunction(obj, dynamics)
             % Determine the Jacobian Matrix
             L = dynamics.L_active;
             % Compute singular values of jacobian matrix
@@ -38,7 +44,7 @@ classdef UnilateralMaximumForceAmplificationMetric < WorkspaceMetricBase
             beq = zeros(dynamics.numDofs,1);
             lb = ones(dynamics.numCablesActive,1);
             ub = Inf*ones(dynamics.numCablesActive,1);
-            [u,~,exit_flag] = quadprog(H,f,[],[],Aeq,beq,lb,ub,[],options);
+            [u,~,exit_flag] = quadprog(H,f,[],[],Aeq,beq,lb,ub,[],obj.options);
             if((exit_flag == 1) && (rank(L) == dynamics.numDofs))
                 % ADD A LATER FLAG THAT CAN USE WCW IF ALREADY TESTED
                 h = u/norm(u);
@@ -58,7 +64,7 @@ classdef UnilateralMaximumForceAmplificationMetric < WorkspaceMetricBase
                     Aeq     =   -L_m';
                     lb      =   ones(dynamics.numCablesActive-1,1);
                     ub      =   Inf*ones(dynamics.numCablesActive-1,1);
-                    [u,~,exit_flag] = quadprog(H,f,[],[],Aeq,beq,lb,ub,[],options);
+                    [u,~,exit_flag] = quadprog(H,f,[],[],Aeq,beq,lb,ub,[],obj.options);
                     % Test if the Jacobian is full rank
                     if((exit_flag==1) && (L_rank == dynamics.numDofs))
                         h = u/norm(u);

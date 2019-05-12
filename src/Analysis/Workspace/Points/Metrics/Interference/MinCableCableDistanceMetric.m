@@ -2,7 +2,14 @@
 % Author        : Zeqing Zhang
 % Created       : 2016
 % Description   : Interference metric
-classdef MinCableCableDistanceMetric < WorkspaceMetricBase
+classdef MinCableCableDistanceMetric < WorkspaceMetricBase    
+    % Constants that needs to be defined from parent
+    properties (Constant)
+        type = WorkspaceMetricType.MIN_CABLE_CABLE_DISTANCE;
+        metricMin = 0;
+        metricMax = Inf;
+    end
+    
     properties 
         mindis_mn % save the min distance for all WorkspacePoints
     end
@@ -10,12 +17,10 @@ classdef MinCableCableDistanceMetric < WorkspaceMetricBase
     methods
         % Constructor
         function m = MinCableCableDistanceMetric()
-            m.metricMin = 0;
-            m.metricMax = 0.12; %unit is m
         end
         
         % Evaluate function implementation
-        function v = evaluateFunction(obj,dynamics,~) % default of obj is itself
+        function v = evaluateFunction(obj,dynamics) % default of obj is itself
             % pick up a seg. s1 from cable n and the other seg. s2 from cable m (may or may not same)
             % the total munber of calculation for an input model at one worksapce point
             sumcal_model = 0.5 * dynamics.numCables * (1 + dynamics.numCables);

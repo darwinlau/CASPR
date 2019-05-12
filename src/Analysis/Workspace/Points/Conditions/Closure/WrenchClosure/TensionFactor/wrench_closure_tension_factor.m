@@ -7,7 +7,7 @@
 % Author         : Jonathan EDEN
 % Created        : 2016
 % Description    : Implementation of WCW analysis using the tension factor
-function inWorkspace = wrench_closure_tension_factor(dynamics,options)
+function inWorkspace = wrench_closure_tension_factor(dynamics)
     m = TensionFactorMetric();
-    inWorkspace = m.evaluate(dynamics,options)>0;
+    inWorkspace = m.evaluate(dynamics)>0;
 end

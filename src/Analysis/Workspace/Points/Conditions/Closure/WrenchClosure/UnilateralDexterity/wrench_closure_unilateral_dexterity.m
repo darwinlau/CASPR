@@ -9,7 +9,7 @@
 % dexterity
 % Note           : This metric has been extended to consider the case of
 % greater than n+1 elements.
-function inWorkspace = wrench_closure_unilateral_dexterity(dynamics,options)
+function inWorkspace = wrench_closure_unilateral_dexterity(dynamics)
     m = UnilateralDexterityMetric();
-    inWorkspace = m.evaluate(dynamics,options)>0;
+    inWorkspace = m.evaluate(dynamics)>0;
 end

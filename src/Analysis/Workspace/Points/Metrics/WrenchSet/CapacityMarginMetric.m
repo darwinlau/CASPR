@@ -15,7 +15,14 @@
 % Created       : 2016
 % Description   : Capacity margin metric
 classdef CapacityMarginMetric < WorkspaceMetricBase
-    properties (SetAccess = protected, GetAccess = protected)
+    % Constants that needs to be defined from parent
+    properties (Constant)
+        type = WorkspaceMetricType.CAPACITY_MARGIN;
+        metricMin = -Inf;
+        metricMax = Inf;
+    end
+    
+    properties (SetAccess = protected)
         desired_wrench_set
     end
     
@@ -23,12 +30,10 @@ classdef CapacityMarginMetric < WorkspaceMetricBase
         % Constructor
         function m = CapacityMarginMetric(desired_wrench_set)
             m.desired_wrench_set = desired_wrench_set;
-            m.metricMin = -Inf;
-            m.metricMax = Inf;
         end
         
         % Evaluate Function implementation
-        function v = evaluateFunction(obj,dynamics,~)
+        function v = evaluateFunction(obj,dynamics)
             L   =   dynamics.L_active;
             f_u =   dynamics.actuationForcesMax;
             f_l =   dynamics.actuationForcesMin;
