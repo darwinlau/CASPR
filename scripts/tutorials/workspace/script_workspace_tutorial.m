@@ -17,18 +17,16 @@ modelObj = model_config.getModel(cable_set_id);
 q_step          =   0.1; n_dim           =   2;
 uGrid           =   UniformGrid(0.1*ones(n_dim,1),0.9*ones(n_dim,1),q_step*ones(n_dim,1),'step_size');
 % Define the workspace condition and metrics
-% w_condition  =   {WorkspaceCondition.CreateWorkspaceCondition(WorkspaceConditionType.WRENCH_CLOSURE,WrenchClosureMethods.M_COMBINATORIC_NULL_SPACE,[])};
-w_condition  =   {WorkspaceConditionBase.CreateWorkspaceCondition(WorkspaceConditionType.WRENCH_CLOSURE,[],[])};
-w_metric = {WorkspaceMetricBase.CreateWorkspaceMetric(WorkspaceMetricType.SEACM,[]),WorkspaceMetricBase.CreateWorkspaceMetric(WorkspaceMetricType.TENSION_FACTOR,[])};
-opt = PointWorkspaceSimulatorOptions(false,optimset('Display','off'));
+w_condition  =   {WrenchClosureCondition([])};
+w_metrics = {SEACMetric(), TensionFactorMetric()};
 
 % Start the simulation
 disp('Start Setup Simulation');
-wsim            =   PointWorkspaceSimulator(modelObj,uGrid,opt);
+wsim            =   PointWorkspaceSimulator(modelObj, uGrid, w_condition, w_metrics, []);
 
 % Run the simulation
 disp('Start Running Simulation');
-wsim.run(w_condition,w_metric);
+wsim.run();
 
 % Plot the simulation
 disp('Start Plotting Simulation');

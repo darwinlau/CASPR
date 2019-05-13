@@ -10,49 +10,38 @@
 classdef PointWorkspaceSimulator < SimulatorBase
     
     properties
-        grid            % Grid object for brute force workspace (input)
-        workspace       % Final Workspace (output)
-        conditions = [] % A list of conditions to be evaluated for
-        metrics = []    % A list of metrics to be evaluated for
-        options         % The workspace simulator options
-        edge_matrix = []% The graph representation for the workspace
-        graph_rep = []  % The graph representation for the workspace
-        node_list = []  % A list of all nodes
-        comp_time       % Computational time structure
+        grid                        % Grid object for brute force workspace (input)
+        workspace                   % Final Workspace (output)
+        %options                 % The workspace simulator options
+        edge_matrix = []            % The graph representation for the workspace
+        graph_rep = []              % The graph representation for the workspace
+        node_list = []              % A list of all nodes
+    end
+    
+    properties (SetAccess = private)
+        comp_time_total             % Total time to compute workspace
+        comp_time_evaluation        % Time to just evaluate the workspace points
+        comp_time_graph             % Time to construct the graph structure
+        
+        conditions = []             % An array of conditions to be evaluated for
+        metrics = []                % An array of metrics to be evaluated for
+        connectivity                % Connectivity condition (children of WorkspaceConnectivityBase object)
     end
     
     methods
         % The constructor for the workspace simulator class.
-        function w = PointWorkspaceSimulator(model,grid,options)
+        function w = PointWorkspaceSimulator(model, grid, conditions, metrics, connectivity)
             w@SimulatorBase(model);
             w.grid          = grid;
-            w.options       = options;
-            w.comp_time     = struct('point_construction',0,'graph_construction',0,'total',0);
+            w.conditions    = conditions;
+            w.metrics       = metrics;
+            w.connectivity  = connectivity;
         end
         
         % Implementation of the run function
-        function run(obj, w_conditions, w_metrics, w_connectivity)
-            % First determine how big the metrics previously were
-            if(isempty(obj.metrics))
-                n_metrics_prev  = 0; 
-                obj.metrics     = w_metrics;
-            else
-                n_metrics_prev  = size(obj.metrics,2);
-                obj.metrics = [obj.metrics,w_metrics];
-            end
-            % Determine how big the conditions previously were
-            if(isempty(obj.conditions))
-                n_conditions_prev = 0; 
-                obj.conditions = w_conditions;
-            else
-                n_conditions_prev = size(obj.conditions,2);
-                obj.conditions = [obj.conditions,w_conditions];
-            end
-            % Store the previous workspace
-            workspace_prev = obj.workspace;
-            % Test if the metrics have infinite limits
-            for i = 1:size(w_metrics,2)
-                if((~isempty(w_metrics{i}.metricMax))&&((abs(w_metrics{i}.metricMax)==Inf)||(abs(w_metrics{i}.metricMin)==Inf)))
+        function run(obj)
+            for i = 1:size(obj.metrics,2)
+                if((~isempty(obj.metrics{i}.metricMax))&&((abs(obj.metrics{i}.metricMax)==Inf)||(abs(obj.metrics{i}.metricMin)==Inf)))
                     CASPR_log.Print('A metric with infinite limit values cannot be plotted.  To plot please set the metric limit to be finite or filter the workspace after plotting',CASPRLogLevel.WARNING);
                 end
             end
@@ -61,10 +50,6 @@ classdef PointWorkspaceSimulator < SimulatorBase
             n_grid_points = obj.grid.n_points;
             obj.workspace = cell(n_grid_points,1);
             workspace_count = 0;
-            n_metrics       = length(obj.metrics);
-            n_conditions    = length(obj.conditions);
-            % Determine translation from workspace_in to current metrics
-            % list            
             
             % Timing variables
             point_t_in = tic;
@@ -76,63 +61,24 @@ classdef PointWorkspaceSimulator < SimulatorBase
                 CASPR_log.Print([sprintf('Workspace point %d. ',i),sprintf('Completion Percentage: %3.2f',100*i/n_grid_points)],CASPRLogLevel.INFO);
                 % Get the grid point
                 q = obj.grid.getGridPoint(i);
-                % Construct the workspace point
-                wp = PointWorkspaceElement(q,n_metrics,n_conditions);
-                % Update the system dynamics
-                obj.model.update(q, zeros(obj.model.numDofs,1), zeros(obj.model.numDofs,1),zeros(obj.model.numDofs,1));
-                % For each metric compute the value of the point
-                for j = 1:n_metrics
-                    if(j<=n_metrics_prev)
-                        if(~isempty(workspace_prev{i}))
-                            % The metric is at valid value
-                            wp.addMetric(workspace_prev{i}.metrics{j,1},workspace_prev{i}.metrics{j,2},j);
-                        end
-                    else
-                        % New metric
-                        [metric_type,metric_value]          =   obj.metrics{j}.evaluate(obj.model,obj.options.solver_options);
-                        % The metric is at valid value
-                        wp.addMetric(metric_type,metric_value,j);
-                    end
-                end
-                % Evaluate each condition
-                for j = 1:length(obj.conditions)
-                    if(j<=n_conditions_prev)
-                        if((~isempty(workspace_prev{i}))&&(~isempty(workspace_prev{i}.conditions{j})))
-                            % The metric is at valid value
-                            wp.addCondition(workspace_prev{i}.conditions{j,1},j);
-                        end
-                    else
-                        % New condition
-                        [condition_type,condition_value]    =   obj.conditions{j}.evaluate(obj.model,wp);
-                        if(condition_value==true)
-                            % The condition is evaluated to be true
-                            wp.addCondition(condition_type,j);
-                        end
-                    end
-                end
-                test_conditions = cellfun(@isempty,wp.conditions);
-                % Determine whether to add to workspace
-                if(obj.options.union)
-                    entry_condition = (~isempty(obj.metrics)||(sum(test_conditions(:,1))~=n_conditions));
-                else
-                    entry_condition = (sum(test_conditions(:,1))==0);
-                end
-                if(entry_condition)
-                    % Add the workspace point to the 
+                % Construct and evaluate the workspace point
+                wp = PointWorkspaceElement(q, obj.model, obj.conditions, obj.metrics);
+                    
+                if (~isempty(wp.conditions) || ~isempty(wp.metrics))
                     obj.workspace{i} = wp;
                     workspace_count = workspace_count + 1;
                 end
             end
-            obj.comp_time.point_construction = toc(point_t_in);
+            obj.comp_time_evaluation = toc(point_t_in);
             graph_t_in = tic;
             % If graph generation is set generate the graph
-            if(nargin == 4)
-%                 obj.generateWorkspaceGraph(w_connectivity);
-                obj.createWorkspaceGraph(w_conditions{1},[],w_connectivity);
+            if (~isempty(obj.connectivity))
+                obj.createWorkspaceGraph(obj.conditions{1},[],obj.connectivity);
                 % FOR THE MOMENT NO METRICS
             end
-            obj.comp_time.graph_construction = toc(graph_t_in);
-            obj.comp_time.total = toc(total_t_in);
+                
+            obj.comp_time_graph = toc(graph_t_in);
+            obj.comp_time_total = toc(total_t_in);
         end
         
         % Plotting function to plot a two dimensional (subset of the) workspace plot
@@ -451,7 +397,7 @@ classdef PointWorkspaceSimulator < SimulatorBase
                 if(~isempty(obj.workspace{i}))
                     n_constraints = size(obj.workspace{i}.conditions,1);
                     for j = 1:n_constraints
-                        if(condition.type == obj.workspace{i}.conditions{j,1})
+                        if(condition.type == obj.workspace{i}.conditions{j,1}.type)
                             number_node = number_node + 1;
                             obj.node_list(number_node,:) = [i,obj.workspace{i}.pose'];
                             break;

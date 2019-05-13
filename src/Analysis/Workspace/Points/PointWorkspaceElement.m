@@ -8,28 +8,70 @@
 classdef PointWorkspaceElement < handle
     properties(SetAccess = protected)
         pose        % The pose for the workspace condition to be evaluated at
-        metrics     % A cell array of different metrics (enum and value)
-        conditions  % A cell array of different workspace conditions (enum and value)
+        metrics     % A cell array of different metrics (metric object, value)
+        conditions  % A cell array of different workspace conditions (conditon object)
     end
     
     methods
         % Constructor for the class
-        function wp = PointWorkspaceElement(pose,n_metrics,n_constraints)
-            wp.pose         = pose;
-            wp.metrics      = cell(n_metrics,2);
-            wp.conditions   = cell(n_constraints,2);
+        function wp = PointWorkspaceElement(q, modelObj, conditions, metrics)
+            wp.pose         = q;
+            
+            % Checks if the modelObj is already this q value (and hence
+            % updated)
+            if (~isequal(q, modelObj.q))
+                modelObj.update(q, zeros(modelObj.numDofs,1), zeros(modelObj.numDofs,1),zeros(modelObj.numDofs,1));
+            end
+            
+            wp.evaluateMetrics(modelObj, metrics);
+            % Pass the evaluated metrics into the conditions to help
+            wp.evaluateConditions(modelObj, conditions, wp.metrics);
         end
         
-        % A function to add the metric information to the point
-        function addMetric(obj,metric_type,metric_value,index)
-            obj.metrics{index,1} = metric_type;
-            obj.metrics{index,2} = metric_value;
+        % Evaluate all metrics and store values
+        function evaluateMetrics(obj, model, metrics)
+            obj.metrics = PointWorkspaceElement.EvaluateMetrics(model, metrics);
         end
         
-        % A function to add a new condition to the point
-        function addCondition(obj,condition_type,index)
-            obj.conditions{index,1} = condition_type;
-            obj.conditions{index,2} = true;
+        function evaluateConditions(obj, model, conditions, evaluated_metrics)
+            [condition_results] = PointWorkspaceElement.EvaluateConditions(model, conditions, evaluated_metrics);
+            n_conditions = sum(condition_results{:, 2});
+            obj.conditions = cell(n_conditions, 1);
+            c_ind = 1;
+            for ind = 1:length(conditions)
+                if (condition_results{ind, 2})
+                    obj.conditions{c_ind, 1} = condition_results{ind, 1};
+                    c_ind = c_ind + 1;
+                end
+            end
         end
     end    
+    
+    methods (Static)
+        % Function evaluates a cell array of metrics
+        % Input: model object
+        % Input: cell array of metrics
+        % Output: An array of metric types (WorkspaceMetricType)
+        % Output: An array of metric values
+        function [results] = EvaluateMetrics(model, metrics)
+            results = cell(length(metrics), 2);
+            for i = 1:length(metrics)
+                results{i, 1} = metrics{i};
+                results{i, 2} = metrics{i}.evaluate(model);
+            end
+        end
+        
+        % Function evaluates a cell array of conditions
+        % Input: model object
+        % Input: cell array of conditions
+        % Output: An array of condition types (WorkspaceConditionType)
+        % Output: An array of condition values
+        function [results] = EvaluateConditions(model, conditions, evaluated_metrics)
+            results = cell(length(conditions), 2);
+            for i = 1:length(conditions)
+                results{i, 1} = conditions{i};
+                results{i, 2} = conditions{i}.evaluate(model, evaluated_metrics);
+            end
+        end
+    end
 end

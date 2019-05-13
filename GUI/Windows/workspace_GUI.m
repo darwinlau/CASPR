@@ -258,7 +258,7 @@ function generate_button_Callback(~, ~, handles) %#ok<DEFNU>
         if(~strcmp(wc_string,'wrench feasible'))
             wc_string = upper(wc_string);
             wc_string = strrep(wc_string,' ','_');
-            w_condition = {WorkspaceConditionBase.CreateWorkspaceCondition(eval(['WorkspaceConditionType.',wc_string]),[],[])};
+            w_condition = {WorkspaceConditionBase.CreateWorkspaceCondition(eval(['WorkspaceConditionType.',wc_string]),[])};
         else
             wc_string = 'WRENCH_FEASIBLE';
             i_max     = 2^(modObj.numDofs)-1;
@@ -271,10 +271,10 @@ function generate_button_Callback(~, ~, handles) %#ok<DEFNU>
                 flag_vec(:) = str2num(flag_set(:)); %#ok<ST2NM>
                 w_set(:,k+1) = min_vec.*(~flag_vec) + max_vec.*flag_vec;
             end 
-            w_condition = {WorkspaceConditionBase.CreateWorkspaceCondition(eval(['WorkspaceConditionType.',wc_string]),[],w_set)};
+            w_condition = {WrenchFeasibleCondition([], w_set)};
         end
         % Then the metric
-        w_metric = {WorkspaceMetricBase.CreateWorkspaceMetric(WorkspaceMetricType.CONDITION_NUMBER,[])};
+        %w_metric = {WorkspaceMetricBase.CreateWorkspaceMetric(WorkspaceMetricType.CONDITION_NUMBER,[])};
         % FOR THE MOMENT NO OPTIONS ON CONNECTIVITY
         w_connectivity  =   WorkspaceConnectivityBase.CreateWorkspaceConnectivityCondition(WorkspaceConnectivityType.GRID,uGrid);
         %% Now initialise the simulation
@@ -282,9 +282,7 @@ function generate_button_Callback(~, ~, handles) %#ok<DEFNU>
         set(handles.status_text,'String','Setting up simulation');
         drawnow;
         start_tic       =   tic;
-
-        opt = PointWorkspaceSimulatorOptions(false,optimset('Display','off')); % This should be made into an object
-        wsim            =   PointWorkspaceSimulator(modObj,uGrid,opt);
+        wsim            =   PointWorkspaceSimulator(modObj, uGrid, w_condition, {}, w_connectivity);
         time_elapsed    =   toc(start_tic);
         CASPR_log.Info(sprintf('End Setup Simulation : %f seconds', time_elapsed));
 
@@ -292,7 +290,7 @@ function generate_button_Callback(~, ~, handles) %#ok<DEFNU>
         set(handles.status_text,'String','Simulation running');
         drawnow;
         start_tic       =   tic;
-        wsim.run(w_condition,[],w_connectivity); 
+        wsim.run(); 
         time_elapsed    =   toc(start_tic);
         CASPR_log.Info(sprintf('End Running Simulation : %f seconds', time_elapsed));
         CASPR_log.Info('Start Plotting Simulation');
