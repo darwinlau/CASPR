@@ -43,7 +43,7 @@ classdef WrenchFeasibleCondition < WorkspaceConditionBase
                 end
             end
             switch(obj.method)
-                case WrenchFeasibleMethod.M_CAPACITY_MARGIN
+                case WrenchFeasibleMethodType.M_CAPACITY_MARGIN
                     inWorkspace = wrench_feasible_capacity_margin(obj.desired_wrench_set,dynamics);
                 otherwise
                     CASPR_log.Print('Wrench feasible method is not defined',CASPRLogLevel.ERROR);
