@@ -41,7 +41,7 @@ classdef WorkspaceStaticCondition < WorkspaceConditionBase
             end
             switch(obj.method)
                 case WorkspaceStaticMethodType.M_QUAD_PROG
-                    inWorkspace = static_quadprog(dynamics,obj.options);
+                    inWorkspace = static_quadprog(dynamics);
                 case WorkspaceStaticMethodType.M_CAPACITY_MARGIN
                     inWorkspace = static_capacity_margin(dynamics);
                 case WorkspaceStaticMethodType.M_SEACM
