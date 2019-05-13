@@ -260,7 +260,7 @@ function update_button_Callback(~, ~, handles) %#ok<DEFNU>
     cla;
     axis_range = getappdata(handles.cable_popup,'axis_range');
     view_angle = getappdata(handles.cable_popup,'view_angle');
-    MotionSimulatorBase.PlotFrame(modObj, axis_range, view_angle, handles.figure1);
+    MotionSimulatorBase.PlotFrame(modObj, axis_range, view_angle, handles.figure1, handles.plot_axis);
 end
 
 % --- Executes on button press in control_button.
