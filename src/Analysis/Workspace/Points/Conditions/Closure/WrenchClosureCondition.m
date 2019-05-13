@@ -20,7 +20,7 @@ classdef WrenchClosureCondition < WorkspaceConditionBase
             w.options               =   optimset('display','off');
             if(isempty(method))
                 % default method
-                w.method = WrenchClosureMethods.M_QUAD_PROG;
+                w.method = WrenchClosureMethodType.M_QUAD_PROG;
             else
                 w.method = method; 
             end 
@@ -41,15 +41,15 @@ classdef WrenchClosureCondition < WorkspaceConditionBase
                 end
             end
             switch(obj.method)
-                case WrenchClosureMethods.M_QUAD_PROG
+                case WrenchClosureMethodType.M_QUAD_PROG
                     inWorkspace = wrench_closure_quadprog(dynamics, obj.options);
-                case WrenchClosureMethods.M_TENSION_FACTOR
+                case WrenchClosureMethodType.M_TENSION_FACTOR
                     inWorkspace = wrench_closure_tension_factor(dynamics);
-                case WrenchClosureMethods.M_UNILATERAL_DEXTERITY
+                case WrenchClosureMethodType.M_UNILATERAL_DEXTERITY
                     inWorkspace = wrench_closure_unilateral_dexterity(dynamics);
-                case WrenchClosureMethods.M_COMBINATORIC_NULL_SPACE
+                case WrenchClosureMethodType.M_COMBINATORIC_NULL_SPACE
                     inWorkspace = wrench_closure_combinatoric_null_space(dynamics);
-                case WrenchClosureMethods.M_COMBINATORIC_POSITIVE_SPAN
+                case WrenchClosureMethodType.M_COMBINATORIC_POSITIVE_SPAN
                     inWorkspace = wrench_closure_combinatoric_positive_span(dynamics);
                 otherwise
                     CASPR_log.Error('Wrench closure method is not defined');

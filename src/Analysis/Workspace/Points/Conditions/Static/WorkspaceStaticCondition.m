@@ -21,7 +21,7 @@ classdef WorkspaceStaticCondition < WorkspaceConditionBase
         function w = WorkspaceStaticCondition(method)
             w.options               =   optimset('display','off','Algorithm','interior-point-convex');
             if(isempty(method))
-                w.method = WorkspaceStaticMethods.M_QUAD_PROG;
+                w.method = WorkspaceStaticMethodType.M_QUAD_PROG;
             else
                 w.method = method; 
             end 
@@ -40,11 +40,11 @@ classdef WorkspaceStaticCondition < WorkspaceConditionBase
                 end
             end
             switch(obj.method)
-                case WorkspaceStaticMethods.M_QUAD_PROG
+                case WorkspaceStaticMethodType.M_QUAD_PROG
                     inWorkspace = static_quadprog(dynamics,obj.options);
-                case WorkspaceStaticMethods.M_CAPACITY_MARGIN
+                case WorkspaceStaticMethodType.M_CAPACITY_MARGIN
                     inWorkspace = static_capacity_margin(dynamics);
-                case WorkspaceStaticMethods.M_SEACM
+                case WorkspaceStaticMethodType.M_SEACM
                     inWorkspace = static_capability_measure(dynamics);
                 otherwise
                     CASPR_log.Error('Static workspace method is not defined');

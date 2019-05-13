@@ -3,7 +3,7 @@
 % Date:  7/2017
 % Description: Enum class for different interference free workspace methods
 
-classdef InterferenceFreeMethods
+classdef InterferenceFreeMethodType
     enumeration 
         M_MINDISTANCE_CABLE_CABLE
     end

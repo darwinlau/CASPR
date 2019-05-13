@@ -18,7 +18,7 @@ classdef WrenchFeasibleCondition < WorkspaceConditionBase
         % Constructor for wrench closure workspace
         function w = WrenchFeasibleCondition(method, desired_wrench_set)
             if(isempty(method))
-                w.method = WrenchFeasibleMethods.M_CAPACITY_MARGIN;
+                w.method = WrenchFeasibleMethodType.M_CAPACITY_MARGIN;
             else
                 w.method = method; 
             end 
@@ -43,7 +43,7 @@ classdef WrenchFeasibleCondition < WorkspaceConditionBase
                 end
             end
             switch(obj.method)
-                case WrenchFeasibleMethods.M_CAPACITY_MARGIN
+                case WrenchFeasibleMethod.M_CAPACITY_MARGIN
                     inWorkspace = wrench_feasible_capacity_margin(obj.desired_wrench_set,dynamics);
                 otherwise
                     CASPR_log.Print('Wrench feasible method is not defined',CASPRLogLevel.ERROR);

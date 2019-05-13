@@ -14,7 +14,7 @@ classdef InterferenceFreeCondition < WorkspaceConditionBase
         % Constructor for Interference Free WS
         function w = InterferenceFreeCondition(method)
             if (isempty(method))
-                w.method = InterferenceFreeMethods.M_MINDISTANCE_CABLE_CABLE;
+                w.method = InterferenceFreeMethodType.M_MINDISTANCE_CABLE_CABLE;
             else
                 w.method = method;
             end
@@ -24,7 +24,7 @@ classdef InterferenceFreeCondition < WorkspaceConditionBase
         % satisified
         function inWorkspace = evaluateFunction(obj, dynamics)
             switch(obj.method)
-                case InterferenceFreeMethods.M_MINDISTANCE_CABLE_CABLE
+                case InterferenceFreeMethodType.M_MINDISTANCE_CABLE_CABLE
                     inWorkspace = interference_free_mindistance_cable_cable(dynamics);
                 otherwise
                     CASPR_log.Print('Interference free method is not defined',CASPRLogLevel.ERROR);
