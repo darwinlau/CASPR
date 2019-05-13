@@ -7,14 +7,15 @@
 % conditions that have been evalauted at that point.
 classdef PointWorkspaceElement < handle
     properties(SetAccess = protected)
-        pose        % The pose for the workspace condition to be evaluated at
-        metrics     % A cell array of different metrics (metric object, value)
-        conditions  % A cell array of different workspace conditions (conditon object)
+        pose                % The pose for the workspace condition to be evaluated at
+        metrics = {};       % A cell array of different metrics (metric object, value)
+        conditions = {};    % A cell array of different workspace conditions (conditon object)
     end
     
     methods
         % Constructor for the class
         function wp = PointWorkspaceElement(q, modelObj, conditions, metrics)
+            CASPR_log.Assert(~(isempty(conditions) && isempty(metrics)), 'At least one workspace condition or metric is required');
             wp.pose         = q;
             
             % Checks if the modelObj is already this q value (and hence
@@ -35,13 +36,15 @@ classdef PointWorkspaceElement < handle
         
         function evaluateConditions(obj, model, conditions, evaluated_metrics)
             [condition_results] = PointWorkspaceElement.EvaluateConditions(model, conditions, evaluated_metrics);
-            n_conditions = sum(condition_results{:, 2});
-            obj.conditions = cell(n_conditions, 1);
-            c_ind = 1;
-            for ind = 1:length(conditions)
-                if (condition_results{ind, 2})
-                    obj.conditions{c_ind, 1} = condition_results{ind, 1};
-                    c_ind = c_ind + 1;
+            if (~isempty(condition_results))
+                n_conditions = sum(condition_results{:, 2});
+                obj.conditions = cell(n_conditions, 1);
+                c_ind = 1;
+                for ind = 1:length(conditions)
+                    if (condition_results{ind, 2})
+                        obj.conditions{c_ind, 1} = condition_results{ind, 1};
+                        c_ind = c_ind + 1;
+                    end
                 end
             end
         end
