@@ -37,7 +37,7 @@ classdef PointWorkspaceElement < handle
         function evaluateConditions(obj, model, conditions, evaluated_metrics)
             [condition_results] = PointWorkspaceElement.EvaluateConditions(model, conditions, evaluated_metrics);
             if (~isempty(condition_results))
-                n_conditions = sum(condition_results{:, 2});
+                n_conditions = sum(cell2mat(condition_results(:, 2)));
                 obj.conditions = cell(n_conditions, 1);
                 c_ind = 1;
                 for ind = 1:length(conditions)
