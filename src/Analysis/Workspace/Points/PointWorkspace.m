@@ -26,6 +26,8 @@ classdef PointWorkspace < handle
         
         % This function generates a graph workspace representation based on
         % a set of conditions and metrics
+        % CHAGE 1: make condition to CONDITIONS
+        % CHAGE 2: make metric to METRICS
         function createWorkspaceGraph(obj, condition, metric, w_connectivity)
             if(isempty(metric))
                 metric_flag = 0;
@@ -81,6 +83,10 @@ classdef PointWorkspace < handle
         end
         
         % Plotting function to plot a two dimensional (subset of the) workspace plot
+        % CHANGES 1: plotWorkspce2(obj, plot_axis, CONDITIONS, METRIC or
+        % METRICS or DEFAULT, DIMENSIONS (for e.g. [4 5] fo [x y z alpha
+        % beta gamma], FIXED VALUES [x_fix y_fix z_fix 0 0 gamma_fix])
+       
         function plotWorkspace2(obj,plot_axis,capability_measure,slices,fixed_dim_cor)
             CASPR_log.Assert((isempty(slices)||(numel(slices)==2)),'Only 2 dimensional slices can be plotted in this function');
 			CASPR_log.Assert((obj.model.numDofs-numel(fixed_dim_cor))==2,'The number of elements of fixed dimension are not equal to remaining dimension.');
@@ -162,7 +168,8 @@ classdef PointWorkspace < handle
         end
         
         
-        
+        % CHANGE 1: SAME AS CREATEWORKSPACE and call createWorkspaceGraph
+        % inside here
         % A function for plotting a graph
         function plotGraph(obj)
             % Shrink the graph to remove all nodes that are empty
@@ -254,6 +261,9 @@ classdef PointWorkspace < handle
             end
         end
         
+        % DECIDE WHAT TO DO, A BIT WEIRD HERE
+        % A BIT DANGEROUS?!
+        % maybe output another PointWorkspace object
         % Filters the workspace metric to set new limits.
         function filterWorkspaceMetric(obj,w_metric,metric_min,metric_max)
             m_i = find_capability_index(obj,w_metric);
