@@ -24,7 +24,7 @@ classdef UniformGrid < PointGridBase
             % Maybe add more checks to ensure
             id.q_begin  =   q_begin;
             id.q_end    =   q_end;
-            id.setNDimensions(size(q_begin,1));
+            id.n_dimensions = size(q_begin,1);
             id.dim_disc_ia = find(q_info ~= 0);
             
             if((nargin==3)||strcmp(info_type,'step_size'))
@@ -51,8 +51,8 @@ classdef UniformGrid < PointGridBase
             else
                 CASPR_log.Error('Unknown info type entered');
             end
-            id.setNDimensions(size(q_begin,1));
-            id.setNPoints(round(prod(id.q_length)));
+            id.n_dimensions = size(q_begin,1);
+            id.n_points = round(prod(id.q_length));
             if(nargin <= 4)
                 id.q_wrap = false(size(q_begin));
             else
