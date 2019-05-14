@@ -20,7 +20,7 @@ uGrid           =   UniformGrid(q_begin, q_end, q_step,'step_size');
 % Define the workspace condition(s): must have at least 1 condition
 w_conditions    =   {WrenchClosureCondition([])};
 % Define the workspace metric(s) (optional)
-w_metrics       =   {};
+w_metrics       =   {ConditionNumberMetric()};
 % Define the connectivity condition for point-wise workspaces
 w_connectivity  =   WorkspaceConnectivityBase.CreateWorkspaceConnectivityCondition(WorkspaceConnectivityType.GRID,uGrid);
 
@@ -34,4 +34,4 @@ wsim.run();
 
 % Plot the simulation
 CASPR_log.Info('Start Plotting Simulation');
-wsim.plotGraph();
+wsim.workspace.plotGraph();
