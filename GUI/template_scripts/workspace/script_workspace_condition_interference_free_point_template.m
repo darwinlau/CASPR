@@ -41,11 +41,17 @@ wsim.run();
 CASPR_log.Info('Start Plotting Simulation');
 
 graph_plot = wsim.workspace.plotGraph(w_conditions,w_metrics,w_connectivity);
-close all force
-% 2D/3D
+
 plot_axis = [1 2 3];% Maximum allow 3 axis plot e.g. here 1st, 2nd variables as the axis
-sliding_axis = [4];% Slider axis maximum 1 input so far
 % Fixed variables, you can leave the value of plot axis zero/any number, it won't affect the result plot
 % 4 digits numbers are counted into the plotting error
 fixed_variables = [4.80000000000000,3,4,0.628320000000000,-3.14160000000000,-3.14160000000000]; 
-cartesian_workspace_graph = wsim.workspace.plotWorkspaceSlider(plot_axis,sliding_axis,w_conditions, w_metrics, fixed_variables);
+close all force
+% 2D/3D plot
+cartesian_workspace_plot = wsim.workspace.plotWorkspace(plot_axis, w_conditions, w_metrics, fixed_variables);
+
+close all force
+% 2D/3D slider plot 
+sliding_axis = [4];% Slider axis maximum 1 input so far
+
+cartesian_workspace_plot_slide = wsim.workspace.plotWorkspaceSlider(plot_axis,sliding_axis,w_conditions, w_metrics, fixed_variables);
