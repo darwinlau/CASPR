@@ -43,8 +43,8 @@ classdef PointWorkspace < handle
                     CASPR_log.Error('Input metric(s) NOT exist in the workspace metric(s)')
                 end
             end
-               obj.node_list = create_node_list(obj, conditions);
-               obj.graph_rep =  create_graph_rep(obj, w_connectivity, num_metrics);               
+            obj.node_list = create_node_list(obj, conditions);
+            obj.graph_rep =  create_graph_rep(obj, w_connectivity, num_metrics);
         end
         
         % Plotting function to plot 2D/3D (subset of the) workspace plot
@@ -70,18 +70,18 @@ classdef PointWorkspace < handle
                 
                 points_to_plot = filted_node_list(matched_poses_indices,2:end);
                 point_color_matrix = 0;
-               
+                
             elseif ~isempty(conditions) && ~isempty(metrics)
                 
                 filted_node_list = create_node_list(obj, conditions);
-  
+                
                 for i = 1:num_metrics
                     metric_types(i) = metrics{i}.type;
                 end
                 for i = 1:size(obj.poses{1}.metrics,1)
                     pose_metric_types(i) = obj.poses{1}.metrics{i}.type;
                 end
-                if(all(ismember(metric_types,pose_metric_types)))                    
+                if(all(ismember(metric_types,pose_metric_types)))
                     pose_data = round(filted_node_list(:,2:end),digit_tolerance);
                     fixed_variables = round(fixed_variables,digit_tolerance);
                     pose_data(:,[plot_axis]) = [];
@@ -102,7 +102,7 @@ classdef PointWorkspace < handle
                 end
                 
             elseif ~isempty(metrics) && isempty(conditions)
-                  
+                
                 for i = 1:num_metrics
                     metric_types(i) = metrics{i}.type;
                 end
@@ -111,7 +111,7 @@ classdef PointWorkspace < handle
                 end
                 
                 for i = 1:size(obj.poses,1)
-                    pose_data(i,:) = round(obj.poses{i}.pose',digit_tolerance);     
+                    pose_data(i,:) = round(obj.poses{i}.pose',digit_tolerance);
                     filted_node_list(i,:) = obj.poses{i}.pose';
                 end
                 fixed_variables = round(fixed_variables,digit_tolerance);
@@ -121,11 +121,11 @@ classdef PointWorkspace < handle
                 matched_poses_indices = find(ismember(pose_data,fixed_variables,'rows'));
                 
                 points_to_plot = filted_node_list(matched_poses_indices,:);
-
-                    for j = 1:num_metrics
-                        metrics_indices = find(ismember(pose_metric_types,metric_types(j)));
-                        point_color_matrix(j,i) = cell2mat(obj.poses{i}.metrics(metrics_indices,2));
-                    end
+                
+                for j = 1:num_metrics
+                    metrics_indices = find(ismember(pose_metric_types,metric_types(j)));
+                    point_color_matrix(j,i) = cell2mat(obj.poses{i}.metrics(metrics_indices,2));
+                end
             else
                 CASPR_log.Error('At least one of the metrics of conditions should be the input')
             end
@@ -133,7 +133,7 @@ classdef PointWorkspace < handle
             if ~isempty(matched_poses_indices)
                 c_workspace = universal_plot(obj,plot_axis,points_to_plot,point_color_matrix);
                 disp('Plot updated')
-            else                
+            else
                 cla;
                 disp('No results')
                 c_workspace = [];
@@ -142,18 +142,21 @@ classdef PointWorkspace < handle
         
         % Plotting function to plot 2D/3D (subset of the) workspace with slider
         function f = plotWorkspaceSlider(obj,plot_axis,slide_axis,conditions, metrics, fixed_variables)
-             num_metrics = size(metrics,2);
+            num_metrics = size(metrics,2);
             if num_metrics == 1
                 metrics = mat2cell(metrics,1);
+            elseif num_metrics == 0
+                num_metrics = 1;
+                metrics{num_metrics} = {};
             end
-            for i = 1:size(metrics,2)
-            f(i) = figure(i);
-            
-            b(i) = uicontrol('Parent',f(i),'Style','slider','Position',[0,0,400,20],'value',fixed_variables(slide_axis), 'min',obj.grid.q_begin(slide_axis), 'max',obj.grid.q_end(slide_axis),...
-                'sliderstep',[1/(obj.grid.q_length(slide_axis)-1),1/(obj.grid.q_length(slide_axis)-1)]);
-            current_fixed_variables = fixed_variables;
-            
-            b(i).Callback = @(es,ed) refreshdata(f(i),plotWorkspace(obj,plot_axis,conditions, metrics{i}, [current_fixed_variables(1:slide_axis-1),es.Value,current_fixed_variables(slide_axis+1:end)]));
+            for i = 1:num_metrics
+                f(i) = figure(i);
+                
+                b(i) = uicontrol('Parent',f(i),'Style','slider','Position',[0,0,400,20],'value',fixed_variables(slide_axis), 'min',obj.grid.q_begin(slide_axis), 'max',obj.grid.q_end(slide_axis),...
+                    'sliderstep',[1/(obj.grid.q_length(slide_axis)-1),1/(obj.grid.q_length(slide_axis)-1)]);
+                current_fixed_variables = fixed_variables;
+                
+                b(i).Callback = @(es,ed) refreshdata(f(i),plotWorkspace(obj,plot_axis,conditions, metrics{i}, [current_fixed_variables(1:slide_axis-1),es.Value,current_fixed_variables(slide_axis+1:end)]));
             end
         end
         
@@ -161,7 +164,7 @@ classdef PointWorkspace < handle
         function node_graph = plotGraph(obj, conditions, metrics, w_connectivity)
             %Create the graph data depends on the inputs
             createWorkspaceGraph(obj, conditions, metrics, w_connectivity);
-
+            
             G = graph(obj.graph_rep(:,1),obj.graph_rep(:,2));
             if(isempty(metrics))
                 num_metrics = 0;
@@ -177,7 +180,7 @@ classdef PointWorkspace < handle
             for i = 1:obj.grid.n_dimensions+num_metrics
                 figure;
                 edge_colour_matrix = nan(number_edges,1);
-                for ii = 1:number_edges                    
+                for ii = 1:number_edges
                     if(i <= obj.grid.n_dimensions)
                         if(obj.graph_rep(ii,2+i))
                             edge_colour_matrix(ii) = obj.poses{obj.node_list(obj.graph_rep(ii,1),1)}.pose(i);
@@ -188,7 +191,7 @@ classdef PointWorkspace < handle
                     
                 end
                 ax1 = axes;
-                node_graph(i) = plot(G,'MarkerSize',2); 
+                node_graph(i) = plot(G,'MarkerSize',2);
                 %Specify the title
                 if(i <= obj.grid.n_dimensions)
                     title(['variable ' num2str(i)]);
@@ -245,7 +248,7 @@ classdef PointWorkspace < handle
                         set(cb1,'Limits',[min(G.Edges.EdgeColours),max(G.Edges.EdgeColours)])
                     end
                     cb2 = colorbar(ax2,'Position',[.85 .11 .0675 .815]);
-                    caxis(ax2,[min_list,max_list]);                    
+                    caxis(ax2,[min_list,max_list]);
                 else
                     node_graph(i).EdgeCData = G.Edges.EdgeColours;
                     node_graph(i).LineWidth = 2;
@@ -257,7 +260,7 @@ classdef PointWorkspace < handle
                         set(cb1,'Limits',[min(G.Edges.EdgeColours),max(G.Edges.EdgeColours)+1e-4])
                     else
                         set(cb1,'Limits',[min(G.Edges.EdgeColours),max(G.Edges.EdgeColours)])
-                    end                    
+                    end
                 end
             end
         end
@@ -280,8 +283,8 @@ classdef PointWorkspace < handle
             end
         end
     end
-    methods (Access=private)        
-
+    methods (Access=private)
+        
         function c_workspace = universal_plot(obj,plot_axis,points_to_plot,point_color_matrix)
             if size(plot_axis,2) == 2 %plot 2D
                 
@@ -291,10 +294,10 @@ classdef PointWorkspace < handle
                     c = linspace(min(point_color_matrix(i,:)),max(point_color_matrix(i,:)),length(x));
                     g = groot;
                     if isempty(g.Children)
-                    figure(i);
+                        figure(i);
                     else
-                    corresponding_figure = gcf;
-                    figure(corresponding_figure.Number)    
+                        corresponding_figure = gcf;
+                        figure(corresponding_figure.Number)
                     end
                     
                     if size(unique(c),2) ==1
@@ -315,8 +318,8 @@ classdef PointWorkspace < handle
                             title_disp{j} = [num2str(points_to_plot(1,j)),' '];
                         end
                     end
-%                     disp_message = ['Fig. ', num2str(i) ' shows the point(s) that fulfill the input condition(s) and metric(s) ', num2str(i)];
-%                     disp(disp_message)
+                    %                     disp_message = ['Fig. ', num2str(i) ' shows the point(s) that fulfill the input condition(s) and metric(s) ', num2str(i)];
+                    %                     disp(disp_message)
                     title_disp = cell2mat(title_disp);
                     title(title_disp)
                     clear title_disp;
@@ -329,12 +332,12 @@ classdef PointWorkspace < handle
                 
                 for i = 1:size(point_color_matrix,1)
                     c = linspace(min(point_color_matrix(i,:)),max(point_color_matrix(i,:)),length(x));
-                     g = groot;
+                    g = groot;
                     if isempty(g.Children)
-                    figure(i);
+                        figure(i);
                     else
-                    corresponding_figure = gcf;
-                    figure(corresponding_figure.Number)    
+                        corresponding_figure = gcf;
+                        figure(corresponding_figure.Number)
                     end
                     if size(unique(c),2) ==1
                         c_workspace(i) =scatter3(x,y,z,'filled','MarkerFaceColor','k');
@@ -359,8 +362,8 @@ classdef PointWorkspace < handle
                             title_disp{j} = [num2str(points_to_plot(1,j)),' '];
                         end
                     end
-%                     disp_message = ['Fig. ', num2str(i) ' shows the point(s) that fulfill the input condition(s) and metric ', num2str(i)];
-%                     disp(disp_message)
+                    %                     disp_message = ['Fig. ', num2str(i) ' shows the point(s) that fulfill the input condition(s) and metric ', num2str(i)];
+                    %                     disp(disp_message)
                     title_disp = cell2mat(title_disp);
                     title(title_disp)
                     clear title_disp;
@@ -431,7 +434,7 @@ classdef PointWorkspace < handle
             graph_rep  = [graph_rep,ones(size(graph_rep,1),num_metrics)];%Add metrics connectivity
         end
         % Plot the workspace metric for 2 and 3 dimensional objects
-
+        
     end
 end
 
