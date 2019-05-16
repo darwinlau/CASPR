@@ -69,14 +69,9 @@ classdef PointWorkspaceSimulator < SimulatorBase
             end
             obj.comp_time_evaluation = toc(point_t_in);
             graph_t_in = tic;
-            % If graph generation is set generate the graph
-            if (~isempty(obj.connectivity))
-                obj.workspace.createWorkspaceGraph(obj.conditions{1},[],obj.connectivity);
-                % FOR THE MOMENT NO METRICS
-            end
                 
             obj.comp_time_graph = toc(graph_t_in);
             obj.comp_time_total = toc(total_t_in);
-        end            
+        end  
     end
 end
