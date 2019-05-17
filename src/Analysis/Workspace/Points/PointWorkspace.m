@@ -150,6 +150,9 @@ classdef PointWorkspace < handle
                 num_metrics = 1;
                 metrics{num_metrics} = {};
             end
+            if obj.grid.q_begin(slide_axis) == obj.grid.q_end(slide_axis)
+                CASPR_log.Error('No sliding options for this axis')
+            end
             for i = 1:num_metrics
                 f(i) = figure(i);
                 
