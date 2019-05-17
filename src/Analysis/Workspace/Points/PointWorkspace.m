@@ -14,6 +14,7 @@ classdef PointWorkspace < handle
         poses                       % Cell array
         graph_rep = []              % The graph representation for the workspace
         node_list = []              % A list of all nodes
+        filted_workspace = []       % Filted workspace for metrics value
     end
     
     methods
@@ -286,19 +287,20 @@ classdef PointWorkspace < handle
     methods (Access=private)
         
         function c_workspace = universal_plot(obj,plot_axis,points_to_plot,point_color_matrix)
+            g = groot;
+            if isempty(g.Children)
+                for i = size(point_color_matrix,1):-1:1
+                    c_workspace(i) = figure(i);
+                end
+            elseif ~isempty(g.Children)
+                c_workspace = g.CurrentFigure;
+            end
             if size(plot_axis,2) == 2 %plot 2D
                 
                 x = points_to_plot(:,plot_axis(1));
                 y = points_to_plot(:,plot_axis(2));
                 for i = 1:size(point_color_matrix,1)
                     c = linspace(min(point_color_matrix(i,:)),max(point_color_matrix(i,:)),length(x));
-                    g = groot;
-                    if isempty(g.Children)
-                        figure(i);
-                    else
-                        corresponding_figure = gcf;
-                        figure(corresponding_figure.Number)
-                    end
                     
                     if size(unique(c),2) ==1
                         c_workspace(i) = scatter(x,y,'filled','MarkerFaceColor','k');
@@ -332,16 +334,11 @@ classdef PointWorkspace < handle
                 
                 for i = 1:size(point_color_matrix,1)
                     c = linspace(min(point_color_matrix(i,:)),max(point_color_matrix(i,:)),length(x));
-                    g = groot;
-                    if isempty(g.Children)
-                        figure(i);
-                    else
-                        corresponding_figure = gcf;
-                        figure(corresponding_figure.Number)
-                    end
                     if size(unique(c),2) ==1
-                        c_workspace(i) =scatter3(x,y,z,'filled','MarkerFaceColor','k');
+                        figure(c_workspace(i));
+                        c_workspace(i) = scatter3(x,y,z,'filled','MarkerFaceColor','k');
                     else
+                        figure(c_workspace(i));
                         c_workspace(i) = scatter3(x,y,z,[],c','filled');
                         colorbar;
                     end
