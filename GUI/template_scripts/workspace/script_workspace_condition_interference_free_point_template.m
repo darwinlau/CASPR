@@ -28,6 +28,7 @@ uGrid           =   UniformGrid(q_begin, q_end, q_step,'step_size');
 % Minimum distance for interference free
 min_epsilon_d   = 0.01;
 % Define the workspace condition(s): must have at least 1 condition
+% So far there are multiple condtions and metrics, will updated to a new file later
 w_conditions    =   {WrenchClosureCondition([]),WorkspaceStaticCondition([]),InterferenceFreeCondition([], min_epsilon_d)};
 % Define the workspace metric(s) (optional)
 w_metrics       =   {TensionFactorMetric,ConditionNumberMetric};
@@ -60,3 +61,12 @@ close all force
 sliding_axis = [3];% Slider axis maximum 1 input so far
 
 cartesian_workspace_plot_slide = wsim.workspace.plotWorkspaceSlider(plot_axis,sliding_axis,w_conditions, w_metrics, fixed_variables);
+
+% Find the workspace that do not meet the metrics requirment(allow multiple inputs), all the
+% functions exist in the old workspace can work
+close all force
+metric_value_min = [0.1 0.26];
+metric_value_max = [];
+filter_workspace = wsim.workspace.fliterWorkspaceMetric(w_metrics,metric_value_min,metric_value_max);
+cartesian = new_workspace.plotWorkspace(plot_axis, w_conditions, w_metrics, fixed_variables);
+

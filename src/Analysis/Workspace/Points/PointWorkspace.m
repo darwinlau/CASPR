@@ -14,7 +14,6 @@ classdef PointWorkspace < handle
         poses                       % Cell array
         graph_rep = []              % The graph representation for the workspace
         node_list = []              % A list of all nodes
-        filted_workspace = []       % Filted workspace for metrics value
     end
     
     methods
@@ -269,23 +268,48 @@ classdef PointWorkspace < handle
             end
         end
         
-        % DECIDE WHAT TO DO, A BIT WEIRD HERE
-        % A BIT DANGEROUS?!
-        % maybe output another PointWorkspace object
-        % Filters the workspace metric to set new limits.
-        function filterWorkspaceMetric(obj,w_metric,metric_min,metric_max)
-            m_i = find_capability_index(obj,w_metric);
-            CASPR_log.Assert(m_i~=0,'Can only filter metrics that have already been computed');
-            obj.metrics{m_i}.setMetricLimits(metric_min,metric_max);
-            for i = 1:length(obj.workspace)
-                wp = obj.workspace{i};
-                if(wp.metrics{m_i,2} > metric_max)
-                    wp.metrics{m_i,2} = metric_max;
-                elseif(wp.metrics{m_i,2} < metric_min)
-                    wp.metrics{m_i,2} = metric_min;
-                end
-            end
-        end
+        % Filter and creat new workspace based on the boundary of the
+        % metric values
+         function new_workspace = fliterWorkspaceMetric(obj,metrics,metric_min,metric_max)
+             
+             if (~isempty(metric_min) && size(metrics,2) ~= size(metric_min,2)) ||...
+                     (~isempty(metric_max) && size(metrics,1) ~= size(metric_max,2))
+                 CASPR_log.Error('Number of metric boundary does not equal to the number of metrics')
+             end
+             
+             new_workspace =  PointWorkspace(obj.model, obj.grid);
+             num_metrics = size(metrics,2);
+             if num_metrics == 1
+                 metrics = mat2cell(metrics,1);
+             end
+             for i = 1:num_metrics
+                 metric_types(i) = metrics{i}.type;
+             end
+             for i = 1:size(obj.poses{1}.metrics,1)
+                 pose_metric_types(i) = obj.poses{1}.metrics{i}.type;
+             end
+             metric_indices = find(ismember(pose_metric_types,metric_types));
+             %For every current existing poses
+             for i = 1:size(obj.poses,1)
+                 %check if the metric boundary condition
+                 for j = 1:num_metrics
+                     if ~isempty(metric_min) && obj.poses{i}.metrics{metric_indices(j),2} >= metric_min(j)
+                         check_flag(j) = 1;
+                     elseif ~isempty(metric_max) && obj.poses{i}.metrics{metric_indices(j),2} <= metric_max(j)
+                         check_flag(j) = 1;
+                     else
+                         check_flag(j) = 0;
+                     end
+                 end
+                 
+                 if ~isempty(check_flag) && all(check_flag)
+                     new_workspace.poses{i} = obj.poses{i};
+                 end                
+             end
+             %remove empty poses
+              new_workspace.poses = new_workspace.poses(~cellfun('isempty',new_workspace.poses));
+         end        
+        
     end
     methods (Access=private)
         
@@ -303,7 +327,7 @@ classdef PointWorkspace < handle
                 x = points_to_plot(:,plot_axis(1));
                 y = points_to_plot(:,plot_axis(2));
                 for i = 1:size(point_color_matrix,1)
-                    c = linspace(min(point_color_matrix(i,:)),max(point_color_matrix(i,:)),length(x));
+                    c = point_color_matrix(i,:);
                     
                     if size(unique(c),2) ==1
                         c_workspace(i) = scatter(x,y,'filled','MarkerFaceColor','k');
@@ -336,7 +360,7 @@ classdef PointWorkspace < handle
                 z =  points_to_plot(:,plot_axis(3));
                 
                 for i = 1:size(point_color_matrix,1)
-                    c = linspace(min(point_color_matrix(i,:)),max(point_color_matrix(i,:)),length(x));
+                    c = point_color_matrix(i,:);
                     if size(unique(c),2) ==1
                         figure(c_workspace(i));
                         c_workspace(i) = scatter3(x,y,z,'filled','MarkerFaceColor','k');
