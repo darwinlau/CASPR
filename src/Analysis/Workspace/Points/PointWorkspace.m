@@ -26,25 +26,16 @@ classdef PointWorkspace < handle
         % This function generates a graph workspace representation based on
         % a set of conditions and metrics
         function createWorkspaceGraph(obj, conditions, metrics, w_connectivity)
-            if(isempty(metrics))
-                num_metrics = 0;
-            else
-                num_metrics = size(metrics,2);
-                if num_metrics == 1
-                    metrics = mat2cell(metrics,1);
-                end
-                for i = 1:num_metrics
-                    metric_types(i) = metrics{i}.type;
-                end
-                for i = 1:size(obj.poses{1}.metrics,1)
-                    pose_metric_types(i) = obj.poses{1}.metrics{i}.type;
-                end
+            if(~isempty(metrics))
+                metric_types = input_conversion(metrics);
+                pose_metric_types = input_conversion(obj.poses{1}.metrics);
+                
                 if(~all(ismember(metric_types,pose_metric_types)))
                     CASPR_log.Error('Input metric(s) NOT exist in the workspace metric(s)')
                 end
             end
             obj.node_list = create_node_list(obj, conditions);
-            obj.graph_rep =  create_graph_rep(obj, w_connectivity, num_metrics);
+            obj.graph_rep =  create_graph_rep(obj, w_connectivity, size(metrics,2));
         end
         
         % Plotting function to plot 2D/3D (subset of the) workspace plot
@@ -74,13 +65,9 @@ classdef PointWorkspace < handle
             elseif ~isempty(conditions) && ~isempty(metrics)
                 
                 filted_node_list = create_node_list(obj, conditions);
+                metric_types = input_conversion(metrics);
+                pose_metric_types = input_conversion(obj.poses{1}.metrics);
                 
-                for i = 1:num_metrics
-                    metric_types(i) = metrics{i}.type;
-                end
-                for i = 1:size(obj.poses{1}.metrics,1)
-                    pose_metric_types(i) = obj.poses{1}.metrics{i}.type;
-                end
                 if(all(ismember(metric_types,pose_metric_types)))
                     pose_data = round(filted_node_list(:,2:end),digit_tolerance);
                     fixed_variables = round(fixed_variables,digit_tolerance);
@@ -102,13 +89,8 @@ classdef PointWorkspace < handle
                 end
                 
             elseif ~isempty(metrics) && isempty(conditions)
-                
-                for i = 1:num_metrics
-                    metric_types(i) = metrics{i}.type;
-                end
-                for i = 1:size(obj.poses{1}.metrics,1)
-                    pose_metric_types(i) = obj.poses{1}.metrics{i}.type;
-                end
+                metric_types = input_conversion(metrics);
+                pose_metric_types = input_conversion(obj.poses{1}.metrics);
                 
                 for i = 1:size(obj.poses,1)
                     pose_data(i,:) = round(obj.poses{i}.pose',digit_tolerance);
@@ -270,45 +252,38 @@ classdef PointWorkspace < handle
         
         % Filter and creat new workspace based on the boundary of the
         % metric values
-         function new_workspace = fliterWorkspaceMetric(obj,metrics,metric_min,metric_max)
-             
-             if (~isempty(metric_min) && size(metrics,2) ~= size(metric_min,2)) ||...
-                     (~isempty(metric_max) && size(metrics,1) ~= size(metric_max,2))
-                 CASPR_log.Error('Number of metric boundary does not equal to the number of metrics')
-             end
-             
-             new_workspace =  PointWorkspace(obj.model, obj.grid);
-             num_metrics = size(metrics,2);
-             if num_metrics == 1
-                 metrics = mat2cell(metrics,1);
-             end
-             for i = 1:num_metrics
-                 metric_types(i) = metrics{i}.type;
-             end
-             for i = 1:size(obj.poses{1}.metrics,1)
-                 pose_metric_types(i) = obj.poses{1}.metrics{i}.type;
-             end
-             metric_indices = find(ismember(pose_metric_types,metric_types));
-             %For every current existing poses
-             for i = 1:size(obj.poses,1)
-                 %check if the metric boundary condition
-                 for j = 1:num_metrics
-                     if ~isempty(metric_min) && obj.poses{i}.metrics{metric_indices(j),2} >= metric_min(j)
-                         check_flag(j) = 1;
-                     elseif ~isempty(metric_max) && obj.poses{i}.metrics{metric_indices(j),2} <= metric_max(j)
-                         check_flag(j) = 1;
-                     else
-                         check_flag(j) = 0;
-                     end
-                 end
-                 
-                 if ~isempty(check_flag) && all(check_flag)
-                     new_workspace.poses{i} = obj.poses{i};
-                 end                
-             end
-             %remove empty poses
-              new_workspace.poses = new_workspace.poses(~cellfun('isempty',new_workspace.poses));
-         end        
+        function new_workspace = fliterWorkspaceMetric(obj,metrics,metric_min,metric_max)
+            
+            if (~isempty(metric_min) && size(metrics,2) ~= size(metric_min,2)) ||...
+                    (~isempty(metric_max) && size(metrics,1) ~= size(metric_max,2))
+                CASPR_log.Error('Number of metric boundary does not equal to the number of metrics')
+            end
+            
+            new_workspace =  PointWorkspace(obj.model, obj.grid);
+            metric_types = input_conversion(metrics);
+            pose_metric_types = input_conversion(obj.poses{1}.metrics);
+            
+            metric_indices = find(ismember(pose_metric_types,metric_types));
+            %For every current existing poses
+            for i = 1:size(obj.poses,1)
+                %check if the metric boundary condition
+                for j = 1:size(metrics,2)
+                    if ~isempty(metric_min) && obj.poses{i}.metrics{metric_indices(j),2} >= metric_min(j)
+                        check_flag(j) = 1;
+                    elseif ~isempty(metric_max) && obj.poses{i}.metrics{metric_indices(j),2} <= metric_max(j)
+                        check_flag(j) = 1;
+                    else
+                        check_flag(j) = 0;
+                    end
+                end
+                
+                if ~isempty(check_flag) && all(check_flag)
+                    new_workspace.poses{i} = obj.poses{i};
+                end
+            end
+            %remove empty poses
+            new_workspace.poses = new_workspace.poses(~cellfun('isempty',new_workspace.poses));
+        end
         
     end
     methods (Access=private)
@@ -406,7 +381,7 @@ classdef PointWorkspace < handle
             node_list = zeros(number_points,1+obj.grid.n_dimensions);
             number_node = 0;
             n_conditions = size(conditions,2);
-            if n_conditions == 1
+            if n_conditions == 1 && ~iscell(conditions)
                 conditions = mat2cell(conditions,1);
             end
             for i = 1:n_conditions
@@ -417,7 +392,8 @@ classdef PointWorkspace < handle
             for i = 1:number_points
                 % Find out the poses that fulfill the condition(s)
                 if(~isempty(pose_data{i}))
-                    n_constraints = size(pose_data{i}.conditions,1);
+                    
+                    n_constraints = size(pose_data{i}.conditions,1);                    
                     for j = 1:n_constraints
                         pose_condition_types(j) = pose_data{i}.conditions{j,1}.type;
                     end
@@ -457,8 +433,20 @@ classdef PointWorkspace < handle
             graph_rep = graph_rep(1:number_intersects,:);
             graph_rep  = [graph_rep,ones(size(graph_rep,1),num_metrics)];%Add metrics connectivity
         end
-        % Plot the workspace metric for 2 and 3 dimensional objects
+        
+        
         
     end
 end
 
+% function to handle numerous inputs to processable inputs
+function output_types = input_conversion(input)
+num_input= size(input,2);
+
+if num_input == 1 && ~iscell(input)
+    input = mat2cell(input,1);
+end
+for i = 1:num_input
+    output_types(i) = input{i}.type;
+end
+end

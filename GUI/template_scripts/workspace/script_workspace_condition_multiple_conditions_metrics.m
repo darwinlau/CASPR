@@ -15,11 +15,11 @@ cable_set_id    =   'original';
 modelObj        =   model_config.getModel(cable_set_id);
 
 q_begin         =   modelObj.bodyModel.q_min; q_end = modelObj.bodyModel.q_max;
-q_step          =   (modelObj.bodyModel.q_max - modelObj.bodyModel.q_min)./[8 8 8 Inf Inf Inf]';
+q_step          =   (modelObj.bodyModel.q_max - modelObj.bodyModel.q_min)./[20 20 20 Inf Inf Inf]';
 
 % Set up the workspace simulator
-% Specify any fixed value (optional)
-q_begin(4:end,:) = zeros(3,1) ;
+% Specify any fixed value if wanted
+q_begin(4:end,:) = zeros(3,1) ;l
 q_end(4:end,:) = zeros(3,1) ;
 % Defne the grid
 uGrid           =   UniformGrid(q_begin, q_end, q_step,'step_size');
@@ -28,9 +28,10 @@ uGrid           =   UniformGrid(q_begin, q_end, q_step,'step_size');
 % Minimum distance for interference free
 min_epsilon_d   = 0.01;
 % Define the workspace condition(s): must have at least 1 condition
-w_conditions    =   {InterferenceFreeCondition([], min_epsilon_d)};
+% So far there are multiple condtions and metrics, will updated to a new file later
+w_conditions    =   {WrenchClosureCondition([]),WorkspaceStaticCondition([]),InterferenceFreeCondition([], min_epsilon_d)};
 % Define the workspace metric(s) (optional)
-w_metrics       =   {};
+w_metrics       =   {TensionFactorMetric,ConditionNumberMetric};
 % Define the connectivity condition for point-wise workspaces
 w_connectivity  =   WorkspaceConnectivityBase.CreateWorkspaceConnectivityCondition(WorkspaceConnectivityType.GRID,uGrid);
 
@@ -45,7 +46,7 @@ wsim.run();
 % Plot the simulation, accept single/multiple conditions/metrics input
 CASPR_log.Info('Start Plotting Simulation');
 
-graph_plot = wsim.workspace.plotGraph(w_conditions,w_metrics,w_connectivity);
+graph_plot = wsim.workspace.plotGraph(w_conditions{1},w_metrics,w_connectivity);
 
 plot_axis = [1 2 4];% Maximum allow 3 axis plot e.g. here 1st, 2nd variables as the axis
 % Fixed variables, you can leave the value of plot axis zero/any number, it won't affect the result plot
