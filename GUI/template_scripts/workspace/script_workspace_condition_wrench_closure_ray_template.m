@@ -20,17 +20,22 @@ uGrid           =   UniformGrid(q_begin,q_end,q_step,'step_size');
 % Workspace settings and conditions
 min_segment_percentage = 20;
 w_condition     =   {WorkspaceRayConditionBase.CreateWorkspaceRayCondition(WorkspaceRayConditionType.WRENCH_CLOSURE,min_segment_percentage,modelObj)};
-w_metrics       =   {WorkspaceMetricBase.CreateWorkspaceMetric(WorkspaceMetricType.TENSION_FACTOR)};
-opt             =   RayWorkspaceSimulatorOptions(false,false);
+% bug condition:
+% w_conditions     =   {WorkspaceRayConditionBase.CreateWorkspaceRayCondition(WorkspaceRayConditionType.INTERFERENCE,0,modelObj)};
+
+
+% w_metrics       =   {WorkspaceMetricBase.CreateWorkspaceMetric(WorkspaceMetricType.TENSION_FACTOR)};
+% no metrics so far
+w_metrics = {};
 
 % Start the simulation
 CASPR_log.Info('Start Setup Simulation');
-wsim            =   RayWorkspaceSimulator(modelObj,uGrid,opt);
+wsim            =    RayWorkspaceSimulator(modelObj,uGrid,w_condition,w_metrics);
 
 % Run the simulation
 CASPR_log.Info('Start Running Simulation');
-wsim.run(w_condition,[])
+wsim.run()
 
-% Plot the simulation
-CASPR_log.Info('Start Plotting Simulation');
-wsim.plotGraph();
+% % Plot the simulation
+% CASPR_log.Info('Start Plotting Simulation');
+% wsim.plotGraph();
