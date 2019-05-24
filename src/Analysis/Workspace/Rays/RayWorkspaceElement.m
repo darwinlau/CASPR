@@ -28,7 +28,7 @@ classdef RayWorkspaceElement < handle
         function wp = RayWorkspaceElement(model,fixed_variables,metrics,conditions,free_variable_index,free_variable_range)
           
                         wp.fixed_variables      =   fixed_variables;
-%                         wp.metrics              =   cell(size(metrics,2),2);
+% y                        wp.metrics              =   cell(size(metrics,2),2);
                         wp.conditions           =   cell(size(conditions,2),2);
                         wp.free_variable_index  =   free_variable_index;
                         wp.free_variable_range  =   free_variable_range;

@@ -15,7 +15,7 @@ cable_set_id    =   'original';
 modelObj        =   model_config.getModel(cable_set_id);
 
 q_begin         =   modelObj.bodyModel.q_min; q_end = modelObj.bodyModel.q_max;
-q_step          =   (modelObj.bodyModel.q_max - modelObj.bodyModel.q_min)./[20 20 20 Inf Inf Inf]';
+q_step          =   (modelObj.bodyModel.q_max - modelObj.bodyModel.q_min)./[5 5 5 Inf Inf Inf]';
 
 % Set up the workspace simulator
 % Specify any fixed value if wanted

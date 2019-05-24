@@ -47,12 +47,12 @@ classdef RayWorkspaceSimulator < SimulatorBase
             
             
             n_grid_points = 0;
-            for i =1:obj.grid.n_dimensions
+            for i =1:size(obj.grid.dim_disc_ia)
                 grid_index = true(obj.grid.n_dimensions,1); grid_index(i) = false;
                 obj.free_variable_length(i) = prod(obj.grid.q_length(grid_index));
                 n_grid_points = n_grid_points + obj.free_variable_length(i);
             end
-%             obj.workspace = cell(n_grid_points,1);
+            
             workspace_count = 0;
             obj.workspace = RayWorkspace(obj.model, obj.grid);
 
@@ -63,6 +63,8 @@ classdef RayWorkspaceSimulator < SimulatorBase
             ray_t_in = tic;
             total_t_in = tic;
             for i = 1:obj.grid.n_dimensions
+
+                if ismember(i,obj.grid.dim_disc_ia) 
                 %i is the free variable index;
                 grid_index = true(obj.grid.n_dimensions,1); grid_index(i) = false;
                 % Create a subgrid
@@ -72,7 +74,6 @@ classdef RayWorkspaceSimulator < SimulatorBase
                     % Load the current fixed grid coordinates
                     q_fixed = sub_grid.getGridPoint(j);
                     % Construct the workspace ray
-                    
                     wr = RayWorkspaceElement(obj.model,q_fixed,obj.metrics,obj.conditions,...
                         i,[obj.grid.q_begin(i),obj.grid.q_end(i)]);
                     
@@ -91,9 +92,9 @@ classdef RayWorkspaceSimulator < SimulatorBase
                     end
                     k = k+1;
                 end
-            end
-            obj.workspace.rays = obj.workspace.rays(~cellfun('isempty',obj.workspace.rays));
-            
+                end
+             end 
+%             obj.workspace.rays = obj.workspace.rays(~cellfun('isempty',obj.workspace.rays));            
             obj.comp_time_evaluation = toc(ray_t_in);
             graph_t_in = tic;
             obj.comp_time_graph = toc(graph_t_in);
