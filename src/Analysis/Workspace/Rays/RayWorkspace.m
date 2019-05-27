@@ -28,36 +28,159 @@ classdef RayWorkspace < handle
             %node_list        % A list of all nodes
         end
         
-        function createWorkspacePointGraph(obj,conditions,metrics)
+        function createWorkspacePointGraph(obj,conditions)
             % Create list of nodes and graph in point representation
             obj.point_node(:).node_list = create_point_node_list(obj, conditions);
-            obj.point_node(:).graph_rep =  create_point_graph_rep(obj, obj.point_node.node_list, metrics);
+            obj.point_node(:).graph_rep =  create_point_graph_rep(obj, obj.point_node.node_list);
             
         end
         
-        function createWorkspaceRayGraph(obj,conditions,metrics)
+        function intersected_point_set = createWorkspaceRayGraph(obj,conditions,metrics)
             
             % Create list of nodes and graph in ray representation
             obj.ray_node(:).node_list = create_ray_node_list(obj, conditions);
-            obj.ray_node(:).graph_rep =  create_ray_graph_rep(obj, obj.ray_node.node_list, metrics);
+            [obj.ray_node(:).graph_rep,intersected_point_set] =  create_ray_graph_rep(obj, obj.ray_node.node_list, metrics);
             
             
         end
         
-        function plotPointGraph(obj,metrics)
-            for i = 1:size(metrics)
+        function point_graph = plotPointGraph(obj,conditions,metrics)
+            createWorkspacePointGraph(obj,conditions);
+            for i = 1:size(obj.point_node.node_list,1)
+                wp(i,:) = PointWorkspaceElement(obj.point_node.node_list(i,2:end), obj.model, [], metrics);
+            end
+            for i = 1:size(metrics,2)
+                for j = 1:size(obj.point_node.node_list,1)
+                    color_matrix(:,j) = wp(j).metrics{i,2};
+                end
+                G = graph(obj.point_node.graph_rep(:,1),obj.point_node.graph_rep(:,2));
                 
+                figure
+                ax1 = axes;%display min distance
+                point_graph = plot(G,'MarkerSize',2);
+                point_graph.NodeColor = 'none';
+                
+                G.Edges.EdgeColours = obj.point_node.graph_rep(:,3);
+                point_graph.EdgeCData = G.Edges.EdgeColours;
+                
+                ax2 = axes;%display metrics
+                point_graph = plot(G,'MarkerSize',2);
+                point_graph.EdgeColor = 'none';
+                for k = 1:G.numnodes
+                    G.Nodes.NodeColours(k) = color_matrix(k);
+                end
+                point_graph.NodeCData = G.Nodes.NodeColours;
+                linkaxes([ax1,ax2]);
+                
+                ax2.Visible = 'off';
+                ax2.XTick = [];
+                ax2.YTick = [];
+                
+                colormap(ax1,winter(128))
+                colormap(ax2,autumn);
+                set([ax1,ax2],'Position',[.17 .11 .685 .815]);
+                cb1 = colorbar(ax1,'Position',[.15 .11 .03 .815]);
+                cb2 = colorbar(ax2,'Position',[.85 .11 .03 .815]);
+                cb2.Label.String = 'Metric';
+                cb1.Label.String = 'Min Distance';
             end
         end
         
-        function plotPointWorkspace()
-        end
-        
-        function plotRayGraph()
+        function plotPointWorkspace(obj,plot_axis,conditions,fixed_variables)
+            fixed_variables([plot_axis]) = [];
+            if size(fixed_variables,2) + size(plot_axis,2) ~= obj.model.numDofs
+                CASPR_log.Error('Not enought number of fixed axis')
+            end
+            fixed_axis = 1:obj.model.numDofs;
+            fixed_axis(plot_axis) = []; 
+            node_list = create_point_node_list(obj, conditions);
+            plot_data_index = find(ismember(node_list(:,1 + fixed_axis),fixed_variables,'rows'));
+            plot_data = node_list(plot_data_index,1+[plot_axis]);
             
+             if isempty(plot_data)
+                CASPR_log.Error('No available plot, try to change fixed variable value')
+            end
+            figure;
+            if size(plot_axis,2) == 3 %3D plot                
+                    scatter3(plot_data(:,1),plot_data(:,2),plot_data(:,3),'filled', 'MarkerEdgeColor',[0 0 0],...
+              'MarkerFaceColor',[0 0 0]);
+                    xlabel(['Variable: ',num2str(plot_axis(1))]);
+                    ylabel(['Variable: ',num2str(plot_axis(2))]);
+                    zlabel(['Variable: ',num2str(plot_axis(3))]);
+            elseif size(plot_axis,2) == 2 %2D plot
+                
+                    scatter(plot_data(:,1),plot_data(:,2),'filled', 'MarkerEdgeColor',[0 0 0],...
+              'MarkerFaceColor',[0 0 0]);
+                    xlabel(['Variable: ',num2str(plot_axis(1))]);
+                    ylabel(['Variable: ',num2str(plot_axis(2))]);
+                    hold on
+               
+            else
+                CASPR_log.Error('Only 3D/2D plot is available.')
+            end
+            title(['Fixed variables: ',num2str(fixed_variables)]);
+        
+    end
+        
+        function plotRayGraph(obj,conditions,metrics)
+            intersected_point_set = createWorkspaceRayGraph(obj,conditions,metrics);
+            
+            G = graph(obj.ray_node.graph_rep(:,1),obj.ray_node.graph_rep(:,2));
+            %graph for n variable value for intersection point(edge) and ray(node)
+            for i = 1:obj.model.numDofs
+                for j = 1:size(obj.ray_node.node_list,1) 
+                if i == obj.ray_node.node_list{j,end}
+                    node_color_matrix(j) =  0;
+                else
+                    node_color_matrix(j) = obj.ray_node.node_list{j,i+1};
+                end
+                end
+                for j = 1:size(G.Edges,1)
+                    edge_color_matrix(j) = intersected_point_set(j,i);
+                end
+                title_str = ['Variable ' num2str(i)];
+                plot2ColorGraph(G,node_color_matrix,edge_color_matrix,title_str);
+            end            
+            
+            %graph for length of ray(node) and min distance to the ray(ray)
+            for i = 1:size(obj.ray_node.node_list,1)
+                node_color_matrix(i) =  norm(obj.ray_node.node_list{i,obj.ray_node.node_list{i,end}+1});
+            end
+            edge_color_matrix = obj.ray_node.graph_rep(:,3);
+            title_str = ['Ray length and boundary distance'];
+            plot2ColorGraph(G,node_color_matrix,edge_color_matrix,title_str);
+            node_color_matrix = [];edge_color_matrix = [];
+            
+            %graph for number of intersection            
+            for i = 1:size(obj.ray_node.node_list,1)
+                node_color_matrix(i) = sum(sum(ismember(obj.ray_node.graph_rep(:,[1 2]),i)));
+            end
+            for j = 1:size(G.Edges,1)
+                edge_color_matrix(j,:) = [0.5 0.5 0.5];
+            end
+            title_str = 'Number of intersection'
+            plot1ColorGraph(G,node_color_matrix,edge_color_matrix,title_str)
+            node_color_matrix = [];edge_color_matrix = [];
+            
+            %graph for metrics
+            for i = 1:size(metrics,2)
+                for j = 1:size(obj.ray_node.node_list,1)
+                    node_color_matrix(j,:) = [0.5 0.5 0.5];
+                end
+                edge_color_matrix = obj.ray_node.graph_rep(:,i+3);
+                
+                title_str = ['Metric ', num2str(i)];
+                plot1ColorGraph(G,node_color_matrix,edge_color_matrix,title_str)
+            end
+            node_color_matrix = [];edge_color_matrix = [];
         end
         
-        function plotRayWorkspace(obj,node_list,plot_axis,fixed_variables)
+        function plotRayWorkspace(obj,plot_axis,conditions,fixed_variables)
+            fixed_variables([plot_axis]) = [];
+            if size(fixed_variables,2) + size(plot_axis,2) ~= obj.model.numDofs
+                CASPR_log.Error('Not enought number of fixed axis')
+            end
+            node_list = create_ray_node_list(obj, conditions);
             plot_data_index = find(ismember(cell2mat(node_list(:,end)),plot_axis));
             plot_data = node_list(plot_data_index,[plot_axis+1,end]);
             
@@ -65,28 +188,52 @@ classdef RayWorkspace < handle
             fixed_variable_column_index([plot_axis]) = [];
             fixed_variable_data = node_list(plot_data_index,[fixed_variable_column_index+1]);
             
-            fixed_variables([plot_axis]) = [];
+            
             
             variables_matched_index = find(ismember(cell2mat(fixed_variable_data),fixed_variables,'rows'));
-            
-            for i = 1:size(variables_matched_index,1)
-                if plot_data{variables_matched_index(i),end} == plot_axis(1)
-                    x = plot_data{variables_matched_index(i),1};
-                    y = ones(1,2)*plot_data{variables_matched_index(i),2};
-                    z = ones(1,2)*plot_data{variables_matched_index(i),3};
-                elseif plot_data{variables_matched_index(i),end} == plot_axis(2)
-                    x = ones(1,2)*plot_data{variables_matched_index(i),1};
-                    y = plot_data{variables_matched_index(i),2};
-                    z = ones(1,2)*plot_data{variables_matched_index(i),3};
-                elseif plot_data{variables_matched_index(i),end} == plot_axis(3)
-                    x = ones(1,2)*plot_data{variables_matched_index(i),1};
-                    y = ones(1,2)*plot_data{variables_matched_index(i),2};
-                    z = plot_data{variables_matched_index(i),3};
-                end
-                plot3(x,y,z,'k');
-                hold on
+            if isempty(variables_matched_index)
+                CASPR_log.Error('No available plot, try to change fixed variable value')
             end
-            
+            figure;
+            if size(plot_axis,2) == 3 %3D plot
+                for i = 1:size(variables_matched_index,1)
+                    if plot_data{variables_matched_index(i),end} == plot_axis(1)
+                        x = plot_data{variables_matched_index(i),1};
+                        y = ones(1,2)*plot_data{variables_matched_index(i),2};
+                        z = ones(1,2)*plot_data{variables_matched_index(i),3};
+                    elseif plot_data{variables_matched_index(i),end} == plot_axis(2)
+                        x = ones(1,2)*plot_data{variables_matched_index(i),1};
+                        y = plot_data{variables_matched_index(i),2};
+                        z = ones(1,2)*plot_data{variables_matched_index(i),3};
+                    elseif plot_data{variables_matched_index(i),end} == plot_axis(3)
+                        x = ones(1,2)*plot_data{variables_matched_index(i),1};
+                        y = ones(1,2)*plot_data{variables_matched_index(i),2};
+                        z = plot_data{variables_matched_index(i),3};
+                    end
+                    plot3(x,y,z,'k');
+                     xlabel(['Variable: ',num2str(plot_axis(1))]);
+                    ylabel(['Variable: ',num2str(plot_axis(2))]);
+                    zlabel(['Variable: ',num2str(plot_axis(3))]);
+                    hold on
+                end
+            elseif size(plot_axis,2) == 2 %2D plot
+                 for i = 1:size(variables_matched_index,1)
+                    if plot_data{variables_matched_index(i),end} == plot_axis(1)
+                        x = plot_data{variables_matched_index(i),1};
+                        y = ones(1,2)*plot_data{variables_matched_index(i),2};
+                    elseif plot_data{variables_matched_index(i),end} == plot_axis(2)
+                        x = ones(1,2)*plot_data{variables_matched_index(i),1};
+                        y = plot_data{variables_matched_index(i),2};
+                    end
+                    plot(x,y,'k');
+                    xlabel(['Variable: ',num2str(plot_axis(1))]);
+                    ylabel(['Variable: ',num2str(plot_axis(2))]);
+                    hold on
+                end
+            else
+                CASPR_log.Error('Only 3D/2D plot is available.')                
+            end
+            title(['Fixed variables: ',num2str(fixed_variables)]);
         end
         
     end
@@ -106,9 +253,9 @@ classdef RayWorkspace < handle
                     ray_B = rays_seg(j,2:end);
                     [intersected_point,~] = check_intersection(ray_A,ray_B);
                     intersected_point = round(intersected_point,10);
-                    if ~isempty(intersected_point)                        
+                    if ~isempty(intersected_point)
                         intersected_ray(end+1,:) = {rays_seg{i,1},rays_seg{j,1}};
-                        ref_intersected_point(end+1,:) = intersected_point;  
+                        ref_intersected_point(end+1,:) = intersected_point;
                     end
                 end
             end
@@ -117,19 +264,19 @@ classdef RayWorkspace < handle
             for i = 1:size(unique_points,1)
                 repeated_point_index = find(ismember(ref_intersected_point,unique_points(i,:),'rows'));
                 int_ray_index = [];
-%                 int_ray_index = unique(cell2mat(intersected_ray([repeated_point_index],:)));
-%                 if size(int_ray_index,1)>1
-%                     int_ray_index = int_ray_index';
-%                 end
+                %                 int_ray_index = unique(cell2mat(intersected_ray([repeated_point_index],:)));
+                %                 if size(int_ray_index,1)>1
+                %                     int_ray_index = int_ray_index';
+                %                 end
                 node = num2cell([i,unique_points(i,:),int_ray_index]);
-                node_list(i,1:size(node,2)) = node;   
+                node_list(i,1:size(node,2)) = node;
                 clear node
             end
             node_list = cell2mat(node_list);
         end
-    
+        
         % function to create the graph_rep variable for point representation
-        function graph_rep = create_point_graph_rep(obj, node_list, metrics)
+        function graph_rep = create_point_graph_rep(obj, node_list)
             
             graph_rep = [];
             for k = 1:size(node_list,1)
@@ -148,11 +295,11 @@ classdef RayWorkspace < handle
                         
                         if ~isempty(neighbour_point_index)
                             if ~ismember(neighbour_point_index,node_list(1:k,1))
-%                                 graph_rep(end+1,:) =
-%                                 [node_list{k,1},neighbour_point_index,delta_q_vector];
-%                                 % for grpah search, this one may be more
-%                                 usefull since it sepearte the distance in
-%                                 different dimension
+                                %                                 graph_rep(end+1,:) =
+                                %                                 [node_list{k,1},neighbour_point_index,delta_q_vector];
+                                %                                 % for grpah search, this one may be more
+                                %                                 usefull since it sepearte the distance in
+                                %                                 different dimension
                                 graph_rep(end+1,:) = [node_list(k,1),neighbour_point_index,delta_q];
                             end
                         end
@@ -183,7 +330,7 @@ classdef RayWorkspace < handle
                     end
                     for j = 1:size(intervals,1)
                         number_node = number_node + 1;
-                        node_list{number_node,1} = i; % node number
+                        node_list{number_node,1} = number_node; % node number
                         kk = 1;
                         for k = 2:size(node_list,2)-1
                             if k ~= obj.rays{i}.free_variable_index+1
@@ -200,19 +347,21 @@ classdef RayWorkspace < handle
         end
         
         % function to create the graph_rep variable for ray representation
-        function graph_rep = create_ray_graph_rep(obj, node_list,metrics)
+        function [graph_rep,intersected_point_set] = create_ray_graph_rep(obj, node_list,metrics)
             graph_rep = [];metric_value = [];
-            
+            intersected_point_set = [];
             for j = 1:size(node_list,1)
                 current_variable = find(ismember([node_list{:,end}],node_list{j,end}));
                 starting_index = current_variable(end)+1;
                 for i = starting_index:size(node_list,1)
                     % check parallel ray
                     if node_list{i,end} ~= node_list{j,end}
+                        
                         [intersected_point,min_dist] = check_intersection({node_list{j,2:end}},{node_list{i,2:end}});
                         if ~isempty(intersected_point)
                             % evaluate intersected points
                             if ~isempty(metrics)
+                                intersected_point_set = [intersected_point_set;intersected_point];
                                 for k = 1:size(metrics,2)
                                     point_metric = PointWorkspaceElement(intersected_point, obj.model, [], metrics(k));
                                     metric_value(k) = point_metric.metrics{2};
@@ -296,3 +445,50 @@ if (co_planar_flag)
 end
 end
 
+% function to plot two color bar graph
+function graph = plot2ColorGraph(G,node_color_matrix,edge_color_matrix,title_str)
+figure
+for i = 1:2
+    ax(i) = axes;
+    if i == 1
+        graph = plot(G,'MarkerSize',2);
+        graph.NodeCData = node_color_matrix';
+        graph.EdgeColor = 'none';
+    else
+        graph = plot(G,'MarkerSize',2);
+        graph.NodeColor = 'none';
+        graph.EdgeCData = edge_color_matrix';
+    end
+end
+linkaxes([ax(1),ax(2)]);
+ax(2).Visible = 'off';
+ax(2).XTick = [];
+ax(2).YTick = [];
+colormap(ax(1),cool)
+colormap(ax(2),autumn);
+set([ax(1),ax(2)],'Position',[.17 .11 .685 .815]);
+cb1 = colorbar(ax(1),'Position',[.14 .11 .03 .815]);
+cb2 = colorbar(ax(2),'Position',[.84 .11 .03 .815]);
+dim = [.42 .7 .3 .3];
+annotation('textbox',dim,'EdgeColor','none','String',title_str,'FitBoxToText','on');
+
+end
+
+% function to plot one color bar graph
+function graph = plot1ColorGraph(G,node_color,edge_color,title_str)
+figure
+graph = plot(G,'MarkerSize',2);
+if size(node_color,1) == 1
+    graph.NodeCData = node_color';
+else
+    graph.NodeColor = node_color;
+end
+if size(edge_color,2) == 1
+    graph.EdgeCData = edge_color';
+else    
+    graph.EdgeColor = edge_color;
+end
+colormap(autumn);
+colorbar
+title(title_str)
+end
