@@ -11,7 +11,7 @@ clc; clear; warning off; close all;
 % model_config    =   ModelConfig('Example planar XY');
 % cable_set_id    =   'basic';
 model_config    =   ModelConfig('The Cable Robot Simulator');
-cable_set_id    =   'original';
+cable_set_id    =   'normal';
 modelObj        =   model_config.getModel(cable_set_id);
 
 q_begin         =   modelObj.bodyModel.q_min; q_end = modelObj.bodyModel.q_max;
@@ -51,7 +51,7 @@ graph_plot = wsim.workspace.plotGraph(w_conditions{1},w_metrics,w_connectivity);
 plot_axis = [1 2 4];% Maximum allow 3 axis plot e.g. here 1st, 2nd variables as the axis
 % Fixed variables, you can leave the value of plot axis zero/any number, it won't affect the result plot
 % 4 digits numbers are counted into the plotting error
-fixed_variables = [3,3,3.50000000000000,0,0,0]; 
+fixed_variables = wsim.grid.q_begin' + wsim.grid.delta_q' .* [1 3 2 0 0 0];
 close all force
 % 2D/3D plot
 cartesian_workspace_plot = wsim.workspace.plotWorkspace(plot_axis, w_conditions, w_metrics, fixed_variables);

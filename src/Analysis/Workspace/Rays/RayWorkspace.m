@@ -46,6 +46,7 @@ classdef RayWorkspace < handle
         
         function point_graph = plotPointGraph(obj,conditions,metrics)
             createWorkspacePointGraph(obj,conditions);
+            if ~isempty(metrics)
             for i = 1:size(obj.point_node.node_list,1)
                 wp(i,:) = PointWorkspaceElement(obj.point_node.node_list(i,2:end), obj.model, [], metrics);
             end
@@ -54,47 +55,40 @@ classdef RayWorkspace < handle
                     color_matrix(:,j) = wp(j).metrics{i,2};
                 end
                 G = graph(obj.point_node.graph_rep(:,1),obj.point_node.graph_rep(:,2));
-                
-                figure
-                ax1 = axes;%display min distance
-                point_graph = plot(G,'MarkerSize',2);
-                point_graph.NodeColor = 'none';
-                
-                G.Edges.EdgeColours = obj.point_node.graph_rep(:,3);
-                point_graph.EdgeCData = G.Edges.EdgeColours;
-                
-                ax2 = axes;%display metrics
-                point_graph = plot(G,'MarkerSize',2);
-                point_graph.EdgeColor = 'none';
+                edge_color_matrix = obj.point_node.graph_rep(:,3);
                 for k = 1:G.numnodes
-                    G.Nodes.NodeColours(k) = color_matrix(k);
+                    node_color_matrix(k) = color_matrix(k);
                 end
-                point_graph.NodeCData = G.Nodes.NodeColours;
-                linkaxes([ax1,ax2]);
+                title_str = [];
+                plot2ColorGraph(G,node_color_matrix,edge_color_matrix,title_str);
                 
-                ax2.Visible = 'off';
-                ax2.XTick = [];
-                ax2.YTick = [];
-                
-                colormap(ax1,winter(128))
-                colormap(ax2,autumn);
-                set([ax1,ax2],'Position',[.17 .11 .685 .815]);
-                cb1 = colorbar(ax1,'Position',[.15 .11 .03 .815]);
-                cb2 = colorbar(ax2,'Position',[.85 .11 .03 .815]);
-                cb2.Label.String = 'Metric';
-                cb1.Label.String = 'Min Distance';
+            end
+            else
+                G = graph(obj.point_node.graph_rep(:,1),obj.point_node.graph_rep(:,2));
+                edge_color_matrix = obj.point_node.graph_rep(:,3);
+                for k = 1:G.numnodes
+                    node_color(k,:) = [0 0 0];
+                end
+                title_str = [];
+                plot1ColorGraph(G,node_color,edge_color_matrix,title_str);                
             end
         end
         
         function plotPointWorkspace(obj,plot_axis,conditions,fixed_variables)
+            rounding_digit = 4; % remove numerical error from input, change it if not accurate enough
             fixed_variables([plot_axis]) = [];
+            fixed_variables = round(fixed_variables,rounding_digit);
             if size(fixed_variables,2) + size(plot_axis,2) ~= obj.model.numDofs
                 CASPR_log.Error('Not enought number of fixed axis')
             end
             fixed_axis = 1:obj.model.numDofs;
             fixed_axis(plot_axis) = []; 
-            node_list = create_point_node_list(obj, conditions);
+            node_list = round(create_point_node_list(obj, conditions),rounding_digit);
+            if ~isempty(fixed_variables)
             plot_data_index = find(ismember(node_list(:,1 + fixed_axis),fixed_variables,'rows'));
+            elseif size(plot_axis,2) == obj.model.numDofs
+                plot_data_index = node_list(:,1); 
+            end
             plot_data = node_list(plot_data_index,1+[plot_axis]);
             
              if isempty(plot_data)
@@ -106,7 +100,7 @@ classdef RayWorkspace < handle
               'MarkerFaceColor',[0 0 0]);
                     xlabel(['Variable: ',num2str(plot_axis(1))]);
                     ylabel(['Variable: ',num2str(plot_axis(2))]);
-                    zlabel(['Variable: ',num2str(plot_axis(3))]);
+                    zlabel(['Variable: ',num2str(plot_axis(3))]);                    
             elseif size(plot_axis,2) == 2 %2D plot
                 
                     scatter(plot_data(:,1),plot_data(:,2),'filled', 'MarkerEdgeColor',[0 0 0],...
@@ -118,6 +112,7 @@ classdef RayWorkspace < handle
             else
                 CASPR_log.Error('Only 3D/2D plot is available.')
             end
+            
             title(['Fixed variables: ',num2str(fixed_variables)]);
         
     end
@@ -159,7 +154,7 @@ classdef RayWorkspace < handle
                 edge_color_matrix(j,:) = [0.5 0.5 0.5];
             end
             title_str = 'Number of intersection'
-            plot1ColorGraph(G,node_color_matrix,edge_color_matrix,title_str)
+            plot1ColorGraph(G,node_color_matrix,edge_color_matrix,title_str);
             node_color_matrix = [];edge_color_matrix = [];
             
             %graph for metrics
@@ -176,8 +171,10 @@ classdef RayWorkspace < handle
         end
         
         function plotRayWorkspace(obj,plot_axis,conditions,fixed_variables)
+            rounding_digit = 4; % remove numerical error from input, change it if not accurate enough
             fixed_variables([plot_axis]) = [];
-            if size(fixed_variables,2) + size(plot_axis,2) ~= obj.model.numDofs
+            fixed_variables = round(fixed_variables,rounding_digit);
+            if size(fixed_variables,1) + size(plot_axis,2) ~= obj.model.numDofs
                 CASPR_log.Error('Not enought number of fixed axis')
             end
             node_list = create_ray_node_list(obj, conditions);
@@ -188,9 +185,12 @@ classdef RayWorkspace < handle
             fixed_variable_column_index([plot_axis]) = [];
             fixed_variable_data = node_list(plot_data_index,[fixed_variable_column_index+1]);
             
-            
-            
+             if ~isempty(fixed_variables)
+                 fixed_variable_data = round(fixed_variable_data,rounding_digit);
             variables_matched_index = find(ismember(cell2mat(fixed_variable_data),fixed_variables,'rows'));
+            elseif size(plot_axis,2) == obj.model.numDofs
+                variables_matched_index = [obj.ray_node.node_list{:,1}]'; 
+            end
             if isempty(variables_matched_index)
                 CASPR_log.Error('No available plot, try to change fixed variable value')
             end
@@ -360,8 +360,8 @@ classdef RayWorkspace < handle
                         [intersected_point,min_dist] = check_intersection({node_list{j,2:end}},{node_list{i,2:end}});
                         if ~isempty(intersected_point)
                             % evaluate intersected points
+                            intersected_point_set = [intersected_point_set;intersected_point];
                             if ~isempty(metrics)
-                                intersected_point_set = [intersected_point_set;intersected_point];
                                 for k = 1:size(metrics,2)
                                     point_metric = PointWorkspaceElement(intersected_point, obj.model, [], metrics(k));
                                     metric_value(k) = point_metric.metrics{2};
@@ -489,6 +489,6 @@ else
     graph.EdgeColor = edge_color;
 end
 colormap(autumn);
-colorbar
-title(title_str)
+colorbar;
+title(title_str);
 end

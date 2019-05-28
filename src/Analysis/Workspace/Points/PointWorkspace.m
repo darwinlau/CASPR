@@ -1,6 +1,6 @@
 % A container class to hold workspace result for a point pose
 %
-% Author        : Darwin LAU
+% Author        : Darwin LAU, Paul Cheng
 % Created       : 2019
 % Description    : This class contains the known information obtained
 % through workspace analysis for all poses
@@ -27,7 +27,7 @@ classdef PointWorkspace < handle
         % a set of conditions and metrics
         function createWorkspaceGraph(obj, conditions, metrics, w_connectivity)
             if(~isempty(metrics))
-                metric_types = input_conversion(metrics);
+                metric_types = input_conversion(metrics');
                 pose_metric_types = input_conversion(obj.poses{1}.metrics);
                 
                 if(~all(ismember(metric_types,pose_metric_types)))
@@ -44,10 +44,6 @@ classdef PointWorkspace < handle
             digit_tolerance = 4;
             
             num_metrics = size(metrics,2);
-            if num_metrics == 1
-                metrics = mat2cell(metrics,1);
-            end
-            % select plotting data based on the input
             if ~isempty(conditions) && isempty(metrics)
                 
                 filted_node_list = create_node_list(obj, conditions);
@@ -65,7 +61,7 @@ classdef PointWorkspace < handle
             elseif ~isempty(conditions) && ~isempty(metrics)
                 
                 filted_node_list = create_node_list(obj, conditions);
-                metric_types = input_conversion(metrics);
+                metric_types = input_conversion(metrics');
                 pose_metric_types = input_conversion(obj.poses{1}.metrics);
                 
                 if(all(ismember(metric_types,pose_metric_types)))
@@ -89,7 +85,7 @@ classdef PointWorkspace < handle
                 end
                 
             elseif ~isempty(metrics) && isempty(conditions)
-                metric_types = input_conversion(metrics);
+                metric_types = input_conversion(metrics');
                 pose_metric_types = input_conversion(obj.poses{1}.metrics);
                 
                 for i = 1:size(obj.poses,1)
@@ -103,10 +99,11 @@ classdef PointWorkspace < handle
                 matched_poses_indices = find(ismember(pose_data,fixed_variables,'rows'));
                 
                 points_to_plot = filted_node_list(matched_poses_indices,:);
-                
-                for j = 1:num_metrics
-                    metrics_indices = find(ismember(pose_metric_types,metric_types(j)));
-                    point_color_matrix(j,i) = cell2mat(obj.poses{i}.metrics(metrics_indices,2));
+                for i = 1:size(matched_poses_indices,1)
+                    for j = 1:num_metrics
+                        metrics_indices = find(ismember(pose_metric_types,metric_types(j)));
+                        point_color_matrix(j,i) = obj.poses{i}.metrics{metrics_indices,2};
+                    end
                 end
             else
                 CASPR_log.Error('At least one of the metrics of conditions should be the input')
@@ -260,7 +257,7 @@ classdef PointWorkspace < handle
             end
             
             new_workspace =  PointWorkspace(obj.model, obj.grid);
-            metric_types = input_conversion(metrics);
+            metric_types = input_conversion(metrics');
             pose_metric_types = input_conversion(obj.poses{1}.metrics);
             
             metric_indices = find(ismember(pose_metric_types,metric_types));
@@ -393,13 +390,15 @@ classdef PointWorkspace < handle
                 % Find out the poses that fulfill the condition(s)
                 if(~isempty(pose_data{i}))
                     
-                    n_constraints = size(pose_data{i}.conditions,1);                    
+                    n_constraints = size(pose_data{i}.conditions,1); 
+                    if n_constraints ~=0
                     for j = 1:n_constraints
                         pose_condition_types(j) = pose_data{i}.conditions{j,1}.type;
                     end
                     if(all(ismember(condition_types,pose_condition_types)))
                         number_node = number_node + 1;
-                        node_list(number_node,:) = [i,pose_data{i}.pose'];
+                        node_list(number_node,:) = [number_node,pose_data{i}.pose'];
+                    end
                     end
                 end
             end
@@ -441,12 +440,13 @@ end
 
 % function to handle numerous inputs to processable inputs
 function output_types = input_conversion(input)
-num_input= size(input,2);
+
+num_input= size(input,1);
 
 if num_input == 1 && ~iscell(input)
     input = mat2cell(input,1);
 end
 for i = 1:num_input
-    output_types(i) = input{i}.type;
+    output_types(i) = input{i,1}.type;
 end
 end
