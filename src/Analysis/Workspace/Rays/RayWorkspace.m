@@ -157,7 +157,7 @@ classdef RayWorkspace < handle
             for j = 1:size(G.Edges,1)
                 edge_color_matrix(j,:) = [0.5 0.5 0.5];
             end
-            title_str = 'Number of intersection'
+            title_str = 'Number of intersection';
             plot1ColorGraph(G,node_color_matrix,edge_color_matrix,title_str);
             node_color_matrix = [];edge_color_matrix = [];
             
@@ -169,7 +169,7 @@ classdef RayWorkspace < handle
                 edge_color_matrix = obj.ray_node.graph_rep(:,replete_node_index(i)+3);
                 
                 title_str = ['Metric ', num2str(i)];
-                plot1ColorGraph(G,node_color_matrix,edge_color_matrix,title_str)
+                plot1ColorGraph(G,node_color_matrix,edge_color_matrix,title_str);
             end
             node_color_matrix = [];edge_color_matrix = [];
         end
