@@ -18,18 +18,20 @@ q_step          =   (modelObj.bodyModel.q_max - modelObj.bodyModel.q_min)/5;
 % First the grid
 uGrid           =   UniformGrid(q_begin,q_end,q_step,'step_size');
 % Workspace settings and conditions
-min_segment_percentage = 20;
+q_end(end) = 3.1415;
+q_begin(end) = -3.1415;
+min_segment_percentage = 1;
 w_condition     =   {WorkspaceRayConditionBase.CreateWorkspaceRayCondition(WorkspaceRayConditionType.INTERFERENCE,min_segment_percentage,modelObj)};
-opt             =   RayWorkspaceSimulatorOptions(false,false);
-
+% opt             =   RayWorkspaceSimulatorOptions(false,false);
+w_metrics       =   [];
 % Start the simulation
 CASPR_log.Info('Start Setup Simulation');
-wsim            =   RayWorkspaceSimulator(modelObj,uGrid,opt);
+wsim            =    RayWorkspaceSimulator(modelObj,uGrid,w_condition,w_metrics);
 
 % Run the simulation
 CASPR_log.Info('Start Running Simulation');
-wsim.run(w_condition,[])
+wsim.run()
 
 % Plot the simulation
-CASPR_log.Info('Start Plotting Simulation');
-wsim.plotGraph();
+% CASPR_log.Info('Start Plotting Simulation');
+% wsim.plotGraph();
