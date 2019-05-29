@@ -46,7 +46,8 @@ classdef WrenchClosureRayCondition < WorkspaceRayConditionBase
                 least_squares_matrix = GeneralMathOperations.ComputeLeastSquareMatrix(free_variable_linear_space',maximum_degree);
             else
                 % THIS MAY NEED TO BE CHANGED
-                maximum_degree = 2*obj.number_dofs;
+                maximum_degree = 2*obj.number_dofs+3; % temporarily added 3 to increase the accuracy
+%                 maximum_degree = 2*obj.number_dofs;
                 % Set up a linear space for the free variable
                 free_variable_linear_space = workspace_ray.free_variable_range(1):(workspace_ray.free_variable_range(2)-workspace_ray.free_variable_range(1))/maximum_degree:workspace_ray.free_variable_range(2);
                 % Matrix for least squares computations
@@ -303,6 +304,9 @@ classdef WrenchClosureRayCondition < WorkspaceRayConditionBase
                         end
                         % sort the roots
                         null_roots = sort(null_roots);
+%                         if any(ismember(round(null_roots,2), -0.68))
+%                             null_roots
+%                         end
                         % go through all of the roots and check if at the
                         % midpoints they have the same sign
                         for root_index=1:length(null_roots)-1

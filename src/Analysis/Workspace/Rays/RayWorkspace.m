@@ -121,13 +121,17 @@ classdef RayWorkspace < handle
             intersected_point_set = createWorkspaceRayGraph(obj,conditions,metrics);
             
             G = graph(obj.ray_node.graph_rep(:,1),obj.ray_node.graph_rep(:,2));
+            %remove zero intersection node
+            empty_node_index = find(degree(G)==0);
+            G = rmnode(G,empty_node_index);
             %graph for n variable value for intersection point(edge) and ray(node)
+            replete_node_index = find(degree(G)~=0);
             for i = 1:obj.model.numDofs
-                for j = 1:size(obj.ray_node.node_list,1) 
+                for j = 1:size(replete_node_index,1) 
                 if i == obj.ray_node.node_list{j,end}
                     node_color_matrix(j) =  0;
                 else
-                    node_color_matrix(j) = obj.ray_node.node_list{j,i+1};
+                    node_color_matrix(j) = obj.ray_node.node_list{replete_node_index(j),i+1};
                 end
                 end
                 for j = 1:size(G.Edges,1)
@@ -138,8 +142,8 @@ classdef RayWorkspace < handle
             end            
             
             %graph for length of ray(node) and min distance to the ray(ray)
-            for i = 1:size(obj.ray_node.node_list,1)
-                node_color_matrix(i) =  norm(obj.ray_node.node_list{i,obj.ray_node.node_list{i,end}+1});
+            for i = 1:size(replete_node_index,1)
+                node_color_matrix(i) =  norm(obj.ray_node.node_list{replete_node_index(i),obj.ray_node.node_list{replete_node_index(i),end}+1});
             end
             edge_color_matrix = obj.ray_node.graph_rep(:,3);
             title_str = ['Ray length and boundary distance'];
@@ -147,8 +151,8 @@ classdef RayWorkspace < handle
             node_color_matrix = [];edge_color_matrix = [];
             
             %graph for number of intersection            
-            for i = 1:size(obj.ray_node.node_list,1)
-                node_color_matrix(i) = sum(sum(ismember(obj.ray_node.graph_rep(:,[1 2]),i)));
+            for i = 1:size(replete_node_index,1)
+                node_color_matrix(i) = sum(sum(ismember(obj.ray_node.graph_rep(:,[1 2]),replete_node_index(i))));
             end
             for j = 1:size(G.Edges,1)
                 edge_color_matrix(j,:) = [0.5 0.5 0.5];
@@ -159,10 +163,10 @@ classdef RayWorkspace < handle
             
             %graph for metrics
             for i = 1:size(metrics,2)
-                for j = 1:size(obj.ray_node.node_list,1)
+                for j = 1:size(replete_node_index,1)
                     node_color_matrix(j,:) = [0.5 0.5 0.5];
                 end
-                edge_color_matrix = obj.ray_node.graph_rep(:,i+3);
+                edge_color_matrix = obj.ray_node.graph_rep(:,replete_node_index(i)+3);
                 
                 title_str = ['Metric ', num2str(i)];
                 plot1ColorGraph(G,node_color_matrix,edge_color_matrix,title_str)
@@ -367,7 +371,8 @@ classdef RayWorkspace < handle
                                     metric_value(k) = point_metric.metrics{2};
                                 end
                             end
-                            graph_rep = [graph_rep;j,node_list{i,1},min_dist,metric_value];
+              
+                            graph_rep = [graph_rep;node_list{j,1},node_list{i,1},min_dist,metric_value];
                         end
                     end
                 end

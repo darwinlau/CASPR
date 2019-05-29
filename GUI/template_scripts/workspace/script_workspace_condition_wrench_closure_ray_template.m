@@ -18,7 +18,7 @@ q_step          =   (modelObj.bodyModel.q_max - modelObj.bodyModel.q_min)/3;
 % First the grid
 uGrid           =   UniformGrid(q_begin,q_end,q_step,'step_size');
 % Workspace settings and conditions
-min_segment_percentage = 10;
+min_segment_percentage = 1;
 w_condition     =   {WorkspaceRayConditionBase.CreateWorkspaceRayCondition(WorkspaceRayConditionType.WRENCH_CLOSURE,min_segment_percentage,modelObj)};
 
 % w_metrics       =   {TensionFactorMetric,ConditionNumberMetric};
