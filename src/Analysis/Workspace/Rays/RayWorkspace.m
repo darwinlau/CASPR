@@ -55,6 +55,8 @@ classdef RayWorkspace < handle
                     color_matrix(:,j) = wp(j).metrics{i,2};
                 end
                 G = graph(obj.point_node.graph_rep(:,1),obj.point_node.graph_rep(:,2));
+                empty_node_index = find(degree(G)==0);
+                G = rmnode(G,empty_node_index);
                 edge_color_matrix = obj.point_node.graph_rep(:,3);
                 for k = 1:G.numnodes
                     node_color_matrix(k) = color_matrix(k);
