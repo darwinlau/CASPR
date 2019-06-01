@@ -281,8 +281,9 @@ classdef RayWorkspace < handle
         
         % function to create the graph_rep variable for point representation
         function graph_rep = create_point_graph_rep(obj, node_list)
-            
+            rounding_digit = 4;
             graph_rep = [];
+            node_list = round(node_list,rounding_digit);
             for k = 1:size(node_list,1)
                 for i = 1:size(obj.grid.dim_disc_ia,1)
                     dimension_index = obj.grid.dim_disc_ia(i);
@@ -291,9 +292,9 @@ classdef RayWorkspace < handle
                     delta_q_vector(obj.grid.dim_disc_ia(i)) = delta_q;
                     for j = 1:2
                         if j == 1
-                            nearby_point = node_list(k,2:obj.model.numDofs+1) + delta_q_vector;
+                            nearby_point = round(node_list(k,2:obj.model.numDofs+1) + delta_q_vector,rounding_digit);
                         else
-                            nearby_point = node_list(k,2:obj.model.numDofs+1) - delta_q_vector;
+                            nearby_point = round(node_list(k,2:obj.model.numDofs+1) - delta_q_vector,rounding_digit);
                         end
                         neighbour_point_index = find(ismember(node_list(:,2:obj.model.numDofs+1),nearby_point,'rows'));
                         
