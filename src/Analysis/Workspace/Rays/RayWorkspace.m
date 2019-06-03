@@ -180,8 +180,7 @@ classdef RayWorkspace < handle
             rounding_digit = 4; % remove numerical error from input, change it if not accurate enough
             fixed_variables([plot_axis]) = [];
             fixed_variables = round(fixed_variables,rounding_digit);
-            if size(fixed_variables,1) + size(plot_axis,2) ~= obj.model.numDofs
-                CASPR_log.Error('Not enought number of fixed axis')
+            if max(size(fixed_variables)) + max(size(plot_axis)) ~= obj.model.numDofs  CASPR_log.Error('Not enought number of fixed axis')
             end
             node_list = create_ray_node_list(obj, conditions);
             plot_data_index = find(ismember(cell2mat(node_list(:,end)),plot_axis));
