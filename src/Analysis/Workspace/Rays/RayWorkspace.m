@@ -192,7 +192,7 @@ classdef RayWorkspace < handle
             fixed_variable_data = node_list(plot_data_index,[fixed_variable_column_index+1]);
             
              if ~isempty(fixed_variables)
-                 fixed_variable_data = round(fixed_variable_data,rounding_digit);
+                 fixed_variable_data = cellfun(@(x)round(x,rounding_digit),fixed_variable_data);
             variables_matched_index = find(ismember(cell2mat(fixed_variable_data),fixed_variables,'rows'));
             elseif size(plot_axis,2) == obj.model.numDofs
                 variables_matched_index = [obj.ray_node.node_list{:,1}]'; 
