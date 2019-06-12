@@ -130,6 +130,98 @@ classdef UniformGrid < PointGridBase
             end
         end
         
+        
+        % TODO: given a center shift, shift the box reusing the original
+        % box
+        function [result_index, removed_index, added_index] = getShiftedSubgrid(obj, ori_center, new_center, half_size, ori_index_set)
+            numDim              =   length(ori_center);
+            ori_center          =   obj.getGridPoint(obj.getGridIndex(ori_center));
+            new_center          =   obj.getGridPoint(obj.getGridIndex(new_center));
+            ori_q_begin_local  	=   ori_center - half_size.*obj.delta_q;
+            ori_q_end_local  	=   ori_center + half_size.*obj.delta_q;
+            % relax the margin of the reference box
+            ori_q_begin_local  	=   ori_q_begin_local - 1e-6*ones(size(ori_q_begin_local));
+            ori_q_end_local  	=   ori_q_end_local + 1e-6*ones(size(ori_q_end_local));
+            ori_q_mult          =   2*half_size + ones(size(half_size));
+            ori_q_div           =   prod(ori_q_mult);
+            ori_numPoints           =   ori_q_div;
+            if length(ori_index_set) ~= ori_numPoints
+                CASPR_log.Warn('The number of points in the original index set seems to be wrong, will directly generate the new box');
+                result_index = obj.getSubGrid(new_center, half_size);
+                removed_index = [];
+                added_index = result_index;
+            else
+                center_val_diff = new_center - ori_center;
+                center_step_diff = zeros(numDim, 1);
+                for i = 1:numDim
+                    if center_val_diff(i) >= 0
+                        center_step_diff(i) = floor(center_val_diff(i)/obj.delta_q(i));
+                    else
+                        center_step_diff(i) = ceil(center_val_diff(i)/obj.delta_q(i));
+                    end
+                end
+%                 center_step_diff = center_val_diff./obj.delta_q;
+                reuse_q_mult = ori_q_mult - center_step_diff;
+                reuse_q_div = prod(reuse_q_mult);
+                reuse_numPoints = reuse_q_div;
+                changed_numPoints = ori_numPoints - reuse_numPoints;
+
+                result_index = ori_index_set; 
+                removed_index = [];
+                added_index = [];
+%                 center_step_diff_magnitude = abs(center_step_diff);
+%                 center_step_diff_sign = sign(center_step_diff);
+                new_q_begin_local  	=   ori_q_begin_local + center_val_diff;
+                new_q_end_local  	=   ori_q_end_local + center_val_diff;
+                flag_inside_ori_box = false;
+                flag_inside_new_box = false;
+                
+                for i = 1:ori_numPoints
+                    % take a simple to implement but computationally less
+                    % effcient way first
+                    current_index = ori_index_set(i);
+                    current_q = obj.getGridPoint(current_index);
+                    
+                    if prod(current_q >= ori_q_begin_local & current_q <= ori_q_end_local)
+                        flag_inside_ori_box = true;
+                    else
+                        flag_inside_ori_box = false;
+                    end
+                    if prod(current_q >= new_q_begin_local & current_q <= new_q_end_local)
+                        flag_inside_new_box = true;
+                    else
+                        flag_inside_new_box = false;
+                    end
+                    
+                    if flag_inside_ori_box && ~flag_inside_new_box
+                        % indicate the point is not inside the new box, it
+                        % needs to be removed and a counterpart needs to be
+                        % added
+                        counterpart_q = ori_center + new_center - current_q;
+                        counterpart_index = obj.getGridIndex(counterpart_q);
+                        result_index = result_index(result_index ~= current_index); 
+                        removed_index = [removed_index; current_index];
+                        added_index = [added_index; counterpart_index];
+                    elseif flag_inside_ori_box && flag_inside_new_box
+                        % indicate the point is inside the new box as well,
+                        % nothing needs to be done
+                    else
+                        tmp1 = current_q >= ori_q_begin_local
+                        tmp2 = current_q <= ori_q_end_local
+                        CASPR_log.Error('Something went wrong, the point being evaluated should be inside the original box.');
+                    end
+                end
+                % add the new points
+                result_index = [result_index;added_index];
+                if length(result_index) ~= ori_numPoints
+                    CASPR_log.Warn('The number of points in the resulting index set seems to be wrong, will directly generate the new box');
+                    result_index = obj.getSubGrid(new_center, half_size);
+                    removed_index = [];
+                    added_index = result_index;
+                end
+            end
+        end
+        
         % Obtain a subgrid with a specific size (NOTE: the size is given as
         % integers which indicate number of grid steps)
         function result_index = getSubGrid(obj, center, half_size, existing_grid_index)
