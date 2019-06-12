@@ -61,6 +61,49 @@ classdef ForwardDynamics < handle
             q_ddot = model.q_ddot_dynamics;
             dynamics = model;
         end
+        
+        
+        % Compute the forward dynamics given a set of desired joint space
+        % positions and cable forces.
+        function [q, q_dot, q_ddot, dynamics] = computeJointActuated(obj, qp, qp_d, tau, cable_indices_active, w_ext, dt, model)
+            n_vars = model.numDofVars;
+            n_dofs = model.numDofs;
+            % The procedure to perform the forward dynamics
+            % Initialise the starting point for the ODE
+            y0 = [qp; qp_d];
+            % Run the ODE function
+            switch (obj.solverType)
+                case FDSolverType.ODE45
+                    solverFn = @(f,t,y0) ode45(f,t,y0);
+                case FDSolverType.ODE23
+                    solverFn = @(f,t,y0) ode23(f,t,y0);
+                case FDSolverType.ODE113
+                    solverFn = @(f,t,y0) ode113(f,t,y0);
+                case FDSolverType.ODE15S
+                    solverFn = @(f,t,y0) ode15s(f,t,y0);
+                case FDSolverType.ODE23S
+                    solverFn = @(f,t,y0) ode23s(f,t,y0);
+                case FDSolverType.ODE23T
+                    solverFn = @(f,t,y0) ode23t(f,t,y0);
+                case FDSolverType.ODE23TB
+                    solverFn = @(f,t,y0) ode23tb(f,t,y0);
+                case FDSolverType.ODE4
+                    solverFn = @(f,t,y0) ode4(f,t,y0);
+                case FDSolverType.ODE1
+                    solverFn = @(f,t,y0) ode1(f,t,y0);
+            end
+            [~, y_out] = solverFn(@(~,y) ForwardDynamics.eomJointActuated(0, y, model, tau, cable_indices_active, w_ext), [0 dt], y0);
+            % The output of the ODE is the solution and y0 for the next iteration
+            s_end = size(y_out,1);
+            % Store the q and q_dot values
+            q = y_out(s_end, 1:n_vars)';
+            q_dot = y_out(s_end, n_vars+1:length(y0))';
+            % Update the model with q, q_dot and f so that q_ddot can be determined
+            model.update(q, q_dot, zeros(n_dofs, 1), w_ext);
+            
+            q_ddot = model.M\(tau - model.C - model.G - model.W_e);
+            dynamics = model;
+        end
     end
 
     methods (Static, Access = private)
@@ -80,6 +123,25 @@ classdef ForwardDynamics < handle
 
             y_dot(1:n_vars) = model.q_deriv;
             y_dot(n_vars+1:length(y)) = model.q_ddot_dynamics;
+        end
+        
+        % The equation of motion for integration purposes.
+        % the control input is assumed to be the joint torque, i.e. removes
+        % the cable actuation part
+        function y_dot = eomJointActuated(~, y, model, tau, cable_indices_active, w_ext)
+            n_vars = model.numDofVars;
+            n_dofs = model.numDofs;
+            q = y(1:n_vars);
+            q_dot = y(n_vars+1:length(y));
+
+            y_dot = zeros(size(y));
+
+            model.update(q, q_dot, zeros(n_dofs, 1), w_ext);
+            assert(~isempty(cable_indices_active), 'This is the EoM of a system with no cable actuation, please confirm if that is what you want.');
+            
+
+            y_dot(1:n_vars) = model.q_deriv;
+            y_dot(n_vars+1:length(y)) = model.M\(tau - model.C - model.G - model.W_e);
         end
     end
 end
