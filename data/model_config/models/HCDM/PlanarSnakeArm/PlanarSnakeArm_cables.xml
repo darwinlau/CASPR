@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE cables SYSTEM "../../../templates/cables.dtd">
+<cables default_cable_set="Empty">
+  <cable_set id="PlaceHOlder">
+	<cable_ideal name="place holder" attachment_reference="com">
+      <properties>
+        <force_min>1</force_min>
+        <force_max>500</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>1 0 0</location>
+        </attachment>
+        <attachment>
+          <link>7</link>
+          <location>2 0 0</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+  </cable_set>
+  <cable_set id="Empty">
+  </cable_set>
+</cables>
