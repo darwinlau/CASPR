@@ -18,7 +18,7 @@ classdef JointTest < matlab.unittest.TestCase
     % Create the jointObj properties.
     methods(TestClassSetup)
         function createJointObj(testCase, joint_type)
-            if (joint_type == JointType.R_AXIS)
+            if (joint_type == JointType.R_AXIS || joint_type == JointType.P_AXIS)
                 testCase.jointObj = JointBase.CreateJoint(joint_type, [], [], [], 0, [1; 0; 0]);
             else
                 testCase.jointObj = JointBase.CreateJoint(joint_type, [], [], [], 0);

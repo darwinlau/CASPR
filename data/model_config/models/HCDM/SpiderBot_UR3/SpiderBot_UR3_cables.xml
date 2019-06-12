@@ -6,7 +6,7 @@
 	<cable_ideal name="X" attachment_reference="joint">
       <properties>
         <force_min>1</force_min>
-        <force_max>2000</force_max>
+        <force_max>500</force_max>
       </properties>
       <attachments>
         <base_rotating_pulley>
@@ -23,7 +23,7 @@
     <cable_ideal name="Y" attachment_reference="joint">
       <properties>
         <force_min>1</force_min>
-        <force_max>2000</force_max>
+        <force_max>500</force_max>
       </properties>
       <attachments>
         <base_rotating_pulley>
@@ -40,7 +40,7 @@
 	<cable_ideal name="Z" attachment_reference="joint">
       <properties>
         <force_min>1</force_min>
-        <force_max>2000</force_max>
+        <force_max>500</force_max>
       </properties>
       <attachments>
         <base_rotating_pulley>
@@ -57,7 +57,7 @@
     <cable_ideal name="A" attachment_reference="joint">
       <properties>
         <force_min>1</force_min>
-        <force_max>2000</force_max>
+        <force_max>500</force_max>
       </properties>
       <attachments>
         <base_rotating_pulley>
@@ -74,7 +74,7 @@
 	<cable_ideal name="B" attachment_reference="joint">
       <properties>
         <force_min>1</force_min>
-        <force_max>2000</force_max>
+        <force_max>500</force_max>
       </properties>
       <attachments>
         <base_rotating_pulley>
@@ -91,7 +91,7 @@
     <cable_ideal name="C" attachment_reference="joint">
       <properties>
         <force_min>1</force_min>
-        <force_max>2000</force_max>
+        <force_max>500</force_max>
       </properties>
       <attachments>
         <base_rotating_pulley>
@@ -108,7 +108,7 @@
 	<cable_ideal name="U" attachment_reference="joint">
       <properties>
         <force_min>1</force_min>
-        <force_max>2000</force_max>
+        <force_max>500</force_max>
       </properties>
       <attachments>
         <base_rotating_pulley>
@@ -125,7 +125,7 @@
     <cable_ideal name="V" attachment_reference="joint">
       <properties>
         <force_min>1</force_min>
-        <force_max>2000</force_max>
+        <force_max>500</force_max>
       </properties>
       <attachments>
         <base_rotating_pulley>
@@ -144,12 +144,12 @@
 	<cable_ideal name="X" attachment_reference="joint">
       <properties>
         <force_min>1</force_min>
-        <force_max>2000</force_max>
+        <force_max>500</force_max>
       </properties>
       <attachments>
         <attachment>
           <link>0</link>
-          <location>0.083 2.197 1.905</location>
+          <location>0.083 2.197 1.90</location>
         </attachment>
         <attachment>
           <link>1</link>
@@ -160,7 +160,7 @@
     <cable_ideal name="Y" attachment_reference="joint">
       <properties>
         <force_min>1</force_min>
-        <force_max>2000</force_max>
+        <force_max>500</force_max>
       </properties>
       <attachments>
         <attachment>
@@ -176,7 +176,7 @@
 	<cable_ideal name="Z" attachment_reference="joint">
       <properties>
         <force_min>1</force_min>
-        <force_max>2000</force_max>
+        <force_max>500</force_max>
       </properties>
       <attachments>
         <attachment>
@@ -192,7 +192,7 @@
     <cable_ideal name="A" attachment_reference="joint">
       <properties>
         <force_min>1</force_min>
-        <force_max>2000</force_max>
+        <force_max>500</force_max>
       </properties>
       <attachments>
         <attachment>
@@ -208,7 +208,7 @@
 	<cable_ideal name="B" attachment_reference="joint">
       <properties>
         <force_min>1</force_min>
-        <force_max>2000</force_max>
+        <force_max>500</force_max>
       </properties>
       <attachments>
         <attachment>
@@ -224,7 +224,7 @@
     <cable_ideal name="C" attachment_reference="joint">
       <properties>
         <force_min>1</force_min>
-        <force_max>2000</force_max>
+        <force_max>500</force_max>
       </properties>
       <attachments>
         <attachment>
@@ -240,7 +240,7 @@
 	<cable_ideal name="U" attachment_reference="joint">
       <properties>
         <force_min>1</force_min>
-        <force_max>2000</force_max>
+        <force_max>500</force_max>
       </properties>
       <attachments>
         <attachment>
@@ -256,7 +256,7 @@
     <cable_ideal name="V" attachment_reference="joint">
       <properties>
         <force_min>1</force_min>
-        <force_max>2000</force_max>
+        <force_max>500</force_max>
       </properties>
       <attachments>
         <attachment>

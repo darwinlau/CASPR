@@ -31,14 +31,14 @@ classdef TaskGrid < GridBase
             id.x_end    =   x_end;
             id.delta_x  =   delta_x;
             id.n_task_dimensions = size(x_begin,1); 
-            id.setNDimensions(size(q_begin,1));
+            id.n_dimensions = size(q_begin,1);
             id.x_length = (id.x_end - id.x_begin)./id.delta_x + 1;
             % THIS CAN BE CHANGED LATER
             id.q_length = zeros(id.n_dimensions,1);
             for i=1:id.n_dimensions
                 id.q_length(i) = id.x_length;
             end
-            id.setNPoints(prod(id.q_length));
+            id.n_points = prod(id.q_length);
         end
         
         % Get a point in the grid

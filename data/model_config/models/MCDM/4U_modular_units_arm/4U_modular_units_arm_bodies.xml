@@ -3,15 +3,15 @@
 <bodies_system>
     <links display_range="-0.1 0.85 -0.2 0.2 -0.2 0.2" view_angle="19 29">
       <link_rigid num="1" name="M1">
-        <joint type="U_YZ" q_initial="0 0" q_min="-3.1416 -3.1416" q_max="3.1416 3.1416"/>
+        <joint type="U_YZ" q_initial="0 0" q_min="-0.78 -0.78" q_max="0.78 0.78"/>
         <physical>
-          <mass>0.1</mass>
-          <com_location>0.099 0.0 0.0</com_location>
-          <end_location>0.198 0.0 0.0</end_location>
+          <mass>0.27243</mass>
+          <com_location>0.05 0.0 0.0</com_location>
+          <end_location>0.1 0.0 0.0</end_location>
           <inertia ref="com">
-            <Ixx>0.000125</Ixx> <!--m=0.1; r=0.05; h = 0.198-->
-            <Iyy>0.0003892</Iyy>
-            <Izz>0.0003892</Izz>
+            <Ixx>0.0006393</Ixx> <!--m=0.1; r=0.05; h = 0.198-->
+            <Iyy>0.00039596</Iyy>
+            <Izz>0.00039596</Izz>
             <Ixy>0.0</Ixy>
             <Ixz>0.0</Ixz>
             <Iyz>0.0</Iyz>
@@ -19,19 +19,19 @@
         </physical>
         <parent>
           <num>0</num>
-          <location>0.08 0.0 0.0</location> <!--set 0.08-->
+          <location>0.05 0.0 0.0</location> <!--set 0.08-->
         </parent>
       </link_rigid>
       <link_rigid num="2" name="M2">
         <joint type="U_YZ" q_initial="0 0" q_min="-3.1416 -3.1416" q_max="3.1416 3.1416"/>
         <physical>
-          <mass>0.1</mass>
-          <com_location>0.099 0.0 0.0</com_location>
-          <end_location>0.198 0.0 0.0</end_location>
+          <mass>0.27243</mass>
+          <com_location>0.05 0.0 0.0</com_location>
+          <end_location>0.1 0.0 0.0</end_location>
           <inertia ref="com">
-            <Ixx>0.000125</Ixx>
-            <Iyy>0.0003892</Iyy>
-            <Izz>0.0003892</Izz>
+            <Ixx>0.0006393</Ixx> <!--m=0.1; r=0.05; h = 0.198-->
+            <Iyy>0.00039596</Iyy>
+            <Izz>0.00039596</Izz>
             <Ixy>0.0</Ixy>
             <Ixz>0.0</Ixz>
             <Iyz>0.0</Iyz>
@@ -39,19 +39,19 @@
         </physical>
         <parent>
           <num>1</num>
-          <location>0.198 0.0 0.0</location>
+          <location>0.1 0.0 0.0</location>
         </parent>
       </link_rigid>
       <link_rigid num="3" name="M3">
           <joint type="U_YZ" q_initial="0 0" q_min="-3.1416 -3.1416" q_max="3.1416 3.1416"/>
           <physical>
-          <mass>0.1</mass>
-          <com_location>0.099 0.0 0.0</com_location>
-          <end_location>0.198 0.0 0.0</end_location>
+          <mass>0.27243</mass>
+          <com_location>0.05 0.0 0.0</com_location>
+          <end_location>0.1 0.0 0.0</end_location>
           <inertia ref="com">
-            <Ixx>0.000125</Ixx>
-            <Iyy>0.0003892</Iyy>
-            <Izz>0.0003892</Izz>
+            <Ixx>0.0006393</Ixx> <!--m=0.1; r=0.05; h = 0.198-->
+            <Iyy>0.00039596</Iyy>
+            <Izz>0.00039596</Izz>
             <Ixy>0.0</Ixy>
             <Ixz>0.0</Ixz>
             <Iyz>0.0</Iyz>
@@ -59,19 +59,19 @@
         </physical>
         <parent>
           <num>2</num>
-          <location>0.198 0.0 0.0</location>
+          <location>0.1 0.0 0.0</location>
         </parent>
       </link_rigid>
       <link_rigid num="4" name="M4">
         <joint type="U_YZ" q_initial="0 0" q_min="-3.1416 -3.1416" q_max="3.1416 3.1416"/>
         <physical>
-          <mass>0.1</mass>
-          <com_location>0.027 0.0 0.0</com_location>
-          <end_location>0.054 0.0 0.0</end_location>
+           <mass>0.27243</mass>
+          <com_location>0.05 0.0 0.0</com_location>
+          <end_location>0.1 0.0 0.0</end_location>
           <inertia ref="com">
-            <Ixx>0.000125</Ixx>
-            <Iyy>0.000087</Iyy>
-            <Izz>0.000087</Izz>
+            <Ixx>0.0006393</Ixx> <!--m=0.1; r=0.05; h = 0.198-->
+            <Iyy>0.00039596</Iyy>
+            <Izz>0.00039596</Izz>
             <Ixy>0.0</Ixy>
             <Ixz>0.0</Ixz>
             <Iyz>0.0</Iyz>
@@ -79,7 +79,7 @@
         </physical>
         <parent>
           <num>3</num>
-          <location>0.198 0.0 0.0</location>
+          <location>0.1 0.0 0.0</location>
         </parent>
       </link_rigid>
     </links>

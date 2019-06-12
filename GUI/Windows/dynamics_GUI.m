@@ -31,7 +31,7 @@ function varargout = dynamics_GUI(varargin)
 
     % Edit the above text to modify the response to help dynamics_GUI
 
-    % Last Modified by GUIDE v2.5 01-Jun-2017 13:29:27
+    % Last Modified by GUIDE v2.5 16-Oct-2018 11:33:55
 
     % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
@@ -351,6 +351,24 @@ function plot_movie_button_Callback(~, ~, handles) %#ok<DEFNU>
     end
 end
 
+function Rviz_pushbutton_Callback(~, ~, handles) %#ok<DEFNU>
+    % hObject    handle to Rviz_pushbutton (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    structure with handles and user data (see GUIDATA)
+    sim = getappdata(handles.figure1,'sim');
+    modObj = getappdata(handles.cable_text,'modObj');
+    if(isempty(sim))
+        warning('No simulator has been generated. Please press run first'); %#ok<WNTAG>
+    else
+        try 
+            load('CARDSFlowConfig.mat');
+            MotionSimulatorBase.plotCARDSFlow(modObj, sim.trajectory);  
+        catch
+            MotionSimulatorBase.plotRviz(modObj, sim.trajectory, sim.cableForces);
+        end
+    end
+end
+
 %--------------------------------------------------------------------------
 %% Toolbar buttons
 %--------------------------------------------------------------------------
@@ -430,7 +448,7 @@ function run_inverse_dynamics(handles,modObj,trajectory_id)
     
     % Setup the inverse dynamics simulator with the SystemModel
     % object and the inverse dynamics solver
-    disp('Start Setup Simulation');
+    CASPR_log.Info('Start Setup Simulation');
     set(handles.status_text,'String','Setting up simulation');
     drawnow;
     start_tic = tic;
@@ -438,28 +456,28 @@ function run_inverse_dynamics(handles,modObj,trajectory_id)
     model_config = getappdata(handles.trajectory_popup,'model_config');
     trajectory= model_config.getJointTrajectory(trajectory_id);
     time_elapsed = toc(start_tic);
-    fprintf('End Setup Simulation : %f seconds\n', time_elapsed);
+    CASPR_log.Info(sprintf('End Setup Simulation : %f seconds', time_elapsed));
 
     % Run the solver on the desired trajectory
-    disp('Start Running Simulation');
+    CASPR_log.Info('Start Running Simulation');
     set(handles.status_text,'String','Simulation running');
     drawnow;
     start_tic = tic;
     idsim.run(trajectory);
     time_elapsed = toc(start_tic);
-    fprintf('End Running Simulation : %f seconds\n', time_elapsed);
+    CASPR_log.Info(sprintf('End Running Simulation : %f seconds', time_elapsed));
 
     % Display information from the inverse dynamics simulator
-    fprintf('Optimisation computational time, mean : %f seconds, std dev : %f seconds, total: %f seconds\n', mean(idsim.compTime), std(idsim.compTime), sum(idsim.compTime));
+    CASPR_log.Info(sprintf('Optimisation computational time, mean : %f seconds, std dev : %f seconds, total: %f seconds', mean(idsim.compTime), std(idsim.compTime), sum(idsim.compTime)));
 
     % Plot the data
-    disp('Start Plotting Simulation');
+    CASPR_log.Info('Start Plotting Simulation');
     set(handles.status_text,'String','Simulation plotting');
     drawnow;
     start_tic = tic;
     GUIOperations.GUIPlot(plot_type,idsim,handles,str2double(getappdata(handles.plot_type_popup,'num_plots')),get(handles.undock_box,'Value'));
     time_elapsed = toc(start_tic);
-    fprintf('End Plotting Simulation : %f seconds\n', time_elapsed);
+    CASPR_log.Info(sprintf('End Plotting Simulation : %f seconds', time_elapsed));
     set(handles.status_text,'String','No simulation running');
     setappdata(handles.figure1,'sim',idsim);
     assignin('base','inverse_dynamics_simulator',idsim);
@@ -549,7 +567,7 @@ function run_forward_dynamics(handles,modObj,trajectory_id)
         
     % Setup the inverse dynamics simulator with the SystemModel
     % object and the inverse dynamics solver
-    disp('Start Setup Simulation');
+    CASPR_log.Info('Start Setup Simulation');
     set(handles.status_text,'String','Setting up simulation');
     drawnow;
     start_tic = tic;
@@ -558,25 +576,25 @@ function run_forward_dynamics(handles,modObj,trajectory_id)
     model_config = getappdata(handles.trajectory_popup,'model_config');
     trajectory= model_config.getJointTrajectory(trajectory_id);
     time_elapsed = toc(start_tic);
-    fprintf('End Setup Simulation : %f seconds\n', time_elapsed);
+    CASPR_log.Info(sprintf('End Setup Simulation : %f seconds', time_elapsed));
     
     % First run the inverse dynamics
-    disp('Start Running Inverse Dynamics Simulation');
+    CASPR_log.Info('Start Running Inverse Dynamics Simulation');
     
     start_tic = tic;
     idsim.run(trajectory);
     time_elapsed = toc(start_tic);
-    fprintf('End Running Inverse Dynamics Simulation : %f seconds\n', time_elapsed);
+    CASPR_log.Info(sprintf('End Running Inverse Dynamics Simulation : %f seconds', time_elapsed));
     set(handles.status_text,'String','Running inverse dynamics');
     drawnow;
     % Then run the forward dynamics
-    disp('Start Running Forward Dynamics Simulation');
+    CASPR_log.Info('Start Running Forward Dynamics Simulation');
     set(handles.status_text,'String','Running forward dynamics');
     drawnow;
     start_tic = tic;
     fdsim.run(idsim.cableForcesActive, idsim.cableIndicesActive, trajectory.timeVector, trajectory.q{1}, trajectory.q_dot{1});
     time_elapsed = toc(start_tic);
-    fprintf('End Running Forward Dynamics Simulation : %f seconds\n', time_elapsed);
+    CASPR_log.Info(sprintf('End Running Forward Dynamics Simulation : %f seconds', time_elapsed));
     
     % Finally compare the results
     set(handles.status_text,'String','Plotting results');
@@ -632,23 +650,23 @@ function file_copy(handles,output_file)
     trajectory_str = contents{get(handles.trajectory_popup,'Value')};
     if(strcmp(dynamics_id,'Forward Dynamics'))
         base_folder = CASPR_configuration.LoadHomePath();
-        r_string = [base_folder,'/scripts/examples/dynamics/script_FD_example.m'];
+        r_string = [base_folder,'/GUI/template_scripts/dynamics/script_FD_template.m'];
     else
         contents = cellstr(get(handles.solver_class_popup,'String'));
         solver_class_id = contents{get(handles.solver_class_popup,'Value')};
         base_folder = CASPR_configuration.LoadHomePath();
         if(strcmp(solver_class_id,'IDSolverLinProg'))
-            r_string = [base_folder,'/scripts/examples/dynamics/script_ID_linprog_example.m'];
+            r_string = [base_folder,'/GUI/template_scripts/dynamics/script_ID_linprog_template.m'];
         elseif(strcmp(solver_class_id,'IDSolverQuadProg'))
-            r_string = [base_folder,'/scripts/examples/dynamics/script_ID_quadprog_example.m'];
+            r_string = [base_folder,'/GUI/template_scripts/dynamics/script_ID_quadprog_template.m'];
         elseif(strcmp(solver_class_id,'IDSolverFeasiblePolygon'))
-            r_string = [base_folder,'/scripts/examples/dynamics/script_ID_feasible_polygon_example.m'];
+            r_string = [base_folder,'/GUI/template_scripts/dynamics/script_ID_feasible_polygon_template.m'];
         elseif(strcmp(solver_class_id,'IDSolverOptimallySafe'))
-            r_string = [base_folder,'/scripts/examples/dynamics/script_ID_optimally_safe_example.m'];
+            r_string = [base_folder,'/GUI/template_scripts/dynamics/script_ID_optimally_safe_template.m'];
         elseif(strcmp(solver_class_id,'IDSolverClosedForm'))
-            r_string = [base_folder,'/scripts/examples/dynamics/script_ID_closed_form_example.m'];
+            r_string = [base_folder,'/GUI/template_scripts/dynamics/script_ID_closed_form_template.m'];
         elseif(strcmp(solver_class_id,'IDSolverMinInfNorm'))
-            r_string = [base_folder,'/scripts/examples/dynamics/script_ID_min_inf_norm_example.m'];
+            r_string = [base_folder,'/GUI/template_scripts/dynamics/script_ID_min_inf_norm_template.m'];
         end        
     end
     w_string = [base_folder,output_file];
@@ -661,8 +679,7 @@ function file_copy(handles,output_file)
         % Replace all references to the model
         new_s = regexprep(new_s,'Example planar XY',model_str);
         new_s = regexprep(new_s,'basic',cable_str);
-        new_s = regexprep(new_s,'example_quintic',trajectory_str);
-%         fprintf(w_fid,[new_s,'\n']);
+        new_s = regexprep(new_s,'example_linear',trajectory_str);
         fprintf(w_fid, new_s);
         fprintf(w_fid, '\n');
     end

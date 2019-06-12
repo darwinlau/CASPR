@@ -66,5 +66,6 @@
                 </point>
             </points>
         </parabolic_blend_trajectory>
+        <file_trajectory id="example_file" filename="example_planar_XY_trajectory_file_example.traj" />
     </joint_trajectories>
 </trajectories>

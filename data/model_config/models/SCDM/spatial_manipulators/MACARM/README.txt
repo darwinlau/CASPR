@@ -1,3 +1,3 @@
 Please cite the following paper when using this model for your studies:
 
-Mayhew, David, et al. "Development of the MACARM-a novel cable robot for upper limb neurorehabilitation." Rehabilitation Robotics, 2005. ICORR 2005. 9th International Conference on. IEEE, 2005.
+D. Mayhew, B Bachrach, W. Z. Rymer and R. F. Beer, "Development of the MACARM-a novel cable robot for upper limb neurorehabilitation." IEEE International Conference on. Rehabilitation Robotics (ICORR), pp. 299-302, 2005.

@@ -4,9 +4,9 @@
 % Date:   7/2017
 % Description: cal.the min distance between cable and cable, return 1 if
 %              distance is not 0, otherwise return 1.
-function inWorkspace = interference_free_mindistance_cable_cable(dynamics, options)
+function inWorkspace = interference_free_mindistance_cable_cable(dynamics, epsilon_d)
     m = MinCableCableDistanceMetric();
-    [~, v, ~] = m.evaluate(dynamics,options);
-    inWorkspace = (v > 0.02); % Specify the diameter of the segment
+    val = m.evaluate(dynamics);
+    inWorkspace = (val > epsilon_d); % Minimum distance cables should be away from each other
 end
 

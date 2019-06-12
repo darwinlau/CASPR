@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE cables SYSTEM "../../../../templates/cables.dtd">
+<cables default_cable_set="original"> 
+  <cable_set id="original">
+      <cable_ideal name="cable 1" attachment_reference="joint">
+      <properties>
+        <force_min>0.0</force_min>
+        <force_max>1000</force_max>
+        <diameter>0.1</diameter>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 1 0</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>-0.15 -0.1 0.3</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 2" attachment_reference="joint">
+      <properties>
+        <force_min>0.0</force_min>
+        <force_max>1000</force_max>
+        <diameter>0.1</diameter>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 3 0</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>-0.15 0.1 0.3</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 3" attachment_reference="joint">
+      <properties>
+        <force_min>0.0</force_min>
+        <force_max>1000</force_max>
+        <diameter>0.1</diameter>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>4 2 0</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0.15 0 0.3</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 4" attachment_reference="joint">
+      <properties>
+        <force_min>0.0</force_min>
+        <force_max>1000</force_max>
+        <diameter>0.1</diameter>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 0 4</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>-0.15 -0.2 -0.3</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 5" attachment_reference="joint">
+      <properties>
+        <force_min>0.0</force_min>
+        <force_max>1000</force_max>
+        <diameter>0.1</diameter>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0 4 4</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>-0.15 0.2 -0.3</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 6" attachment_reference="joint">
+      <properties>
+        <force_min>0.0</force_min>
+        <force_max>1000</force_max>
+        <diameter>0.1</diameter>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>4 4 4</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0.15 0.2 -0.3</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 7" attachment_reference="joint">
+      <properties>
+        <force_min>0.0</force_min>
+        <force_max>1000</force_max>
+        <diameter>0.1</diameter>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>4 0 4</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0.15 -0.2 -0.3</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+  </cable_set>
+</cables>

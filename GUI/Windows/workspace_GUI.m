@@ -31,7 +31,7 @@ function varargout = workspace_GUI(varargin)
 
     % Edit the above text to modify the response to help workspace_GUI
 
-    % Last Modified by GUIDE v2.5 07-Jul-2017 17:37:00
+    % Last Modified by GUIDE v2.5 09-Feb-2019 07:24:01
 
     % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
@@ -131,6 +131,36 @@ function workspace_condition_popup_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
     set(hObject, 'String', workspace_str);
 end
 
+% --- Executes on selection change in workspace_type_popup.
+function workspace_type_popup_Callback(~, ~, ~) %#ok<DEFNU>
+    % hObject    handle to workspace_type_popup (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    structure with handles and user data (see GUIDATA)
+
+    % Hints: contents = cellstr(get(hObject,'String')) returns workspace_type_popup contents as cell array
+    %        contents{get(hObject,'Value')} returns selected item from workspace_type_popup
+end
+
+% --- Executes during object creation, after setting all properties.
+function workspace_type_popup_CreateFcn(hObject, ~, ~)%#ok<DEFNU>
+    % hObject    handle to workspace_type_popup (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    empty - handles not created until after all CreateFcns called
+
+    % Hint: popupmenu controls usually have a white background on Windows.
+    %       See ISPC and COMPUTER.
+    if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+        set(hObject,'BackgroundColor','white');
+    end
+    settingsXMLObj =  GUIOperations.GetSettings('/GUI/XML/workspaceXML.xml');
+    setappdata(hObject,'settings',settingsXMLObj);
+    workspace_str = GUIOperations.XmlObj2StringCellArray(settingsXMLObj.getElementsByTagName('simulator').item(0).getElementsByTagName('workspace_type')...
+                    ,'id');
+    workspace_str = lower(workspace_str);
+    workspace_str = strrep(workspace_str,'_',' ');
+    set(hObject, 'String', workspace_str);
+end
+
 % % Workspace Metric
 % % --- Executes on selection change in workspace_metric_popup.
 % function workspace_metric_popup_Callback(~, ~, ~) %#ok<DEFNU>
@@ -215,64 +245,98 @@ function generate_button_Callback(~, ~, handles) %#ok<DEFNU>
     % Set up the workspace simulator
     % First the grid
     q_begin         =   modObj.bodyModel.q_min; q_end = modObj.bodyModel.q_max;
-    q_step          =   (modObj.bodyModel.q_max - modObj.bodyModel.q_min)/10;
+    q_step          =   (modObj.bodyModel.q_max - modObj.bodyModel.q_min)/5;
     uGrid           =   UniformGrid(q_begin,q_end,q_step,'step_size');
-    % First the condition
-    contents = cellstr(get(handles.workspace_condition_popup,'String'));
-    wc_string = contents{get(handles.workspace_condition_popup,'Value')};
-    settings = getappdata(handles.workspace_condition_popup,'settings');
-    if(~strcmp(wc_string,'wrench feasible'))
+    % First determine if ray or point
+    contents = cellstr(get(handles.workspace_type_popup,'String'));
+    wt_string = contents{get(handles.workspace_type_popup,'Value')};
+    if(strcmp(wt_string,'point'))
+        % First the condition
+        contents = cellstr(get(handles.workspace_condition_popup,'String'));
+        wc_string = contents{get(handles.workspace_condition_popup,'Value')};
+        settings = getappdata(handles.workspace_condition_popup,'settings');
+        if(~strcmp(wc_string,'wrench feasible'))
+            wc_string = upper(wc_string);
+            wc_string = strrep(wc_string,' ','_');
+            w_condition = {WorkspaceConditionBase.CreateWorkspaceCondition(eval(['WorkspaceConditionType.',wc_string]),[])};
+        else
+            wc_string = 'WRENCH_FEASIBLE';
+            i_max     = 2^(modObj.numDofs)-1;
+            w_set     = zeros(modObj.numDofs,i_max+1);
+            flag_vec  = zeros(modObj.numDofs,1);
+            min_vec     = -ones(modObj.numDofs,1);
+            max_vec     = ones(modObj.numDofs,1);
+            for k = 0:i_max
+                flag_set = dec2bin(k,modObj.numDofs);
+                flag_vec(:) = str2num(flag_set(:)); %#ok<ST2NM>
+                w_set(:,k+1) = min_vec.*(~flag_vec) + max_vec.*flag_vec;
+            end 
+            w_condition = {WrenchFeasibleCondition([], w_set)};
+        end
+        % Then the metric
+        %w_metric = {WorkspaceMetricBase.CreateWorkspaceMetric(WorkspaceMetricType.CONDITION_NUMBER,[])};
+        % FOR THE MOMENT NO OPTIONS ON CONNECTIVITY
+        w_connectivity  =   WorkspaceConnectivityBase.CreateWorkspaceConnectivityCondition(WorkspaceConnectivityType.GRID,uGrid);
+        %% Now initialise the simulation
+        CASPR_log.Info('Start Setup Simulation');
+        set(handles.status_text,'String','Setting up simulation');
+        drawnow;
+        start_tic       =   tic;
+        wsim            =   PointWorkspaceSimulator(modObj, uGrid, w_condition, {}, w_connectivity);
+        time_elapsed    =   toc(start_tic);
+        CASPR_log.Info(sprintf('End Setup Simulation : %f seconds', time_elapsed));
+
+        CASPR_log.Info('Start Running Simulation');
+        set(handles.status_text,'String','Simulation running');
+        drawnow;
+        start_tic       =   tic;
+        wsim.run(); 
+        time_elapsed    =   toc(start_tic);
+        CASPR_log.Info(sprintf('End Running Simulation : %f seconds', time_elapsed));
+        CASPR_log.Info('Start Plotting Simulation');
+        drawnow;
+        start_tic       =   tic;
+        wsim.plotGraph();
+        time_elapsed    =   toc(start_tic);
+        CASPR_log.Info(sprintf('End Plotting Simulation : %f seconds\n', time_elapsed));
+        set(handles.status_text,'String','No simulation running');
+    else
+        min_segment_percentage = 20;
+        contents = cellstr(get(handles.workspace_condition_popup,'String'));
+        wc_string = contents{get(handles.workspace_condition_popup,'Value')};
         wc_string = upper(wc_string);
         wc_string = strrep(wc_string,' ','_');
-        w_condition = {WorkspaceConditionBase.CreateWorkspaceCondition(eval(['WorkspaceConditionType.',wc_string]),[],[])};
-    else
-        wc_string = 'WRENCH_FEASIBLE';
-        i_max     = 2^(modObj.numDofs)-1;
-        w_set     = zeros(modObj.numDofs,i_max+1);
-        flag_vec  = zeros(modObj.numDofs,1);
-        min_vec     = -ones(modObj.numDofs,1);
-        max_vec     = ones(modObj.numDofs,1);
-        for k = 0:i_max
-            flag_set = dec2bin(k,modObj.numDofs);
-            flag_vec(:) = str2num(flag_set(:)); %#ok<ST2NM>
-            w_set(:,k+1) = min_vec.*(~flag_vec) + max_vec.*flag_vec;
-        end 
-        w_condition = {WorkspaceConditionBase.CreateWorkspaceCondition(eval(['WorkspaceConditionType.',wc_string]),[],w_set)};
+        w_condition     =   {WorkspaceRayConditionBase.CreateWorkspaceRayCondition(eval(['WorkspaceRayConditionType.',wc_string]),min_segment_percentage,modObj)};
+%         w_metrics       =   {WorkspaceMetricBase.CreateWorkspaceMetric(WorkspaceMetricType.TENSION_FACTOR)};
+        opt             =   RayWorkspaceSimulatorOptions(false,false);
+        
+        % Start the simulation
+        CASPR_log.Info('Start Setup Simulation');
+        set(handles.status_text,'String','Setting up simulation');
+        drawnow;
+        start_tic       =   tic;
+        wsim            =   RayWorkspaceSimulator(modObj,uGrid,opt);
+        time_elapsed    =   toc(start_tic);
+        CASPR_log.Info(sprintf('End Setup Simulation : %f seconds', time_elapsed));
+        
+        % Run the simulation
+        CASPR_log.Info('Start Running Simulation');
+        set(handles.status_text,'String','Simulation running');
+        drawnow;
+        start_tic       =   tic;
+        wsim.run(w_condition,[])
+        time_elapsed    =   toc(start_tic);
+        CASPR_log.Info(sprintf('End Running Simulation : %f seconds', time_elapsed));
+        
+        % Plot the simulation
+        CASPR_log.Info('Start Plotting Simulation');
+        drawnow;
+        start_tic       =   tic;
+        wsim.plotGraph();
+        time_elapsed    =   toc(start_tic);
+        CASPR_log.Info(sprintf('End Plotting Simulation : %f seconds\n', time_elapsed));
+        set(handles.status_text,'String','No simulation running');
     end
-    % Then the metric
-%     contents = cellstr(get(handles.workspace_metric_popup,'String'));
-%     if(strcmp(contents{get(handles.workspace_metric_popup,'Value')},' '))
-%         metric = {};
-%     else
-%         wmetric = contents{get(handles.workspace_metric_popup,'Value')};
-%         metric = {WorkspaceMetricBase.CreateWorkspaceMetric(eval(['WorkspaceMetricType.',wmetric]),[])};
-%     end
-    w_metric = {WorkspaceMetricBase.CreateWorkspaceMetric(WorkspaceMetricType.CONDITION_NUMBER,[])};
-    % FOR THE MOMENT NO OPTIONS ON CONNECTIVITY
-    w_connectivity  =   WorkspaceConnectivityBase.CreateWorkspaceConnectivityCondition(WorkspaceConnectivityType.GRID,uGrid);
-    %% Now initialise the simulation
-    disp('Start Setup Simulation');
-    set(handles.status_text,'String','Setting up simulation');
-    drawnow;
-    start_tic       =   tic;
-    
-    opt = WorkspaceSimulatorOptions(true,optimset('Display','off')); % This should be made into an object
-    wsim            =   WorkspaceSimulator(modObj,uGrid,opt);
-    time_elapsed    =   toc(start_tic);
-    fprintf('End Setup Simulation : %f seconds\n', time_elapsed);
-    
-    disp('Start Running Simulation');
-    set(handles.status_text,'String','Simulation running');
-    drawnow;
-    start_tic       =   tic;
-    wsim.run(w_condition,w_metric,w_connectivity); 
-    time_elapsed    =   toc(start_tic);
-    fprintf('End Running Simulation : %f seconds\n', time_elapsed);
-    
-    disp('Start Plotting Simulation');
-    wsim.plotWorkspaceGraph();
-    fprintf('End Plotting Simulation : %f seconds\n', time_elapsed);
-    set(handles.status_text,'String','No simulation running');
     setappdata(handles.figure1,'sim',wsim);
     assignin('base','workspace_sim',wsim); 
 end
@@ -300,12 +364,28 @@ function generate_script_button_Callback(~, ~, handles) %#ok<DEFNU>
     model_str = cellstr(get(handles.model_text,'String'));
     cable_str = cellstr(get(handles.cable_text,'String'));
     wc_string = contents{get(handles.workspace_condition_popup,'Value')};
-    if(strcmp(wc_string,'wrench closure'))
-        r_string = [base_folder,'/scripts/examples/workspace/script_workspace_condition_wrench_closure_example.m'];
-    elseif(strcmp(wc_string,'wrench feasible'))
-        r_string = [base_folder,'/scripts/examples/workspace/script_workspace_condition_wrench_feasible_example.m'];
-    elseif(strcmp(wc_string,'static'))
-        r_string = [base_folder,'/scripts/examples/workspace/script_workspace_condition_static_example.m'];
+    contents = cellstr(get(handles.workspace_type_popup,'String'));
+    wt_string = contents{get(handles.workspace_type_popup,'Value')};
+    if(strcmp(wt_string,'point'))
+        if(strcmp(wc_string,'wrench closure'))
+            r_string = [base_folder,'/GUI/template_scripts/workspace/script_workspace_condition_wrench_closure_point_template.m'];
+        elseif(strcmp(wc_string,'wrench feasible'))
+            r_string = [base_folder,'/GUI/template_scripts/workspace/script_workspace_condition_wrench_feasible_point_template.m'];
+        elseif(strcmp(wc_string,'static'))
+            r_string = [base_folder,'/GUI/template_scripts/workspace/script_workspace_condition_static_point_template.m'];
+        elseif(strcmp(wc_string,'interference free'))
+            r_string = [base_folder,'/GUI/template_scripts/workspace/script_workspace_condition_interference_free_point_template.m'];
+        end
+    else
+        if(strcmp(wc_string,'wrench closure'))
+            r_string = [base_folder,'/GUI/template_scripts/workspace/script_workspace_condition_wrench_closure_ray_template.m'];
+        elseif(strcmp(wc_string,'wrench feasible'))
+            CASPR_log.Error('Wrench feasible workspace is currently not supported in ray mode')
+        elseif(strcmp(wc_string,'static'))
+            CASPR_log.Error('Static workspace is currently not supported in ray mode')
+        elseif(strcmp(wc_string,'interference free'))
+            r_string = [base_folder,'/GUI/template_scripts/workspace/script_workspace_condition_interference_free_ray_template.m'];
+        end
     end
     w_string = [base_folder,'/scripts/local/GUI_script_autogenerated.m'];
     r_fid = fopen(r_string,'r');
@@ -315,7 +395,7 @@ function generate_script_button_Callback(~, ~, handles) %#ok<DEFNU>
         % Determine if comment
         new_s = regexprep(s,'%','%%');
         % Replace all references to the model
-        new_s = regexprep(new_s,'2 DoF VSD',model_str);
+        new_s = regexprep(new_s,'Example planar XY',model_str);
         new_s = regexprep(new_s,'basic',cable_str);
         fprintf(w_fid,[new_s,'\n']);
     end
@@ -429,6 +509,7 @@ function saveState(handles,file_path)
     state.model_text                        =   get(handles.model_text,'String');
     state.cable_text                        =   get(handles.cable_text,'String');
     state.workspace_condition_popup_value   =   get(handles.workspace_condition_popup,'value');
+    state.workspace_type_popup_value        =   get(handles.workspace_type_popup,'value');
 %     state.workspace_metric_popup_value      =   get(handles.workspace_metric_popup,'value');
     state.plot_type_popup                   =   get(handles.plot_type_popup,'value');
     if(nargin>1)
@@ -458,6 +539,7 @@ function loadState(handles)
             cs_text = get(handles.cable_text,'String');
             if(strcmp(mp_text,state.model_text)&&strcmp(cs_text,state.cable_text))
                 set(handles.workspace_condition_popup,'value',state.workspace_condition_popup_value);
+                set(handles.workspace_type_popup,'value',state.workspace_type_popup_value);
 %                 set(handles.workspace_metric_popup,'value',state.workspace_metric_popup_value);
                 set(handles.plot_type_popup,'value',state.plot_type_popup);
                 plot_type_popup_Callback(handles.plot_type_popup,[],handles);

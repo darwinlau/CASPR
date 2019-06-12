@@ -11,11 +11,11 @@
             <physical>
                 <mass>10</mass>
                 <com_location>0 0 0.35</com_location>
-                <end_location>0 0 3</end_location>
+                <end_location>0 0 2</end_location>
                 <inertia ref="com">
                     <Ixx>1.0</Ixx>
                     <Iyy>1.0</Iyy>
-                    <Izz>1.0</Izz>
+                    <Izz>0.1</Izz>
                     <Ixy>0.0</Ixy>
                     <Ixz>0.0</Ixz>
                     <Iyz>0.0</Iyz>
@@ -28,15 +28,15 @@
         </link_rigid>
 
             <link_rigid num="2" name="Mobile_bot_2">
-            <joint type="P_X" actuated="true" q_initial="3" q_min="3.0" q_max="4.0"/>
+            <joint type="P_X" actuated="true" q_initial="3" q_min="2.0" q_max="4.0"/>
             <physical>
                 <mass>10</mass>
                 <com_location>0 0 0.35</com_location>
-                <end_location>0 0 3</end_location>
+                <end_location>0 0 2</end_location>
                 <inertia ref="com">
                     <Ixx>1.0</Ixx>
                     <Iyy>1.0</Iyy>
-                    <Izz>1.0</Izz>
+                    <Izz>0.1</Izz>
                     <Ixy>0.0</Ixy>
                     <Ixz>0.0</Ixz>
                     <Iyz>0.0</Iyz>
@@ -49,15 +49,15 @@
         </link_rigid>
         
            <link_rigid num="3" name="Platform">
-            <joint type="PLANAR_XZ" q_initial="1.5 1.5 0"  q_min="0.5 0.0 -3.1416" q_max="2.5 2.0 3.1416"/> <!-- Platform itself is not actuated-->  
+            <joint type="PLANAR_XZ" q_initial="1.5 1.75 0"  q_min="1.0 0.0 -3.1416" q_max="2.0 2.0 3.1416"/> <!-- Platform itself is not actuated-->  
             <physical>
-                <mass>10</mass>
+                <mass>1</mass>
                 <com_location>0 0 0</com_location>
                 <end_location>0 0 0</end_location>
                 <inertia ref="com">
-                    <Ixx>1.0</Ixx>
-                    <Iyy>1.0</Iyy>
-                    <Izz>1.0</Izz>
+                    <Ixx>0.1</Ixx>
+                    <Iyy>0.1</Iyy>
+                    <Izz>0.1</Izz>
                     <Ixy>0.0</Ixy>
                     <Ixz>0.0</Ixz>
                     <Iyz>0.0</Iyz>

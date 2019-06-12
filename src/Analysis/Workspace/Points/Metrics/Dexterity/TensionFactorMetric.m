@@ -11,22 +11,28 @@
 % Created       : 2016
 % Description   : Implementation of the tension factor metric.
 classdef TensionFactorMetric < WorkspaceMetricBase
-    properties (SetAccess = protected, GetAccess = protected)
+    % Constants that needs to be defined from parent
+    properties (Constant)
+        type = WorkspaceMetricType.TENSION_FACTOR;
+        metricMin = 0;
+        metricMax = 1;
+    end
+    
+    properties
+        options = []        % Solver options for LP
     end
     
     methods
         % Constructor
         function m = TensionFactorMetric()
-            m.metricMin = 0;
-            m.metricMax = 1;
         end
         
         % Evaluate function implementation
-        function v = evaluateFunction(~,dynamics,options)
+        function v = evaluateFunction(obj, dynamics)
             % Determine the Jacobian Matrix
 %             L = dynamics.L_active;
             L = dynamics.L;
-            [u,~,exit_flag] = linprog(ones(1,dynamics.numCablesActive),[],[],-L',zeros(dynamics.numDofs,1),1e-6*ones(dynamics.numCablesActive,1),1e6*ones(dynamics.numCablesActive,1),[],options);
+            [u,~,exit_flag] = linprog(ones(1,dynamics.numCablesActive),[],[],-L',zeros(dynamics.numDofs,1),1e-6*ones(dynamics.numCablesActive,1),1e6*ones(dynamics.numCablesActive,1),[],obj.options);
             if((exit_flag == 1) && (rank(L) == dynamics.numDofs))
                 h = u/norm(u);
                 h_min = min(h); h_max = max(h);

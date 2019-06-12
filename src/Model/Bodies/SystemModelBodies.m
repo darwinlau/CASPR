@@ -272,8 +272,7 @@ classdef SystemModelBodies < handle
                         zeros(3,3) R_ka];                     
                     obj.P(6*k-5:6*k, 6*a-5:6*a) = Pak;                    
                 end
-            end        
-            
+            end
             % W = P*S              
             obj.W = obj.P*obj.S;                      
        
@@ -1134,6 +1133,7 @@ classdef SystemModelBodies < handle
             for k = 1:length(obj.operationalSpaceBodyIndices)
                 index = obj.operationalSpaceBodyIndices(k);
                 n_y = obj.bodies{index}.numOperationalDofs;
+                tmp = obj.bodies{index}.operationalSpace.getSelectionMatrix();
                 obj.T(l:l+n_y-1,6*index-5:6*index) = obj.bodies{index}.operationalSpace.getSelectionMatrix();
                 l = l + n_y;
             end
@@ -1619,7 +1619,10 @@ classdef SystemModelBodies < handle
                 CASPR_log.Info('- Compiling Dynamics Variables...'); 
                 matlabFunction(obj.M_b, 'File', strcat(path, '/compile_M_b'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
                 matlabFunction(obj.C_b, 'File', strcat(path, '/compile_C_b'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
-                matlabFunction(obj.G_b, 'File', strcat(path, '/compile_G_b'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
+                matlabFunction(obj.G_b, 'File', strcat(path, '/compile_G_b'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});  
+                matlabFunction(obj.M, 'File', strcat(path, '/compile_M'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
+                matlabFunction(obj.C, 'File', strcat(path, '/compile_C'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
+                matlabFunction(obj.G, 'File', strcat(path, '/compile_G'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
                 obj.compiled.dynamics = true;               
             end            
         end

@@ -10,7 +10,7 @@
 % Author        : Jonathan EDEN
 % Created       : 2016
 % Description   : 
-function inWorkspace = wrench_closure_combinatoric_positive_span(dynamics,options)
+function inWorkspace = wrench_closure_combinatoric_positive_span(dynamics)
     % Determine necessary variables for test
     A       =   -dynamics.L_active'; % Cable Jacobian
     n = size(A,1); m = size(A,2); % Size variables

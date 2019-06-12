@@ -31,7 +31,7 @@ function varargout = kinematics_GUI(varargin)
 
     % Edit the above text to modify the response to help kinematics_GUI
 
-    % Last Modified by GUIDE v2.5 01-Jun-2017 13:29:18
+    % Last Modified by GUIDE v2.5 16-Oct-2018 11:32:22
 
     % Begin initialization code - DO NOT EDIT
     gui_Singleton = 1;
@@ -367,17 +367,17 @@ function script_button_Callback(~, ~, handles) %#ok<DEFNU>
     trajectory_str = contents{get(handles.trajectory_popup,'Value')};
     if(strcmp(kinematics_id,'Inverse Kinematics'))
         base_folder = CASPR_configuration.LoadHomePath();
-        r_string = [base_folder,'/scripts/examples/kinematics/script_IK_example.m'];
+        r_string = [base_folder,'/GUI/template_scripts/kinematics/script_IK_template.m'];
     else
         contents = cellstr(get(handles.solver_class_popup,'String'));
         solver_class_id = contents{get(handles.solver_class_popup,'Value')};
         base_folder = CASPR_configuration.LoadHomePath();
         if(strcmp(solver_class_id,'FKLeastSquares'))
-            r_string = [base_folder,'/scripts/examples/kinematics/script_FK_least_squares_example.m'];
+            r_string = [base_folder,'/GUI/template_scripts/kinematics/script_FK_least_squares_template.m'];
         elseif(strcmp(solver_class_id,'FKDifferential'))
-            r_string = [base_folder,'/scripts/examples/kinematics/script_FK_differential_example.m'];
+            r_string = [base_folder,'/GUI/template_scripts/kinematics/script_FK_differential_template.m'];
         elseif(strcmp(solver_class_id,'FKHybridLeastSquaresDifferential'))
-            r_string = [base_folder,'/scripts/examples/kinematics/script_FK_hybrid_leastsquares_differential_example.m'];
+            r_string = [base_folder,'/GUI/template_scripts/kinematics/script_FK_hybrid_leastsquares_differential_template.m'];
         end
         
     end
@@ -397,6 +397,24 @@ function script_button_Callback(~, ~, handles) %#ok<DEFNU>
     fclose(r_fid);
     fclose(w_fid);
     edit(w_string)
+end
+
+function Rviz_pushbutton_Callback(~, ~, handles) %#ok<DEFNU>
+    % hObject    handle to Rviz_pushbutton (see GCBO)
+    % eventdata  reserved - to be defined in a future version of MATLAB
+    % handles    structure with handles and user data (see GUIDATA)
+    sim = getappdata(handles.figure1,'sim');
+    modObj = getappdata(handles.cable_text,'modObj');
+    if(isempty(sim))
+        warning('No simulator has been generated. Please press run first'); %#ok<WNTAG>
+    else
+        try 
+            load('CARDSFlowConfig.mat');
+            MotionSimulatorBase.plotCARDSFlow(modObj, sim.trajectory);       
+        catch 
+            MotionSimulatorBase.plotRviz(modObj, sim.trajectory);     
+        end       
+    end
 end
 
 
@@ -484,7 +502,7 @@ function run_inverse_kinematics(handles,modObj,trajectory_id)
     contents = cellstr(get(handles.plot_type_popup,'String'));
     plot_type = contents{get(handles.plot_type_popup,'Value')};
     % Setup the inverse kinematics simulator with the SystemKinematics object
-    disp('Start Setup Simulation');
+    CASPR_log.Info('Start Setup Simulation');
     set(handles.status_text,'String','Setting up simulation');
     drawnow;
     start_tic = tic;
@@ -492,26 +510,26 @@ function run_inverse_kinematics(handles,modObj,trajectory_id)
     model_config = getappdata(handles.trajectory_popup,'model_config');
     trajectory = model_config.getJointTrajectory(trajectory_id);
     time_elapsed = toc(start_tic);
-    fprintf('End Setup Simulation : %f seconds\n', time_elapsed);
+    CASPR_log.Info(sprintf('End Setup Simulation : %f seconds', time_elapsed));
 
     % Run the kinematics on the desired trajectory
-    disp('Start Running Simulation');
+    CASPR_log.Info('Start Running Simulation');
     set(handles.status_text,'String','Simulation running');
     drawnow;
     start_tic = tic;
     sim.run(trajectory);
     time_elapsed = toc(start_tic);
-    fprintf('End Running Simulation : %f seconds\n', time_elapsed);
+    CASPR_log.Info(sprintf('End Running Simulation : %f seconds', time_elapsed));
 
     % After running the simulator the data can be plotted
     % Refer to the simulator classes to see what can be plotted.
-    disp('Start Plotting Simulation');
+    CASPR_log.Info('Start Plotting Simulation');
     start_tic = tic;
     set(handles.status_text,'String','Simulation plotting');
     drawnow;
     GUIOperations.GUIPlot(plot_type,sim,handles,str2double(getappdata(handles.plot_type_popup,'num_plots')),get(handles.undock_box,'Value'));
     time_elapsed = toc(start_tic);
-    fprintf('End Plotting Simulation : %f seconds\n', time_elapsed);
+    CASPR_log.Info(sprintf('End Plotting Simulation : %f seconds', time_elapsed));
     set(handles.status_text,'String','No simulation running');
     setappdata(handles.figure1,'sim',sim);
     assignin('base','inverse_kinematic_simulator',sim);
@@ -524,7 +542,7 @@ function run_forward_kinematics(handles,modObj,trajectory_id)
     
     % An inverse kinematics and forward kinematics simulator will be run to
     % show that the results are consistent.
-    disp('Start Setup Simulation');
+    CASPR_log.Info('Start Setup Simulation');
     set(handles.status_text,'String','Setting up simulation');
     drawnow;
     start_tic = tic;
@@ -546,29 +564,29 @@ function run_forward_kinematics(handles,modObj,trajectory_id)
     model_config = getappdata(handles.trajectory_popup,'model_config');
     trajectory = model_config.getJointTrajectory(trajectory_id);
     time_elapsed = toc(start_tic);
-    fprintf('End Setup Simulation : %f seconds\n', time_elapsed);
+    CASPR_log.Info(sprintf('End Setup Simulation : %f seconds', time_elapsed));
 
     % Run inverse kinematics
-    disp('Start Running Inverse Kinematics Simulation');
+    CASPR_log.Info('Start Running Inverse Kinematics Simulation');
     set(handles.status_text,'String','Running inverse kinematics');
     drawnow;
     start_tic = tic;
     iksim.run(trajectory);
     time_elapsed = toc(start_tic);
-    fprintf('End Running Inverse Kinematics Simulation : %f seconds\n', time_elapsed);
+    CASPR_log.Info(sprintf('End Running Inverse Kinematics Simulation : %f seconds', time_elapsed));
 
     % Run forward kinematics
-    disp('Start Running Forward Kinematics Simulation');
+    CASPR_log.Info('Start Running Forward Kinematics Simulation');
     set(handles.status_text,'String','Running forward kinematics');
     drawnow;
     start_tic = tic;
     fksim.run(iksim.cableLengths, iksim.cableLengthsDot, iksim.timeVector, iksim.trajectory.q{1}, iksim.trajectory.q_dot{1});
     time_elapsed = toc(start_tic);
-    fprintf('End Running Forward Kinematics Simulation : %f seconds\n', time_elapsed);
+    CASPR_log.Info(sprintf('End Running Forward Kinematics Simulation : %f seconds', time_elapsed));
 
     % It is expected that iksim and fksim should have the same joint space (the
     % result of fksim)
-    disp('Start Plotting Simulation');
+    CASPR_log.Info('Start Plotting Simulation');
     set(handles.status_text,'String','Simulation plotting');
     drawnow;
     start_tic = tic;
@@ -576,9 +594,11 @@ function run_forward_kinematics(handles,modObj,trajectory_id)
     GUIOperations.GUIPlot('plotJointSpace',fksim,handles,1,get(handles.undock_box,'Value'));
     GUIOperations.GUIPlot('plotCableLengthError',fksim,handles,1,get(handles.undock_box,'Value'));
     time_elapsed = toc(start_tic);
-    fprintf('End Plotting Simulation : %f seconds\n', time_elapsed);
+    CASPR_log.Info(sprintf('End Plotting Simulation : %f seconds', time_elapsed));
     set(handles.status_text,'String','No simulation running');
     assignin('base','forward_kinematic_simulator',fksim);
+    % Save the sim
+    setappdata(handles.figure1,'sim',fksim);
 end
 
 function loadState(handles)
@@ -657,3 +677,5 @@ function initialise_popups(handles)
     % Needed callbacks
     plot_type_popup_Callback(handles.plot_type_popup,[],handles);
 end
+
+

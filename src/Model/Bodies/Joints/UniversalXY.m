@@ -71,7 +71,7 @@ classdef UniversalXY < JointBase
         % Generate the \dot{S} gradient tensor
         function [S_dot_grad] = RelVelocityMatrixDerivGradient(q,q_dot)
             b = UniversalXY.GetBeta(q);
-            b_d = SphericalEulerXYZ.GetBeta(q_dot);
+            b_d = UniversalXY.GetBeta(q_dot);
             S_dot_grad = MatrixOperations.Initialise([6,2,2], isa(b, 'sym'));
             S_dot_grad(:,:,2)   =   [zeros(3,2); -b_d*cos(b) 0; 0 0; -b_d*sin(b) 0];    
         end

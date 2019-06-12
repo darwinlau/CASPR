@@ -13,8 +13,9 @@ classdef OperationalOrientationEulerXYZ < OperationalSpaceBase
             o.offset            =   zeros(3,1);
             o.numOperationalDofs         =   size(selection_matrix,1);
             % Determine the selection matrix assuming 6 DoF
-            temp_selection_matrix = [zeros(3),eye(3)];
-            o.selection_matrix  =   temp_selection_matrix(logical(diag(selection_matrix)),:);
+%             temp_selection_matrix = [zeros(3),eye(3)];
+%             o.selection_matrix  =   temp_selection_matrix(logical(diag(selection_matrix)),:);
+            o.selection_matrix  =   selection_matrix;
         end
         
         % Implementation of the abstract function
@@ -26,6 +27,41 @@ classdef OperationalOrientationEulerXYZ < OperationalSpaceBase
 %             b = round(b, 10);
 %             g = round(g, 10);
             y = obj.selection_matrix(:,4:6)*[a;b;g];
+        end
+        
+        function [y, y_dot, y_ddot] = generateTrajectoryLinearSpline(obj, y_s, y_e, time_vector)
+            n_dof = obj.numOperationalDofs;
+            CASPR_log.Assert(n_dof == length(y_s) && n_dof == length(y_e), 'Length of input states are different to the number of operational space DoFs');
+            y = zeros(n_dof, length(time_vector)); 
+            y_dot = zeros(n_dof, length(time_vector));
+            y_ddot = zeros(n_dof, length(time_vector));
+            for i = 1:n_dof
+                [y(i,:), y_dot(i,:), y_ddot(i,:)] = Spline.LinearInterpolation(y_s(i), y_e(i), time_vector);
+            end
+        end
+        
+        function [y, y_dot, y_ddot] = generateTrajectoryCubicSpline(obj, y_s, y_s_d, y_e, y_e_d, time_vector)
+            n_dof = obj.numOperationalDofs;
+            CASPR_log.Assert(n_dof == length(y_s) && n_dof == length(y_e) && n_dof == length(y_s_d) && n_dof == length(y_e_d), 'Length of input states are different to the number of operational space DoFs');
+            y = zeros(n_dof, length(time_vector)); 
+            y_dot = zeros(n_dof, length(time_vector));
+            y_ddot = zeros(n_dof, length(time_vector));
+            for i = 1:n_dof
+                [y(i,:), y_dot(i,:), y_ddot(i,:)] = Spline.CubicInterpolation(y_s(i), y_s_d(i), y_e(i), y_e_d(i), time_vector);
+            end
+        end
+        
+        function [y, y_dot, y_ddot] = generateTrajectoryQuinticSpline(obj, y_s, y_s_d, y_s_dd, y_e, y_e_d, y_e_dd, time_vector)
+            n_dof = obj.numOperationalDofs;
+            CASPR_log.Assert(n_dof == length(y_s) && n_dof == length(y_e) ...
+                && n_dof == length(y_s_d) && n_dof == length(y_e_d) ...
+                && n_dof == length(y_s_dd) && n_dof == length(y_e_dd), 'Length of input states are different to the number of operational space DoFs');
+            y = zeros(n_dof, length(time_vector)); 
+            y_dot = zeros(n_dof, length(time_vector));
+            y_ddot = zeros(n_dof, length(time_vector));
+            for i = 1:n_dof
+                [y(i,:), y_dot(i,:), y_ddot(i,:)] = Spline.QuinticInterpolation(y_s(i), y_s_d(i), y_s_dd(i), y_e(i), y_e_d(i), y_e_dd(i), time_vector);
+            end
         end
     end
     

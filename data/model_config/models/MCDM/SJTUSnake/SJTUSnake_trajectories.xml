@@ -224,4 +224,48 @@
             </points>
         </quintic_spline_trajectory>
     </joint_trajectories>
+    <operational_trajectories>      
+      <quintic_spline_trajectory id="position_traj_1" time_step="0.1" time_definition="relative">
+        <points>
+          <point>
+            <y>0 1.1905 0</y>
+            <y_dot>0 0 0</y_dot>
+            <y_ddot>0 0 0</y_ddot>
+          </point>
+          <point time="6.0">
+            <y>0 0.7 0</y>
+            <y_dot>0 0 0</y_dot>
+            <y_ddot>0 0 0</y_ddot>
+          </point>
+        </points>
+      </quintic_spline_trajectory>      
+      <quintic_spline_trajectory id="orientation_traj_1" time_step="0.1" time_definition="relative">
+        <points>
+          <point>
+            <y>0 0 0</y>
+            <y_dot>0 0 0</y_dot>
+            <y_ddot>0 0 0</y_ddot>
+          </point>
+          <point time="6.0">
+            <y>1 1 1</y>
+            <y_dot>0 0 0</y_dot>
+            <y_ddot>0 0 0</y_ddot>
+          </point>
+        </points>
+      </quintic_spline_trajectory>  
+      <quintic_spline_trajectory id="orientation_s_traj_1" time_step="0.1" time_definition="relative">
+        <points>
+          <point>
+            <y>0 0 0</y>
+            <y_dot>0 0 0</y_dot>
+            <y_ddot>0 0 0</y_ddot>
+          </point>
+          <point time="6.0">
+            <y>1 1 0</y>
+            <y_dot>0 0 0</y_dot>
+            <y_ddot>0 0 0</y_ddot>
+          </point>
+        </points>
+      </quintic_spline_trajectory>      
+    </operational_trajectories>
 </trajectories>

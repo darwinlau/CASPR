@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!DOCTYPE bodies_system
+  PUBLIC "" "../../../templates/bodies.dtd">
+<bodies_system>
+   <links display_range="-1.0 1.0 -0.5 0.5 0.0 1.0" view_angle="90 0">
+      <link_rigid name="shoulder_left_link2" num="1">
+         <joint axis="0.05101 -0.9984 0.02231" q_initial="1.2" q_max="1.7" q_min="1.2" type="R_AXIS"/>
+         <physical>
+            <mass>0.001</mass>
+            <com_location>0 0 0</com_location>
+            <end_location>0 0 0</end_location>
+            <inertia ref="com">
+               <Ixx>0.001</Ixx>
+               <Iyy>0.001</Iyy>
+               <Izz>0.001</Izz>
+               <Ixy>0</Ixy>
+               <Ixz>0</Ixz>
+               <Iyz>0</Iyz>
+            </inertia>
+         </physical>
+         <parent>
+            <num>0</num>
+            <location>0.2926 0.007368 0.5479</location>
+         </parent>
+      </link_rigid>
+      <link_rigid name="shoulder_left_link3" num="2">
+         <joint axis="-0.9157 -0.03784 0.4001" q_initial="0.0" q_max="3.142" q_min="-3.142" type="R_AXIS"/>
+         <physical>
+            <mass>0.001</mass>
+            <com_location>0 0 0</com_location>
+            <end_location>-0.005238 -0.0005333 -0.01189</end_location>
+            <inertia ref="com">
+               <Ixx>0.001</Ixx>
+               <Iyy>0.001</Iyy>
+               <Izz>0.001</Izz>
+               <Ixy>0</Ixy>
+               <Ixz>0</Ixz>
+               <Iyz>0</Iyz>
+            </inertia>
+         </physical>
+         <parent>
+            <num>1</num>
+            <location>0 0 0</location>
+         </parent>
+      </link_rigid>
+      <link_rigid name="upper_arm_left" num="3">
+         <joint axis="-0.3986 -0.04084 -0.9162" q_initial="0.0" q_max="0.5" q_min="-0.5" type="R_AXIS"/>
+         <physical>
+            <mass>1</mass>
+            <com_location>-0.05912 -0.006673 -0.1688</com_location>
+            <end_location>-0.1399 -0.01744 -0.277</end_location>
+            <inertia ref="com">
+               <Ixx>0.01</Ixx>
+               <Iyy>0.01</Iyy>
+               <Izz>0.01</Izz>
+               <Ixy>0</Ixy>
+               <Ixz>0</Ixz>
+               <Iyz>0</Iyz>
+            </inertia>
+         </physical>
+         <parent>
+            <num>2</num>
+            <location>-0.005238 -0.0005333 -0.01189</location>
+         </parent>
+      </link_rigid>
+      <link_rigid name="lower_arm_left" num="4">
+         <joint axis="0.9171 -0.01288 -0.3984" q_initial="-0.5" q_max="0" q_min="-1.57" type="R_AXIS"/>
+         <physical>
+            <mass>1</mass>
+            <com_location>-0.03277 0.004782 -0.1547</com_location>
+            <end_location>-0.06554 0.009563 -0.3094</end_location>
+            <inertia ref="com">
+               <Ixx>0.01</Ixx>
+               <Iyy>0.01</Iyy>
+               <Izz>0.01</Izz>
+               <Ixy>0</Ixy>
+               <Ixz>0</Ixz>
+               <Iyz>0</Iyz>
+            </inertia>
+         </physical>
+         <parent>
+            <num>3</num>
+            <location>-0.1399 -0.01744 -0.277</location>
+         </parent>
+      </link_rigid>
+   </links>
+   <operational_spaces default_operational_set="ee_default">
+      <operational_set id="ee_default">
+         <position marker_id="1" name="ee_default">
+            <link>4</link>
+            <offset>-0.15492 -0.254225 -0.386772</offset>
+            <axes active_axes="xyz"/>
+         </position>
+      </operational_set>
+   </operational_spaces>
+</bodies_system>

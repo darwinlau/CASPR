@@ -34,7 +34,7 @@ function varargout = CASPR_GUI(varargin)
 
     % Edit the above text to modify the response to help CASPR_GUI
 
-    % Last Modified by GUIDE v2.5 30-May-2017 01:26:05
+    % Last Modified by GUIDE v2.5 13-Nov-2018 13:01:30
 
     % Begin initialization code - DO NOT EDIT
     warning('off','MATLAB:uitabgroup:OldVersion')
@@ -260,7 +260,7 @@ function update_button_Callback(~, ~, handles) %#ok<DEFNU>
     cla;
     axis_range = getappdata(handles.cable_popup,'axis_range');
     view_angle = getappdata(handles.cable_popup,'view_angle');
-    MotionSimulatorBase.PlotFrame(modObj, axis_range, view_angle, handles.figure1);
+    MotionSimulatorBase.PlotFrame(modObj, axis_range, view_angle, handles.figure1, handles.plot_axis);
 end
 
 % --- Executes on button press in control_button.
@@ -289,7 +289,11 @@ function missing_term_error = model_update_button_Callback(~, ~, handles) %#ok<D
     % hObject    handle to model_update_button (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    structure with handles and user data (see GUIDATA)
-    
+    try 
+        model_popup_update(handles, get(handles.model_popup,'Value'));
+    catch
+        model_popup_update(handles);
+    end
     % Update the cable set list
     % Generate the model_config object
     contents = cellstr(get(handles.model_popup,'String'));
@@ -357,14 +361,18 @@ function generate_model_object(handles)
     format_q_table(modObj.numDofs,handles.qtable,modObj.q');
 end
 
-function model_popup_update(handles)
+function model_popup_update(handles, model_popup_value)
     % Determine the state of the toggle
     if(CASPR_configuration.LoadDevModelConfig())
         e_list_str      =   sort(ModelConfigManager.GetDevModelConfigListNames());
     else
     	e_list_str      =   sort(ModelConfigManager.GetModelConfigListNames());
     end
-    set(handles.model_popup, 'Value', 1);
+    if nargin > 1
+        set(handles.model_popup, 'Value', model_popup_value);
+    else
+        set(handles.model_popup, 'Value', 1);
+    end
     set(handles.model_popup, 'String', e_list_str);
 end
 
@@ -448,4 +456,27 @@ function format_q_table(numDofs,qtable,q_data)
         column_name{i} = ['q',num2str(i)];
     end
     set(qtable,'ColumnName',column_name);
+end
+
+% --- Executes on button press in Rviz_pushbutton.
+function Rviz_pushbutton_Callback(~,~, handles) %#ok<DEFNU>
+    modObj = getappdata(handles.cable_popup,'modObj');    
+    try 
+        load('CARDSFlowConfig.mat');
+        interface = CARDSFlowInterface();        
+    catch 
+        interface = CASPRRVizInterface();        
+    end    
+    % Set robot name rosparam
+    rosparam('set','/robot_name',modObj.robotName);
+    rosparam('set','/deleteall',1);
+    start_tic = tic;
+    while toc(start_tic) < 5       
+        interface.visualize(modObj);
+    end
+end
+
+% --- Executes on button press in model_manager_button.
+function model_manager_button_Callback(~, ~, ~) %#ok<DEFNU>
+    CASPR_Model_Manager;
 end

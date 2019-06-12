@@ -2,7 +2,7 @@
 % Author         : Jonathan EDEN
 % Created        : 2015
 % Description    : Implementation of static workspace analysis using a QP
-function inWorkspace = static_quadprog(dynamics,~)
+function inWorkspace = static_quadprog(dynamics)
     % Test if the pose can be an equilibrium pose
     weights = ones(dynamics.numCables,1);
     o = IDObjectiveMinQuadCableForce(weights);

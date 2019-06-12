@@ -39,27 +39,29 @@ classdef OperationalTrajectory < TrajectoryBase
     
     methods (Static)
         % Loads all trajectories from XML configuration
-        function [trajectory] = LoadXmlObj(xmlObj, bodiesObj)
+        function [trajectory] = LoadXmlObj(xmlObj, bodiesObj, modelConfig)
             node_name = xmlObj.getNodeName;
             % First select the type of trajectory and then pass it to 
             % individual functions
             if (strcmp(node_name, 'linear_spline_trajectory'))
-                trajectory = OperationalTrajectory.LinearTrajectoryLoadXmlObj(xmlObj, bodiesObj);
+                trajectory = OperationalTrajectory.LinearTrajectoryLoadXmlObj(xmlObj, bodiesObj, modelConfig);
             elseif (strcmp(node_name, 'cubic_spline_trajectory'))
-                trajectory = OperationalTrajectory.CubicTrajectoryLoadXmlObj(xmlObj, bodiesObj);
+                trajectory = OperationalTrajectory.CubicTrajectoryLoadXmlObj(xmlObj, bodiesObj, modelConfig);
             elseif (strcmp(node_name, 'quintic_spline_trajectory'))
-                trajectory = OperationalTrajectory.QuinticTrajectoryLoadXmlObj(xmlObj, bodiesObj);
+                trajectory = OperationalTrajectory.QuinticTrajectoryLoadXmlObj(xmlObj, bodiesObj, modelConfig);
             elseif (strcmp(node_name, 'cubic_spline_average_velocity_trajectory'))
-                trajectory = OperationalTrajectory.CubicTrajectoryAverageVelocityLoadXmlObj(xmlObj, bodiesObj);
+                trajectory = OperationalTrajectory.CubicTrajectoryAverageVelocityLoadXmlObj(xmlObj, bodiesObj, modelConfig);
             elseif (strcmp(node_name, 'parabolic_blend_trajectory'))
-                trajectory = OperationalTrajectory.ParabolicBlendTrajectoryLoadXmlObj(xmlObj, bodiesObj);
+                trajectory = OperationalTrajectory.ParabolicBlendTrajectoryLoadXmlObj(xmlObj, bodiesObj, modelConfig);
+            elseif (strcmp(node_name, 'file_trajectory'))
+                trajectory = JointTrajectory.FileTrajectoryLoadXmlObj(xmlObj, bodiesObj, modelConfig);
             else
                 CASPR_log.Error('Trajectory type in XML undefined');
             end
         end
         
         % Perform linear trajectory spline to produce trajectory
-        function [trajectory] = LinearTrajectoryLoadXmlObj(xmlObj, bodiesObj)
+        function [trajectory] = LinearTrajectoryLoadXmlObj(xmlObj, bodiesObj, ~)
             CASPR_log.Assert(strcmp(xmlObj.getNodeName, 'linear_spline_trajectory'), 'Element should be <linear_spline_trajectory>');            
             points_node = xmlObj.getElementsByTagName('points').item(0);
             point_nodes = points_node.getChildNodes;
@@ -130,7 +132,7 @@ classdef OperationalTrajectory < TrajectoryBase
         end
         
         % Perform cubic trajectory spline to produce trajectory
-        function [trajectory] = CubicTrajectoryLoadXmlObj(xmlObj, bodiesObj)
+        function [trajectory] = CubicTrajectoryLoadXmlObj(xmlObj, bodiesObj, ~)
             CASPR_log.Error('Function has not been implemented yet');
         end
         
@@ -140,7 +142,7 @@ classdef OperationalTrajectory < TrajectoryBase
         end
         
         % Perform quintic trajectory spline to produce trajectory
-        function [trajectory] = QuinticTrajectoryLoadXmlObj(xmlObj, bodiesObj)
+        function [trajectory] = QuinticTrajectoryLoadXmlObj(xmlObj, bodiesObj, ~)
             CASPR_log.Assert(strcmp(xmlObj.getNodeName, 'quintic_spline_trajectory'), 'Element should be <quintic_spline_trajectory>');
             
             points_node = xmlObj.getElementsByTagName('points').item(0);
@@ -222,7 +224,7 @@ classdef OperationalTrajectory < TrajectoryBase
             trajectory.y_ddot = mat2cell(y_dd_trajectory, size(y_dd_trajectory,1), ones(size(y_dd_trajectory,2),1));
         end
         
-        function [trajectory] = CubicTrajectoryAverageVelocityLoadXmlObj(xmlObj, bodiesObj)
+        function [trajectory] = CubicTrajectoryAverageVelocityLoadXmlObj(xmlObj, bodiesObj, ~)
             CASPR_log.Error('Function has not been implemented yet');
         end  
         
@@ -230,13 +232,17 @@ classdef OperationalTrajectory < TrajectoryBase
             CASPR_log.Error('Function has not been implemented yet');
         end 
         
-        function [trajectory] = ParabolicBlendTrajectoryLoadXmlObj(xmlObj, bodiesObj)
+        function [trajectory] = ParabolicBlendTrajectoryLoadXmlObj(xmlObj, bodiesObj, ~)
             CASPR_log.Error('Function has not been implemented yet');
         end   
         
         function [trajectory] = ParabolicBlendTrajectoryCreate(num_points, y_pj, y_d_pj, y_dd_pj, time_points_abs, time_step, bodiesObj)
             CASPR_log.Error('Function has not been implemented yet');
         end 
+        
+        function [trajectory] = FileTrajectoryLoadXmlObj(xmlObj, bodiesObj, modelConfig)
+            CASPR_log.Error('Function has not been implemented yet');
+        end   
         
         % Loads a complete trajectory by reading a .traj file
         function [trajectory_all, force_trajectory] = LoadCompleteTrajectory(traj_file,model)

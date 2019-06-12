@@ -3,11 +3,11 @@
 <bodies_system>
     <links display_range="-0.2 2.3 -0.2 2.3 0 2.5" view_angle="-37 32">
       <link_rigid num="1" name="UR3 base">
-        <joint type="SPATIAL_EULER_XYZ" q_initial="0.5431 0.8057 1.3335 0.0 0.0 0.0" q_min="0.0 0.0 0.0 -0.1 -0.1 -0.1" q_max="2.28 2.28 2.28 0.1 0.1 0.1"/>
+        <joint type="SPATIAL_EULER_XYZ" q_initial="0.5205 0.8250 1.3625 0.0 0.0 0.0" q_min="0.0 0.0 0.0 -0.1 -0.1 -0.1" q_max="2.28 2.28 2.28 0.1 0.1 0.1"/>
         <physical>
           <mass>2.0</mass> <!-- This is a guess still -->
-          <com_location>0.0 0.0 0.07</com_location> <!-- This is a guess still -->
-          <end_location>0.0 0.0 0.1519</end_location>
+          <com_location>0.0 0.0 0.0</com_location> <!-- This is a guess still -->
+          <end_location>0.0 0.0 0.341</end_location>
           <inertia ref="com">
             <Ixx>1.0</Ixx>
             <Iyy>1.0</Iyy>
@@ -27,7 +27,7 @@
         <physical>
           <mass>2.0</mass>
           <com_location>0.0 0.0 -0.02</com_location>
-          <end_location>0.0 0.1198 0.0</end_location>
+          <end_location>0.0 0.1198 -0.02</end_location>
           <inertia ref="com">
             <Ixx>1.0</Ixx>
             <Iyy>1.0</Iyy>
@@ -39,7 +39,7 @@
         </physical>
         <parent>
           <num>1</num>
-          <location>0.0 0.0 0.1519</location>
+          <location>0.0 0.0 0.341</location>
         </parent>
       </link_rigid>
       <link_rigid num="3" name="UR3 upper arm">
@@ -47,7 +47,7 @@
         <physical>
           <mass>3.42</mass>
           <com_location>0.1136 -0.0041 0.0</com_location>
-          <end_location>0.24365 -0.0925 0.0</end_location>
+          <end_location>0.255 -0.0925 0.0</end_location>
           <inertia ref="com">
             <Ixx>1.0</Ixx>
             <Iyy>1.0</Iyy>
@@ -59,7 +59,7 @@
         </physical>
         <parent>
           <num>2</num>
-          <location>0.0 0.1198 0.0</location>
+          <location>0.0 0.1198 -0.02</location>
         </parent>
       </link_rigid>
       <link_rigid num="4" name="UR3 forearm">
@@ -67,7 +67,7 @@
         <physical>
           <mass>1.26</mass>
           <com_location>0.1633 -0.0035 0.0</com_location>
-          <end_location>0.21325 0.0 0.0</end_location>
+          <end_location>0.2245 -0.007 0.0</end_location>
           <inertia ref="com">
             <Ixx>1.0</Ixx>
             <Iyy>1.0</Iyy>
@@ -79,7 +79,7 @@
         </physical>
         <parent>
           <num>3</num>
-          <location>0.24365 -0.0925 0.0</location>
+          <location>0.255 -0.0925 0.0</location>
         </parent>
       </link_rigid>
       <link_rigid num="5" name="UR3 wrist 1">
@@ -87,7 +87,7 @@
         <physical>
           <mass>0.8</mass>
           <com_location>0.0 0.0851 -0.01</com_location>
-          <end_location>0.0 0.0851 0.0</end_location>
+          <end_location>0.0 0.0792 -0.043</end_location>
           <inertia ref="com">
             <Ixx>1.0</Ixx>
             <Iyy>1.0</Iyy>
@@ -99,15 +99,15 @@
         </physical>
         <parent>
           <num>4</num>
-          <location>0.21325 0.0 0.0</location>
+          <location>0.2245 -0.007 0.0</location>
         </parent>
       </link_rigid>
       <link_rigid num="6" name="UR3 wrist 2">
         <joint type="R_Z" actuated="true" q_initial="0.0" q_min="-3.1416" q_max="3.1416"/>
         <physical>
           <mass>0.8</mass>
-          <com_location>0.0 0.01 -0.08535</com_location>
-          <end_location>0.0 0.0 -0.08535</end_location>
+          <com_location>0.0 -0.01 -0.04</com_location>
+          <end_location>0.0 0.043 -0.0405</end_location>
           <inertia ref="com">
             <Ixx>1.0</Ixx>
             <Iyy>1.0</Iyy>
@@ -119,15 +119,15 @@
         </physical>
         <parent>
           <num>5</num>
-          <location>0.0 0.0851 0.0</location>
+          <location>0.0 0.0792 -0.043</location>
         </parent>
       </link_rigid>
       <link_rigid num="7" name="UR3 wrist 3">
         <joint type="R_Y" actuated="true" q_initial="0.0" q_min="-3.1416" q_max="3.1416"/>
         <physical>
           <mass>0.8</mass>
-          <com_location>0.0 0.0619 0.0</com_location>
-          <end_location>0.0 0.0819 0.0</end_location>
+          <com_location>0.0 0.0163 0.0</com_location>
+          <end_location>0.0 0.0325 0.0</end_location>
           <inertia ref="com">
             <Ixx>1.0</Ixx>
             <Iyy>1.0</Iyy>
@@ -139,7 +139,7 @@
         </physical>
         <parent>
           <num>6</num>
-          <location>0.0 0.0 -0.08535</location>
+          <location>0.0 0.043 -0.0405</location>
         </parent>
       </link_rigid>
     </links>
@@ -147,8 +147,8 @@
 	  <operational_set id="ee_position">
         <position marker_id="1" name="ee_pos">
           <link>7</link>
-          <offset>0.0 0.0819 0.0</offset>
-          <axes active_axes="xyzab"/>
+          <offset>0.0 0.0325 0.0</offset>
+          <axes active_axes="xyz"/>
         </position>
 	  </operational_set>    
     </operational_spaces>

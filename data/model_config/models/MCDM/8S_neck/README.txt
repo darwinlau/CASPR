@@ -1,3 +1,3 @@
 Please cite the following paper when using this model for your studies:
 
-D. Lau, D. Oetomo, and S. K. Halgamuge, "Generalized Modeling of Multilink Cable-Driven Manipulators with Arbitrary Routing Using the Cable-Routing Matrix," IEEE Trans. Robot., vol. 29, no. 5, pp. 1102-1113, Oct. 2013.
+A. N. Vasavada, S. Li, and S. L. Delp, "Influence of muscle morphometry and moment arms on the moment-generating capacity of human neck muscles", Spine, vol. 23, no. 4, pp. 412-422, 1998

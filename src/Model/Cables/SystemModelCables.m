@@ -44,6 +44,7 @@ classdef SystemModelCables < handle
 
     properties (Dependent)
         numSegmentsMax              % Maximum number of segments out of all of the cables
+        numSegments                 % Total number of segments out of all of the cables
         % Information about cable lengths
         
         lengthsActive               % Vector of lengths for active cables
@@ -315,6 +316,13 @@ classdef SystemModelCables < handle
             s_max = 0;
             for i = 1:obj.numCables
                 s_max = max([s_max obj.cables{i}.numSegments]);
+            end
+        end
+        
+        function value = get.numSegments(obj)
+            value = 0;
+            for i = 1:obj.numCables
+                value = value + obj.cables{i}.numSegments;
             end
         end
 
