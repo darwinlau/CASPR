@@ -1655,6 +1655,7 @@ classdef SystemModelBodies < handle
                 matlabFunction(obj.M, 'File', strcat(path, '/compile_M'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
                 matlabFunction(obj.C, 'File', strcat(path, '/compile_C'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
                 matlabFunction(obj.G, 'File', strcat(path, '/compile_G'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
+                matlabFunction(inv(obj.M), 'File', strcat(path, '/compile_Minv'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
                 obj.compiled.dynamics = true;               
             end            
         end
