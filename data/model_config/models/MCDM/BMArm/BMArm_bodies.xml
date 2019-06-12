@@ -3,7 +3,7 @@
 <bodies_system>
     <links display_range="-0.3 0.3 0.0 1.0 -0.3 0.3" view_angle="-37 32">
       <link_rigid num="1" name="Upper Arm">
-        <joint type="S_EULER_XYZ" q_initial="0.18 0.0 0" q_min="-1.0 -0.1 -1.0" q_max="1.0 0.1 1.0"/>
+        <joint type="S_EULER_XYZ" q_initial="0.18 0.0 0" q_min="-1.0 -1.0 -1.0" q_max="1.0 1.0 1.0"/>
         <physical>
           <mass>0.9810187</mass>
           <com_location>6.11879e-05 0.142722 9.20007e-05</com_location>
