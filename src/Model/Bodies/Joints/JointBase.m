@@ -19,6 +19,8 @@ classdef (Abstract) JointBase < handle
     
     properties
         tau                 % Actuator effort for joint (if actuated)
+        tau_min             % Minimum actuation (if actuated)
+        tau_max             % Maximum actuation (if actuated)
         axis                % Rotation axis for revolute joints / Translation axis for prismatic joints
     end
    
@@ -33,8 +35,6 @@ classdef (Abstract) JointBase < handle
         q_initial           % The initial value of q for plotting
         
         isActuated = 0      % Is this joint actuated, by default not actuated
-        tau_min             % Minimum actuation (if actuated)
-        tau_max             % Maximum actuation (if actuated)
         
         % Dependent but stored values (hence private set)
         R_pe                % The relative rotation
@@ -94,6 +94,18 @@ classdef (Abstract) JointBase < handle
         function set.tau(obj, value)
             if (obj.isActuated)
                 obj.tau = value;
+            end
+        end
+        
+        function set.tau_min(obj, value)
+            if (obj.isActuated)
+                obj.tau_min = value;
+            end
+        end
+        
+        function set.tau_max(obj, value)
+            if (obj.isActuated)
+                obj.tau_max = value;
             end
         end
         

@@ -1523,6 +1523,22 @@ classdef SystemModelBodies < handle
             end
         end
         
+        function set.tauMin(obj,val)
+            if length(val) == obj.numDofsActuated
+                count = 0;
+                for k = 1:obj.numLinks
+                    if (obj.bodies{k}.joint.isActuated)
+                        num_dofs = obj.bodies{k}.joint.numDofs;
+                        obj.bodies{k}.joint.tau_min = val(count+1:count+num_dofs);
+                        count = count + num_dofs;
+                    end
+                end
+            else
+                % invalid input, do nothing
+                CASPR_log.Warn('The given minimum joint torque is invalid, abort update.');
+            end
+        end
+        
         function val = get.tauMax(obj)            
             val = zeros(obj.numDofsActuated, 1);
             count = 0;
@@ -1532,6 +1548,22 @@ classdef SystemModelBodies < handle
                     val(count+1:count+num_dofs) = obj.bodies{k}.joint.tau_max;
                     count = count + num_dofs;
                 end
+            end
+        end
+        
+        function set.tauMax(obj,val)
+            if length(val) == obj.numDofsActuated
+                count = 0;
+                for k = 1:obj.numLinks
+                    if (obj.bodies{k}.joint.isActuated)
+                        num_dofs = obj.bodies{k}.joint.numDofs;
+                        obj.bodies{k}.joint.tau_max = val(count+1:count+num_dofs);
+                        count = count + num_dofs;
+                    end
+                end
+            else
+                % invalid input, do nothing
+                CASPR_log.Warn('The given maximum joint torque is invalid, abort update.');
             end
         end
         
