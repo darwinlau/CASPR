@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE bodies_system SYSTEM "../../../../templates/bodies.dtd">
+<bodies_system>
+  <links display_range="0 4 0 4 0 3" view_angle="-37 32">
+    <link_rigid num="1" name="PoCaBot_spatial">
+      <joint type="SPATIAL_EULER_XYZ" q_initial="2.0 2.0 1.0 0.0 0.0 0.0" q_min="0.0 0.0 0.0 -3.1416 -3.1416 -3.1416" q_max="4.0 4.0 2.5 3.1416 3.1416 3.1416" />
+      <physical>
+        <mass>2.1</mass>
+        <com_location>0.0 0.0 0.0</com_location>
+        <end_location>0.0 0.0 0.0</end_location>
+        <inertia ref="com">
+          <Ixx>0.1</Ixx>
+          <Iyy>0.1</Iyy>
+          <Izz>0.1</Izz>
+          <Ixy>0.0</Ixy>
+          <Ixz>0.0</Ixz>
+          <Iyz>0.0</Iyz>
+        </inertia>
+      </physical>
+      <parent>
+        <num>0</num>
+        <location>0.0 0.0 0.0</location>
+      </parent>
+    </link_rigid>
+  </links>
+</bodies_system>

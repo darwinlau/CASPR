@@ -12,7 +12,7 @@
             <attachments>
                 <attachment>
                     <link>0</link>
-                    <location>0.05 0.494 0.605</location>
+                    <location>0.05 0.494 0.616</location>
                 </attachment>
                 <attachment>
                     <link>1</link>
@@ -44,7 +44,7 @@
             <attachments>
                 <attachment>
                     <link>0</link>
-                    <location>0.794 0.494 0.605</location>
+                    <location>0.794 0.494 0.616</location>
                 </attachment>
                 <attachment>
                     <link>1</link>
@@ -60,7 +60,7 @@
             <attachments>
                 <attachment>
                     <link>0</link>
-                    <location>0.794 0.04 0.193</location>
+                    <location>0.794 0.045 0.193</location>
                 </attachment>
                 <attachment>
                     <link>1</link>
@@ -76,7 +76,7 @@
             <attachments>
                 <attachment>
                     <link>0</link>
-                    <location>0.794 0.04 0.605</location>
+                    <location>0.794 0.045 0.616</location>
                 </attachment>
                 <attachment>
                     <link>1</link>
@@ -92,7 +92,7 @@
             <attachments>
                 <attachment>
                     <link>0</link>
-                    <location>0.05 0.04 0.194</location>
+                    <location>0.05 0.045 0.194</location>
                 </attachment>
                 <attachment>
                     <link>1</link>
@@ -108,7 +108,7 @@
             <attachments>
                 <attachment>
                     <link>0</link>
-                    <location>0.05 0.04 0.605</location>
+                    <location>0.05 0.045 0.616</location>
                 </attachment>
                 <attachment>
                     <link>1</link>
