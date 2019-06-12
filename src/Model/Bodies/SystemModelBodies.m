@@ -1002,6 +1002,115 @@ classdef SystemModelBodies < handle
                 obj.massInertiaMatrix(6*k-5:6*k, 6*k-5:6*k) = [obj.bodies{k}.m*eye(3) zeros(3,3); zeros(3,3) obj.bodies{k}.I_G];
             end
         end
+
+        % calculate the quadratic form of centrifugal/Coriolis term
+        function N = quadraticC(obj)
+            n_l = obj.numLinks;
+            n_q = length(obj.q_dot);
+            N = zeros(n_q,n_q,n_q);
+            vq = zeros(6,n_q);
+            aq = zeros(6,n_q,n_q);
+            fJ = cell(n_l,1);
+            
+            n_q_0_to_i = 0;
+            for i = 1:n_l
+                n_q_i = obj.bodies{i}.joint.numDofs;
+                r_i_const = obj.bodies{i}.r_Parent;
+                % this is doubtful, not sure if the transpose should exist
+                % I think this should be correct, R_pe represents rotation
+                % matrix that converts a vector coordinate in the rotated
+                % frame into a coordinate in the original frame
+                R_i = obj.bodies{i}.joint.R_pe';
+                % r_i is the joint induced translation, represented in the
+                % link frame
+                r_i = obj.bodies{i}.joint.r_rel;
+                r_CoM_i = obj.bodies{i}.r_G;
+                I_CoM_i = obj.bodies{i}.I_G;
+                m_i = obj.bodies{i}.m;
+                S_i = [obj.bodies{i}.joint.S(4:6,:); obj.bodies{i}.joint.S(1:3,:)];
+                S_grad_i = [obj.bodies{i}.joint.S_grad(4:6,:,:); obj.bodies{i}.joint.S_grad(1:3,:,:)];
+                XM_i_from_parent = xltMMat(r_i)*rotMat(R_i)*xltMMat(r_i_const);
+                Is_i = spatialInertiaTensor(I_CoM_i, r_CoM_i, m_i);
+                
+                % coordinate transformatioin
+                for j = 1:n_q_0_to_i
+                    vq(:,j) = XM_i_from_parent*vq(:,j);
+                    for k = 1:n_q_0_to_i
+                        aq(:,j,k) = XM_i_from_parent*aq(:,j,k);
+                    end
+                end
+%                 n_q_accumelated = 0;
+%                 for l = 1:i-1
+%                     n_q_l = obj.bodies{l}.joint.numDofs;
+%                     for j = 1:n_q_l
+%                         vq(:,n_q_accumelated+j) = XM_i_from_parent*vq(:,n_q_accumelated+j);
+%                         for k = 1:n_q_l
+%                             aq(:,n_q_accumelated+j,n_q_accumelated+k) = XM_i_from_parent*aq(:,n_q_accumelated+j,n_q_accumelated+k);
+%                         end
+%                     end
+%                     n_q_accumelated = n_q_accumelated + n_q_l;
+%                 end
+                
+                % update joint velocity/acceleration - add joint i's contribution
+                for j = 1:n_q_i
+                    vq(:,n_q_0_to_i+j) = S_i(:,j);
+                end
+                for j = 1:n_q_i
+                    for k = 1:n_q_0_to_i+n_q_i
+                        aq(:,n_q_0_to_i+j,k) = vecX6DM(vq(:,k))*S_i(:,j);
+                    end
+                    for k = 1:n_q_i
+                        aq(:,n_q_0_to_i+j,n_q_0_to_i+k) = aq(:,n_q_0_to_i+j,n_q_0_to_i+k) + S_grad_i(:,j,k);
+                    end
+                end
+                
+                n_q_0_to_i = n_q_0_to_i + n_q_i;
+                fJ{i} = zeros(6,n_q,n_q);
+                % compute joint force
+                for j = 1:n_q_0_to_i
+                    for k = 1:n_q_0_to_i
+                        fJ{i}(:,j,k) = Is_i*aq(:,j,k) + vecX6DF(vq(:,k))*Is_i*vq(:,j);
+                    end
+                end
+            end
+            
+            q_index = n_q;
+            for cnt = 1:n_l
+                i = n_l-cnt+1;
+                n_q_i = obj.bodies{i}.joint.numDofs;
+                S_i = [obj.bodies{i}.joint.S(4:6,:); obj.bodies{i}.joint.S(1:3,:)];
+                % derive quadratic C for joint i
+                for j = 1:n_q_i
+                    tmp_index = q_index - n_q_i + j;
+                    for m = 1:n_q
+                        for n = 1:n_q
+                            N(m,n,tmp_index) = S_i(:,j)'*fJ{i}(:,m,n);
+                        end
+                    end
+                end
+                % update fJ
+                if i-1 ~= 0
+                    r_i_const = obj.bodies{i}.r_Parent;
+                    % this is doubtful, not sure if the transpose should exist
+                    % I think this should be correct, R_pe represents rotation
+                    % matrix that converts a vector coordinate in the rotated
+                    % frame into a coordinate in the original frame
+                    R_i = obj.bodies{i}.joint.R_pe';
+                    % r_i is the joint induced translation, represented in the
+                    % link frame
+                    r_i = obj.bodies{i}.joint.r_rel;
+                    XF_i_to_parent = xltFMat(-r_i_const)*rotMat(R_i')*xltFMat(-r_i);
+                    for m = 1:n_q
+                        for n = 1:n_q
+                            fJ{i-1}(:,m,n)=fJ{i-1}(:,m,n)+XF_i_to_parent*fJ{i}(:,m,n);
+                        end
+                    end
+                end
+                q_index = q_index - n_q_i;
+            end
+            
+        end
+                
                 
         % Calculate the internal matrices for the quadratic form of the
         % Coriolis/Centrifugal forces.
