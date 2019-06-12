@@ -179,6 +179,28 @@ classdef SystemModel < handle
                 obj.bodyModel.updateLinearisation();
             end
             
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%             % without considering the active joints
+%             % Determine the A matrix using gradient matrices
+%             % Initialise the A matrix
+%             A = zeros(2*obj.numDofs);
+%             % Top left block is zero
+%             % Top right block is I
+%             A(1:obj.numDofs,obj.numDofs+1:2*obj.numDofs) = eye(obj.numDofs);
+%             % Bottom left corner
+%             A(obj.numDofs+1:2*obj.numDofs,1:obj.numDofs) =  -obj.M\(obj.bodyModel.G_grad + obj.bodyModel.C_grad_q + TensorOperations.VectorProduct(L_grad_temp,obj.cableForces,1,isa(obj.q,'symbolic'))) ...
+%                                                             - TensorOperations.VectorProduct(obj.bodyModel.Minv_grad,(obj.G + obj.C + obj.L.'*obj.cableForces),2,isa(obj.q,'symbolic'));
+%             % Bottom right corner
+%             A(obj.numDofs+1:2*obj.numDofs,obj.numDofs+1:2*obj.numDofs) = -obj.M\obj.bodyModel.C_grad_qdot;
+%             
+%             % The B matrix
+%             B = [zeros(obj.numDofs,obj.numCables);-obj.M\obj.L_active'];
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            
+            
+            
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            % considers the active joints
             % Determine the A matrix using gradient matrices
             % Initialise the A matrix
             A = zeros(2*obj.numDofs);
@@ -187,12 +209,13 @@ classdef SystemModel < handle
             A(1:obj.numDofs,obj.numDofs+1:2*obj.numDofs) = eye(obj.numDofs);
             % Bottom left corner
             A(obj.numDofs+1:2*obj.numDofs,1:obj.numDofs) =  -obj.M\(obj.bodyModel.G_grad + obj.bodyModel.C_grad_q + TensorOperations.VectorProduct(L_grad_temp,obj.cableForces,1,isa(obj.q,'symbolic'))) ...
-                                                            - TensorOperations.VectorProduct(obj.bodyModel.Minv_grad,(obj.G + obj.C + obj.L.'*obj.cableForces),2,isa(obj.q,'symbolic'));
+                                                            - TensorOperations.VectorProduct(obj.bodyModel.Minv_grad,(obj.G + obj.C + [obj.L.',-obj.A]*obj.actuationForces),2,isa(obj.q,'symbolic'));
             % Bottom right corner
             A(obj.numDofs+1:2*obj.numDofs,obj.numDofs+1:2*obj.numDofs) = -obj.M\obj.bodyModel.C_grad_qdot;
             
             % The B matrix
-            B = [zeros(obj.numDofs,obj.numCables);-obj.M\obj.L_active'];
+            B = [zeros(obj.numDofs,obj.numActuatorsActive);[-obj.M\obj.L_active',obj.M\obj.A]];
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         end
         
         % Load the operational space xml object
