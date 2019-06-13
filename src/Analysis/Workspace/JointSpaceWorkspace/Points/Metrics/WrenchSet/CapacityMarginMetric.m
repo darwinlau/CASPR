@@ -38,15 +38,21 @@ classdef CapacityMarginMetric < WorkspaceMetricBase
             f_u =   dynamics.actuationForcesMax;
             f_l =   dynamics.actuationForcesMin;
             w   =   WrenchSet(L,f_u,f_l);
-            q   =   length(w.b);
-            p   =   size(obj.desired_wrench_set,2);
-            s   =   zeros(p,q);
-            for i = 1:p
-                for j=1:q
-                    s(i,j) = (w.b(j) - w.A(j,:)*obj.desired_wrench_set(:,i))/norm(w.A(j,:),2);
+            if isempty(w.b)
+                % in case the generation of the feasible wrench set convex
+                % hull failed, consider a negative capacity margin value
+                v = -1;
+            else
+                q   =   length(w.b);
+                p   =   size(obj.desired_wrench_set,2);
+                s   =   zeros(p,q);
+                for i = 1:p
+                    for j=1:q
+                        s(i,j) = (w.b(j) - w.A(j,:)*obj.desired_wrench_set(:,i))/norm(w.A(j,:),2);
+                    end
                 end
+                v = min(min(s));
             end
-            v = min(min(s));
         end
     end
 end
