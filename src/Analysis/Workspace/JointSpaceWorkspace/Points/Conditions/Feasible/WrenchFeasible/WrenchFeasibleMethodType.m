@@ -5,5 +5,7 @@
 classdef WrenchFeasibleMethodType
     enumeration 
         M_CAPACITY_MARGIN
+        M_LINEAR_PROGRAMMING_MATLAB
+        M_LINEAR_PROGRAMMING_CPLEX
     end
 end

@@ -45,6 +45,10 @@ classdef WrenchFeasibleCondition < WorkspaceConditionBase
             switch(obj.method)
                 case WrenchFeasibleMethodType.M_CAPACITY_MARGIN
                     inWorkspace = wrench_feasible_capacity_margin(obj.desired_wrench_set,dynamics);
+                case WrenchFeasibleMethodType.M_LINEAR_PROGRAMMING_MATLAB
+                    inWorkspace = wrench_feasible_linear_programming_MATLAB(obj.desired_wrench_set,dynamics);
+                case WrenchFeasibleMethodType.M_LINEAR_PROGRAMMING_CPLEX
+                    inWorkspace = wrench_feasible_linear_programming_CPLEX(obj.desired_wrench_set,dynamics);
                 otherwise
                     CASPR_log.Print('Wrench feasible method is not defined',CASPRLogLevel.ERROR);
             end
