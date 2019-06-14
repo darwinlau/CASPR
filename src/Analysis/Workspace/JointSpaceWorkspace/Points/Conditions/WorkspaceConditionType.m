@@ -7,6 +7,7 @@ classdef WorkspaceConditionType
     enumeration 
         WRENCH_CLOSURE
         WRENCH_FEASIBLE
+        DYNAMIC_FEASIBLE
         STATIC
         INTERFERENCE
     end
