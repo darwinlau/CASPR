@@ -23,6 +23,8 @@ classdef CASPRRVizInterface < CableActuatorInterfaceBase
         cable_msg;                  % Message type for cables
         ee_pub;                     % Publisher for end-effector
         ee_msg;                     % Message type for end-effector
+        ee_ref_pub;                 % Publisher for end-effector reference
+        ee_ref_msg;                 % Message type for end-effector reference
         f_pub;                      % Publisher for cable forces
         f_msg;                      % Message type for cable forces
     end
@@ -46,6 +48,9 @@ classdef CASPRRVizInterface < CableActuatorInterfaceBase
         % End-effector pos
         ee_topic = '/ee';   
         ee_msg_type = 'std_msgs/Float32MultiArray';
+        % End-effector reference pos
+        ee_ref_topic = '/ee_ref';   
+        ee_ref_msg_type = 'std_msgs/Float32MultiArray';       
         % Cable Force
         f_topic = '/force';
         f_msg_type = 'std_msgs/Float32MultiArray';
@@ -100,19 +105,29 @@ classdef CASPRRVizInterface < CableActuatorInterfaceBase
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % Visualization
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%         
-        function visualize(obj, cdpr, f)            
+        function visualize(obj, cdpr, f, ee_ref)            
             obj.linkInfoSend(cdpr);
             obj.cableInfoSend(cdpr);
             if ~isempty(cdpr.y)
                 obj.eeInfoSend(cdpr);
             end          
             if nargin > 2
-                CASPR_log.Assert(cdpr.numCables==length(f), ...
-                    'Size of force vectors does not match the number of cables of the cdpr.');
-                obj.forceInfoSend(cdpr, f);
+                % f
+                if ~isempty(f)
+                    CASPR_log.Assert(cdpr.numCables==length(f), ...
+                        'Size of force vectors does not match the number of cables of the cdpr.');
+                    obj.forceInfoSend(cdpr, f);
+                end
+                % ee_ref
+                if nargin > 3
+                    CASPR_log.Assert(length(ee_ref) == 3, ...
+                        'Size of end-effector must be 3.');
+                    obj.eeRefInfoSend(ee_ref);
+                end
             end           
         end
         
+        % Function for creating a static object
         function createStaticObj(obj, name, pos, quat)
             % Send object name
             obj.link_name_msg.Data = strcat(name, ',;/');            
@@ -123,6 +138,18 @@ classdef CASPRRVizInterface < CableActuatorInterfaceBase
             send(obj.link_name_pub, obj.link_name_msg);
             send(obj.link_tf_pub, obj.link_tf_msg);            
             pause(0.2);
+        end
+        
+        % Function for creating op space reference trajectory
+        function createReferenceTraj(obj, ee_ref_array)
+            if isa(ee_ref_array, 'cell')
+                ee_ref_array = cell2mat(ee_ref_array);
+            end
+            for i = 1:size(ee_ref_array, 2)
+                obj.eeRefInfoSend(ee_ref_array(:,i));
+                pause(0.01);
+            end
+            
         end
         
         % publish tf of links
@@ -168,9 +195,17 @@ classdef CASPRRVizInterface < CableActuatorInterfaceBase
         
         % publish end-effector
         function eeInfoSend(obj, cdpr)
-            % Assume only 1 ee for now                           
-            obj.ee_msg.Data = cdpr.y;
+            % Assume only 1 ee
+            % Assume first 3 elements of y is xyz
+            obj.ee_msg.Data = cdpr.y(1:3);
             send(obj.ee_pub, obj.ee_msg);
+        end
+        
+        % publish end-effector reference
+        function eeRefInfoSend(obj, ee_ref)
+            % Assume only 1 ee ref            
+            obj.ee_ref_msg.Data = ee_ref(1:3);
+            send(obj.ee_ref_pub, obj.ee_ref_msg);
         end
         
         % publish cable force
@@ -242,6 +277,7 @@ classdef CASPRRVizInterface < CableActuatorInterfaceBase
                 [obj.link_tf_pub, obj.link_tf_msg] = rospublisher(obj.link_tf_topic, obj.link_tf_msg_type);
                 [obj.cable_pub, obj.cable_msg] = rospublisher(obj.cable_topic, obj.cable_msg_type);
                 [obj.ee_pub, obj.ee_msg] = rospublisher(obj.ee_topic, obj.ee_msg_type);
+                [obj.ee_ref_pub, obj.ee_ref_msg] = rospublisher(obj.ee_ref_topic, obj.ee_ref_msg_type);
                 [obj.f_pub, obj.f_msg] = rospublisher(obj.f_topic, obj.f_msg_type);
             catch
                 CASPR_log.Error('Failed to create publisher!');
