@@ -11,7 +11,7 @@
 classdef PSOOptimiser < BBOptimiserBase
     properties (SetAccess = private)    
         numParticles        % Number of particles
-        maxIterations = 15  % Maximum number of iterations
+        maxIterations       % Maximum number of iterations
         % Rule of thumb: phi_g = phi_p = (w+1)^2/2
         w_vel = 0.73        % Velocity weight, use values from 0.4 to 0.9
         w_vel_f = 0.4       % Final velocity weight
@@ -34,14 +34,24 @@ classdef PSOOptimiser < BBOptimiserBase
     end
     
     methods
-        function op = PSOOptimiser(xmin, xmax, objectiveFn)
+        function op = PSOOptimiser(xmin, xmax, objectiveFn, maxIterations, numParticles)
             op@BBOptimiserBase(length(xmin), objectiveFn);
             op.x_min = xmin;
             op.x_max = xmax;
             op.v_min = - (xmax - xmin)/2;
             op.v_max = (xmax - xmin)/2;
-            % Rule of thumb: numParticles = 10 + 2*sqrt(2*numVars)
-            op.numParticles = ceil(10 + 2*sqrt(2*op.numVars));
+            
+            if nargin > 3
+                op.maxIterations = maxIterations;
+                if nargin > 4
+                    op.numParticles = numParticles;
+                else       
+                    op.numParticles = ceil(10 + 2*sqrt(2*op.numVars));
+                end
+            else
+                op.maxIterations = 10;
+                op.numParticles = ceil(10 + 2*sqrt(2*op.numVars));
+            end
         end
         
         function [x_opt, Q_opt] = optimise(obj, graph_path)
@@ -250,12 +260,25 @@ classdef PSOOptimiser < BBOptimiserBase
             % Return value
             x_opt = gBest;   
         end
+        
+        % Plot results
+        function plotResults(obj, init_Q)
+            if nargin > 1
+                obj.plotQopt(init_Q);
+            else
+                obj.plotQopt();
+            end
+%             obj.drawGraphs();
+        end
     end
     
     methods (Access = private)
         % Plot Qopt history       
-        function plotQopt(obj)
+        function plotQopt(obj, init_Q)            
             Qopt_history = cell2mat(obj.Qopt_array);
+            if nargin > 1
+                Qopt_history = [init_Q, Qopt_history];
+            end
             iteration_array = 1:1:size(Qopt_history, 2);
             CASPR_log.Assert(length(Qopt_history)>1, 'Qopt history is too short for plotting.'); 
             figure;
@@ -305,7 +328,8 @@ classdef PSOOptimiser < BBOptimiserBase
                     hold on
                     if length(graph_array)*2 ~= obj.numVars && g == length(graph_array) % last input
                         for p = 1:size(current_input,2)
-                            color_ratio = (current_std - std_min)/(std_max - std_min);
+%                             color_ratio = (current_std - std_min)/(std_max - std_min);
+                            color_ratio = 1 - i/length(obj.input_array);
                             
                             if strcmp(obj.graph_opt, 'gb')
                                 c = [0.8*color_ratio 0.8*color_ratio 0.8*color_ratio];
@@ -320,7 +344,8 @@ classdef PSOOptimiser < BBOptimiserBase
                         drawnow;
                     else                        
                         for p = 1:size(current_input,2)
-                            color_ratio = (current_std - std_min)/(std_max - std_min);
+%                             color_ratio = (current_std - std_min)/(std_max - std_min);
+                            color_ratio = 1 - i/length(obj.input_array);
                             
                             if strcmp(obj.graph_opt, 'gb')
                                 c = [0.8*color_ratio 0.8*color_ratio 0.8*color_ratio];
