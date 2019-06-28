@@ -20,22 +20,18 @@ classdef OperationalPoseEulerXYZ < OperationalSpaceBase
         
         % Implementation of the abstract function
         function y = extractOperationalSpace(obj,x,R)
-%             y_x = obj.selection_matrix(:,1:3)*R*x;
-%             b   = asin(R(1,3));
-%             g   = -atan2(R(1,2), R(1,1));
-%             a   = -atan2(R(2,3), R(3,3));
-% %             a   = round(a, 10);
-% %             b   = round(b, 10);
-% %             g   = round(g, 10);
-%             y_r = obj.selection_matrix(:,4:6)*[a;b;g];
-%             y   = [y_x;y_r];
-
-            b   = asin(R(1,3));
-            g   = -atan2(R(1,2), R(1,1));
-            a   = -atan2(R(2,3), R(3,3));
-%             a   = round(a, 10);
-%             b   = round(b, 10);
-%             g   = round(g, 10);
+            sy = sqrt(R(1,1)*R(1,1) + R(2,1)*R(2,1));
+            if sy < 1e-6
+                % Singular
+                a = atan2(-R(2,3), R(2,2));
+                b = atan2(-R(3,1), sy);
+                g = 0;
+            else
+                % Not singular
+                a = atan2(R(3,2), R(3,3));
+                b = atan2(-R(3,1), sy);
+                g = atan2(R(2,1), R(1,1));
+            end
             y = obj.selection_matrix*[R*x; [a;b;g]];
         end
         
