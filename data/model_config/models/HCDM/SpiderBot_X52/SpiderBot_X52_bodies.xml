@@ -3,7 +3,7 @@
 <bodies_system>
   <links display_range="-0.2 4.1 -0.1 4.1 0 2.3" view_angle="-37 32">
       <link_rigid num="1" name="X52 base">
-        <joint type="SPATIAL_EULER_XYZ" q_initial="2 2 1 0.0 0.0 0.0" q_min="0.0 0.0 0.0 -3.1416 -3.1416 -3.1416" q_max="4.0 4.0 4.0 3.1416 3.1416 3.1416"/>
+        <joint type="SPATIAL_EULER_XYZ" q_initial="2 1 1 0.0 0.0 0.0" q_min="0.5 0.5 0.5 -3.1416 -3.1416 -3.1416" q_max="3.2 2.0 1 3.1416 3.1416 3.1416"/>
         <physical>
           <mass>1.0</mass>
           <com_location>0.0 0.0 0.03</com_location>
@@ -23,7 +23,7 @@
         </parent>
       </link_rigid>
       <link_rigid num="2" name="X52 shoulder">
-        <joint type="R_Z" actuated="true" q_initial="0.0" q_min="-3.1416" q_max="3.1416"/>
+        <joint type="R_Z" actuated="true" q_initial="0.0" q_min="-3.0416" q_max="3.1416"/>
         <physical>
           <mass>0.1</mass>
           <com_location>0.0 0.0 0.0203</com_location>
@@ -43,7 +43,7 @@
         </parent>
       </link_rigid>
       <link_rigid num="3" name="X52 arm">
-        <joint type="R_Y" actuated="true" q_initial="0.0" q_min="-3.1416" q_max="3.1416"/>
+        <joint type="R_Y" actuated="true" q_initial="0.0" q_min="-1.8193" q_max="1.288"/>
         <physical>
           <mass>0.2</mass>
           <com_location>0.012 0.0 0.064</com_location>
@@ -63,7 +63,7 @@
         </parent>
       </link_rigid>
       <link_rigid num="4" name="X52 forearm">
-        <joint type="R_Y" actuated="true" q_initial="0.0" q_min="-3.1416" q_max="3.1416"/>
+        <joint type="R_Y" actuated="true" q_initial="0.0" q_min="-1.3208" q_max="2.0172"/>
         <physical>
           <mass>0.15</mass>
           <com_location>0.062 0.0 0.0</com_location>
@@ -83,7 +83,7 @@
         </parent>
       </link_rigid>
       <link_rigid num="5" name="X52 wrist">
-        <joint type="R_Y" actuated="true" q_initial="0.0" q_min="-3.1416" q_max="3.1416"/>
+        <joint type="R_Y" actuated="true" q_initial="0.0" q_min="-2.1583" q_max="1.7181"/>
         <physical>
           <mass>0.15</mass>
           <com_location>0.0733 0.0 0.0</com_location>

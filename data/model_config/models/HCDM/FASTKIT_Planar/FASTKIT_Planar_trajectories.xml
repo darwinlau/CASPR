@@ -2,8 +2,6 @@
 <!DOCTYPE trajectories SYSTEM "../../../templates/trajectories.dtd">
 <!-- Template generated file for XML joint_trajectories in CASPR -->
 <trajectories>    
-    <joint_trajectories>
-    </joint_trajectories>
     <operational_trajectories>
       <quintic_spline_trajectory id="simple_motion" time_step="0.005" time_definition="relative">
         <points>
