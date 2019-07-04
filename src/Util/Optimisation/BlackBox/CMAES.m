@@ -41,7 +41,7 @@ classdef CMAES < BBOptimiserBase
         % Result records
         input_array             % Save input
         fitness_array           % Save fitness
-        fittest_array           % Save fittest result
+        output_array            % Save fittest result
         std_array               % Save max standard deviation of the particles among input channels        
         
         % Graph log
@@ -141,7 +141,7 @@ classdef CMAES < BBOptimiserBase
                     x_opt = arx(:, arindex(1));
                     Q_opt = arfitness(arindex(1));                    
                 end
-                obj.fittest_array{end+1} = Q_opt;
+                obj.output_array{end+1} = Q_opt;
                 CASPR_log.Info(sprintf('After %d evaluations...', counteval));
                 CASPR_log.Info(sprintf('- Best cost: %.4f', Q_opt));
 
@@ -180,13 +180,27 @@ classdef CMAES < BBOptimiserBase
             % Finishing message
             obj.finishMessage(Q_opt);
             
+            obj.plotResults();
+        end
+        
+        % Result plotting
+        function plotResults(obj)
             % Plot the fittest curve
             obj.plotFittest();
             
             % Draw scatter graphs
             if ~isempty(obj.graph_path)
                 obj.drawGraphs();                
-            end
+            end            
+        end
+        
+        % Getters
+        % Retrievers for inputs and outputs
+        function value = getInputArray(obj)
+            value = obj.input_array;
+        end
+        function value = getOutputArray(obj)
+            value = obj.output_array;
         end
     end
     
@@ -314,7 +328,7 @@ classdef CMAES < BBOptimiserBase
         
         % Plot fittest result
         function plotFittest(obj)
-            fittest = cell2mat(obj.fittest_array);
+            fittest = cell2mat(obj.output_array);
             generation_array = 1:1:size(fittest, 2);
             CASPR_log.Assert(length(fittest)>1, 'Fittest array is too short for plotting.'); 
             figure;
@@ -326,7 +340,7 @@ classdef CMAES < BBOptimiserBase
         end
         
         % Finish message
-        function finishMessage(obj, Q_opt)
+        function finishMessage(~, Q_opt)
             CASPR_log.Info('');
             CASPR_log.Info(repmat('*', 1, 40));
             CASPR_log.Info('CMA-ES is finished.');

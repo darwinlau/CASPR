@@ -26,7 +26,7 @@ classdef PSOOptimiser < BBOptimiserBase
         % Result records
         input_array         % Save input
         std_array           % Save max standard deviation of the particles among input channels 
-        Qopt_array          % Save history of best Q
+        output_array        % Save history of best Q
         
         % Graphs
         graph_opt = 'rg'    % rg: red-green; gb: grey-black
@@ -155,7 +155,7 @@ classdef PSOOptimiser < BBOptimiserBase
                     Q_opt = Q_particles_opt(p);
                 end
             end        
-            obj.Qopt_array{end+1} = Q_opt;
+            obj.output_array{end+1} = Q_opt;
             CASPR_log.Info('Initialisation Stage:');
             CASPR_log.Info(sprintf('- Q_opt: %.4f, gBest particle %d', Q_opt, gBestId));
             
@@ -233,7 +233,7 @@ classdef PSOOptimiser < BBOptimiserBase
                         Q_opt = Q_particles_opt(p);
                     end
                 end       
-                obj.Qopt_array{end+1} = Q_opt;
+                obj.output_array{end+1} = Q_opt;
                 CASPR_log.Info(sprintf('Iteration: %d', it));
                 CASPR_log.Info(sprintf('- Q_opt: %.4f, gBest particle %d', Q_opt, gBestId));
                 
@@ -249,6 +249,14 @@ classdef PSOOptimiser < BBOptimiserBase
             % Finishing message
             obj.finishMessage(Q_opt, gBestId);
             
+            obj.plotResults();
+            
+            % Return value
+            x_opt = gBest;   
+        end
+        
+        % Plot results
+        function plotResults(obj)
             % Plot Qopt history
             obj.plotQopt();
             
@@ -256,29 +264,22 @@ classdef PSOOptimiser < BBOptimiserBase
             if ~isempty(obj.graph_path)
                 obj.drawGraphs();
             end
-            
-            % Return value
-            x_opt = gBest;   
         end
         
-        % Plot results
-        function plotResults(obj, init_Q)
-            if nargin > 1
-                obj.plotQopt(init_Q);
-            else
-                obj.plotQopt();
-            end
-%             obj.drawGraphs();
+        % Getters
+        % Retrievers for inputs and outputs
+        function value = getInputArray(obj)
+            value = obj.input_array;
+        end
+        function value = getOutputArray(obj)
+            value = obj.output_array;
         end
     end
     
     methods (Access = private)
         % Plot Qopt history       
-        function plotQopt(obj, init_Q)            
-            Qopt_history = cell2mat(obj.Qopt_array);
-            if nargin > 1
-                Qopt_history = [init_Q, Qopt_history];
-            end
+        function plotQopt(obj)            
+            Qopt_history = cell2mat(obj.output_array);            
             iteration_array = 1:1:size(Qopt_history, 2);
             CASPR_log.Assert(length(Qopt_history)>1, 'Qopt history is too short for plotting.'); 
             figure;
@@ -383,12 +384,12 @@ classdef PSOOptimiser < BBOptimiserBase
         end
         
         % Check convergence (not yet added any convergence conditions)
-        function [flag] = isConverged(obj)
+        function [flag] = isConverged(~)
             flag = false;
         end
         
         % Finish message
-        function finishMessage(obj, Q_opt, gBestId)
+        function finishMessage(~, Q_opt, gBestId)
             CASPR_log.Info('');
             CASPR_log.Info(repmat('*', 1, 40));
             CASPR_log.Info('Particle Swarm Optimisation is finished.');

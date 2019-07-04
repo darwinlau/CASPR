@@ -19,8 +19,8 @@ classdef BFGS < BBOptimiserBase
         current_update          % Counter of current_update
         
         % Results
-        input_results           % Array storing input results
-        output_results          % Array storing output results
+        input_array             % Array storing input results
+        output_array            % Array storing output results
         
         % BFGS
         Binv                    % B inverse
@@ -90,8 +90,8 @@ classdef BFGS < BBOptimiserBase
             obj.steady_iteration    = -1;     
             obj.steady_count        = 0;    
             obj.pos_grad            = false;  
-            obj.input_results       = cell(1, 0);
-            obj.output_results      = cell(1, 0);
+            obj.input_array       = cell(1, 0);
+            obj.output_array      = cell(1, 0);
             obj.current_update      = 1;
             obj.pre_search_iteration= 1;           
         end
@@ -109,8 +109,8 @@ classdef BFGS < BBOptimiserBase
             end
             if index == obj.m + 1
                 % Record results
-                obj.input_results{end+1} = obj.input{1};
-                obj.output_results{end+1} = obj.output{1};
+                obj.input_array{end+1} = obj.input{1};
+                obj.output_array{end+1} = obj.output{1};
                 CASPR_log.Info(sprintf('Output: %.2f', obj.output{1}));
                 obj.grad_vec = cell2mat(obj.grad');                
                 obj.gradientUpdate();             
@@ -156,8 +156,8 @@ classdef BFGS < BBOptimiserBase
                 obj.lineSearch();                
                 obj.current_update = obj.current_update + 1;
             end      
-            input_opt = obj.input_results{end};
-            output_opt = obj.output_results{end};
+            input_opt = obj.input_array{end};
+            output_opt = obj.output_array{end};
             
             % Finish message
             obj.finishMessage(start_tic, convergence_flag);            
@@ -218,11 +218,11 @@ classdef BFGS < BBOptimiserBase
                 % compare result from line search and grad
                 [min_v, min_i] = min(obj.grad_vec);
                 min_v = min_v*obj.delta; % convert back to cost difference
-                min_grad_cost = obj.output_results{end} + min_v;
+                min_grad_cost = obj.output_array{end} + min_v;
                 obj.pos_grad = min_v >= 0;                
               
                 % Check armijo condition
-                if (obj.output_results{end} - obj.c*a_0*obj.r^minindex*abs(obj.grad_vec'*search_direction) >= minval)  
+                if (obj.output_array{end} - obj.c*a_0*obj.r^minindex*abs(obj.grad_vec'*search_direction) >= minval)  
                     isArmijo = true;
                     CASPR_log.Info(sprintf('Armijo met.'));                    
                     if min_grad_cost < minval   % grad is better
@@ -240,7 +240,7 @@ classdef BFGS < BBOptimiserBase
                 elseif (search_iteration == obj.max_search)  
                     CASPR_log.Info(sprintf('Max Search Iteration reached'));                    
                     % Compare cost
-                    if obj.output_results{end} > minval || obj.output_results{end} > min_grad_cost % better result(s) found
+                    if obj.output_array{end} > minval || obj.output_array{end} > min_grad_cost % better result(s) found
                         if minval > min_grad_cost % grad is better
                             update_vec = zeros(size(obj.grad_vec));
                             update_vec(min_i) = obj.delta;
@@ -379,27 +379,36 @@ classdef BFGS < BBOptimiserBase
             obj.plotOutputResults();
         end
         function plotInputResults(obj)
-            input_array = cell2mat(obj.input_results);
-            iteration_array = 1:1:size(input_array, 2);
+            input_soln_array = cell2mat(obj.input_array);
+            iteration_array = 1:1:size(input_soln_array, 2);
             CASPR_log.Assert(length(iteration_array)>1, 'Input array is too short for plotting.');                
             figure;
-            plot(iteration_array, input_array', 'LineWidth', 1.5);
+            plot(iteration_array, input_soln_array', 'LineWidth', 1.5);
             title('ILC - Input Results');
             xlabel('Iterations');
             ylabel('Input');
-            xlim([1 size(input_array, 2)]);
+            xlim([1 size(input_soln_array, 2)]);
         end
         function plotOutputResults(obj)
-            output_array = cell2mat(obj.output_results);
-            iteration_array = 1:1:size(output_array, 2);
+            output_soln_array = cell2mat(obj.output_array);
+            iteration_array = 1:1:size(output_soln_array, 2);
             CASPR_log.Assert(length(iteration_array)>1, 'Output array is too short for plotting.');   
             figure;
-            plot(iteration_array, output_array', 'LineWidth', 1.5);
+            plot(iteration_array, output_soln_array', 'LineWidth', 1.5);
             title('ILC - Output Results');
             xlabel('Iterations');            
             ylabel('Output');
-            xlim([1 size(output_array, 2)]);
-        end        
+            xlim([1 size(output_soln_array, 2)]);
+        end    
+        
+        % Getters
+        % Retrievers for inputs and outputs
+        function value = getInputArray(obj)
+            value = obj.input_array;
+        end
+        function value = getOutputArray(obj)
+            value = obj.output_array;
+        end
     end   
     
     methods (Access=private)
@@ -449,13 +458,13 @@ classdef BFGS < BBOptimiserBase
         function flag = isConvergence(obj)
             flag = false;
             % Check pos_grad and output
-            if obj.pos_grad && obj.output_results{end} > obj.output_results{end-1}
+            if obj.pos_grad && obj.output_array{end} > obj.output_array{end-1}
                 % last input is already optimal
-                obj.input_results = obj.input_results(1:end-1);
-                obj.output_results = obj.output_results(1:end-1);
+                obj.input_array = obj.input_array(1:end-1);
+                obj.output_array = obj.output_array(1:end-1);
                 flag = true;
-            elseif length(obj.output_results) > 1  % Check convergence
-                if norm(obj.output_results{end} - obj.output_results{end-1})/obj.output_results{end-1} < obj.conv_r
+            elseif length(obj.output_array) > 1  % Check convergence
+                if norm(obj.output_array{end} - obj.output_array{end-1})/obj.output_array{end-1} < obj.conv_r
                     % Check if consecutive
                     if obj.steady_iteration ~= obj.current_update - 1
                         obj.steady_count = 0;
@@ -475,7 +484,7 @@ classdef BFGS < BBOptimiserBase
             CASPR_log.Info(repmat('*', 1, 40));   
             CASPR_log.Info(sprintf('BFGS Optimisation is finished in %.2f seconds', toc(start_tic)));
             CASPR_log.Info(sprintf('%d Updates have been performed.', obj.current_update-1));
-            cost_improvement = (obj.output_results{end} - obj.output_results{1})/obj.output_results{1};
+            cost_improvement = (obj.output_array{end} - obj.output_array{1})/obj.output_array{1};
             CASPR_log.Info(sprintf('Improvements of %.2f %s has been achieved.', -cost_improvement*100, '%%'));
             
             if convergence_flag
