@@ -16,13 +16,40 @@ classdef Quaternion
         % the form q = q0 + q1*i + q2*j + q3*k
         function q = Quaternion(q0, q1, q2, q3)
             if nargin > 0
-                q.q0 = q0;
-                q.q1 = q1;
-                q.q2 = q2;
-                q.q3 = q3;
+                if nargin == 1
+                    CASPR_log.Assert(length(q0)==4,'Invalid vector for quaternion definition');
+                    q.q0 = q0(1);
+                    q.q1 = q0(2);
+                    q.q2 = q0(3);
+                    q.q3 = q0(4);
+                else
+                    q.q0 = q0;
+                    q.q1 = q1;
+                    q.q2 = q2;
+                    q.q3 = q3;
+                end
             end
+        end        
+
+
+        % Conversion of the quaternion to a vector
+        function q_vec = toVector(obj)
+            q_vec = [obj.q0; obj.q1; obj.q2; obj.q3];
         end
 
+        % Normalisation of the quaternion. This results in a scaled
+        % quaternion with magnitude 1.
+        function q_out = normalise(obj)
+            if (abs(obj.q0) == 1)
+                q_out = Quaternion(obj.q0, 0, 0, 0);
+            else
+                A = sqrt((obj.q1^2 + obj.q2^2 + obj.q2^2)/(1-obj.q0^2));
+                q_out = Quaternion(obj.q0, obj.q1/A, obj.q2/A, obj.q3/A);
+            end
+        end
+    end
+
+    methods (Static)        
         % Quaternion inversion. q_inv = q_bar/||q||^2
         function q_inv = inv(q)
             q_inv = Quaternion;
@@ -104,25 +131,7 @@ classdef Quaternion
             end
             q_e = Quaternion(q_0, q_1, q_2, q_3);
         end
-
-        % Conversion of the quaternion to a vector
-        function q_vec = toVector(obj)
-            q_vec = [obj.q0; obj.q1; obj.q2; obj.q3];
-        end
-
-        % Normalisation of the quaternion. This results in a scaled
-        % quaternion with magnitude 1.
-        function q_out = normalise(obj)
-            if (abs(obj.q0) == 1)
-                q_out = Quaternion(obj.q0, 0, 0, 0);
-            else
-                A = sqrt((obj.q1^2 + obj.q2^2 + obj.q2^2)/(1-obj.q0^2));
-                q_out = Quaternion(obj.q0, obj.q1/A, obj.q2/A, obj.q3/A);
-            end
-        end
-    end
-
-    methods (Static)
+        
         % Convert from rotation matrix to quaternion
         function q_0p = FromRotationMatrix(R_0p)
             q_0p = Quaternion;
