@@ -170,6 +170,7 @@ classdef (Abstract) ModelConfigBase < handle
                     sysModel.setModelMode(ModelModeType.COMPILED);
             end
             sysModel.setRobotName(obj.robotName);
+            obj.bodiesModel = sysModel.bodyModel;
         end
         
         % Getting the joint and operational space trajectories
