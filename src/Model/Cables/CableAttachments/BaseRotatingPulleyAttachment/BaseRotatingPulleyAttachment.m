@@ -49,19 +49,22 @@ classdef BaseRotatingPulleyAttachment < CableAttachmentBase
         end
         
         % Function to determine the leaving location of the pulley given:
+        % INPUTS
         %   - r_A: Constant location on the pulley where cable enters
         %   - v_A: Direction vector of the cable entering r_A
         %   - r_B: Location of the other end of the cable on the robot
         %   - R: Radius of the pulley
+        % OUTPUTS
+        %   - r_D: The position of the cable leaving the pulley
+        %   - l_arc: length of the arc on the pulley
+        %   - r_C: The position of the centre of the pulley location
         function [r_D, l_arc, r_C] = ComputePulleyLeavingLocation(r_A, v_A, r_B, R)
-            r_D = [0;0;0];
-            
             n_plane = cross(v_A, r_B - r_A);
             p_plane = [0;0;0];
             n_c_perpendicular = v_A;
             p_c_perpendicular = [0;0;0];
             
-            [p_C, v_C, check] = PlaneOperations.PlaneIntersection(n_c_perpendicular, p_c_perpendicular, n_plane, p_plane);
+            [p_C, v_C, ~] = PlaneOperations.PlaneIntersection(n_c_perpendicular, p_c_perpendicular, n_plane, p_plane);
             a = v_C' * v_C;
             b = 2 * p_C' * v_C;
             c = p_C' * p_C - R^2;
@@ -71,7 +74,7 @@ classdef BaseRotatingPulleyAttachment < CableAttachmentBase
             n_d_perpendicular = (r_C - r_B);
             p_d_perpendicular = [0; 0; -R^2/n_d_perpendicular(3)];
             
-            [p_D, v_D, check] = PlaneOperations.PlaneIntersection(n_d_perpendicular, p_d_perpendicular, n_plane, p_plane);
+            [p_D, v_D, ~] = PlaneOperations.PlaneIntersection(n_d_perpendicular, p_d_perpendicular, n_plane, p_plane);
             a = v_D' * v_D;
             b = 2 * p_D' * v_D;
             c = p_D' * p_D - R^2;
