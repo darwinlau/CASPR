@@ -91,19 +91,19 @@ classdef (Abstract) JointBase < handle
             value = obj.RelVelocityMatrix(obj.q);
         end
         
-        function set.tau(obj, value)
+        function set_tau(obj, value)
             if (obj.isActuated)
                 obj.tau = value;
             end
         end
         
-        function set.tau_min(obj, value)
+        function set_tau_min(obj, value)
             if (obj.isActuated)
                 obj.tau_min = value;
             end
         end
         
-        function set.tau_max(obj, value)
+        function set_tau_max(obj, value)
             if (obj.isActuated)
                 obj.tau_max = value;
             end

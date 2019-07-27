@@ -1602,7 +1602,7 @@ classdef SystemModelBodies < handle
             for k = 1:obj.numLinks
                 if (obj.bodies{k}.joint.isActuated)
                     num_dofs = obj.bodies{k}.joint.numDofs;
-                    obj.bodies{k}.joint.tau = value(count+1:count+num_dofs);
+                    obj.bodies{k}.joint.set_tau(value(count+1:count+num_dofs));
                     count = count + num_dofs;
                 end
             end
@@ -1638,7 +1638,7 @@ classdef SystemModelBodies < handle
                 for k = 1:obj.numLinks
                     if (obj.bodies{k}.joint.isActuated)
                         num_dofs = obj.bodies{k}.joint.numDofs;
-                        obj.bodies{k}.joint.tau_min = val(count+1:count+num_dofs);
+                        obj.bodies{k}.joint.set_tau_min(val(count+1:count+num_dofs));
                         count = count + num_dofs;
                     end
                 end
@@ -1666,7 +1666,7 @@ classdef SystemModelBodies < handle
                 for k = 1:obj.numLinks
                     if (obj.bodies{k}.joint.isActuated)
                         num_dofs = obj.bodies{k}.joint.numDofs;
-                        obj.bodies{k}.joint.tau_max = val(count+1:count+num_dofs);
+                        obj.bodies{k}.joint.set_tau_max(val(count+1:count+num_dofs));
                         count = count + num_dofs;
                     end
                 end
