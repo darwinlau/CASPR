@@ -260,6 +260,7 @@ classdef RayWorkspace < handle
                 ray_A = rays_seg(i,2:end);
                 co_planar_rays = [];
                 %find out co-planar rays
+                if  obj.model.bodyModel.numDofs >2
                 for j = rays_seg{i,end}+1:obj.grid.n_dimensions
                     remove_index = [rays_seg{i,end}, j];
                     plane_A  = ray_A; plane_A(remove_index) = []; plane_A(end) = []; plane_A = cell2mat(plane_A);
@@ -269,6 +270,11 @@ classdef RayWorkspace < handle
                     co_planar_index = find(ismember(cell2mat(checking_rays(:,2:end)),plane_A,'rows'));
                     co_planar_rays = [co_planar_rays;rays_seg(cell2mat(checking_rays(co_planar_index,1)),:)];
                     
+                end
+                else
+                     j = rays_seg{i,end}+1:obj.grid.n_dimensions;
+                    checking_rays = rays_seg([find(ismember([rays_seg{:,end}],j))],1:end);
+                    co_planar_rays = checking_rays;
                 end
                 %find intersection points
                 for j = 1:size(co_planar_rays,1)
@@ -474,6 +480,7 @@ function [intersected_point,min_dist] = check_intersection(ray_1,ray_2)
 for i = 1:size(ray_2,2)-1
     if i == ray_2{end} || i == ray_1{end}
         intersected_point(i) = Inf;
+        co_planar_flag = 1;
     else
         pt_B = ray_2{i};
         pt_A = ray_1{i};
