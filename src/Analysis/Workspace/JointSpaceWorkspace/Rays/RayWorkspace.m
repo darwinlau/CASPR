@@ -413,7 +413,8 @@ classdef RayWorkspace < handle
             intersected_point_set = [];
             ternimal_index = find(ismember([node_list{:,end}],node_list{end,end}));
             ternimal_index = ternimal_index(1);
-            for j = 1:size(node_list,1) - ternimal_index
+            for j = 1:- ternimal_index-1
+%                 for j = 1:size(node_list,1) - ternimal_index
                 tic;
                 current_variable = find(ismember([node_list{:,end}],node_list{j,end}));
                 starting_index = current_variable(end)+1;
