@@ -42,6 +42,12 @@ classdef SystemModelBodies < handle
         y       = [];           % Operational space coordinates
         y_dot   = [];           % Operational space velocity
         y_ddot  = [];           % Operational space acceleration
+        
+        % Kinematics
+        R_0ks                   % Matrix storing rotation matrices of bodies
+        r_OPs                   % Matrix storing joint locations
+        r_Gs                    % Matrix storing location of CoG
+        r_Pes                   % Matrix storing location of end of bodies
 
         % Jacobian Matrices - These matrices should probably be computed as
         % needed (dependent variable), but if it is a commonly used matrix
@@ -166,7 +172,12 @@ classdef SystemModelBodies < handle
             b.P = MatrixOperations.Initialise([6*b.numLinks, 6*b.numLinks],0);
             b.W = MatrixOperations.Initialise([6*b.numLinks, b.numDofs],0);
             b.T = MatrixOperations.Initialise([0,6*b.numLinks],0);
-
+            
+            b.R_0ks = MatrixOperations.Initialise([3, 3*b.numLinks],0);
+            b.r_OPs = MatrixOperations.Initialise([3, b.numLinks],0);
+            b.r_Gs  = MatrixOperations.Initialise([3, b.numLinks],0);
+            b.r_Pes = MatrixOperations.Initialise([3, b.numLinks],0);
+            
             % Construct joint actuation selection matrix
             b.A = zeros(b.numDofs, b.numDofsActuated);
             dof_ind = 0;
@@ -241,6 +252,11 @@ classdef SystemModelBodies < handle
                 if(~isempty(obj.bodies{k}.operationalSpace))
                     obj.bodies{k}.r_OY  = obj.bodies{k}.r_OP + obj.bodies{k}.r_y;
                 end
+                % Store information in matrices
+                obj.R_0ks(:,3*k-2:3*k) = obj.bodies{k}.R_0k;
+                obj.r_OPs(:,k) = obj.bodies{k}.r_OP;
+                obj.r_Gs(:,k) = obj.bodies{k}.r_G;
+                obj.r_Pes(:,k) = obj.bodies{k}.r_Pe;
             end
 
             % Set S (joint state matrix) and S_dot            
@@ -364,6 +380,10 @@ classdef SystemModelBodies < handle
             % Now the global system updates
             % Set bodies kinematics (rotation matrices)
             CASPR_log.Info('Body Kinematics: ');
+            obj.R_0ks = MatrixOperations.Initialise([3, 3*obj.numLinks],is_symbolic);
+            obj.r_OPs = MatrixOperations.Initialise([3, obj.numLinks],is_symbolic);
+            obj.r_Gs  = MatrixOperations.Initialise([3, obj.numLinks],is_symbolic);
+            obj.r_Pes = MatrixOperations.Initialise([3, obj.numLinks],is_symbolic);
             for k = 1:obj.numLinks
                 % Displaying the update status of the k-th link
                 CASPR_log.Info(['- k: ',num2str(k)]);
@@ -397,7 +417,12 @@ classdef SystemModelBodies < handle
                 % Determine absolute position of the operational space
                 if(~isempty(obj.bodies{k}.operationalSpace))
                     obj.bodies{k}.r_OY  = obj.bodies{k}.r_OP + obj.bodies{k}.r_y;
-                end
+                end                
+                % Store information in matrices
+                obj.R_0ks(:,3*k-2:3*k) = obj.bodies{k}.R_0k;
+                obj.r_OPs(:,k) = obj.bodies{k}.r_OP;
+                obj.r_Gs(:,k) = obj.bodies{k}.r_G;
+                obj.r_Pes(:,k) = obj.bodies{k}.r_Pe;
             end
 
             % Set S (joint state matrix) and S_dot           
@@ -453,8 +478,7 @@ classdef SystemModelBodies < handle
             
             % W = P*S              
             CASPR_log.Info('Calculating W...');            
-            obj.W = obj.P*obj.S;              
-            obj.W = simplify(obj.W, 'Step', 50);                       
+            obj.W = obj.P*obj.S;             
        
             % Determine x_dot              
             CASPR_log.Info('Calculating x_dot...');            
@@ -523,15 +547,27 @@ classdef SystemModelBodies < handle
         
         % Update function under COMPILED mode
         % - Update using compiled files       
-        function compiledUpdate(obj, q, q_dot, q_ddot, w_ext)    
-            
+        function compiledUpdate(obj, q, q_dot, q_ddot, w_ext)   
             % Update the 4 arguments
             obj.q = q;
             obj.q_dot = q_dot;
             obj.q_ddot = q_ddot;
             obj.W_e = w_ext;
             
-            obj.W = compile_W(q, q_dot, q_ddot, w_ext);
+            % Body kinematics
+            obj.R_0ks = compile_R_0ks(q, q_dot, q_ddot, w_ext);
+            obj.r_OPs = compile_r_OPs(q, q_dot, q_ddot, w_ext);
+            for k = 1:obj.numLinks
+                obj.bodies{k}.R_0k = obj.R_0ks(:,3*k-2:3*k);
+                obj.bodies{k}.r_OP = obj.r_OPs(:,k);
+                obj.bodies{k}.r_OG = obj.r_OPs(:,k) + obj.r_Gs(:,k);
+                obj.bodies{k}.r_OPe = obj.r_OPs(:,k) + obj.r_Pes(:,k);
+            end
+            
+            % Kinematics jacobians
+            obj.P = compile_P(q, q_dot, q_ddot, w_ext);
+            obj.S = compile_S(q, q_dot, q_ddot, w_ext);
+            obj.W = obj.P*obj.S;            
             obj.x_ddot = compile_x_ddot(q, q_dot, q_ddot, w_ext);
             obj.x_dot = compile_x_dot(q, q_dot, q_ddot, w_ext);
             
@@ -1737,7 +1773,12 @@ classdef SystemModelBodies < handle
             obj.compiled = BodyFlags();
             % Jacobians
             CASPR_log.Info('- Compiling Jacobians...');
-            matlabFunction(obj.W, 'File', strcat(path, '/compile_W'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});
+            matlabFunction(obj.S, 'File', strcat(path, '/compile_S'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});
+            matlabFunction(obj.P, 'File', strcat(path, '/compile_P'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});   
+            
+            % Kinematics
+            matlabFunction(obj.R_0ks, 'File', strcat(path, '/compile_R_0ks'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});
+            matlabFunction(obj.r_OPs, 'File', strcat(path, '/compile_r_OPs'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});
             
             % Operational space
             if(obj.occupied.operational_space)
