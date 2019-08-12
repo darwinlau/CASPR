@@ -177,18 +177,7 @@ classdef CASPRRVizInterface < CableActuatorInterfaceBase
         
         % publish attachements of segments
         function cableInfoSend(obj, cdpr)
-            cable_vec = [];
-            % Cables
-            for c = 1:cdpr.cableModel.numCables
-                this_cable = cdpr.cableModel.cables{c};
-                for s = 1:length(this_cable.segments)
-                    this_segment = this_cable.segments{s};
-                    % 1st attachment point
-                    cable_vec = [cable_vec; this_segment.attachments{1}.r_OA];
-                    % 2nd attachment point
-                    cable_vec = [cable_vec; this_segment.attachments{2}.r_OA];
-                end                
-            end
+            cable_vec = reshape(cdpr.cableModel.r_OAs, 6*cdpr.cableModel.numSegments,1);
             obj.cable_msg.Data = cable_vec;
             send(obj.cable_pub, obj.cable_msg);
         end

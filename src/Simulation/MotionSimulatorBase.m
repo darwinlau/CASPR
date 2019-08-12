@@ -466,11 +466,6 @@ classdef (Abstract) MotionSimulatorBase < SimulatorBase
             rosparam('set','/robot_name',modelObj.robotName);
             rosparam('set','/deleteall', true);            
             pause(1);
-            % Ensure the model mode is default            
-            modelObj.setModelMode(ModelModeType.DEFAULT);  
-            modelObj.bodyModel.occupied.dynamics = false;
-            modelObj.bodyModel.occupied.hessian = false;
-            modelObj.bodyModel.occupied.linearisation = false;
             % Use the period in trajectory
             period = (joint_trajectory.timeVector(2) - joint_trajectory.timeVector(1));
             % Plot initial pose and wait

@@ -22,6 +22,10 @@ classdef (Abstract) CableAttachmentBase < handle
                 obj.r_OA = bodyKinematics.bodies{obj.link_num}.R_0k * (bodyKinematics.bodies{obj.link_num}.r_OG + obj.r_GA);
             end
         end
+        
+        function directUpdate(obj, r_OA)
+            obj.r_OA = r_OA;
+        end
     end
     
     methods (Abstract)

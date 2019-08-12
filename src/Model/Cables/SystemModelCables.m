@@ -30,6 +30,9 @@ classdef SystemModelCables < handle
         cables = {};                % Cell array of CableKinematics object
         lengths                     % Vector of lengths for all of the cables
         
+        % Attachment location matrix
+        r_OAs                       % 6 x no.of segments matrix
+        
         % These vectors contain the indices of each active cable
         % corresponding to their index within the cables vector
         numCables = 0;              % The number of cables
@@ -71,7 +74,8 @@ classdef SystemModelCables < handle
             ck.setModelMode(model_mode);
             ck.cables = cables;
             ck.numCables = length(cables);
-            ck.numLinks = numLinks;            
+            ck.numLinks = numLinks; 
+            ck.r_OAs = MatrixOperations.Initialise([6,ck.numSegments],0);
         end
 
         % Update the kinematics of the cables for the entire system using
@@ -92,6 +96,7 @@ classdef SystemModelCables < handle
             obj.K = MatrixOperations.Initialise([obj.numCables,obj.numCables],is_symbolic);
             
             obj.numCablesActive = 0;
+            segment_count = 1;
             for i = 1:obj.numCables
                 obj.cables{i}.update(bodyModel);
                 cable = obj.cables{i};
@@ -124,6 +129,9 @@ classdef SystemModelCables < handle
                                 cross(segment.attachments{2}.r_GA, V_ijk_T).';
                         end
                     end
+                    % Store r_OA
+                    obj.r_OAs(:,segment_count) = [segment.attachments{1}.r_OA;segment.attachments{2}.r_OA];
+                    segment_count = segment_count + 1;
                 end
                 obj.K(i,i) = obj.cables{i}.K;
 
@@ -161,9 +169,11 @@ classdef SystemModelCables < handle
             % and segment vectors) and Determine V
             obj.V = MatrixOperations.Initialise([obj.numCables,6*obj.numLinks],is_symbolic);
             obj.K = MatrixOperations.Initialise([obj.numCables,obj.numCables],is_symbolic);
+            obj.r_OAs = MatrixOperations.Initialise([6,obj.numSegments],is_symbolic);
             
             CASPR_log.Info('Calculating V...');            
             obj.numCablesActive = 0;
+            segment_count = 1;
             for i = 1:obj.numCables
                 obj.cables{i}.update(bodyModel);
                 cable = obj.cables{i};
@@ -199,6 +209,9 @@ classdef SystemModelCables < handle
                                 cross(segment.attachments{2}.r_GA, V_ijk_T).';                           
                         end
                     end
+                    % Store r_OA
+                    obj.r_OAs(:,segment_count) = simplify([segment.attachments{1}.r_OA;segment.attachments{2}.r_OA],'Step',10);                    
+                    segment_count = segment_count + 1;
                 end
                 obj.K(i,i) = obj.cables{i}.K;
 
@@ -228,9 +241,21 @@ classdef SystemModelCables < handle
         
         % Update function under COMPILED mode
         % - Update using compiled files   
-        function compiledUpdate(obj, bodyModel)            
-            obj.V = compile_V(bodyModel.q, bodyModel.q_dot, bodyModel.q_ddot, bodyModel.W_e);           
+        function compiledUpdate(obj, bodyModel)       
+            % Attachment locations
+            obj.r_OAs = compile_r_OAs(bodyModel.q, bodyModel.q_dot, bodyModel.q_ddot, bodyModel.W_e);
+            segment_count = 1;
+            for i = 1:obj.numCables
+                for j = 1:obj.cables{i}.numSegments
+                    obj.cables{i}.segments{j}.attachments{1}.directUpdate(obj.r_OAs(1:3,segment_count));
+                    obj.cables{i}.segments{j}.attachments{2}.directUpdate(obj.r_OAs(4:6,segment_count));
+                    segment_count = segment_count + 1;
+                end
+            end            
+            % Cable length
             obj.lengths = compile_lengths(bodyModel.q, bodyModel.q_dot, bodyModel.q_ddot, bodyModel.W_e); 
+            % Matrix
+            obj.V = compile_V(bodyModel.q, bodyModel.q_dot, bodyModel.q_ddot, bodyModel.W_e); 
        end
         
         % This function updates V_grad
@@ -460,6 +485,7 @@ classdef SystemModelCables < handle
             CASPR_log.Info('- Compiling Cable Variables...');
             matlabFunction(obj.V, 'File', strcat(path, '/compile_V'), 'Vars', {bodyModel.q, bodyModel.q_dot, bodyModel.q_ddot, bodyModel.W_e});                   
             matlabFunction(obj.lengths, 'File', strcat(path, '/compile_lengths'), 'Vars', {bodyModel.q, bodyModel.q_dot, bodyModel.q_ddot, bodyModel.W_e});                   
+            matlabFunction(obj.r_OAs, 'File', strcat(path, '/compile_r_OAs'), 'Vars', {bodyModel.q, bodyModel.q_dot, bodyModel.q_ddot, bodyModel.W_e});                   
         end
     end
     
