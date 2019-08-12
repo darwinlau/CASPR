@@ -44,5 +44,10 @@ CASPR_log.Info('Start Running Simulation');
 wsim.run();
 
 % Plot the simulation
-CASPR_log.Info('Start Plotting Simulation');
-wsim.plotGraph();
+% CASPR_log.Info('Start Plotting Simulation');
+% graph_plot = wsim.workspace.plotGraph(w_conditions,w_metrics,w_connectivity);
+
+figure
+plot_axis = [1 2 3];
+fixed_variables = wsim.grid.q_begin' + wsim.grid.delta_q' .* [0 0 0];
+cartesian_workspace_plot = wsim.workspace.plotWorkspace(plot_axis, w_conditions, [], fixed_variables);

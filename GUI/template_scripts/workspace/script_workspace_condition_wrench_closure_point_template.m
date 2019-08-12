@@ -5,16 +5,12 @@
 % Description    :
 
 % Load configs
-clc; clear; warning off; close all;
+clc; clear; warning off; 
+% close all;
 
 % CASPR_configuration.SetDevModelConfig(1)
-model_config    =   DevModelConfig('CU-Brick');
-cable_set_id    =   'demo_causewaybay';
-
-% Set up the model 
-% model_config    =   ModelConfig('The Cable Robot Simulator');
-% cable_set_id    =   'normal';
-
+model_config    =   ModelConfig('Example planar XY');
+cable_set_id    =   'basic';
 modelObj        =   model_config.getModel(cable_set_id);
 
 q_begin         =   modelObj.bodyModel.q_min; q_end = modelObj.bodyModel.q_max;
@@ -28,6 +24,9 @@ uGrid           =   UniformGrid(q_begin, q_end, q_step,'step_size');
 w_conditions    =   {WrenchClosureCondition([])};
 % Define the workspace metric(s) (optional)
 w_metrics       =   {ConditionNumberMetric()};
+w_conditions    =   {WrenchClosureCondition([]),WorkspaceStaticCondition([]),InterferenceFreeCondition([], 0.01)};
+% Define the workspace metric(s) (optional)
+w_metrics       =   {TensionFactorMetric,ConditionNumberMetric};
 % Define the connectivity condition for point-wise workspaces
 w_connectivity  =   WorkspaceConnectivityBase.CreateWorkspaceConnectivityCondition(WorkspaceConnectivityType.GRID,uGrid);
 
@@ -40,32 +39,13 @@ CASPR_log.Info('Start Running Simulation');
 wsim.run();
 %% Simulation result operation -- Plotting
 % Graph plot
-graph_plot = wsim.workspace.plotGraph(w_conditions,w_metrics,w_connectivity);
+% figure
+% graph_plot = wsim.workspace.plotGraph(w_conditions(1),w_metrics,w_connectivity);
 
 % Workspace plot
 % plot specific axis with specified variable value (2D/3D plot)
-close all force
+figure
 plot_axis = [1 2 3];
-fixed_variables = wsim.grid.q_begin' + wsim.grid.delta_q' .* [1 3 2 0 0 0];
-cartesian_workspace_plot = wsim.workspace.plotWorkspace(plot_axis, w_conditions, [], fixed_variables);
-
-
-% 2D/3D slider plot 
-close all force
-sliding_axis = [3];% 1 sliding axis only
-plot_axis = [1 2 3];
-fixed_variables = wsim.grid.q_begin' + wsim.grid.delta_q' .* [1 3 2 0 0 0];
-cartesian_workspace_plot_slide = wsim.workspace.plotWorkspaceSlider(plot_axis,sliding_axis,w_conditions, w_metrics, fixed_variables);
-
-% Workspace opertation
-% construct workspace for by metric(s)/condition(s)
-wsim.workspace.createWorkspaceGraph(w_conditions, w_metrics, w_connectivity)
-
-% filter workspace by metric value
-close all force
-metric_value_min = [0.1 0.26];
-metric_value_max = [];
-filter_workspace = wsim.workspace.fliterWorkspaceMetric(w_metrics,metric_value_min,metric_value_max);
-cartesian = filter_workspace.plotWorkspace(plot_axis, w_conditions, w_metrics, fixed_variables);
-
+fixed_variables = wsim.grid.q_begin' + wsim.grid.delta_q' .* [0 0 0];
+cartesian_workspace_plot = wsim.workspace.plotWorkspace(plot_axis, w_conditions(1), [], fixed_variables);
 

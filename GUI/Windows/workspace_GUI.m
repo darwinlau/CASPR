@@ -296,7 +296,10 @@ function generate_button_Callback(~, ~, handles) %#ok<DEFNU>
         CASPR_log.Info('Start Plotting Simulation');
         drawnow;
         start_tic       =   tic;
-        wsim.plotGraph();
+        %         figure
+        plot_axis = 1:size(wsim.grid.delta_q',2);
+        fixed_variables = wsim.grid.q_begin' + wsim.grid.delta_q' .* size(wsim.grid.delta_q',2);
+        cartesian_workspace_plot = wsim.workspace.plotWorkspace(plot_axis, w_condition, [], fixed_variables);
         time_elapsed    =   toc(start_tic);
         CASPR_log.Info(sprintf('End Plotting Simulation : %f seconds\n', time_elapsed));
         set(handles.status_text,'String','No simulation running');
