@@ -256,7 +256,13 @@ classdef SystemModelCables < handle
             obj.lengths = compile_lengths(bodyModel.q, bodyModel.q_dot, bodyModel.q_ddot, bodyModel.W_e); 
             % Matrix
             obj.V = compile_V(bodyModel.q, bodyModel.q_dot, bodyModel.q_ddot, bodyModel.W_e); 
-       end
+        end
+        
+        % Update function under CUSTOM mode
+        % - Update using C shared library 
+        function customUpdate(obj, q, q_dot, q_ddot, w_ext)  
+            
+        end
         
         % This function updates V_grad
         function updateHessian(obj,bodyModel)
@@ -463,6 +469,9 @@ classdef SystemModelCables < handle
                    % Preparation for compilations
                    obj.update = @obj.compiledPreparationUpdate;
                end   
+           elseif model_mode==ModelModeType.CUSTOM
+               % CUSTOM
+               obj.update = @obj.customUpdate;
            else
                % DEFAULT and SYMBOLIC 
                obj.update = @obj.defaultUpdate;

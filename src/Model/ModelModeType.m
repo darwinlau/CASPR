@@ -8,5 +8,6 @@ classdef ModelModeType
         DEFAULT         % Standard model updating
         SYMBOLIC        % Symbolic model
         COMPILED        % Model is to use compiled functions
+        CUSTOM          % Custom model using C shared library
     end
 end

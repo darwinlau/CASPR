@@ -135,7 +135,13 @@ classdef SystemModel < handle
                 q_dd = sym('q_dd',[b.numDofs,1]); w_ext = sym('w_ext',[b.numDofs,1]);                               
                 b.setFilesCompiled(false); 
                 b.setModelMode(model_mode);
-                b.update(q, q_d, q_dd, w_ext);                
+                b.update(q, q_d, q_dd, w_ext);   
+            elseif (model_mode == ModelModeType.CUSTOM)
+                b               =   SystemModel();
+                b.modelMode     =   ModelModeType.CUSTOM;
+                b.bodyModel     =   SystemModelBodies.LoadXmlObj(body_xmlobj,b.modelMode);                
+                b.cableModel    =   SystemModelCables.LoadXmlObj(cable_xmlobj, b.bodyModel,b.modelMode);                
+                b.update(b.bodyModel.q_initial, b.bodyModel.q_dot_default, b.bodyModel.q_ddot_default, zeros(b.numDofs,1));            
             end
         end
     end

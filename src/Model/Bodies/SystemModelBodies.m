@@ -591,6 +591,12 @@ classdef SystemModelBodies < handle
             end               
         end
         
+        % Update function under CUSTOM mode
+        % - Update using C shared library 
+        function customUpdate(obj, q, q_dot, q_ddot, w_ext)  
+            
+        end
+        
         % Update the operational space variables
         function updateOperationalSpace(obj)
             is_symbolic = obj.modelMode==ModelModeType.SYMBOLIC; 
@@ -1750,6 +1756,9 @@ classdef SystemModelBodies < handle
                    % Preparation for compilations
                    obj.update = @obj.compiledPreparationUpdate;
                end   
+           elseif model_mode==ModelModeType.CUSTOM
+               % CUSTOM
+               obj.update = @obj.customUpdate;
            else
                % DEFAULT and SYMBOLIC 
                obj.update = @obj.defaultUpdate;
