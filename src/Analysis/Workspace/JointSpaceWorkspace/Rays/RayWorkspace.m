@@ -78,13 +78,13 @@ classdef RayWorkspace < handle
         function plotPointWorkspace(obj,plot_axis,conditions,fixed_variables)
             rounding_digit = 4; % remove numerical error from input, change it if not accurate enough
             fixed_variables([plot_axis]) = [];
-            fixed_variables = round(fixed_variables,rounding_digit);
+            fixed_variables = fix(fixed_variables*10^rounding_digit)/10^rounding_digit;
             if size(fixed_variables,2) + size(plot_axis,2) ~= obj.model.numDofs
                 CASPR_log.Error('Not enought number of fixed axis')
             end
             fixed_axis = 1:obj.model.numDofs;
             fixed_axis(plot_axis) = [];
-            node_list = round(create_point_node_list(obj, conditions),rounding_digit);
+            node_list = fix(create_point_node_list(obj, conditions)*10^rounding_digit)/10^rounding_digit;
             if ~isempty(fixed_variables)
                 plot_data_index = find(ismember(node_list(:,1 + fixed_axis),fixed_variables,'rows'));
             elseif size(plot_axis,2) == obj.model.numDofs
@@ -178,7 +178,8 @@ classdef RayWorkspace < handle
         function plotRayWorkspace(obj,plot_axis,conditions,fixed_variables)
             rounding_digit = 4; % remove numerical error from input, change it if not accurate enough
             fixed_variables([plot_axis]) = [];
-            fixed_variables = round(fixed_variables,rounding_digit);
+%             fixed_variables = round(fixed_variables,rounding_digit);
+            fixed_variables = fix(fixed_variables*10^rounding_digit)/10^rounding_digit;
             if max(size(fixed_variables)) + max(size(plot_axis)) ~= obj.model.numDofs
                 CASPR_log.Error('Not enought number of fixed axis')
             end
@@ -280,7 +281,7 @@ classdef RayWorkspace < handle
                 for j = 1:size(co_planar_rays,1)
                     ray_B = co_planar_rays(j,2:end);
                     [intersected_point,~] = check_intersection(ray_A,ray_B);
-                    intersected_point = round(intersected_point,4);
+%                     intersected_point = round(intersected_point,4);
                     if ~isempty(intersected_point)
                         intersected_ray(end+1,:) = {rays_seg{i,1},co_planar_rays{j,1}};
                         ref_intersected_point(end+1,:) = intersected_point;
@@ -319,7 +320,7 @@ classdef RayWorkspace < handle
         function graph_rep = create_point_graph_rep(obj, node_list)
             rounding_digit = 4;
             graph_rep = [];
-            node_list = round(node_list,rounding_digit);
+%             node_list = round(node_list,rounding_digit);
             count_time = 0;c_2 = 0; c_2 = tic;
             for k = 1:size(node_list,1)
                 tic;
@@ -334,8 +335,8 @@ classdef RayWorkspace < handle
                         else
                             nearby_point = node_list(k,2:obj.model.numDofs+1) - delta_q_vector;
                         end
-                        neighbour_point_index = find(ismember(node_list(:,2:obj.model.numDofs+1),round(nearby_point,rounding_digit),'rows'));
-                        
+%                         neighbour_point_index = find(ismember(node_list(:,2:obj.model.numDofs+1),round(nearby_point,rounding_digit),'rows'));
+                        neighbour_point_index =  find(vecnorm(node_list(:,2:obj.model.numDofs+1)'-nearby_point')'<=10^-rounding_digit);
                         if ~isempty(neighbour_point_index)
                             if ~ismember(neighbour_point_index,node_list(1:k,1))
                                 %                                 graph_rep(end+1,:) =
@@ -353,10 +354,10 @@ classdef RayWorkspace < handle
                 if toc(c_2) >= 5
                     disp(time_left);
                     c_2 = tic;
-                end
-                obj.point_node(:).graph_rep =  graph_rep;
+                end                
                 data_count = k;
             end
+            obj.point_node(:).graph_rep =  graph_rep;
         end
         
         % function to create the node_list variable for ray representation
