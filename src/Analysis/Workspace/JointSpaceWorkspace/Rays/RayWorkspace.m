@@ -379,9 +379,12 @@ classdef RayWorkspace < handle
                         ray_condition_types(j) = obj.rays{i}.conditions{j,1};
                     end
                     
-                    if(all(ismember(conditions_types,ray_condition_types)))
-                        intervals = obj.rays{i}.conditions{j,2};
-                    end
+                     if(all(ismember(conditions_types,ray_condition_types)))
+                        for j = 1:size(obj.rays{i}.conditions{2},1)
+                        intervals(j,:) = obj.rays{i}.conditions{2}(j,:);
+                        end
+                     end
+                    
                     for j = 1:size(intervals,1)
                         number_node = number_node + 1;
                         node_list{number_node,1} = number_node; % node number
@@ -414,7 +417,7 @@ classdef RayWorkspace < handle
             intersected_point_set = [];
             ternimal_index = find(ismember([node_list{:,end}],node_list{end,end}));
             ternimal_index = ternimal_index(1);
-            for j = 1:- ternimal_index-1
+            for j = 1:ternimal_index-1
 %                 for j = 1:size(node_list,1) - ternimal_index
                 tic;
                 current_variable = find(ismember([node_list{:,end}],node_list{j,end}));
