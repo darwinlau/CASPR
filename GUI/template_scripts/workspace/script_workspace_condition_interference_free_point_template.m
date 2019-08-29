@@ -8,19 +8,18 @@
 clc; clear; warning off; close all;
 
 % Set up the model 
-% model_config    =   ModelConfig('Example planar XY');
-% cable_set_id    =   'basic';
-model_config    =   ModelConfig('The Cable Robot Simulator');
-cable_set_id    =   'original';
+model_config    =   ModelConfig('Example planar XY');
+cable_set_id    =   'basic_notouch';
 modelObj        =   model_config.getModel(cable_set_id);
-
+% Define the number of points per axis
+num_seg = 5;
 q_begin         =   modelObj.bodyModel.q_min; q_end = modelObj.bodyModel.q_max;
-q_step          =   (modelObj.bodyModel.q_max - modelObj.bodyModel.q_min)./[8 8 8 Inf Inf Inf]';
+q_step          =   (modelObj.bodyModel.q_max - modelObj.bodyModel.q_min)./num_seg;
 
 % Set up the workspace simulator
 % Specify any fixed value (optional)
-q_begin(4:end,:) = zeros(3,1) ;
-q_end(4:end,:) = zeros(3,1) ;
+% q_begin(4:end,:) = zeros(3,1) ;
+% q_end(4:end,:) = zeros(3,1) ;
 % Defne the grid
 uGrid           =   UniformGrid(q_begin, q_end, q_step,'step_size');
 
@@ -47,25 +46,25 @@ CASPR_log.Info('Start Plotting Simulation');
 
 graph_plot = wsim.workspace.plotGraph(w_conditions,w_metrics,w_connectivity);
 
-plot_axis = [1 2 4];% Maximum allow 3 axis plot e.g. here 1st, 2nd variables as the axis
+figure
+plot_axis = [1 2 3];% Maximum allow 3 axis plot e.g. here 1st, 2nd variables as the axis
 % Fixed variables, you can leave the value of plot axis zero/any number, it won't affect the result plot
 % 4 digits numbers are counted into the plotting error
-fixed_variables = [3,3,3.50000000000000,0,0,0]; 
-close all force
+fixed_variables = wsim.grid.q_begin' + wsim.grid.delta_q' .* [0 0 0];
 % 2D/3D plot
 cartesian_workspace_plot = wsim.workspace.plotWorkspace(plot_axis, w_conditions, w_metrics, fixed_variables);
 
-close all force
-% 2D/3D slider plot 
-sliding_axis = [3];% Slider axis maximum 1 input so far
-
-cartesian_workspace_plot_slide = wsim.workspace.plotWorkspaceSlider(plot_axis,sliding_axis,w_conditions, w_metrics, fixed_variables);
+% close all 
+% % 2D/3D slider plot 
+% sliding_axis = [3];% Slider axis maximum 1 input so far
+% 
+% cartesian_workspace_plot_slide = wsim.workspace.plotWorkspaceSlider(plot_axis,sliding_axis,w_conditions, w_metrics, fixed_variables);
 
 % Find the workspace that do not meet the metrics requirment(allow multiple inputs), all the
 % functions exist in the old workspace can work
-close all force
-metric_value_min = [0.1 0.26];
-metric_value_max = [];
-filter_workspace = wsim.workspace.fliterWorkspaceMetric(w_metrics,metric_value_min,metric_value_max);
-cartesian = filter_workspace.plotWorkspace(plot_axis, w_conditions, w_metrics, fixed_variables);
+% close all force
+% metric_value_min = [0.1 0.26];
+% metric_value_max = [];
+% filter_workspace = wsim.workspace.fliterWorkspaceMetric(w_metrics,metric_value_min,metric_value_max);
+% cartesian = filter_workspace.plotWorkspace(plot_axis, w_conditions, w_metrics, fixed_variables);
 

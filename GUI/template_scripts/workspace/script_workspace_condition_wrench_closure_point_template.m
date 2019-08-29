@@ -12,9 +12,10 @@ clc; clear; warning off;
 model_config    =   ModelConfig('Example planar XY');
 cable_set_id    =   'basic';
 modelObj        =   model_config.getModel(cable_set_id);
-
+% Define the number of points per axis
+num_seg = 5;
 q_begin         =   modelObj.bodyModel.q_min; q_end = modelObj.bodyModel.q_max;
-q_step          =   (modelObj.bodyModel.q_max - modelObj.bodyModel.q_min)/3;
+q_step          =   (modelObj.bodyModel.q_max - modelObj.bodyModel.q_min)/num_seg;
 % Set up the workspace simulator
 % Defne the grid
 % q_begin(4:end,:) = zeros(3,1) ;
@@ -38,14 +39,23 @@ wsim            =   PointWorkspaceSimulator(modelObj, uGrid, w_conditions, w_met
 CASPR_log.Info('Start Running Simulation');
 wsim.run();
 %% Simulation result operation -- Plotting
-% Graph plot
-% figure
-% graph_plot = wsim.workspace.plotGraph(w_conditions(1),w_metrics,w_connectivity);
 
 % Workspace plot
 % plot specific axis with specified variable value (2D/3D plot)
+% Graph plot
+graph_plot = wsim.workspace.plotGraph(w_conditions,w_metrics,w_connectivity);
+
 figure
-plot_axis = [1 2 3];
+plot_axis = [1 2 3];% Maximum allow 3 axis plot e.g. here 1st, 2nd variables as the axis
+% Fixed variables, you can leave the value of plot axis zero/any number, it won't affect the result plot
+% 4 digits numbers are counted into the plotting error
 fixed_variables = wsim.grid.q_begin' + wsim.grid.delta_q' .* [0 0 0];
-cartesian_workspace_plot = wsim.workspace.plotWorkspace(plot_axis, w_conditions(1), [], fixed_variables);
+% 2D/3D plot
+cartesian_workspace_plot = wsim.workspace.plotWorkspace(plot_axis, w_conditions, w_metrics, fixed_variables);
+
+% close all 
+% % 2D/3D slider plot 
+% sliding_axis = [3];% Slider axis maximum 1 input so far
+% 
+% cartesian_workspace_plot_slide = wsim.workspace.plotWorkspaceSlider(plot_axis,sliding_axis,w_conditions, w_metrics, fixed_variables);
 

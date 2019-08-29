@@ -145,6 +145,9 @@ classdef PointWorkspace < handle
         % A function for plotting a graph
         function node_graph = plotGraph(obj, conditions, metrics, w_connectivity)
             %Create the graph data depends on the inputs
+            if isempty(obj.poses)
+                CASPR_log.Error('Empty workspace! No plot available')
+            end
             createWorkspaceGraph(obj, conditions, metrics, w_connectivity);
             
             G = graph(obj.graph_rep(:,1),obj.graph_rep(:,2));
