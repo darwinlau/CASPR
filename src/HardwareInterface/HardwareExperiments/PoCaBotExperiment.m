@@ -439,8 +439,10 @@ classdef PoCaBotExperiment < ExperimentBase
             [tension] = obj.hardwareInterface.getCableTensionByCurrent(initialCurrent);
             originalLength = obj.model.cableLengths ./(1+obj.elongation_per_Newton.*tension);
 
-            [motorPosOffset] = obj.hardwareInterface.getMotorPosInitOffset(obj.model.cableLengths - originalLength);
-            init_pos = present_position + motorPosOffset; % in motor encoder measurement
+%             [motorPosOffset] = obj.hardwareInterface.getMotorPosInitOffset(obj.model.cableLengths - originalLength);
+%             init_pos = present_position + motorPosOffset; % in motor encoder measurement
+
+            init_pos = present_position;
             
             % Send the initial commands to the hardware
             obj.initialLength = obj.model.cableLengths;
@@ -531,16 +533,18 @@ classdef PoCaBotExperiment < ExperimentBase
                 % update cable lengths for next command from trajectory
                 obj.model.update(trajectory.q(:,t), trajectory.q_dot(:,t), trajectory.q_ddot(:,t),zeros(size(trajectory.q_dot(:,t))));
                 
-                [~, model_temp, ~, ~, ~] = obj.idsim.IDSolver.resolve(trajectory.q(:,t), trajectory.q_dot(:,t), trajectory.q_ddot(:,t), zeros(obj.idsim.model.numDofs,1));
+%                 [~, model_temp, ~, ~, ~] = obj.idsim.IDSolver.resolve(trajectory.q(:,t), trajectory.q_dot(:,t), trajectory.q_ddot(:,t), zeros(obj.idsim.model.numDofs,1));
 %                 [~] = obj.hardwareInterface.getCableOffsetByTension(model_temp.cableForces);
-                [offset] = obj.hardwareInterface.IDcableOffset(model_temp.cableForces,model_temp.cableLengths);
+%                 [offset] = obj.hardwareInterface.IDcableOffset(model_temp.cableForces,model_temp.cableLengths);
 %                 if(any(model_temp.cableForces<0))
 %                     fprintf('The force solved from ID gets beyond the limit!!!\n');
 %                 end
 %                 offset = zeros(size(offset,1),size(offset,2)); %%TEMP
 %                 offset = [0.004;0.002;0.004;0.002;0.004;0.002;0.004;0.002;]*0.1;
+                lengthCommand = obj.model.cableLengths
+%               
 %                 lengthCommand = model_temp.cableLengths ./(1+obj.elongation_per_Newton.*model_temp.cableForces);
-                lengthCommand = model_temp.cableLengths ./(1+obj.elongation_per_Newton.*model_temp.cableForces) - offset;
+%                 lengthCommand = model_temp.cableLengths ./(1+obj.elongation_per_Newton.*model_temp.cableForces) - offset;
 %                 lengthModifiedElongation = lengthCommand - obj.initialLength;
 %                 if(lengthModifiedElongation > 0)
 %                     lengthTuned

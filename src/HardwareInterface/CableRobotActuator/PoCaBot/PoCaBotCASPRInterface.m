@@ -63,6 +63,8 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
                         interface.ActuatorParas = XM540_W150;
                     case DynamixelType.PRO_M54_60_S250
                         interface.ActuatorParas = PRO_M54_60_S250;
+                    case DynamixelType.PRO_H54P_200_S500
+                        interface.ActuatorParas = PRO_H54P_200_S500;
                     case DynamixelType.RH_P12_RN
                         interface.ActuatorParas = RH_P12_RN;
                     otherwise
@@ -93,6 +95,10 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
             elseif actuatorType == DynamixelType.XM540_W150 || actuatorType == DynamixelType.PRO_M54_60_S250
                 for i = 1:numMotor
                     accessories_temp(i) = MegaSpoolSpecifications;
+                end
+            elseif actuatorType == DynamixelType.PRO_H54P_200_S500
+                for i = 1:numMotor
+                    accessories_temp(i) = meter_20_Spool;
                 end
             else
                 disp('Please specify spool type in PoCaBotCASPRInterface')
@@ -236,7 +242,7 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
                 CASPR_log.Error('Input argument error, please check the size of the argument l0 and try again');
             end
             [dynamixel_position_cmd] = obj.len2anglecmd(l_cmd);
-            obj.sync_write(obj.ActuatorParas.ADDR_GOAL_POSITION, obj.ActuatorParas.LEN_GOAL_POSITION, dynamixel_position_cmd);
+            obj.sync_write(obj.ActuatorParas.ADDR_GOAL_POSITION, obj.ActuatorParas.LEN_GOAL_POSITION, round(dynamixel_position_cmd));
         end
         
         % Method to send the initial cable length information to the
@@ -419,6 +425,14 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
                 CASPR_log.Error('Input argument error, please check the size of the argument c_cmd and try again');
             end
             obj.sync_write(obj.ActuatorParas.ADDR_GOAL_CURRENT, obj.ActuatorParas.LEN_GOAL_CURRENT, f_cmd*obj.dynamixel_direction_factor_current);
+        end
+        % Intended for Dynamixel Pro Plus
+        function setGoalCurrent(obj, current_cmd)
+            if(length(current_cmd) ~= obj.numMotor)
+                obj.close();
+                CASPR_log.Error('Input argument error, please check the size of the argument c_cmd and try again');
+            end
+            obj.sync_write(obj.ActuatorParas.ADDR_GOAL_CURRENT, obj.ActuatorParas.LEN_GOAL_CURRENT, current_cmd);
         end
         
         % Method to read the current from the hardware (if available)
