@@ -32,3 +32,4 @@ SJTUSnake,/MCDM/SJTUSnake/,SJTUSnake_bodies.xml,SJTUSnake_cables.xml,SJTUSnake_t
 RoboyUpperBody,/MCDM/RoboyUpperBody/,RoboyUpperBody_bodies.xml,RoboyUpperBody_cables.xml,RoboyUpperBody_trajectories.xml
 SpiderBot_X52,/HCDM/SpiderBot_X52/,SpiderBot_X52_bodies.xml,SpiderBot_X52_cables.xml,SpiderBot_X52_trajectories.xml
 PlanarSnakeArm,/HCDM/PlanarSnakeArm/,PlanarSnakeArm_bodies.xml,PlanarSnakeArm_cables.xml,PlanarSnakeArm_trajectories.xml
+SpiderBot UR3 Test,/HCDM/SpiderBot_UR3_Test/,SpiderBot_UR3_Test_bodies.xml,SpiderBot_UR3_Test_cables.xml,SpiderBot_UR3_Test_trajectories.xml,

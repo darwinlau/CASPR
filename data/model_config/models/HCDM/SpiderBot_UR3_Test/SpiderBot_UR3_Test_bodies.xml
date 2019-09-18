@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE bodies_system SYSTEM "../../../templates/bodies.dtd">
+<bodies_system>
+    <links display_range="-0.2 2.3 -0.2 2.3 0 2.5" view_angle="-37 32">
+      <link_rigid num="1" name="UR3 base">
+        <joint type="SPATIAL_EULER_XYZ" q_initial="1.4450 1.0005 0.9025 0.0 0.0 0.0" q_min="0.0 0.0 0.0 -0.1 -0.1 -0.1" q_max="2.28 2.28 2.28 0.1 0.1 0.1"/>
+        <physical>
+          <mass>5</mass> <!-- This is a guess still -->
+          <com_location>0.0 0.0 0.0</com_location> <!-- This is a guess still -->
+          <end_location>0.0 0.0 0.341</end_location>
+          <inertia ref="com">
+            <Ixx>1.0</Ixx>
+            <Iyy>1.0</Iyy>
+            <Izz>1.0</Izz>
+            <Ixy>0.0</Ixy>
+            <Ixz>0.0</Ixz>
+            <Iyz>0.0</Iyz>
+          </inertia>
+        </physical>
+        <parent>
+          <num>0</num>
+          <location>0.0 0.0 0.0</location>
+        </parent>
+      </link_rigid>
+    </links>
+    <operational_spaces default_operational_set="ee_position">
+	  <operational_set id="ee_position">
+        <pose_euler_xyz marker_id="1" name="ee_pos">
+          <link>1</link>
+          <offset>0.0 0.0325 0.0</offset>
+          <axes active_axes="xyzabg"/>
+        </pose_euler_xyz>
+	  </operational_set>    
+    </operational_spaces>
+</bodies_system>

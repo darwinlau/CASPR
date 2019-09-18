@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE cables SYSTEM "../../../templates/cables.dtd">
+
+<cables default_cable_set="CUcablerobot">
+  <cable_set id="CUcablerobot">
+	<cable_ideal name="X" attachment_reference="joint">
+      <properties>
+        <force_min>1</force_min>
+        <force_max>500</force_max>
+      </properties>
+      <attachments>
+        <screw_base_rotating_pulley>
+          <constant_winch_point>0.083 2.197 1.905</constant_winch_point>
+          <winch_vector>0 -1 0</winch_vector>
+          <cable_pulley_entry_vector>0 0 1</cable_pulley_entry_vector>
+          <pulley_radius>0.025</pulley_radius>
+          <winch_radius>0.06</winch_radius>
+          <winch_groove_width>0.002</winch_groove_width>
+        </screw_base_rotating_pulley>
+        <attachment>
+          <link>1</link>
+          <location>-0.200 0.160 0.07</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="Y" attachment_reference="joint">
+      <properties>
+        <force_min>1</force_min>
+        <force_max>500</force_max>
+      </properties>
+      <attachments>
+        <screw_base_rotating_pulley>
+          <constant_winch_point>2.197 2.197 0.095</constant_winch_point>
+          <winch_vector>0 -1 0</winch_vector>
+          <cable_pulley_entry_vector>0 0 -1</cable_pulley_entry_vector>
+          <pulley_radius>0.025</pulley_radius>
+          <winch_radius>0.06</winch_radius>
+          <winch_groove_width>0.002</winch_groove_width>
+        </screw_base_rotating_pulley>
+        <attachment>
+          <link>1</link>
+          <location>0.200 0.160 -0.07</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+	<cable_ideal name="Z" attachment_reference="joint">
+      <properties>
+        <force_min>1</force_min>
+        <force_max>500</force_max>
+      </properties>
+      <attachments>
+        <screw_base_rotating_pulley>
+          <constant_winch_point>2.197 2.197 1.905</constant_winch_point>
+          <winch_vector>0 1 0</winch_vector>
+          <cable_pulley_entry_vector>0 0 1</cable_pulley_entry_vector>
+          <pulley_radius>0.025</pulley_radius>
+          <winch_radius>0.06</winch_radius>
+          <winch_groove_width>0.002</winch_groove_width>
+        </screw_base_rotating_pulley>
+        <attachment>
+          <link>1</link>
+          <location>0.200 0.160 0.07</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="A" attachment_reference="joint">
+      <properties>
+        <force_min>1</force_min>
+        <force_max>500</force_max>
+      </properties>
+      <attachments>
+        <screw_base_rotating_pulley>
+          <constant_winch_point>2.197 0.083 0.095</constant_winch_point>
+          <winch_vector>0 -1 0</winch_vector>
+          <cable_pulley_entry_vector>0 0 -1</cable_pulley_entry_vector>
+          <pulley_radius>0.025</pulley_radius>
+          <winch_radius>0.06</winch_radius>
+          <winch_groove_width>0.002</winch_groove_width>
+        </screw_base_rotating_pulley>
+        <attachment>
+          <link>1</link>
+          <location>0.200 -0.160 -0.07</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+	<cable_ideal name="B" attachment_reference="joint">
+      <properties>
+        <force_min>1</force_min>
+        <force_max>500</force_max>
+      </properties>
+      <attachments>
+        <screw_base_rotating_pulley>
+          <constant_winch_point>2.197 0.083 1.905</constant_winch_point>
+          <winch_vector>0 1 0</winch_vector>
+          <cable_pulley_entry_vector>0 0 1</cable_pulley_entry_vector>
+          <pulley_radius>0.025</pulley_radius>
+          <winch_radius>0.06</winch_radius>
+          <winch_groove_width>0.002</winch_groove_width>
+        </screw_base_rotating_pulley>
+        <attachment>
+          <link>1</link>
+          <location>0.200 -0.160 0.07</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="C" attachment_reference="joint">
+      <properties>
+        <force_min>1</force_min>
+        <force_max>500</force_max>
+      </properties>
+      <attachments>
+        <screw_base_rotating_pulley>
+          <constant_winch_point>0.083 0.083 0.095</constant_winch_point>
+          <winch_vector>0 -1 0</winch_vector>
+          <cable_pulley_entry_vector>0 0 -1</cable_pulley_entry_vector>
+          <pulley_radius>0.025</pulley_radius>
+          <winch_radius>0.06</winch_radius>
+          <winch_groove_width>0.002</winch_groove_width>
+        </screw_base_rotating_pulley>
+        <attachment>
+          <link>1</link>
+          <location>-0.200 -0.160 -0.07</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+	<cable_ideal name="U" attachment_reference="joint">
+      <properties>
+        <force_min>1</force_min>
+        <force_max>500</force_max>
+      </properties>
+      <attachments>
+        <screw_base_rotating_pulley>
+          <constant_winch_point>0.083 0.083 1.905</constant_winch_point>
+          <winch_vector>0 1 0</winch_vector>
+          <cable_pulley_entry_vector>0 0 1</cable_pulley_entry_vector>
+          <pulley_radius>0.025</pulley_radius>
+          <winch_radius>0.06</winch_radius>
+          <winch_groove_width>0.002</winch_groove_width>
+        </screw_base_rotating_pulley>
+        <attachment>
+          <link>1</link>
+          <location>-0.200 -0.160 0.07</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="V" attachment_reference="joint">
+      <properties>
+        <force_min>1</force_min>
+        <force_max>500</force_max>
+      </properties>
+      <attachments>
+        <screw_base_rotating_pulley>
+          <constant_winch_point>0.083 2.197 0.095</constant_winch_point>
+          <winch_vector>0 1 0</winch_vector>
+          <cable_pulley_entry_vector>0 0 -1</cable_pulley_entry_vector>
+          <pulley_radius>0.025</pulley_radius>
+          <winch_radius>0.06</winch_radius>
+          <winch_groove_width>0.002</winch_groove_width>
+        </screw_base_rotating_pulley>
+        <attachment>
+          <link>1</link>
+          <location>-0.200 0.160 -0.07</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+  </cable_set>
+  <cable_set id="singleCableTest">
+	<cable_ideal name="cable 1" attachment_reference="joint">
+      <properties>
+        <force_min>1</force_min>
+        <force_max>500</force_max>
+      </properties>
+      <attachments>
+        <screw_base_rotating_pulley>
+          <constant_winch_point>0 0.013 0.088</constant_winch_point>
+          <winch_vector>1 0 0</winch_vector>
+          <cable_pulley_entry_vector>0 0 -1</cable_pulley_entry_vector>
+          <pulley_radius>0.025</pulley_radius>
+          <winch_radius>0.06</winch_radius>
+          <winch_groove_width>0.002</winch_groove_width>
+        </screw_base_rotating_pulley>
+        <attachment>
+          <link>1</link>
+          <location>0 0 0</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+  </cable_set>
+</cables>
