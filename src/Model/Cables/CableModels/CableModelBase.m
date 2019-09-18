@@ -133,6 +133,7 @@ classdef (Abstract) CableModelBase < handle
             segments = cell(1, numAttachments - 1); % Number of segments is one less than the number of attachments
             
             load_base_attachment_pulley = 0;
+            load_screw_base_attachment_pulley = 0;
             
             % Setup the attachments
             for a = 1:numAttachments
@@ -149,6 +150,9 @@ classdef (Abstract) CableModelBase < handle
                 elseif (strcmp(type, 'base_rotating_pulley'))
                     CASPR_log.Assert(a == 1, '''base_rotating_pulley'' can only be used on the base attachment');
                     load_base_attachment_pulley = 1; % Load this at the end
+                elseif (strcmp(type, 'screw_base_rotating_pulley'))
+                    CASPR_log.Assert(a == 1, '''base_rotating_pulley'' can only be used on the base attachment');
+                    load_screw_base_attachment_pulley = 1; % Load this at the end
                 else
                     CASPR_log.Print(sprintf('Unknown cables type: %s', type),CASPRLogLevel.ERROR);
                 end
@@ -157,6 +161,10 @@ classdef (Abstract) CableModelBase < handle
             % Load base attachment pulley (special type of attachment)
             if (load_base_attachment_pulley)
                 attachments{1} = BaseRotatingPulleyAttachment.LoadXmlObj(attachmentXmlObjs.item(0), attachments{2});
+            end
+
+            if (load_screw_base_attachment_pulley)
+                attachments{1} = ScrewDriveRotatingPulleyAttachment.LoadXmlObj(attachmentXmlObjs.item(0), attachments{2});
             end
             
             % Using the attachments, setup the segment model

@@ -1,5 +1,7 @@
-% The simplest type of cable attachment where it is only a single point
-% 
+% This type of attachment is with a kingpin which rotates the cable outlet
+% according to the direction of next attachment. For details please refers
+% to explaination on https://github.com/darwinlau/CASPR/issues/4
+%
 % Author        : Darwin LAU
 % Created       : 2016
 % Description	:
