@@ -25,6 +25,14 @@ EXPORTED_FUNCTION void customM(double* M, double* q, double* q_dot, double* q_dd
     M[5] = q_dot[1];
     M[6] = q_dot[2];
     M[7] = q_dot[3];
+    M[8] = q[0];
+    M[9] = q[1];
+    M[10] = q[2];
+    M[11] = q[3];
+    M[12] = q_dot[0];
+    M[13] = q_dot[1];
+    M[14] = q_dot[2];
+    M[15] = q_dot[3];
 }
 
 // Centrifugal and Coriolis vector
