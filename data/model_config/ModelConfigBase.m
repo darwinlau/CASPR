@@ -20,6 +20,14 @@ classdef (Abstract) ModelConfigBase < handle
         viewAngle                   % The angle for which the model should be viewed at
         defaultCableSetId           % ID for the default cable set to display first
         defaultOperationalSetId     % ID for the default operational set to display first
+        
+        robotNamesList              % List of names of robots as cell array of strings
+    end
+    
+    properties (Dependent)
+        cableSetNamesList               % List of names of cable sets
+        jointTrajectoryNamesList        % List of names of trajectories (joint space)
+        operationalTrajectoryNamesList  % List of names of trajectories (operational space)
     end
     
     properties (Access = private)
@@ -34,9 +42,9 @@ classdef (Abstract) ModelConfigBase < handle
     methods
         % Constructor for the ModelConfig class. This builds the xml
         % objects.
-        function c = ModelConfigBase(type_string, folder, list_file)
+        function c = ModelConfigBase(robot_name, folder, list_file)
             c.root_folder = [CASPR_configuration.LoadModelConfigPath(), folder];
-            c.robotName = type_string;
+            c.robotName = robot_name;
                         
             % Check the type of enum and open the master list
             fid = fopen([c.root_folder, list_file]);
@@ -44,11 +52,16 @@ classdef (Abstract) ModelConfigBase < handle
             % Determine the Filenames
             % Load the contents
             cell_array = textscan(fid,'%s %s %s %s %s %s','delimiter',',');
-            i_length = length(cell_array{1});
+            num_robots = length(cell_array{1});
+            c.robotNamesList = cell(1, num_robots);
             status_flag = 1;
+            % Store the robot names
+            for i = 1:num_robots
+                c.robotNamesList{i} = char(cell_array{1}{i});
+            end
             % Loop through until the right line of the list is found
-            for i = 1:i_length
-                if(strcmp(char(cell_array{1}{i}),type_string))
+            for i = 1:num_robots
+                if(strcmp(c.robotNamesList{i},robot_name))
                     cdpr_folder                 = char(cell_array{2}{i});
                     c.modelFolderPath           = [c.root_folder, cdpr_folder];
                     c.bodyPropertiesFilename    = [c.root_folder, cdpr_folder, char(cell_array{3}{i})];
@@ -60,7 +73,7 @@ classdef (Abstract) ModelConfigBase < handle
                 end
             end
             if(status_flag)
-                CASPR_log.Error(sprintf('Robot model ''%s'' is not defined', type_string));
+                CASPR_log.Error(sprintf('Robot model ''%s'' is not defined', robot_name));
             end
             
             % Make sure all the filenames that are required exist
@@ -107,7 +120,7 @@ classdef (Abstract) ModelConfigBase < handle
                 sysModel.loadOperationalXmlObj(operationalset_xmlobj);
             end    
             c.bodiesModel = sysModel.bodyModel;
-            c.displayRange = XmlOperations.StringToVector(char(bodies_xmlobj.getAttribute('display_range')));
+            c.displayRange = XmlOperations.StringToVector(char(bodies_xmlobj.getAttribute('display_range')))';
             c.viewAngle = XmlOperations.StringToVector(char(bodies_xmlobj.getAttribute('view_angle')))';
         end
                 
@@ -227,6 +240,21 @@ classdef (Abstract) ModelConfigBase < handle
             else
                 trajectories_str = {};
             end
+        end
+    end
+    
+    % Dependent variables
+    methods
+        function value = get.cableSetNamesList(obj)
+            value = obj.getCableSetList();
+        end
+        
+        function value = get.jointTrajectoryNamesList(obj)
+            value = obj.getJointTrajectoriesList();
+        end
+        
+        function value = get.operationalTrajectoryNamesList(obj)
+            value = obj.getOperationalTrajectoriesList();
         end
     end
     
