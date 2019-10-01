@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE bodies_system SYSTEM "../../../templates/bodies.dtd">
 <bodies_system>
-    <links display_range="-0.25 1.25 -0.25 1.25 -0.25 1.25" view_angle="-37 32">
+    <links display_range="-0.25 1.25 -0.25 1.25 -0.25 1.25" view_angle="-12 28">
       <link_rigid num="1" name="Spatial Manipulator">
         <joint type="SPATIAL_EULER_XYZ" q_initial="0.5 0.5 0.5 0 0 0" q_min="0.0 0.0 0.0 -1 -1 -1" q_max="1.0 1.0 1.0 1 1 1"/>
         <physical>
