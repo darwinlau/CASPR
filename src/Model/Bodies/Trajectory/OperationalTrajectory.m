@@ -12,28 +12,67 @@ classdef OperationalTrajectory < TrajectoryBase
     
     methods        
         % Plots the operational space
-        function plotOperationalSpace(obj, states_to_plot)
-            n_operational_dof = length(obj.y{1});
+        function plotOperationalSpace(obj, states_to_plot, plot_ax)
+            obj.plotOperationalPose(states_to_plot, plot_ax);
+            obj.plotOperationalVelocity(states_to_plot, plot_ax);
+            obj.plotOperationalAcceleration(states_to_plot, plot_ax);
+        end
+        
+        function plotOperationalPose(obj, states_to_plot, plot_ax)
+            n_dof = length(obj.y{1});
+            y_array = cell2mat(obj.y);
             
-            if nargin == 1 || isempty(states_to_plot)
-                states_to_plot = 1:n_operational_dof;
+            if nargin <= 1 || isempty(states_to_plot)
+                states_to_plot = 1:n_dof;
             end
+            if(nargin <= 2 || isempty(plot_ax))
+                % Plots joint space variables q(t)
+                figure;
+                plot(obj.timeVector, y_array(states_to_plot, :), 'Color', 'k', 'LineWidth', 1.5);
+                title('Operational Pose');
+            else
+                plot(plot_ax, obj.timeVector, y_array(states_to_plot, :), 'LineWidth', 1.5, 'Color', 'k');
+            end
+            xlabel('Time (s)');
+            ylabel('Operational Pose');
+        end
+        
+        function plotOperationalVelocity(obj, states_to_plot, plot_ax)
+            n_dof = length(obj.y_dot{1});
+            y_dot_array = cell2mat(obj.y_dot);
             
-            y_vector = cell2mat(obj.q);
-            yd_vector = cell2mat(obj.q_dot);
-            ydd_vector = cell2mat(obj.q_ddot);
+            if nargin <= 1 || isempty(states_to_plot)
+                states_to_plot = 1:n_dof;
+            end
+            if(nargin <= 2 || isempty(plot_ax))
+                % Plots joint space variables q(t)
+                figure;
+                plot(obj.timeVector, y_dot_array(states_to_plot, :), 'Color', 'k', 'LineWidth', 1.5);
+                title('Operational Velocity');
+            else
+                plot(plot_ax, obj.timeVector, y_dot_array(states_to_plot, :), 'LineWidth', 1.5, 'Color', 'k');
+            end
+            xlabel('Time (s)');
+            ylabel('Operational Velocity');
+        end
+        
+        function plotOperationalAcceleration(obj, states_to_plot, plot_ax)
+            n_dof = length(obj.y_ddot{1});
+            y_dot_array = cell2mat(obj.y_ddot);
             
-            figure;
-            title('Trajectory');
-            plot(obj.timeVector, y_vector(states_to_plot, :), 'Color', 'k', 'LineWidth', 1.5);
-            
-            figure;
-            title('Trajectory velocity');
-            plot(obj.timeVector, yd_vector(states_to_plot, :), 'Color', 'k', 'LineWidth', 1.5);
-            
-            figure;
-            title('Trajectory acceleration');
-            plot(obj.timeVector, ydd_vector(states_to_plot, :), 'Color', 'k', 'LineWidth', 1.5);
+            if nargin <= 1 || isempty(states_to_plot)
+                states_to_plot = 1:n_dof;
+            end
+            if(nargin <= 2 || isempty(plot_ax))
+                % Plots joint space variables q(t)
+                figure;
+                plot(obj.timeVector, y_dot_array(states_to_plot, :), 'Color', 'k', 'LineWidth', 1.5);
+                title('Operational Acceleration');
+            else
+                plot(plot_ax, obj.timeVector, y_dot_array(states_to_plot, :), 'LineWidth', 1.5, 'Color', 'k');
+            end
+            xlabel('Time (s)');
+            ylabel('Operational Acceleration');
         end
     end
     
@@ -243,10 +282,5 @@ classdef OperationalTrajectory < TrajectoryBase
         function [trajectory] = FileTrajectoryLoadXmlObj(xmlObj, bodiesObj, modelConfig)
             CASPR_log.Error('Function has not been implemented yet');
         end   
-        
-        % Loads a complete trajectory by reading a .traj file
-        function [trajectory_all, force_trajectory] = LoadCompleteTrajectory(traj_file,model)
-            CASPR_log.Error('Function has not been implemented yet');
-        end
     end
 end

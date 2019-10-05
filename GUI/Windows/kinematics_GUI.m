@@ -590,8 +590,8 @@ function run_forward_kinematics(handles,modObj,trajectory_id)
     set(handles.status_text,'String','Simulation plotting');
     drawnow;
     start_tic = tic;
-    GUIOperations.GUIPlot('plotJointSpace',iksim,handles,1,get(handles.undock_box,'Value'));
-    GUIOperations.GUIPlot('plotJointSpace',fksim,handles,1,get(handles.undock_box,'Value'));
+    GUIOperations.GUIPlot('plotJointPose',iksim,handles,1,get(handles.undock_box,'Value'));
+    GUIOperations.GUIPlot('plotJointPose',fksim,handles,1,get(handles.undock_box,'Value'));
     GUIOperations.GUIPlot('plotCableLengthError',fksim,handles,1,get(handles.undock_box,'Value'));
     time_elapsed = toc(start_tic);
     CASPR_log.Info(sprintf('End Plotting Simulation : %f seconds', time_elapsed));

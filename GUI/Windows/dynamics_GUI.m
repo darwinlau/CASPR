@@ -599,8 +599,8 @@ function run_forward_dynamics(handles,modObj,trajectory_id)
     % Finally compare the results
     set(handles.status_text,'String','Plotting results');
     drawnow;
-    GUIOperations.GUIPlot('plotJointSpace',idsim,handles,1,get(handles.undock_box,'Value'));
-    GUIOperations.GUIPlot('plotJointSpace',fdsim,handles,1,get(handles.undock_box,'Value'));
+    GUIOperations.GUIPlot('plotJointPose',idsim,handles,1,get(handles.undock_box,'Value'));
+    GUIOperations.GUIPlot('plotJointPose',fdsim,handles,1,get(handles.undock_box,'Value'));
     set(handles.status_text,'String','No simulation running');
     assignin('base','forward_dynamics_simulator',fdsim);
 end

@@ -89,7 +89,7 @@ classdef CUCableRobotExperiment < ExperimentBase
             % Setup the trajectory and run the experiment
             trajectory = model_config.getJointTrajectory(trajectory_id);
             exp.hardwareInterface.timeStep = trajectory.timeVector(2)-trajectory.timeVector(1);
-            trajectory.plotJointSpace();
+            trajectory.plotJointPose();
             exp.runTrajectory(trajectory);
         end
     end

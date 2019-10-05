@@ -113,7 +113,13 @@ classdef JointTrajectory < TrajectoryBase
             [output_data.q_fs_1, output_data.f] = fftAnalysis(output_data.t_sampled_data, output_data.q_sampled_data);
             [output_data.q_dot_fs_1, ~] = fftAnalysis(output_data.t_sampled_data, output_data.q_dot_sampled_data);
             [output_data.q_ddot_fs_1, ~] = fftAnalysis(output_data.t_sampled_data, output_data.q_ddot_sampled_data);
-            
+        end
+        
+        % Plots the joint space
+        function plotJointSpace(obj, states_to_plot, plot_ax)
+            obj.plotJointPose(states_to_plot, plot_ax);
+            obj.plotJointVelocity(states_to_plot, plot_ax);
+            obj.plotJointAcceleration(states_to_plot, plot_ax);
         end
         
         % Function plots the joint trajectory
@@ -128,7 +134,7 @@ classdef JointTrajectory < TrajectoryBase
                 % Plots joint space variables q(t)
                 figure;
                 plot(obj.timeVector, q_array(states_to_plot, :), 'Color', 'k', 'LineWidth', 1.5);
-                title('Joint space');
+                title('Joint Pose');
             else
                 plot(plot_ax, obj.timeVector, q_array(states_to_plot, :), 'LineWidth', 1.5, 'Color', 'k');
             end
@@ -138,7 +144,7 @@ classdef JointTrajectory < TrajectoryBase
         
         % Function plots the joint trajectory velocity
         function plotJointVelocity(obj, states_to_plot, plot_ax)
-            n_dof = length(obj.q{1});
+            n_dof = length(obj.q_dot{1});
             qd_array = cell2mat(obj.q_dot);
             
             if nargin <= 1 || isempty(states_to_plot)
@@ -158,7 +164,7 @@ classdef JointTrajectory < TrajectoryBase
         
         % Function plots the joint trajectory, velocity and acceleration
         function plotJointAcceleration(obj, states_to_plot, plot_ax)
-            n_dof = length(obj.q{1});
+            n_dof = length(obj.q_ddot{1});
             qdd_array = cell2mat(obj.q_ddot);
             
             if nargin <= 1 || isempty(states_to_plot)

@@ -42,7 +42,7 @@
         <plot_function type="plotBodyCoGAcceleration">
             <figure_quantity>1</figure_quantity>
         </plot_function>
-        <plot_function type="plotJointSpace">
+        <plot_function type="plotJointPose">
             <figure_quantity>1</figure_quantity>
         </plot_function>
         <plot_function type="plotJointVelocity">
