@@ -181,6 +181,42 @@ classdef JointTrajectory < TrajectoryBase
             xlabel('Time (s)');
             ylabel('Joint Acceleration');
         end
+        
+        function saveJointTrajectoryFile(obj, file_name)
+            n_q = length(obj.q{1});
+            fid = fopen(file_name, 'w');
+            fprintf(fid, 'time_step,%f\n', obj.timeStep);
+            
+            for i = 1:length(obj.timeVector)
+                q_tmp = obj.q{i};
+                v_tmp = obj.q_dot{i};
+                a_tmp = obj.q_ddot{i};
+                % First the time
+                str = [sprintf('t,%0.6f,p,', obj.timeVector(i))];
+                % Now add the joint pose
+                for j = 1:n_q
+                    str = [str, sprintf('%.6f,', q_tmp(j))];
+                end
+                str = [str,'v,'];
+                for j = 1:n_q
+                    str = [str, sprintf('%.6f,', v_tmp(j))];
+                end
+                str = [str,'a,'];
+                for j = 1:n_q
+                    if (j ~= n_q)
+                        str = [str, sprintf('%.6f,', a_tmp(j))];
+                    else
+                        str = [str, sprintf('%.6f', a_tmp(j))];
+                    end
+                end
+                if(i < length(obj.timeVector))
+                    fprintf(fid,'%s\n',str);
+                else
+                    fprintf(fid,'%s',str);
+                end
+            end
+            fclose(fid);
+        end
     end
     
     methods (Static)
@@ -633,7 +669,7 @@ classdef JointTrajectory < TrajectoryBase
             file_location = [modelConfig.modelFolderPath, filename];
             
             trajectory = JointTrajectory.FileTrajectoryCreate(file_location, bodiesObj);
-        end       
+        end
         
         % Loads a complete trajectory by reading a .traj file
         function [trajectory] = FileTrajectoryCreate(traj_file, model)
@@ -642,7 +678,7 @@ classdef JointTrajectory < TrajectoryBase
             
             % Read through the trajectory file
             % Open the file
-            fid = fopen(traj_file,'r');
+            fid = fopen(traj_file, 'r');
             % Read the first line
             l0 = fgetl(fid);
             % Split the line
@@ -650,34 +686,46 @@ classdef JointTrajectory < TrajectoryBase
             % extract the double values
             timeStep = str2double(l_split{2});
             
+            time = 0.0;
+            
             % For the remaining lines extract the data
             num_points = 1;
             % Initialise the trajectory vectors
             n_q = model.numDofs;
             while(~feof(fid))
-                l1 = fgetl(fid);
+                line = fgetl(fid);
                 % Split up the components
-                l_split = strsplit(l1,{'q,',',v,',',a,'});
+                l_split = strsplit(line,{'t,','p,',',v,',',a,'});
+                
+                % Extract and check the time (error checking that file is
+                % valid)
+                l_time = str2double(l_split{2});
+                % Check that time is within the mantissa
+                CASPR_log.Assert(abs(time - l_time) <= 1e-9, 'Invalid format: time is not correct');
+                time = time + timeStep;
                 
                 % First the pose
-                l_split_q = strsplit(l_split{2},',');
+                l_split_p = strsplit(l_split{3},',');
                 q = zeros(n_q,1);
-                for k=1:length(l_split_q)
-                    q(k) = str2double(l_split_q{k});
+                CASPR_log.Assert(n_q == length(l_split_p), 'Invalid format: invalid number of joint poses specified');
+                for k=1:length(l_split_p)
+                    q(k) = str2double(l_split_p{k});
                 end
                 trajectory.q{num_points} = q;
                 
                 % Then the velocity
-                l_split_v = strsplit(l_split{3},',');
+                l_split_v = strsplit(l_split{4},',');
                 v = zeros(n_q,1);
+                CASPR_log.Assert(n_q == length(l_split_v), 'Invalid format: invalid number of joint velocities specified');
                 for k=1:length(l_split_v)
                     v(k) = str2double(l_split_v{k});
                 end
                 trajectory.q_dot{num_points} = v;
                 
                 % Then the acceleration
-                l_split_a = strsplit(l_split{4},',');
+                l_split_a = strsplit(l_split{5},',');
                 a = zeros(n_q,1);
+                CASPR_log.Assert(n_q == length(l_split_a), 'Invalid format: invalid number of joint accelerations specified');
                 for k=1:length(l_split_a)
                     a(k) = str2double(l_split_a{k});
                 end
@@ -689,69 +737,6 @@ classdef JointTrajectory < TrajectoryBase
             trajectory.timeVector = [0:timeStep:totalTime];
             fclose(fid);
         end
-        
-%         % Loads a complete trajectory by reading a .traj file
-%         function [trajectory_all, force_trajectory] = LoadCompleteTrajectory(traj_file,model)
-%             % Initialise a new trajectry
-%             trajectory_all = JointTrajectory();
-%             
-%             % Read through the trajectory file
-%             % Open the file
-%             fid = fopen(traj_file,'r');
-%             % Read the first line
-%             l0 = fgetl(fid);
-%             % Split the line
-%             l_split = strsplit(l0,'t,');
-%             % extract the double values
-%             trajectory_all.timeStep = str2double(l_split{2});
-%             
-%             % For the remaining lines extract the data
-%             num_points = 1;
-%             % Initialise the trajectory vectors
-%             n_q = model.bodyModel.numDofs; n_f = model.cableModel.numCables;
-%             while(~feof(fid))
-%                 l1 = fgetl(fid);
-%                 % Split up the components
-%                 l_split = strsplit(l1,{'q,',',v,',',a,',',f,'});
-%                 
-%                 % First the pose
-%                 l_split_q = strsplit(l_split{2},',');
-%                 q = zeros(n_q,1);
-%                 for k=1:length(l_split_q)
-%                     q(k) = str2double(l_split_q{k});
-%                 end
-%                 trajectory_all.q{num_points} = q;
-%                 
-%                 % Then the velocity
-%                 l_split_v = strsplit(l_split{3},',');
-%                 v = zeros(n_q,1);
-%                 for k=1:length(l_split_v)
-%                     v(k) = str2double(l_split_v{k});
-%                 end
-%                 trajectory_all.q_dot{num_points} = v;
-%                 
-%                 % Then the acceleration
-%                 l_split_a = strsplit(l_split{4},',');
-%                 a = zeros(n_q,1);
-%                 for k=1:length(l_split_a)
-%                     a(k) = str2double(l_split_a{k});
-%                 end
-%                 trajectory_all.q_ddot{num_points} = a;
-%                 
-%                 % Finally the force
-%                 l_split_f = strsplit(l_split{5},',');
-%                 f = zeros(n_f,1);
-%                 for k=1:length(l_split_f)-1
-%                     f(k) = str2double(l_split_f{k});
-%                 end
-%                 force_trajectory{num_points} = f;
-%                 
-%                 num_points = num_points + 1;
-%             end
-%             trajectory_all.totalTime = (num_points-2)*trajectory_all.timeStep;
-%             trajectory_all.timeVector = [0:trajectory_all.timeStep:trajectory_all.totalTime];
-%             fclose(fid);
-%         end
         
         % NEEDS TO BE FIXED TO GENERATE BASED ON JOINTS AND MERGE WITH
         % EXISTING PARABOLIC BLEND

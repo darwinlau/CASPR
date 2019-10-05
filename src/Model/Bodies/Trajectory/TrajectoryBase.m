@@ -10,11 +10,17 @@ classdef (Abstract) TrajectoryBase < handle
     
     properties (Dependent)
         totalTime 
+        timeStep        % The time step for the trajectory
     end
     
     methods        
         function value = get.totalTime(obj)
             value = obj.timeVector(length(obj.timeVector)) - obj.timeVector(1);
+        end
+        
+        % It is assumed that the time-step is uniform for trajectories
+        function value = get.timeStep(obj)
+            value = obj.timeVector(2) - obj.timeVector(1);
         end
     end
     
