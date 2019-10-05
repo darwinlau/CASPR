@@ -11,7 +11,7 @@
 %   include:
 %       - plotMovie: to plot an avi animation of the CDPR motion
 %       - plotCableLengths: plot the length of a set (or all) of the cables
-%       - plotJointSpace: plot the joint space variables
+%       - plotJointPose: plot the joint space variables
 %       - plotBodyCOG: plot the COG position of the CDPR in inertial frame
 %       - plotAngularAcceleration: plot the angular acceleration in {0}
 %       - plotFrame: plots a single frame of the CDPR, can be used to plot
@@ -95,17 +95,24 @@ classdef (Abstract) MotionSimulatorBase < SimulatorBase
 %             title('Cable Lengths Derivative (Numerical)');
             % ONLY USED IN DEBUGGING END
         end
+        
+        % Plots the joint space (pose, velocity and acceleration) of the
+        % CDPR over the trajectory.
+        function plotJointSpace(obj, states_to_plot, plot_ax)
+            CASPR_log.Assert(~isempty(obj.trajectory), 'Cannot plot since trajectory is empty');            
+            obj.trajectory.plotJointSpace(states_to_plot, plot_ax);
+        end
 
-        % Plots the joint space vars of the CDPR over the trajectory. Users
+        % Plots the joint pose of the CDPR over the trajectory. Users
         % need to specify the plot axis and also which states (as an array
         % of numbers) to plot (it is possible to default to plot all states
         % if the array is []).
-        function plotJointSpace(obj, states_to_plot, plot_ax)
+        function plotJointPose(obj, states_to_plot, plot_ax)
             CASPR_log.Assert(~isempty(obj.trajectory), 'Cannot plot since trajectory is empty');            
             obj.trajectory.plotJointPose(states_to_plot, plot_ax);       
         end
         
-        % Plots the joint space velocity of the CDPR over the trajectory. Users
+        % Plots the joint velocity of the CDPR over the trajectory. Users
         % need to specify the plot axis and also which states (as an array
         % of numbers) to plot (it is possible to default to plot all states
         % if the array is []).
@@ -115,7 +122,7 @@ classdef (Abstract) MotionSimulatorBase < SimulatorBase
         end
         
         
-        % Plots the joint space acceleration of the CDPR over the trajectory. Users
+        % Plots the joint acceleration of the CDPR over the trajectory. Users
         % need to specify the plot axis and also which states (as an array
         % of numbers) to plot (it is possible to default to plot all states
         % if the array is []).
