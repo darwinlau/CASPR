@@ -47,45 +47,42 @@ classdef (Abstract) MotionSimulatorBase < SimulatorBase
         % need to specify the plot axis and also which cables (as an array
         % of numbers) to plot (it is possible to default to plot all cables
         % if the array is []).
-        function plotCableLengths(obj, plot_axis, cables_to_plot)
+        function plotCableLengths(obj, cables_to_plot, plot_ax)
             CASPR_log.Assert(~isempty(obj.cableLengths), 'Cannot plot since lengths vector is empty');
             if nargin <= 2 || isempty(cables_to_plot)
                 cables_to_plot = 1:obj.model.numCables;
             end
             length_array = cell2mat(obj.cableLengths);
-            if(nargin <= 1||isempty(plot_axis))
+            if(nargin <= 1||isempty(plot_ax))
                 figure;
                 plot(obj.timeVector, length_array(cables_to_plot, :), 'LineWidth', 1.5, 'Color', 'k');
                 title('Cable Lengths');
             else
-                plot(plot_axis,obj.timeVector, length_array(cables_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); 
+                plot(plot_ax,obj.timeVector, length_array(cables_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); 
             end
             xlabel('Time (s)');
-            ylabel('Lengths (m)');
+            ylabel('Length (m)');
         end
         
         % Plots the cable lengths derivative of the CDPR over the trajectory. Users
         % need to specify the plot axis and also which cables (as an array
         % of numbers) to plot (it is possible to default to plot all cables
         % if the array is []).
-        function plotCableLengthsDot(obj, plot_axis, cables_to_plot)
+        function plotCableLengthsVelocity(obj, cables_to_plot, plot_ax)
             CASPR_log.Assert(~isempty(obj.cableLengthsDot), 'Cannot plot since lengths_dot vector is empty');
             if nargin <= 2 || isempty(cables_to_plot)
                 cables_to_plot = 1:obj.model.numCables;
             end
             length_dot_array = cell2mat(obj.cableLengthsDot);
-            if(nargin <= 1||isempty(plot_axis))
+            if(nargin <= 1||isempty(plot_ax))
                 figure;
                 plot(obj.timeVector, length_dot_array(cables_to_plot, :), 'LineWidth', 1.5, 'Color', 'k');
-                title('Cable Lengths Derivative');
+                title('Cable Lengths Velocity');
             else
-                plot(plot_axis,obj.timeVector, length_dot_array(cables_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); 
+                plot(plot_ax,obj.timeVector, length_dot_array(cables_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); 
             end
             xlabel('Time (s)');
             ylabel('Velocity (m/s)');
-            
-            %assignin('base','lengths',length_array);
-        
             
             % ONLY USED IN DEBUGGING START
 %             length_array = cell2mat(obj.cableLengths);
@@ -103,53 +100,35 @@ classdef (Abstract) MotionSimulatorBase < SimulatorBase
         % need to specify the plot axis and also which states (as an array
         % of numbers) to plot (it is possible to default to plot all states
         % if the array is []).
-        function plotJointSpace(obj, plot_axis, states_to_plot)
-            CASPR_log.Assert(~isempty(obj.trajectory), 'Cannot plot since trajectory is empty');
-            n_dof = obj.model.numDofs;
-            if nargin <= 2 || isempty(cables_to_plot)
-                states_to_plot = 1:n_dof;
-            end
-            q_array = cell2mat(obj.trajectory.q);
-            if(nargin <= 1||isempty(plot_axis))
-                % Plots joint space variables q(t)
-                figure;
-                plot(obj.timeVector, q_array(states_to_plot, :), 'Color', 'k', 'LineWidth', 1.5);
-                title('Joint space variables');
-            else
-                plot(plot_axis,obj.timeVector, q_array(states_to_plot, :), 'LineWidth', 1.5, 'Color', 'k');
-            end
-            xlabel('Time (seconds)');
-            ylabel('Pose');
+        function plotJointSpace(obj, states_to_plot, plot_ax)
+            CASPR_log.Assert(~isempty(obj.trajectory), 'Cannot plot since trajectory is empty');            
+            obj.trajectory.plotJointPose(states_to_plot, plot_ax);       
         end
         
-        % Plots the joint space vars of the CDPR over the trajectory. Users
+        % Plots the joint space velocity of the CDPR over the trajectory. Users
         % need to specify the plot axis and also which states (as an array
         % of numbers) to plot (it is possible to default to plot all states
         % if the array is []).
-        function plotJointSpaceDot(obj, plot_axis, states_to_plot)
-            CASPR_log.Assert(~isempty(obj.trajectory), 'Cannot plot since trajectory is empty');
-            n_dof = obj.model.numDofs;
-            if nargin <= 2 || isempty(cables_to_plot)
-                states_to_plot = 1:n_dof;
-            end
-            q_dot_array = cell2mat(obj.trajectory.q_dot);
-            if(nargin <= 1||isempty(plot_axis))
-                % Plots derivative joint space variables q_dot(t)
-                figure;
-                plot(obj.timeVector, q_dot_array(states_to_plot, :), 'Color', 'k', 'LineWidth', 1.5);
-                title('Joint space derivatives');
-            else
-                plot(plot_axis,obj.timeVector, q_dot_array(states_to_plot, :), 'LineWidth', 1.5, 'Color', 'k'); 
-            end
-            xlabel('Time (seconds)');
-            ylabel('Velocity');            
+        function plotJointVelocity(obj, states_to_plot, plot_ax)
+            CASPR_log.Assert(~isempty(obj.trajectory), 'Cannot plot since trajectory is empty');         
+            obj.trajectory.plotJointVelocity(states_to_plot, plot_ax);          
+        end
+        
+        
+        % Plots the joint space acceleration of the CDPR over the trajectory. Users
+        % need to specify the plot axis and also which states (as an array
+        % of numbers) to plot (it is possible to default to plot all states
+        % if the array is []).
+        function plotJointAcceleration(obj, states_to_plot, plot_ax)
+            CASPR_log.Assert(~isempty(obj.trajectory), 'Cannot plot since trajectory is empty');         
+            obj.trajectory.plotJointAcceleration(states_to_plot, plot_ax);
         end
 
         % Plots the CoG of the links of the CDPR over the trajectory. Users
         % need to specify the plot axis and also which bodies (as an array
         % of numbers) to plot (it is possible to default to plot all bodies
         % if the array is []).
-        function plotBodyCOG(obj, plot_axis, bodies_to_plot)
+        function plotBodyCoG(obj, bodies_to_plot, plot_ax)
             CASPR_log.Assert(~isempty(obj.trajectory), 'Cannot plot since trajectory is empty');
             % Plots absolute position, velocity and acceleration of COG
             % with respect to {0}
@@ -163,14 +142,14 @@ classdef (Abstract) MotionSimulatorBase < SimulatorBase
                     pos0(3*ki-2:3*ki, t) = obj.model.bodyModel.bodies{bodies_to_plot(ki)}.R_0k*obj.model.bodyModel.bodies{bodies_to_plot(ki)}.r_OG;
                 end
             end
-            if(nargin <= 1 ||isempty(plot_axis))
+            if(nargin <= 1 ||isempty(plot_ax))
                 figure;
                 plot(obj.timeVector, pos0, 'Color', 'k', 'LineWidth', 1.5);
                 title('Position of CoG');
             else
-                plot(plot_axis,obj.timeVector, pos0, 'LineWidth', 1.5, 'Color', 'k'); 
+                plot(plot_ax,obj.timeVector, pos0, 'LineWidth', 1.5, 'Color', 'k'); 
             end
-            xlabel('Time (seconds)');
+            xlabel('Time (s)');
             ylabel('Position (m)');            
         end       
         
@@ -178,7 +157,7 @@ classdef (Abstract) MotionSimulatorBase < SimulatorBase
         % need to specify the plot axis and also which bodies (as an array
         % of numbers) to plot (it is possible to default to plot all bodies
         % if the array is []).
-        function plotBodyCOGDot(obj, plot_axis, bodies_to_plot)
+        function plotBodyCoGVelocity(obj, bodies_to_plot, plot_ax)
             CASPR_log.Assert(~isempty(obj.trajectory), 'Cannot plot since trajectory is empty');
             % Plots absolute position, velocity and acceleration of COG
             % with respect to {0}
@@ -192,14 +171,14 @@ classdef (Abstract) MotionSimulatorBase < SimulatorBase
                     pos0_dot(3*ki-2:3*ki, t) = obj.model.bodyModel.bodies{bodies_to_plot(ki)}.R_0k*obj.model.bodyModel.bodies{bodies_to_plot(ki)}.v_OG;
                 end
             end
-            if(nargin <= 1 ||isempty(plot_axis))
+            if(nargin <= 1 ||isempty(plot_ax))
                 figure;
                 plot(obj.timeVector, pos0_dot, 'Color', 'k', 'LineWidth', 1.5);
                 title('Velocity of CoG');
             else 
-                plot(plot_axis,obj.timeVector, pos0_dot, 'LineWidth', 1.5, 'Color', 'k'); 
+                plot(plot_ax,obj.timeVector, pos0_dot, 'LineWidth', 1.5, 'Color', 'k'); 
             end
-            xlabel('Time (seconds)');
+            xlabel('Time (s)');
             ylabel('Velocity (m/s)');
             % ONLY USED IN DEBUGGING START
             % Numerical derivative must be performed in frame {0}
@@ -217,7 +196,7 @@ classdef (Abstract) MotionSimulatorBase < SimulatorBase
         % need to specify the plot axis and also which bodies (as an array
         % of numbers) to plot (it is possible to default to plot all bodies
         % if the array is []).
-        function plotBodyCOGDdot(obj, plot_axis, bodies_to_plot)
+        function plotBodyCoGAcceleration(obj, bodies_to_plot, plot_ax)
             CASPR_log.Assert(~isempty(obj.trajectory), 'Cannot plot since trajectory is empty');
             % Plots absolute position, velocity and acceleration of COG
             % with respect to {0}
@@ -231,14 +210,14 @@ classdef (Abstract) MotionSimulatorBase < SimulatorBase
                     pos0_ddot(3*ki-2:3*ki, t) = obj.model.bodyModel.bodies{bodies_to_plot(ki)}.R_0k*obj.model.bodyModel.bodies{bodies_to_plot(ki)}.a_OG;
                 end
             end
-            if(nargin <= 1 ||isempty(plot_axis))
+            if(nargin <= 1 ||isempty(plot_ax))
                 figure;
                 plot(obj.timeVector, pos0_ddot, 'Color', 'k', 'LineWidth', 1.5);
                 title('Acceleration of CoG');
             else
-                plot(plot_axis,obj.timeVector, pos0_ddot, 'LineWidth', 1.5, 'Color', 'k'); 
+                plot(plot_ax,obj.timeVector, pos0_ddot, 'LineWidth', 1.5, 'Color', 'k'); 
             end
-            xlabel('Time (seconds)');
+            xlabel('Time (s)');
             ylabel('Acceleration (m/s^2)');            
             % ONLY USED IN DEBUGGING START
             % Numerical derivative must be performed in frame {0}
@@ -256,7 +235,7 @@ classdef (Abstract) MotionSimulatorBase < SimulatorBase
         % need to specify the plot axis and also which bodies (as an array
         % of numbers) to plot (it is possible to default to plot all bodies
         % if the array is []).
-        function plotAngularVelocity(obj, plot_axis, bodies_to_plot)
+        function plotAngularVelocity(obj, bodies_to_plot, plot_ax)
             CASPR_log.Assert(~isempty(obj.trajectory), 'Cannot plot since trajectory is empty');
             % Plots absolute position, velocity and acceleration of COG
             % with respect to {0}
@@ -270,12 +249,12 @@ classdef (Abstract) MotionSimulatorBase < SimulatorBase
                     ang0(3*ki-2:3*ki, t) = obj.model.bodyModel.bodies{bodies_to_plot(ki)}.R_0k*obj.model.bodyModel.bodies{bodies_to_plot(ki)}.w;
                 end
             end
-            if(nargin <= 1 || isempty(plot_axis))
+            if(nargin <= 1 || isempty(plot_ax))
                 figure;
                 plot(obj.timeVector, ang0, 'Color', 'k', 'LineWidth', 1.5);
                 title('Angular velocity of rigid bodies');          
             else
-                plot(plot_axis,obj.timeVector, ang0, 'LineWidth', 1.5, 'Color', 'k'); 
+                plot(plot_ax,obj.timeVector, ang0, 'LineWidth', 1.5, 'Color', 'k'); 
             end
             xlabel('Time (seconds)');
             ylabel('Angular Velocity (rad/s)');            
@@ -285,7 +264,7 @@ classdef (Abstract) MotionSimulatorBase < SimulatorBase
         % need to specify the plot axis and also which bodies (as an array
         % of numbers) to plot (it is possible to default to plot all bodies
         % if the array is []).
-        function plotAngularAcceleration(obj, plot_axis, bodies_to_plot)
+        function plotAngularAcceleration(obj, bodies_to_plot, plot_ax)
             CASPR_log.Assert(~isempty(obj.trajectory), 'Cannot plot since trajectory is empty');
             % Plots absolute position, velocity and acceleration of COG
             % with respect to {0}
@@ -299,12 +278,12 @@ classdef (Abstract) MotionSimulatorBase < SimulatorBase
                     ang0_dot(3*ki-2:3*ki, t) = obj.model.bodyModel.bodies{bodies_to_plot(ki)}.R_0k*obj.model.bodyModel.bodies{bodies_to_plot(ki)}.w_dot;
                 end
             end
-            if(nargin <= 1 || isempty(plot_axis))
+            if(nargin <= 1 || isempty(plot_ax))
                 figure;
                 plot(obj.timeVector, ang0_dot, 'Color', 'k', 'LineWidth', 1.5);
                 title('Angular acceleration dot of rigid bodies');                
             else
-                plot(plot_axis,obj.timeVector, ang0_dot, 'LineWidth', 1.5, 'Color', 'k'); 
+                plot(plot_ax,obj.timeVector, ang0_dot, 'LineWidth', 1.5, 'Color', 'k'); 
             end
             xlabel('Time (seconds)');
             ylabel('Angular Acceleration (rad/s^3)');            

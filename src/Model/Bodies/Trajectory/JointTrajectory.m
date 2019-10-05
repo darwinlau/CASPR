@@ -115,29 +115,65 @@ classdef JointTrajectory < TrajectoryBase
             [output_data.q_ddot_fs_1, ~] = fftAnalysis(output_data.t_sampled_data, output_data.q_ddot_sampled_data);
             
         end
-        % Function plots the joint trajectory, velocity and acceleration
-        function plotJointSpace(obj, states_to_plot)
+        
+        % Function plots the joint trajectory
+        function plotJointPose(obj, states_to_plot, plot_ax)
             n_dof = length(obj.q{1});
+            q_array = cell2mat(obj.q);
             
-            if nargin == 1 || isempty(states_to_plot)
+            if nargin <= 1 || isempty(states_to_plot)
                 states_to_plot = 1:n_dof;
             end
+            if(nargin <= 2 || isempty(plot_ax))
+                % Plots joint space variables q(t)
+                figure;
+                plot(obj.timeVector, q_array(states_to_plot, :), 'Color', 'k', 'LineWidth', 1.5);
+                title('Joint space');
+            else
+                plot(plot_ax, obj.timeVector, q_array(states_to_plot, :), 'LineWidth', 1.5, 'Color', 'k');
+            end
+            xlabel('Time (s)');
+            ylabel('Joint Pose');
+        end
+        
+        % Function plots the joint trajectory velocity
+        function plotJointVelocity(obj, states_to_plot, plot_ax)
+            n_dof = length(obj.q{1});
+            qd_array = cell2mat(obj.q_dot);
             
-            q_vector = cell2mat(obj.q);
-            qd_vector = cell2mat(obj.q_dot);
-            qdd_vector = cell2mat(obj.q_ddot);
+            if nargin <= 1 || isempty(states_to_plot)
+                states_to_plot = 1:n_dof;
+            end
+            if(nargin <= 2 || isempty(plot_ax))
+                % Plots joint space variables q(t)
+                figure;
+                plot(obj.timeVector, qd_array(states_to_plot, :), 'Color', 'k', 'LineWidth', 1.5);
+                title('Joint velocity');
+            else
+                plot(plot_ax, obj.timeVector, qd_array(states_to_plot, :), 'LineWidth', 1.5, 'Color', 'k');
+            end
+            xlabel('Time (s)');
+            ylabel('Joint Velocity');
+        end
+        
+        % Function plots the joint trajectory, velocity and acceleration
+        function plotJointAcceleration(obj, states_to_plot, plot_ax)
+            n_dof = length(obj.q{1});
+            qdd_array = cell2mat(obj.q_ddot);
             
-            figure;
-            title('Trajectory');
-            plot(obj.timeVector, q_vector(states_to_plot, :), 'Color', 'k', 'LineWidth', 1.5);
-            
-            figure;
-            title('Trajectory velocity');
-            plot(obj.timeVector, qd_vector(states_to_plot, :), 'Color', 'k', 'LineWidth', 1.5);
-            
-            figure;
-            title('Trajectory acceleration');
-            plot(obj.timeVector, qdd_vector(states_to_plot, :), 'Color', 'k', 'LineWidth', 1.5);
+            if nargin <= 1 || isempty(states_to_plot)
+                states_to_plot = 1:n_dof;
+            end
+            if(nargin <= 2 || isempty(plot_ax))
+                % Plots joint space variables q(t)
+                figure;
+                plot(obj.timeVector, qdd_array(states_to_plot, :), 'Color', 'k', 'LineWidth', 1.5);
+                title('Joint acceleration');
+            else
+                plot(plot_ax, obj.timeVector, qdd_array(states_to_plot, :), 'LineWidth', 1.5, 'Color', 'k');
+            end
+            xlabel('Time (s)');
+            ylabel('Joint Acceleration');
         end
     end
     
@@ -648,68 +684,68 @@ classdef JointTrajectory < TrajectoryBase
             fclose(fid);
         end
         
-        % Loads a complete trajectory by reading a .traj file
-        function [trajectory_all, force_trajectory] = LoadCompleteTrajectory(traj_file,model)
-            % Initialise a new trajectry
-            trajectory_all = JointTrajectory();
-            
-            % Read through the trajectory file
-            % Open the file
-            fid = fopen(traj_file,'r');
-            % Read the first line
-            l0 = fgetl(fid);
-            % Split the line
-            l_split = strsplit(l0,'t,');
-            % extract the double values
-            trajectory_all.timeStep = str2double(l_split{2});
-            
-            % For the remaining lines extract the data
-            num_points = 1;
-            % Initialise the trajectory vectors
-            n_q = model.bodyModel.numDofs; n_f = model.cableModel.numCables;
-            while(~feof(fid))
-                l1 = fgetl(fid);
-                % Split up the components
-                l_split = strsplit(l1,{'q,',',v,',',a,',',f,'});
-                
-                % First the pose
-                l_split_q = strsplit(l_split{2},',');
-                q = zeros(n_q,1);
-                for k=1:length(l_split_q)
-                    q(k) = str2double(l_split_q{k});
-                end
-                trajectory_all.q{num_points} = q;
-                
-                % Then the velocity
-                l_split_v = strsplit(l_split{3},',');
-                v = zeros(n_q,1);
-                for k=1:length(l_split_v)
-                    v(k) = str2double(l_split_v{k});
-                end
-                trajectory_all.q_dot{num_points} = v;
-                
-                % Then the acceleration
-                l_split_a = strsplit(l_split{4},',');
-                a = zeros(n_q,1);
-                for k=1:length(l_split_a)
-                    a(k) = str2double(l_split_a{k});
-                end
-                trajectory_all.q_ddot{num_points} = a;
-                
-                % Finally the force
-                l_split_f = strsplit(l_split{5},',');
-                f = zeros(n_f,1);
-                for k=1:length(l_split_f)-1
-                    f(k) = str2double(l_split_f{k});
-                end
-                force_trajectory{num_points} = f;
-                
-                num_points = num_points + 1;
-            end
-            trajectory_all.totalTime = (num_points-2)*trajectory_all.timeStep;
-            trajectory_all.timeVector = [0:trajectory_all.timeStep:trajectory_all.totalTime];
-            fclose(fid);
-        end
+%         % Loads a complete trajectory by reading a .traj file
+%         function [trajectory_all, force_trajectory] = LoadCompleteTrajectory(traj_file,model)
+%             % Initialise a new trajectry
+%             trajectory_all = JointTrajectory();
+%             
+%             % Read through the trajectory file
+%             % Open the file
+%             fid = fopen(traj_file,'r');
+%             % Read the first line
+%             l0 = fgetl(fid);
+%             % Split the line
+%             l_split = strsplit(l0,'t,');
+%             % extract the double values
+%             trajectory_all.timeStep = str2double(l_split{2});
+%             
+%             % For the remaining lines extract the data
+%             num_points = 1;
+%             % Initialise the trajectory vectors
+%             n_q = model.bodyModel.numDofs; n_f = model.cableModel.numCables;
+%             while(~feof(fid))
+%                 l1 = fgetl(fid);
+%                 % Split up the components
+%                 l_split = strsplit(l1,{'q,',',v,',',a,',',f,'});
+%                 
+%                 % First the pose
+%                 l_split_q = strsplit(l_split{2},',');
+%                 q = zeros(n_q,1);
+%                 for k=1:length(l_split_q)
+%                     q(k) = str2double(l_split_q{k});
+%                 end
+%                 trajectory_all.q{num_points} = q;
+%                 
+%                 % Then the velocity
+%                 l_split_v = strsplit(l_split{3},',');
+%                 v = zeros(n_q,1);
+%                 for k=1:length(l_split_v)
+%                     v(k) = str2double(l_split_v{k});
+%                 end
+%                 trajectory_all.q_dot{num_points} = v;
+%                 
+%                 % Then the acceleration
+%                 l_split_a = strsplit(l_split{4},',');
+%                 a = zeros(n_q,1);
+%                 for k=1:length(l_split_a)
+%                     a(k) = str2double(l_split_a{k});
+%                 end
+%                 trajectory_all.q_ddot{num_points} = a;
+%                 
+%                 % Finally the force
+%                 l_split_f = strsplit(l_split{5},',');
+%                 f = zeros(n_f,1);
+%                 for k=1:length(l_split_f)-1
+%                     f(k) = str2double(l_split_f{k});
+%                 end
+%                 force_trajectory{num_points} = f;
+%                 
+%                 num_points = num_points + 1;
+%             end
+%             trajectory_all.totalTime = (num_points-2)*trajectory_all.timeStep;
+%             trajectory_all.timeVector = [0:trajectory_all.timeStep:trajectory_all.totalTime];
+%             fclose(fid);
+%         end
         
         % NEEDS TO BE FIXED TO GENERATE BASED ON JOINTS AND MERGE WITH
         % EXISTING PARABOLIC BLEND

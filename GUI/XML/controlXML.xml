@@ -33,25 +33,25 @@
         <plot_function type="plotAngularAcceleration">
             <figure_quantity>1</figure_quantity>
         </plot_function>
-        <plot_function type="plotBodyCOG">
+        <plot_function type="plotBodyCoG">
             <figure_quantity>1</figure_quantity>
         </plot_function>
-        <plot_function type="plotBodyCOGDot">
+        <plot_function type="plotBodyCoGVelocity">
             <figure_quantity>1</figure_quantity>
         </plot_function>
-        <plot_function type="plotBodyCOGDdot">
+        <plot_function type="plotBodyCoGAcceleration">
             <figure_quantity>1</figure_quantity>
         </plot_function>
         <plot_function type="plotJointSpace">
             <figure_quantity>1</figure_quantity>
         </plot_function>
-        <plot_function type="plotJointSpaceDot">
+        <plot_function type="plotJointVelocity">
             <figure_quantity>1</figure_quantity>
         </plot_function>
         <plot_function type="plotCableLengths">
             <figure_quantity>1</figure_quantity>
         </plot_function>
-        <plot_function type="plotCableLengthsDot">
+        <plot_function type="plotCableLengthsVelocity">
             <figure_quantity>1</figure_quantity>
         </plot_function>
 	</plot_functions>
