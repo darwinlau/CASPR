@@ -2,7 +2,7 @@
 <!DOCTYPE trajectories SYSTEM "../../../templates/trajectories.dtd">
 <trajectories>
     <joint_trajectories>
-        <linear_spline_trajectory id="example_linear" time_definition="absolute" time_step="0.01">
+        <linear_spline_trajectory id="example_linear" time_definition="absolute" time_step="0.05">
             <points>
                 <point>
                     <q>0.3 0.5 0.0</q>
@@ -13,7 +13,7 @@
             </points>
         </linear_spline_trajectory>
         
-        <cubic_spline_trajectory id="example_cubic" time_definition="absolute" time_step="0.01">
+        <cubic_spline_trajectory id="example_cubic" time_definition="absolute" time_step="0.05">
             <points>
                 <point>
                     <q>0.3 0.5 0.0</q>
@@ -25,7 +25,7 @@
                 </point>
             </points>
         </cubic_spline_trajectory>
-        <quintic_spline_trajectory id="example_quintic" time_definition="absolute" time_step="0.01">
+        <quintic_spline_trajectory id="example_quintic" time_definition="absolute" time_step="0.05">
             <points>
                 <point>
                     <q>0.3 0.5 0.0</q>
@@ -34,6 +34,25 @@
                 </point>
                 <point time="5.0">
                     <q>0.7 0.5 0.0</q>
+                    <q_dot>0.0 0.0 0.0</q_dot>
+                    <q_ddot>0.0 0.0 0.0</q_ddot>
+                </point>
+            </points>
+        </quintic_spline_trajectory>
+        <quintic_spline_trajectory id="example_infeasible" time_definition="absolute" time_step="0.05">
+            <points>
+                <point>
+                    <q>0.3 0.5 0.0</q>
+                    <q_dot>0.0 0.0 0.0</q_dot>
+                    <q_ddot>0.0 0.0 0.0</q_ddot>
+                </point>
+                <point time="2.5">
+                    <q>1.0 0.5 0.0</q>
+                    <q_dot>0.0 0.0 0.0</q_dot>
+                    <q_ddot>0.0 0.0 0.0</q_ddot>
+                </point>
+                <point time="5.0">
+                    <q>0.3 0.5 0.0</q>
                     <q_dot>0.0 0.0 0.0</q_dot>
                     <q_ddot>0.0 0.0 0.0</q_ddot>
                 </point>
