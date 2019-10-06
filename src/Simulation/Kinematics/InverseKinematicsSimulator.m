@@ -27,20 +27,12 @@ classdef InverseKinematicsSimulator < MotionSimulatorBase
             obj.cableLengths = cell(1, length(obj.trajectory.timeVector));
             obj.cableLengthsDot = cell(1, length(obj.trajectory.timeVector));
             
-            try
-                for t = 1:length(obj.trajectory.timeVector)
-                    CASPR_log.Print(sprintf('Time : %f', obj.trajectory.timeVector(t)),CASPRLogLevel.INFO);
-                    obj.model.update(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t},zeros(size(obj.trajectory.q_dot{t})));
-                    obj.cableLengths{t} = obj.model.cableLengths(cable_indices);
-                    obj.cableLengthsDot{t} = obj.model.cableLengthsDot(cable_indices);
-                end
-            catch
-                for t = 1:length(obj.trajectory.timeVector)
-                    CASPR_log.Print(sprintf('Time : %f', obj.trajectory.timeVector(t)),CASPRLogLevel.INFO);
-                    obj.model.update(obj.trajectory.q(:,t), obj.trajectory.q_dot(:,t), obj.trajectory.q_ddot(:,t),zeros(size(obj.trajectory.q_dot(:,t))));
-                    obj.cableLengths{t} = obj.model.cableLengths(cable_indices);
-                    obj.cableLengthsDot{t} = obj.model.cableLengthsDot(cable_indices);
-                end
+            CASPR_log.Info('Begin inverse kinematics simulator run...');
+            for t = 1:length(obj.trajectory.timeVector)
+                CASPR_log.Print(sprintf('Time : %f', obj.trajectory.timeVector(t)),CASPRLogLevel.INFO);
+                obj.model.update(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t},zeros(size(obj.trajectory.q_dot{t})));
+                obj.cableLengths{t} = obj.model.cableLengths(cable_indices);
+                obj.cableLengthsDot{t} = obj.model.cableLengthsDot(cable_indices);
             end
         end
     end
