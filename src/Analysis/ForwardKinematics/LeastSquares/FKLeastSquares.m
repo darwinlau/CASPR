@@ -21,7 +21,7 @@ classdef FKLeastSquares < FKAnalysisBase
         end
 
         % The implementatin of the abstract compute function.
-        function [q, q_dot] = computeFunction(obj, len, len_prev, cable_indices, q_prev, q_d_prev, delta_t)
+        function [q, q_dot] = computeFunction(obj, len, len_prev, q_prev, q_d_prev, delta_t, cable_indices)
             L = obj.model.L(cable_indices, :);
             L_pinv = (L' * L) \ L';
             len_fk = len(cable_indices);
@@ -56,7 +56,7 @@ classdef FKLeastSquares < FKAnalysisBase
             % determine q
             [q, resnorm, ~, ~, output] = lsqnonlin(func, q_approx, obj.model.bodyModel.q_lb, obj.model.bodyModel.q_ub, options);
 
-            CASPR_log.Print(sprintf('Function lsqnonlin completed. Fitting error: %f. Number of function calls: %d', resnorm, output.funcCount),CASPRLogLevel.INFO);
+            CASPR_log.Debug(sprintf('Function lsqnonlin completed. Fitting error: %f. Number of function calls: %d', resnorm, output.funcCount));
 
             % Step 4: Determine the value of q_dot
             % TODO: Need to use generic approach to determine q_dot for

@@ -18,6 +18,11 @@ classdef ForwardKinematicsSimulator < MotionSimulatorBase
         FKSolver            % The FK solver object (inherits from FKAnalysisBase)
     end
     
+    properties (Dependent)
+        compTimeTotal       % total computational time
+        lengthErrorTotal    % total length error of FK solver
+    end
+    
     methods
         % Constructor for the forward kinematics class
         function fk = ForwardKinematicsSimulator(model, fk_solver)
@@ -57,9 +62,10 @@ classdef ForwardKinematicsSimulator < MotionSimulatorBase
             
             time_prev = 0;
             
+            CASPR_log.Info('Begin forward kinematics simulator run...');
             for t = 1:length(obj.trajectory.timeVector)
-                CASPR_log.Print(sprintf('Time : %f', obj.trajectory.timeVector(t)),CASPRLogLevel.INFO);
-                [q, q_dot, obj.compTime(t)] = obj.FKSolver.compute(lengths{t}, lengths_prev, cable_indices, q_prev, q_d_prev, obj.trajectory.timeVector(t) - time_prev);
+                CASPR_log.Info(sprintf('Time : %f', obj.trajectory.timeVector(t)));
+                [q, q_dot, obj.compTime(t)] = obj.FKSolver.compute(lengths{t}, lengths_prev, q_prev, q_d_prev, obj.trajectory.timeVector(t) - time_prev, cable_indices);
                 obj.trajectory.q{t} = q;
                 obj.trajectory.q_dot{t} = q_dot;                
                 q_prev = q;
@@ -100,6 +106,14 @@ classdef ForwardKinematicsSimulator < MotionSimulatorBase
             end
             xlabel('Time (seconds)')
             ylabel('Error norm (m)');
+        end
+        
+        % Dependent variables
+        function value = get.compTimeTotal(obj)
+            value = sum(obj.compTime);
+        end
+        function value = get.lengthErrorTotal(obj)
+            value = sum(obj.lengthErrorNorm);
         end
     end
 end

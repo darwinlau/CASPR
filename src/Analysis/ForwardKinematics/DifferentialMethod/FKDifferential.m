@@ -16,8 +16,7 @@ classdef FKDifferential < FKAnalysisBase
         end
 
         % The implementation of the abstract computeFunction methods.
-        function [q, q_dot] = computeFunction(obj, length, lengths_prev, cable_indices, q_prev, ~, delta_t)
-%          function [q, q_dot] = computeFunction(obj, length, l_dot, cable_indices, q_prev, ~, delta_t)
+        function [q, q_dot] = computeFunction(obj, length, lengths_prev, q_prev, ~, delta_t, cable_indices)
             L = obj.model.L(cable_indices, :);
             if delta_t ~= 0
                 L_pinv = (L' * L) \ L';
