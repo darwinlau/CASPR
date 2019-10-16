@@ -93,13 +93,13 @@ classdef (Abstract) ModelConfigBase < handle
             % Checks for CUSTOM mode
             if CASPR_configuration.LoadGlobalModelMode() == ModelModeType.CUSTOM
                 customFolderName = [c.modelFolderPath,'C/'];
-                customFileName   = [customFolderName,'custom_',c.robotName];
+                customFileName   = [customFolderName,'custom_C'];
                 assert(exist([customFileName,'.c'], 'file') == 2, 'Source file for custom model does not exist.');
                 assert(exist([customFileName,'.h'], 'file') == 2, 'Header file for custom model does not exist.');
                 % Compile
                 original_path = pwd;
                 cd(customFolderName);
-                libname = ['custom_',c.robotName];
+                libname = ['custom_C'];
                 if libisloaded(libname)
                     unloadlibrary(libname);    
                 end

@@ -7,7 +7,7 @@
 #include <string.h>
 #include <mex.h>
 #define EXPORT_FCNS
-#include "custom_BMArm.h"
+#include "custom_C.h"
 
 // Cable Lengths
 EXPORTED_FUNCTION void customCableLengths(double* l, double* q, double* q_dot, double* q_ddot, double* W_e){
