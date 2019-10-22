@@ -21,9 +21,9 @@ classdef TaskGrid < GridBase
     methods
         % A constructor for the task grid object
         function id = TaskGrid(q_begin,q_end,x_begin,x_end,delta_x)
-            assert((size(q_begin,2)==1)&&(size(q_end,2)==1)&&(size(delta_x,2)==1)&&(size(x_begin,2)==1)&&(size(x_end,2)==1),'Input to UniformGrid must be a column vector');
-            assert((size(q_begin,1)==size(q_end,1)),'Inputs must be of the same dimension');
-            assert((sum(q_begin > q_end)==0),'Invalid Input Range');
+            CASPR_log.Assert((size(q_begin,2)==1)&&(size(q_end,2)==1)&&(size(delta_x,2)==1)&&(size(x_begin,2)==1)&&(size(x_end,2)==1),'Input to UniformGrid must be a column vector');
+            CASPR_log.Assert((size(q_begin,1)==size(q_end,1)),'Inputs must be of the same dimension');
+            CASPR_log.Assert((sum(q_begin > q_end)==0),'Invalid Input Range');
             % Maybe add more checks to ensure
             id.q_begin  =   q_begin;
             id.q_end    =   q_end;

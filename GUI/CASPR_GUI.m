@@ -345,10 +345,7 @@ function generate_model_object(handles)
         CASPR_log.Warn('Previous cable set state does not exist anymore. Default to first element.');
         cable_set_id = contents{1};
     end
-    % set global model mode to DEFAULT
-    CASPR_configuration.SetGlobalModelMode(ModelModeType.DEFAULT, false);
     modObj = model_config.getModel(cable_set_id);
-    modObj.bodyModel.occupied.reset();
     cla;
     display_range = model_config.displayRange;
     view_angle = model_config.viewAngle;

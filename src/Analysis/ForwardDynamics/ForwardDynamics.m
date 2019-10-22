@@ -118,7 +118,7 @@ classdef ForwardDynamics < handle
             y_dot = zeros(size(y));
 
             model.update(q, q_dot, zeros(n_dofs, 1), w_ext);
-            assert(isequal(model.cableModel.cableIndicesActive, cable_indices_active), 'The cable forces that should be active do not match that of the input');
+            CASPR_log.Assert(isequal(model.cableModel.cableIndicesActive, cable_indices_active), 'The cable forces that should be active do not match that of the input');
             model.actuationForces = f_active;
 
             y_dot(1:n_vars) = model.q_deriv;
@@ -137,7 +137,7 @@ classdef ForwardDynamics < handle
             y_dot = zeros(size(y));
 
             model.update(q, q_dot, zeros(n_dofs, 1), w_ext);
-            assert(~isempty(cable_indices_active), 'This is the EoM of a system with no cable actuation, please confirm if that is what you want.');
+            CASPR_log.Assert(~isempty(cable_indices_active), 'This is the EoM of a system with no cable actuation, please confirm if that is what you want.');
             
 
             y_dot(1:n_vars) = model.q_deriv;

@@ -22,6 +22,7 @@ classdef (Abstract) ModelConfigBase < handle
         defaultOperationalSetId     % ID for the default operational set to display first
         
         robotNamesList              % List of names of robots as cell array of strings
+        robotName                   % Name of the robot
     end
     
     properties (Dependent)
@@ -33,7 +34,6 @@ classdef (Abstract) ModelConfigBase < handle
     properties (Access = private)
         root_folder                 % The root folder for the models
         
-        robotName                   % Name of the robot
         bodiesXmlObj                % The DOMNode object for body props
         cablesXmlObj                % The DOMNode object for cable props
         trajectoriesXmlObj          % The DOMNode for trajectory props
@@ -77,135 +77,189 @@ classdef (Abstract) ModelConfigBase < handle
             end
             
             % Make sure all the filenames that are required exist
-            assert(exist(c.bodyPropertiesFilename, 'file') == 2, 'Body properties file does not exist.');
-            assert(exist(c.cablesPropertiesFilename, 'file') == 2, 'Cable properties file does not exist.');
-            assert(exist(c.trajectoriesFilename, 'file') == 2, 'Trajectories file does not exist.');
+            CASPR_log.Assert(exist(c.bodyPropertiesFilename, 'file') == 2, 'Body properties file does not exist.');
+            CASPR_log.Assert(exist(c.cablesPropertiesFilename, 'file') == 2, 'Cable properties file does not exist.');
+            CASPR_log.Assert(exist(c.trajectoriesFilename, 'file') == 2, 'Trajectories file does not exist.');
             % Read the XML file to an DOM XML object
             c.bodiesXmlObj =  XmlOperations.XmlReadRemoveIndents(c.bodyPropertiesFilename);
             c.cablesXmlObj =  XmlOperations.XmlReadRemoveIndents(c.cablesPropertiesFilename);
             c.trajectoriesXmlObj =  XmlOperations.XmlReadRemoveIndents(c.trajectoriesFilename);
-            % If the operational space filename is specified then check and load it
-%             if (~isempty(c.opFilename))
-%                 assert(exist(c.opFilename, 'file') == 2, 'Operational space properties file does not exist.');
-%                 XmlOperations.XmlReadRemoveIndents(c.opFilename);
-%             end
-
-            % Checks for CUSTOM mode
-            if CASPR_configuration.LoadGlobalModelMode() == ModelModeType.CUSTOM
-                customFolderName = [c.modelFolderPath,'C/'];
-                customFileName   = [customFolderName,'custom_',c.robotName];
-                assert(exist([customFileName,'.c'], 'file') == 2, 'Source file for custom model does not exist.');
-                assert(exist([customFileName,'.h'], 'file') == 2, 'Header file for custom model does not exist.');
-                % Compile
-                original_path = pwd;
-                cd(customFolderName);
-                libname = ['custom_',c.robotName];
-                if libisloaded(libname)
-                    unloadlibrary(libname);    
-                end
-                mex([libname,'.c'])
-                % Load library
-                loadlibrary(libname);
-                cd(original_path); 
-            end
             
             % Loads the bodiesModel and cable set to be used for the trajectory loading
             bodies_xmlobj = c.getBodiesPropertiesXmlObj();
-            c.defaultCableSetId = char(c.cablesXmlObj.getDocumentElement.getAttribute('default_cable_set'));
+            
+            default_cable_set_id = char(c.cablesXmlObj.getDocumentElement.getAttribute('default_cable_set'));
+            CASPR_log.Assert(~isempty(default_cable_set_id), '''default_cable_set'' must be specified in the cables XML configuration file.');
+            c.defaultCableSetId = default_cable_set_id;
+            
             cableset_xmlobj = c.getCableSetXmlObj(c.defaultCableSetId);
-            sysModel = SystemModel.LoadXmlObj(bodies_xmlobj, cableset_xmlobj);            
-            if(c.bodiesXmlObj.getElementsByTagName('operational_spaces').getLength~=0)
+            
+            if(c.bodiesXmlObj.getElementsByTagName('operational_spaces').getLength ~= 0 && ~isempty(char(c.bodiesXmlObj.getElementsByTagName('operational_spaces').item(0).getAttribute('default_operational_set'))))
                 c.defaultOperationalSetId = char(c.bodiesXmlObj.getElementsByTagName('operational_spaces').item(0).getAttribute('default_operational_set'));
                 operationalset_xmlobj = c.getOperationalSetXmlObj(c.defaultOperationalSetId);
-                sysModel.loadOperationalXmlObj(operationalset_xmlobj);
-            end    
+            else 
+                operationalset_xmlobj = [];
+            end
+            
+            % At this stage load the default system model so trajectories
+            % can be loaded.
+            sysModel = SystemModel.LoadXmlObj(c.robotName, bodies_xmlobj, cableset_xmlobj, operationalset_xmlobj, ModelModeType.DEFAULT, ModelOptions());
+            
             c.bodiesModel = sysModel.bodyModel;
             c.displayRange = XmlOperations.StringToVector(char(bodies_xmlobj.getAttribute('display_range')))';
             c.viewAngle = XmlOperations.StringToVector(char(bodies_xmlobj.getAttribute('view_angle')))';
         end
                 
-        function [sysModel] = getModel(obj, cable_set_id, operational_space_id)
+        function [sysModel] = getModel(obj, cable_set_id, operational_space_id, model_mode, model_options)
             bodies_xmlobj = obj.getBodiesPropertiesXmlObj();
             cableset_xmlobj = obj.getCableSetXmlObj(cable_set_id);
+            
+            if nargin < 3 || isempty(operational_space_id)
+                op_space_set_xmlobj = [];
+            else
+                op_space_set_xmlobj = obj.getOperationalSetXmlObj(operational_space_id);
+            end
+            if nargin < 4 || isempty(model_mode)
+                model_mode = ModelModeType.DEFAULT;
+            end
+            if (nargin < 5 || isempty(model_options))
+                model_options = ModelOptions();
+            end
 
-            % Decide action according to the global_model_mode 
-            model_mode = CASPR_configuration.LoadGlobalModelMode();
             if model_mode == ModelModeType.COMPILED
-                % Check the reuse_compiled flag in
-                % CASPR_environment variables
-                is_reuse = false;                                
-                reuse_compiled = CASPR_configuration.LoadReuseCompiled();
-                % If the flag is turned on, warn the user
-                if reuse_compiled
-                    warning('off','all');  
-                    CASPR_log.Warn('Flag: reuse_compiled is turned on.');
-                    CASPR_log.Warn('Are you sure you want to reuse compiled files? Y/N [Y]');
-                    str = input('', 's');
-                    if str == 'y' || str == 'Y'
-                        is_reuse = true;
-                    else
-                        % Turn the flag off if the user
-                        % chose 'no'
-                        CASPR_configuration.SetReuseCompiled(0);
-                    end
-                    warning('on','all');  
-                end       
-                % If the flag is on, also the user chose
-                % 'y', then reuse previously compiled
-                % files.
-                if is_reuse                                        
-                    sysModel = SystemModel.LoadXmlObj(bodies_xmlobj, cableset_xmlobj,ModelModeType.DEFAULT);   
-                    % Operational
-                    if nargin > 2
-                        operationalset_xmlobj = obj.getOperationalSetXmlObj(operational_space_id);
-                        sysModel.loadOperationalXmlObj(operationalset_xmlobj);                                                             
-                        sysModel.bodyModel.updateOperationalSpace();  
-                    end
-                else
+                % First check if a new compilation is required
+                
+                % If so, then perform compilation through the symbolic mode
+                
+                % Finally, create a SystemModel object (in compiled mode) to return
+                
+                
+                model_config_path = CASPR_configuration.LoadModelConfigPath();
+                compile_file_folder = [model_config_path, '\tmp_compilations'];
+                
                     % Start Compilations...
                     warning('off','all');  
                     CASPR_log.Warn('Current version of compiled mode does not support changes in active <-> passive cables.');
                     CASPR_log.Warn('Compilation needs a long time. Please wait...');                        
                     warning('on','all');  
                     CASPR_log.Info('Preparation work...');
-                    sysModel = SystemModel.LoadXmlObj(bodies_xmlobj, cableset_xmlobj,ModelModeType.COMPILED);
-                    % Operational
-                    if nargin > 2
-                        operationalset_xmlobj = obj.getOperationalSetXmlObj(obj.defaultOperationalSetId);
-                        sysModel.loadOperationalXmlObj(operationalset_xmlobj);
-                        sysModel.bodyModel.updateOperationalSpace();
-                    end
-                    sysModel.compile();                                    
-                end     
-                sysModel.setFilesCompiled(true); 
-                sysModel.setModelMode(ModelModeType.COMPILED);
-            elseif model_mode == ModelModeType.CUSTOM
-                % Use this two step approach for now
-                % If op space can also be updated in custom mode,
-                % then we can run CUSTOM mode at the first run                
+                    sysModelSym = SystemModel.LoadXmlObj(obj.robotName, bodies_xmlobj, cableset_xmlobj, op_space_set_xmlobj, ModelModeType.SYMBOLIC, model_options);
+                    sysModelSym.compile(compile_file_folder);
+                    
+                    sysModel = SystemModel.LoadXmlObj(obj.robotName, bodies_xmlobj, cableset_xmlobj, op_space_set_xmlobj, ModelModeType.COMPILED, model_options);
+                               
+%                 end     
+%             elseif model_mode == ModelModeType.CUSTOM
+%                 % Use this two step approach for now
+%                 % If op space can also be updated in custom mode,
+%                 % then we can run CUSTOM mode at the first run                
+%                 
+%                 % Run DEFAULT mode first
+%                 sysModel = SystemModel.LoadXmlObj(bodies_xmlobj,cableset_xmlobj,ModelModeType.DEFAULT);
+%                 % Operational
+%                 if ~isempty(operational_space_id)
+%                     operationalset_xmlobj = obj.getOperationalSetXmlObj(operational_space_id);
+%                     sysModel.loadOperationalXmlObj(operationalset_xmlobj);
+%                     sysModel.bodyModel.updateOperationalSpace();
+%                 end              
+%             elseif model_mode == ModelModeType.COMPILED_AUTO
+%                 model_config_path = CASPR_configuration.LoadModelConfigPath();
+%                 library_name = ModelConfigBase.GetAutoCompiledLibraryName(obj.robotName, cable_set_id);
+%                 
+%                 
+%                 % Step 1: Check if the robot needs to be compiled first
+%                 
+%                 % Step 2: Compile .m files from symbolic to temp compilations folder
+%                 compile_file_folder = [model_config_path, '\tmp_compilations'];
+%                 
+%                 % Remove all the existing compiled files to ensure all compiled
+%                 % files are up-to-date
+%                 if exist(compile_file_folder, 'dir')
+%                     warning('off','all');  
+%                     try
+%                         if libisloaded(library_name)
+%                             unloadlibrary(library_name);
+%                         end
+%                         rmpath(genpath(compile_file_folder));
+%                         rmdir(compile_file_folder, 's');
+%                         CASPR_log.Info('Previously compiled files are removed.');
+%                     catch
+%                         CASPR_log.Warn('You might not have the permission to remove previously compiled files');
+%                         CASPR_log.Warn('Please check your permission before running COMPILED mode.');
+%                         return;
+%                     end
+%                     warning('on','all');
+%                 else
+%                     % Make folders
+%                     mkdir(compile_file_folder);  
+%                 end
+%                 
+%                 % Start Compilations...
+%                 warning('off','all');
+%                 CASPR_log.Warn('Current version of compiled mode does not support changes in active <-> passive cables.');
+%                 CASPR_log.Warn('Compilation needs a long time. Please wait...');
+%                 warning('on','all');
+%                 CASPR_log.Info('Preparation work...');
+%                 
+%                 
+%                 
+%                 sysModelSym = SystemModel.LoadXmlObj(bodies_xmlobj, cableset_xmlobj, ModelModeType.SYMBOLIC);
+%                 sysModelSym.compile(compile_file_folder);
+%                     
+%                 % Operational
+% %                 if ~isempty(operational_space_id)
+% %                     operationalset_xmlobj = obj.getOperationalSetXmlObj(obj.defaultOperationalSetId);
+% %                     sysModel.loadOperationalXmlObj(operationalset_xmlobj);
+% %                     sysModel.bodyModel.updateOperationalSpace();
+% %                 end
+%                 
+%                 
+%                 % Step 3: Compile C version of the .m code
+%                 build_folder = [compile_file_folder, '/c_build'];
+%                 filesList = dir([compile_file_folder, '/**/', '*.m']);
+%                 
+%                 source_files = cell(1, length(filesList));
+%                 
+%                 for i = 1:length(filesList)
+%                     source_files{i} = [filesList(i).folder, '\', filesList(i).name];
+%                 end
+%                 
+%                 sysModelSym.numDofs
+%                 input_data = {zeros(sysModelSym.numDofs,1),zeros(sysModelSym.numDofs,1),zeros(sysModelSym.numDofs,1),zeros(sysModelSym.numDofs,1)};
+%                 
+%                 % Config
+%                 code_config = coder.config('dll');
+%                 %code_config.IncludeTerminateFcn = false;
+%                 code_config.SupportNonFinite = false;
+%                 code_config.SaturateOnIntegerOverflow = false;
+%                 code_config.GenerateExampleMain = 'DoNotGenerate';
+%                 code_config.TargetLang = 'C';
+%                 code_config.FilePartitionMethod = 'SingleFile';
+%                 
+%                 % Code generation
+%                 
+%                 str = ['codegen -d ', build_folder, ' -o ', library_name, ' -config code_config '];
+%                 for i = 1:length(source_files)
+%                     str = [str, source_files{i},' -args input_data '];
+%                 end
+%                 eval(str)
+%                 % Remove unnecessary stuff
+%                 rmdir([build_folder,'/examples']);
+%                 delete([build_folder,'/*.mat']);
+%                 
+%                 addpath(genpath(build_folder));
                 
-                % Run DEFAULT mode first
-                sysModel = SystemModel.LoadXmlObj(bodies_xmlobj,cableset_xmlobj,ModelModeType.DEFAULT);
-                % Operational
-                if nargin > 2
-                    operationalset_xmlobj = obj.getOperationalSetXmlObj(operational_space_id);
-                    sysModel.loadOperationalXmlObj(operationalset_xmlobj);
-                    sysModel.bodyModel.updateOperationalSpace();
-                end
-                
-                % Enter custom mode                
-                sysModel.setModelMode(ModelModeType.CUSTOM);            
+%                 warning('off','all');  
+%                 if (~libisloaded(library_name))
+%                     loadlibrary(library_name);
+%                 end
+%                 warning('on','all');
+%                 
+%                 sysModel = SystemModel.LoadXmlObj(bodies_xmlobj, cableset_xmlobj, ModelModeType.COMPILED_AUTO);
             else
                 % DEFAULT || SYMBOLIC 
-                sysModel = SystemModel.LoadXmlObj(bodies_xmlobj, cableset_xmlobj,model_mode);
-                % Operational
-                if nargin > 2
-                    operationalset_xmlobj = obj.getOperationalSetXmlObj(operational_space_id);
-                    sysModel.loadOperationalXmlObj(operationalset_xmlobj);
-                    sysModel.bodyModel.updateOperationalSpace();
-                end
+                sysModel = SystemModel.LoadXmlObj(obj.robotName, bodies_xmlobj, cableset_xmlobj, op_space_set_xmlobj, model_mode, model_options);
             end
-            sysModel.setRobotName(obj.robotName);
             obj.bodiesModel = sysModel.bodyModel;
         end        
         
@@ -289,6 +343,14 @@ classdef (Abstract) ModelConfigBase < handle
             CASPR_log.Assert(v_temp.getLength == 1,'1 operational space tag should be specified');
             v = obj.bodiesXmlObj.getElementById(id);
             CASPR_log.Assert(~isempty(v), sprintf('Id ''%s'' does not exist in the bodies XML file', id));
+        end
+    end
+    
+    methods (Static)
+        function library_name = GetAutoCompiledLibraryName(robot_name, cable_set_id)
+            library_name = [robot_name, '_', cable_set_id];
+            library_name = strrep(library_name, ' ', '_');
+            library_name = strrep(library_name, '-', '_');
         end
     end
 end

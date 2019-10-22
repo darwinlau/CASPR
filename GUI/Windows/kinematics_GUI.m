@@ -613,7 +613,6 @@ function loadState(handles)
         set(handles.model_text,'String',state.model_text);
         set(handles.cable_text,'String',state.cable_text);
         setappdata(handles.figure1,'toggle',CASPR_configuration.LoadDevModelConfig());
-        state.modObj.bodyModel.occupied.reset();
         setappdata(handles.cable_text,'modObj',state.modObj);
         trajectory_popup_Update([], handles);
         file_name = [path_string,'/GUI/config/kinematics_gui_state.mat'];

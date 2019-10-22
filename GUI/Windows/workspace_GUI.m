@@ -532,8 +532,6 @@ function loadState(handles)
         load(file_name)
         set(handles.model_text,'String',state.model_text);
         set(handles.cable_text,'String',state.cable_text);
-        % This is to ensure that we are starting fresh
-        state.modObj.bodyModel.occupied.reset();
         setappdata(handles.cable_text,'modObj',state.modObj);
         file_name = [path_string,'/GUI/config/workspace_gui_state.mat'];
         if(exist(file_name,'file'))

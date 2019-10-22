@@ -8,16 +8,16 @@
 classdef (Abstract) InertiaUncertaintyBase < ConstructorUncertaintyBase
     methods
         % Implementation of applyConstructorUncertainty
-        function applyConstructorUncertainty(obj,system_model)
+        function applyConstructorUncertainty(obj, system_model)
             sm = system_model;
-            % Generate the dynamic component of the model if needed to
-            if(~sm.bodyModel.occupied.dynamics)
-                sm.bodyModel.createMassInertiaMatrix();
-                sm.bodyModel.occupied.dynamics = true;
-                sm.bodyModel.updateDynamics();
-            end
+                
+                % TODO: add check to see if model is in compute dynamics
+                % mode, otherwise this uncertainty is useless
+%             if(sm.modelOptions.isComputeDynamics)
+%                 sm.bodyModel.createMassInertiaMatrix();
+%             end
             im = obj.applyInertiaUncertainty(sm);
-            sm.updateInertiaProperties(im.m,im.r_G,im.I_G,1);
+            sm.updateInertiaProperties(im.m, im.r_G, im.I_G);
         end
     end
     methods(Abstract,Access=protected)

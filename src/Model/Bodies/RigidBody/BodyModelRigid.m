@@ -51,7 +51,7 @@ classdef BodyModelRigid < BodyModelBase
             % <inertia>
             inertiaObj = physicalObj.getElementsByTagName('inertia').item(0);
             RefString = char(inertiaObj.getAttribute('ref'));
-            assert(~isempty(RefString), 'Invalid <inertia> XML format: ref field empty');
+            CASPR_log.Assert(~isempty(RefString), 'Invalid <inertia> XML format: ref field empty');
             if (strcmp(RefString, 'joint'))
                 I_Oxx = str2double(inertiaObj.getElementsByTagName('Ixx').item(0).getFirstChild.getData);
                 I_Oyy = str2double(inertiaObj.getElementsByTagName('Iyy').item(0).getFirstChild.getData);

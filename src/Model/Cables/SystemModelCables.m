@@ -41,8 +41,8 @@ classdef SystemModelCables < handle
         numLinks = 0;               % The number of links
         K                           % The matix of cable stiffnesses
         modelMode                   % A flag to indicate the need for symbolic computations
-        filesCompiled               % whether files are compiled
-        update
+        modelOptions                % ModelOptions object storing options for the model
+        update                      % Update function handle
     end
 
     properties (Dependent)
@@ -67,15 +67,23 @@ classdef SystemModelCables < handle
         V_grad_passive
         % Constant active forces invalid setinal vector
         FORCES_ACTIVE_INVALID       % Constant of vector of invalid forces for active cables
+        
+        isSymbolic
     end
 
     methods
-        function ck = SystemModelCables(cables, numLinks,model_mode)
-            ck.setModelMode(model_mode);
+        function ck = SystemModelCables(cables, bodiesModel, model_mode, model_options)
+            ck.set_model_mode(model_mode);  % Sets the modelMode property and update function handle
             ck.cables = cables;
             ck.numCables = length(cables);
-            ck.numLinks = numLinks; 
-            ck.r_OAs = MatrixOperations.Initialise([6,ck.numSegments],0);
+            ck.numLinks = bodiesModel.numLinks; 
+            ck.modelOptions = model_options;
+            
+            ck.r_OAs = MatrixOperations.Initialise([6,ck.numSegments],ck.isSymbolic);
+            ck.V = MatrixOperations.Initialise([ck.numCables,6*ck.numLinks], ck.isSymbolic);
+            ck.K = MatrixOperations.Initialise([ck.numCables,ck.numCables], ck.isSymbolic);
+            ck.lengths = MatrixOperations.Initialise([ck.numCables,1], ck.isSymbolic);
+            ck.V_grad = MatrixOperations.Initialise([ck.numCables,6*ck.numLinks,bodiesModel.numDofs], ck.isSymbolic);
         end
 
         % Update the kinematics of the cables for the entire system using
@@ -87,13 +95,14 @@ classdef SystemModelCables < handle
         % Update function under DEFAULT mode
         % - update using numerical methods
         function defaultUpdate(obj, bodyModel)
+            if (obj.isSymbolic)
+                CASPR_log.Assert(bodyModel.isSymbolic, 'body model must be symbolic in symbolic mode');
+            end
             CASPR_log.Assert(bodyModel.numLinks == obj.numLinks, 'Number of links between the cable and body kinematics must be consistent');
-            is_symbolic = obj.modelMode==ModelModeType.SYMBOLIC;
+            is_symbolic = obj.isSymbolic;
             
             % Set each cable's kinematics (absolute attachment locations
             % and segment vectors) and Determine V
-            obj.V = MatrixOperations.Initialise([obj.numCables,6*obj.numLinks],is_symbolic);
-            obj.K = MatrixOperations.Initialise([obj.numCables,obj.numCables],is_symbolic);
             
             obj.numCablesActive = 0;
             segment_count = 1;
@@ -103,6 +112,9 @@ classdef SystemModelCables < handle
                 num_cable_segments = cable.numSegments;
                 
                 for j = 1:num_cable_segments
+                    if (is_symbolic)
+                        CASPR_log.Info(sprintf('Symbolic computing/simplifying of kinematics of cable %d segment %d', i, j));
+                    end
                     segment = cable.segments{j};
                     % Update V elements only when segments are on different
                     % links
@@ -111,6 +123,9 @@ classdef SystemModelCables < handle
                         k = segment.attached_links(1);
                         if k > 0
                             V_ijk_T = -bodyModel.bodies{k}.R_0k.'*segment.segmentVector/segment.length;
+                            if (is_symbolic)
+                                V_ijk_T = simplify(V_ijk_T, 'Step', k*20);
+                            end
                             % - Translation
                             obj.V(i, 6*k-5:6*k-3) = obj.V(i, 6*k-5:6*k-3) + V_ijk_T.';
                             % - Orientation
@@ -122,6 +137,9 @@ classdef SystemModelCables < handle
                         k = segment.attached_links(2);
                         if k > 0
                             V_ijk_T = bodyModel.bodies{k}.R_0k.'*segment.segmentVector/segment.length;
+                            if (is_symbolic)
+                                V_ijk_T = simplify(V_ijk_T, 'Step', k*20);
+                            end
                             % - Translation
                             obj.V(i, 6*k-5:6*k-3) = obj.V(i, 6*k-5:6*k-3) + V_ijk_T.';
                             % - Orientation
@@ -130,7 +148,10 @@ classdef SystemModelCables < handle
                         end
                     end
                     % Store r_OA
-                    obj.r_OAs(:,segment_count) = [segment.attachments{1}.r_OA;segment.attachments{2}.r_OA];
+                    obj.r_OAs(:,segment_count) = [segment.attachments{1}.r_OA; segment.attachments{2}.r_OA];
+                    if (is_symbolic)
+                        obj.r_OAs(:,segment_count) = simplify(obj.r_OAs(:,segment_count), 'Step', 10);
+                    end
                     segment_count = segment_count + 1;
                 end
                 obj.K(i,i) = obj.cables{i}.K;
@@ -139,10 +160,13 @@ classdef SystemModelCables < handle
                     obj.numCablesActive = obj.numCablesActive + 1;
                 end 
             end  
+            if (is_symbolic)
+                CASPR_log.Info('Symbolic computing/simplifying of V');
+                obj.V = simplify(obj.V, 'Step', 20);
+            end
                        
             ind_active = 1;
             obj.cableIndicesActive = zeros(obj.numCablesActive, 1);            
-            obj.lengths = MatrixOperations.Initialise([obj.numCables,1],is_symbolic);
             for i = 1:obj.numCables
                 % Active cable
                 if (obj.cables{i}.isActive)
@@ -152,92 +176,11 @@ classdef SystemModelCables < handle
                 obj.lengths(i) = obj.cables{i}.length;                
             end               
             
-            if(bodyModel.occupied.hessian)
+            if(bodyModel.modelOptions.isComputeHessian)
                 obj.updateHessian(bodyModel);
             end
         end
         
-        % Update function for preparation of compilation
-        % - Symbolic expressions are calculated for the variables
-        % - Simplification takes a long time, but it makes compilation
-        % easier and more chance to be successfully done
-        function compiledPreparationUpdate(obj, bodyModel)
-            CASPR_log.Assert(bodyModel.numLinks == obj.numLinks, 'Number of links between the cable and body kinematics must be consistent');
-            is_symbolic = true;
-            
-            % Set each cable's kinematics (absolute attachment locations
-            % and segment vectors) and Determine V
-            obj.V = MatrixOperations.Initialise([obj.numCables,6*obj.numLinks],is_symbolic);
-            obj.K = MatrixOperations.Initialise([obj.numCables,obj.numCables],is_symbolic);
-            obj.r_OAs = MatrixOperations.Initialise([6,obj.numSegments],is_symbolic);
-            
-            CASPR_log.Info('Calculating V...');            
-            obj.numCablesActive = 0;
-            segment_count = 1;
-            for i = 1:obj.numCables
-                obj.cables{i}.update(bodyModel);
-                cable = obj.cables{i};
-                num_cable_segments = cable.numSegments;
-                
-                for j = 1:num_cable_segments
-                    CASPR_log.Info(sprintf('Cable: %d\tSegment: %d', i, j));
-                    segment = cable.segments{j};
-                    % Update V elements only when segments are on different
-                    % links
-                    if segment.attached_links(1)~=segment.attached_links(2)
-                        % Starting point
-                        k = segment.attached_links(1);
-                        if k > 0
-                            V_ijk_T = -bodyModel.bodies{k}.R_0k.'*segment.segmentVector/segment.length;
-                            V_ijk_T = simplify(V_ijk_T, 'Step', k*20);
-                            % - Translation
-                            obj.V(i, 6*k-5:6*k-3) = obj.V(i, 6*k-5:6*k-3) + V_ijk_T.';
-                            % - Orientation
-                            obj.V(i, 6*k-2:6*k) = obj.V(i, 6*k-2:6*k) + ...
-                                cross(segment.attachments{1}.r_GA, V_ijk_T).';                          
-                        end
-                        
-                        % Ending point
-                        k = segment.attached_links(2);
-                        if k > 0
-                            V_ijk_T = bodyModel.bodies{k}.R_0k.'*segment.segmentVector/segment.length;
-                            V_ijk_T = simplify(V_ijk_T, 'Step', k*20);
-                            % - Translation
-                            obj.V(i, 6*k-5:6*k-3) = obj.V(i, 6*k-5:6*k-3) + V_ijk_T.';
-                            % - Orientation
-                            obj.V(i, 6*k-2:6*k) = obj.V(i, 6*k-2:6*k) + ...
-                                cross(segment.attachments{2}.r_GA, V_ijk_T).';                           
-                        end
-                    end
-                    % Store r_OA
-                    obj.r_OAs(:,segment_count) = simplify([segment.attachments{1}.r_OA;segment.attachments{2}.r_OA],'Step',10);                    
-                    segment_count = segment_count + 1;
-                end
-                obj.K(i,i) = obj.cables{i}.K;
-
-                if (cable.isActive)
-                    obj.numCablesActive = obj.numCablesActive + 1;
-                end 
-            end 
-            CASPR_log.Info('Simplifying V...');
-            obj.V = simplify(obj.V, 'Step', 20);           
-                       
-            ind_active = 1;
-            obj.cableIndicesActive = zeros(obj.numCablesActive, 1);            
-            obj.lengths = MatrixOperations.Initialise([obj.numCables,1],is_symbolic);
-            for i = 1:obj.numCables
-                % Active cable
-                if (obj.cables{i}.isActive)
-                    obj.cableIndicesActive(ind_active) = i;
-                    ind_active = ind_active + 1;                    
-                end               
-                obj.lengths(i) = obj.cables{i}.length;                
-            end               
-            
-            if(bodyModel.occupied.hessian)
-                obj.updateHessian(bodyModel);
-            end
-        end
         
         % Update function under COMPILED mode
         % - Update using compiled files   
@@ -258,17 +201,29 @@ classdef SystemModelCables < handle
             obj.V = compile_V(bodyModel.q, bodyModel.q_dot, bodyModel.q_ddot, bodyModel.W_e); 
         end
         
-        % Update function under CUSTOM mode
-        % - Update using C shared library 
-        function customUpdate(obj, q, q_dot, q_ddot, w_ext)  
-            
+        % Update function under COMPILED mode
+        % - Update using compiled files   
+        function compiledAutoUpdate(obj, bodyModel)       
+            % Attachment locations
+            obj.r_OAs = compile_r_OAs(bodyModel.q, bodyModel.q_dot, bodyModel.q_ddot, bodyModel.W_e);
+            segment_count = 1;
+            for i = 1:obj.numCables
+                for j = 1:obj.cables{i}.numSegments
+                    obj.cables{i}.segments{j}.attachments{1}.directUpdate(obj.r_OAs(1:3,segment_count));
+                    obj.cables{i}.segments{j}.attachments{2}.directUpdate(obj.r_OAs(4:6,segment_count));
+                    segment_count = segment_count + 1;
+                end
+            end            
+            % Cable length
+            obj.lengths = compile_lengths(bodyModel.q, bodyModel.q_dot, bodyModel.q_ddot, bodyModel.W_e); 
+            % Matrix
+            obj.V = compile_V(bodyModel.q, bodyModel.q_dot, bodyModel.q_ddot, bodyModel.W_e); 
         end
         
         % This function updates V_grad
         function updateHessian(obj,bodyModel)
             is_symbolic = obj.modelMode == ModelModeType.SYMBOLIC;
             
-            obj.V_grad = MatrixOperations.Initialise([obj.numCables,6*obj.numLinks,bodyModel.numDofs],is_symbolic);
             for i = 1:obj.numCables
                 % Cables are already up to date
                 cable = obj.cables{i};
@@ -457,40 +412,17 @@ classdef SystemModelCables < handle
             value = CableModelBase.INVALID_FORCE * ones(obj.numCablesActive, 1);
         end
         
-        % Model Mode Related Functions %        
+        function value = get.isSymbolic(obj)
+            value = (obj.modelMode == ModelModeType.SYMBOLIC);
+        end
         
-        % set update function
-        function setupdate(obj, model_mode)  
-           if model_mode==ModelModeType.COMPILED
-               if obj.filesCompiled
-                   % When compiled files are available
-                   obj.update = @obj.compiledUpdate;
-               else
-                   % Preparation for compilations
-                   obj.update = @obj.compiledPreparationUpdate;
-               end   
-           elseif model_mode==ModelModeType.CUSTOM
-               % CUSTOM
-               obj.update = @obj.customUpdate;
-           else
-               % DEFAULT and SYMBOLIC 
-               obj.update = @obj.defaultUpdate;
-           end
-        end
-        % set model mode
-        function setModelMode(obj, model_mode)
-            obj.modelMode = model_mode;
-            obj.setupdate(model_mode);
-        end
-        % set files compiled flag
-        function setFilesCompiled(obj, value)
-            obj.filesCompiled = value;
-        end       
         
         % Compiling cable variables under COMPILED mode
         % - Symbolic Variables are compiled into .m files and saved to the
         % path
         function compile(obj, path, bodyModel)   
+            CASPR_log.Assert(obj.modelMode == ModelModeType.SYMBOLIC, 'Can only compile a symbolic model');
+            
             CASPR_log.Info('- Compiling Cable Variables...');
             matlabFunction(obj.V, 'File', strcat(path, '/compile_V'), 'Vars', {bodyModel.q, bodyModel.q_dot, bodyModel.q_ddot, bodyModel.W_e});                   
             matlabFunction(obj.lengths, 'File', strcat(path, '/compile_lengths'), 'Vars', {bodyModel.q, bodyModel.q_dot, bodyModel.q_ddot, bodyModel.W_e});                   
@@ -575,12 +507,106 @@ classdef SystemModelCables < handle
                 k_B = find(obj.getCRMTerm(i,j,1:obj.numLinks+1)==1);
                 k_B = k_B - 1; % To account for CRM indexing
             end
-        end 
+        end
+        
+        
+%         % Update function for preparation of compilation
+%         % - Symbolic expressions are calculated for the variables
+%         % - Simplification takes a long time, but it makes compilation
+%         % easier and more chance to be successfully done
+%         function symbolic_update(obj, bodyModel)
+%             CASPR_log.Assert(bodyModel.numLinks == obj.numLinks, 'Number of links between the cable and body kinematics must be consistent');
+%             is_symbolic = true;
+%             
+%             % Set each cable's kinematics (absolute attachment locations
+%             % and segment vectors) and Determine V
+%             obj.V = MatrixOperations.Initialise([obj.numCables,6*obj.numLinks],is_symbolic);
+%             obj.K = MatrixOperations.Initialise([obj.numCables,obj.numCables],is_symbolic);
+%             obj.r_OAs = MatrixOperations.Initialise([6,obj.numSegments],is_symbolic);
+%             
+%             CASPR_log.Info('Calculating V...');            
+%             obj.numCablesActive = 0;
+%             segment_count = 1;
+%             for i = 1:obj.numCables
+%                 obj.cables{i}.update(bodyModel);
+%                 cable = obj.cables{i};
+%                 num_cable_segments = cable.numSegments;
+%                 
+%                 for j = 1:num_cable_segments
+%                     CASPR_log.Info(sprintf('Cable: %d\tSegment: %d', i, j));
+%                     segment = cable.segments{j};
+%                     % Update V elements only when segments are on different
+%                     % links
+%                     if segment.attached_links(1)~=segment.attached_links(2)
+%                         % Starting point
+%                         k = segment.attached_links(1);
+%                         if k > 0
+%                             V_ijk_T = -bodyModel.bodies{k}.R_0k.'*segment.segmentVector/segment.length;
+%                             V_ijk_T = simplify(V_ijk_T, 'Step', k*20);
+%                             % - Translation
+%                             obj.V(i, 6*k-5:6*k-3) = obj.V(i, 6*k-5:6*k-3) + V_ijk_T.';
+%                             % - Orientation
+%                             obj.V(i, 6*k-2:6*k) = obj.V(i, 6*k-2:6*k) + ...
+%                                 cross(segment.attachments{1}.r_GA, V_ijk_T).';                          
+%                         end
+%                         
+%                         % Ending point
+%                         k = segment.attached_links(2);
+%                         if k > 0
+%                             V_ijk_T = bodyModel.bodies{k}.R_0k.'*segment.segmentVector/segment.length;
+%                             V_ijk_T = simplify(V_ijk_T, 'Step', k*20);
+%                             % - Translation
+%                             obj.V(i, 6*k-5:6*k-3) = obj.V(i, 6*k-5:6*k-3) + V_ijk_T.';
+%                             % - Orientation
+%                             obj.V(i, 6*k-2:6*k) = obj.V(i, 6*k-2:6*k) + ...
+%                                 cross(segment.attachments{2}.r_GA, V_ijk_T).';                           
+%                         end
+%                     end
+%                     % Store r_OA
+%                     obj.r_OAs(:,segment_count) = simplify([segment.attachments{1}.r_OA;segment.attachments{2}.r_OA],'Step',10);                    
+%                     segment_count = segment_count + 1;
+%                 end
+%                 obj.K(i,i) = obj.cables{i}.K;
+% 
+%                 if (cable.isActive)
+%                     obj.numCablesActive = obj.numCablesActive + 1;
+%                 end 
+%             end 
+%             CASPR_log.Info('Simplifying V...');
+%             obj.V = simplify(obj.V, 'Step', 20);           
+%                        
+%             ind_active = 1;
+%             obj.cableIndicesActive = zeros(obj.numCablesActive, 1);            
+%             obj.lengths = MatrixOperations.Initialise([obj.numCables,1],is_symbolic);
+%             for i = 1:obj.numCables
+%                 % Active cable
+%                 if (obj.cables{i}.isActive)
+%                     obj.cableIndicesActive(ind_active) = i;
+%                     ind_active = ind_active + 1;                    
+%                 end               
+%                 obj.lengths(i) = obj.cables{i}.length;                
+%             end               
+%             
+%             if(bodyModel.occupied.hessian)
+%                 obj.updateHessian(bodyModel);
+%             end
+%         end
+        
+        % set update function
+        function set_model_mode(obj, model_mode) 
+            obj.modelMode = model_mode;
+           if model_mode==ModelModeType.COMPILED
+               obj.update = @obj.compiledUpdate;
+           else
+               % DEFAULT and SYMBOLIC 
+               obj.update = @obj.defaultUpdate;
+           end
+        end
     end
 
 
     methods (Static)
-        function c = LoadXmlObj(cable_prop_xmlobj, bodiesModel,model_mode)
+        function c = LoadXmlObj(cable_prop_xmlobj, bodiesModel, model_mode, model_options)
             CASPR_log.Assert(strcmp(cable_prop_xmlobj.getNodeName, 'cable_set'), 'Root element should be <cable_set>');
             allCableItems = cable_prop_xmlobj.getChildNodes;
             num_cables = allCableItems.getLength;
@@ -614,7 +640,7 @@ classdef SystemModelCables < handle
             end
 
             % Create the actual object to return
-            c = SystemModelCables(xml_cables, bodiesModel.numLinks,model_mode);
+            c = SystemModelCables(xml_cables, bodiesModel, model_mode, model_options);
         end
     end
 end

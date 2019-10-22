@@ -24,7 +24,6 @@ classdef SystemModel < handle
         bodyModel               % SystemModelBodies object
         cableModel              % SystemModelCables object
         modelMode               % The mode of the model
-        filesCompiled           % Flag indicating whether files are compiled
     end
 
     properties (Constant)
@@ -105,50 +104,42 @@ classdef SystemModel < handle
         y                       % Operational space coordinate vector
         y_dot                   % Operational space coordinate derivative
         y_ddot                  % Operational space coordinate double derivative
+        
+        isSymbolic
     end
 
     methods (Static)
         % Load the xml objects for bodies and cable sets.
-        function b = LoadXmlObj(body_xmlobj, cable_xmlobj, model_mode)
-            if((nargin == 2)||(model_mode == ModelModeType.DEFAULT))
-                b               =   SystemModel();
-                b.modelMode     =   ModelModeType.DEFAULT;
-                b.bodyModel     =   SystemModelBodies.LoadXmlObj(body_xmlobj,b.modelMode);                
-                b.cableModel    =   SystemModelCables.LoadXmlObj(cable_xmlobj, b.bodyModel,b.modelMode);                
+        function b = LoadXmlObj(robot_name, body_xmlobj, cable_xmlobj, op_space_set_xmlobj, model_mode, model_options)
+            if (nargin < 5)
+                model_mode = ModelModeType.DEFAULT;
+            elseif (nargin < 6)
+                model_options = ModelOptions();
+            end
+            b               =   SystemModel(robot_name, model_mode);
+            b.bodyModel     =   SystemModelBodies.LoadXmlObj(body_xmlobj, op_space_set_xmlobj, b.modelMode, model_options);
+            b.cableModel    =   SystemModelCables.LoadXmlObj(cable_xmlobj, b.bodyModel, b.modelMode, model_options);
+            if ((model_mode == ModelModeType.DEFAULT) || (model_mode == ModelModeType.COMPILED))
                 b.update(b.bodyModel.q_initial, b.bodyModel.q_dot_default, b.bodyModel.q_ddot_default, zeros(b.numDofs,1));
-            elseif(model_mode == ModelModeType.SYMBOLIC )
-                b               =   SystemModel();
-                b.modelMode     =   ModelModeType.SYMBOLIC;
-                b.bodyModel     =   SystemModelBodies.LoadXmlObj(body_xmlobj,b.modelMode);                
-                b.cableModel    =   SystemModelCables.LoadXmlObj(cable_xmlobj, b.bodyModel,b.modelMode);                
+            elseif (model_mode == ModelModeType.SYMBOLIC)
                 % Create symbolic variables
-                q = sym('q',[b.numDofs,1]); q_d = sym('q_d',[b.numDofs,1]);
-                q_dd = sym('q_dd',[b.numDofs,1]); w_ext = sym('w_ext',[b.numDofs,1]);                               
-                b.update(q, q_d, q_dd, w_ext);  
-            elseif(model_mode == ModelModeType.COMPILED)
-                b               =   SystemModel();
-                b.modelMode     =   ModelModeType.COMPILED;
-                b.bodyModel     =   SystemModelBodies.LoadXmlObj(body_xmlobj,b.modelMode);                
-                b.cableModel    =   SystemModelCables.LoadXmlObj(cable_xmlobj, b.bodyModel,b.modelMode);                
-                % Create symbolic variables
-                q = sym('q',[b.numDofs,1]); q_d = sym('q_d',[b.numDofs,1]);
-                q_dd = sym('q_dd',[b.numDofs,1]); w_ext = sym('w_ext',[b.numDofs,1]);                               
-                b.setFilesCompiled(false); 
-                b.setModelMode(model_mode);
-                b.update(q, q_d, q_dd, w_ext);   
-            elseif (model_mode == ModelModeType.CUSTOM)
-                b               =   SystemModel();
-                b.modelMode     =   ModelModeType.CUSTOM;
-                b.bodyModel     =   SystemModelBodies.LoadXmlObj(body_xmlobj,b.modelMode);                
-                b.cableModel    =   SystemModelCables.LoadXmlObj(cable_xmlobj, b.bodyModel,b.modelMode);                
-                b.update(b.bodyModel.q_initial, b.bodyModel.q_dot_default, b.bodyModel.q_ddot_default, zeros(b.numDofs,1));            
+                q = sym('q', [b.numDofs,1]); 
+                q_d = sym('q_d', [b.numDofs,1]);
+                q_dd = sym('q_dd', [b.numDofs,1]); 
+                w_ext = sym('w_ext', [b.numDofs,1]);                               
+                b.update(q, q_d, q_dd, w_ext);
             end
         end
     end
 
     methods
         % Constructor
-        function b = SystemModel()
+        function b = SystemModel(robot_name, mode)
+            b.robotName = robot_name;
+            if nargin < 2
+                mode = ModelModeType.DEFAULT;
+            end
+            b.modelMode = mode;
         end
 
         % Function updates the kinematics and dynamics of the bodies and
@@ -156,17 +147,15 @@ classdef SystemModel < handle
         function update(obj, q, q_dot, q_ddot, w_ext)
             % Assert that the body model uses the correct             
             CASPR_log.Assert(length(q) == obj.bodyModel.numDofVars && length(q_dot) == obj.bodyModel.numDofs ...
-                && length(q_ddot) == obj.bodyModel.numDofs && length(w_ext) == obj.bodyModel.numDofs,'Incorrect input to update function');
+                && length(q_ddot) == obj.bodyModel.numDofs && length(w_ext) == obj.bodyModel.numDofs, 'Incorrect input to update function');
             obj.bodyModel.update(q, q_dot, q_ddot, w_ext);              
             obj.cableModel.update(obj.bodyModel);   
         end
         
         % Function that updates the inertia parameters
-        function updateInertiaProperties(obj,m,r_G,I_G,update_flag)
-            obj.bodyModel.updateInertiaProperties(m,r_G,I_G);
-            if(update_flag)
-                obj.update(obj.q,obj.q_dot,obj.q_ddot,obj.W_e);
-            end
+        function updateInertiaProperties(obj, m, r_G, I_G)
+            obj.bodyModel.updateInertiaProperties(m, r_G, I_G);
+            obj.update(obj.q, obj.q_dot, obj.q_ddot, obj.W_e);
         end
         
         % Get the linearisation terms for the system.
@@ -178,13 +167,7 @@ classdef SystemModel < handle
             % First compute L_grad (this also sets the hessian flag to
             % true)
             L_grad_temp = obj.L_grad;
-            
-            % Had the linearisation been computed previously
-            if(isempty(obj.bodyModel.Minv_grad))
-                obj.bodyModel.occupied.linearisation = true;
-                obj.bodyModel.updateLinearisation();
-            end
-            
+                        
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %             % without considering the active joints
 %             % Determine the A matrix using gradient matrices
@@ -297,7 +280,7 @@ classdef SystemModel < handle
         end
 
         function value = get.L(obj)            
-            if((obj.modelMode == ModelModeType.COMPILED)&&obj.filesCompiled)
+            if (obj.modelMode == ModelModeType.COMPILED)
                 value = compile_L(obj.bodyModel.q,obj.bodyModel.q_dot,obj.bodyModel.q_ddot,obj.bodyModel.W_e);                      
             else
                 value = obj.cableModel.V*obj.bodyModel.W;                      
@@ -313,15 +296,7 @@ classdef SystemModel < handle
         end
         
         function value = get.L_grad(obj)
-            if(isempty(obj.cableModel.V_grad))
-                if(~obj.bodyModel.occupied.hessian)
-                    obj.bodyModel.occupied.hessian = true;
-                    obj.bodyModel.updateHessian();
-                    obj.cableModel.updateHessian(obj.bodyModel);
-                end
-            end
-            is_symbolic = obj.modelMode == ModelModeType.SYMBOLIC;
-            value = TensorOperations.LeftMatrixProduct(obj.cableModel.V,obj.bodyModel.W_grad,is_symbolic) + TensorOperations.RightMatrixProduct(obj.cableModel.V_grad,obj.bodyModel.W,is_symbolic);
+            value = TensorOperations.LeftMatrixProduct(obj.cableModel.V,obj.bodyModel.W_grad, obj.isSymbolic) + TensorOperations.RightMatrixProduct(obj.cableModel.V_grad,obj.bodyModel.W, obj.isSymbolic);
         end
         
         function value = get.L_grad_active(obj)
@@ -336,8 +311,7 @@ classdef SystemModel < handle
             if(obj.modelMode == ModelModeType.COMPILED)
                 CASPR_log.Error('Stiffness calculation is not supported in the compiled mode.');                      
             else
-                is_symbolic = obj.modelMode == ModelModeType.SYMBOLIC;
-                value = obj.L.'*obj.cableModel.K*obj.L + TensorOperations.VectorProduct(obj.L_grad,obj.cableForces,1,is_symbolic);
+                value = obj.L.'*obj.cableModel.K*obj.L + TensorOperations.VectorProduct(obj.L_grad,obj.cableForces, 1, obj.isSymbolic);
 %                 value = obj.L.'*obj.cableModel.K*obj.L;
             end
         end
@@ -476,60 +450,21 @@ classdef SystemModel < handle
                 obj.bodyModel.addInertiaUncertainty(m_bounds,I_bounds);
             end
         end
-        
-        % RobotName getter
-        function value = get.robotName(obj)
-            value = obj.robotName;
+                
+        function value = get.isSymbolic(obj)
+            value = (obj.modelMode == ModelModeType.SYMBOLIC);
         end
-        % RobotName setter
-        function setRobotName(obj, robotName)
-            obj.robotName = robotName;
-        end
-        
-        
-        % Model Mode Related Functions %        
-        
-        % set model mode
-        function setModelMode(obj, model_mode)
-            obj.modelMode = model_mode;
-            obj.bodyModel.setModelMode(model_mode);
-            obj.cableModel.setModelMode(model_mode);
-        end       
-        
-        % set filesCompiled Flag
-        function setFilesCompiled(obj, value)
-            obj.filesCompiled = value;
-            obj.bodyModel.setFilesCompiled(value);
-            obj.cableModel.setFilesCompiled(value);
-        end
-        
+                
         % System Compiling Procedure in COMPILED mode
         % - New folders are created in model_config to store the compiled
         % body and cable .m files
-        function compile(obj)           
+        function compile(obj, file_folder)
+            CASPR_log.Assert(obj.modelMode == ModelModeType.SYMBOLIC, 'Compile function only works when in symbolic mode');
+            
             % Define the paths for storing the compiled files
-            model_config_path = CASPR_configuration.LoadModelConfigPath();
-            tmp_path = [model_config_path, '/tmp_compilations'];
-            tmp_body_path = [tmp_path, '/Bodies'];
-            tmp_cable_path = [tmp_path, '/Cables'];
+            tmp_body_path = [file_folder, '/Bodies'];
+            tmp_cable_path = [file_folder, '/Cables'];
            
-            % Remove all the existing compiled files to ensure all compiled
-            % files are up-to-date
-            if exist(tmp_path)
-                warning('off','all');  
-                try
-                    rmdir(tmp_path, 's');
-                    CASPR_log.Info('Previously compiled files are removed.');
-                catch
-                    CASPR_log.Warn('You might not have the permission to remove previously compiled files');
-                    CASPR_log.Warn('Please check your permission before running COMPILED mode.');
-                    return;
-                end
-                warning('on','all');
-            else
-                % Make folders
-                mkdir(tmp_path);  
-            end            
             CASPR_log.Info('New files will be compiled.');
                       
             if ~exist(tmp_body_path)
@@ -554,17 +489,12 @@ classdef SystemModel < handle
             % If more system variables are needed in the future, a separate
             % function handling these variables might be prefered.
             CASPR_log.Info('- Compiling L...');            
-            matlabFunction(obj.L, 'File', strcat(tmp_path, '/compile_L'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});
+            matlabFunction(obj.L, 'File', strcat(file_folder, '/compile_L'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});
             CASPR_log.Info('Finished L Compilation.');  
             
             % Add the compiled files to the path            
-            addpath(genpath(tmp_path));
+            addpath(genpath(file_folder));
             
-            % Perform an update under compiled mode to initialise
-            obj.setFilesCompiled(true);
-            obj.bodyModel.occupied = BodyFlags();
-            obj.setModelMode(ModelModeType.COMPILED);
-            obj.update(obj.bodyModel.q_initial, obj.bodyModel.q_dot_default, obj.bodyModel.q_ddot_default, zeros(obj.numDofs,1));
             CASPR_log.Info('Finished All Compilations.\n');
         end
     end
