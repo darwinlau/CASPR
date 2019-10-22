@@ -2,8 +2,8 @@
  *  Template for custom CDPR (Header File)
  */
 
-#ifndef custom_BMArm_h
-#define custom_BMArm_h
+#ifndef custom_C_h
+#define custom_C_h
 #include "shrhelp.h"
 
 /* Function declarations */
