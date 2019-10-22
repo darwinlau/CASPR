@@ -50,8 +50,6 @@
         </points>
       </quintic_spline_trajectory>
       
-      
-      <!-- Set point for memory algorithm test -->
       <quintic_spline_trajectory id="setpoint" time_step="0.01" time_definition="relative">
         <points>
           <point>
