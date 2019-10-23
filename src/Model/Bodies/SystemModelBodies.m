@@ -57,8 +57,9 @@ classdef SystemModelBodies < handle
         P                       % 6p x 6p matrix representing mapping between absolute body velocities (CoG) and relative body velocities (joint)
         W                       % W = P*S : 6p x n matrix representing mapping \dot{\mathbf{x}} = W \dot{\mathbf{q}}    
 
-        % Gradient terms
         W_grad          = []; % The gradient tensor of the W matrix
+        
+        % Gradient terms
         Minv_grad       = []; % The gradient tensor of the M^-1 matrix
         C_grad_q        = []; % The gradient (wrt q) of C
         C_grad_qdot     = []; % The gradient (wrt \dot{q}) of C
@@ -111,6 +112,28 @@ classdef SystemModelBodies < handle
         % Flags
         modelMode                           % The model mode
         modelOptions                        % ModelOptions object storing options for the model
+        
+    end
+    
+    properties (Access = private)
+        compiled_lib_name; 
+        % Function handles for compiled update mode        
+        compiled_R_0ks_fn;
+        compiled_r_OPs_fn;
+        compiled_P_fn;
+        compiled_S_fn;
+        compiled_x_ddot_fn;
+        compiled_x_dot_fn;
+        
+        compiled_C_b_fn;
+        compiled_G_b_fn;
+        compiled_M_b_fn;
+        
+        compiled_J_fn;
+        compiled_J_dot_fn;
+        compiled_y_fn;
+        compiled_y_dot_fn;
+        compiled_y_ddot_fn;
     end
 
     properties (Dependent)
@@ -141,15 +164,19 @@ classdef SystemModelBodies < handle
         isSymbolic
     end
 
-    properties
-        occupied                     % An object to keep flags for whether or not matrices are occupied
-    end
-
     methods
         % Constructor for the class SystemModelBodies.  This determines the
         % numbers of degrees of freedom as well as initialises the
         % matrices.
-        function b = SystemModelBodies(bodies, model_mode, model_options)
+        function b = SystemModelBodies(bodies, model_mode, model_options, compiled_lib_name)
+            if (model_mode == ModelModeType.COMPILED)
+                if (nargin < 4 || isempty(compiled_lib_name))
+                    CASPR_log.Error('Library name must be supplied with COMPILED mode');
+                else 
+                    b.compiled_lib_name = compiled_lib_name;
+                end
+            end
+            
             num_dofs = 0;
             num_dof_vars = 0;
             num_operational_dofs = 0;
@@ -163,7 +190,7 @@ classdef SystemModelBodies < handle
                     num_dof_actuated = num_dof_actuated + bodies{k}.joint.numDofs;
                 end
             end
-            b.set_model_mode(model_mode); % Sets the modelMode property and update function handle
+            b.modelMode = model_mode;
             b.modelOptions = model_options;
             b.bodies = bodies;
             b.numDofs = num_dofs;
@@ -172,8 +199,8 @@ classdef SystemModelBodies < handle
             b.numDofsActuated = num_dof_actuated;
             b.numLinks = length(b.bodies);
             
-            b.connectivityGraph = MatrixOperations.Initialise([b.numLinks, b.numLinks], 0);
-            b.bodiesPathGraph = MatrixOperations.Initialise([b.numLinks, b.numLinks], 0);
+            b.connectivityGraph = MatrixOperations.Initialise([b.numLinks, b.numLinks], false);
+            b.bodiesPathGraph = MatrixOperations.Initialise([b.numLinks, b.numLinks], false);
             b.S = MatrixOperations.Initialise([6*b.numLinks, b.numDofs], b.isSymbolic);
             b.S_dot = MatrixOperations.Initialise([6*b.numLinks,b.numDofs], b.isSymbolic);
             b.P = MatrixOperations.Initialise([6*b.numLinks, 6*b.numLinks], b.isSymbolic);
@@ -182,8 +209,8 @@ classdef SystemModelBodies < handle
             
             b.R_0ks = MatrixOperations.Initialise([3, 3*b.numLinks], b.isSymbolic);
             b.r_OPs = MatrixOperations.Initialise([3, b.numLinks], b.isSymbolic);
-            b.r_Gs  = MatrixOperations.Initialise([3, b.numLinks],0);
-            b.r_Pes = MatrixOperations.Initialise([3, b.numLinks],0);
+            b.r_Gs  = MatrixOperations.Initialise([3, b.numLinks], false);
+            b.r_Pes = MatrixOperations.Initialise([3, b.numLinks], false);
             
             % Construct joint actuation selection matrix
             b.A = zeros(b.numDofs, b.numDofsActuated);
@@ -201,6 +228,8 @@ classdef SystemModelBodies < handle
             % connectivity and body path graphs
             b.formConnectiveMap();
             b.createMassInertiaMatrix();  
+            
+            b.set_update_fns(); % Sets the modelMode property and update function handle
         end
 
         % Update the kinematics of the body model for the entire
@@ -328,8 +357,8 @@ classdef SystemModelBodies < handle
                 CASPR_log.Info('Symbolic computing/simplifying of W');
             end
             % W = P*S              
-            obj.W = obj.P*obj.S;                      
-       
+            obj.W = obj.P*obj.S;       
+                   
             % Determine x_dot              
             obj.x_dot = obj.W*obj.q_dot;          
             
@@ -403,7 +432,7 @@ classdef SystemModelBodies < handle
         
         % Update function under COMPILED mode
         % - Update using compiled files       
-        function compiledUpdate(obj, q, q_dot, q_ddot, w_ext)   
+        function compiledUpdate(obj, q, q_dot, q_ddot, w_ext)            
             % Update the 4 arguments
             obj.q = q;
             obj.q_dot = q_dot;
@@ -411,8 +440,9 @@ classdef SystemModelBodies < handle
             obj.W_e = w_ext;
             
             % Body kinematics
-            obj.R_0ks = compile_R_0ks(q, q_dot, q_ddot, w_ext);
-            obj.r_OPs = compile_r_OPs(q, q_dot, q_ddot, w_ext);
+            obj.R_0ks = obj.compiled_R_0ks_fn(q, q_dot, q_ddot, w_ext);
+            obj.r_OPs = obj.compiled_r_OPs_fn(q, q_dot, q_ddot, w_ext);
+            
             for k = 1:obj.numLinks
                 obj.bodies{k}.R_0k = obj.R_0ks(:,3*k-2:3*k);
                 obj.bodies{k}.r_OP = obj.r_OPs(:,k);
@@ -421,18 +451,18 @@ classdef SystemModelBodies < handle
             end
             
             % Kinematics jacobians
-            obj.P = compile_P(q, q_dot, q_ddot, w_ext);
-            obj.S = compile_S(q, q_dot, q_ddot, w_ext);
+            obj.P = obj.compiled_P_fn(q, q_dot, q_ddot, w_ext);
+            obj.S = obj.compiled_S_fn(q, q_dot, q_ddot, w_ext);
             %obj.S_dot = compile_S_dot(q, q_dot, q_ddot, w_ext);
             obj.W = obj.P*obj.S;            
-            obj.x_ddot = compile_x_ddot(q, q_dot, q_ddot, w_ext);
-            obj.x_dot = compile_x_dot(q, q_dot, q_ddot, w_ext);
+            obj.x_ddot = obj.compiled_x_ddot_fn(q, q_dot, q_ddot, w_ext);
+            obj.x_dot = obj.compiled_x_dot_fn(q, q_dot, q_ddot, w_ext);
             
             % Update class properties by calling the compiled functions
             if obj.modelOptions.isComputeDynamics             
-                obj.C_b = compile_C_b(q, q_dot, q_ddot, w_ext);   
-                obj.G_b = compile_G_b(q, q_dot, q_ddot, w_ext);           
-                obj.M_b = compile_M_b(q, q_dot, q_ddot, w_ext);
+                obj.C_b = obj.compiled_C_b_fn(q, q_dot, q_ddot, w_ext);   
+                obj.G_b = obj.compiled_G_b_fn(q, q_dot, q_ddot, w_ext);           
+                obj.M_b = obj.compiled_M_b_fn(q, q_dot, q_ddot, w_ext);
                 obj.M =   obj.W.' * obj.M_b;
                 obj.C =   obj.W.' * obj.C_b;
                 obj.G = - obj.W.' * obj.G_b;
@@ -440,11 +470,11 @@ classdef SystemModelBodies < handle
             
             % Update operational space variables
             if (obj.isComputeOperationalSpace)             
-                obj.J = compile_J(q, q_dot, q_ddot, w_ext);
-                obj.J_dot = compile_J_dot(q, q_dot, q_ddot, w_ext);
-                obj.y = compile_y(q, q_dot, q_ddot, w_ext);
-                obj.y_ddot = compile_y_ddot(q, q_dot, q_ddot, w_ext);
-                obj.y_dot = compile_y_dot(q, q_dot, q_ddot, w_ext);                
+                obj.J = obj.compiled_J_fn(q, q_dot, q_ddot, w_ext);
+                obj.J_dot = obj.compiled_J_dot_fn(q, q_dot, q_ddot, w_ext);
+                obj.y = obj.compiled_y_fn(q, q_dot, q_ddot, w_ext);
+                obj.y_dot = obj.compiled_y_dot_fn(q, q_dot, q_ddot, w_ext);       
+                obj.y_ddot = obj.compiled_y_ddot_fn(q, q_dot, q_ddot, w_ext);         
             end               
         end
                         
@@ -556,17 +586,6 @@ classdef SystemModelBodies < handle
                         aq(:,j,k) = XM_i_from_parent*aq(:,j,k);
                     end
                 end
-%                 n_q_accumelated = 0;
-%                 for l = 1:i-1
-%                     n_q_l = obj.bodies{l}.joint.numDofs;
-%                     for j = 1:n_q_l
-%                         vq(:,n_q_accumelated+j) = XM_i_from_parent*vq(:,n_q_accumelated+j);
-%                         for k = 1:n_q_l
-%                             aq(:,n_q_accumelated+j,n_q_accumelated+k) = XM_i_from_parent*aq(:,n_q_accumelated+j,n_q_accumelated+k);
-%                         end
-%                     end
-%                     n_q_accumelated = n_q_accumelated + n_q_l;
-%                 end
                 
                 % update joint velocity/acceleration - add joint i's contribution
                 for j = 1:n_q_i
@@ -972,6 +991,15 @@ classdef SystemModelBodies < handle
             value = (obj.modelMode == ModelModeType.SYMBOLIC);
         end
         
+        function value = get.W_grad(obj)
+            if obj.modelMode==ModelModeType.COMPILED || ~obj.modelOptions.isComputeHessian
+                CASPR_log.Warn('W_grad is not computed under compiled mode or if hessian computation is off');
+                value = [];
+            else
+                value = obj.W_grad;
+            end
+        end
+        
        
         % Model Mode Related Functions %        
         
@@ -979,43 +1007,43 @@ classdef SystemModelBodies < handle
         % Compiling body variables under COMPILED mode
         % - Symbolic Variables are compiled into .m files and saved to the
         % path
-        function compile(obj, path)  
+        function compile(obj, path, lib_name)  
             CASPR_log.Assert(obj.modelMode == ModelModeType.SYMBOLIC, 'Can only compile a symbolic model');
             % Jacobians
             CASPR_log.Info('- Compiling Jacobians...');
-            matlabFunction(obj.S, 'File', strcat(path, '/compile_S'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});
+            matlabFunction(obj.S, 'File', strcat(path, '/', lib_name, '_compiled_S'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});
             %matlabFunction(obj.S_dot, 'File', strcat(path, '/compile_S_dot'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});
-            matlabFunction(obj.P, 'File', strcat(path, '/compile_P'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});   
+            matlabFunction(obj.P, 'File', strcat(path, '/', lib_name, '_compiled_P'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});   
             
             % Kinematics
-            matlabFunction(obj.R_0ks, 'File', strcat(path, '/compile_R_0ks'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});
-            matlabFunction(obj.r_OPs, 'File', strcat(path, '/compile_r_OPs'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});
+            matlabFunction(obj.R_0ks, 'File', strcat(path, '/', lib_name, '_compiled_R_0ks'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});
+            matlabFunction(obj.r_OPs, 'File', strcat(path, '/', lib_name, '_compiled_r_OPs'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});
             
             % Absolute CoM velocities and accelerations (linear and angular)
             CASPR_log.Info('- Compiling Velocities and Accelerations...');            
-            matlabFunction(obj.x_dot, 'File', strcat(path, '/compile_x_dot'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
-            matlabFunction(obj.x_ddot, 'File', strcat(path, '/compile_x_ddot'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
+            matlabFunction(obj.x_dot, 'File', strcat(path, '/', lib_name, '_compiled_x_dot'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
+            matlabFunction(obj.x_ddot, 'File', strcat(path, '/', lib_name, '_compiled_x_ddot'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
             
             % Dynamics
             if(obj.modelOptions.isComputeDynamics)
                 CASPR_log.Info('- Compiling Dynamics Variables...'); 
-                matlabFunction(obj.M_b, 'File', strcat(path, '/compile_M_b'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
-                matlabFunction(obj.C_b, 'File', strcat(path, '/compile_C_b'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
-                matlabFunction(obj.G_b, 'File', strcat(path, '/compile_G_b'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});  
-                matlabFunction(obj.M, 'File', strcat(path, '/compile_M'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
-                matlabFunction(obj.C, 'File', strcat(path, '/compile_C'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
-                matlabFunction(obj.G, 'File', strcat(path, '/compile_G'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
-                matlabFunction(inv(obj.M), 'File', strcat(path, '/compile_Minv'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
+                matlabFunction(obj.M_b, 'File', strcat(path, '/', lib_name, '_compiled_M_b'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
+                matlabFunction(obj.C_b, 'File', strcat(path, '/', lib_name, '_compiled_C_b'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
+                matlabFunction(obj.G_b, 'File', strcat(path, '/', lib_name, '_compiled_G_b'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});  
+                matlabFunction(obj.M, 'File', strcat(path, '/', lib_name, '_compiled_M'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
+                matlabFunction(obj.C, 'File', strcat(path, '/', lib_name, '_compiled_C'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
+                matlabFunction(obj.G, 'File', strcat(path, '/', lib_name, '_compiled_G'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
+                matlabFunction(inv(obj.M), 'File', strcat(path, '/', lib_name, '_compiled_Minv'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
             end            
             
             % Operational space
             if(obj.isComputeOperationalSpace)
                 CASPR_log.Info('- Compiling Operational Space Variables...');
-                matlabFunction(obj.y, 'File', strcat(path, '/compile_y'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});                
-                matlabFunction(obj.y_dot, 'File', strcat(path, '/compile_y_dot'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});                
-                matlabFunction(obj.y_ddot, 'File', strcat(path, '/compile_y_ddot'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});                
-                matlabFunction(obj.J, 'File', strcat(path, '/compile_J'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});
-                matlabFunction(obj.J_dot, 'File', strcat(path, '/compile_J_dot'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});
+                matlabFunction(obj.y, 'File', strcat(path, '/', lib_name, '_compiled_y'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});                
+                matlabFunction(obj.y_dot, 'File', strcat(path, '/', lib_name, '_compiled_y_dot'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});                
+                matlabFunction(obj.y_ddot, 'File', strcat(path, '/', lib_name, '_compiled_y_ddot'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});                
+                matlabFunction(obj.J, 'File', strcat(path, '/', lib_name, '_compiled_J'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});
+                matlabFunction(obj.J_dot, 'File', strcat(path, '/', lib_name, '_compiled_J_dot'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});
             end
         end
     end
@@ -1053,7 +1081,9 @@ classdef SystemModelBodies < handle
                     w_kp = zeros(3,1);
                 end
                 w_k = obj.bodies{k}.w;
-                w_k = simplify(w_k);
+                if is_symbolic
+                    w_k = simplify(w_k);
+                end
                 ang_mat(6*k-5:6*k, 6*k-5:6*k) = [2*MatrixOperations.SkewSymmetric(w_kp) zeros(3,3); zeros(3,3) MatrixOperations.SkewSymmetric(w_k)];
             end
 
@@ -1083,7 +1113,9 @@ classdef SystemModelBodies < handle
                     Q(6*k-5:6*k, 6*a-5:6*a) = Qak;
                 end
             end
-            Q = simplify(Q);
+            if is_symbolic
+                Q = simplify(Q);
+            end
 
             % J = T*Q*S
             if is_symbolic
@@ -1104,7 +1136,9 @@ classdef SystemModelBodies < handle
             temp_j_dot = Q*obj.S_dot + Q*ang_mat*obj.S;
             for k = 1:obj.numLinks
                 k_R_0k = obj.bodies{k}.R_0k;
-                k_R_0k = simplify(k_R_0k, 'Step', k*50);
+                if (is_symbolic)
+                    k_R_0k = simplify(k_R_0k, 'Step', k*50);
+                end
                 for a = 1:k
                     ap = obj.bodies{a}.parentLinkId;
                     if (ap > 0 && obj.bodiesPathGraph(a,k))
@@ -1115,7 +1149,9 @@ classdef SystemModelBodies < handle
                 temp_j_dot(6*k-5:6*k-3,:) = temp_j_dot(6*k-5:6*k-3,:) - obj.bodies{k}.R_0k*MatrixOperations.SkewSymmetric(obj.bodies{k}.w)*MatrixOperations.SkewSymmetric(obj.bodies{k}.r_y)*obj.W(6*k-2:6*k,:);
             end
             obj.J_dot = obj.T*temp_j_dot;
-            obj.J_dot = simplify(obj.J_dot);
+            if (is_symbolic)
+                obj.J_dot = simplify(obj.J_dot);
+            end
 
             % Determine y_ddot
             if is_symbolic
@@ -1691,20 +1727,37 @@ classdef SystemModelBodies < handle
 %         end
         
         % set update function
-        function set_model_mode(obj, model_mode) 
-            obj.modelMode = model_mode;
-           if model_mode==ModelModeType.COMPILED
-               obj.update = @obj.compiledUpdate;
-           else
-               % DEFAULT and SYMBOLIC 
-               obj.update = @obj.defaultUpdate;
-           end
+        function set_update_fns(obj) 
+            CASPR_log.Assert(~isempty(obj.modelMode), 'The model mode should never empty');
+            if obj.modelMode == ModelModeType.DEFAULT || obj.modelMode == ModelModeType.SYMBOLIC
+                obj.update = @obj.defaultUpdate;
+            elseif obj.modelMode == ModelModeType.COMPILED
+                obj.update = @obj.compiledUpdate;
+                obj.compiled_R_0ks_fn = str2func([obj.compiled_lib_name, '_compiled_R_0ks']);
+                obj.compiled_r_OPs_fn = str2func([obj.compiled_lib_name, '_compiled_r_OPs']);
+                obj.compiled_P_fn = str2func([obj.compiled_lib_name, '_compiled_P']);
+                obj.compiled_S_fn = str2func([obj.compiled_lib_name, '_compiled_S']);
+                obj.compiled_x_ddot_fn = str2func([obj.compiled_lib_name, '_compiled_x_ddot']);
+                obj.compiled_x_dot_fn = str2func([obj.compiled_lib_name, '_compiled_x_dot']);
+
+                obj.compiled_C_b_fn = str2func([obj.compiled_lib_name, '_compiled_C_b']);
+                obj.compiled_G_b_fn = str2func([obj.compiled_lib_name, '_compiled_G_b']);
+                obj.compiled_M_b_fn = str2func([obj.compiled_lib_name, '_compiled_M_b']);
+
+                obj.compiled_J_fn = str2func([obj.compiled_lib_name, '_compiled_J']);
+                obj.compiled_J_dot_fn = str2func([obj.compiled_lib_name, '_compiled_J_dot']);
+                obj.compiled_y_fn = str2func([obj.compiled_lib_name, '_compiled_y']);
+                obj.compiled_y_dot_fn = str2func([obj.compiled_lib_name, '_compiled_y_dot']);
+                obj.compiled_y_ddot_fn = str2func([obj.compiled_lib_name, '_compiled_y_ddot']);
+            else
+                CASPR_log.Error('Model mode does not exist');
+            end
         end
     end
 
     methods (Static)
         % Load the bodies xml object.
-        function b = LoadXmlObj(body_prop_xmlobj, op_space_set_xmlobj, model_mode, model_options)
+        function b = LoadXmlObj(body_prop_xmlobj, op_space_set_xmlobj, model_mode, model_options, compiled_lib_name)
             % Load the body
             CASPR_log.Assert(strcmp(body_prop_xmlobj.getNodeName, 'links'), 'Root element should be <links>');
 
@@ -1730,7 +1783,7 @@ classdef SystemModelBodies < handle
             end
 
             % Create the actual object to return
-            b = SystemModelBodies(links, model_mode, model_options);
+            b = SystemModelBodies(links, model_mode, model_options, compiled_lib_name);
             if (~isempty(op_space_set_xmlobj))
                 b.load_operational_space_xml_obj(op_space_set_xmlobj);
             end

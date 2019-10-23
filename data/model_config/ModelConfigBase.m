@@ -9,8 +9,8 @@
 %    accessible.
 classdef (Abstract) ModelConfigBase < handle
     properties (SetAccess = private)
-        bodyPropertiesFilename      % Filename for the body properties
-        cablesPropertiesFilename    % Filename for the cable properties
+        bodiesPropertiesFilepath      % Filename for the body properties
+        cablesPropertiesFilepath    % Filename for the cable properties
         trajectoriesFilename        % Filename for the trajectories
         
         modelFolderPath             % Path of folder for the model
@@ -30,13 +30,17 @@ classdef (Abstract) ModelConfigBase < handle
         jointTrajectoryNamesList        % List of names of trajectories (joint space)
         operationalTrajectoryNamesList  % List of names of trajectories (operational space)
     end
-    
+        
     properties (Access = private)
         root_folder                 % The root folder for the models
         
         bodiesXmlObj                % The DOMNode object for body props
         cablesXmlObj                % The DOMNode object for cable props
         trajectoriesXmlObj          % The DOMNode for trajectory props
+    end
+    
+    properties (Constant)
+        COMPILE_RECORD_FILENAME = 'compile_record.txt'
     end
     
     methods
@@ -64,8 +68,8 @@ classdef (Abstract) ModelConfigBase < handle
                 if(strcmp(c.robotNamesList{i},robot_name))
                     cdpr_folder                 = char(cell_array{2}{i});
                     c.modelFolderPath           = [c.root_folder, cdpr_folder];
-                    c.bodyPropertiesFilename    = [c.root_folder, cdpr_folder, char(cell_array{3}{i})];
-                    c.cablesPropertiesFilename  = [c.root_folder, cdpr_folder, char(cell_array{4}{i})];
+                    c.bodiesPropertiesFilepath    = [c.root_folder, cdpr_folder, char(cell_array{3}{i})];
+                    c.cablesPropertiesFilepath  = [c.root_folder, cdpr_folder, char(cell_array{4}{i})];
                     c.trajectoriesFilename      = [c.root_folder, cdpr_folder, char(cell_array{5}{i})];
                     fclose(fid);
                     status_flag = 0;
@@ -77,12 +81,12 @@ classdef (Abstract) ModelConfigBase < handle
             end
             
             % Make sure all the filenames that are required exist
-            CASPR_log.Assert(exist(c.bodyPropertiesFilename, 'file') == 2, 'Body properties file does not exist.');
-            CASPR_log.Assert(exist(c.cablesPropertiesFilename, 'file') == 2, 'Cable properties file does not exist.');
+            CASPR_log.Assert(exist(c.bodiesPropertiesFilepath, 'file') == 2, 'Body properties file does not exist.');
+            CASPR_log.Assert(exist(c.cablesPropertiesFilepath, 'file') == 2, 'Cable properties file does not exist.');
             CASPR_log.Assert(exist(c.trajectoriesFilename, 'file') == 2, 'Trajectories file does not exist.');
             % Read the XML file to an DOM XML object
-            c.bodiesXmlObj =  XmlOperations.XmlReadRemoveIndents(c.bodyPropertiesFilename);
-            c.cablesXmlObj =  XmlOperations.XmlReadRemoveIndents(c.cablesPropertiesFilename);
+            c.bodiesXmlObj =  XmlOperations.XmlReadRemoveIndents(c.bodiesPropertiesFilepath);
+            c.cablesXmlObj =  XmlOperations.XmlReadRemoveIndents(c.cablesPropertiesFilepath);
             c.trajectoriesXmlObj =  XmlOperations.XmlReadRemoveIndents(c.trajectoriesFilename);
             
             % Loads the bodiesModel and cable set to be used for the trajectory loading
@@ -103,7 +107,7 @@ classdef (Abstract) ModelConfigBase < handle
             
             % At this stage load the default system model so trajectories
             % can be loaded.
-            sysModel = SystemModel.LoadXmlObj(c.robotName, bodies_xmlobj, cableset_xmlobj, operationalset_xmlobj, ModelModeType.DEFAULT, ModelOptions());
+            sysModel = SystemModel.LoadXmlObj(c.robotName, bodies_xmlobj, default_cable_set_id, cableset_xmlobj, c.defaultOperationalSetId, operationalset_xmlobj, ModelModeType.DEFAULT, ModelOptions());
             
             c.bodiesModel = sysModel.bodyModel;
             c.displayRange = XmlOperations.StringToVector(char(bodies_xmlobj.getAttribute('display_range')))';
@@ -115,6 +119,7 @@ classdef (Abstract) ModelConfigBase < handle
             cableset_xmlobj = obj.getCableSetXmlObj(cable_set_id);
             
             if nargin < 3 || isempty(operational_space_id)
+                operational_space_id = [];
                 op_space_set_xmlobj = [];
             else
                 op_space_set_xmlobj = obj.getOperationalSetXmlObj(operational_space_id);
@@ -127,26 +132,26 @@ classdef (Abstract) ModelConfigBase < handle
             end
 
             if model_mode == ModelModeType.COMPILED
-                % First check if a new compilation is required
-                
-                % If so, then perform compilation through the symbolic mode
-                
-                % Finally, create a SystemModel object (in compiled mode) to return
-                
-                
                 model_config_path = CASPR_configuration.LoadModelConfigPath();
-                compile_file_folder = [model_config_path, '\tmp_compilations'];
-                
-                    % Start Compilations...
+                lib_name = ModelConfigBase.ConstructCompiledLibraryName(obj.robotName, cable_set_id, operational_space_id);
+                compile_file_folder = [model_config_path, '\tmp_compilations\', lib_name];
+                % First check if a new compilation is required
+                if(obj.check_require_compile(compile_file_folder))
+                    % Recompiling, so first remove the existing directory
+                    if (exist(compile_file_folder, 'dir'))
+                        rmpath(genpath(compile_file_folder));
+                        rmdir(compile_file_folder, 's');
+                    end
                     warning('off','all');  
                     CASPR_log.Warn('Current version of compiled mode does not support changes in active <-> passive cables.');
                     CASPR_log.Warn('Compilation needs a long time. Please wait...');                        
                     warning('on','all');  
                     CASPR_log.Info('Preparation work...');
-                    sysModelSym = SystemModel.LoadXmlObj(obj.robotName, bodies_xmlobj, cableset_xmlobj, op_space_set_xmlobj, ModelModeType.SYMBOLIC, model_options);
-                    sysModelSym.compile(compile_file_folder);
-                    
-                    sysModel = SystemModel.LoadXmlObj(obj.robotName, bodies_xmlobj, cableset_xmlobj, op_space_set_xmlobj, ModelModeType.COMPILED, model_options);
+                    sysModelSym = SystemModel.LoadXmlObj(obj.robotName, bodies_xmlobj, cable_set_id, cableset_xmlobj, operational_space_id, op_space_set_xmlobj, ModelModeType.SYMBOLIC, model_options);
+                    sysModelSym.compile(compile_file_folder, lib_name);
+                    obj.write_compile_record_file(compile_file_folder);
+                end
+                sysModel = SystemModel.LoadXmlObj(obj.robotName, bodies_xmlobj, cable_set_id, cableset_xmlobj, operational_space_id, op_space_set_xmlobj, ModelModeType.COMPILED, model_options);
                                
 %                 end     
 %             elseif model_mode == ModelModeType.CUSTOM
@@ -258,7 +263,7 @@ classdef (Abstract) ModelConfigBase < handle
 %                 sysModel = SystemModel.LoadXmlObj(bodies_xmlobj, cableset_xmlobj, ModelModeType.COMPILED_AUTO);
             else
                 % DEFAULT || SYMBOLIC 
-                sysModel = SystemModel.LoadXmlObj(obj.robotName, bodies_xmlobj, cableset_xmlobj, op_space_set_xmlobj, model_mode, model_options);
+                sysModel = SystemModel.LoadXmlObj(obj.robotName, bodies_xmlobj, cable_set_id, cableset_xmlobj, operational_space_id, op_space_set_xmlobj, model_mode, model_options);
             end
             obj.bodiesModel = sysModel.bodyModel;
         end        
@@ -348,11 +353,58 @@ classdef (Abstract) ModelConfigBase < handle
             v = obj.bodiesXmlObj.getElementById(id);
             CASPR_log.Assert(~isempty(v), sprintf('Id ''%s'' does not exist in the bodies XML file', id));
         end
+        
+        function val = check_require_compile(obj, compile_file_folder)
+            val = false;
+            if (~exist([compile_file_folder, '\', obj.COMPILE_RECORD_FILENAME], 'file'))
+                val = true;
+                return;
+            end
+            % Get data from the compiled record file
+            fid = fopen([compile_file_folder, '\', obj.COMPILE_RECORD_FILENAME], 'r');
+            line = fgetl(fid);
+            fclose(fid);
+            split_str = strsplit(line, ',');
+            id_str = split_str{1};
+            compiled_date = datetime(split_str{2});
+            timezone_str = split_str{3};
+            CASPR_log.Assert(id_str == 'compiledtime', 'Invalid compiled record file');
+            
+            % Get current datetime and timezone information
+            curr_date = datetime('now', 'TimeZone', 'local');
+            
+            % If the timezone from file is not the system, maybe a change
+            % in system times occured, recompile anyway for safety
+            if (curr_date.TimeZone ~= timezone_str)
+                val = true;
+                return;
+            end
+            
+            % Get datetime of last modified from the bodies.xml and
+            % cables.xml
+            bodyfile = dir(obj.bodiesPropertiesFilepath);
+            cablefile = dir(obj.cablesPropertiesFilepath);
+            
+            if (bodyfile.date > compiled_date || cablefile.date > compiled_date)
+                val = true;
+                return;
+            end
+        end
+        
+        function write_compile_record_file(obj, compile_file_folder)
+            fid = fopen([compile_file_folder, '\', obj.COMPILE_RECORD_FILENAME], 'w');
+            dt = datetime('now', 'TimeZone', 'local');
+            fprintf(fid, ['compiledtime,', datestr(dt), ',', dt.TimeZone]);
+            fclose(fid);
+        end
     end
     
     methods (Static)
-        function library_name = GetAutoCompiledLibraryName(robot_name, cable_set_id)
+        function library_name = ConstructCompiledLibraryName(robot_name, cable_set_id, op_space_id)
             library_name = [robot_name, '_', cable_set_id];
+            if (~isempty(op_space_id))
+                library_name = [library_name, '_', op_space_id];
+            end
             library_name = strrep(library_name, ' ', '_');
             library_name = strrep(library_name, '-', '_');
         end

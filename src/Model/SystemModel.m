@@ -21,13 +21,21 @@
 classdef SystemModel < handle
     properties (SetAccess = protected)
         robotName               % Name of the robot
+        cableSetName            % Name of cable set
+        operationalSpaceName    % Name of the operational space
         bodyModel               % SystemModelBodies object
         cableModel              % SystemModelCables object
         modelMode               % The mode of the model
+        modelOptions            % Model options
     end
 
     properties (Constant)
         GRAVITY_CONSTANT = 9.81;
+    end
+    
+    properties (Access = private)
+        compiled_lib_name       % Library name for compiled mode
+        compiled_L_fn           % Function handle of getting L in compiled mode
     end
 
     properties (Dependent)
@@ -110,15 +118,22 @@ classdef SystemModel < handle
 
     methods (Static)
         % Load the xml objects for bodies and cable sets.
-        function b = LoadXmlObj(robot_name, body_xmlobj, cable_xmlobj, op_space_set_xmlobj, model_mode, model_options)
-            if (nargin < 5)
+        function b = LoadXmlObj(robot_name, body_xmlobj, cable_set_id, cable_xmlobj, op_space_id, op_space_set_xmlobj, model_mode, model_options)
+            if (nargin < 7)
                 model_mode = ModelModeType.DEFAULT;
-            elseif (nargin < 6)
+            elseif (nargin < 8)
                 model_options = ModelOptions();
             end
-            b               =   SystemModel(robot_name, model_mode);
-            b.bodyModel     =   SystemModelBodies.LoadXmlObj(body_xmlobj, op_space_set_xmlobj, b.modelMode, model_options);
-            b.cableModel    =   SystemModelCables.LoadXmlObj(cable_xmlobj, b.bodyModel, b.modelMode, model_options);
+            if (model_mode == ModelModeType.COMPILED)
+                compiled_lib_name = ModelConfigBase.ConstructCompiledLibraryName(robot_name, cable_set_id, op_space_id);
+            else 
+                compiled_lib_name = '';
+            end
+            
+            b               =   SystemModel(robot_name, cable_set_id, op_space_id, model_mode, model_options, compiled_lib_name);
+            b.bodyModel     =   SystemModelBodies.LoadXmlObj(body_xmlobj, op_space_set_xmlobj, b.modelMode, model_options, compiled_lib_name);
+            b.cableModel    =   SystemModelCables.LoadXmlObj(cable_xmlobj, b.bodyModel, b.modelMode, model_options, compiled_lib_name);
+                
             if ((model_mode == ModelModeType.DEFAULT) || (model_mode == ModelModeType.COMPILED))
                 b.update(b.bodyModel.q_initial, b.bodyModel.q_dot_default, b.bodyModel.q_ddot_default, zeros(b.numDofs,1));
             elseif (model_mode == ModelModeType.SYMBOLIC)
@@ -134,12 +149,23 @@ classdef SystemModel < handle
 
     methods
         % Constructor
-        function b = SystemModel(robot_name, mode)
+        function b = SystemModel(robot_name, cable_set_id, op_space_id, mode, model_options, compiled_lib_name)
+            if (mode == ModelModeType.COMPILED)
+                if (nargin < 6 || isempty(compiled_lib_name))
+                    CASPR_log.Error('Library name must be supplied with COMPILED mode');
+                else 
+                    b.compiled_lib_name = compiled_lib_name;
+                    b.compiled_L_fn = str2func([b.compiled_lib_name, '_compiled_L']);
+                end
+            end
             b.robotName = robot_name;
-            if nargin < 2
+            if nargin < 4
                 mode = ModelModeType.DEFAULT;
             end
             b.modelMode = mode;
+            b.modelOptions = model_options;
+            b.cableSetName = cable_set_id;
+            b.operationalSpaceName = op_space_id;
         end
 
         % Function updates the kinematics and dynamics of the bodies and
@@ -167,26 +193,6 @@ classdef SystemModel < handle
             % First compute L_grad (this also sets the hessian flag to
             % true)
             L_grad_temp = obj.L_grad;
-                        
-            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%             % without considering the active joints
-%             % Determine the A matrix using gradient matrices
-%             % Initialise the A matrix
-%             A = zeros(2*obj.numDofs);
-%             % Top left block is zero
-%             % Top right block is I
-%             A(1:obj.numDofs,obj.numDofs+1:2*obj.numDofs) = eye(obj.numDofs);
-%             % Bottom left corner
-%             A(obj.numDofs+1:2*obj.numDofs,1:obj.numDofs) =  -obj.M\(obj.bodyModel.G_grad + obj.bodyModel.C_grad_q + TensorOperations.VectorProduct(L_grad_temp,obj.cableForces,1,isa(obj.q,'symbolic'))) ...
-%                                                             - TensorOperations.VectorProduct(obj.bodyModel.Minv_grad,(obj.G + obj.C + obj.L.'*obj.cableForces),2,isa(obj.q,'symbolic'));
-%             % Bottom right corner
-%             A(obj.numDofs+1:2*obj.numDofs,obj.numDofs+1:2*obj.numDofs) = -obj.M\obj.bodyModel.C_grad_qdot;
-%             
-%             % The B matrix
-%             B = [zeros(obj.numDofs,obj.numCables);-obj.M\obj.L_active'];
-            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            
-            
             
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             % considers the active joints
@@ -281,7 +287,7 @@ classdef SystemModel < handle
 
         function value = get.L(obj)            
             if (obj.modelMode == ModelModeType.COMPILED)
-                value = compile_L(obj.bodyModel.q,obj.bodyModel.q_dot,obj.bodyModel.q_ddot,obj.bodyModel.W_e);                      
+                value = obj.compiled_L_fn(obj.bodyModel.q,obj.bodyModel.q_dot,obj.bodyModel.q_ddot,obj.bodyModel.W_e);                      
             else
                 value = obj.cableModel.V*obj.bodyModel.W;                      
             end
@@ -296,23 +302,38 @@ classdef SystemModel < handle
         end
         
         function value = get.L_grad(obj)
-            value = TensorOperations.LeftMatrixProduct(obj.cableModel.V,obj.bodyModel.W_grad, obj.isSymbolic) + TensorOperations.RightMatrixProduct(obj.cableModel.V_grad,obj.bodyModel.W, obj.isSymbolic);
+            if obj.modelMode==ModelModeType.COMPILED || ~obj.modelOptions.isComputeHessian
+                CASPR_log.Warn('L_grad is not be computed under compiled mode or if hessian computation is off');
+                value = [];
+            else
+                value = TensorOperations.LeftMatrixProduct(obj.cableModel.V, obj.bodyModel.W_grad, obj.isSymbolic) + TensorOperations.RightMatrixProduct(obj.cableModel.V_grad,obj.bodyModel.W, obj.isSymbolic);
+            end
         end
         
         function value = get.L_grad_active(obj)
-            value = obj.L_grad(obj.cableModel.cableIndicesActive, :, :);
+            if obj.modelMode==ModelModeType.COMPILED || ~obj.modelOptions.isComputeHessian
+                CASPR_log.Warn('L_grad is not be computed under compiled mode or if hessian computation is off');
+                value = [];
+            else
+                value = obj.L_grad(obj.cableModel.cableIndicesActive, :, :);
+            end
         end
         
         function value = get.L_grad_passive(obj)
-            value = obj.L_grad(obj.cableModel.cableIndicesPassive, :, :);
+            if obj.modelMode==ModelModeType.COMPILED || ~obj.modelOptions.isComputeHessian
+                CASPR_log.Warn('L_grad is not computed under compiled mode or if hessian computation is off');
+                value = [];
+            else
+                value = obj.L_grad(obj.cableModel.cableIndicesPassive, :, :);
+            end
         end
         
         function value = get.K(obj)          
-            if(obj.modelMode == ModelModeType.COMPILED)
-                CASPR_log.Error('Stiffness calculation is not supported in the compiled mode.');                      
+            if(obj.modelMode == ModelModeType.COMPILED  || ~obj.modelOptions.isComputeHessian)
+                CASPR_log.Warn('Stiffness matrix K is not computed under compiled mode or if hessian computation is off');
+                value = [];
             else
-                value = obj.L.'*obj.cableModel.K*obj.L + TensorOperations.VectorProduct(obj.L_grad,obj.cableForces, 1, obj.isSymbolic);
-%                 value = obj.L.'*obj.cableModel.K*obj.L;
+                value = obj.L.'*obj.cableModel.K*obj.L + TensorOperations.VectorProduct(obj.L_grad, obj.cableForces, 1, obj.isSymbolic);
             end
         end
         
@@ -458,7 +479,7 @@ classdef SystemModel < handle
         % System Compiling Procedure in COMPILED mode
         % - New folders are created in model_config to store the compiled
         % body and cable .m files
-        function compile(obj, file_folder)
+        function compile(obj, file_folder, lib_name)
             CASPR_log.Assert(obj.modelMode == ModelModeType.SYMBOLIC, 'Compile function only works when in symbolic mode');
             
             % Define the paths for storing the compiled files
@@ -467,21 +488,21 @@ classdef SystemModel < handle
            
             CASPR_log.Info('New files will be compiled.');
                       
-            if ~exist(tmp_body_path)
+            if ~exist(tmp_body_path, 'dir')
                 mkdir(tmp_body_path);              
             end
-            if ~exist(tmp_cable_path)
+            if ~exist(tmp_cable_path, 'dir')
                 mkdir(tmp_cable_path);              
             end                        
             CASPR_log.Info('Created Folders.');
             
             % Body Variables Compilations
             CASPR_log.Info('Start Body Compilations...');
-            obj.bodyModel.compile(tmp_body_path);
+            obj.bodyModel.compile(tmp_body_path, lib_name);
             CASPR_log.Info('Finished Body Compilations.');
             % Cable Variables Compilations
             CASPR_log.Info('Start Cable Compilations...');
-            obj.cableModel.compile(tmp_cable_path, obj.bodyModel);
+            obj.cableModel.compile(tmp_cable_path, obj.bodyModel, lib_name);
             CASPR_log.Info('Finished Cable Compilations.');
             % System Variables Compilations
             CASPR_log.Info('Start System Compilation...');  
@@ -489,7 +510,7 @@ classdef SystemModel < handle
             % If more system variables are needed in the future, a separate
             % function handling these variables might be prefered.
             CASPR_log.Info('- Compiling L...');            
-            matlabFunction(obj.L, 'File', strcat(file_folder, '/compile_L'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});
+            matlabFunction(obj.L, 'File', strcat(file_folder, '/', lib_name, '_compiled_L'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});
             CASPR_log.Info('Finished L Compilation.');  
             
             % Add the compiled files to the path            
