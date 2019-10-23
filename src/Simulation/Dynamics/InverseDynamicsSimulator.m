@@ -37,13 +37,10 @@ classdef InverseDynamicsSimulator < DynamicsSimulator
 
             obj.IDFunctionCost = zeros(length(obj.timeVector), 1);
             obj.IDExitType = cell(length(obj.timeVector), 1);
-%            obj.IDInfo = cell(length(obj.timeVector), 1);
 
             obj.compTime = zeros(length(obj.timeVector), 1);
-%            obj.compIterations = zeros(length(obj.timeVector), 1);
 
             for t = 1:length(obj.timeVector)
-%             for t = 1
                 CASPR_log.Info(sprintf('Time : %f', obj.timeVector(t)));
                 % The model is already updated within the resolve function
                 [forces_active, obj.model, obj.IDFunctionCost(t), obj.IDExitType{t}, obj.compTime(t)] = obj.IDSolver.resolve(obj.trajectory.q{t}, obj.trajectory.q_dot{t}, obj.trajectory.q_ddot{t}, zeros(obj.model.numDofs,1));
@@ -55,18 +52,18 @@ classdef InverseDynamicsSimulator < DynamicsSimulator
                 obj.cableLengthsDot{t}      =   obj.model.cableLengthsDot;
                 % record the stiffness when the system is not in the
                 % compiled mode
-                if (obj.model.modelMode ~= ModelModeType.COMPILED)
+                if (obj.model.modelMode ~= ModelModeType.COMPILED && obj.model.modelOptions.isComputeHessian)
                     obj.stiffness{t}            =   obj.model.K;
                 end
                 
                 if (obj.IDExitType{t} ~= IDSolverExitType.NO_ERROR)
-                    CASPR_log.Print('No feasible solution for the ID',CASPRLogLevel.WARNING);
+                    CASPR_log.Warn('No feasible solution for the ID');
                     errorFlag = 1;
                 end
             end
             
             if (errorFlag == 1)
-                CASPR_log.Print('At least one point on the trajectory resulted in no feasible solution for the ID',CASPRLogLevel.WARNING);
+                CASPR_log.Warn('At least one point on the trajectory resulted in no feasible solution for the ID');
             end
         end
 
