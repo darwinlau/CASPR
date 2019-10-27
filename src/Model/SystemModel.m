@@ -303,7 +303,7 @@ classdef SystemModel < handle
         
         function value = get.L_grad(obj)
             if obj.modelMode==ModelModeType.COMPILED || ~obj.modelOptions.isComputeHessian
-                CASPR_log.Warn('L_grad is not be computed under compiled mode or if hessian computation is off');
+                %CASPR_log.Warn('L_grad is not be computed under compiled mode or if hessian computation is off');
                 value = [];
             else
                 value = TensorOperations.LeftMatrixProduct(obj.cableModel.V, obj.bodyModel.W_grad, obj.isSymbolic) + TensorOperations.RightMatrixProduct(obj.cableModel.V_grad,obj.bodyModel.W, obj.isSymbolic);
@@ -312,7 +312,7 @@ classdef SystemModel < handle
         
         function value = get.L_grad_active(obj)
             if obj.modelMode==ModelModeType.COMPILED || ~obj.modelOptions.isComputeHessian
-                CASPR_log.Warn('L_grad is not be computed under compiled mode or if hessian computation is off');
+                %CASPR_log.Warn('L_grad is not be computed under compiled mode or if hessian computation is off');
                 value = [];
             else
                 value = obj.L_grad(obj.cableModel.cableIndicesActive, :, :);
@@ -321,7 +321,7 @@ classdef SystemModel < handle
         
         function value = get.L_grad_passive(obj)
             if obj.modelMode==ModelModeType.COMPILED || ~obj.modelOptions.isComputeHessian
-                CASPR_log.Warn('L_grad is not computed under compiled mode or if hessian computation is off');
+                %CASPR_log.Warn('L_grad is not computed under compiled mode or if hessian computation is off');
                 value = [];
             else
                 value = obj.L_grad(obj.cableModel.cableIndicesPassive, :, :);
@@ -330,7 +330,7 @@ classdef SystemModel < handle
         
         function value = get.K(obj)          
             if(obj.modelMode == ModelModeType.COMPILED  || ~obj.modelOptions.isComputeHessian)
-                CASPR_log.Warn('Stiffness matrix K is not computed under compiled mode or if hessian computation is off');
+                %CASPR_log.Warn('Stiffness matrix K is not computed under compiled mode or if hessian computation is off');
                 value = [];
             else
                 value = obj.L.'*obj.cableModel.K*obj.L + TensorOperations.VectorProduct(obj.L_grad, obj.cableForces, 1, obj.isSymbolic);

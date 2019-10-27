@@ -993,7 +993,7 @@ classdef SystemModelBodies < handle
         
         function value = get.W_grad(obj)
             if obj.modelMode==ModelModeType.COMPILED || ~obj.modelOptions.isComputeHessian
-                CASPR_log.Warn('W_grad is not computed under compiled mode or if hessian computation is off');
+                %CASPR_log.Warn('W_grad is not computed under compiled mode or if hessian computation is off');
                 value = [];
             else
                 value = obj.W_grad;

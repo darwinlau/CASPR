@@ -335,7 +335,7 @@ classdef SystemModelCables < handle
         
         function value = get.V_grad(obj)
             if obj.modelMode==ModelModeType.COMPILED || ~obj.modelOptions.isComputeHessian
-                CASPR_log.Warn('V_grad is not computed under compiled mode or if hessian computation is off');
+                %CASPR_log.Warn('V_grad is not computed under compiled mode or if hessian computation is off');
                 value = [];
             else
                 value = obj.V_grad;
@@ -344,7 +344,7 @@ classdef SystemModelCables < handle
         
         function value = get.V_grad_active(obj)
             if obj.modelMode==ModelModeType.COMPILED || ~obj.modelOptions.isComputeHessian
-                CASPR_log.Warn('V_grad is not computed under compiled mode or if hessian computation is off');
+                %CASPR_log.Warn('V_grad is not computed under compiled mode or if hessian computation is off');
                 value = [];
             else
                 value = obj.V_grad(obj.cableIndicesActive, :, :);
@@ -353,7 +353,7 @@ classdef SystemModelCables < handle
         
         function value = get.V_grad_passive(obj)
             if obj.modelMode==ModelModeType.COMPILED || ~obj.modelOptions.isComputeHessian
-                CASPR_log.Warn('V_grad is not computed under compiled mode or if hessian computation is off');
+                %CASPR_log.Warn('V_grad is not computed under compiled mode or if hessian computation is off');
                 value = [];
             else
                 value = obj.V_grad(obj.cableIndicesPassive, :, :);
