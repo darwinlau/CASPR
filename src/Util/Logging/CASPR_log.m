@@ -16,13 +16,18 @@ classdef CASPR_log
                 % Reset the log file to be empty
                 fid = fopen(log_path,'w'); fclose(fid);
             else
-                log_path = []; %#ok<NASGU>
+                log_path = [];
             end
             CASPR_homepath = CASPR_configuration.LoadHomePath();
             if(~exist([CASPR_homepath,'/data/config'],'dir'))
                 CASPR_log.Error('CASPR environment file must be set');
             end
             save([CASPR_homepath,'/data/config/CASPR_environment.mat'], 'log_level', 'log_path','-append');
+        end
+        
+        function level = GetLogLevel()
+            model_config = load('CASPR_environment.mat', 'log_level');
+            level = model_config.log_level;            
         end
         
         % Prints debug statement
@@ -80,7 +85,7 @@ classdef CASPR_log
     end
     
     methods(Access = private, Static)
-        function [log_level,fid,carrage_return] = Extract() %#ok<STOUT>
+        function [log_level,fid,carrage_return] = Extract()
             load('data/config/CASPR_environment.mat','log_level','log_path');
             % Determine the what to print to
             if(isempty(log_path))
