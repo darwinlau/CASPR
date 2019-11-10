@@ -20,7 +20,7 @@ function initialise_CASPR()
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Determine if setup needs to be executed
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    if (~exist([CASPR_homepath,'/data/config'],'dir'))
+    if (~exist([CASPR_homepath,'/data/config'],'dir') || ~exist([CASPR_homepath,'/data/config/CASPR_environment.mat'], 'file'))
         mkdir([CASPR_homepath,'/data/config'])
         save([CASPR_homepath,'/data/config/CASPR_environment.mat'],...
                                     'CASPR_homepath','CASPR_version','CASPR_model_config_path','CASPR_GUI_dev_model_config');
