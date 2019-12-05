@@ -36,7 +36,7 @@ classdef TmotorCASPRInterface < CableActuatorInterfaceBase
             Obj.Ierror = 0;
             Obj.period1 = period;
             Obj.cmd_current = 0;
-            Obj.max_current = m_curr;
+            Obj.max_current = max_curr;
             Obj.T_pos = 0;
             Obj.C_pos = 0;
             Obj.I_pos = 0;
@@ -80,6 +80,22 @@ classdef TmotorCASPRInterface < CableActuatorInterfaceBase
         function force = forceFeedbackRead (Obj)
              force = Obj.cmd_current;
         end
+
+        function systemOnSend(Obj)
+        end
+
+        function systemOffSend(Obj)
+        end
+
+        function initialise(Obj)
+        end
+
+        function switchOperatingMode(Obj)
+        end
+
+        function [success] = detectDevice(Obj)
+        end
+
     end
 
     methods (Access = private)
