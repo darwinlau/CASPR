@@ -135,21 +135,65 @@ classdef (Abstract) ModelConfigBase < handle
                 model_config_path = CASPR_configuration.LoadModelConfigPath();
                 lib_name = ModelConfigBase.ConstructCompiledLibraryName(obj.robotName, cable_set_id, operational_space_id);
                 compile_file_folder = [model_config_path, '\tmp_compilations\', lib_name];
+                compile_file_folder_m = [compile_file_folder, '\m'];
+                compile_file_folder_cpp = [compile_file_folder, '\cpp'];
                 % First check if a new compilation is required
                 if(obj.check_require_compile(compile_file_folder))
                     % Recompiling, so first remove the existing directory
                     if (exist(compile_file_folder, 'dir'))
                         rmpath(genpath(compile_file_folder));
                         rmdir(compile_file_folder, 's');
+                        mkdir(compile_file_folder);
                     end
                     warning('off','all');  
                     CASPR_log.Warn('Current version of compiled mode does not support changes in active <-> passive cables.');
                     CASPR_log.Warn('Compilation needs a long time. Please wait...');                        
                     warning('on','all');  
                     CASPR_log.Info('Preparation work...');
+                    % Create a symbolic model
                     sysModelSym = SystemModel.LoadXmlObj(obj.robotName, bodies_xmlobj, cable_set_id, cableset_xmlobj, operational_space_id, op_space_set_xmlobj, ModelModeType.SYMBOLIC, model_options);
-                    sysModelSym.compile(compile_file_folder, lib_name);
+                    
+                    % Do the .m compile
+                    sysModelSym.compile(compile_file_folder_m, lib_name);
+                    
+                    % Do the .cpp compile
+                    mkdir(compile_file_folder_cpp);
+                    files_list = dir([compile_file_folder_m, '/**/', '*.m']);
+                    source_files = cell(1, length(files_list));
+                    for i = 1:length(files_list)
+                        source_files{i} = [files_list(i).folder, '\', files_list(i).name];
+                    end
+                    % Set the input data type for the cpp functions
+                    input_data = {zeros(sysModelSym.numDofs,1), zeros(sysModelSym.numDofs,1), zeros(sysModelSym.numDofs,1), zeros(sysModelSym.numDofs,1)};
+                    % Setup the CPP compile config
+                    cpp_code_config = coder.config('dll');
+                    %code_config.IncludeTerminateFcn = false;
+                    cpp_code_config.SupportNonFinite = false;
+                    cpp_code_config.SaturateOnIntegerOverflow = false;
+                    cpp_code_config.GenerateExampleMain = 'DoNotGenerate';
+                    cpp_code_config.TargetLang = 'C++';
+                    cpp_code_config.FilePartitionMethod = 'SingleFile';                
+                    % Code generation
+                    str = ['codegen -d ', compile_file_folder_cpp, ' -o ', lib_name, ' -config cpp_code_config '];
+                    for i = 1:length(source_files)
+                        str = [str, source_files{i},' -args input_data '];
+                    end
+                    eval(str)
+                    % Remove unnecessary stuff
+                    rmdir([compile_file_folder_cpp, '/examples']);
+                    delete([compile_file_folder_cpp, '/*.mat']);
+%                 
+%                 addpath(genpath(build_folder));
+                    
+                    
+                    
+                    
+                    
+                    % Record the timestamp file
                     obj.write_compile_record_file(compile_file_folder);
+                    
+                    % Add the compiled files to the path            
+                    addpath(genpath(compile_file_folder));
                 end
                 sysModel = SystemModel.LoadXmlObj(obj.robotName, bodies_xmlobj, cable_set_id, cableset_xmlobj, operational_space_id, op_space_set_xmlobj, ModelModeType.COMPILED, model_options);
                                
