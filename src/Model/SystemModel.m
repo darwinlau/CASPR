@@ -107,6 +107,11 @@ classdef SystemModel < handle
         interactionWrench               % Joint interaction wrenches (w_p)
         interactionForceMagnitudes      % Magnitudes of the interaction force at each joint
         interactionMomentMagnitudes     % Magnitudes of the interaction moments at each joint
+        
+        % Wrench set
+        availWrenchSet
+        availStaticWrenchSet
+        availStaticAccelerationSet
                 
         % Operational space coordinates
         y                       % Operational space coordinate vector
@@ -285,12 +290,13 @@ classdef SystemModel < handle
             value = obj.bodyModel.q_ddot;
         end
 
-        function value = get.L(obj)            
-            if (obj.modelMode == ModelModeType.COMPILED)
-                value = obj.compiled_L_fn(obj.bodyModel.q,obj.bodyModel.q_dot,obj.bodyModel.q_ddot,obj.bodyModel.W_e);                      
-            else
-                value = obj.cableModel.V*obj.bodyModel.W;                      
-            end
+        function value = get.L(obj)        
+%             if (obj.modelMode == ModelModeType.COMPILED)
+%                 value = obj.compiled_L_fn(obj.bodyModel.q,obj.bodyModel.q_dot,obj.bodyModel.q_ddot,obj.bodyModel.W_e);                      
+%             else
+%                 value = obj.cableModel.V*obj.bodyModel.W;                      
+%             end
+            value = obj.cableModel.V*obj.bodyModel.W;        
         end
         
         function value = get.L_active(obj)
@@ -359,7 +365,6 @@ classdef SystemModel < handle
         
         % Function computes the interaction wrench between the joint of the
         % links.
-        % M_b*q_ddot + C_b = G_b +
         function value = get.interactionWrench(obj)
             value = obj.bodyModel.P.'*(obj.cableModel.V.'*obj.cableModel.forces + obj.bodyModel.M_b*obj.q_ddot + obj.bodyModel.C_b - obj.bodyModel.G_b);
         end
@@ -461,6 +466,18 @@ classdef SystemModel < handle
             value = [obj.cableModel.FORCES_ACTIVE_INVALID; obj.bodyModel.TAU_INVALID];
         end
         
+        function value = get.availWrenchSet(obj)
+            value = WrenchSet(-obj.L_active', obj.actuationForcesMax, obj.actuationForcesMin, -obj.L_passive'*obj.cableForcesPassive);
+        end
+        
+        function value = get.availStaticWrenchSet(obj)
+            value = WrenchSet(-obj.L_active', obj.actuationForcesMax, obj.actuationForcesMin, -obj.L_passive'*obj.cableForcesPassive - obj.M'\dynamics.G);
+        end
+        
+        function value = get.availStaticAccelerationSet(obj)  
+            value = WrenchSet(-obj.M\dynamics.L_active', obj.actuationForcesMax, obj.actuationForcesMin, -obj.M\obj.L_passive'*obj.cableForcesPassive - obj.M'\dynamics.G);
+        end
+        
         % Uncertainties
         function addInertiaUncertainty(obj,m_bounds,I_bounds)
             CASPR_log.Assert((size(m_bounds,1)==1)&&(length(m_bounds) == 2*obj.numLinks),'Mass uncertainty must be of size 2 * number of links');
@@ -509,12 +526,13 @@ classdef SystemModel < handle
             % Currently only L is needed.
             % If more system variables are needed in the future, a separate
             % function handling these variables might be prefered.
-            CASPR_log.Info('- Compiling L...');            
-            matlabFunction(obj.L, 'File', strcat(file_folder, '/', lib_name, '_compiled_L'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});
-            CASPR_log.Info('Finished L Compilation.');  
             
-            % Add the compiled files to the path            
-            addpath(genpath(file_folder));
+            
+            % Commented out since it may be favourable (for more complex
+            % robots) to just use L = V*W in code
+%             CASPR_log.Info('- Compiling L...');            
+%             matlabFunction(obj.L, 'File', strcat(file_folder, '/', lib_name, '_compiled_L'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});
+%             CASPR_log.Info('Finished L Compilation.');  
             
             CASPR_log.Info('Finished All Compilations.\n');
         end

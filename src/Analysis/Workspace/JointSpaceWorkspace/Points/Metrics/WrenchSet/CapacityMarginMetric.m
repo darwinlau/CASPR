@@ -34,10 +34,8 @@ classdef CapacityMarginMetric < WorkspaceMetricBase
         
         % Evaluate Function implementation
         function v = evaluateFunction(obj,dynamics)
-            L   =   dynamics.L_active;
-            f_u =   dynamics.actuationForcesMax;
-            f_l =   dynamics.actuationForcesMin;
-            w   =   WrenchSet(L,f_u,f_l);
+            w = dynamics.availWrenchSet;
+            
             if isempty(w.b)
                 % in case the generation of the feasible wrench set convex
                 % hull failed, consider a negative capacity margin value

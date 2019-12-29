@@ -6,10 +6,12 @@
 classdef WrenchSet < handle
         
     properties (SetAccess = protected)
-        n_faces         % The number of faces for the wrench set
-        A               % The polytope is described by A*x <= b
-        b
-        v               % The vertices of the polytope
+        n_faces = 0                 % The number of faces for the wrench set
+        A = []                      % The polytope is described by A*w <= b
+        b = []                      % The polytope is described by A*w <= b
+        volume = 0                  % The volume of the polytope
+        wrenchCombinations = []     % The complete combinations of wrenches
+        convexHullIndices = []      % Wrench vertices that represent the convex hull 
     end
     
     methods
@@ -59,62 +61,74 @@ classdef WrenchSet < handle
         
         % Builds the wrench set using the jacobian and force bounds. This
         % version does not make an external system call.
-        function id = WrenchSet(L,f_u,f_l,offset)
-            n = size(L,2); m = size(L,1);
-            q = 2^m;
-            f = zeros(q,m);
-            w = zeros(q,n);
-            for k=1:q
-                % Convert k to binary
-                beta = double(dec2bin(k-1,m)) - 48;
-                f(k,:) = (eye(m) - diag(beta))*f_l + diag(beta)*f_u;
-                w(k,:) = -L'*f(k,:)';
+        % The system model is defined as:
+        %   w = As * f + offset
+        % Note: As is the structure matrix
+        function ws = WrenchSet(As, F_u, F_l, offset)
+            % n refers to the degree of freedom (dimension of wrench)
+            n = size(As,1); 
+            % m refers to the number of actuators
+            m = size(As,2);
+            
+            if (nargin < 4 || isempty(offset))
+                offset = zeros(n, 1);
             end
+            n_points = 2^m;
+            F = zeros(n_points, m);
+            W = zeros(n_points, n);
+            for k=1:n_points
+                % Convert k to binary (the double function turns the number
+                % to 48 or 49 depending if it is a 0 or 1, respectively
+                beta = double(dec2bin(k-1,m)) - 48;
+                F(k,:) = (eye(m) - diag(beta))*F_l + diag(beta)*F_u;
+                W(k,:) = As*F(k,:)' + offset;
+            end
+            
             try
-                [K,id.v] = convhulln(w);
-
-                id.n_faces = size(K,1);
+                [K, vol] = convhulln(W);
+                
+                n_faces = size(K,1);
                 n_shape = size(K,2);
-                n_f = id.n_faces;
-                t_A = zeros(n_f,n);
-                t_b = zeros(n_f,1);
+
+                t_A = zeros(n_faces, n);
+                t_b = zeros(n_faces, 1);
+                
                 count = 1;
-                for i = 1:n_f
-                    W = w(K(i,2:end),:) - repmat(w(K(i,1),:),n_shape-1,1);
-                    T = null(W)';
-                    if(rank(T)>1)
+                
+                for i = 1:n_faces
+                    Wi = W(K(i,2:end),:) - repmat(W(K(i,1),:),n_shape-1,1);
+                    Ti = null(Wi)';
+                    if(rank(Ti)>1)
                     else
-                        t_A(count,:) = T;
-                        t_b(count,:) = t_A(count,:)*w(K(i,1),:).'; 
-                        % Find a new vertext not in the face
+                        t_A(count,:) = Ti;
+                        t_b(count,:) = t_A(count,:)*W(K(i,1),:).'; 
+                        % Find a new vertex not in the face
                         s_flag = 0; j = 1;
                         while(s_flag == 0)
-                            if((sum(j==K(i,:))==0)&&(norm(t_A(count,:)*w(K(j,1),:)'-t_b(count))>1e-6))
+                            if((sum(j==K(i,:))==0)&&(norm(t_A(count,:)*W(K(j,1),:)'-t_b(count))>1e-6))
                                 s_flag = 1;
                             else
                                 j = j+1;
                             end
                         end
-                        if(t_A(count,:)*w(K(j,1),:)'>t_b(count))
+                        if(t_A(count,:)*W(K(j,1),:)'>t_b(count))
                             t_A(count,:) = -t_A(count,:);
                             t_b(count) = -t_b(count);
                         end
                         count = count + 1;
                     end
                 end
-                id.A = t_A(1:count-1,:);
-                id.b = t_b(1:count-1);
-    %             for i = 1:id.n_faces
-    %                 hold on
-    % %                 x = [-2000;2000];
-    % %                 y1 = pinv(id.A(i,:))*id.b(i) + null(id.A(i,:)).*x(1);
-    % %                 y2 = pinv(id.A(i,:))*id.b(i) + null(id.A(i,:)).*x(2);
-    % %                 plot([y1(1),y2(1)],[y1(2),y2(2)],'b')
-    %                 plot([w(K(i,1),1),w(K(i,2),1)]-offset(1),[w(K(i,1),2),w(K(i,2),2)]-offset(2),'b')
-    %             end
+                
+                ws.A = t_A(1:count-1,:);
+                ws.b = t_b(1:count-1);
+                ws.n_faces = n_faces;
+                ws.volume = vol;
+                ws.wrenchCombinations = W;
+                ws.convexHullIndices = K;
             catch
-               id.n_faces = -1; id.A = []; id.b = []; 
             end
+            
+            
         end
         
         % Approximate the wrench set with a sphere at position G with
