@@ -129,6 +129,10 @@ classdef SystemModelCables < handle
             ind_active = 1;
             obj.cableIndicesActive = zeros(obj.numCablesActive, 1);    
             
+            if (is_symbolic)
+                CASPR_log.Info('Symbolic computing/simplifying of cable kinematics');
+            end
+            
             for i = 1:obj.numCables
                 obj.cables{i}.update(bodyModel);
                 cable = obj.cables{i};
@@ -136,7 +140,7 @@ classdef SystemModelCables < handle
                 
                 for j = 1:num_cable_segments
                     if (is_symbolic)
-                        CASPR_log.Info(sprintf('Symbolic computing/simplifying of kinematics of cable %d segment %d', i, j));
+                        CASPR_log.Info(sprintf('- Symbolic computing/simplifying of kinematics of cable %d segment %d', i, j));
                     end
                     segment = cable.segments{j};
                     % Update V elements only when segments are on different
@@ -147,7 +151,7 @@ classdef SystemModelCables < handle
                         if k > 0
                             V_ijk_T = -bodyModel.bodies{k}.R_0k.'*segment.segmentVector/segment.length;
                             if (is_symbolic)
-                                V_ijk_T = simplify(V_ijk_T, 'Step', k*20);
+                                V_ijk_T = simplify(V_ijk_T, 'Step', k*5);
                             end
                             % - Translation
                             obj.V(i, 6*k-5:6*k-3) = obj.V(i, 6*k-5:6*k-3) + V_ijk_T.';
@@ -161,7 +165,7 @@ classdef SystemModelCables < handle
                         if k > 0
                             V_ijk_T = bodyModel.bodies{k}.R_0k.'*segment.segmentVector/segment.length;
                             if (is_symbolic)
-                                V_ijk_T = simplify(V_ijk_T, 'Step', k*20);
+                                V_ijk_T = simplify(V_ijk_T, 'Step', k*5);
                             end
                             % - Translation
                             obj.V(i, 6*k-5:6*k-3) = obj.V(i, 6*k-5:6*k-3) + V_ijk_T.';
@@ -173,7 +177,7 @@ classdef SystemModelCables < handle
                     % Store r_OA
                     obj.r_OAs(:,segment_count) = [segment.attachments{1}.r_OA; segment.attachments{2}.r_OA];
                     if (is_symbolic)
-                        obj.r_OAs(:,segment_count) = simplify(obj.r_OAs(:,segment_count), 'Step', 10);
+                        obj.r_OAs(:,segment_count) = simplify(obj.r_OAs(:,segment_count), 'Step', 5);
                     end
                     segment_count = segment_count + 1;
                 end
@@ -186,11 +190,15 @@ classdef SystemModelCables < handle
                 end 
                 obj.lengths(i) = obj.cables{i}.length;      
             end  
-            if (is_symbolic)
-                CASPR_log.Info('Symbolic computing/simplifying of V');
-                obj.V = simplify(obj.V, 'Step', 20);
-            end
-%                                
+%             if (is_symbolic)
+%                 CASPR_log.Info('Symbolic computing/simplifying of V');
+%                 obj.V = simplify(obj.V, 'Step', 20);
+%             end
+            
+            
+            
+            
+%             May not be needed since should be merged above (if no bugs)                   
 %             for i = 1:obj.numCables
 %                 % Active cable
 %                 if (obj.cables{i}.isActive)
@@ -209,28 +217,36 @@ classdef SystemModelCables < handle
         % Update function under COMPILED mode
         % - Update using compiled files   
         function compiledUpdate(obj, bodyModel)       
+            q = bodyModel.q;
+            q_dot = bodyModel.q_dot;
+            q_ddot = bodyModel.q_ddot;
+            W_e = bodyModel.W_e;
+            
             % Attachment locations
-            obj.r_OAs = obj.compiled_r_OAs_fn(bodyModel.q, bodyModel.q_dot, bodyModel.q_ddot, bodyModel.W_e);
+            obj.r_OAs = obj.compiled_r_OAs_fn(q, q_dot, q_ddot, W_e);
+            num_cables_active = 0;
             obj.numCablesActive = 0;
             segment_count = 1;
             ind_active = 1;
-            obj.cableIndicesActive = zeros(obj.numCablesActive, 1);
+            cable_indices_active = zeros(obj.numCablesActive, 1);
             for i = 1:obj.numCables
-                for j = 1:obj.cables{i}.numSegments
-                    obj.cables{i}.segments{j}.attachments{1}.directUpdate(obj.r_OAs(1:3,segment_count));
-                    obj.cables{i}.segments{j}.attachments{2}.directUpdate(obj.r_OAs(4:6,segment_count));
-                    segment_count = segment_count + 1;
-                end
+%                 for j = 1:obj.cables{i}.numSegments
+%                     obj.cables{i}.segments{j}.attachments{1}.directUpdate(obj.r_OAs(1:3,segment_count));
+%                     obj.cables{i}.segments{j}.attachments{2}.directUpdate(obj.r_OAs(4:6,segment_count));
+%                     segment_count = segment_count + 1;
+%                 end
                 if (obj.cables{i}.isActive)
-                    obj.numCablesActive = obj.numCablesActive + 1;
-                    obj.cableIndicesActive(ind_active) = i;
+                    num_cables_active = num_cables_active + 1;
+                    cable_indices_active(ind_active) = i;
                     ind_active = ind_active + 1;
                 end
-            end            
+            end
+            obj.numCablesActive = num_cables_active;
+            obj.cableIndicesActive = cable_indices_active;
             % Cable length
-            obj.lengths = obj.compiled_lengths_fn(bodyModel.q, bodyModel.q_dot, bodyModel.q_ddot, bodyModel.W_e); 
+            obj.lengths = obj.compiled_lengths_fn(q, q_dot, q_ddot, W_e); 
             % Matrix
-            obj.V = obj.compiled_V_fn(bodyModel.q, bodyModel.q_dot, bodyModel.q_ddot, bodyModel.W_e); 
+            obj.V = obj.compiled_V_fn(q, q_dot, q_ddot, W_e); 
         end
 
         % Returns the c_{ijk} element of the CRM
@@ -375,9 +391,12 @@ classdef SystemModelCables < handle
         function compile(obj, path, bodyModel, lib_name)   
             CASPR_log.Assert(obj.modelMode == ModelModeType.SYMBOLIC, 'Can only compile a symbolic model');
             
-            CASPR_log.Info('- Compiling Cable Variables...');
-            matlabFunction(obj.V, 'File', strcat(path, '/', lib_name, '_compiled_V'), 'Vars', {bodyModel.q, bodyModel.q_dot, bodyModel.q_ddot, bodyModel.W_e});                   
-            matlabFunction(obj.lengths, 'File', strcat(path, '/', lib_name, '_compiled_lengths'), 'Vars', {bodyModel.q, bodyModel.q_dot, bodyModel.q_ddot, bodyModel.W_e});                   
+            CASPR_log.Info('Compiling Cable Variables...');
+            CASPR_log.Info('- Compiling V...');
+            matlabFunction(obj.V, 'File', strcat(path, '/', lib_name, '_compiled_V'), 'Vars', {bodyModel.q, bodyModel.q_dot, bodyModel.q_ddot, bodyModel.W_e});        
+            CASPR_log.Info('- Compiling cable lengths...');           
+            matlabFunction(obj.lengths, 'File', strcat(path, '/', lib_name, '_compiled_lengths'), 'Vars', {bodyModel.q, bodyModel.q_dot, bodyModel.q_ddot, bodyModel.W_e});     
+            CASPR_log.Info('- Compiling r_OAs...');                             
             matlabFunction(obj.r_OAs, 'File', strcat(path, '/', lib_name, '_compiled_r_OAs'), 'Vars', {bodyModel.q, bodyModel.q_dot, bodyModel.q_ddot, bodyModel.W_e});                   
         end
     end

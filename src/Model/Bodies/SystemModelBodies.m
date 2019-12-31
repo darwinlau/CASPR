@@ -120,8 +120,9 @@ classdef SystemModelBodies < handle
         % Function handles for compiled update mode        
         compiled_R_0ks_fn;
         compiled_r_OPs_fn;
-        compiled_P_fn;
+        compiled_P_fns;
         compiled_S_fn;
+        compiled_S_dot_fn;
         compiled_x_ddot_fn;
         compiled_x_dot_fn;
         
@@ -276,32 +277,32 @@ classdef SystemModelBodies < handle
 
                 % Determine rotation matrix
                 % Determine joint location
+                R_pe = obj.bodies{k}.joint.R_pe;   
+                if (is_symbolic)
+                    R_pe = simplify(R_pe, 'Step', 15);
+                end  
+                                
                 if parent_link_num > 0
                     parent_R_0k = obj.bodies{parent_link_num}.R_0k;
-                    R_pe = obj.bodies{k}.joint.R_pe;     
-                    if (is_symbolic)
-                        parent_R_0k = simplify(parent_R_0k, 'Step', k*20);
-                        try 
-                            R_pe = simplify(R_pe, 'Step', k*20);
-                        catch
-                        end
-                    end
                     obj.bodies{k}.R_0k = parent_R_0k*R_pe; 
                     obj.bodies{k}.r_OP = R_pe.'*(obj.bodies{parent_link_num}.r_OP + obj.bodies{k}.r_Parent + obj.bodies{k}.joint.r_rel);
                 else
-                    obj.bodies{k}.R_0k = obj.bodies{k}.joint.R_pe;
-                    obj.bodies{k}.r_OP = obj.bodies{k}.joint.R_pe.'*(obj.bodies{k}.r_Parent + obj.bodies{k}.joint.r_rel);
+                    obj.bodies{k}.R_0k = R_pe;
+                    obj.bodies{k}.r_OP = R_pe.'*(obj.bodies{k}.r_Parent + obj.bodies{k}.joint.r_rel);
                 end
                 
                 if (is_symbolic)
-                    CASPR_log.Info(sprintf('Symbolic computing/simplifying of R_0k and r_OP for body %d', k));
-                    obj.bodies{k}.R_0k = simplify(obj.bodies{k}.R_0k, 'Step', k*20);
-                    obj.bodies{k}.r_OP = simplify(obj.bodies{k}.r_OP, 'Step', k*20);
+                    CASPR_log.Info(sprintf('- Symbolic simplifying of R_0k for body %d', k));
+                    obj.bodies{k}.R_0k = simplify(obj.bodies{k}.R_0k, 'Step', k*15);
+                    CASPR_log.Info(sprintf('- Symbolic simplifying of r_OP for body %d', k));
+                    obj.bodies{k}.r_OP = simplify(obj.bodies{k}.r_OP, 'Step', k*15);
                 end
+                
                 % Determine absolute position of COG
                 obj.bodies{k}.r_OG  = obj.bodies{k}.r_OP + obj.bodies{k}.r_G;
                 % Determine absolute position of link's ending position
                 obj.bodies{k}.r_OPe = obj.bodies{k}.r_OP + obj.bodies{k}.r_Pe;
+                
                 % Determine absolute position of the operational space
                 if(~isempty(obj.bodies{k}.operationalSpace))
                     obj.bodies{k}.r_OY  = obj.bodies{k}.r_OP + obj.bodies{k}.r_y;
@@ -314,7 +315,7 @@ classdef SystemModelBodies < handle
             end
 
             if (is_symbolic)
-                CASPR_log.Info('Symbolic computing/simplifying of S');
+                CASPR_log.Info('Symbolic computing of S and S_dot');
             end
             % Set S (joint state matrix) and S_dot            
             index_dofs = 1;
@@ -331,30 +332,41 @@ classdef SystemModelBodies < handle
             for k = 1:obj.numLinks
                 body_k = obj.bodies{k};
                 k_R_0k = body_k.R_0k;
-                
                 for a = 1:k
                     body_a = obj.bodies{a}; 
-                    a_R_0k = body_a.R_0k;                    
+                    a_R_0k = body_a.R_0k;         
                     R_ka = k_R_0k.'*a_R_0k;
+                    
+                    if (is_symbolic)
+                        CASPR_log.Info(sprintf('- Symbolic computing of P_ak, k: %d, a: %d', k, a));
+                        CASPR_log.Info(sprintf('- Symbolic simplifying of R_ka, k: %d, a: %d', k, a));
+                        R_ka = simplify(R_ka, 'Step', k*15);
+                    end
                     Pak_1 = R_ka*body_a.joint.R_pe.';
                     r_OP = body_a.r_OP;
                     r_OG = body_k.r_OG;
                     Pak_2_1 = MatrixOperations.SkewSymmetric(-r_OP + R_ka.'*r_OG);
+                    
+                    if (is_symbolic)
+                        Pak_2_1 = simplify(Pak_2_1, 'Step', k*10);
+                    end
+                    
                     Pak_2 = -R_ka*Pak_2_1;
                                         
                     if (is_symbolic)
-                        Pak_1 = simplify(Pak_1);
-                        Pak_2 = simplify(Pak_2);
+                        CASPR_log.Info(sprintf('- Symbolic simplifying of P_ak, k: %d, a: %d', k, a));
+                        Pak_1 = simplify(Pak_1, 'Step', k*5);
+                        Pak_2 = simplify(Pak_2, 'Step', k*5);
                     end
                     
                     Pak = obj.bodiesPathGraph(a,k)*[Pak_1 Pak_2; ...
-                        zeros(3,3) R_ka];                     
-                    obj.P(6*k-5:6*k, 6*a-5:6*a) = Pak;                    
+                        zeros(3,3) R_ka];       
+                    obj.P(6*k-5:6*k, 6*a-5:6*a) = Pak; 
                 end
             end
             
             if (is_symbolic)
-                CASPR_log.Info('Symbolic computing/simplifying of W');
+                CASPR_log.Info('Symbolic computing of W');
             end
             % W = P*S              
             obj.W = obj.P*obj.S;       
@@ -389,7 +401,7 @@ classdef SystemModelBodies < handle
                 ang_mat(6*k-5:6*k, 6*k-5:6*k) = [2*MatrixOperations.SkewSymmetric(w_kp) zeros(3,3); zeros(3,3) MatrixOperations.SkewSymmetric(w_k)];
             end
 
-            obj.C_a = obj.P*obj.S_dot*obj.q_dot + obj.P*ang_mat*obj.S*obj.q_dot;
+            obj.C_a = obj.P*(obj.S_dot + ang_mat*obj.S)*obj.q_dot;
             for k = 1:obj.numLinks
                 for a = 1:k
                     ap = obj.bodies{a}.parentLinkId;
@@ -399,7 +411,7 @@ classdef SystemModelBodies < handle
                 end
                 obj.C_a(6*k-5:6*k-3) = obj.C_a(6*k-5:6*k-3) + cross(obj.bodies{k}.w, cross(obj.bodies{k}.w, obj.bodies{k}.r_G));
             end
-            obj.x_ddot = obj.P*obj.S*obj.q_ddot + obj.C_a;
+            obj.x_ddot = obj.W*obj.q_ddot + obj.C_a;
             
             % Extract absolute accelerations
             for k = 1:obj.numLinks
@@ -443,25 +455,33 @@ classdef SystemModelBodies < handle
             obj.R_0ks = obj.compiled_R_0ks_fn(q, q_dot, q_ddot, w_ext);
             obj.r_OPs = obj.compiled_r_OPs_fn(q, q_dot, q_ddot, w_ext);
             
-            for k = 1:obj.numLinks
-                obj.bodies{k}.R_0k = obj.R_0ks(:,3*k-2:3*k);
-                obj.bodies{k}.r_OP = obj.r_OPs(:,k);
-                obj.bodies{k}.r_OG = obj.r_OPs(:,k) + obj.r_Gs(:,k);
-                obj.bodies{k}.r_OPe = obj.r_OPs(:,k) + obj.r_Pes(:,k);
-            end
+%             for k = 1:obj.numLinks
+%                 obj.bodies{k}.R_0k = obj.R_0ks(:,3*k-2:3*k);
+%                 obj.bodies{k}.r_OP = obj.r_OPs(:,k);
+%                 obj.bodies{k}.r_OG = obj.r_OPs(:,k) + obj.r_Gs(:,k);
+%                 obj.bodies{k}.r_OPe = obj.r_OPs(:,k) + obj.r_Pes(:,k);
+%             end
             
             % Kinematics jacobians
-            obj.P = obj.compiled_P_fn(q, q_dot, q_ddot, w_ext);
+            %obj.P = obj.compiled_P_fn(q, q_dot, q_ddot, w_ext);
+            
+            for k = 1:obj.numLinks
+                for a = 1:k
+                    obj.P(6*k-5:6*k, 6*a-5:6*a) = obj.compiled_P_fns{k,a}(q, q_dot, q_ddot, w_ext);
+                end
+            end
+            
+            
             obj.S = obj.compiled_S_fn(q, q_dot, q_ddot, w_ext);
-            %obj.S_dot = compile_S_dot(q, q_dot, q_ddot, w_ext);
+            obj.S_dot = obj.compiled_S_dot_fn(q, q_dot, q_ddot, w_ext);
             obj.W = obj.P*obj.S;            
             obj.x_ddot = obj.compiled_x_ddot_fn(q, q_dot, q_ddot, w_ext);
             obj.x_dot = obj.compiled_x_dot_fn(q, q_dot, q_ddot, w_ext);
             
             % Update class properties by calling the compiled functions
             if obj.modelOptions.isComputeDynamics             
-                obj.C_b = obj.compiled_C_b_fn(q, q_dot, q_ddot, w_ext);   
-                obj.G_b = obj.compiled_G_b_fn(q, q_dot, q_ddot, w_ext);           
+                obj.C_b = obj.compiled_C_b_fn(q, q_dot, q_ddot, w_ext);
+                obj.G_b = obj.compiled_G_b_fn(q, q_dot, q_ddot, w_ext);
                 obj.M_b = obj.compiled_M_b_fn(q, q_dot, q_ddot, w_ext);
                 obj.M =   obj.W.' * obj.M_b;
                 obj.C =   obj.W.' * obj.C_b;
@@ -1000,40 +1020,66 @@ classdef SystemModelBodies < handle
             end
         end
         
-       
-        % Model Mode Related Functions %        
-        
-        
         % Compiling body variables under COMPILED mode
         % - Symbolic Variables are compiled into .m files and saved to the
         % path
         function compile(obj, path, lib_name)  
             CASPR_log.Assert(obj.modelMode == ModelModeType.SYMBOLIC, 'Can only compile a symbolic model');
             % Jacobians
-            CASPR_log.Info('- Compiling Jacobians...');
+            CASPR_log.Info('Compiling S and S_dot...');
             matlabFunction(obj.S, 'File', strcat(path, '/', lib_name, '_compiled_S'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});
-            %matlabFunction(obj.S_dot, 'File', strcat(path, '/compile_S_dot'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});
-            matlabFunction(obj.P, 'File', strcat(path, '/', lib_name, '_compiled_P'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});   
+            matlabFunction(obj.S_dot, 'File',strcat(path, '/', lib_name, '_compiled_S_dot'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});
             
+            CASPR_log.Info('Compiling P...');
+            tmp_body_P_path = strcat(path, '/P');
+            if ~exist(tmp_body_P_path, 'dir')
+                mkdir(tmp_body_P_path);              
+            end
+            for k = 1:obj.numLinks
+                for a = 1:k
+                    CASPR_log.Info(sprintf('- Compiling P%d%d...', k, a));
+                    P_temp = obj.P(6*k-5:6*k, 6*a-5:6*a);
+                    matlabFunction(P_temp, 'File', sprintf('%s/%s_compiled_P_%d_%d', tmp_body_P_path, lib_name, k, a), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});
+                end
+            end
             % Kinematics
+            CASPR_log.Info('Compiling R_0ks...');
             matlabFunction(obj.R_0ks, 'File', strcat(path, '/', lib_name, '_compiled_R_0ks'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});
+            
+%             for k = 1:obj.numLinks
+%                 CASPR_log.Info(sprintf('- Compiling R_0_%d...', k));
+%                 matlabFunction(obj.bodies{k}.R_0k, 'File', sprintf('%s/R_0k/%s_compiled_R_0_%d', path, lib_name, k), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});
+%             end
+            
+%                 obj.R_0ks(:,3*k-2:3*k) = obj.bodies{k}.R_0k;
+%                 obj.r_OPs(:,k) = obj.bodies{k}.r_OP;
+%                 obj.r_Gs(:,k) = obj.bodies{k}.r_G;
+%                 obj.r_Pes(:,k) = obj.bodies{k}.r_Pe;
+                
+%             matlabFunction(obj.R_0ks, 'File', strcat(path, '/', lib_name, '_compiled_R_0ks'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});
+            CASPR_log.Info('Compiling r_OPs...');
             matlabFunction(obj.r_OPs, 'File', strcat(path, '/', lib_name, '_compiled_r_OPs'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});
             
             % Absolute CoM velocities and accelerations (linear and angular)
-            CASPR_log.Info('- Compiling Velocities and Accelerations...');            
+            CASPR_log.Info('Compiling Velocities and Accelerations...');        
+            CASPR_log.Info('- Compiling x_dot...');            
             matlabFunction(obj.x_dot, 'File', strcat(path, '/', lib_name, '_compiled_x_dot'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
+            CASPR_log.Info('- Compiling x_ddot...');            
             matlabFunction(obj.x_ddot, 'File', strcat(path, '/', lib_name, '_compiled_x_ddot'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
             
             % Dynamics
             if(obj.modelOptions.isComputeDynamics)
-                CASPR_log.Info('- Compiling Dynamics Variables...'); 
+                CASPR_log.Info('Compiling Dynamics Variables...'); 
+                CASPR_log.Info('- Compiling M_b...'); 
                 matlabFunction(obj.M_b, 'File', strcat(path, '/', lib_name, '_compiled_M_b'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
+                CASPR_log.Info('- Compiling C_b...'); 
                 matlabFunction(obj.C_b, 'File', strcat(path, '/', lib_name, '_compiled_C_b'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
+                CASPR_log.Info('- Compiling G_b...'); 
                 matlabFunction(obj.G_b, 'File', strcat(path, '/', lib_name, '_compiled_G_b'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});  
-                matlabFunction(obj.M, 'File', strcat(path, '/', lib_name, '_compiled_M'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
-                matlabFunction(obj.C, 'File', strcat(path, '/', lib_name, '_compiled_C'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
-                matlabFunction(obj.G, 'File', strcat(path, '/', lib_name, '_compiled_G'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
-                matlabFunction(inv(obj.M), 'File', strcat(path, '/', lib_name, '_compiled_Minv'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
+%                 matlabFunction(obj.M, 'File', strcat(path, '/', lib_name, '_compiled_M'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
+%                 matlabFunction(obj.C, 'File', strcat(path, '/', lib_name, '_compiled_C'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
+%                 matlabFunction(obj.G, 'File', strcat(path, '/', lib_name, '_compiled_G'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
+%                 matlabFunction(inv(obj.M), 'File', strcat(path, '/', lib_name, '_compiled_Minv'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
             end            
             
             % Operational space
@@ -1167,7 +1213,7 @@ classdef SystemModelBodies < handle
         function update_dynamics(obj)        
             is_symbolic = obj.isSymbolic; 
             if (is_symbolic)
-                CASPR_log.Info('Symbolic computing/simplifying of M_b, C_b, G_b terms');
+                CASPR_log.Info('Symbolic computing M_b, C_b, G_b terms');
             end
             % Body equation of motion terms           
             obj.M_b = obj.massInertiaMatrix*obj.W;
@@ -1179,14 +1225,18 @@ classdef SystemModelBodies < handle
                 obj.C_b(6*k-2:6*k) = obj.C_b(6*k-2:6*k) + cross(body_k.w, body_k.I_G*body_k.w);
                 obj.G_b(6*k-5:6*k-3) = R_0k.'*[0; 0; -body_k.m*SystemModel.GRAVITY_CONSTANT];
             end  
+            
             if is_symbolic
-                obj.M_b = simplify(obj.M_b);
-                obj.C_b = simplify(obj.C_b);
-                obj.G_b = simplify(obj.G_b);
+%                 CASPR_log.Info('- Symbolic simplifying M_b...');
+%                 obj.M_b = simplify(obj.M_b);
+%                 CASPR_log.Info('- Symbolic simplifying C_b...');
+%                 obj.C_b = simplify(obj.C_b);
+%                 CASPR_log.Info('- Symbolic simplifying G_b...');
+%                 obj.G_b = simplify(obj.G_b);
             end
            
             if (is_symbolic)
-                CASPR_log.Info('Symbolic computing/simplifying of M, C, G terms');
+                CASPR_log.Info('Symbolic computing of M, C, G terms');
             end
             % Joint space equation of motion terms             
             obj.M =   obj.W.' * obj.M_b;
@@ -1735,8 +1785,14 @@ classdef SystemModelBodies < handle
                 obj.update = @obj.compiledUpdate;
                 obj.compiled_R_0ks_fn = str2func([obj.compiled_lib_name, '_compiled_R_0ks']);
                 obj.compiled_r_OPs_fn = str2func([obj.compiled_lib_name, '_compiled_r_OPs']);
-                obj.compiled_P_fn = str2func([obj.compiled_lib_name, '_compiled_P']);
+                obj.compiled_P_fns = cell(obj.numLinks, obj.numLinks);
+                for k = 1:obj.numLinks
+                    for a = 1:k
+                        obj.compiled_P_fns{k,a} = str2func(sprintf('%s_compiled_P_%d_%d', obj.compiled_lib_name, k, a));
+                    end
+                end
                 obj.compiled_S_fn = str2func([obj.compiled_lib_name, '_compiled_S']);
+                obj.compiled_S_dot_fn = str2func([obj.compiled_lib_name, '_compiled_S_dot']);
                 obj.compiled_x_ddot_fn = str2func([obj.compiled_lib_name, '_compiled_x_ddot']);
                 obj.compiled_x_dot_fn = str2func([obj.compiled_lib_name, '_compiled_x_dot']);
 

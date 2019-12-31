@@ -132,179 +132,18 @@ classdef (Abstract) ModelConfigBase < handle
             end
 
             if model_mode == ModelModeType.COMPILED
-                model_config_path = CASPR_configuration.LoadModelConfigPath();
-                lib_name = ModelConfigBase.ConstructCompiledLibraryName(obj.robotName, cable_set_id, operational_space_id);
-                compile_file_folder = [model_config_path, '\tmp_compilations\', lib_name];
-                compile_file_folder_m = [compile_file_folder, '\m'];
-                compile_file_folder_cpp = [compile_file_folder, '\cpp'];
+                [lib_name, compile_file_folder] = ModelConfigBase.ConstructCompiledLibraryName(obj.robotName, cable_set_id, operational_space_id);                
+                
                 % First check if a new compilation is required
                 if(obj.check_require_compile(compile_file_folder))
-                    % Recompiling, so first remove the existing directory
-                    if (exist(compile_file_folder, 'dir'))
-                        rmpath(genpath(compile_file_folder));
-                        rmdir(compile_file_folder, 's');
-                        mkdir(compile_file_folder);
-                    end
-                    warning('off','all');  
-                    CASPR_log.Warn('Current version of compiled mode does not support changes in active <-> passive cables.');
-                    CASPR_log.Warn('Compilation needs a long time. Please wait...');                        
-                    warning('on','all');  
-                    CASPR_log.Info('Preparation work...');
+                    CASPR_log.Info('Creating symbolic model');
                     % Create a symbolic model
                     sysModelSym = SystemModel.LoadXmlObj(obj.robotName, bodies_xmlobj, cable_set_id, cableset_xmlobj, operational_space_id, op_space_set_xmlobj, ModelModeType.SYMBOLIC, model_options);
-                    
+                    CASPR_log.Info('Compiling symbolic model');
                     % Do the .m compile
-                    sysModelSym.compile(compile_file_folder_m, lib_name);
-                    
-                    % Do the .cpp compile
-                    mkdir(compile_file_folder_cpp);
-                    files_list = dir([compile_file_folder_m, '/**/', '*.m']);
-                    source_files = cell(1, length(files_list));
-                    for i = 1:length(files_list)
-                        source_files{i} = [files_list(i).folder, '\', files_list(i).name];
-                    end
-                    % Set the input data type for the cpp functions
-                    input_data = {zeros(sysModelSym.numDofs,1), zeros(sysModelSym.numDofs,1), zeros(sysModelSym.numDofs,1), zeros(sysModelSym.numDofs,1)};
-                    % Setup the CPP compile config
-                    cpp_code_config = coder.config('dll');
-                    %code_config.IncludeTerminateFcn = false;
-                    cpp_code_config.SupportNonFinite = false;
-                    cpp_code_config.SaturateOnIntegerOverflow = false;
-                    cpp_code_config.GenerateExampleMain = 'DoNotGenerate';
-                    cpp_code_config.TargetLang = 'C++';
-                    cpp_code_config.FilePartitionMethod = 'SingleFile';                
-                    % Code generation
-                    str = ['codegen -d ', compile_file_folder_cpp, ' -o ', lib_name, ' -config cpp_code_config '];
-                    for i = 1:length(source_files)
-                        str = [str, source_files{i},' -args input_data '];
-                    end
-                    eval(str)
-                    % Remove unnecessary stuff
-                    rmdir([compile_file_folder_cpp, '/examples']);
-                    delete([compile_file_folder_cpp, '/*.mat']);
-%                 
-%                 addpath(genpath(build_folder));
-                    
-                    
-                    
-                    
-                    
-                    % Record the timestamp file
-                    obj.write_compile_record_file(compile_file_folder);
-                    
-                    % Add the compiled files to the path            
-                    addpath(genpath(compile_file_folder));
+                    sysModelSym.compile(lib_name, compile_file_folder);
                 end
                 sysModel = SystemModel.LoadXmlObj(obj.robotName, bodies_xmlobj, cable_set_id, cableset_xmlobj, operational_space_id, op_space_set_xmlobj, ModelModeType.COMPILED, model_options);
-                               
-%                 end     
-%             elseif model_mode == ModelModeType.CUSTOM
-%                 % Use this two step approach for now
-%                 % If op space can also be updated in custom mode,
-%                 % then we can run CUSTOM mode at the first run                
-%                 
-%                 % Run DEFAULT mode first
-%                 sysModel = SystemModel.LoadXmlObj(bodies_xmlobj,cableset_xmlobj,ModelModeType.DEFAULT);
-%                 % Operational
-%                 if ~isempty(operational_space_id)
-%                     operationalset_xmlobj = obj.getOperationalSetXmlObj(operational_space_id);
-%                     sysModel.loadOperationalXmlObj(operationalset_xmlobj);
-%                     sysModel.bodyModel.updateOperationalSpace();
-%                 end              
-%             elseif model_mode == ModelModeType.COMPILED_AUTO
-%                 model_config_path = CASPR_configuration.LoadModelConfigPath();
-%                 library_name = ModelConfigBase.GetAutoCompiledLibraryName(obj.robotName, cable_set_id);
-%                 
-%                 
-%                 % Step 1: Check if the robot needs to be compiled first
-%                 
-%                 % Step 2: Compile .m files from symbolic to temp compilations folder
-%                 compile_file_folder = [model_config_path, '\tmp_compilations'];
-%                 
-%                 % Remove all the existing compiled files to ensure all compiled
-%                 % files are up-to-date
-%                 if exist(compile_file_folder, 'dir')
-%                     warning('off','all');  
-%                     try
-%                         if libisloaded(library_name)
-%                             unloadlibrary(library_name);
-%                         end
-%                         rmpath(genpath(compile_file_folder));
-%                         rmdir(compile_file_folder, 's');
-%                         CASPR_log.Info('Previously compiled files are removed.');
-%                     catch
-%                         CASPR_log.Warn('You might not have the permission to remove previously compiled files');
-%                         CASPR_log.Warn('Please check your permission before running COMPILED mode.');
-%                         return;
-%                     end
-%                     warning('on','all');
-%                 else
-%                     % Make folders
-%                     mkdir(compile_file_folder);  
-%                 end
-%                 
-%                 % Start Compilations...
-%                 warning('off','all');
-%                 CASPR_log.Warn('Current version of compiled mode does not support changes in active <-> passive cables.');
-%                 CASPR_log.Warn('Compilation needs a long time. Please wait...');
-%                 warning('on','all');
-%                 CASPR_log.Info('Preparation work...');
-%                 
-%                 
-%                 
-%                 sysModelSym = SystemModel.LoadXmlObj(bodies_xmlobj, cableset_xmlobj, ModelModeType.SYMBOLIC);
-%                 sysModelSym.compile(compile_file_folder);
-%                     
-%                 % Operational
-% %                 if ~isempty(operational_space_id)
-% %                     operationalset_xmlobj = obj.getOperationalSetXmlObj(obj.defaultOperationalSetId);
-% %                     sysModel.loadOperationalXmlObj(operationalset_xmlobj);
-% %                     sysModel.bodyModel.updateOperationalSpace();
-% %                 end
-%                 
-%                 
-%                 % Step 3: Compile C version of the .m code
-%                 build_folder = [compile_file_folder, '/c_build'];
-%                 filesList = dir([compile_file_folder, '/**/', '*.m']);
-%                 
-%                 source_files = cell(1, length(filesList));
-%                 
-%                 for i = 1:length(filesList)
-%                     source_files{i} = [filesList(i).folder, '\', filesList(i).name];
-%                 end
-%                 
-%                 sysModelSym.numDofs
-%                 input_data = {zeros(sysModelSym.numDofs,1),zeros(sysModelSym.numDofs,1),zeros(sysModelSym.numDofs,1),zeros(sysModelSym.numDofs,1)};
-%                 
-%                 % Config
-%                 code_config = coder.config('dll');
-%                 %code_config.IncludeTerminateFcn = false;
-%                 code_config.SupportNonFinite = false;
-%                 code_config.SaturateOnIntegerOverflow = false;
-%                 code_config.GenerateExampleMain = 'DoNotGenerate';
-%                 code_config.TargetLang = 'C';
-%                 code_config.FilePartitionMethod = 'SingleFile';
-%                 
-%                 % Code generation
-%                 
-%                 str = ['codegen -d ', build_folder, ' -o ', library_name, ' -config code_config '];
-%                 for i = 1:length(source_files)
-%                     str = [str, source_files{i},' -args input_data '];
-%                 end
-%                 eval(str)
-%                 % Remove unnecessary stuff
-%                 rmdir([build_folder,'/examples']);
-%                 delete([build_folder,'/*.mat']);
-%                 
-%                 addpath(genpath(build_folder));
-                
-%                 warning('off','all');  
-%                 if (~libisloaded(library_name))
-%                     loadlibrary(library_name);
-%                 end
-%                 warning('on','all');
-%                 
-%                 sysModel = SystemModel.LoadXmlObj(bodies_xmlobj, cableset_xmlobj, ModelModeType.COMPILED_AUTO);
             else
                 % DEFAULT || SYMBOLIC 
                 sysModel = SystemModel.LoadXmlObj(obj.robotName, bodies_xmlobj, cable_set_id, cableset_xmlobj, operational_space_id, op_space_set_xmlobj, model_mode, model_options);
@@ -434,23 +273,27 @@ classdef (Abstract) ModelConfigBase < handle
                 return;
             end
         end
-        
-        function write_compile_record_file(obj, compile_file_folder)
-            fid = fopen([compile_file_folder, '\', obj.COMPILE_RECORD_FILENAME], 'w');
-            dt = datetime('now', 'TimeZone', 'local');
-            fprintf(fid, ['compiledtime,', datestr(dt), ',', dt.TimeZone]);
-            fclose(fid);
-        end
     end
     
     methods (Static)
-        function library_name = ConstructCompiledLibraryName(robot_name, cable_set_id, op_space_id)
+        function [library_name, compile_file_folder] = ConstructCompiledLibraryName(robot_name, cable_set_id, op_space_id)
             library_name = [robot_name, '_', cable_set_id];
             if (~isempty(op_space_id))
                 library_name = [library_name, '_', op_space_id];
             end
             library_name = strrep(library_name, ' ', '_');
             library_name = strrep(library_name, '-', '_');
+            
+            model_config_path = CASPR_configuration.LoadModelConfigPath();
+            compile_file_folder = [model_config_path, '\tmp_compilations\', library_name];
+        end
+        
+        
+        function WriteCompileRecordFile(compile_file_folder)
+            fid = fopen([compile_file_folder, '\', ModelConfigBase.COMPILE_RECORD_FILENAME], 'w');
+            dt = datetime('now', 'TimeZone', 'local');
+            fprintf(fid, ['compiledtime,', datestr(dt), ',', dt.TimeZone]);
+            fclose(fid);
         end
     end
 end
