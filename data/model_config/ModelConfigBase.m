@@ -28,6 +28,7 @@ classdef (Abstract) ModelConfigBase < handle
     
     properties (Dependent)
         cableSetNamesList               % List of names of cable sets
+        operationalSpaceSetNamesList    % List of names of operational space sets
         jointTrajectoryNamesList        % List of names of trajectories (joint space)
         operationalTrajectoryNamesList  % List of names of trajectories (operational space)
     end
@@ -183,6 +184,16 @@ classdef (Abstract) ModelConfigBase < handle
             end
         end
         
+        function opset_str = getOperationalSpaceSetList(obj)
+            opsetsObj = obj.operational_spaces_xml_obj.getElementsByTagName('operational_spaces').item(0).getElementsByTagName('operational_set');
+            opset_str = cell(1,opsetsObj.getLength);
+            % Extract the identifies from the cable sets
+            for i =1 :opsetsObj.getLength
+                opsetObj = opsetsObj.item(i-1);
+                opset_str{i} = char(opsetObj.getAttribute('id'));
+            end
+        end
+        
         function trajectories_str = getJointTrajectoriesList(obj)
             if (~isempty(obj.trajectories_xml_obj.getElementsByTagName('joint_trajectories').item(0)))
                 trajectories_str = GUIOperations.XmlObj2StringCellArray(obj.trajectories_xml_obj.getElementsByTagName('joint_trajectories').item(0).getChildNodes,'id');
@@ -277,6 +288,10 @@ classdef (Abstract) ModelConfigBase < handle
     methods
         function value = get.cableSetNamesList(obj)
             value = obj.getCableSetList();
+        end
+        
+        function value = get.operationalSpaceSetNamesList(obj)
+            value = obj.getOperationalSpaceSetList();
         end
         
         function value = get.jointTrajectoryNamesList(obj)
