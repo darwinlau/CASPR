@@ -9,10 +9,10 @@
 %    accessible.
 classdef (Abstract) ModelConfigBase < handle
     properties (SetAccess = private)
-        bodiesPropertiesFilepath                % Filename for the body properties
-        operationalSpacesPropertiesFilepath     % Filename for the operational space properties
-        cablesPropertiesFilepath                % Filename for the cable properties
-        trajectoriesFilename                    % Filename for the trajectories
+        bodiesPropertiesFilepath                % File path for the body properties
+        operationalSpacesPropertiesFilepath     % File path for the operational space properties
+        cablesPropertiesFilepath                % File path for the cable properties
+        trajectoriesFilepath                    % File path for the trajectories
         
         modelFolderPath             % Path of folder for the model
         
@@ -35,9 +35,10 @@ classdef (Abstract) ModelConfigBase < handle
     properties (Access = private)
         root_folder_path            % The root folder for the models
         
-        bodiesXmlObj                % The DOMNode object for body props
-        cablesXmlObj                % The DOMNode object for cable props
-        trajectoriesXmlObj          % The DOMNode for trajectory props
+        bodies_xml_obj                  % The DOMNode object for body props
+        cables_xml_obj                  % The DOMNode object for cable props
+        trajectories_xml_obj            % The DOMNode for trajectory props
+        operational_spaces_xml_obj      % The DOMNode for operational spaces
     end
     
     properties (Constant)
@@ -74,8 +75,8 @@ classdef (Abstract) ModelConfigBase < handle
                     c.modelFolderPath           = [c.root_folder_path, cdpr_folder];
                     c.bodiesPropertiesFilepath    = [c.root_folder_path, cdpr_folder, char(cell_array{3}{i})];
                     c.cablesPropertiesFilepath  = [c.root_folder_path, cdpr_folder, char(cell_array{4}{i})];
-                    c.trajectoriesFilename      = [c.root_folder_path, cdpr_folder, char(cell_array{5}{i})];
-                    c.operationalSpacesPropertiesFilepath    = [c.root_folder_path, cdpr_folder, char(cell_array{3}{i})];
+                    c.trajectoriesFilepath      = [c.root_folder_path, cdpr_folder, char(cell_array{5}{i})];
+                    c.operationalSpacesPropertiesFilepath    = [c.root_folder_path, cdpr_folder, char(cell_array{6}{i})];
                     fclose(fid);
                     status_flag = 0;
                     break;
@@ -86,25 +87,28 @@ classdef (Abstract) ModelConfigBase < handle
             end
             
             % Make sure all the filenames that are required exist
-            CASPR_log.Assert(exist(c.bodiesPropertiesFilepath, 'file') == 2, 'Body properties file does not exist.');
-            CASPR_log.Assert(exist(c.cablesPropertiesFilepath, 'file') == 2, 'Cable properties file does not exist.');
-            CASPR_log.Assert(exist(c.trajectoriesFilename, 'file') == 2, 'Trajectories file does not exist.');
+            CASPR_log.Assert(exist(c.bodiesPropertiesFilepath, 'file') == 2, ['Body properties file does not exist: ', c.bodiesPropertiesFilepath]);
+            CASPR_log.Assert(exist(c.cablesPropertiesFilepath, 'file') == 2, ['Cable properties file does not exist: ', c.cablesPropertiesFilepath]);
+            CASPR_log.Assert(exist(c.operationalSpacesPropertiesFilepath, 'file') == 2, ['Operational spaces properties file does not exist: ', c.operationalSpacesPropertiesFilepath]);
+            CASPR_log.Assert(exist(c.trajectoriesFilepath, 'file') == 2, ['Trajectories file does not exist: ', c.trajectoriesFilepath]);
             % Read the XML file to an DOM XML object
-            c.bodiesXmlObj =  XmlOperations.XmlReadRemoveIndents(c.bodiesPropertiesFilepath);
-            c.cablesXmlObj =  XmlOperations.XmlReadRemoveIndents(c.cablesPropertiesFilepath);
-            c.trajectoriesXmlObj =  XmlOperations.XmlReadRemoveIndents(c.trajectoriesFilename);
+            c.bodies_xml_obj =  XmlOperations.XmlReadRemoveIndents(c.bodiesPropertiesFilepath);
+            c.cables_xml_obj =  XmlOperations.XmlReadRemoveIndents(c.cablesPropertiesFilepath);
+            c.trajectories_xml_obj =  XmlOperations.XmlReadRemoveIndents(c.trajectoriesFilepath);
+            c.operational_spaces_xml_obj = XmlOperations.XmlReadRemoveIndents(c.operationalSpacesPropertiesFilepath);
             
             % Loads the bodiesModel and cable set to be used for the trajectory loading
             bodies_xmlobj = c.getBodiesPropertiesXmlObj();
             
-            default_cable_set_id = char(c.cablesXmlObj.getDocumentElement.getAttribute('default_cable_set'));
+            % Loads the default cable set
+            default_cable_set_id = char(c.cables_xml_obj.getDocumentElement.getAttribute('default_cable_set'));
             CASPR_log.Assert(~isempty(default_cable_set_id), '''default_cable_set'' must be specified in the cables XML configuration file.');
             c.defaultCableSetId = default_cable_set_id;
-            
             cableset_xmlobj = c.getCableSetXmlObj(c.defaultCableSetId);
             
-            if(c.bodiesXmlObj.getElementsByTagName('operational_spaces').getLength ~= 0 && ~isempty(char(c.bodiesXmlObj.getElementsByTagName('operational_spaces').item(0).getAttribute('default_operational_set'))))
-                c.defaultOperationalSetId = char(c.bodiesXmlObj.getElementsByTagName('operational_spaces').item(0).getAttribute('default_operational_set'));
+            % Loads the default operational space set
+            c.defaultOperationalSetId = char(c.operational_spaces_xml_obj.getDocumentElement.getAttribute('default_operational_set'));
+            if(~isempty(c.defaultOperationalSetId))
                 operationalset_xmlobj = c.getOperationalSetXmlObj(c.defaultOperationalSetId);
             else 
                 operationalset_xmlobj = [];
@@ -170,7 +174,7 @@ classdef (Abstract) ModelConfigBase < handle
         end
         
         function cableset_str = getCableSetList(obj)
-            cablesetsObj = obj.cablesXmlObj.getElementsByTagName('cables').item(0).getElementsByTagName('cable_set');
+            cablesetsObj = obj.cables_xml_obj.getElementsByTagName('cables').item(0).getElementsByTagName('cable_set');
             cableset_str = cell(1,cablesetsObj.getLength);
             % Extract the identifies from the cable sets
             for i =1 :cablesetsObj.getLength
@@ -180,16 +184,16 @@ classdef (Abstract) ModelConfigBase < handle
         end
         
         function trajectories_str = getJointTrajectoriesList(obj)
-            if (~isempty(obj.trajectoriesXmlObj.getElementsByTagName('joint_trajectories').item(0)))
-                trajectories_str = GUIOperations.XmlObj2StringCellArray(obj.trajectoriesXmlObj.getElementsByTagName('joint_trajectories').item(0).getChildNodes,'id');
+            if (~isempty(obj.trajectories_xml_obj.getElementsByTagName('joint_trajectories').item(0)))
+                trajectories_str = GUIOperations.XmlObj2StringCellArray(obj.trajectories_xml_obj.getElementsByTagName('joint_trajectories').item(0).getChildNodes,'id');
             else
                 trajectories_str = {};
             end
         end
         
         function trajectories_str = getOperationalTrajectoriesList(obj)
-            if (~isempty(obj.trajectoriesXmlObj.getElementsByTagName('operational_trajectories').item(0)))
-                trajectories_str = GUIOperations.XmlObj2StringCellArray(obj.trajectoriesXmlObj.getElementsByTagName('operational_trajectories').item(0).getChildNodes,'id');
+            if (~isempty(obj.trajectories_xml_obj.getElementsByTagName('operational_trajectories').item(0)))
+                trajectories_str = GUIOperations.XmlObj2StringCellArray(obj.trajectories_xml_obj.getElementsByTagName('operational_trajectories').item(0).getChildNodes,'id');
             else
                 trajectories_str = {};
             end
@@ -287,37 +291,33 @@ classdef (Abstract) ModelConfigBase < handle
     methods (Access = private)
         % Gets the body properties xml object
         function v = getBodiesPropertiesXmlObj(obj)
-            v_temp = obj.bodiesXmlObj.getElementsByTagName('links');
-            CASPR_log.Assert(v_temp.getLength == 1,'1 links tag should be specified');
+            v_temp = obj.bodies_xml_obj.getElementsByTagName('links');
+            CASPR_log.Assert(v_temp.getLength == 1,'Only one <links> tag should be specified');
             v = v_temp.item(0);
         end
         
         % Gets the cable set properties xml object
         function v = getCableSetXmlObj(obj, id)
-            v = obj.cablesXmlObj.getElementById(id);
+            v = obj.cables_xml_obj.getElementById(id);
             CASPR_log.Assert(~isempty(v), sprintf('Id ''%s'' does not exist in the cables XML file', id));
         end
         
         % Get the trajectory xml object
         function v = getJointTrajectoryXmlObj(obj, id)
-            v = obj.trajectoriesXmlObj.getElementById(id);
+            v = obj.trajectories_xml_obj.getElementById(id);
             CASPR_log.Assert(~isempty(v), sprintf('Id ''%s'' does not exist in the trajectories XML file', id));
         end
         
         function v = getOperationalTrajectoryXmlObj(obj, id)
-            v = obj.trajectoriesXmlObj.getElementById(id);
+            v = obj.trajectories_xml_obj.getElementById(id);
             CASPR_log.Assert(~isempty(v), sprintf('Id ''%s'' does not exist in the trajectories XML file', id));
         end
         
         % Get the operational space xml object
         function v = getOperationalSetXmlObj(obj, id)
-            v_temp = obj.bodiesXmlObj.getElementsByTagName('operational_spaces');
-            CASPR_log.Assert(v_temp.getLength == 1,'1 operational space tag should be specified');
-            v = obj.bodiesXmlObj.getElementById(id);
-            CASPR_log.Assert(~isempty(v), sprintf('Id ''%s'' does not exist in the bodies XML file', id));
+            v = obj.operational_spaces_xml_obj.getElementById(id);
+            CASPR_log.Assert(~isempty(v), sprintf('Id ''%s'' does not exist in the operational spaces XML file', id));
         end
-        
-        
     end
     
     methods (Static)

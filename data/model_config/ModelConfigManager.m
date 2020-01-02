@@ -14,7 +14,7 @@ classdef ModelConfigManager
             
             % Determine the Filenames
             % Load the contents
-            csv_content = textscan(fid,'%s %s %s %s %s %s','delimiter',',');
+            csv_content = textscan(fid,'%s %s %s %s %s %s %s','delimiter',',');
             models = csv_content{1};            
         end
         
@@ -26,7 +26,7 @@ classdef ModelConfigManager
             
             % Determine the Filenames
             % Load the contents
-            csv_content = textscan(fid,'%s %s %s %s %s %s','delimiter',',');
+            csv_content = textscan(fid,'%s %s %s %s %s %s %s','delimiter',',');
             models = csv_content{1};            
         end
         
@@ -38,11 +38,11 @@ classdef ModelConfigManager
             
             % Determine the Filenames
             % Load the contents
-            csv_content = textscan(fid,'%s %s %s %s %s %s','delimiter',',');
+            csv_content = textscan(fid,'%s %s %s %s %s %s %s','delimiter',',');
             models = csv_content{1};            
         end
         
-        function AddModelConfig(name, folder, bodies_xml_filename, cable_xml_filename, trajectory_xml_filename)
+        function AddModelConfig(name, folder, bodies_xml_filename, cable_xml_filename, trajectory_xml_filename, operational_spaces_xml_filename)
             % Determine the base folder and root folder
             base_folder = CASPR_configuration.LoadModelConfigPath();
             root_folder = [base_folder, ModelConfig.MODEL_FOLDER_PATH];
@@ -97,9 +97,19 @@ classdef ModelConfigManager
             end
             fclose(r_fid);
             fclose(w_fid);
+            % Operational spaces file
+            r_fid = fopen([base_folder,'/templates/template_operational_spaces.xml']);
+            w_fid = fopen([dir_folder,operational_spaces_xml_filename],'w');
+            while(~feof(r_fid))
+                r_str = fgets(r_fid);
+                w_str = strrep(r_str,'templates',[replacement_str,'templates']);
+                fprintf(w_fid,w_str);
+            end
+            fclose(r_fid);
+            fclose(w_fid);
             % Add line to the CSV file
             fid = fopen([root_folder, ModelConfig.LIST_FILENAME],'a');
-            fprintf(fid,[name,',',folder,',',bodies_xml_filename,',',cable_xml_filename,',',trajectory_xml_filename,',','','\n']);
+            fprintf(fid,[name,',',folder,',',bodies_xml_filename,',',cable_xml_filename,',',trajectory_xml_filename,',',operational_spaces_xml_filename,',','','\n']);
             fclose(fid);
         end
         
@@ -142,7 +152,7 @@ classdef ModelConfigManager
             rmdir(dir_folder,'s');
         end
         
-        function AddDevModelConfig(name, folder, bodies_xml_filename, cable_xml_filename, trajectory_xml_filename)
+        function AddDevModelConfig(name, folder, bodies_xml_filename, cable_xml_filename, trajectory_xml_filename, operational_spaces_xml_filename)
             % Determine the base folder and root folder
             base_folder = CASPR_configuration.LoadModelConfigPath();
             root_folder = [base_folder, DevModelConfig.MODEL_FOLDER_PATH];
@@ -197,9 +207,19 @@ classdef ModelConfigManager
             end
             fclose(r_fid);
             fclose(w_fid);
+            % Operational spaces file
+            r_fid = fopen([base_folder,'/templates/template_operational_spaces.xml']);
+            w_fid = fopen([dir_folder,operational_spaces_xml_filename],'w');
+            while(~feof(r_fid))
+                r_str = fgets(r_fid);
+                w_str = strrep(r_str,'templates',[replacement_str,'templates']);
+                fprintf(w_fid,w_str);
+            end
+            fclose(r_fid);
+            fclose(w_fid);
             % Add line to the CSV file
             fid = fopen([root_folder, DevModelConfig.LIST_FILENAME],'a');
-            fprintf(fid,[name,',',folder,',',bodies_xml_filename,',',cable_xml_filename,',',trajectory_xml_filename,',','','\n']);
+            fprintf(fid,[name,',',folder,',',bodies_xml_filename,',',cable_xml_filename,',',trajectory_xml_filename,',',operational_spaces_xml_filename,',','','\n']);
             fclose(fid);            
         end
         

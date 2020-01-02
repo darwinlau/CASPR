@@ -23,13 +23,4 @@
         </parent>
       </link_rigid>
     </links>
-    <operational_spaces default_operational_set="ee_position">
-	  <operational_set id="ee_position">
-        <pose_euler_xyz marker_id="1" name="ee_pos">
-          <link>1</link>
-          <offset>0.0 0.0325 0.0</offset>
-          <axes active_axes="xyzabg"/>
-        </pose_euler_xyz>
-	  </operational_set>    
-    </operational_spaces>
 </bodies_system>

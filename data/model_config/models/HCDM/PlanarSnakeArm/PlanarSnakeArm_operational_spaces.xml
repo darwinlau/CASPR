@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE trajectories SYSTEM "../../../templates/operational_spaces.dtd">
+<!-- Template generated file for XML operational_spaces in CASPR -->
+
+<operational_spaces default_operational_set="ee_yz">
+  <operational_set id="ee_yz">
+    <position marker_id="1" name="ee_yz">
+      <link>7</link>
+      <offset>0.0 0.1 0.0</offset>
+      <axes active_axes="yz"/>
+    </position>
+  </operational_set>
+  <operational_set id="ee_position">
+    <position marker_id="1" name="ee_pos">
+      <link>7</link>
+      <offset>0.0 0.1 0.0</offset>
+      <axes active_axes="xyz"/>
+    </position>
+  </operational_set>
+  <operational_set id="ee_pose">
+    <pose_euler_xyz marker_id="1" name="ee_pose">
+      <link>7</link>
+      <offset>0.0 0.1 0.0</offset>
+      <axes active_axes="xyzabg"/>
+    </pose_euler_xyz>
+  </operational_set>
+  <operational_set id="ee_pose_alt">
+    <pose_euler_xyz marker_id="1" name="ee_pose_alt">
+      <link>7</link>
+      <offset>0.0 0.0 0.0</offset>
+      <axes active_axes="xyzabg"/>
+    </pose_euler_xyz>
+  </operational_set>
+</operational_spaces>

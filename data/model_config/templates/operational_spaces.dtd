@@ -1,0 +1,3 @@
+<!-- Rules for operational spaces files-->
+
+<!ATTLIST operational_set id ID #REQUIRED>

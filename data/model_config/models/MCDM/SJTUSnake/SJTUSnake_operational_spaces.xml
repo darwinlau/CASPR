@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE trajectories SYSTEM "../../../templates/operational_spaces.dtd">
+<!-- Template generated file for XML operational_spaces in CASPR -->
+
+<operational_spaces default_operational_set="tip_position">
+    <operational_set id="tip_pose_s">
+        <pose_euler_xyz marker_id="1" name="tip_pose_s">
+            <link>12</link>
+            <offset>0 0.09921 0</offset>
+            <axes active_axes="xyzag"/>
+        </pose_euler_xyz>
+    </operational_set>    
+    <operational_set id="tip_orientation_s">
+        <orientation_euler_xyz marker_id="1" name="tip_orientation_s">
+            <link>12</link>
+            <axes active_axes="ag"/>
+        </orientation_euler_xyz>
+    </operational_set>    
+    <operational_set id="tip_pose">
+        <pose_euler_xyz marker_id="1" name="tip_pose">
+            <link>12</link>
+            <offset>0 0.09921 0</offset>
+            <axes active_axes="xyzabg"/>
+        </pose_euler_xyz>
+    </operational_set>    
+    <operational_set id="tip_position">
+        <position marker_id="1" name="tip_position">
+            <link>12</link>
+            <offset>0 0.09921 0</offset>
+            <axes active_axes="xyz"/>
+        </position>
+    </operational_set>       
+    <operational_set id="tip_orientation">
+        <orientation_euler_xyz marker_id="1" name="tip_orientation">
+            <link>12</link>
+            <axes active_axes="abg"/>
+        </orientation_euler_xyz>
+    </operational_set>     
+    <operational_set id="tip_position_x">
+        <position marker_id="1" name="tip_position_x">
+            <link>12</link>
+            <offset>0 0.09921 0</offset>
+            <axes active_axes="x"/>
+        </position>
+    </operational_set>   
+    <operational_set id="tip_position_y">
+        <position marker_id="1" name="tip_position_y">
+            <link>12</link>
+            <offset>0 0.09921 0</offset>
+            <axes active_axes="y"/>
+        </position>
+    </operational_set>
+    <operational_set id="tip_position_z">
+        <position marker_id="1" name="tip_position_z">
+            <link>12</link>
+            <offset>0 0.09921 0</offset>
+            <axes active_axes="z"/>
+        </position>
+    </operational_set>    
+</operational_spaces>

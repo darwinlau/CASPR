@@ -108,6 +108,7 @@ function add_button_Callback(~, ~, handles) %#ok<DEFNU>
         bodies = table_data{2};
         cables = table_data{3};
         trajectories = table_data{4};
+        op_spaces = table_data{5};
     else
         % Add conversions
         name_for_files = strrep(name,' ','_');
@@ -117,13 +118,14 @@ function add_button_Callback(~, ~, handles) %#ok<DEFNU>
         bodies = [name_for_files,'_bodies.xml'];
         cables = [name_for_files,'_cables.xml'];
         trajectories = [name_for_files,'_trajectories.xml'];
+        op_spaces = [name_for_files,'_operational_spaces.xml'];
     end
        
     % Call the appropriate model config operations
     if(CASPR_configuration.LoadDevModelConfig())
-        ModelConfigManager.AddDevModelConfig(name,folder,bodies,cables,trajectories);
+        ModelConfigManager.AddDevModelConfig(name,folder,bodies,cables,trajectories,op_spaces);
     else
-        ModelConfigManager.AddModelConfig(name,folder,bodies,cables,trajectories);
+        ModelConfigManager.AddModelConfig(name,folder,bodies,cables,trajectories,op_spaces);
     end
     set_robotlist(handles)
     addpath(genpath(CASPR_configuration.LoadModelConfigPath()));
@@ -143,6 +145,7 @@ function remove_button_Callback(~, ~, handles) %#ok<DEFNU>
         ModelConfigManager.RemoveModelConfig(name);
     end
     set_robotlist(handles)
+    set(handles.remove_box,'string','');
 end
 
 % --- Executes during object creation, after setting all properties.
@@ -150,7 +153,7 @@ function model_table_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
     % hObject    handle to model_table (see GCBO)
     % eventdata  reserved - to be defined in a future version of MATLAB
     % handles    empty - handles not created until after all CreateFcns called
-    set(hObject,'Data',cell(1,4),'ColumnName',{'Folder','Bodies XML Filename','Cables XML Filename','Trajectories XML Filename'})
+    set(hObject,'Data',cell(1,5),'ColumnName',{'Folder','Bodies XML Filename','Cables XML Filename','Trajectories XML Filename','Operational Spaces XML Filename'})
     set(hObject,'Visible','Off');
 end
 

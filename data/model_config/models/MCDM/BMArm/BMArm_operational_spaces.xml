@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE trajectories SYSTEM "../../../templates/operational_spaces.dtd">
+<!-- Template generated file for XML operational_spaces in CASPR -->
+
+<operational_spaces default_operational_set="ee_pose">
+    <operational_set id="ee_pose">
+        <position marker_id="1" name="ee_pose">
+            <link>2</link>
+            <offset>0.0 0.2430 0.0</offset>
+            <axes active_axes="xyz"/>
+        </position>
+    </operational_set>
+    <operational_set id="tip_vertical">
+        <position marker_id="1" name="tip_vertical">
+            <link>2</link>
+            <offset>0.0 0.2430 0.0</offset>
+            <axes active_axes="z"/>
+        </position>
+    </operational_set>    
+</operational_spaces>
