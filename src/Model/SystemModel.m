@@ -130,14 +130,17 @@ classdef SystemModel < handle
                 model_options = ModelOptions();
             end
             if (model_mode == ModelModeType.COMPILED)
-                compiled_lib_name = ModelConfigBase.ConstructCompiledLibraryName(robot_name, cable_set_id, op_space_id);
+                [bodies_lib_name, cableset_lib_name, opset_lib_name, ~, ~, ~, ~, ~, ...
+                ~, ~] = ModelConfigBase.ConstructCompiledLibraryNames(robot_name, cable_set_id, op_space_id);
             else 
-                compiled_lib_name = '';
+                bodies_lib_name = '';
+                cableset_lib_name = '';
+                opset_lib_name = '';
             end
             
-            b               =   SystemModel(robot_name, cable_set_id, op_space_id, model_mode, model_options, compiled_lib_name);
-            b.bodyModel     =   SystemModelBodies.LoadXmlObj(body_xmlobj, op_space_set_xmlobj, b.modelMode, model_options, compiled_lib_name);
-            b.cableModel    =   SystemModelCables.LoadXmlObj(cable_xmlobj, b.bodyModel, b.modelMode, model_options, compiled_lib_name);
+            b               =   SystemModel(robot_name, cable_set_id, op_space_id, model_mode, model_options, cableset_lib_name);
+            b.bodyModel     =   SystemModelBodies.LoadXmlObj(body_xmlobj, op_space_set_xmlobj, b.modelMode, model_options, bodies_lib_name);
+            b.cableModel    =   SystemModelCables.LoadXmlObj(cable_xmlobj, b.bodyModel, b.modelMode, model_options, cableset_lib_name);
                 
             if ((model_mode == ModelModeType.DEFAULT) || (model_mode == ModelModeType.COMPILED))
                 b.update(b.bodyModel.q_initial, b.bodyModel.q_dot_default, b.bodyModel.q_ddot_default, zeros(b.numDofs,1));
@@ -494,114 +497,156 @@ classdef SystemModel < handle
         end
                 
         % System Compiling Procedure in COMPILED mode
-        % - New folders are created in model_config to store the compiled
-        % body and cable .m files
-        function compile(obj, lib_name, compile_file_folder)
+        % This function performs the following steps:
+        % 1) Checks if the SystemModelBodies needs to be compiled (if so,
+        %   the entire model will compiled)
+        % 2) Checks if the SystemModelCables needs to be compiled (if so,
+        %   just the cable set will be compiled)
+        % 3) Checks if the operational space needs to be compiled (if so,
+        %   just the operational space set will be compiled) 
+        function compile(obj, base_compile_folder, model_config)
             CASPR_log.Assert(obj.modelMode == ModelModeType.SYMBOLIC, 'Compile function only works when in symbolic mode');
             
-            if (nargin < 2)
-                [lib_name, compile_file_folder] = ModelConfigBase.ConstructCompiledLibraryName(obj.robotName, obj.cableSetName, obj.operationalSpaceName);     
+            % Function should return bodies folder, cableset folder, and
+            % operational set folder; and also corresponding library names?
+            
+            [b_lib_name, c_lib_name, op_lib_name, cpp_lib_name, b_folder, c_folder, op_folder, cpp_folder, cables_base_folder, opset_base_folder] = ModelConfigBase.ConstructCompiledLibraryNames(obj.robotName, obj.cableSetName, obj.operationalSpaceName, base_compile_folder);
+            
+            [compile_bodies, compile_cables, compile_opspaces] = model_config.checkRequireCompile(obj.cableSetName, obj.operationalSpaceName, base_compile_folder)
+            
+            if (exist(base_compile_folder, 'dir'))
+                rmpath(genpath(base_compile_folder));
             end
-            
-            compile_file_folder_m = [compile_file_folder, '\m'];
-            compile_file_folder_cpp = [compile_file_folder, '\cpp'];
-            
-            % First remove the existing directory and recreate for a clean
-            % compile
-            
-            % COMMENTED ONLY TEMPORARILY!!!!
-%             if (exist(compile_file_folder, 'dir'))
-%                 rmpath(genpath(compile_file_folder));
-%                 rmdir(compile_file_folder, 's');
-%             end
+                
+            if (compile_bodies)
+                if (exist(base_compile_folder, 'dir'))
+                    rmdir(base_compile_folder, 's');
+                end
+                mkdir(b_folder);
 
-            if ~exist(compile_file_folder, 'dir')
-                mkdir(compile_file_folder);
-            end
-            if ~exist(compile_file_folder_m, 'dir')
-                mkdir(compile_file_folder_m);
-            end
-            if ~exist(compile_file_folder_cpp, 'dir')
-                mkdir(compile_file_folder_cpp);
+                CASPR_log.Info('Start Body Compilations...');
+                obj.bodyModel.compile(b_folder, b_lib_name);
+                
+                % Record the timestamp file
+                ModelConfigBase.WriteCompileBodiesRecordFile(base_compile_folder);
             end
             
-            warning('off','all');
-            CASPR_log.Warn('Current version of compiled mode does not support changes in active <-> passive cables.');
-            CASPR_log.Warn('Compilation needs a long time. Please wait...');
-            warning('on','all');
-            CASPR_log.Info('Compiling .m files...');
-                    
-            % Define the paths for storing the compiled files
-            tmp_body_path = [compile_file_folder_m, '/Bodies'];
-            tmp_cable_path = [compile_file_folder_m, '/Cables'];
-                      
-            if ~exist(tmp_body_path, 'dir')
-                mkdir(tmp_body_path);              
+            if (compile_cables)
+                if (exist(c_folder, 'dir'))
+                    rmdir(cables_base_folder, 's');
+                end
+                mkdir(c_folder);
+                
+                CASPR_log.Info('Start Body Compilations...');
+                obj.cableModel.compile(c_folder, obj.bodyModel, c_lib_name);
+                
+                % Record the timestamp file
+                ModelConfigBase.WriteCompileCablesRecordFile(base_compile_folder);
             end
-            if ~exist(tmp_cable_path, 'dir')
-                mkdir(tmp_cable_path);              
-            end                        
-            CASPR_log.Info('Created Folders.');
             
-            % Body Variables Compilations
-            CASPR_log.Info('Start Body Compilations...');
-            obj.bodyModel.compile(tmp_body_path, lib_name);
-            CASPR_log.Info('Finished Body Compilations.');
-            % Cable Variables Compilations
-            CASPR_log.Info('Start Cable Compilations...');
-            obj.cableModel.compile(tmp_cable_path, obj.bodyModel, lib_name);
-            CASPR_log.Info('Finished Cable Compilations.');
-            
-            
-            % System Variables Compilations
-            % CASPR_log.Info('Start System Compilation...');  
-            % Currently only L is needed.
-            % If more system variables are needed in the future, a separate
-            % function handling these variables might be prefered.
-            
-            
-            % Commented out since it may be favourable (for more complex
-            % robots) to just use L = V*W in code
-%             CASPR_log.Info('- Compiling L...');            
-%             matlabFunction(obj.L, 'File', strcat(file_folder, '/', lib_name, '_compiled_L'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});
-%             CASPR_log.Info('Finished L Compilation.');  
-            
-            % CASPR_log.Info('Finished All Compilations.\n');
-            
-            CASPR_log.Info('Compiling cpp files...');
-            % Do the .cpp compile
-            files_list = dir([compile_file_folder_m, '/**/', '*.m']);
-            source_files = cell(1, length(files_list));
-            for i = 1:length(files_list)
-                source_files{i} = [files_list(i).folder, '\', files_list(i).name];
-            end
-            % Set the input data type for the cpp functions
-            input_data = {zeros(obj.numDofs,1), zeros(obj.numDofs,1), zeros(obj.numDofs,1), zeros(obj.numDofs,1)};
-            % Setup the CPP compile config
-            cpp_code_config = coder.config('dll');
-            %code_config.IncludeTerminateFcn = false;
-            cpp_code_config.SupportNonFinite = false;
-            cpp_code_config.SaturateOnIntegerOverflow = false;
-            cpp_code_config.GenerateExampleMain = 'DoNotGenerate';
-            cpp_code_config.TargetLang = 'C++';
-            cpp_code_config.FilePartitionMethod = 'SingleFile';
-            % Code generation
-            str = ['codegen -d ', compile_file_folder_cpp, ' -o ', lib_name, ' -config cpp_code_config '];
-            for i = 1:length(source_files)
-                str = [str, source_files{i},' -args input_data '];
-            end
-            eval(str)
-            CASPR_log.Info('Finished compiling cpp files');
-            CASPR_log.Info('Cleaning up...');
-            % Remove unnecessary stuff
-            rmdir([compile_file_folder_cpp, '/examples']);
-            delete([compile_file_folder_cpp, '/*.mat']);
-            CASPR_log.Info('Finished Compilation.');
-            
-            % Record the timestamp file
-            ModelConfigBase.WriteCompileRecordFile(compile_file_folder);
             % Add the compiled files to the path
-            addpath(genpath(compile_file_folder));
+            addpath(genpath(base_compile_folder));
+            
+%             
+%             compile_file_folder_m = [base_compile_folder, '\m'];
+%             compile_file_folder_cpp = [base_compile_folder, '\cpp'];
+%             
+%             % First remove the existing directory and recreate for a clean
+%             % compile
+%             
+%             % COMMENTED ONLY TEMPORARILY!!!!
+% %             if (exist(compile_file_folder, 'dir'))
+% %                 rmpath(genpath(compile_file_folder));
+% %                 rmdir(compile_file_folder, 's');
+% %             end
+% 
+%             if ~exist(base_compile_folder, 'dir')
+%                 mkdir(base_compile_folder);
+%             end
+%             if ~exist(compile_file_folder_m, 'dir')
+%                 mkdir(compile_file_folder_m);
+%             end
+%             if ~exist(compile_file_folder_cpp, 'dir')
+%                 mkdir(compile_file_folder_cpp);
+%             end
+%             
+%             warning('off','all');
+%             CASPR_log.Warn('Current version of compiled mode does not support changes in active <-> passive cables.');
+%             CASPR_log.Warn('Compilation needs a long time. Please wait...');
+%             warning('on','all');
+%             CASPR_log.Info('Compiling .m files...');
+%                     
+%             % Define the paths for storing the compiled files
+%             tmp_body_path = [compile_file_folder_m, '/Bodies'];
+%             tmp_cable_path = [compile_file_folder_m, '/Cables'];
+%                       
+%             if ~exist(tmp_body_path, 'dir')
+%                 mkdir(tmp_body_path);              
+%             end
+%             if ~exist(tmp_cable_path, 'dir')
+%                 mkdir(tmp_cable_path);              
+%             end                        
+%             CASPR_log.Info('Created Folders.');
+%             
+%             % Body Variables Compilations
+%             CASPR_log.Info('Start Body Compilations...');
+%             obj.bodyModel.compile(tmp_body_path, lib_name);
+%             CASPR_log.Info('Finished Body Compilations.');
+%             % Cable Variables Compilations
+%             CASPR_log.Info('Start Cable Compilations...');
+%             obj.cableModel.compile(tmp_cable_path, obj.bodyModel, lib_name);
+%             CASPR_log.Info('Finished Cable Compilations.');
+%             
+%             
+%             % System Variables Compilations
+%             % CASPR_log.Info('Start System Compilation...');  
+%             % Currently only L is needed.
+%             % If more system variables are needed in the future, a separate
+%             % function handling these variables might be prefered.
+%             
+%             
+%             % Commented out since it may be favourable (for more complex
+%             % robots) to just use L = V*W in code
+% %             CASPR_log.Info('- Compiling L...');            
+% %             matlabFunction(obj.L, 'File', strcat(file_folder, '/', lib_name, '_compiled_L'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});
+% %             CASPR_log.Info('Finished L Compilation.');  
+%             
+%             % CASPR_log.Info('Finished All Compilations.\n');
+%             
+%             CASPR_log.Info('Compiling cpp files...');
+%             % Do the .cpp compile
+%             files_list = dir([compile_file_folder_m, '/**/', '*.m']);
+%             source_files = cell(1, length(files_list));
+%             for i = 1:length(files_list)
+%                 source_files{i} = [files_list(i).folder, '\', files_list(i).name];
+%             end
+%             % Set the input data type for the cpp functions
+%             input_data = {zeros(obj.numDofs,1), zeros(obj.numDofs,1), zeros(obj.numDofs,1), zeros(obj.numDofs,1)};
+%             % Setup the CPP compile config
+%             cpp_code_config = coder.config('dll');
+%             %code_config.IncludeTerminateFcn = false;
+%             cpp_code_config.SupportNonFinite = false;
+%             cpp_code_config.SaturateOnIntegerOverflow = false;
+%             cpp_code_config.GenerateExampleMain = 'DoNotGenerate';
+%             cpp_code_config.TargetLang = 'C++';
+%             cpp_code_config.FilePartitionMethod = 'SingleFile';
+%             % Code generation
+%             str = ['codegen -d ', compile_file_folder_cpp, ' -o ', lib_name, ' -config cpp_code_config '];
+%             for i = 1:length(source_files)
+%                 str = [str, source_files{i},' -args input_data '];
+%             end
+%             eval(str)
+%             CASPR_log.Info('Finished compiling cpp files');
+%             CASPR_log.Info('Cleaning up...');
+%             % Remove unnecessary stuff
+%             rmdir([compile_file_folder_cpp, '/examples']);
+%             delete([compile_file_folder_cpp, '/*.mat']);
+%             CASPR_log.Info('Finished Compilation.');
+%             
+%             % Record the timestamp file
+%             ModelConfigBase.WriteCompileRecordFile(base_compile_folder);
+%             % Add the compiled files to the path
+%             addpath(genpath(base_compile_folder));
         end
     end
 end

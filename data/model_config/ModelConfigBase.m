@@ -9,9 +9,10 @@
 %    accessible.
 classdef (Abstract) ModelConfigBase < handle
     properties (SetAccess = private)
-        bodiesPropertiesFilepath      % Filename for the body properties
-        cablesPropertiesFilepath    % Filename for the cable properties
-        trajectoriesFilename        % Filename for the trajectories
+        bodiesPropertiesFilepath                % Filename for the body properties
+        operationalSpacesPropertiesFilepath     % Filename for the operational space properties
+        cablesPropertiesFilepath                % Filename for the cable properties
+        trajectoriesFilename                    % Filename for the trajectories
         
         modelFolderPath             % Path of folder for the model
         
@@ -32,7 +33,7 @@ classdef (Abstract) ModelConfigBase < handle
     end
         
     properties (Access = private)
-        root_folder                 % The root folder for the models
+        root_folder_path            % The root folder for the models
         
         bodiesXmlObj                % The DOMNode object for body props
         cablesXmlObj                % The DOMNode object for cable props
@@ -40,18 +41,21 @@ classdef (Abstract) ModelConfigBase < handle
     end
     
     properties (Constant)
-        COMPILE_RECORD_FILENAME = 'compile_record.txt'
+        COMPILE_RECORD_BODIES_FILENAME = 'compile_record_bodies.txt'
+        COMPILE_RECORD_CABLES_FILENAME = 'compile_record_cables.txt'
+        COMPILE_RECORD_OPERATIONAL_SPACES_FILENAME = 'compile_record_operationalspaces.txt'
+        DEFAULT_COMPILED_FOLDER = 'tmp_compilations'
     end
     
     methods
         % Constructor for the ModelConfig class. This builds the xml
         % objects.
         function c = ModelConfigBase(robot_name, folder, list_file)
-            c.root_folder = [CASPR_configuration.LoadModelConfigPath(), folder];
+            c.root_folder_path = [CASPR_configuration.LoadModelConfigPath(), folder];
             c.robotName = robot_name;
                         
             % Check the type of enum and open the master list
-            fid = fopen([c.root_folder, list_file]);
+            fid = fopen([c.root_folder_path, list_file]);
             
             % Determine the Filenames
             % Load the contents
@@ -67,10 +71,11 @@ classdef (Abstract) ModelConfigBase < handle
             for i = 1:num_robots
                 if(strcmp(c.robotNamesList{i},robot_name))
                     cdpr_folder                 = char(cell_array{2}{i});
-                    c.modelFolderPath           = [c.root_folder, cdpr_folder];
-                    c.bodiesPropertiesFilepath    = [c.root_folder, cdpr_folder, char(cell_array{3}{i})];
-                    c.cablesPropertiesFilepath  = [c.root_folder, cdpr_folder, char(cell_array{4}{i})];
-                    c.trajectoriesFilename      = [c.root_folder, cdpr_folder, char(cell_array{5}{i})];
+                    c.modelFolderPath           = [c.root_folder_path, cdpr_folder];
+                    c.bodiesPropertiesFilepath    = [c.root_folder_path, cdpr_folder, char(cell_array{3}{i})];
+                    c.cablesPropertiesFilepath  = [c.root_folder_path, cdpr_folder, char(cell_array{4}{i})];
+                    c.trajectoriesFilename      = [c.root_folder_path, cdpr_folder, char(cell_array{5}{i})];
+                    c.operationalSpacesPropertiesFilepath    = [c.root_folder_path, cdpr_folder, char(cell_array{3}{i})];
                     fclose(fid);
                     status_flag = 0;
                     break;
@@ -132,16 +137,18 @@ classdef (Abstract) ModelConfigBase < handle
             end
 
             if model_mode == ModelModeType.COMPILED
-                [lib_name, compile_file_folder] = ModelConfigBase.ConstructCompiledLibraryName(obj.robotName, cable_set_id, operational_space_id);                
+                base_compile_folder = ModelConfigBase.GetDefaultCompiledFolder(obj.robotName);
+
+                % Check if a new compilation is required
+                [compile_bodies, compile_cables, compile_opspaces] = obj.checkRequireCompile(cable_set_id, operational_space_id, base_compile_folder);
                 
-                % First check if a new compilation is required
-                if(obj.check_require_compile(compile_file_folder))
+                if(compile_bodies || compile_cables || compile_opspaces)
                     CASPR_log.Info('Creating symbolic model');
                     % Create a symbolic model
                     sysModelSym = SystemModel.LoadXmlObj(obj.robotName, bodies_xmlobj, cable_set_id, cableset_xmlobj, operational_space_id, op_space_set_xmlobj, ModelModeType.SYMBOLIC, model_options);
                     CASPR_log.Info('Compiling symbolic model');
                     % Do the .m compile
-                    sysModelSym.compile(lib_name, compile_file_folder);
+                    sysModelSym.compile(base_compile_folder, obj);
                 end
                 sysModel = SystemModel.LoadXmlObj(obj.robotName, bodies_xmlobj, cable_set_id, cableset_xmlobj, operational_space_id, op_space_set_xmlobj, ModelModeType.COMPILED, model_options);
             else
@@ -185,6 +192,79 @@ classdef (Abstract) ModelConfigBase < handle
                 trajectories_str = GUIOperations.XmlObj2StringCellArray(obj.trajectoriesXmlObj.getElementsByTagName('operational_trajectories').item(0).getChildNodes,'id');
             else
                 trajectories_str = {};
+            end
+        end
+        
+        function [compile_bodies, compile_cables, compile_opspaces] = checkRequireCompile(obj, cableset_id, opspace_id, base_folder)
+            compile_bodies_dtstamp_file = [base_folder, '\', obj.COMPILE_RECORD_BODIES_FILENAME];
+            compile_cables_dtstamp_file = [base_folder, '\', obj.COMPILE_RECORD_CABLES_FILENAME];
+            compile_opspaces_dtstamp_file = [base_folder, '\', obj.COMPILE_RECORD_OPERATIONAL_SPACES_FILENAME];
+            
+            [~, ~, ~, ~, bodies_folder, cableset_folder, opset_folder, ~, ~, ~] = ModelConfigBase.ConstructCompiledLibraryNames(obj.robotName, cableset_id, opspace_id, base_folder);
+            
+            % Get datetime of last modified from the bodies.xml and
+            % cables.xml
+            bodyfile = dir(obj.bodiesPropertiesFilepath);
+            opspacefile = dir(obj.operationalSpacesPropertiesFilepath);
+            cablefile = dir(obj.cablesPropertiesFilepath);
+            
+            % Get current datetime and timezone information
+            curr_date = datetime('now', 'TimeZone', 'local');
+            
+            compile_bodies = false;
+            compile_cables = false;
+            compile_opspaces = false;
+            
+            % Check if the bodies folder should be compiled
+            if (~exist(compile_bodies_dtstamp_file, 'file') || ~exist(bodies_folder, 'dir'))
+                compile_bodies = true;
+                compile_cables = true;
+                compile_opspaces = true;
+            else
+                [datetime_out, timezone] = ModelConfigBase.GetCompiledDatetime(compile_bodies_dtstamp_file);
+                % If the timezone from file is not the system, maybe a change
+                % in system times occured, recompile anyway for safety
+                if (curr_date.TimeZone ~= timezone)
+                    compile_bodies = true;
+                    compile_cables = true;
+                    compile_opspaces = true;
+                elseif (bodyfile.date > datetime_out)
+                    compile_bodies = true;
+                    compile_cables = true;
+                    compile_opspaces = true;
+                end
+            end
+            
+            % Check if the cables folder should be compiled
+            if (~exist(compile_cables_dtstamp_file, 'file') || ~exist(cableset_folder, 'dir'))
+                compile_cables = true;
+            else
+                [datetime_out, timezone] = ModelConfigBase.GetCompiledDatetime(compile_cables_dtstamp_file);
+                % If the timezone from file is not the system, maybe a change
+                % in system times occured, recompile anyway for safety
+                if (curr_date.TimeZone ~= timezone)
+                    compile_cables = true;
+                elseif (cablefile.date > datetime_out)
+                    compile_cables = true;
+                end
+            end
+            
+            % Check if the operational spaces folder should be compiled
+            if (~isempty(opspace_id))
+                if (~exist(compile_opspaces_dtstamp_file, 'file') || ~exist(opset_folder, 'dir'))
+                    compile_opspaces = true;
+                else
+                    [datetime_out, timezone] = ModelConfigBase.GetCompiledDatetime(compile_opspaces_dtstamp_file);
+                    % If the timezone from file is not the system, maybe a change
+                    % in system times occured, recompile anyway for safety
+                    if (curr_date.TimeZone ~= timezone)
+                        compile_opspaces = true;
+                    elseif (opspacefile.date > datetime_out)
+                        compile_opspaces = true;
+                    end
+                end
+            else
+                compile_opspaces = false;
             end
         end
     end
@@ -237,63 +317,81 @@ classdef (Abstract) ModelConfigBase < handle
             CASPR_log.Assert(~isempty(v), sprintf('Id ''%s'' does not exist in the bodies XML file', id));
         end
         
-        function val = check_require_compile(obj, compile_file_folder)
-            val = false;
-            if (~exist([compile_file_folder, '\', obj.COMPILE_RECORD_FILENAME], 'file'))
-                val = true;
-                return;
-            end
-            % Get data from the compiled record file
-            fid = fopen([compile_file_folder, '\', obj.COMPILE_RECORD_FILENAME], 'r');
-            line = fgetl(fid);
-            fclose(fid);
-            split_str = strsplit(line, ',');
-            id_str = split_str{1};
-            compiled_date = datetime(split_str{2});
-            timezone_str = split_str{3};
-            CASPR_log.Assert(id_str == 'compiledtime', 'Invalid compiled record file');
-            
-            % Get current datetime and timezone information
-            curr_date = datetime('now', 'TimeZone', 'local');
-            
-            % If the timezone from file is not the system, maybe a change
-            % in system times occured, recompile anyway for safety
-            if (curr_date.TimeZone ~= timezone_str)
-                val = true;
-                return;
-            end
-            
-            % Get datetime of last modified from the bodies.xml and
-            % cables.xml
-            bodyfile = dir(obj.bodiesPropertiesFilepath);
-            cablefile = dir(obj.cablesPropertiesFilepath);
-            
-            if (bodyfile.date > compiled_date || cablefile.date > compiled_date)
-                val = true;
-                return;
-            end
-        end
+        
     end
     
     methods (Static)
-        function [library_name, compile_file_folder] = ConstructCompiledLibraryName(robot_name, cable_set_id, op_space_id)
-            library_name = [robot_name, '_', cable_set_id];
-            if (~isempty(op_space_id))
-                library_name = [library_name, '_', op_space_id];
-            end
-            library_name = strrep(library_name, ' ', '_');
-            library_name = strrep(library_name, '-', '_');
+        function [bodies_lib_name, cableset_lib_name, opset_lib_name, ...
+                cpp_lib_name, bodies_folder, cableset_folder, opset_folder, cpp_folder, ...
+                cables_base_folder, opset_base_folder] = ConstructCompiledLibraryNames(robot_name, cable_set_id, op_space_id, base_folder)
             
-            model_config_path = CASPR_configuration.LoadModelConfigPath();
-            compile_file_folder = [model_config_path, '\tmp_compilations\', library_name];
+            if (nargin < 4)
+                base_folder = ModelConfigBase.GetDefaultCompiledFolder(robot_name);
+            end
+            
+            % First process the invalid or unwanted characters
+            robot_name = strrep(strrep(robot_name, ' ', '_'), '-', '_');
+            cable_set_id = strrep(strrep(cable_set_id, ' ', '_'), '-', '_');
+            
+            if (~isempty(op_space_id))
+                op_space_id = strrep(strrep(op_space_id, ' ', '_'), '-', '_');
+            end               
+            
+            bodies_lib_name = robot_name;
+            cableset_lib_name = [robot_name, '_', cable_set_id];
+            cpp_lib_name = [robot_name, '_', cable_set_id];
+            
+            bodies_folder = [base_folder, '\m\Bodies'];
+            cables_base_folder = [base_folder, '\m\Cables'];
+            cableset_folder = [cables_base_folder, '\', cable_set_id];
+            cpp_folder = [base_folder, '\cpp\', cableset_lib_name];
+            
+            if (~isempty(op_space_id))
+                opset_lib_name = [robot_name, '_', op_space_id];
+                cpp_lib_name = [cpp_lib_name, '_', op_space_id];
+                opset_base_folder = [base_folder, '\m\OperationalSpaces'];
+                opset_folder = [opset_base_folder, '\', op_space_id];
+            else 
+                opset_lib_name = '';
+                opset_base_folder = '';
+                opset_folder = '';
+            end
+            
         end
         
-        
-        function WriteCompileRecordFile(compile_file_folder)
-            fid = fopen([compile_file_folder, '\', ModelConfigBase.COMPILE_RECORD_FILENAME], 'w');
+        function WriteCompileBodiesRecordFile(compile_file_folder)
+            fid = fopen([compile_file_folder, '\', ModelConfigBase.COMPILE_RECORD_BODIES_FILENAME], 'w');
             dt = datetime('now', 'TimeZone', 'local');
             fprintf(fid, ['compiledtime,', datestr(dt), ',', dt.TimeZone]);
             fclose(fid);
+        end
+        
+        function WriteCompileCablesRecordFile(compile_file_folder)
+            fid = fopen([compile_file_folder, '\', ModelConfigBase.COMPILE_RECORD_CABLES_FILENAME], 'w');
+            dt = datetime('now', 'TimeZone', 'local');
+            fprintf(fid, ['compiledtime,', datestr(dt), ',', dt.TimeZone]);
+            fclose(fid);
+        end
+        
+        function [datetime_out, timezone] = GetCompiledDatetime(file)
+            CASPR_log.Assert(exist(file, 'file'), 'Compiled timestamp file does not exist');
+            try
+                % Get data from the compiled record file
+                fid = fopen(file, 'r');
+                line = fgetl(fid);
+                fclose(fid);
+                split_str = strsplit(line, ',');
+                id_str = split_str{1};
+                datetime_out = datetime(split_str{2});
+                timezone = split_str{3};
+                CASPR_log.Assert(id_str == 'compiledtime', 'Invalid compiled record file');
+            catch
+                CASPR_log.Error('Invalid compiled record file');
+            end
+        end
+        
+        function path = GetDefaultCompiledFolder(robot_name)
+            path = [CASPR_configuration.LoadModelConfigPath(), '\tmp_compilations\', robot_name];
         end
     end
 end

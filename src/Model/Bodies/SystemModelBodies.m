@@ -426,7 +426,7 @@ classdef SystemModelBodies < handle
             
             % The dynamics variables (both joint and operational spaces)
             % Hence must run after the update_operational_space()
-            if(obj.modelOptions.isComputeDynamics)
+            if(obj.modelOptions.isComputeDynamics || obj.modelMode ~= ModelModeType.DEFAULT)
                 obj.update_dynamics();
             end
                         
@@ -471,15 +471,16 @@ classdef SystemModelBodies < handle
                 end
             end
             
-            
             obj.S = obj.compiled_S_fn(q, q_dot, q_ddot, w_ext);
             obj.S_dot = obj.compiled_S_dot_fn(q, q_dot, q_ddot, w_ext);
-            obj.W = obj.P*obj.S;            
+            
+            obj.W = obj.P*obj.S;      
+            
             obj.x_ddot = obj.compiled_x_ddot_fn(q, q_dot, q_ddot, w_ext);
             obj.x_dot = obj.compiled_x_dot_fn(q, q_dot, q_ddot, w_ext);
             
             % Update class properties by calling the compiled functions
-            if obj.modelOptions.isComputeDynamics             
+            if obj.modelOptions.isComputeDynamics
                 obj.C_b = obj.compiled_C_b_fn(q, q_dot, q_ddot, w_ext);
                 obj.G_b = obj.compiled_G_b_fn(q, q_dot, q_ddot, w_ext);
                 obj.M_b = obj.compiled_M_b_fn(q, q_dot, q_ddot, w_ext);
