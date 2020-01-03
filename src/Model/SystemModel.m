@@ -139,7 +139,7 @@ classdef SystemModel < handle
             end
             
             b               =   SystemModel(robot_name, cable_set_id, op_space_id, model_mode, model_options, cableset_lib_name);
-            b.bodyModel     =   SystemModelBodies.LoadXmlObj(body_xmlobj, op_space_set_xmlobj, b.modelMode, model_options, bodies_lib_name);
+            b.bodyModel     =   SystemModelBodies.LoadXmlObj(body_xmlobj, op_space_set_xmlobj, b.modelMode, model_options, bodies_lib_name, opset_lib_name);
             b.cableModel    =   SystemModelCables.LoadXmlObj(cable_xmlobj, b.bodyModel, b.modelMode, model_options, cableset_lib_name);
                 
             if ((model_mode == ModelModeType.DEFAULT) || (model_mode == ModelModeType.COMPILED))
@@ -512,7 +512,7 @@ classdef SystemModel < handle
             
             [b_lib_name, c_lib_name, op_lib_name, cpp_lib_name, b_folder, c_folder, op_folder, cpp_folder, cables_base_folder, opset_base_folder] = ModelConfigBase.ConstructCompiledLibraryNames(obj.robotName, obj.cableSetName, obj.operationalSpaceName, base_compile_folder);
             
-            [compile_bodies, compile_cables, compile_opspaces] = model_config.checkRequireCompile(obj.cableSetName, obj.operationalSpaceName, base_compile_folder)
+            [compile_bodies, compile_cables, compile_opspaces] = model_config.checkRequireCompile(obj.cableSetName, obj.operationalSpaceName, base_compile_folder);
             
             if (exist(base_compile_folder, 'dir'))
                 rmpath(genpath(base_compile_folder));
@@ -523,10 +523,8 @@ classdef SystemModel < handle
                     rmdir(base_compile_folder, 's');
                 end
                 mkdir(b_folder);
-
                 CASPR_log.Info('Start Body Compilations...');
-                obj.bodyModel.compile(b_folder, b_lib_name);
-                
+                obj.bodyModel.compileBodies(b_folder, b_lib_name);                
                 % Record the timestamp file
                 ModelConfigBase.WriteCompileBodiesRecordFile(base_compile_folder);
             end
@@ -535,13 +533,22 @@ classdef SystemModel < handle
                 if (exist(c_folder, 'dir'))
                     rmdir(cables_base_folder, 's');
                 end
-                mkdir(c_folder);
-                
+                mkdir(c_folder);                
                 CASPR_log.Info('Start Body Compilations...');
-                obj.cableModel.compile(c_folder, obj.bodyModel, c_lib_name);
-                
+                obj.cableModel.compile(c_folder, obj.bodyModel, c_lib_name);                
                 % Record the timestamp file
                 ModelConfigBase.WriteCompileCablesRecordFile(base_compile_folder);
+            end
+            
+            if (compile_opspaces)
+                if (exist(op_folder, 'dir'))
+                    rmdir(opset_base_folder, 's');
+                end
+                mkdir(op_folder);                
+                CASPR_log.Info('Start Body Compilations...');
+                obj.bodyModel.compileOperationalSpace(op_folder, op_lib_name);                
+                % Record the timestamp file
+                ModelConfigBase.WriteCompileOperationalSpaceRecordFile(base_compile_folder);
             end
             
             % Add the compiled files to the path

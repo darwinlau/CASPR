@@ -112,11 +112,12 @@ classdef SystemModelBodies < handle
         % Flags
         modelMode                           % The model mode
         modelOptions                        % ModelOptions object storing options for the model
-        
     end
     
     properties (Access = private)
-        compiled_lib_name; 
+        compiled_bodies_lib_name; 
+        compiled_operational_space_lib_name; 
+        
         % Function handles for compiled update mode        
         compiled_R_0ks_fn;
         compiled_r_OPs_fn;
@@ -169,15 +170,7 @@ classdef SystemModelBodies < handle
         % Constructor for the class SystemModelBodies.  This determines the
         % numbers of degrees of freedom as well as initialises the
         % matrices.
-        function b = SystemModelBodies(bodies, model_mode, model_options, compiled_lib_name)
-            if (model_mode == ModelModeType.COMPILED)
-                if (nargin < 4 || isempty(compiled_lib_name))
-                    CASPR_log.Error('Library name must be supplied with COMPILED mode');
-                else 
-                    b.compiled_lib_name = compiled_lib_name;
-                end
-            end
-            
+        function b = SystemModelBodies(bodies, model_mode, model_options, bodies_lib_name, opset_lib_name)            
             num_dofs = 0;
             num_dof_vars = 0;
             num_operational_dofs = 0;
@@ -228,9 +221,35 @@ classdef SystemModelBodies < handle
             % Connects the objects of the system and create the
             % connectivity and body path graphs
             b.formConnectiveMap();
-            b.createMassInertiaMatrix();  
-            
+            b.createMassInertiaMatrix(); 
             b.set_update_fns(); % Sets the modelMode property and update function handle
+            
+            
+            if (model_mode == ModelModeType.COMPILED)
+                if (nargin < 4 || isempty(bodies_lib_name))
+                    CASPR_log.Error('Library name must be supplied with COMPILED mode');
+                else 
+                    b.compiled_bodies_lib_name = bodies_lib_name;
+                    b.compiled_operational_space_lib_name = opset_lib_name;
+                    
+                    b.compiled_R_0ks_fn = str2func([b.compiled_bodies_lib_name, '_compiled_R_0ks']);
+                    b.compiled_r_OPs_fn = str2func([b.compiled_bodies_lib_name, '_compiled_r_OPs']);
+                    b.compiled_P_fns = cell(b.numLinks, b.numLinks);
+                    for k = 1:b.numLinks
+                        for a = 1:k
+                            b.compiled_P_fns{k,a} = str2func(sprintf('%s_compiled_P_%d_%d', b.compiled_bodies_lib_name, k, a));
+                        end
+                    end
+                    b.compiled_S_fn = str2func([b.compiled_bodies_lib_name, '_compiled_S']);
+                    b.compiled_S_dot_fn = str2func([b.compiled_bodies_lib_name, '_compiled_S_dot']);
+                    b.compiled_x_ddot_fn = str2func([b.compiled_bodies_lib_name, '_compiled_x_ddot']);
+                    b.compiled_x_dot_fn = str2func([b.compiled_bodies_lib_name, '_compiled_x_dot']);
+                    
+                    b.compiled_C_b_fn = str2func([b.compiled_bodies_lib_name, '_compiled_C_b']);
+                    b.compiled_G_b_fn = str2func([b.compiled_bodies_lib_name, '_compiled_G_b']);
+                    b.compiled_M_b_fn = str2func([b.compiled_bodies_lib_name, '_compiled_M_b']);
+                end
+            end
         end
 
         % Update the kinematics of the body model for the entire
@@ -496,7 +515,7 @@ classdef SystemModelBodies < handle
                 obj.y = obj.compiled_y_fn(q, q_dot, q_ddot, w_ext);
                 obj.y_dot = obj.compiled_y_dot_fn(q, q_dot, q_ddot, w_ext);       
                 obj.y_ddot = obj.compiled_y_ddot_fn(q, q_dot, q_ddot, w_ext);         
-            end               
+            end    
         end
                         
         % Supporting function to connect all of the parent and child bodies
@@ -765,7 +784,6 @@ classdef SystemModelBodies < handle
             obj.operationalSpaceBodyIndices = zeros(1, num_operationals);
             obj.yIndexInit = zeros(1, num_operationals);
             
-            
             num_operational_dofs = 0;
             
             % Creates all of the operational spaces first first
@@ -800,6 +818,14 @@ classdef SystemModelBodies < handle
                 n_y = obj.bodies{index}.numOperationalDofs;
                 obj.T(l:l+n_y-1,6*index-5:6*index) = obj.bodies{index}.operationalSpace.getSelectionMatrix();
                 l = l + n_y;
+            end
+            
+            if (obj.modelMode == ModelModeType.COMPILED)
+                obj.compiled_J_fn = str2func([obj.compiled_operational_space_lib_name, '_compiled_J']);
+                obj.compiled_J_dot_fn = str2func([obj.compiled_operational_space_lib_name, '_compiled_J_dot']);
+                obj.compiled_y_fn = str2func([obj.compiled_operational_space_lib_name, '_compiled_y']);
+                obj.compiled_y_dot_fn = str2func([obj.compiled_operational_space_lib_name, '_compiled_y_dot']);
+                obj.compiled_y_ddot_fn = str2func([obj.compiled_operational_space_lib_name, '_compiled_y_ddot']);
             end
         end
 
@@ -1024,7 +1050,7 @@ classdef SystemModelBodies < handle
         % Compiling body variables under COMPILED mode
         % - Symbolic Variables are compiled into .m files and saved to the
         % path
-        function compile(obj, path, lib_name)  
+        function compileBodies(obj, path, lib_name)
             CASPR_log.Assert(obj.modelMode == ModelModeType.SYMBOLIC, 'Can only compile a symbolic model');
             % Jacobians
             CASPR_log.Info('Compiling S and S_dot...');
@@ -1047,11 +1073,6 @@ classdef SystemModelBodies < handle
             CASPR_log.Info('Compiling R_0ks...');
             matlabFunction(obj.R_0ks, 'File', strcat(path, '/', lib_name, '_compiled_R_0ks'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});
             
-%             for k = 1:obj.numLinks
-%                 CASPR_log.Info(sprintf('- Compiling R_0_%d...', k));
-%                 matlabFunction(obj.bodies{k}.R_0k, 'File', sprintf('%s/R_0k/%s_compiled_R_0_%d', path, lib_name, k), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});
-%             end
-            
 %                 obj.R_0ks(:,3*k-2:3*k) = obj.bodies{k}.R_0k;
 %                 obj.r_OPs(:,k) = obj.bodies{k}.r_OP;
 %                 obj.r_Gs(:,k) = obj.bodies{k}.r_G;
@@ -1069,7 +1090,7 @@ classdef SystemModelBodies < handle
             matlabFunction(obj.x_ddot, 'File', strcat(path, '/', lib_name, '_compiled_x_ddot'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
             
             % Dynamics
-            if(obj.modelOptions.isComputeDynamics)
+            %if(obj.modelOptions.isComputeDynamics)
                 CASPR_log.Info('Compiling Dynamics Variables...'); 
                 CASPR_log.Info('- Compiling M_b...'); 
                 matlabFunction(obj.M_b, 'File', strcat(path, '/', lib_name, '_compiled_M_b'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
@@ -1081,17 +1102,21 @@ classdef SystemModelBodies < handle
 %                 matlabFunction(obj.C, 'File', strcat(path, '/', lib_name, '_compiled_C'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
 %                 matlabFunction(obj.G, 'File', strcat(path, '/', lib_name, '_compiled_G'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
 %                 matlabFunction(inv(obj.M), 'File', strcat(path, '/', lib_name, '_compiled_Minv'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
-            end            
+            %end            
             
+        end
+        
+        function compileOperationalSpace(obj, path, lib_name)
+            CASPR_log.Assert(obj.modelMode == ModelModeType.SYMBOLIC, 'Can only compile a symbolic model');
             % Operational space
-            if(obj.isComputeOperationalSpace)
+            %if(obj.isComputeOperationalSpace)
                 CASPR_log.Info('- Compiling Operational Space Variables...');
                 matlabFunction(obj.y, 'File', strcat(path, '/', lib_name, '_compiled_y'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});                
                 matlabFunction(obj.y_dot, 'File', strcat(path, '/', lib_name, '_compiled_y_dot'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});                
                 matlabFunction(obj.y_ddot, 'File', strcat(path, '/', lib_name, '_compiled_y_ddot'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});                
                 matlabFunction(obj.J, 'File', strcat(path, '/', lib_name, '_compiled_J'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});
                 matlabFunction(obj.J_dot, 'File', strcat(path, '/', lib_name, '_compiled_J_dot'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});
-            end
+            %end
         end
     end
 
@@ -1585,227 +1610,13 @@ classdef SystemModelBodies < handle
         end
                
         
-%         % Update function for preparation of compilation
-%         % - Symbolic expressions are calculated for the variables
-%         % - Simplification takes a long time, but it makes compilation
-%         % easier and more chance to be successfully done
-%         function symbolic_update(obj)
-%             obj.q = sym('q',[obj.numDofs,1]); 
-%             obj.q_dot = sym('q_d',[obj.numDofs,1]);
-%             obj.q_ddot = sym('q_dd',[obj.numDofs,1]); 
-%             obj.W_e = sym('W_e',[obj.numDofs,1]);   
-% 
-%             CASPR_log.Assert(obj.modelMode == ModelModeType.SYMBOLIC);
-%             
-%             % Update each body first
-%             index_vars = 1;
-%             index_dofs = 1;
-%             for k = 1:obj.numLinks
-%                 q_k = obj.q(index_vars:index_vars+obj.bodies{k}.joint.numVars-1);
-%                 q_dot_k = obj.q_dot(index_dofs:index_dofs+obj.bodies{k}.joint.numDofs-1);
-%                 q_ddot_k = obj.q_ddot(index_dofs:index_dofs+obj.bodies{k}.joint.numDofs-1);
-%                 obj.bodies{k}.update(q_k, q_dot_k, q_ddot_k);
-%                 index_vars = index_vars + obj.bodies{k}.joint.numVars;
-%                 index_dofs = index_dofs + obj.bodies{k}.joint.numDofs;
-%             end
-%             
-%             % Now the global system updates
-%             % Set bodies kinematics (rotation matrices)
-%             CASPR_log.Info('Body Kinematics: ');
-%             obj.R_0ks = MatrixOperations.Initialise([3, 3*obj.numLinks], true);
-%             obj.r_OPs = MatrixOperations.Initialise([3, obj.numLinks], true);
-%             obj.r_Gs  = MatrixOperations.Initialise([3, obj.numLinks], false);
-%             obj.r_Pes = MatrixOperations.Initialise([3, obj.numLinks], false);
-%             for k = 1:obj.numLinks
-%                 % Displaying the update status of the k-th link
-%                 CASPR_log.Info(['- k: ',num2str(k)]);
-%                 parent_link_num = obj.bodies{k}.parentLinkId;
-%                 CASPR_log.Assert(parent_link_num < k, 'Problem with numbering of links with parent and child');
-% 
-%                 % Determine rotation matrix
-%                 % Determine joint location
-%                 if parent_link_num > 0                    
-%                     parent_R_0k = obj.bodies{parent_link_num}.R_0k;
-%                     R_pe = obj.bodies{k}.joint.R_pe;       
-%                     % Simplifying internal elements of big rotation
-%                     % matrices
-%                     parent_R_0k = simplify(parent_R_0k, 'Step', k*20);
-%                     try
-%                         R_pe = simplify(R_pe, 'Step', k*20);
-%                     catch
-%                     end
-%                     obj.bodies{k}.R_0k = parent_R_0k*R_pe;                     
-%                     obj.bodies{k}.R_0k = simplify(obj.bodies{k}.R_0k, 'Step', k*20);
-%                     obj.bodies{k}.r_OP = R_pe.'*(obj.bodies{parent_link_num}.r_OP + obj.bodies{k}.r_Parent + obj.bodies{k}.joint.r_rel);
-%                 else                    
-%                     obj.bodies{k}.R_0k = obj.bodies{k}.joint.R_pe;
-%                     obj.bodies{k}.r_OP = obj.bodies{k}.joint.R_pe.'*(obj.bodies{k}.r_Parent + obj.bodies{k}.joint.r_rel);
-%                     obj.bodies{k}.R_0k = simplify(obj.bodies{k}.R_0k, 'Step', k*20);
-%                 end
-%                 % Determine absolute position of COG
-%                 obj.bodies{k}.r_OG  = obj.bodies{k}.r_OP + obj.bodies{k}.r_G;
-%                 % Determine absolute position of link's ending position
-%                 obj.bodies{k}.r_OPe = obj.bodies{k}.r_OP + obj.bodies{k}.r_Pe;
-%                 % Determine absolute position of the operational space
-%                 if(~isempty(obj.bodies{k}.operationalSpace))
-%                     obj.bodies{k}.r_OY  = obj.bodies{k}.r_OP + obj.bodies{k}.r_y;
-%                 end                
-%                 % Store information in matrices
-%                 obj.R_0ks(:,3*k-2:3*k) = obj.bodies{k}.R_0k;
-%                 obj.r_OPs(:,k) = obj.bodies{k}.r_OP;
-%                 obj.r_Gs(:,k) = obj.bodies{k}.r_G;
-%                 obj.r_Pes(:,k) = obj.bodies{k}.r_Pe;
-%             end
-% 
-%             % Set S (joint state matrix) and S_dot           
-%             CASPR_log.Info('Calculating S...');               
-%             CASPR_log.Info('Calculating S_dot...');  
-%             index_dofs = 1;
-%             obj.S = MatrixOperations.Initialise([6*obj.numLinks,obj.numDofs], true);
-%             obj.S_dot = MatrixOperations.Initialise([6*obj.numLinks,obj.numDofs],true);
-%             for k = 1:obj.numLinks                
-%                 obj.S(6*k-5:6*k, index_dofs:index_dofs+obj.bodies{k}.joint.numDofs-1) = obj.bodies{k}.joint.S;
-%                 obj.S_dot(6*k-5:6*k, index_dofs:index_dofs+obj.bodies{k}.joint.numDofs-1) = obj.bodies{k}.joint.S_dot;
-%                 index_dofs = index_dofs + obj.bodies{k}.joint.numDofs;
-%             end            
-%             
-%             % Set P
-%             CASPR_log.Info('Calculating P...'); 
-%             obj.P = MatrixOperations.Initialise([6*obj.numLinks,6*obj.numLinks], true);
-%             for k = 1:obj.numLinks        
-%                 % As k increases, the rotation matrices get more complex
-%                 % Thus, need more simplification steps
-%                 body_k = obj.bodies{k};
-%                 k_R_0k = body_k.R_0k;
-%                 k_R_0k = simplify(k_R_0k, 'Step', k*20);             
-%                 
-%                 for a = 1:k
-%                     CASPR_log.Info(['- k: ',num2str(k),' -a: ',num2str(a)']);
-%                     body_a = obj.bodies{a}; 
-%                     a_R_0k = body_a.R_0k;
-%                     a_R_0k = simplify(a_R_0k, 'Step', a*20); 
-%                     
-%                     R_ka = k_R_0k.'*a_R_0k;                      
-%                     R_ka = simplify(R_ka, 'Step', k*20);
-%                     
-%                     Pak_1 = R_ka*body_a.joint.R_pe.';
-%                     r_OP = body_a.r_OP;
-%                     r_OG = body_k.r_OG;                   
-%                     r_OP = simplify(r_OP, 'Step', k*20);
-%                     r_OG = simplify(r_OG, 'Step', k*20);  
-%                     
-%                     Pak_2_1 = MatrixOperations.SkewSymmetric(-r_OP + R_ka.'*r_OG);
-% 
-%                     Pak_2 = -R_ka*Pak_2_1;                 
-%                         
-%                     Pak_1 = simplify(Pak_1);                        
-%                     Pak_2 = simplify(Pak_2);                        
-%                     
-%                     Pak = obj.bodiesPathGraph(a,k)*[Pak_1 Pak_2; ...
-%                         zeros(3,3) R_ka]; 
-%                     
-%                     obj.P(6*k-5:6*k, 6*a-5:6*a) = Pak;                    
-%                 end
-%             end        
-%             
-%             % W = P*S              
-%             CASPR_log.Info('Calculating W...');            
-%             obj.W = obj.P*obj.S;             
-%        
-%             % Determine x_dot              
-%             CASPR_log.Info('Calculating x_dot...');            
-%             obj.x_dot = obj.W*obj.q_dot;          
-%             
-%             % Extract absolute velocities
-%             for k = 1:obj.numLinks
-%                 obj.bodies{k}.v_OG = obj.x_dot(6*k-5:6*k-3);
-%                 obj.bodies{k}.w = obj.x_dot(6*k-2:6*k);
-%             end
-%             
-%             % C_a
-%             CASPR_log.Info('Calculating C_a...');            
-%             ang_mat = MatrixOperations.Initialise([6*obj.numLinks,6*obj.numLinks], true);
-%             for k = 1:obj.numLinks
-%                 kp = obj.bodies{k}.parentLinkId;
-%                 if (kp > 0)
-%                     w_kp = obj.bodies{kp}.w;
-%                 else
-%                     w_kp = zeros(3,1);
-%                 end
-%                 w_k = obj.bodies{k}.w;                
-%                 w_k = simplify(w_k);                             
-%                 ang_mat(6*k-5:6*k, 6*k-5:6*k) = [2*MatrixOperations.SkewSymmetric(w_kp) zeros(3,3); zeros(3,3) MatrixOperations.SkewSymmetric(w_k)];
-%             end
-% 
-%             obj.C_a = obj.P*obj.S_dot*obj.q_dot + obj.P*ang_mat*obj.S*obj.q_dot;
-%             for k = 1:obj.numLinks
-%                 for a = 1:k
-%                     ap = obj.bodies{a}.parentLinkId;
-%                     if (ap > 0 && obj.bodiesPathGraph(a,k))
-%                         obj.C_a(6*k-5:6*k-3) = obj.C_a(6*k-5:6*k-3) + obj.bodies{k}.R_0k.'*obj.bodies{ap}.R_0k*cross(obj.bodies{ap}.w, cross(obj.bodies{ap}.w, obj.bodies{a}.r_Parent + obj.bodies{a}.joint.r_rel));
-%                     end
-%                 end
-%                 obj.C_a(6*k-5:6*k-3) = obj.C_a(6*k-5:6*k-3) + cross(obj.bodies{k}.w, cross(obj.bodies{k}.w, obj.bodies{k}.r_G));
-%             end 
-%                 
-%             obj.x_ddot = obj.P*obj.S*obj.q_ddot + obj.C_a;           
-%             
-%             % Extract absolute accelerations
-%             for k = 1:obj.numLinks
-%                 obj.bodies{k}.a_OG = obj.x_ddot(6*k-5:6*k-3);
-%                 obj.bodies{k}.w_dot = obj.x_ddot(6*k-2:6*k);
-%             end                     
-%             
-%             % The operational space variables
-%             if(obj.occupied.operational_space)
-%                 obj.updateOperationalSpace();                      
-%             end
-% 
-%             % The dynamics variables
-%             if(obj.occupied.dynamics)
-%                 obj.updateDynamics();
-%             end
-%             
-%             % The Hessian Variables
-%             if(obj.occupied.hessian)
-%                 obj.updateHessian();
-%             end  
-%         
-%             % The linearisation variables
-%             if(obj.occupied.linearisation)
-%                 obj.updateLinearisation();
-%             end    
-%         end
-        
         % set update function
         function set_update_fns(obj) 
             CASPR_log.Assert(~isempty(obj.modelMode), 'The model mode should never empty');
             if obj.modelMode == ModelModeType.DEFAULT || obj.modelMode == ModelModeType.SYMBOLIC
                 obj.update = @obj.defaultUpdate;
             elseif obj.modelMode == ModelModeType.COMPILED
-                obj.update = @obj.compiledUpdate;
-                obj.compiled_R_0ks_fn = str2func([obj.compiled_lib_name, '_compiled_R_0ks']);
-                obj.compiled_r_OPs_fn = str2func([obj.compiled_lib_name, '_compiled_r_OPs']);
-                obj.compiled_P_fns = cell(obj.numLinks, obj.numLinks);
-                for k = 1:obj.numLinks
-                    for a = 1:k
-                        obj.compiled_P_fns{k,a} = str2func(sprintf('%s_compiled_P_%d_%d', obj.compiled_lib_name, k, a));
-                    end
-                end
-                obj.compiled_S_fn = str2func([obj.compiled_lib_name, '_compiled_S']);
-                obj.compiled_S_dot_fn = str2func([obj.compiled_lib_name, '_compiled_S_dot']);
-                obj.compiled_x_ddot_fn = str2func([obj.compiled_lib_name, '_compiled_x_ddot']);
-                obj.compiled_x_dot_fn = str2func([obj.compiled_lib_name, '_compiled_x_dot']);
-
-                obj.compiled_C_b_fn = str2func([obj.compiled_lib_name, '_compiled_C_b']);
-                obj.compiled_G_b_fn = str2func([obj.compiled_lib_name, '_compiled_G_b']);
-                obj.compiled_M_b_fn = str2func([obj.compiled_lib_name, '_compiled_M_b']);
-
-                obj.compiled_J_fn = str2func([obj.compiled_lib_name, '_compiled_J']);
-                obj.compiled_J_dot_fn = str2func([obj.compiled_lib_name, '_compiled_J_dot']);
-                obj.compiled_y_fn = str2func([obj.compiled_lib_name, '_compiled_y']);
-                obj.compiled_y_dot_fn = str2func([obj.compiled_lib_name, '_compiled_y_dot']);
-                obj.compiled_y_ddot_fn = str2func([obj.compiled_lib_name, '_compiled_y_ddot']);
+                obj.update = @obj.compiledUpdate;                
             else
                 CASPR_log.Error('Model mode does not exist');
             end
@@ -1814,23 +1625,19 @@ classdef SystemModelBodies < handle
 
     methods (Static)
         % Load the bodies xml object.
-        function b = LoadXmlObj(body_prop_xmlobj, op_space_set_xmlobj, model_mode, model_options, compiled_lib_name)
+        function b = LoadXmlObj(body_prop_xmlobj, op_space_set_xmlobj, model_mode, model_options, bodies_lib_name, opset_lib_name)
             % Load the body
             CASPR_log.Assert(strcmp(body_prop_xmlobj.getNodeName, 'links'), 'Root element should be <links>');
 
             allLinkItems = body_prop_xmlobj.getElementsByTagName('link_rigid');
-
             num_links = allLinkItems.getLength;
             links = cell(1,num_links);
-
             % Creates all of the links first
             for k = 1:num_links
                 % Java uses 0 indexing
                 currentLinkItem = allLinkItems.item(k-1);
-
                 num_k = str2double(currentLinkItem.getAttribute('num'));
                 CASPR_log.Assert(num_k == k, sprintf('Link number does not correspond to its order, order: %d, specified num: %d ', k, num_k));
-
                 type = char(currentLinkItem.getNodeName);
                 if (strcmp(type, 'link_rigid'))
                     links{k} = BodyModelRigid.LoadXmlObj(currentLinkItem);
@@ -1838,9 +1645,8 @@ classdef SystemModelBodies < handle
                     CASPRLogLevel.Print(sprintf('Unknown link type: %s', type),CASPRLogLevel.ERROR);
                 end
             end
-
             % Create the actual object to return
-            b = SystemModelBodies(links, model_mode, model_options, compiled_lib_name);
+            b = SystemModelBodies(links, model_mode, model_options, bodies_lib_name, opset_lib_name);
             if (~isempty(op_space_set_xmlobj))
                 b.load_operational_space_xml_obj(op_space_set_xmlobj);
             end

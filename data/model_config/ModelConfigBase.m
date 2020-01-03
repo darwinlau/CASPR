@@ -388,6 +388,13 @@ classdef (Abstract) ModelConfigBase < handle
             fclose(fid);
         end
         
+        function WriteCompileOperationalSpaceRecordFile(compile_file_folder)
+            fid = fopen([compile_file_folder, '\', ModelConfigBase.COMPILE_RECORD_OPERATIONAL_SPACES_FILENAME], 'w');
+            dt = datetime('now', 'TimeZone', 'local');
+            fprintf(fid, ['compiledtime,', datestr(dt), ',', dt.TimeZone]);
+            fclose(fid);
+        end
+        
         function [datetime_out, timezone] = GetCompiledDatetime(file)
             CASPR_log.Assert(exist(file, 'file'), 'Compiled timestamp file does not exist');
             try
