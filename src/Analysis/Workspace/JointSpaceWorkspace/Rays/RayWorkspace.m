@@ -16,6 +16,10 @@ classdef RayWorkspace < handle
         ray_node = []               % use intersected point as node
     end
     
+    properties(Hidden = true)
+        tolerance = 9;
+    end
+    
     methods
         function pw = RayWorkspace(model, grid)
             pw.model = model;
@@ -85,6 +89,8 @@ classdef RayWorkspace < handle
             fixed_axis = 1:obj.model.numDofs;
             fixed_axis(plot_axis) = [];
             node_list = fix(create_point_node_list(obj, conditions)*10^rounding_digit)/10^rounding_digit;
+%             node_list = obj.point_node.node_list; % use this if there are
+%             node_list already
             if ~isempty(fixed_variables)
                 plot_data_index = find(ismember(node_list(:,1 + fixed_axis),fixed_variables,'rows'));
             elseif size(plot_axis,2) == obj.model.numDofs
@@ -267,6 +273,9 @@ classdef RayWorkspace < handle
                     plane_A  = ray_A; plane_A(remove_index) = []; plane_A(end) = []; plane_A = cell2mat(plane_A);
                     compare_rays_index = find(ismember([rays_seg{:,end}],j));
                     checking_rays = rays_seg([find(ismember([rays_seg{:,end}],j))],1:end-1);
+                    if isempty(checking_rays)
+                        break;
+                    end
                     checking_rays(:,[rays_seg{i,end}+1 j+1]) = [];
                     co_planar_index = find(ismember(cell2mat(checking_rays(:,2:end)),plane_A,'rows'));
                     co_planar_rays = [co_planar_rays;rays_seg(cell2mat(checking_rays(co_planar_index,1)),:)];
@@ -296,6 +305,7 @@ classdef RayWorkspace < handle
                 
             end
             count_time = 0;c_2 = 0; c_2 = tic;
+            ref_intersected_point = round(ref_intersected_point,obj.tolerance)
             unique_points = unique(ref_intersected_point,'rows');
             node_list = cell(size(unique_points,1),size(unique_points,2)+obj.model.numDofs);%[node_number,intersected_point,ray_number]
             for i = 1:size(unique_points,1)
