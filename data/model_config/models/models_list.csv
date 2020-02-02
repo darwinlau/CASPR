@@ -1,3 +1,4 @@
+Example point mass XZ,/examples/Example_point_XZ/,Example_point_XZ_bodies.xml,Example_point_XZ_cables.xml,Example_point_XZ_trajectories.xml,Example_point_XZ_operational_spaces.xml
 Example planar XY,/examples/Example_planar_XY/,Example_planar_XY_bodies.xml,Example_planar_XY_cables.xml,Example_planar_XY_trajectories.xml,Example_planar_XY_operational_spaces.xml
 Example spatial,/examples/Example_spatial/,Example_spatial_bodies.xml,Example_spatial_cables.xml,Example_spatial_trajectories.xml,Example_spatial_operational_spaces.xml
 Example spherical,/examples/Example_spherical/,Example_spherical_bodies.xml,Example_spherical_cables.xml,Example_spherical_trajectories.xml,Example_spherical_operational_spaces.xml
