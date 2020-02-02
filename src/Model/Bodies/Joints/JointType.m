@@ -14,6 +14,7 @@ classdef JointType
         U_XZ                    % Universal with xz-euler
         P_X                     % Translational X
         P_XY                    % Translational joint in XY plane
+        P_XZ                    % Translational joint in XZ plane
         P_AXIS                  % Translational joint in defined axis
         PLANAR_XY               % Planar in XY plane
         PLANAR_YZ               % Planar in YZ plane

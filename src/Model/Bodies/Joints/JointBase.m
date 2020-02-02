@@ -186,12 +186,14 @@ classdef (Abstract) JointBase < handle
                     j = UniversalXZ;
                 case JointType.P_X
                     j = PrismaticX;
-                case JointType.P_XY
-                    j = PrismaticXY;
                 case JointType.P_AXIS
                     j = PrismaticAxis;
                     CASPR_log.Assert(nargin >= 6, 'Translation Axis must be defined.');
                     j.axis = axis;
+                case JointType.P_XY
+                    j = PrismaticXY;
+                case JointType.P_XZ
+                    j = PrismaticXZ;
                 case JointType.PLANAR_XY
                     j = PlanarXY;
                 case JointType.PLANAR_YZ
