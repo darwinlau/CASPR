@@ -12,12 +12,13 @@ classdef ControllerSimulator < DynamicsSimulator
         % results
         compTime                % computational time for each time step
         refTrajectory           % The reference trajectory
+        
         ctrlTrajectory          % The trajectory containing state variables used in the control command update
         obsTrajectory           % The observer trajectory containing estimated variables (state and/or disturbance)
         ctrlFKTrajectory        % The forward kinematics (used with controller) trajectory containing estimated state variables (probably will only be used in debugging)
         obsFKTrajectory         % The forward kinematics (used with observer) trajectory containing estimated state variables (probably will only be used in debugging)
-        stiffness               % The stiffness matrices of the CDPR along the whole trajectory
         
+        stiffness               % The stiffness matrices of the CDPR along the whole trajectory
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % simulator components
         fdSolver                % The forward dynamics solver
@@ -25,8 +26,14 @@ classdef ControllerSimulator < DynamicsSimulator
         controller              % The controller for the system
         observer                % The disturbance observer for the system (if applicable)
         uncertainties           % A list of uncertainties
+        
+        % tackling infeasibility
+        controllerExitType      % exit type that indicates the how the controller runs
+        
         modelTrue               % The true model for the system
         
+    end
+    properties (Access = private)
         
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % simulator configurations
@@ -75,7 +82,6 @@ classdef ControllerSimulator < DynamicsSimulator
         trajectory_duration     % how long the trajectory lasts
 
         % tackling infeasibility
-        controller_exit_type    % exit type that indicates the how the controller runs
         infeasibility_flag      % a flag suggests whether infeasibility happens
         
         % tackling singularity in M
@@ -158,7 +164,7 @@ classdef ControllerSimulator < DynamicsSimulator
             % initialize the out of workspace flag as false
             obj.out_of_workspace_flag = 0;
             % initialize the controller exit flag
-            obj.controller_exit_type = ControllerExitType.NO_ERROR;
+            obj.controllerExitType = ControllerExitType.NO_ERROR;
             % initialize the completion percentage as 1 indicating
             % completed trajectory
             obj.completion_percentage = 1;
@@ -487,10 +493,10 @@ classdef ControllerSimulator < DynamicsSimulator
 
             % run control command update
             if (obj.simopt.is_operational_space_control)
-                [obj.f_cmd, ~, ~, obj.controller_exit_type]  = ...
+                [obj.f_cmd, ~, ~, obj.controllerExitType]  = ...
                     obj.controller.execute(obj.ctrlTrajectory.q{obj.ctrl_counter}, obj.ctrlTrajectory.q_dot{obj.ctrl_counter}, zeros(obj.model.numDofs,1), obj.refTrajectory.y{obj.ctrl_counter}, obj.refTrajectory.y_dot{obj.ctrl_counter}, obj.refTrajectory.y_ddot{obj.ctrl_counter}, obj.q_ddot_ext_est, obj.ctrl_counter);
             else
-                [obj.f_cmd, ~, ~, obj.controller_exit_type]  = ...
+                [obj.f_cmd, ~, ~, obj.controllerExitType]  = ...
                     obj.controller.execute(obj.ctrlTrajectory.q{obj.ctrl_counter}, obj.ctrlTrajectory.q_dot{obj.ctrl_counter}, zeros(obj.model.numDofs,1), obj.refTrajectory.q{obj.ctrl_counter}, obj.refTrajectory.q_dot{obj.ctrl_counter}, obj.refTrajectory.q_ddot{obj.ctrl_counter}, obj.q_ddot_ext_est, obj.ctrl_counter);
             end
             obj.compTime(obj.ctrl_counter)              =   toc;
@@ -611,7 +617,7 @@ classdef ControllerSimulator < DynamicsSimulator
                 end
             else
                 % update sim_trajectory with new state from FD
-                % algorithm                
+                % algorithm            
                 [obj.trajectory.q{obj.sim_counter + 1}, obj.trajectory.q_dot{obj.sim_counter + 1}, obj.trajectory.q_ddot{obj.sim_counter + 1}, obj.modelTrue] = ...
                     obj.fdSolver.compute(obj.trajectory.q{obj.sim_counter}, obj.trajectory.q_dot{obj.sim_counter}, obj.controlForces{obj.ctrl_counter}, obj.modelTrue.cableModel.cableIndicesActive, obj.w_ext, obj.timeVector(obj.sim_counter + 1) - obj.timeVector(obj.sim_counter), obj.modelTrue);
                 obj.trajectory.q_ddot{obj.sim_counter + 1}	=   obj.trajectory.q_ddot{obj.sim_counter};
@@ -636,7 +642,6 @@ classdef ControllerSimulator < DynamicsSimulator
             for i = 1:length(obj.uncertainties)
                 if(isa(obj.uncertainties{i},'ExternalWrenchUncertaintyBase'))
                     [obj.w_ext] = obj.uncertainties{i}.applyWrechDisturbance(current_time);
-                    tmp_d = obj.w_ext
                     obj.q_ddot_ext = obj.modelTrue.M\obj.w_ext;
                 end
                 if(isa(obj.uncertainties{i},'PoseLockUncertaintyBase'))
@@ -874,7 +879,7 @@ classdef ControllerSimulator < DynamicsSimulator
             
             % generate the infeasibility flag to determine whether or not
             % the simulation should continue according to the feasibility
-            if (obj.controller_exit_type ~= ControllerExitType.NO_ERROR && obj.controller_exit_type ~= ControllerExitType.ITERATION_LIMIT_REACHED)
+            if (obj.controllerExitType ~= ControllerExitType.NO_ERROR && obj.controllerExitType ~= ControllerExitType.ITERATION_LIMIT_REACHED)
                 % indicates control problem infeasible
                 obj.infeasibility_flag = 1;
             else
