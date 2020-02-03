@@ -474,11 +474,11 @@ classdef SystemModel < handle
         end
         
         function value = get.availStaticWrenchSet(obj)
-            value = WrenchSet(-obj.L_active', obj.actuationForcesMax, obj.actuationForcesMin, -obj.L_passive'*obj.cableForcesPassive - obj.M'\dynamics.G);
+            value = WrenchSet(-obj.L_active', obj.actuationForcesMax, obj.actuationForcesMin, -obj.L_passive'*obj.cableForcesPassive - obj.M'\obj.G);
         end
         
         function value = get.availStaticAccelerationSet(obj)  
-            value = WrenchSet(-obj.M\dynamics.L_active', obj.actuationForcesMax, obj.actuationForcesMin, -obj.M\obj.L_passive'*obj.cableForcesPassive - obj.M'\dynamics.G);
+            value = WrenchSet(-obj.M\obj.L_active', obj.actuationForcesMax, obj.actuationForcesMin, -obj.M\obj.L_passive'*obj.cableForcesPassive - obj.M'\obj.G);
         end
         
         % Uncertainties
