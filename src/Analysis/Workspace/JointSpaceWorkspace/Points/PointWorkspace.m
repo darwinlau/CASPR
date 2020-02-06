@@ -44,6 +44,8 @@ classdef PointWorkspace < handle
             digit_tolerance = 4;
             if obj.model.numDofs <= 3
                 fixed_variables = [0 0];
+            else
+                fixed_variables = reshape(fixed_variables,[1,obj.model.numDofs]);
             end
             num_metrics = size(metrics,2);
             if ~isempty(conditions) && isempty(metrics)
