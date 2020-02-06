@@ -58,11 +58,11 @@ classdef ModelConfigTest < matlab.unittest.TestCase
                     testCase.assertNotEmpty(traj);
                 end
                 trajs_op = m.getOperationalTrajectoriesList();
-                for j = 1:length(trajs_op)
-                    CASPR_log.Debug(['Testing model: ', mSet{i}, ', trajectory: ', trajs_op{j}]);
-                    traj = m.getOperationalTrajectory(trajs_op{j});
-                    testCase.assertNotEmpty(traj);
-                end
+%                 for j = 1:length(trajs_op)
+%                     CASPR_log.Debug(['Testing model: ', mSet{i}, ', trajectory: ', trajs_op{j}]);
+%                     traj = m.getOperationalTrajectory(trajs_op{j});
+%                     testCase.assertNotEmpty(traj);
+%                 end
             end
             CASPR_log.Debug('Done ModelConfigTest/modelConfigTrajectoriesTest');            
         end
@@ -176,11 +176,11 @@ classdef ModelConfigTest < matlab.unittest.TestCase
                     testCase.assertNotEmpty(traj);
                 end
                 trajs_op = m.getOperationalTrajectoriesList();
-                for j = 1:length(trajs_op)
-                    CASPR_log.Debug(['Testing model: ', mSet{i}, ', trajectory: ', trajs_op{j}]);
-                    traj = m.getOperationalTrajectory(trajs_op{j});
-                    testCase.assertNotEmpty(traj);
-                end
+%                 for j = 1:length(trajs_op)
+%                     CASPR_log.Debug(['Testing model: ', mSet{i}, ', trajectory: ', trajs_op{j}]);
+%                     traj = m.getOperationalTrajectory(trajs_op{j});
+%                     testCase.assertNotEmpty(traj);
+%                 end
             end
             CASPR_log.Debug('Done ModelConfigTest/testModelConfigTrajectoriesTest');            
         end
