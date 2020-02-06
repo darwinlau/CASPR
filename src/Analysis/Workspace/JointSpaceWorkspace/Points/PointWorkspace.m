@@ -42,7 +42,9 @@ classdef PointWorkspace < handle
         function c_workspace = plotWorkspace(obj,plot_axis,conditions, metrics, fixed_variables)
             
             digit_tolerance = 4;
-            
+            if obj.model.numDofs <= 3
+                fixed_variables = [0 0];
+            end
             num_metrics = size(metrics,2);
             if ~isempty(conditions) && isempty(metrics)
                 
