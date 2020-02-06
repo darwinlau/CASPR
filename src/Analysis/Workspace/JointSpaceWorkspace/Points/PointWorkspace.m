@@ -106,7 +106,7 @@ classdef PointWorkspace < handle
                     end
                 end
             else
-                CASPR_log.Error('At least one of the metrics of conditions should be the input')
+                CASPR_log.Error('At least one of the metrics or conditions should be the input')
             end
             % universal plotting function for 2d/3d
             if ~isempty(matched_poses_indices)
