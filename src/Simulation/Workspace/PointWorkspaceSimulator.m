@@ -45,7 +45,7 @@ classdef PointWorkspaceSimulator < SimulatorBase
             n_grid_points = obj.grid.n_points;
             
             % Instantiate workspace object
-            obj.workspace = PointWorkspace(obj.model, obj.grid);
+            obj.workspace = PointWorkspace(obj.model, obj.conditions, obj.grid);
 
             workspace_count = 0;
             

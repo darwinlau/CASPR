@@ -271,7 +271,7 @@ function generate_button_Callback(~, ~, handles) %#ok<DEFNU>
                 flag_vec(:) = str2num(flag_set(:)); %#ok<ST2NM>
                 w_set(:,k+1) = min_vec.*(~flag_vec) + max_vec.*flag_vec;
             end 
-            w_condition = {WrenchFeasibleCondition([], w_set)};
+            w_condition = {WrenchFeasibleCondition(w_set, [])};
         end
         % Then the metric
         %w_metric = {WorkspaceMetricBase.CreateWorkspaceMetric(WorkspaceMetricType.CONDITION_NUMBER,[])};

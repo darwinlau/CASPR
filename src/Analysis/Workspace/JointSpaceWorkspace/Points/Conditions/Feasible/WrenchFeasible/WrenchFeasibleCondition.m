@@ -10,19 +10,19 @@ classdef WrenchFeasibleCondition < WorkspaceConditionBase
         type = WorkspaceConditionType.WRENCH_FEASIBLE;
     end
     
-    properties (SetAccess = protected, GetAccess = protected)
-        desired_wrench_set
+    properties (SetAccess = protected)
+        desiredWrenchSet
     end
     
     methods
         % Constructor for wrench closure workspace
-        function w = WrenchFeasibleCondition(method, desired_wrench_set)
-            if(isempty(method))
+        function w = WrenchFeasibleCondition(desiredWrenchSet, method)
+            if(nargin < 2 || isempty(method))
                 w.method = WrenchFeasibleMethodType.M_CAPACITY_MARGIN;
             else
                 w.method = method; 
             end 
-            w.desired_wrench_set = desired_wrench_set;
+            w.desiredWrenchSet = desiredWrenchSet;
         end
         
         % Evaluate the wrench closure condition return true if satisfied 
@@ -31,7 +31,7 @@ classdef WrenchFeasibleCondition < WorkspaceConditionBase
             % can help to solve for the workspace condition
             if (~isempty(evaluated_metrics))
                 for i = 1:size(evaluated_metrics, 1)  
-                    if (evaluated_metrics{i, 1}.type == WorkspaceMetricType.CAPACITY_MARGIN && isequal(obj.desired_wrench_set, evaluated_metrics{i, 1}.desired_wrench_set))
+                    if (evaluated_metrics{i, 1}.type == WorkspaceMetricType.CAPACITY_MARGIN && isequal(obj.desiredWrenchSet, evaluated_metrics{i, 1}.desiredWrenchSet))
                         if (evaluated_metrics{i, 2} >= 0)
                             inWorkspace = true;
                             return;
@@ -44,13 +44,13 @@ classdef WrenchFeasibleCondition < WorkspaceConditionBase
             end
             switch(obj.method)
                 case WrenchFeasibleMethodType.M_CAPACITY_MARGIN
-                    inWorkspace = wrench_feasible_capacity_margin(obj.desired_wrench_set,dynamics);
+                    inWorkspace = wrench_feasible_capacity_margin(obj.desiredWrenchSet,dynamics);
                 case WrenchFeasibleMethodType.M_LINEAR_PROGRAMMING_MATLAB
-                    inWorkspace = wrench_feasible_linear_programming_MATLAB(obj.desired_wrench_set,dynamics);
+                    inWorkspace = wrench_feasible_linear_programming_MATLAB(obj.desiredWrenchSet,dynamics);
                 case WrenchFeasibleMethodType.M_LINEAR_PROGRAMMING_CPLEX
-                    inWorkspace = wrench_feasible_linear_programming_CPLEX(obj.desired_wrench_set,dynamics);
+                    inWorkspace = wrench_feasible_linear_programming_CPLEX(obj.desiredWrenchSet,dynamics);
                 otherwise
-                    CASPR_log.Print('Wrench feasible method is not defined',CASPRLogLevel.ERROR);
+                    CASPR_log.Print('Wrench feasible method is not defined', CASPRLogLevel.ERROR);
             end
         end
     end

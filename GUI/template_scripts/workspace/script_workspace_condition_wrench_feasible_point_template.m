@@ -30,7 +30,7 @@ for k = 0:i_max
     w_set(:,k+1) = min_vec.*(~flag_vec) + max_vec.*flag_vec;
 end
 % Define the workspace condition(s): must have at least 1 condition
-w_conditions    =   {WrenchFeasibleCondition([], w_set)};
+w_conditions    =   {WrenchFeasibleCondition(w_set, [])};
 % Define the workspace metric(s) (optional)
 w_metrics       =   {};
 % Define the connectivity condition for point-wise workspaces

@@ -41,13 +41,13 @@ classdef WorkspaceConditionBase < handle
                 case WorkspaceConditionType.WRENCH_CLOSURE
                     wc = WrenchClosureCondition(method);
                 case WorkspaceConditionType.WRENCH_FEASIBLE
-                    CASPR_log.Error('Wrench-Feasible Workspace (WFW) cannot be created through CreateWorkspaceCondition and must be instantiated directly through WrenchFeasibleCondition(method, desired_set)');
+                    CASPR_log.Error('Wrench-Feasible Workspace (WFW) cannot be created through CreateWorkspaceCondition and must be instantiated directly through WrenchFeasibleCondition(desired_set, method)');
                 case WorkspaceConditionType.STATIC
                     wc = WorkspaceStaticCondition(method);
                 case WorkspaceConditionType.INTERFERENCE
                     wc = InterferenceFreeCondition(method);
                 otherwise
-                    CASPR_log.Print('Workspace condition type is not defined',CASPRLogLevel.ERROR);
+                    CASPR_log.Print('Workspace condition type is not defined', CASPRLogLevel.ERROR);
             end
         end
     end

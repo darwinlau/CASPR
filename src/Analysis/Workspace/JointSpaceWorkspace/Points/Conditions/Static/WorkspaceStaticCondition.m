@@ -20,7 +20,7 @@ classdef WorkspaceStaticCondition < WorkspaceConditionBase
         % The constructor for this class.
         function w = WorkspaceStaticCondition(method)
             w.options               =   optimset('display','off','Algorithm','interior-point-convex');
-            if(isempty(method))
+            if(nargin < 1 || isempty(method))
                 w.method = WorkspaceStaticMethodType.M_QUAD_PROG;
             else
                 w.method = method; 

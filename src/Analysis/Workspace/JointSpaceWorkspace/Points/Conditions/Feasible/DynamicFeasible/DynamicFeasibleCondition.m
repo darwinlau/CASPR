@@ -10,12 +10,15 @@ classdef DynamicFeasibleCondition < WorkspaceConditionBase
         type = WorkspaceConditionType.DYNAMIC_FEASIBLE;
     end
     
-    properties (SetAccess = protected, GetAccess = protected)
+    properties (SetAccess = protected)
         % vertices of the corresponding sets, each row corresponds to a
         % vectex
-        desired_we_set
-        desired_acc_set
-        desired_vel_set
+        desiredWrenchSet
+        desiredAccSet
+        desiredVelSet
+    end
+    
+    properties (SetAccess = protected, GetAccess = protected)
         % pre-processing result - velocity minimum velocity enclosing
         % ellipsoid (MVEE)
         cv
@@ -26,15 +29,15 @@ classdef DynamicFeasibleCondition < WorkspaceConditionBase
     
     methods
         % Constructor for dynamic feasible workspace
-        function w = DynamicFeasibleCondition(method, desired_vel_set, desired_acc_set, desired_we_set)
-            if(isempty(method))
+        function w = DynamicFeasibleCondition(desiredVelSet, desiredAccSet, desiredWrenchSet, method)
+            if(nargin < 4 || isempty(method))
                 w.method = DynamicFeasibleMethodType.M_CONSTANT_VELOCITY_MATLAB;
             else
                 w.method = method; 
             end
-            w.desired_we_set = desired_we_set;
-            w.desired_acc_set = desired_acc_set;
-            w.desired_vel_set = desired_vel_set;
+            w.desiredWrenchSet = desiredWrenchSet;
+            w.desiredAccSet = desiredAccSet;
+            w.desiredVelSet = desiredVelSet;
             w.Av = [];
             w.cv = [];
             w.Pv = [];
@@ -43,14 +46,14 @@ classdef DynamicFeasibleCondition < WorkspaceConditionBase
             % pre-processing and sanity check
             switch(w.method)
                 case DynamicFeasibleMethodType.M_CONSTANT_VELOCITY_MATLAB
-                    if size(w.desired_vel_set,1) > 1
+                    if size(w.desiredVelSet,1) > 1
                         CASPR_log.Error('A single velocity is expected, not a set.');
                     end
                 case DynamicFeasibleMethodType.M_VELOCITY_SET_QUADRATIC_C_MATLAB
                     % pre-processing: calculate the minimum volume
                     % enclosing ellipsoid for joint velocity
                     tol = 1e-3;
-                    [w.Av, w.cv] = MinVolEllipse(desired_vel_set', tol);
+                    [w.Av, w.cv] = MinVolEllipse(desiredVelSet', tol);
                     % D is a diagonal matrix and since w.Av is symmetric,
                     % the eigenvectors are digonal to each other hence V is
                     % a orthogonal matrix satisfying: A = V*D*V';
@@ -61,15 +64,15 @@ classdef DynamicFeasibleCondition < WorkspaceConditionBase
                         CASPR_log.Warn('The given velocity set is not symmetric with respect to the origin, the algorithm works better with a velocity set that is.');
                     end
                 case DynamicFeasibleMethodType.M_VELOCITY_SET_QUADRATIC_C_CPLEX_INTERVAL
-                    if ~(isa(w.desired_vel_set,'intval') && isa(w.desired_acc_set,'intval') && isa(w.desired_we_set,'intval'))
+                    if ~(isa(w.desiredVelSet,'intval') && isa(w.desiredAccSet,'intval') && isa(w.desiredWrenchSet,'intval'))
                         CASPR_log.Error('The Velocity/Acceleration/External Wrench sets should be intervals.');
                     end
                     % pre-processing: calculate the minimum volume
                     % enclosing ellipsoid for joint velocity
                     % step 1: find the vertices 
-                    n = length(desired_vel_set);
-                    vel_lb = desired_vel_set.inf';
-                    vel_ub = desired_vel_set.sup';
+                    n = length(desiredVelSet);
+                    vel_lb = desiredVelSet.inf';
+                    vel_ub = desiredVelSet.sup';
                     numVertices = 2^n;
                     vertices = zeros(numVertices, n);
                     offset = double('0');
@@ -101,17 +104,17 @@ classdef DynamicFeasibleCondition < WorkspaceConditionBase
         function inWorkspace = evaluateFunction(obj, dynamics, ~)
             switch(obj.method)
                 case DynamicFeasibleMethodType.M_CONSTANT_VELOCITY_MATLAB
-                    if size(obj.desired_vel_set,1) > 1
+                    if size(obj.desiredVelSet,1) > 1
                         CASPR_log.Error('A single velocity is expected, not a set.');
                     end
-                    inWorkspace = dynamic_feasible_constant_velocity_MATLAB(obj.desired_vel_set, obj.desired_acc_set, obj.desired_we_set,dynamics);
+                    inWorkspace = dynamic_feasible_constant_velocity_MATLAB(obj.desiredVelSet, obj.desiredAccSet, obj.desiredWrenchSet,dynamics);
                 case DynamicFeasibleMethodType.M_VELOCITY_SET_QUADRATIC_C_MATLAB
-                    inWorkspace = dynamic_feasible_velocity_set_quadratic_C_MATLAB(obj.Pv_inv, obj.cv, obj.desired_acc_set, obj.desired_we_set,dynamics);
+                    inWorkspace = dynamic_feasible_velocity_set_quadratic_C_MATLAB(obj.Pv_inv, obj.cv, obj.desiredAccSet, obj.desiredWrenchSet,dynamics);
                 case DynamicFeasibleMethodType.M_VELOCITY_SET_QUADRATIC_C_CPLEX_INTERVAL
-                    if ~(isa(obj.desired_vel_set,'intval') && isa(obj.desired_acc_set,'intval') && isa(obj.desired_we_set,'intval'))
+                    if ~(isa(obj.desiredVelSet,'intval') && isa(obj.desiredAccSet,'intval') && isa(obj.desiredWrenchSet,'intval'))
                         CASPR_log.Error('The Velocity/Acceleration/External Wrench sets should be intervals.');
                     end
-                    inWorkspace = dynamic_feasible_velocity_set_quadratic_C_interval_CPLEX(obj.Pv_inv, obj.cv, obj.desired_acc_set, obj.desired_we_set,dynamics);
+                    inWorkspace = dynamic_feasible_velocity_set_quadratic_C_interval_CPLEX(obj.Pv_inv, obj.cv, obj.desiredAccSet, obj.desiredWrenchSet,dynamics);
                 otherwise
                     CASPR_log.Print('Wrench feasible method is not defined',CASPRLogLevel.ERROR);
             end

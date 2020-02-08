@@ -18,7 +18,7 @@ classdef WrenchClosureCondition < WorkspaceConditionBase
         % Constructor for wrench closure workspace
         function w = WrenchClosureCondition(method)
             w.options               =   optimset('display','off');
-            if(isempty(method))
+            if(nargin < 1 || isempty(method))
                 % default method
                 w.method = WrenchClosureMethodType.M_QUAD_PROG;
             else

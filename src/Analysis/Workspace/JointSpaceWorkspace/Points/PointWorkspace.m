@@ -8,6 +8,7 @@ classdef PointWorkspace < handle
     properties (SetAccess = protected)
         model
         grid                        % Grid object for brute force workspace
+        conditions
     end
     
     properties
@@ -17,9 +18,10 @@ classdef PointWorkspace < handle
     end
     
     methods
-        function pw = PointWorkspace(model, grid)
+        function pw = PointWorkspace(model, conditions, grid)
             pw.model = model;
             pw.grid = grid;
+            pw.conditions = conditions;
             pw.poses = cell(grid.n_points,1);
         end
         
@@ -38,71 +40,84 @@ classdef PointWorkspace < handle
             obj.graph_rep =  create_graph_rep(obj, w_connectivity, size(metrics,2));
         end
         
-        % Plotting function to plot 2D/3D (subset of the) workspace plot
-        function c_workspace = plotWorkspace(obj,plot_axis,conditions, metrics, fixed_variables)
-            
+        % Function to plot the workspace in 2D or 3D. For robots with more
+        % than 3 DoFs, values of the fixed DoFs need to be provided to
+        % lower its dimension to 2D or 3D to be 
+        function c_workspace = plotWorkspace(obj, dofs_to_plot, conditions_ind, metrics, fixed_var_val)
             digit_tolerance = 4;
-            if obj.model.numDofs <= 3
-                fixed_variables = [0 0];
-            else
-                fixed_variables = reshape(fixed_variables,[1,obj.model.numDofs]);
+            
+            % Start with a set of checking conditions
+            CASPR_log.Assert(length(dofs_to_plot) == 2 || length(dofs_to_plot) == 3, 'Number of DoFs to plot must be 2 or 3, otherwise it cannot be plotted.');
+            CASPR_log.Assert(length(dofs_to_plot) <= obj.model.numDofs, 'The number of DoFs to plot is more than the degrees of freedom available.');
+            if (length(dofs_to_plot) > obj.model.numDofs)
+                 CASPR_log.Assert(nargin > 4, 'Must input ''fixed_var_val'' if the DoFs to plot does not cover all DoFs.');
+                 CASPR_log.Assert(length(fixed_var_val) == obj.model.numDofs, 'Input ''fixed_var_val'' must have the same dimension as the DoFs of the robot.');
             end
+            
+            if nargin <= 2
+                conditions_ind = 1:length(obj.conditions);
+            end
+            if nargin <= 3
+                metrics = [];
+            end
+            if nargin <= 4
+                fixed_var_val = zeros(1, obj.model.numDofs);
+            end
+            
+            fixed_var_val = reshape(fixed_var_val, [1,obj.model.numDofs]);
+            
             num_metrics = size(metrics,2);
-            if ~isempty(conditions) && isempty(metrics)
+            if ~isempty(conditions_ind) && isempty(metrics)
+                filtered_node_list = create_node_list(obj, conditions_ind);
                 
-                filted_node_list = create_node_list(obj, conditions);
+                pose_data = round(filtered_node_list(:,2:end),digit_tolerance);
+                fixed_var_val = round(fixed_var_val,digit_tolerance);
+                pose_data(:, dofs_to_plot) = [];
+                fixed_var_val(:, dofs_to_plot) = [];
                 
-                pose_data = round(filted_node_list(:,2:end),digit_tolerance);
-                fixed_variables = round(fixed_variables,digit_tolerance);
-                pose_data(:,[plot_axis]) = [];
-                fixed_variables(:,[plot_axis]) = [];
+                matched_poses_indices = find(ismember(pose_data,fixed_var_val,'rows'));
                 
-                matched_poses_indices = find(ismember(pose_data,fixed_variables,'rows'));
-                
-                points_to_plot = filted_node_list(matched_poses_indices,2:end);
+                points_to_plot = filtered_node_list(matched_poses_indices,2:end);
                 point_color_matrix = 0;
-                
-            elseif ~isempty(conditions) && ~isempty(metrics)
-                
-                filted_node_list = create_node_list(obj, conditions);
+            elseif ~isempty(conditions_ind) && ~isempty(metrics)
+                filtered_node_list = create_node_list(obj, conditions_ind);
                 metric_types = input_conversion(metrics');
                 pose_metric_types = input_conversion(obj.poses{1}.metrics);
                 
                 if(all(ismember(metric_types,pose_metric_types)))
-                    pose_data = round(filted_node_list(:,2:end),digit_tolerance);
-                    fixed_variables = round(fixed_variables,digit_tolerance);
-                    pose_data(:,[plot_axis]) = [];
-                    fixed_variables(:,[plot_axis]) = [];
+                    pose_data = round(filtered_node_list(:,2:end),digit_tolerance);
+                    fixed_var_val = round(fixed_var_val,digit_tolerance);
+                    pose_data(:, dofs_to_plot) = [];
+                    fixed_var_val(:, dofs_to_plot) = [];
                     
-                    matched_poses_indices = find(ismember(pose_data,fixed_variables,'rows'));
-                    
-                    points_to_plot = filted_node_list(matched_poses_indices,2:end);
+                    matched_poses_indices = find(ismember(pose_data,fixed_var_val,'rows'));
+                        
+                    points_to_plot = filtered_node_list(matched_poses_indices,2:end);
                     
                     for i = 1:size(matched_poses_indices,1)
                         for j = 1:num_metrics
                             metrics_indices = find(ismember(pose_metric_types,metric_types(j)));
-                            point_color_matrix(j,i) = cell2mat(obj.poses{filted_node_list(matched_poses_indices(i,1))}.metrics(metrics_indices,2));
+                            point_color_matrix(j,i) = cell2mat(obj.poses{filtered_node_list(matched_poses_indices(i,1))}.metrics(metrics_indices,2));
                         end
                     end
                 else
                     CASPR_log.Error('Input metric(s) NOT exist in the workspace metric(s)')
                 end
-                
-            elseif ~isempty(metrics) && isempty(conditions)
+            elseif ~isempty(metrics) && isempty(conditions_ind)
                 metric_types = input_conversion(metrics');
                 pose_metric_types = input_conversion(obj.poses{1}.metrics);
                 
                 for i = 1:size(obj.poses,1)
                     pose_data(i,:) = round(obj.poses{i}.pose',digit_tolerance);
-                    filted_node_list(i,:) = obj.poses{i}.pose';
+                    filtered_node_list(i,:) = obj.poses{i}.pose';
                 end
-                fixed_variables = round(fixed_variables,digit_tolerance);
-                pose_data(:,[plot_axis]) = [];
-                fixed_variables(:,[plot_axis]) = [];
+                fixed_var_val = round(fixed_var_val,digit_tolerance);
+                pose_data(:,[dofs_to_plot]) = [];
+                fixed_var_val(:,[dofs_to_plot]) = [];
                 
-                matched_poses_indices = find(ismember(pose_data,fixed_variables,'rows'));
+                matched_poses_indices = find(ismember(pose_data,fixed_var_val,'rows'));
                 
-                points_to_plot = filted_node_list(matched_poses_indices,:);
+                points_to_plot = filtered_node_list(matched_poses_indices,:);
                 for i = 1:size(matched_poses_indices,1)
                     for j = 1:num_metrics
                         metrics_indices = find(ismember(pose_metric_types,metric_types(j)));
@@ -114,11 +129,9 @@ classdef PointWorkspace < handle
             end
             % universal plotting function for 2d/3d
             if ~isempty(matched_poses_indices)
-                c_workspace = universal_plot(obj,plot_axis,points_to_plot,point_color_matrix);
-                disp('Plot updated')
+                c_workspace = universal_plot(obj,dofs_to_plot,points_to_plot,point_color_matrix);
             else
-                cla;
-                disp('No results')
+                CASPR_log.Warn('There are no points for this workspace to plot');
                 c_workspace = [];
             end
         end
@@ -222,7 +235,7 @@ classdef PointWorkspace < handle
                     set(gca,'XTick',[]);set(gca,'YTick',[]);
                     ax2 = axes;
                     linkaxes([ax1,ax2]);
-                    %% Hide the top axes
+                    % Hide the top axes
                     ax2.Visible = 'off';
                     ax2.XTick = [];
                     ax2.YTick = [];
@@ -291,8 +304,7 @@ classdef PointWorkspace < handle
         
     end
     methods (Access=private)
-        
-        function c_workspace = universal_plot(obj,plot_axis,points_to_plot,point_color_matrix)
+        function c_workspace = universal_plot(obj, plot_axis, points_to_plot, point_color_matrix)
             g = groot;
             if isempty(g.Children)
                 for i = size(point_color_matrix,1):-1:1
@@ -317,21 +329,9 @@ classdef PointWorkspace < handle
                     % plotting title and other stuff, nothing important
                     xlim(1.005*[obj.model.bodyModel.q_min(plot_axis(1)),obj.model.bodyModel.q_max(plot_axis(1))]);
                     ylim(1.005*[obj.model.bodyModel.q_min(plot_axis(2)),obj.model.bodyModel.q_max(plot_axis(2))]);
-                    for j = 1:size(points_to_plot(1,:),2)
-                        if j == plot_axis(1)
-                            title_disp{j} = 'x-axis ';
-                        elseif j == plot_axis(2)
-                            title_disp{j} = 'y-axis ';
-                        else
-                            title_disp{j} = [num2str(points_to_plot(1,j)),' '];
-                        end
-                    end
-                    %                     disp_message = ['Fig. ', num2str(i) ' shows the point(s) that fulfill the input condition(s) and metric(s) ', num2str(i)];
-                    %                     disp(disp_message)
-                    title_disp = cell2mat(title_disp);
-                    title(title_disp)
-                    clear title_disp;
-                    %
+                    title('2-D Workspace Plot');
+                    xlabel(sprintf('q_%d', plot_axis(1)));
+                    ylabel(sprintf('q_%d', plot_axis(2)));
                 end
             elseif size(plot_axis,2) == 3 %Plot 3D
                 x = points_to_plot(:,plot_axis(1));
@@ -354,23 +354,10 @@ classdef PointWorkspace < handle
                     ylim(1.005*[obj.model.bodyModel.q_min(plot_axis(2)),obj.model.bodyModel.q_max(plot_axis(2))]);
                     zlim(1.005*[obj.model.bodyModel.q_min(plot_axis(3)),obj.model.bodyModel.q_max(plot_axis(3))]);
                     
-                    for j = 1:size(points_to_plot(1,:),2)
-                        if j == plot_axis(1)
-                            title_disp{j} = 'x-axis ';
-                        elseif j == plot_axis(2)
-                            title_disp{j} = 'y-axis ';
-                        elseif j == plot_axis(3)
-                            title_disp{j} = 'z-axis ';
-                        else
-                            title_disp{j} = [num2str(points_to_plot(1,j)),' '];
-                        end
-                    end
-                    %                     disp_message = ['Fig. ', num2str(i) ' shows the point(s) that fulfill the input condition(s) and metric ', num2str(i)];
-                    %                     disp(disp_message)
-                    title_disp = cell2mat(title_disp);
-                    title(title_disp)
-                    clear title_disp;
-                    %
+                    title('3-D Workspace Plot');
+                    xlabel(sprintf('q_%d', plot_axis(1)));
+                    ylabel(sprintf('q_%d', plot_axis(2)));
+                    zlabel(sprintf('q_%d', plot_axis(3)));
                 end
             else
                 CASPR_log.Error('Only 2D/3D plot is available. Try slider plot if more than 3 axis')
@@ -378,39 +365,27 @@ classdef PointWorkspace < handle
         end
         
         % function to create the node_list variable
-        function node_list = create_node_list(obj, conditions)
+        function node_list = create_node_list(obj, conditions_ind)
             pose_data = obj.poses;
             number_points = length(pose_data);
             % Create list of nodes
             node_list = zeros(number_points,1+obj.grid.n_dimensions);
             number_node = 0;
-            n_conditions = size(conditions,2);
-            if n_conditions == 1 && ~iscell(conditions)
-                conditions = mat2cell(conditions,1);
-            end
-            for i = 1:n_conditions
-                condition_types(i) = conditions{i}.type;
-            end
-            
             % For each point
             for i = 1:number_points
                 % Find out the poses that fulfill the condition(s)
                 if(~isempty(pose_data{i}))
-                    
-                    n_constraints = size(pose_data{i}.conditions,1); 
-                    if n_constraints ~=0
-                    for j = 1:n_constraints
-                        pose_condition_types(j) = pose_data{i}.conditions{j,1}.type;
-                    end
-                    if(all(ismember(condition_types,pose_condition_types)))
-                        number_node = number_node + 1;
-                        node_list(number_node,:) = [number_node,pose_data{i}.pose'];
-                    end
+                    n_conditions = length(pose_data{i}.conditions);
+                    if n_conditions ~=0
+                        if (all(ismember(conditions_ind, pose_data{i}.conditionsIndices)))
+                            number_node = number_node + 1;
+                            node_list(number_node,:) = [number_node, pose_data{i}.pose'];
+                        end
                     end
                 end
             end
             % Resize to the correct size
-            node_list = node_list(1:number_node,:);
+            node_list = node_list(1:number_node, :);
         end
         
         % function to create the graph_rep variable
