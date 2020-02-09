@@ -470,15 +470,15 @@ classdef SystemModel < handle
         end
         
         function value = get.availWrenchSet(obj)
-            value = WrenchSet(-obj.L_active', obj.actuationForcesMax, obj.actuationForcesMin, -obj.L_passive'*obj.cableForcesPassive);
+            value = Zonotope(-obj.L_active', obj.actuationForcesMax, obj.actuationForcesMin, -obj.L_passive'*obj.cableForcesPassive);
         end
         
         function value = get.availStaticWrenchSet(obj)
-            value = WrenchSet(-obj.L_active', obj.actuationForcesMax, obj.actuationForcesMin, -obj.L_passive'*obj.cableForcesPassive - obj.M'\obj.G);
+            value = Zonotope(-obj.L_active', obj.actuationForcesMax, obj.actuationForcesMin, -obj.L_passive'*obj.cableForcesPassive - obj.M'\obj.G);
         end
         
         function value = get.availStaticAccelerationSet(obj)  
-            value = WrenchSet(-obj.M\obj.L_active', obj.actuationForcesMax, obj.actuationForcesMin, -obj.M\obj.L_passive'*obj.cableForcesPassive - obj.M'\obj.G);
+            value = Zonotope(-obj.M\obj.L_active', obj.actuationForcesMax, obj.actuationForcesMin, -obj.M\obj.L_passive'*obj.cableForcesPassive - obj.M'\obj.G);
         end
         
         % Uncertainties

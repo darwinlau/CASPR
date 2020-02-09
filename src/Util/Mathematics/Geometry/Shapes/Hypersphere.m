@@ -1,9 +1,9 @@
-% Object representation of the wrench-set sphere
+% Object representation of the sphere
 %
 % Author        : Jonathan EDEN
 % Created       : 2015
 % Description    :
-classdef WrenchSetSphere < handle
+classdef Hypersphere < handle
         
     properties (SetAccess = protected)
         radius
@@ -12,7 +12,7 @@ classdef WrenchSetSphere < handle
     
     methods
         % Constructor for a spherical wrench set.
-        function id = WrenchSetSphere(T,r)
+        function id = Hypersphere(T,r)
             id.origin = T;
             id.radius = r;
         end

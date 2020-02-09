@@ -3,7 +3,7 @@
 % Author        : Jonathan EDEN
 % Created       : 2015
 % Description    :
-classdef WrenchSet < handle
+classdef Zonotope < handle
         
     properties (SetAccess = protected)
         n_faces = 0                 % The number of faces for the wrench set
@@ -20,7 +20,7 @@ classdef WrenchSet < handle
         % The system model is defined as:
         %   w = As * f + offset
         % Note: As is the structure matrix
-        function ws = WrenchSet(As, F_u, F_l, offset)
+        function ws = Zonotope(As, F_u, F_l, offset)
             % n refers to the degree of freedom (dimension of wrench)
             n = size(As,1); 
             % m refers to the number of actuators
@@ -97,7 +97,7 @@ classdef WrenchSet < handle
                 s(j) = (obj.b(j) - obj.A(j,:)*G)/norm(obj.A(j,:));
             end
             s = min(s);
-            w_approx_sphere = WrenchSetSphere(G,s);
+            w_approx_sphere = Hypersphere(G,s);
         end
         
         % Determines the largest sphere enclosed within the wrench set.
@@ -116,7 +116,7 @@ classdef WrenchSet < handle
                 subject to
                 A_c*o <= obj.b
             cvx_end
-            w_approx_sphere = WrenchSetSphere(o(1:2),o(3));
+            w_approx_sphere = Hypersphere(o(1:2),o(3));
         end
         
         % Approximate the wrench set with the largest sphere containing the
@@ -124,7 +124,7 @@ classdef WrenchSet < handle
         function w_approx_sphere = sphereApproximationMax(obj,x_ref,buffer)
             options = optimoptions('fmincon','Algorithm','active-set','Display','off');
             [T,r,~] = fmincon(@(x) costMinRad(x,obj.A,obj.b),[0;0],obj.A,obj.b,[],[],[],[],@(x) constraintPointContained(x,obj.A,obj.b,x_ref,buffer),options);
-            w_approx_sphere = WrenchSetSphere(T,r);
+            w_approx_sphere = Hypersphere(T,r);
         end
         
         % Approximates the wrench set to account for the coriolis.
@@ -147,7 +147,7 @@ classdef WrenchSet < handle
                 end
             end
             s = min(s);
-            w_approx_sphere = WrenchSetSphere(G,s);
+            w_approx_sphere = Hypersphere(G,s);
         end
     end
 end
