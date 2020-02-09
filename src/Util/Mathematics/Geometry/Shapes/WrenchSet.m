@@ -14,51 +14,7 @@ classdef WrenchSet < handle
         convexHullIndices = []      % Wrench vertices that represent the convex hull 
     end
     
-    methods
-        % Build the wrench set given the Jacobian matrix and force
-        % bounds. This version calls qhull
-%         function id = WrenchSet(L,f_u,f_l,offset)
-%             n = size(L,2); m = size(L,1);
-%             q = 2^m;
-%             f = zeros(q,m);
-%             w = zeros(q,n);
-%             % Set up the correct directory for logging
-%             str = mfilename('fullpath');
-%             s_id = strfind(str,'CASPR_private');
-%             str  = str(1:s_id+13);
-%             str_logs = [str,'data/logs'];
-%             if(~exist(str_logs,'dir'))
-%                 mkdir(str_logs)
-%             end
-%             str_io1 = [str_logs,'/wrench_set.txt'];
-%             fID = fopen(str_io1,'w');
-%             fprintf(fID,'%d\n',n);
-%             fprintf(fID,'%d\n',q);
-%             for k=1:q
-%                 % Convert k to binary
-%                 beta = double(dec2bin(k-1,m)) - 48;
-%                 f(k,:) = (eye(m) - diag(beta))*f_l + diag(beta)*f_u;
-%                 w(k,:) = -L'*f(k,:)';
-%                 fprintf(fID,'%5.12f\t',w(k,:));
-%                 fprintf(fID,'\n');
-%             end
-%             fclose(fID);
-%             % Now offload to qhull
-%             str_io2 = [str_logs,'/convhull.txt'];
-%             str_qconvex = ['!',str,'/dependencies/qhull-2012.1/bin/qconvex n Qs < ',str_io1,' > ',str_io2];
-%             eval(str_qconvex);
-% %             ! ..\..\dependencies\qhull-2012.1\bin\qconvex n Qs < ..\..\logs\wrench_set.txt > ..\..\logs\convhull.txt
-%             fID2 = fopen(str_io2);
-%             % Read the first two lines of the file
-%             n_s = fgets(fID2);
-%             n_f = fgets(fID2);
-%             T = fscanf(fID2,'%f',[n+1,inf])';
-%             fclose(fID2);
-%             % Convert to A, b form
-%             id.A = T(:,1:n);
-%             id.b = -T(:,n+1);
-%         end
-        
+    methods        
         % Builds the wrench set using the jacobian and force bounds. This
         % version does not make an external system call.
         % The system model is defined as:
@@ -195,4 +151,3 @@ classdef WrenchSet < handle
         end
     end
 end
-
