@@ -6,12 +6,13 @@
 classdef ConvexPolytope < handle
         
     properties (SetAccess = protected)
-        n_faces = 0                 % The number of faces for the wrench set
+        n_faces = 0                 % Number of faces for the convex polytope
+        points = []                 % All points passed in to create the convex polytope
+        vertices = []               % Vertices of the convex polytope
+        indices = []                % Indices points that represent the verticles of the convex hull
+        volume = 0                  % The volume of the polytope
         A = []                      % The polytope is described by A*w <= b
         b = []                      % The polytope is described by A*w <= b
-        volume = 0                  % The volume of the polytope
-        wrenchCombinations = []     % The complete combinations of wrenches
-        convexHullIndices = []      % Wrench vertices that represent the convex hull 
     end
     
     methods        
@@ -21,50 +22,48 @@ classdef ConvexPolytope < handle
         %   w = As * f + offset
         % Note: As is the structure matrix
         function ws = ConvexPolytope(W)
-            %try
-                [K, vol] = convhulln(W);
-                
-                n = size(W,2);
-                n_faces = size(K,1);
-                n_shape = size(K,2);
-
-                t_A = zeros(n_faces, n);
-                t_b = zeros(n_faces, 1);
-                
-                count = 1;
-                
-                for i = 1:n_faces
-                    Wi = W(K(i,2:end),:) - repmat(W(K(i,1),:),n_shape-1,1);
-                    Ti = null(Wi)';
-                    if(rank(Ti)>1)
-                    else
-                        t_A(count,:) = Ti;
-                        t_b(count,:) = t_A(count,:)*W(K(i,1),:).'; 
-                        % Find a new vertex not in the face
-                        s_flag = 0; j = 1;
-                        while(s_flag == 0)
-                            if((sum(j==K(i,:))==0)&&(norm(t_A(count,:)*W(K(j,1),:)'-t_b(count))>1e-6))
-                                s_flag = 1;
-                            else
-                                j = j+1;
-                            end
+            W_T = W';
+            [K, vol] = convhulln(W_T);
+            
+            n_faces = size(K,1);
+            n_dof = size(K,2);
+            
+            t_A = zeros(n_faces, n_dof);
+            t_b = zeros(n_faces, 1);
+            
+            count = 1;
+            
+            for i = 1:n_faces
+                Wi = W_T(K(i,2:end),:) - repmat(W_T(K(i,1),:),n_dof-1,1);
+                Ti = null(Wi)';
+                if(rank(Ti)>1)
+                else
+                    t_A(count,:) = Ti;
+                    t_b(count,:) = t_A(count,:)*W_T(K(i,1),:).';
+                    % Find a new vertex not in the face
+                    s_flag = 0; j = 1;
+                    while(s_flag == 0)
+                        if((sum(j==K(i,:))==0)&&(norm(t_A(count,:)*W_T(K(j,1),:)'-t_b(count))>1e-6))
+                            s_flag = 1;
+                        else
+                            j = j+1;
                         end
-                        if(t_A(count,:)*W(K(j,1),:)'>t_b(count))
-                            t_A(count,:) = -t_A(count,:);
-                            t_b(count) = -t_b(count);
-                        end
-                        count = count + 1;
                     end
+                    if(t_A(count,:)*W_T(K(j,1),:)'>t_b(count))
+                        t_A(count,:) = -t_A(count,:);
+                        t_b(count) = -t_b(count);
+                    end
+                    count = count + 1;
                 end
-                
-                ws.A = t_A(1:count-1,:);
-                ws.b = t_b(1:count-1);
-                ws.n_faces = n_faces;
-                ws.volume = vol;
-                ws.wrenchCombinations = W;
-                ws.convexHullIndices = K;
-%             catch
-%             end
+            end
+            
+            ws.A = t_A(1:count-1,:);
+            ws.b = t_b(1:count-1);
+            ws.n_faces = n_faces;
+            ws.points = W;
+            ws.volume = vol;
+            ws.indices = K;
+            ws.vertices = W(:, unique(K));
         end
         
         % Approximate the wrench set with a sphere at position G with

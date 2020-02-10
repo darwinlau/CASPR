@@ -9,7 +9,7 @@ classdef Zonotope < ConvexPolytope
     end
     
     methods        
-        % Builds the wrench set using the jacobian and force bounds. This
+        % Builds the zonotope using the jacobian and force bounds. This
         % version does not make an external system call.
         % The system model is defined as:
         %   w = L * f + offset
@@ -33,7 +33,7 @@ classdef Zonotope < ConvexPolytope
                 F(k,:) = (eye(m) - diag(beta))*F_l + diag(beta)*F_u;
                 W(k,:) = L*F(k,:)' + offset;
             end
-            ws@ConvexPolytope(W);
+            ws@ConvexPolytope(W');
         end
     end
 end
