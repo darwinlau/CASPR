@@ -10,6 +10,10 @@ classdef PointsSet < handle
         numDofs = 0                 % Number of DoFs of the convex polytope
     end
     
+    properties (Dependent)
+        numPoints
+    end
+    
     methods        
         % Points set P are passed in as a matrix where each column
         % represent one point
@@ -17,6 +21,13 @@ classdef PointsSet < handle
             ps.points = P;
             % Dimension of point is the number of rows
             ps.numDofs = size(P, 1);
+        end
+    end
+    
+    % Getters and setters
+    methods
+        function val = get.numPoints(obj)
+            val = size(obj.points, 2);
         end
     end
 end
