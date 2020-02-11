@@ -6,7 +6,8 @@
 classdef ConvexPolytope < handle
         
     properties (SetAccess = protected)
-        n_faces = 0                 % Number of faces for the convex polytope
+        numDofs = 0                 % Number of DoFs of the convex polytope
+        numFaces = 0                % Number of faces for the convex polytope
         points = []                 % All points passed in to create the convex polytope
         vertices = []               % Vertices of the convex polytope
         indices = []                % Indices points that represent the verticles of the convex hull
@@ -25,16 +26,16 @@ classdef ConvexPolytope < handle
             W_T = W';
             [K, vol] = convhulln(W_T);
             
-            n_faces = size(K,1);
-            n_dof = size(K,2);
+            num_faces = size(K,1);
+            num_dofs = size(K,2);
             
-            t_A = zeros(n_faces, n_dof);
-            t_b = zeros(n_faces, 1);
+            t_A = zeros(num_faces, num_dofs);
+            t_b = zeros(num_faces, 1);
             
             count = 1;
             
-            for i = 1:n_faces
-                Wi = W_T(K(i,2:end),:) - repmat(W_T(K(i,1),:),n_dof-1,1);
+            for i = 1:num_faces
+                Wi = W_T(K(i,2:end),:) - repmat(W_T(K(i,1),:),num_dofs-1,1);
                 Ti = null(Wi)';
                 if(rank(Ti)>1)
                 else
@@ -59,7 +60,8 @@ classdef ConvexPolytope < handle
             
             ws.A = t_A(1:count-1,:);
             ws.b = t_b(1:count-1);
-            ws.n_faces = n_faces;
+            ws.numDofs = num_dofs;
+            ws.numFaces = num_faces;
             ws.points = W;
             ws.volume = vol;
             ws.indices = K;
@@ -70,7 +72,7 @@ classdef ConvexPolytope < handle
         % radius s. The radius corresponds to the radius of the capacity
         % margin
         function w_approx_sphere = sphereApproximationCapacity(obj,G)
-            q = obj.n_faces;
+            q = obj.numFaces;
             s = zeros(q,1);
             for j=1:q
                 s(j) = (obj.b(j) - obj.A(j,:)*G)/norm(obj.A(j,:));
@@ -81,7 +83,7 @@ classdef ConvexPolytope < handle
         
         % Determines the largest sphere enclosed within the wrench set.
         function w_approx_sphere = sphereApproximationChebyshev(obj)
-            q = obj.n_faces;
+            q = obj.numFaces;
             n = size(obj.A,2);
             % Check Chebyshev centre
             A_c = [obj.A,zeros(q,1)];
@@ -109,7 +111,7 @@ classdef ConvexPolytope < handle
         % Approximates the wrench set to account for the coriolis.
         function w_approx_sphere = sphereApproximationCoriolis(obj,G,q2)
             % THIS NEEDS TO BE CHANGED LATER
-            q = obj.n_faces;
+            q = obj.numFaces;
             s = zeros(q,1);
             t = sign(sin(q2));
             for j=1:q
@@ -127,6 +129,28 @@ classdef ConvexPolytope < handle
             end
             s = min(s);
             w_approx_sphere = Hypersphere(G,s);
+        end
+        
+        function plotConvexPolytope(obj)
+            CASPR_log.Assert(obj.numDofs == 2 || obj.numDofs == 3, 'The ConvexPolytope can only be plotted if it is 2-D or 3-D.')
+            
+            if (obj.numDofs == 2)
+                figure;
+                plot(obj.points(1,:), obj.points(2,:), 'k.', 'MarkerSize', 20);
+                hold on;
+                plot(obj.points(1,obj.indices'), obj.points(2,obj.indices'), 'k', 'LineWidth', 1.5);
+                hold off;
+                axis equal;
+                xlabel('q_1');
+                ylabel('q_2');
+            elseif (obj.numDofs == 3)
+                figure;
+                trisurf(obj.indices, obj.points(1,:), obj.points(2,:), obj.points(3,:), 'FaceAlpha', 0.8, 'LineWidth', 1.0, 'FaceColor', [0.7 0.7 0.7]);
+                axis equal;
+                xlabel('q_1');
+                ylabel('q_2');
+                zlabel('q_3');
+            end
         end
     end
 end
