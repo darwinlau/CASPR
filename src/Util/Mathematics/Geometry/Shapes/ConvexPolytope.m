@@ -131,8 +131,11 @@ classdef ConvexPolytope < PointsSet
             w_approx_sphere = Hypersphere(G,s);
         end
         
-        function plotConvexPolytope(obj)
+        function plotConvexPolytope(obj, ax)
             CASPR_log.Assert(obj.numDofs == 2 || obj.numDofs == 3, 'The ConvexPolytope can only be plotted if it is 2-D or 3-D.')
+            if (nargin < 2)
+                ax = [];
+            end
             
             if (obj.numDofs == 2)
                 figure;
@@ -141,12 +144,18 @@ classdef ConvexPolytope < PointsSet
                 plot(obj.points(1,obj.indices'), obj.points(2,obj.indices'), 'k', 'LineWidth', 1.5);
                 hold off;
                 axis equal;
+                if (~isempty(ax))
+                    axis(ax);
+                end
                 xlabel('q_1');
                 ylabel('q_2');
             elseif (obj.numDofs == 3)
                 figure;
                 trisurf(obj.indices, obj.points(1,:), obj.points(2,:), obj.points(3,:), 'FaceAlpha', 0.8, 'LineWidth', 1.0, 'FaceColor', [0.7 0.7 0.7]);
                 axis equal;
+                if (~isempty(ax))
+                    axis(ax);
+                end
                 xlabel('q_1');
                 ylabel('q_2');
                 zlabel('q_3');
