@@ -42,8 +42,21 @@ classdef PointWorkspace < handle
         
         % Function to plot the workspace in 2D or 3D. For robots with more
         % than 3 DoFs, values of the fixed DoFs need to be provided to
-        % lower its dimension to 2D or 3D to be 
-        function c_workspace = plotWorkspace(obj, dofs_to_plot, conditions_ind, metrics, fixed_var_val)
+        % lower its dimension to 2D or 3D.
+        % 
+        % Inputs:
+        %   - dofs_to_plot: The array of the joint pose (q) indices to plot
+        %       in 2-D or 3-D (in the order of XYZ)
+        %   - conditions_ind: The array of the indices of the workspace 
+        %       conditions to be plotted
+        %   - metrics_ind: The array of the indices of the workspace 
+        %       metrics to be plotted
+        %   - fixed_var_val: The array of the values for the fixed
+        %       variables when the DoF of the robot is greater than the
+        %       dimension of the plot. Note that the dimension of the array
+        %       must the same as the DoF of the robot, the fixed values for
+        %       the DoFs to be plotted will be ignored.
+        function c_workspace = plotWorkspace(obj, dofs_to_plot, conditions_ind, metrics, axis, fixed_var_val)
             digit_tolerance = 4;
             
             % Start with a set of checking conditions
@@ -54,13 +67,16 @@ classdef PointWorkspace < handle
                  CASPR_log.Assert(length(fixed_var_val) == obj.model.numDofs, 'Input ''fixed_var_val'' must have the same dimension as the DoFs of the robot.');
             end
             
-            if nargin <= 2
+            if nargin < 3
                 conditions_ind = 1:length(obj.conditions);
             end
-            if nargin <= 3
+            if nargin < 4
                 metrics = [];
             end
-            if nargin <= 4
+            if nargin < 5
+                axis = [];
+            end
+            if nargin < 6
                 fixed_var_val = zeros(1, obj.model.numDofs);
             end
             
@@ -129,7 +145,7 @@ classdef PointWorkspace < handle
             end
             % universal plotting function for 2d/3d
             if ~isempty(matched_poses_indices)
-                c_workspace = universal_plot(obj,dofs_to_plot,points_to_plot,point_color_matrix);
+                c_workspace = universal_plot(obj, dofs_to_plot, points_to_plot, axis, point_color_matrix);
             else
                 CASPR_log.Warn('There are no points for this workspace to plot');
                 c_workspace = [];
@@ -304,7 +320,7 @@ classdef PointWorkspace < handle
         
     end
     methods (Access=private)
-        function c_workspace = universal_plot(obj, plot_axis, points_to_plot, point_color_matrix)
+        function c_workspace = universal_plot(obj, plot_axis, points_to_plot, ax, point_color_matrix)
             g = groot;
             if isempty(g.Children)
                 for i = size(point_color_matrix,1):-1:1
@@ -321,14 +337,18 @@ classdef PointWorkspace < handle
                     c = point_color_matrix(i,:);
                     
                     if size(unique(c),2) ==1
-                        c_workspace(i) = scatter(x,y,'filled','MarkerFaceColor','k');
+                        c_workspace(i) = scatter(x, y, 100, 'k', '.');
                     else
-                        c_workspace(i) = scatter(x,y,[],c','filled');
+                        c_workspace(i) = scatter(x, y, 100, c', '.');
                         colorbar;
                     end
-                    % plotting title and other stuff, nothing important
-                    xlim(1.005*[obj.model.bodyModel.q_min(plot_axis(1)),obj.model.bodyModel.q_max(plot_axis(1))]);
-                    ylim(1.005*[obj.model.bodyModel.q_min(plot_axis(2)),obj.model.bodyModel.q_max(plot_axis(2))]);
+                    if isempty(ax)
+                        % plotting title and other stuff, nothing important
+                        xlim(1.005*[obj.model.bodyModel.q_min(plot_axis(1)),obj.model.bodyModel.q_max(plot_axis(1))]);
+                        ylim(1.005*[obj.model.bodyModel.q_min(plot_axis(2)),obj.model.bodyModel.q_max(plot_axis(2))]);
+                    else
+                        axis(ax);
+                    end
                     title('2-D Workspace Plot');
                     xlabel(sprintf('q_%d', plot_axis(1)));
                     ylabel(sprintf('q_%d', plot_axis(2)));
@@ -342,17 +362,21 @@ classdef PointWorkspace < handle
                     c = point_color_matrix(i,:);
                     if size(unique(c),2) ==1
                         figure(c_workspace(i));
-                        c_workspace(i) = scatter3(x,y,z,'filled','MarkerFaceColor','k');
+                        c_workspace(i) = scatter3(x, y, z, 100, 'k', '.');
                     else
                         figure(c_workspace(i));
-                        c_workspace(i) = scatter3(x,y,z,[],c','filled');
+                        c_workspace(i) = scatter3(x, y, z, 100, c', '.');
                         colorbar;
                     end
                     
-                    % plotting title and other stuff, nothing important
-                    xlim(1.005*[obj.model.bodyModel.q_min(plot_axis(1)),obj.model.bodyModel.q_max(plot_axis(1))]);
-                    ylim(1.005*[obj.model.bodyModel.q_min(plot_axis(2)),obj.model.bodyModel.q_max(plot_axis(2))]);
-                    zlim(1.005*[obj.model.bodyModel.q_min(plot_axis(3)),obj.model.bodyModel.q_max(plot_axis(3))]);
+                    if isempty(ax)
+                        % plotting title and other stuff, nothing important
+                        xlim(1.005*[obj.model.bodyModel.q_min(plot_axis(1)),obj.model.bodyModel.q_max(plot_axis(1))]);
+                        ylim(1.005*[obj.model.bodyModel.q_min(plot_axis(2)),obj.model.bodyModel.q_max(plot_axis(2))]);
+                        zlim(1.005*[obj.model.bodyModel.q_min(plot_axis(3)),obj.model.bodyModel.q_max(plot_axis(3))]);
+                    else
+                        axis(ax);
+                    end
                     
                     title('3-D Workspace Plot');
                     xlabel(sprintf('q_%d', plot_axis(1)));
