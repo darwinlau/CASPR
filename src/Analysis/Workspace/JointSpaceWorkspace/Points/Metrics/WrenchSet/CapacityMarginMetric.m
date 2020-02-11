@@ -23,13 +23,13 @@ classdef CapacityMarginMetric < WorkspaceMetricBase
     end
     
     properties (SetAccess = protected)
-        desired_wrench_set
+        desiredWrenchSet
     end
     
     methods
         % Constructor
-        function m = CapacityMarginMetric(desired_wrench_set)
-            m.desired_wrench_set = desired_wrench_set;
+        function m = CapacityMarginMetric(desiredWrenchSet)
+            m.desiredWrenchSet = desiredWrenchSet;
         end
         
         % Evaluate Function implementation
@@ -42,11 +42,12 @@ classdef CapacityMarginMetric < WorkspaceMetricBase
                 v = -1;
             else
                 q   =   length(w.b);
-                p   =   size(obj.desired_wrench_set,2);
+                vert = obj.desiredWrenchSet.points;
+                p   =   size(vert, 2);
                 s   =   zeros(p,q);
                 for i = 1:p
                     for j=1:q
-                        s(i,j) = (w.b(j) - w.A(j,:)*obj.desired_wrench_set(:,i))/norm(w.A(j,:),2);
+                        s(i,j) = (w.b(j) - w.A(j,:)*vert(:,i))/norm(w.A(j,:), 2);
                     end
                 end
                 v = min(min(s));

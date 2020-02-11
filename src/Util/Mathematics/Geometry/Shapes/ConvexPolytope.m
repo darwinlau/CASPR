@@ -3,13 +3,11 @@
 % Author        : Darwin LAU
 % Created       : 2020
 % Description    :
-classdef ConvexPolytope < handle
+classdef ConvexPolytope < PointsSet
         
     properties (SetAccess = protected)
-        numDofs = 0                 % Number of DoFs of the convex polytope
         numFaces = 0                % Number of faces for the convex polytope
-        points = []                 % All points passed in to create the convex polytope
-        vertices = []               % Vertices of the convex polytope
+        all_points = []             % Vertices of the convex polytope
         indices = []                % Indices points that represent the verticles of the convex hull
         volume = 0                  % The volume of the polytope
         A = []                      % The polytope is described by A*w <= b
@@ -23,6 +21,8 @@ classdef ConvexPolytope < handle
         %   w = As * f + offset
         % Note: As is the structure matrix
         function ws = ConvexPolytope(W)
+            ws@PointsSet(W);
+            
             W_T = W';
             [K, vol] = convhulln(W_T);
             
@@ -62,10 +62,10 @@ classdef ConvexPolytope < handle
             ws.b = t_b(1:count-1);
             ws.numDofs = num_dofs;
             ws.numFaces = num_faces;
-            ws.points = W;
+            ws.all_points = W;
             ws.volume = vol;
             ws.indices = K;
-            ws.vertices = W(:, unique(K));
+            ws.points = W(:, unique(K));
         end
         
         % Approximate the wrench set with a sphere at position G with
