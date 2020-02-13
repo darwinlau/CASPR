@@ -45,28 +45,28 @@ classdef PointWorkspace < handle
         % Function to plot the workspace in 2D or 3D. For robots with more
         % than 3 DoFs, values of the fixed DoFs need to be provided to
         % lower its dimension to 2D or 3D.
-        % 
+        %
         % Inputs:
         %   - dofs_to_plot: The array of the joint pose (q) indices to plot
         %       in 2-D or 3-D (in the order of XYZ)
-        %   - conditions_ind: The array of the indices of the workspace 
+        %   - conditions_ind: The array of the indices of the workspace
         %       conditions to be plotted
-        %   - metrics_ind: The array of the indices of the workspace 
+        %   - metrics_ind: The array of the indices of the workspace
         %       metrics to be plotted
         %   - fixed_var_val: The array of the values for the fixed
         %       variables when the DoF of the robot is greater than the
         %       dimension of the plot. Note that the dimension of the array
         %       must the same as the DoF of the robot, the fixed values for
         %       the DoFs to be plotted will be ignored.
-        function w_handles = plotWorkspace(obj, dofs_to_plot, conditions_ind, metrics_ind, axis, fixed_var_val)
+        function w_handles = plotWorkspace(obj, dofs_to_plot, conditions_ind, metrics_ind, fixed_var_val)
             digit_tolerance = 4;
             
             % Start with a set of checking conditions
             CASPR_log.Assert(length(dofs_to_plot) == 2 || length(dofs_to_plot) == 3, 'Number of DoFs to plot must be 2 or 3, otherwise it cannot be plotted.');
             CASPR_log.Assert(length(dofs_to_plot) <= obj.model.numDofs, 'The number of DoFs to plot is more than the degrees of freedom available.');
             if (length(dofs_to_plot) > obj.model.numDofs)
-                 CASPR_log.Assert(nargin > 4, 'Must input ''fixed_var_val'' if the DoFs to plot does not cover all DoFs.');  
-                 CASPR_log.Assert(length(fixed_var_val) == obj.model.numDofs, 'Input ''fixed_var_val'' must have the same dimension as the DoFs of the robot.');
+                CASPR_log.Assert(nargin > 4, 'Must input ''fixed_var_val'' if the DoFs to plot does not cover all DoFs.');
+                CASPR_log.Assert(length(fixed_var_val) == obj.model.numDofs, 'Input ''fixed_var_val'' must have the same dimension as the DoFs of the robot.');
             end
             
             % If no argument or conditions_ind is empty, then all
@@ -80,7 +80,7 @@ classdef PointWorkspace < handle
                 conditions_ind = [];
             end
             % If no argument or metrics_ind is empty, then all metrics will
-            % be plotted. 
+            % be plotted.
             % If metrics_ind == [0], then no metrics will be plotted even
             % any exist
             if nargin < 4 || isempty(metrics_ind)
@@ -88,10 +88,10 @@ classdef PointWorkspace < handle
             elseif metrics_ind == 0
                 metrics_ind = [];
             end
+%             if nargin < 5
+%                 axis = [];
+%             end
             if nargin < 5
-                axis = [];
-            end
-            if nargin < 6
                 fixed_var_val = zeros(1, obj.model.numDofs);
             end
             
@@ -101,21 +101,21 @@ classdef PointWorkspace < handle
             num_metrics = size(metrics_ind,2);
             
             point_color_matrix = 0;
-                
+            
             % Filter out the points to plot
             if ~isempty(conditions_ind)
                 filtered_node_list = create_node_list(obj, conditions_ind);
                 pose_data = round(filtered_node_list(:,2:end), digit_tolerance);
-            % If no conditions then all points should be plotted
-            else    
+                % If no conditions then all points should be plotted
+            else
                 num_poses = size(obj.poses, 1);
                 pose_data = zeros(num_poses, obj.model.numDofs);
                 filtered_node_list = zeros(num_poses, obj.model.numDofs+1);
-                %filtered_node_list  
+                %filtered_node_list
                 for i = 1:num_poses
                     pose_data(i,:) = round(obj.poses{i}.pose',digit_tolerance);
                     filtered_node_list(i,:) = [i, obj.poses{i}.pose'];
-                end                
+                end
             end
             fixed_var_val = round(fixed_var_val,digit_tolerance);
             pose_data(:, dofs_to_plot) = [];
@@ -134,12 +134,13 @@ classdef PointWorkspace < handle
                     end
                 end
             end
-                       
+            
             % universal plotting function for 2d/3d
             if ~isempty(matched_poses_indices)
                 w_handles = universal_plot(obj, dofs_to_plot, points_to_plot, axis, point_color_matrix);
             else
                 CASPR_log.Warn('There are no points for this workspace to plot');
+                cla
                 w_handles = [];
             end
         end
@@ -157,17 +158,18 @@ classdef PointWorkspace < handle
                 CASPR_log.Error('No sliding options for this axis')
             end
             
-            
-            
             for i = 1:num_metrics
                 f(i) = figure(i);
+                f(i) = plotWorkspace(obj,plot_axis,conditions_ind, metrics{i},fixed_variables);
                 
-                b(i) = uicontrol('Parent',f(i),'Style','slider','Position',[0,0,400,20],'value',fixed_variables(slide_axis), 'min',obj.grid.q_begin(slide_axis), 'max',obj.grid.q_end(slide_axis),...
+                b(i) = uicontrol('Parent',f(i),'Position',[0,0,400,20],'Style','slider','value',fixed_variables(slide_axis), 'min',obj.grid.q_begin(slide_axis), 'max',obj.grid.q_end(slide_axis),...
                     'sliderstep',[1/(obj.grid.q_length(slide_axis)-1),1/(obj.grid.q_length(slide_axis)-1)]);
                 current_fixed_variables = fixed_variables;
+      
+                b(i).Callback = @(es,ed) refreshdata(f(i),plotWorkspace(obj,plot_axis,conditions_ind, metrics{i}, [current_fixed_variables(1:slide_axis-1);es.Value;current_fixed_variables(slide_axis+1:end)]));
                 
-                b(i).Callback = @(es,ed) refreshdata(f(i),plotWorkspace(obj,plot_axis,conditions_ind, metrics{i}, [current_fixed_variables(1:slide_axis-1),es.Value,current_fixed_variables(slide_axis+1:end)]));
             end
+            
         end
         
         % A function for plotting a graph
@@ -317,16 +319,16 @@ classdef PointWorkspace < handle
     methods (Access=private)
         function w_handles = universal_plot(obj, plot_axis, points_to_plot, ax, point_color_matrix)
             g = groot;
-                for i = 1:size(point_color_matrix,1)
+            %                 for i = 1:size(point_color_matrix,1)
+            %                     w_handles(i) = figure;%(i);
+            %                 end
+            if isempty(g.Children)
+                for i = size(point_color_matrix,1):-1:1
                     w_handles(i) = figure;%(i);
                 end
-%             if isempty(g.Children)
-%                 for i = size(point_color_matrix,1):-1:1
-%                     w_handles(i) = figure;%(i);
-%                 end
-%             elseif ~isempty(g.Children)
-%                 w_handles = g.CurrentFigure;
-%             end
+            elseif ~isempty(g.Children)
+                w_handles = g.CurrentFigure;
+            end
             
             if size(plot_axis,2) == 2 %plot 2D
                 
@@ -393,6 +395,7 @@ classdef PointWorkspace < handle
         function node_list = create_node_list(obj, conditions_ind)
             pose_data = obj.poses;
             number_points = length(pose_data);
+            condition_indices = 1:length(obj.conditions);
             % Create list of nodes
             node_list = zeros(number_points,1+obj.grid.n_dimensions);
             number_node = 0;
@@ -402,10 +405,13 @@ classdef PointWorkspace < handle
                 if(~isempty(pose_data{i}))
                     n_conditions = length(pose_data{i}.conditions);
                     if n_conditions ~=0
-                        if (all(ismember(conditions_ind, pose_data{i}.conditionsIndices)))
+                        if (all(ismember(conditions_ind, condition_indices)))
                             number_node = number_node + 1;
                             node_list(number_node,:) = [i, pose_data{i}.pose'];
+                        else
+                            CASPR_log.Error('No available workspace conditions');
                         end
+                        
                     end
                 end
             end
@@ -444,16 +450,3 @@ classdef PointWorkspace < handle
         
     end
 end
-
-% % function to handle numerous inputs to processable inputs
-% function output_types = input_conversion(input)
-% 
-% num_input= size(input,1);
-% 
-% if num_input == 1 && ~iscell(input)
-%     input = mat2cell(input,1);
-% end
-% for i = 1:num_input
-%     output_types(i) = input{i,1}.type;
-% end
-% end
