@@ -8,7 +8,8 @@ classdef PointWorkspace < handle
     properties (SetAccess = protected)
         model
         grid                        % Grid object for brute force workspace
-        conditions
+        conditions                  % Cell array of workspace conditions
+        metrics                     % Cell array of workspace metrics
     end
     
     properties
@@ -18,10 +19,11 @@ classdef PointWorkspace < handle
     end
     
     methods
-        function pw = PointWorkspace(model, conditions, grid)
+        function pw = PointWorkspace(model, conditions, metrics, grid)
             pw.model = model;
             pw.grid = grid;
             pw.conditions = conditions;
+            pw.metrics = metrics;
             pw.poses = cell(grid.n_points,1);
         end
         
@@ -56,22 +58,35 @@ classdef PointWorkspace < handle
         %       dimension of the plot. Note that the dimension of the array
         %       must the same as the DoF of the robot, the fixed values for
         %       the DoFs to be plotted will be ignored.
-        function c_workspace = plotWorkspace(obj, dofs_to_plot, conditions_ind, metrics, axis, fixed_var_val)
+        function w_handles = plotWorkspace(obj, dofs_to_plot, conditions_ind, metrics_ind, axis, fixed_var_val)
             digit_tolerance = 4;
             
             % Start with a set of checking conditions
             CASPR_log.Assert(length(dofs_to_plot) == 2 || length(dofs_to_plot) == 3, 'Number of DoFs to plot must be 2 or 3, otherwise it cannot be plotted.');
             CASPR_log.Assert(length(dofs_to_plot) <= obj.model.numDofs, 'The number of DoFs to plot is more than the degrees of freedom available.');
             if (length(dofs_to_plot) > obj.model.numDofs)
-                 CASPR_log.Assert(nargin > 4, 'Must input ''fixed_var_val'' if the DoFs to plot does not cover all DoFs.');
+                 CASPR_log.Assert(nargin > 4, 'Must input ''fixed_var_val'' if the DoFs to plot does not cover all DoFs.');  
                  CASPR_log.Assert(length(fixed_var_val) == obj.model.numDofs, 'Input ''fixed_var_val'' must have the same dimension as the DoFs of the robot.');
             end
             
-            if nargin < 3
+            % If no argument or conditions_ind is empty, then all
+            % conditions will be plotted.
+            % If conditions_ind == [0], then the metrics for any points
+            % within the PointWorkspace (hence the union of the workspace
+            % conditions) will be plotted.
+            if nargin < 3 || isempty(conditions_ind)
                 conditions_ind = 1:length(obj.conditions);
+            elseif conditions_ind == 0
+                conditions_ind = [];
             end
-            if nargin < 4
-                metrics = [];
+            % If no argument or metrics_ind is empty, then all metrics will
+            % be plotted. 
+            % If metrics_ind == [0], then no metrics will be plotted even
+            % any exist
+            if nargin < 4 || isempty(metrics_ind)
+                metrics_ind = 1:length(obj.metrics);
+            elseif metrics_ind == 0
+                metrics_ind = [];
             end
             if nargin < 5
                 axis = [];
@@ -80,80 +95,57 @@ classdef PointWorkspace < handle
                 fixed_var_val = zeros(1, obj.model.numDofs);
             end
             
-            fixed_var_val = reshape(fixed_var_val, [1,obj.model.numDofs]);
+            CASPR_log.Assert(~isempty(conditions_ind) || ~isempty(metrics_ind), 'There should at least be one metric or condition specified.');
             
-            num_metrics = size(metrics,2);
-            if ~isempty(conditions_ind) && isempty(metrics)
+            fixed_var_val = reshape(fixed_var_val, [1,obj.model.numDofs]);
+            num_metrics = size(metrics_ind,2);
+            
+            point_color_matrix = 0;
+                
+            % Filter out the points to plot
+            if ~isempty(conditions_ind)
                 filtered_node_list = create_node_list(obj, conditions_ind);
-                
-                pose_data = round(filtered_node_list(:,2:end),digit_tolerance);
-                fixed_var_val = round(fixed_var_val,digit_tolerance);
-                pose_data(:, dofs_to_plot) = [];
-                fixed_var_val(:, dofs_to_plot) = [];
-                
-                matched_poses_indices = find(ismember(pose_data,fixed_var_val,'rows'));
-                
-                points_to_plot = filtered_node_list(matched_poses_indices,2:end);
-                point_color_matrix = 0;
-            elseif ~isempty(conditions_ind) && ~isempty(metrics)
-                filtered_node_list = create_node_list(obj, conditions_ind);
-                metric_types = input_conversion(metrics');
-                pose_metric_types = input_conversion(obj.poses{1}.metrics);
-                
-                if(all(ismember(metric_types,pose_metric_types)))
-                    pose_data = round(filtered_node_list(:,2:end),digit_tolerance);
-                    fixed_var_val = round(fixed_var_val,digit_tolerance);
-                    pose_data(:, dofs_to_plot) = [];
-                    fixed_var_val(:, dofs_to_plot) = [];
-                    
-                    matched_poses_indices = find(ismember(pose_data,fixed_var_val,'rows'));
-                        
-                    points_to_plot = filtered_node_list(matched_poses_indices,2:end);
-                    
-                    for i = 1:size(matched_poses_indices,1)
-                        for j = 1:num_metrics
-                            metrics_indices = find(ismember(pose_metric_types,metric_types(j)));
-                            point_color_matrix(j,i) = cell2mat(obj.poses{filtered_node_list(matched_poses_indices(i,1))}.metrics(metrics_indices,2));
-                        end
-                    end
-                else
-                    CASPR_log.Error('Input metric(s) NOT exist in the workspace metric(s)')
-                end
-            elseif ~isempty(metrics) && isempty(conditions_ind)
-                metric_types = input_conversion(metrics');
-                pose_metric_types = input_conversion(obj.poses{1}.metrics);
-                
-                for i = 1:size(obj.poses,1)
+                pose_data = round(filtered_node_list(:,2:end), digit_tolerance);
+            % If no conditions then all points should be plotted
+            else    
+                num_poses = size(obj.poses, 1);
+                pose_data = zeros(num_poses, obj.model.numDofs);
+                filtered_node_list = zeros(num_poses, obj.model.numDofs+1);
+                %filtered_node_list  
+                for i = 1:num_poses
                     pose_data(i,:) = round(obj.poses{i}.pose',digit_tolerance);
-                    filtered_node_list(i,:) = obj.poses{i}.pose';
-                end
-                fixed_var_val = round(fixed_var_val,digit_tolerance);
-                pose_data(:,[dofs_to_plot]) = [];
-                fixed_var_val(:,[dofs_to_plot]) = [];
-                
-                matched_poses_indices = find(ismember(pose_data,fixed_var_val,'rows'));
-                
-                points_to_plot = filtered_node_list(matched_poses_indices,:);
+                    filtered_node_list(i,:) = [i, obj.poses{i}.pose'];
+                end                
+            end
+            fixed_var_val = round(fixed_var_val,digit_tolerance);
+            pose_data(:, dofs_to_plot) = [];
+            fixed_var_val(:, dofs_to_plot) = [];
+            matched_poses_indices = find(ismember(pose_data, fixed_var_val, 'rows'));
+            points_to_plot = filtered_node_list(matched_poses_indices, 2:end);
+            
+            % Construct the point colour matrix if there are metrics to
+            % plot
+            if ~isempty(metrics_ind)
+                point_color_matrix = zeros(num_metrics, size(matched_poses_indices,1));
                 for i = 1:size(matched_poses_indices,1)
                     for j = 1:num_metrics
-                        metrics_indices = find(ismember(pose_metric_types,metric_types(j)));
-                        point_color_matrix(j,i) = obj.poses{i}.metrics{metrics_indices,2};
+                        %metrics_indices = find(ismember(pose_metric_types,metric_types(j)));
+                        point_color_matrix(j,i) = obj.poses{filtered_node_list(matched_poses_indices(i),1)}.metrics{metrics_ind(j),2};
                     end
                 end
-            else
-                CASPR_log.Error('At least one of the metrics or conditions should be the input')
             end
+                       
             % universal plotting function for 2d/3d
             if ~isempty(matched_poses_indices)
-                c_workspace = universal_plot(obj, dofs_to_plot, points_to_plot, axis, point_color_matrix);
+                w_handles = universal_plot(obj, dofs_to_plot, points_to_plot, axis, point_color_matrix);
             else
                 CASPR_log.Warn('There are no points for this workspace to plot');
-                c_workspace = [];
+                w_handles = [];
             end
         end
         
         % Plotting function to plot 2D/3D (subset of the) workspace with slider
-        function f = plotWorkspaceSlider(obj,plot_axis,slide_axis,conditions, metrics, fixed_variables)
+        function f = plotWorkspaceSlider(obj, plot_axis, slide_axis, conditions_ind, metrics, fixed_variables)
             num_metrics = size(metrics,2);
             if num_metrics == 1
                 metrics = mat2cell(metrics,1);
@@ -164,6 +156,9 @@ classdef PointWorkspace < handle
             if obj.grid.q_begin(slide_axis) == obj.grid.q_end(slide_axis)
                 CASPR_log.Error('No sliding options for this axis')
             end
+            
+            
+            
             for i = 1:num_metrics
                 f(i) = figure(i);
                 
@@ -171,7 +166,7 @@ classdef PointWorkspace < handle
                     'sliderstep',[1/(obj.grid.q_length(slide_axis)-1),1/(obj.grid.q_length(slide_axis)-1)]);
                 current_fixed_variables = fixed_variables;
                 
-                b(i).Callback = @(es,ed) refreshdata(f(i),plotWorkspace(obj,plot_axis,conditions, metrics{i}, [current_fixed_variables(1:slide_axis-1),es.Value,current_fixed_variables(slide_axis+1:end)]));
+                b(i).Callback = @(es,ed) refreshdata(f(i),plotWorkspace(obj,plot_axis,conditions_ind, metrics{i}, [current_fixed_variables(1:slide_axis-1),es.Value,current_fixed_variables(slide_axis+1:end)]));
             end
         end
         
@@ -320,15 +315,19 @@ classdef PointWorkspace < handle
         
     end
     methods (Access=private)
-        function c_workspace = universal_plot(obj, plot_axis, points_to_plot, ax, point_color_matrix)
+        function w_handles = universal_plot(obj, plot_axis, points_to_plot, ax, point_color_matrix)
             g = groot;
-            if isempty(g.Children)
-                for i = size(point_color_matrix,1):-1:1
-                    c_workspace(i) = figure(i);
+                for i = 1:size(point_color_matrix,1)
+                    w_handles(i) = figure;%(i);
                 end
-            elseif ~isempty(g.Children)
-                c_workspace = g.CurrentFigure;
-            end
+%             if isempty(g.Children)
+%                 for i = size(point_color_matrix,1):-1:1
+%                     w_handles(i) = figure;%(i);
+%                 end
+%             elseif ~isempty(g.Children)
+%                 w_handles = g.CurrentFigure;
+%             end
+            
             if size(plot_axis,2) == 2 %plot 2D
                 
                 x = points_to_plot(:,plot_axis(1));
@@ -336,10 +335,12 @@ classdef PointWorkspace < handle
                 for i = 1:size(point_color_matrix,1)
                     c = point_color_matrix(i,:);
                     
-                    if size(unique(c),2) ==1
-                        c_workspace(i) = scatter(x, y, 100, 'k', '.');
+                    if size(unique(c),2) == 1
+                        figure(w_handles(i));
+                        scatter(x, y, 100, 'k', '.');
                     else
-                        c_workspace(i) = scatter(x, y, 100, c', '.');
+                        figure(w_handles(i));
+                        scatter(x, y, 100, c', '.');
                         colorbar;
                     end
                     if isempty(ax)
@@ -361,11 +362,11 @@ classdef PointWorkspace < handle
                 for i = 1:size(point_color_matrix,1)
                     c = point_color_matrix(i,:);
                     if size(unique(c),2) ==1
-                        figure(c_workspace(i));
-                        c_workspace(i) = scatter3(x, y, z, 100, 'k', '.');
+                        figure(w_handles(i));
+                        scatter3(x, y, z, 100, 'k', '.');
                     else
-                        figure(c_workspace(i));
-                        c_workspace(i) = scatter3(x, y, z, 100, c', '.');
+                        figure(w_handles(i));
+                        scatter3(x, y, z, 100, c', '.');
                         colorbar;
                     end
                     
@@ -403,7 +404,7 @@ classdef PointWorkspace < handle
                     if n_conditions ~=0
                         if (all(ismember(conditions_ind, pose_data{i}.conditionsIndices)))
                             number_node = number_node + 1;
-                            node_list(number_node,:) = [number_node, pose_data{i}.pose'];
+                            node_list(number_node,:) = [i, pose_data{i}.pose'];
                         end
                     end
                 end
@@ -444,15 +445,15 @@ classdef PointWorkspace < handle
     end
 end
 
-% function to handle numerous inputs to processable inputs
-function output_types = input_conversion(input)
-
-num_input= size(input,1);
-
-if num_input == 1 && ~iscell(input)
-    input = mat2cell(input,1);
-end
-for i = 1:num_input
-    output_types(i) = input{i,1}.type;
-end
-end
+% % function to handle numerous inputs to processable inputs
+% function output_types = input_conversion(input)
+% 
+% num_input= size(input,1);
+% 
+% if num_input == 1 && ~iscell(input)
+%     input = mat2cell(input,1);
+% end
+% for i = 1:num_input
+%     output_types(i) = input{i,1}.type;
+% end
+% end
