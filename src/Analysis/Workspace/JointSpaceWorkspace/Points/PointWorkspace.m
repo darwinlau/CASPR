@@ -169,6 +169,7 @@ classdef PointWorkspace < handle
                 b(i).Callback = @(es,ed) refreshdata(f(i),plotWorkspace(obj,plot_axis,conditions_ind, metrics{i},[0 1 0 1], [current_fixed_variables(1:slide_axis-1);es.Value;current_fixed_variables(slide_axis+1:end)]));
                 
             end
+            
         end
         
         % A function for plotting a graph
