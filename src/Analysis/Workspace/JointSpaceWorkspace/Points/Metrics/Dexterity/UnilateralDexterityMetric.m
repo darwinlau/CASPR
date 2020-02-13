@@ -26,6 +26,9 @@ classdef UnilateralDexterityMetric < WorkspaceMetricBase
     methods
         % Constructor
         function m = UnilateralDexterityMetric(options)
+            if (nargin >= 1)
+                m.options = options;
+            end
         end
         
         % Evaluate function implementation
