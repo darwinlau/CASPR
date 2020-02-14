@@ -191,7 +191,8 @@ classdef PointWorkspace < handle
                 obj.layer_ws_figure{i,current_q_index} = figure_date;
                 
                 b(i) = uicontrol('Parent', f(i), 'Position', [80, 10, 400, 15], ...
-                    'Style', 'slider', 'value', fixed_variables(slide_axis), 'min', obj.grid.q_begin(slide_axis), 'max', obj.grid.q_end(slide_axis), ...
+                    'Style', 'slider', 'value', fixed_variables(slide_axis),...
+                    'min', obj.grid.q_begin(slide_axis), 'max', obj.grid.q_end(slide_axis), ...
                     'sliderstep',[1/(obj.grid.q_length(slide_axis)-1),1/(obj.grid.q_length(slide_axis)-1)]);
                 current_fixed_variables = fixed_variables;
                 
@@ -199,12 +200,20 @@ classdef PointWorkspace < handle
                 b(i).Callback = @(es,ed) refreshdata(f(i),plot_fig(obj,i,slide_axis,...
                     plot_axis,conditions_ind, metrics{i}, [current_fixed_variables(1:slide_axis-1);es.Value;current_fixed_variables(slide_axis+1:end)]));
             end
-            
         end
         
         function fig = reloadFig(obj,metric_num,slide_axis,plot_axis,conditions_ind,metrics,var)
+            
             layer_indices = 1:obj.grid.q_length(slide_axis);
             q_grid = obj.grid.q_begin(slide_axis) + (layer_indices-1)*obj.grid.delta_q(slide_axis);
+            slider_pos_1 = find(var(slide_axis) <= q_grid);
+            slider_pos_2 = find(var(slide_axis) >= q_grid);
+            if q_grid(slider_pos_1(1)) - var(slide_axis) > q_grid(slider_pos_2(end)) - var(slide_axis)
+                var(slide_axis) = q_grid(slider_pos_1(1));
+            else
+                var(slide_axis) = q_grid(slider_pos_2(end));
+            end
+            
             current_fixed_variables = var;
             current_q_index = find(round(q_grid - current_fixed_variables(slide_axis),10) == 0);
             
