@@ -198,7 +198,7 @@ classdef PointWorkspace < handle
             layer_indices = 1:obj.grid.q_length(slide_axis);
             q_grid = obj.grid.q_begin(slide_axis) + (layer_indices-1)*obj.grid.delta_q(slide_axis);
             current_fixed_variables = var;
-            current_q_index = find(ismember(q_grid,current_fixed_variables(slide_axis)));
+            current_q_index = find(round(q_grid - current_fixed_variables(slide_axis),10) == 0);
             
             if ~isempty(obj.layer_ws_figure{metric_num,current_q_index})
                 hold on;
