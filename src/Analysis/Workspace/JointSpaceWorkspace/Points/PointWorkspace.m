@@ -168,28 +168,31 @@ classdef PointWorkspace < handle
             if isempty(current_q_index)
                 CASPR_log.Error('Initial value not available, choose another value');
             end
-            
+                   
             for i = 1:num_metrics
-                f(i) = figure(i);
+                f(i) = figure;
+                f(i).Visible = 'on';
                 ax = axes('Parent', f(i), 'position', [0.15 0.2 0.7 0.7]);
                 workspace_fig = plotWorkspace(obj,plot_axis,conditions_ind, metrics{i},fixed_variables);
                 if isempty(workspace_fig)
                     f(i) = figure(i);
                     figure_date = [];
                 else
-                ax_old = gcf;
-                scatter_data = findobj(ax_old.Children,'-property','YData');
-                % save important data from the plot for recalling the plot again, do not need to recalculate the node list 
-                figure_date.XData = scatter_data.XData;
-                figure_date.YData = scatter_data.YData;
-                figure_date.ZData = scatter_data.ZData;
-                figure_date.CData = scatter_data.CData;
-                figure_date.Marker = scatter_data.Marker;
-                figure_date.MarkerEdgeColor = scatter_data.MarkerEdgeColor;
-                figure_date.MarkerFaceColor = scatter_data.MarkerFaceColor;
-                figure_date.SizeData = scatter_data.SizeData;
-                figure_date.LineWidth = scatter_data.LineWidth;
+                    f(i) = workspace_fig;
+                    ax_old = gcf;
+                    scatter_data = findobj(ax_old.Children,'-property','YData');
+                    % save important data from the plot for recalling the plot again, do not need to recalculate the node list
+                    figure_date.XData = scatter_data.XData;
+                    figure_date.YData = scatter_data.YData;
+                    figure_date.ZData = scatter_data.ZData;
+                    figure_date.CData = scatter_data.CData;
+                    figure_date.Marker = scatter_data.Marker;
+                    figure_date.MarkerEdgeColor = scatter_data.MarkerEdgeColor;
+                    figure_date.MarkerFaceColor = scatter_data.MarkerFaceColor;
+                    figure_date.SizeData = scatter_data.SizeData;
+                    figure_date.LineWidth = scatter_data.LineWidth;
                 end
+               
                 q_grid = obj.grid.q_begin(slide_axis) + (layer_indices-1)*obj.grid.delta_q(slide_axis);
                 current_fixed_variables = fixed_variables;
                 current_q_index = find(round(q_grid - fixed_variables(slide_axis),10) == 0);
@@ -235,28 +238,28 @@ classdef PointWorkspace < handle
                 cla
                 dataObjs = obj.layer_ws_figure{metric_num,current_q_index};
                 if ~isempty(dataObjs)
-                if isempty(dataObjs.ZData)
-                    fig = scatter(dataObjs.XData,dataObjs.YData,dataObjs.SizeData,dataObjs.CData,dataObjs.Marker);
-                else
-                    fig = scatter3(dataObjs.XData,dataObjs.YData,dataObjs.SizeData,dataObjs.CData,dataObjs.Marker);
-                end
+                    if isempty(dataObjs.ZData)
+                        fig = scatter(dataObjs.XData,dataObjs.YData,dataObjs.SizeData,dataObjs.CData,dataObjs.Marker);
+                    else
+                        fig = scatter3(dataObjs.XData,dataObjs.YData,dataObjs.SizeData,dataObjs.CData,dataObjs.Marker);
+                    end
                 end
             else
                 fig = plotWorkspace(obj,plot_axis,conditions_ind, metrics, var);
                 ax_old = gcf;
                 scatter_data = findobj(ax_old.Children,'-property','YData');
                 if ~isempty(scatter_data)
-                % save important data from the plot for recalling the plot again, do not need to recalculate the node list 
-                
-                figure_date.XData = scatter_data.XData;
-                figure_date.YData = scatter_data.YData;
-                figure_date.ZData = scatter_data.ZData;
-                figure_date.CData = scatter_data.CData;
-                figure_date.Marker = scatter_data.Marker;
-                figure_date.MarkerEdgeColor = scatter_data.MarkerEdgeColor;
-                figure_date.MarkerFaceColor = scatter_data.MarkerFaceColor;
-                figure_date.SizeData = scatter_data.SizeData;
-                figure_date.LineWidth = scatter_data.LineWidth;
+                    % save important data from the plot for recalling the plot again, do not need to recalculate the node list
+                    
+                    figure_date.XData = scatter_data.XData;
+                    figure_date.YData = scatter_data.YData;
+                    figure_date.ZData = scatter_data.ZData;
+                    figure_date.CData = scatter_data.CData;
+                    figure_date.Marker = scatter_data.Marker;
+                    figure_date.MarkerEdgeColor = scatter_data.MarkerEdgeColor;
+                    figure_date.MarkerFaceColor = scatter_data.MarkerFaceColor;
+                    figure_date.SizeData = scatter_data.SizeData;
+                    figure_date.LineWidth = scatter_data.LineWidth;
                 else
                     figure_date = [];
                 end
