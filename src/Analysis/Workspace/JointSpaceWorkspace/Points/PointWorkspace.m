@@ -177,9 +177,17 @@ classdef PointWorkspace < handle
                 figure_date.SizeData = scatter_data.SizeData;
                 figure_date.LineWidth = scatter_data.LineWidth;
                 
+                q_grid = obj.grid.q_begin(slide_axis) + (layer_indices-1)*obj.grid.delta_q(slide_axis);
                 current_fixed_variables = fixed_variables;
                 current_q_index = find(ismember(q_grid,current_fixed_variables(slide_axis)));
-
+                title(['Current q_',num2str(slide_axis),' is ', num2str(current_fixed_variables(slide_axis))]);
+                t = annotation('textbox', [0.15, 0.03, 0.1, 0.1], 'String',...
+                    ['min = ',num2str(q_grid(1))]);
+                t.LineStyle = 'none';
+                t = annotation('textbox', [0.7, 0.03, 0.1, 0.1], 'String',...
+                    ['max = ',num2str(q_grid(end))]);
+                t.LineStyle = 'none';
+                
                 obj.layer_ws_figure{i,current_q_index} = figure_date;
                 
                 b(i) = uicontrol('Parent', f(i), 'Position', [80, 10, 400, 15], ...
@@ -232,6 +240,7 @@ classdef PointWorkspace < handle
                 end
                 obj.layer_ws_figure{metric_num,current_q_index} = figure_date;
             end
+            title(['Current q_',num2str(slide_axis),' is ', num2str(current_fixed_variables(slide_axis))]);
         end
         
         % A function for plotting a graph
