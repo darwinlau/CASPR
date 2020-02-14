@@ -88,9 +88,6 @@ classdef PointWorkspace < handle
             elseif metrics_ind == 0
                 metrics_ind = [];
             end
-%             if nargin < 5
-%                 axis = [];
-%             end
             if nargin < 5
                 fixed_var_val = zeros(1, obj.model.numDofs);
             end
@@ -137,7 +134,7 @@ classdef PointWorkspace < handle
             
             % universal plotting function for 2d/3d
             if ~isempty(matched_poses_indices)
-                w_handles = universal_plot(obj, dofs_to_plot, points_to_plot, axis, point_color_matrix);
+                w_handles = universal_plot(obj, dofs_to_plot, points_to_plot, point_color_matrix);
             else
                 CASPR_log.Warn('There are no points for this workspace to plot');
                 cla
@@ -160,9 +157,10 @@ classdef PointWorkspace < handle
             
             for i = 1:num_metrics
                 f(i) = figure(i);
+                ax = axes('Parent', f(i), 'position', [0.15 0.2 0.7 0.7]);
                 f(i) = plotWorkspace(obj,plot_axis,conditions_ind, metrics{i},fixed_variables);
-                
-                b(i) = uicontrol('Parent',f(i),'Position',[0,0,400,20],'Style','slider','value',fixed_variables(slide_axis), 'min',obj.grid.q_begin(slide_axis), 'max',obj.grid.q_end(slide_axis),...
+                b(i) = uicontrol('Parent', f(i), 'Position', [80, 10, 400, 15], ...
+                    'Style', 'slider', 'value', fixed_variables(slide_axis), 'min', obj.grid.q_begin(slide_axis), 'max', obj.grid.q_end(slide_axis), ...
                     'sliderstep',[1/(obj.grid.q_length(slide_axis)-1),1/(obj.grid.q_length(slide_axis)-1)]);
                 current_fixed_variables = fixed_variables;
       
@@ -317,7 +315,7 @@ classdef PointWorkspace < handle
         
     end
     methods (Access=private)
-        function w_handles = universal_plot(obj, plot_axis, points_to_plot, ax, point_color_matrix)
+        function w_handles = universal_plot(obj, plot_axis, points_to_plot, point_color_matrix)
             g = groot;
             %                 for i = 1:size(point_color_matrix,1)
             %                     w_handles(i) = figure;%(i);
@@ -345,14 +343,10 @@ classdef PointWorkspace < handle
                         scatter(x, y, 100, c', '.');
                         colorbar;
                     end
-                    if isempty(ax)
-                        % plotting title and other stuff, nothing important
-                        xlim(1.005*[obj.model.bodyModel.q_min(plot_axis(1)),obj.model.bodyModel.q_max(plot_axis(1))]);
-                        ylim(1.005*[obj.model.bodyModel.q_min(plot_axis(2)),obj.model.bodyModel.q_max(plot_axis(2))]);
-                    else
-                        axis(ax);
-                    end
-                    title('2-D Workspace Plot');
+                    
+                    % plotting title and other stuff, nothing important
+                    xlim(1.005*[obj.model.bodyModel.q_min(plot_axis(1)),obj.model.bodyModel.q_max(plot_axis(1))]);
+                    ylim(1.005*[obj.model.bodyModel.q_min(plot_axis(2)),obj.model.bodyModel.q_max(plot_axis(2))]);
                     xlabel(sprintf('q_%d', plot_axis(1)));
                     ylabel(sprintf('q_%d', plot_axis(2)));
                 end
@@ -372,14 +366,10 @@ classdef PointWorkspace < handle
                         colorbar;
                     end
                     
-                    if isempty(ax)
-                        % plotting title and other stuff, nothing important
-                        xlim(1.005*[obj.model.bodyModel.q_min(plot_axis(1)),obj.model.bodyModel.q_max(plot_axis(1))]);
-                        ylim(1.005*[obj.model.bodyModel.q_min(plot_axis(2)),obj.model.bodyModel.q_max(plot_axis(2))]);
-                        zlim(1.005*[obj.model.bodyModel.q_min(plot_axis(3)),obj.model.bodyModel.q_max(plot_axis(3))]);
-                    else
-                        axis(ax);
-                    end
+                    % plotting title and other stuff, nothing important
+                    xlim(1.005*[obj.model.bodyModel.q_min(plot_axis(1)),obj.model.bodyModel.q_max(plot_axis(1))]);
+                    ylim(1.005*[obj.model.bodyModel.q_min(plot_axis(2)),obj.model.bodyModel.q_max(plot_axis(2))]);
+                    zlim(1.005*[obj.model.bodyModel.q_min(plot_axis(3)),obj.model.bodyModel.q_max(plot_axis(3))]);
                     
                     title('3-D Workspace Plot');
                     xlabel(sprintf('q_%d', plot_axis(1)));
