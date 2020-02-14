@@ -157,13 +157,26 @@ classdef PointWorkspace < handle
             if obj.grid.q_begin(slide_axis) == obj.grid.q_end(slide_axis)
                 CASPR_log.Error('No sliding options for this axis')
             end
+            if ismember(slide_axis,plot_axis)
+                CASPR_log.Error('Sliding axis cannot be the plotting axis');
+            end
             layer_indices = 1:obj.grid.q_length(slide_axis);
             q_grid = obj.grid.q_begin(slide_axis) + (layer_indices-1)*obj.grid.delta_q(slide_axis);
             obj.layer_ws_figure = cell(num_metrics,obj.grid.q_length(slide_axis));
+            current_q_index = find(round(q_grid - fixed_variables(slide_axis),10) == 0);
+            
+            if isempty(current_q_index)
+                CASPR_log.Error('Initial value not available, choose another value');
+            end
+            
             for i = 1:num_metrics
                 f(i) = figure(i);
                 ax = axes('Parent', f(i), 'position', [0.15 0.2 0.7 0.7]);
-                f(i) = plotWorkspace(obj,plot_axis,conditions_ind, metrics{i},fixed_variables);
+                workspace_fig = plotWorkspace(obj,plot_axis,conditions_ind, metrics{i},fixed_variables);
+                if isempty(workspace_fig)
+                    f(i) = figure(i);
+                    figure_date = [];
+                else
                 ax_old = gcf;
                 scatter_data = findobj(ax_old.Children,'-property','YData');
                 % save important data from the plot for recalling the plot again, do not need to recalculate the node list 
@@ -176,10 +189,10 @@ classdef PointWorkspace < handle
                 figure_date.MarkerFaceColor = scatter_data.MarkerFaceColor;
                 figure_date.SizeData = scatter_data.SizeData;
                 figure_date.LineWidth = scatter_data.LineWidth;
-                
+                end
                 q_grid = obj.grid.q_begin(slide_axis) + (layer_indices-1)*obj.grid.delta_q(slide_axis);
                 current_fixed_variables = fixed_variables;
-                current_q_index = find(ismember(q_grid,current_fixed_variables(slide_axis)));
+                current_q_index = find(round(q_grid - fixed_variables(slide_axis),10) == 0);
                 title(['Current q_',num2str(slide_axis),' is ', num2str(current_fixed_variables(slide_axis))]);
                 t = annotation('textbox', [0.15, 0.03, 0.1, 0.1], 'String',...
                     ['min = ',num2str(q_grid(1))]);
