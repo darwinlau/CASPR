@@ -51,23 +51,24 @@ If you use CASPR in your research please cite the 2016 IROS paper:
     }
 
 
-## Contributors: ##
-As an open source platform new developments into CASPR are welcome as are feedback/notification of bugs. Contributors for the development of this project include
-* Darwin Lau:     <darwinlau@mae.cuhk.edu.hk>
-* Jonathan Eden:  <jpeden@student.unimelb.edu.au>
+## Enquiries: ##
+As an open source platform new developments into CASPR are welcome as are feedback/notification of bugs.
 
-For notification of issues please use the issues tab within the github page <https://github.com/darwinlau/CASPR/issues>.  For more detailed communication please email Darwin Lau at <darwinlau@mae.cuhk.edu.hk>.
+For notification of issues please use the issues tab within the github page <https://github.com/darwinlau/CASPR/issues>.  For more detailed communication please email Darwin Lau at <darwinlau@cuhk.edu.hk>.
 
-## Getting Started: ##
+## Getting Started and Help: ##
 To start using CASPR, please follow the steps below
 
 1. Navigate to the CASPR root directory folder.
 2. Run the script initialise_CASPR.m.  This will ensure that your path libraries have been set up and **should be run everytime that you use CASPR**.
 3. Go into the script folders to look at examples or open up the CASPR GUI using the CASPR_GUI command.
 
-For further information regarding the operation of CASPR please refer to the CASPR youtube page https://www.youtube.com/watch?v=b_24t_j1uQo. 
+For further information regarding the operation of CASPR please refer to:
 
-Aditional documentation including the 2016 IROS paper can also be found within the docs folder.
+1. The CASPR youtube page https://www.youtube.com/watch?v=b_24t_j1uQo. 
+2. Live script tutorials within the ~/scripts/tutorials folder (starting with T1_load_robot).
+3. IROS 2016 paper: <https://ieeexplore.ieee.org/document/7759465> and can also be found within the ~/docs folder.
+4. Aditional documentation can also be found within the ~/docs folder.
 
 ## Keeping CASPR Up to Date: ##
 To keep CASPR up to date please periodically execute the command *git pull* from your root directory.
