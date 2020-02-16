@@ -245,6 +245,8 @@ classdef PointWorkspace < handle
                     end
                 end
             else
+                hold on;
+                cla;
                 fig = plotWorkspace(obj,plot_axis,conditions_ind, metrics, var);
                 ax_old = gcf;
                 scatter_data = findobj(ax_old.Children,'-property','YData');
