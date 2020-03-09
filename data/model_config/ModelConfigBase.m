@@ -43,6 +43,7 @@ classdef (Abstract) ModelConfigBase < handle
     end
     
     properties (Constant)
+        COMPILE_RECORD_FILENAME = 'compile_record.txt'
         COMPILE_RECORD_BODIES_FILENAME = 'compile_record_bodies.txt'
         COMPILE_RECORD_CABLES_FILENAME = 'compile_record_cables.txt'
         COMPILE_RECORD_OPERATIONAL_SPACES_FILENAME = 'compile_record_operationalspaces.txt'
@@ -215,7 +216,7 @@ classdef (Abstract) ModelConfigBase < handle
             compile_cables_dtstamp_file = [base_folder, '\', obj.COMPILE_RECORD_CABLES_FILENAME];
             compile_opspaces_dtstamp_file = [base_folder, '\', obj.COMPILE_RECORD_OPERATIONAL_SPACES_FILENAME];
             
-            [~, ~, ~, ~, bodies_folder, cableset_folder, opset_folder, ~, ~, ~] = ModelConfigBase.ConstructCompiledLibraryNames(obj.robotName, cableset_id, opspace_id, base_folder);
+            [~, ~, ~, ~, bodies_folder, cableset_folder, opset_folder, ~, ~, ~, ~] = ModelConfigBase.ConstructCompiledLibraryNames(obj.robotName, cableset_id, opspace_id, base_folder);
             
             % Get datetime of last modified from the bodies.xml and
             % cables.xml
@@ -337,7 +338,7 @@ classdef (Abstract) ModelConfigBase < handle
     
     methods (Static)
         function [bodies_lib_name, cableset_lib_name, opset_lib_name, ...
-                cpp_lib_name, bodies_folder, cableset_folder, opset_folder, cpp_folder, ...
+                cpp_lib_name, bodies_folder, cableset_folder, opset_folder, cpp_folder, m_folder, ...
                 cables_base_folder, opset_base_folder] = ConstructCompiledLibraryNames(robot_name, cable_set_id, op_space_id, base_folder)
             
             if (nargin < 4)
@@ -354,16 +355,17 @@ classdef (Abstract) ModelConfigBase < handle
             
             bodies_lib_name = robot_name;
             cableset_lib_name = [robot_name, '_', cable_set_id];
-            cpp_lib_name = [robot_name, '_', cable_set_id];
+            cpp_lib_name = cableset_lib_name;
             
-            bodies_folder = [base_folder, '\m\Bodies'];
-            cables_base_folder = [base_folder, '\m\Cables'];
+            m_folder = [base_folder, '\m'];
+            
+            bodies_folder = [m_folder, '\Bodies'];
+            cables_base_folder = [m_folder, '\Cables'];
             cableset_folder = [cables_base_folder, '\', cable_set_id];
-            cpp_folder = [base_folder, '\cpp\', cableset_lib_name];
             
             if (~isempty(op_space_id))
                 opset_lib_name = [robot_name, '_', op_space_id];
-                cpp_lib_name = [cpp_lib_name, '_', op_space_id];
+                cpp_lib_name = [cableset_lib_name, '_', op_space_id];
                 opset_base_folder = [base_folder, '\m\OperationalSpaces'];
                 opset_folder = [opset_base_folder, '\', op_space_id];
             else 
@@ -372,24 +374,11 @@ classdef (Abstract) ModelConfigBase < handle
                 opset_folder = '';
             end
             
+            cpp_folder = [base_folder, '\cpp\', cpp_lib_name];            
         end
         
-        function WriteCompileBodiesRecordFile(compile_file_folder)
-            fid = fopen([compile_file_folder, '\', ModelConfigBase.COMPILE_RECORD_BODIES_FILENAME], 'w');
-            dt = datetime('now', 'TimeZone', 'local');
-            fprintf(fid, ['compiledtime,', datestr(dt), ',', dt.TimeZone]);
-            fclose(fid);
-        end
-        
-        function WriteCompileCablesRecordFile(compile_file_folder)
-            fid = fopen([compile_file_folder, '\', ModelConfigBase.COMPILE_RECORD_CABLES_FILENAME], 'w');
-            dt = datetime('now', 'TimeZone', 'local');
-            fprintf(fid, ['compiledtime,', datestr(dt), ',', dt.TimeZone]);
-            fclose(fid);
-        end
-        
-        function WriteCompileOperationalSpaceRecordFile(compile_file_folder)
-            fid = fopen([compile_file_folder, '\', ModelConfigBase.COMPILE_RECORD_OPERATIONAL_SPACES_FILENAME], 'w');
+        function WriteCompileRecordFile(compile_file_folder, filename)
+            fid = fopen([compile_file_folder, '\', filename], 'w');
             dt = datetime('now', 'TimeZone', 'local');
             fprintf(fid, ['compiledtime,', datestr(dt), ',', dt.TimeZone]);
             fclose(fid);
@@ -413,7 +402,8 @@ classdef (Abstract) ModelConfigBase < handle
         end
         
         function path = GetDefaultCompiledFolder(robot_name)
-            path = [CASPR_configuration.LoadModelConfigPath(), '\tmp_compilations\', robot_name];
+            robot_name_path = strrep(strrep(robot_name, ' ', '_'), '-', '_');
+            path = [CASPR_configuration.LoadModelConfigPath(), '\tmp_compilations\', robot_name_path];
         end
     end
 end

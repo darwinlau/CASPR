@@ -39,10 +39,10 @@ classdef SystemModelBodies < handle
         bodiesPathGraph         % p x p matrix that governs how to track to particular bodies, (i,j) = 1 means that to get to link j we must pass through link i
                    
         % Kinematics
-        R_0ks                   % Matrix storing rotation matrices of bodies
-        r_OPs                   % Matrix storing joint locations
-        r_Gs                    % Matrix storing location of CoG
-        r_Pes                   % Matrix storing location of end of bodies
+        R_0ks                   % Matrix storing rotation matrices of bodies (^0_kR)
+        r_OPs                   % Matrix storing joint locations (in local frame)
+        r_Gs                    % Matrix storing location of CoG (in local frame)
+        r_Pes                   % Matrix storing location of end of bodies (in local frame)
 
         % Jacobian Matrices - These matrices should probably be computed as
         % needed (dependent variable), but if it is a commonly used matrix
@@ -121,6 +121,7 @@ classdef SystemModelBodies < handle
         % Function handles for compiled update mode        
         compiled_R_0ks_fn;
         compiled_r_OPs_fn;
+        compiled_P_fn;
         compiled_P_fns;
         compiled_S_fn;
         compiled_S_dot_fn;
@@ -170,7 +171,7 @@ classdef SystemModelBodies < handle
         % Constructor for the class SystemModelBodies.  This determines the
         % numbers of degrees of freedom as well as initialises the
         % matrices.
-        function b = SystemModelBodies(bodies, model_mode, model_options, bodies_lib_name, opset_lib_name)            
+        function b = SystemModelBodies(bodies, model_mode, model_options, bodies_lib_name, opset_lib_name)
             num_dofs = 0;
             num_dof_vars = 0;
             num_operational_dofs = 0;
@@ -234,6 +235,7 @@ classdef SystemModelBodies < handle
                     
                     b.compiled_R_0ks_fn = str2func([b.compiled_bodies_lib_name, '_compiled_R_0ks']);
                     b.compiled_r_OPs_fn = str2func([b.compiled_bodies_lib_name, '_compiled_r_OPs']);
+                    b.compiled_P_fn = str2func([b.compiled_bodies_lib_name, '_compiled_P']);
                     b.compiled_P_fns = cell(b.numLinks, b.numLinks);
                     for k = 1:b.numLinks
                         for a = 1:k
@@ -270,6 +272,8 @@ classdef SystemModelBodies < handle
                 CASPR_log.Assert(isa(w_ext, 'sym'), 'w_ext must be symbolic in symbolic mode');
             end
             
+            num_links = obj.numLinks;
+            
             % Assign q, q_dot, q_ddot
             obj.q = q;
             obj.q_dot = q_dot;
@@ -279,7 +283,7 @@ classdef SystemModelBodies < handle
             % Update each body first
             index_vars = 1;
             index_dofs = 1;
-            for k = 1:obj.numLinks
+            for k = 1:num_links
                 q_k = q(index_vars:index_vars+obj.bodies{k}.joint.numVars-1);
                 q_dot_k = q_dot(index_dofs:index_dofs+obj.bodies{k}.joint.numDofs-1);
                 q_ddot_k = q_ddot(index_dofs:index_dofs+obj.bodies{k}.joint.numDofs-1);
@@ -290,7 +294,7 @@ classdef SystemModelBodies < handle
 
             % Now the global system updates
             % Set bodies kinematics (rotation matrices)
-            for k = 1:obj.numLinks
+            for k = 1:num_links
                 parent_link_num = obj.bodies{k}.parentLinkId;
                 CASPR_log.Assert(parent_link_num < k, 'Problem with numbering of links with parent and child');
 
@@ -338,7 +342,7 @@ classdef SystemModelBodies < handle
             end
             % Set S (joint state matrix) and S_dot            
             index_dofs = 1;
-            for k = 1:obj.numLinks                
+            for k = 1:num_links
                 obj.S(6*k-5:6*k, index_dofs:index_dofs+obj.bodies{k}.joint.numDofs-1) = obj.bodies{k}.joint.S;
                 obj.S_dot(6*k-5:6*k, index_dofs:index_dofs+obj.bodies{k}.joint.numDofs-1) = obj.bodies{k}.joint.S_dot;
                 index_dofs = index_dofs + obj.bodies{k}.joint.numDofs;
@@ -348,7 +352,7 @@ classdef SystemModelBodies < handle
                 CASPR_log.Info('Symbolic computing/simplifying of P');
             end
             % P
-            for k = 1:obj.numLinks
+            for k = 1:num_links
                 body_k = obj.bodies{k};
                 k_R_0k = body_k.R_0k;
                 for a = 1:k
@@ -394,7 +398,7 @@ classdef SystemModelBodies < handle
             obj.x_dot = obj.W*obj.q_dot;          
             
             % Extract absolute velocities
-            for k = 1:obj.numLinks
+            for k = 1:num_links
                 obj.bodies{k}.v_OG = obj.x_dot(6*k-5:6*k-3);
                 obj.bodies{k}.w = obj.x_dot(6*k-2:6*k);
             end
@@ -403,8 +407,8 @@ classdef SystemModelBodies < handle
                 CASPR_log.Info('Symbolic computing/simplifying of C_a');
             end
             % C_a
-            ang_mat = MatrixOperations.Initialise([6*obj.numLinks,6*obj.numLinks], is_symbolic);
-            for k = 1:obj.numLinks
+            ang_mat = MatrixOperations.Initialise([6*num_links,6*num_links], is_symbolic);
+            for k = 1:num_links
                 kp = obj.bodies{k}.parentLinkId;
                 if (kp > 0)
                     w_kp = obj.bodies{kp}.w;
@@ -420,20 +424,22 @@ classdef SystemModelBodies < handle
                 ang_mat(6*k-5:6*k, 6*k-5:6*k) = [2*MatrixOperations.SkewSymmetric(w_kp) zeros(3,3); zeros(3,3) MatrixOperations.SkewSymmetric(w_k)];
             end
 
-            obj.C_a = obj.P*(obj.S_dot + ang_mat*obj.S)*obj.q_dot;
-            for k = 1:obj.numLinks
+            C_a_t = obj.P*(obj.S_dot + ang_mat*obj.S)*obj.q_dot;
+            for k = 1:num_links
                 for a = 1:k
                     ap = obj.bodies{a}.parentLinkId;
                     if (ap > 0 && obj.bodiesPathGraph(a,k))
-                        obj.C_a(6*k-5:6*k-3) = obj.C_a(6*k-5:6*k-3) + obj.bodies{k}.R_0k.'*obj.bodies{ap}.R_0k*cross(obj.bodies{ap}.w, cross(obj.bodies{ap}.w, obj.bodies{a}.r_Parent + obj.bodies{a}.joint.r_rel));
+                        C_a_t(6*k-5:6*k-3) = C_a_t(6*k-5:6*k-3) + obj.bodies{k}.R_0k.'*obj.bodies{ap}.R_0k*cross(obj.bodies{ap}.w, cross(obj.bodies{ap}.w, obj.bodies{a}.r_Parent + obj.bodies{a}.joint.r_rel));
                     end
                 end
-                obj.C_a(6*k-5:6*k-3) = obj.C_a(6*k-5:6*k-3) + cross(obj.bodies{k}.w, cross(obj.bodies{k}.w, obj.bodies{k}.r_G));
+                C_a_t(6*k-5:6*k-3) = C_a_t(6*k-5:6*k-3) + cross(obj.bodies{k}.w, cross(obj.bodies{k}.w, obj.bodies{k}.r_G));
             end
+            obj.C_a = C_a_t;
+            
             obj.x_ddot = obj.W*obj.q_ddot + obj.C_a;
             
             % Extract absolute accelerations
-            for k = 1:obj.numLinks
+            for k = 1:num_links
                 obj.bodies{k}.a_OG = obj.x_ddot(6*k-5:6*k-3);
                 obj.bodies{k}.w_dot = obj.x_ddot(6*k-2:6*k);
             end                  
@@ -470,6 +476,8 @@ classdef SystemModelBodies < handle
             obj.q_ddot = q_ddot;
             obj.W_e = w_ext;
             
+            num_links = obj.numLinks;
+            
             % Body kinematics
             obj.R_0ks = obj.compiled_R_0ks_fn(q, q_dot, q_ddot, w_ext);
             obj.r_OPs = obj.compiled_r_OPs_fn(q, q_dot, q_ddot, w_ext);
@@ -482,14 +490,7 @@ classdef SystemModelBodies < handle
 %             end
             
             % Kinematics jacobians
-            %obj.P = obj.compiled_P_fn(q, q_dot, q_ddot, w_ext);
-            
-            for k = 1:obj.numLinks
-                for a = 1:k
-                    obj.P(6*k-5:6*k, 6*a-5:6*a) = obj.compiled_P_fns{k,a}(q, q_dot, q_ddot, w_ext);
-                end
-            end
-            
+            obj.P = obj.compiled_P_fn(q, q_dot, q_ddot, w_ext);            
             obj.S = obj.compiled_S_fn(q, q_dot, q_ddot, w_ext);
             obj.S_dot = obj.compiled_S_dot_fn(q, q_dot, q_ddot, w_ext);
             
@@ -686,7 +687,6 @@ classdef SystemModelBodies < handle
             end
             
         end
-                
                 
         % Calculate the internal matrices for the quadratic form of the
         % Coriolis/Centrifugal forces.
@@ -1055,7 +1055,7 @@ classdef SystemModelBodies < handle
             % Jacobians
             CASPR_log.Info('Compiling S and S_dot...');
             matlabFunction(obj.S, 'File', strcat(path, '/', lib_name, '_compiled_S'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});
-            matlabFunction(obj.S_dot, 'File',strcat(path, '/', lib_name, '_compiled_S_dot'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});
+            matlabFunction(obj.S_dot, 'File', strcat(path, '/', lib_name, '_compiled_S_dot'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});
             
             CASPR_log.Info('Compiling P...');
             tmp_body_P_path = strcat(path, '/P');
@@ -1069,16 +1069,24 @@ classdef SystemModelBodies < handle
                     matlabFunction(P_temp, 'File', sprintf('%s/%s_compiled_P_%d_%d', tmp_body_P_path, lib_name, k, a), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});
                 end
             end
+            
+            % Write a loop to construct the compiled_P file
+            % It calls the individual sub-P functions
+            compiled_P_fn_name = [lib_name, '_compiled_P'];
+            fid = fopen(strcat(path, '/', compiled_P_fn_name, '.m'), 'w');
+            fprintf(fid, 'function out1 = %s(in1,in2,in3,in4)\n', compiled_P_fn_name);
+            fprintf(fid, 'out1 = zeros(%d,%d);\n', 6*obj.numLinks, 6*obj.numLinks);
+            for k = 1:obj.numLinks
+                for a = 1:k
+                    fprintf(fid, 'out1(%d:%d, %d:%d) = %s_%d_%d(in1,in2,in3,in4);\n', 6*k-5, 6*k, 6*a-5, 6*a, compiled_P_fn_name, k, a);
+                end
+            end
+            fclose(fid);
+            
             % Kinematics
             CASPR_log.Info('Compiling R_0ks...');
             matlabFunction(obj.R_0ks, 'File', strcat(path, '/', lib_name, '_compiled_R_0ks'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});
-            
-%                 obj.R_0ks(:,3*k-2:3*k) = obj.bodies{k}.R_0k;
-%                 obj.r_OPs(:,k) = obj.bodies{k}.r_OP;
-%                 obj.r_Gs(:,k) = obj.bodies{k}.r_G;
-%                 obj.r_Pes(:,k) = obj.bodies{k}.r_Pe;
                 
-%             matlabFunction(obj.R_0ks, 'File', strcat(path, '/', lib_name, '_compiled_R_0ks'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});
             CASPR_log.Info('Compiling r_OPs...');
             matlabFunction(obj.r_OPs, 'File', strcat(path, '/', lib_name, '_compiled_r_OPs'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});
             
