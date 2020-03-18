@@ -34,3 +34,4 @@ RoboyUpperBody,/MCDM/RoboyUpperBody/,RoboyUpperBody_bodies.xml,RoboyUpperBody_ca
 SpiderBot_X52,/HCDM/SpiderBot_X52/,SpiderBot_X52_bodies.xml,SpiderBot_X52_cables.xml,SpiderBot_X52_trajectories.xml,SpiderBot_X52_operational_spaces.xml
 PlanarSnakeArm,/HCDM/PlanarSnakeArm/,PlanarSnakeArm_bodies.xml,PlanarSnakeArm_cables.xml,PlanarSnakeArm_trajectories.xml,PlanarSnakeArm_operational_spaces.xml
 SpiderBot UR3 Test,/HCDM/SpiderBot_UR3_Test/,SpiderBot_UR3_Test_bodies.xml,SpiderBot_UR3_Test_cables.xml,SpiderBot_UR3_Test_trajectories.xml,SpiderBot_UR3_Test_operational_spaces.xml
+Swinburne,/SCDM/spatial_manipulators/Swinburne/,Swinburne_bodies.xml,Swinburne_cables.xml,Swinburne_trajectories.xml,Swinburne_operational_spaces.xml,
