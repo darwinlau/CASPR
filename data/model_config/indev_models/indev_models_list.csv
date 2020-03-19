@@ -20,3 +20,4 @@ PoCaBoss,/CUHK/PoCaBot_family/PoCaBoss/,PoCaBoss_bodies.xml,PoCaBoss_cables.xml,
 fyplightpaint,/CUHK/PoCaBot_family/fyplightpaint/,fyplightpaint_bodies.xml,fyplightpaint_cables.xml,fyplightpaint_trajectories.xml,fyplightpaint_operational_spaces.xml
 XS_Laser,/CUHK/PoCaBot_family/XS_Laser/,XS_Laser_bodies.xml,XS_Laser_cables.xml,XS_Laser_trajectories.xml,XS_Laser_operational_spaces.xml
 CDPR_7c_6Dof,/CUHK/ray_workspace_testing/CDPR_7c_6Dof/,CDPR_7c_6Dof_bodies.xml,CDPR_7c_6Dof_cables.xml,CDPR_7c_6Dof_trajectories.xml,CDPR_7c_6Dof_operational_spaces.xml
+Swinburne,/CUHK/Swinburne/,Swinburne_bodies.xml,Swinburne_cables.xml,Swinburne_trajectories.xml,Swinburne_operational_spaces.xml

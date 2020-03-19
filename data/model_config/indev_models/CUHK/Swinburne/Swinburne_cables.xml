@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE cables SYSTEM "../../../../templates/cables.dtd">
+<!DOCTYPE cables SYSTEM "../../../templates/cables.dtd">
 
 <cables default_cable_set="suspended">
   <cable_set id="suspended">
