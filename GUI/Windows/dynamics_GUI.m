@@ -678,8 +678,10 @@ function file_copy(handles,output_file)
         new_s = regexprep(new_s,'Example planar XY',model_str);
         new_s = regexprep(new_s,'basic',cable_str);
         new_s = regexprep(new_s,'example_linear',trajectory_str);
-        fprintf(w_fid, new_s);
-        fprintf(w_fid, '\n');
+        if (CASPR_configuration.LoadDevModelConfig())
+            new_s = regexprep(new_s, 'ModelConfig', 'DevModelConfig');
+        end
+        fprintf(w_fid,[new_s,'\n']);
     end
     fclose(r_fid);
     fclose(w_fid);

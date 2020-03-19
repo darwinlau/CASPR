@@ -650,6 +650,9 @@ function script_button_Callback(~, ~, handles)
         elseif (~isempty(strfind(new_s,'id_solver = ')))
             new_s = extractDynamics(r_id_string);
         end
+        if (CASPR_configuration.LoadDevModelConfig())
+            new_s = regexprep(new_s, 'ModelConfig', 'DevModelConfig');
+        end
         fprintf(w_fid,[new_s,'\n']);
     end
     fclose(r_fid);

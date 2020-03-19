@@ -400,6 +400,9 @@ function generate_script_button_Callback(~, ~, handles) %#ok<DEFNU>
         % Replace all references to the model
         new_s = regexprep(new_s,'Example planar XY',model_str);
         new_s = regexprep(new_s,'basic',cable_str);
+        if (CASPR_configuration.LoadDevModelConfig())
+            new_s = regexprep(new_s, 'ModelConfig', 'DevModelConfig');
+        end
         fprintf(w_fid,[new_s,'\n']);
     end
     fclose(r_fid);
