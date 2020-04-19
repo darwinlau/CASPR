@@ -672,9 +672,9 @@ function Rviz_pushbutton_Callback(~, ~, handles) %#ok<DEFNU>
     else
         try 
             load('CARDSFlowConfig.mat');
-            MotionSimulatorBase.plotCARDSFlow(modObj, sim.trajectory);       
+            MotionSimulatorBase.PlotCARDSFlow(modObj, sim.trajectory);       
         catch 
-            MotionSimulatorBase.plotRviz(modObj, sim.trajectory);     
+            MotionSimulatorBase.PlotRviz(modObj, sim.trajectory);     
         end  
     end
 end

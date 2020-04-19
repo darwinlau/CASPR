@@ -30,10 +30,10 @@ classdef DynamicsSimulator < MotionSimulatorBase
         % need to specify the plot axis and also which cables (as an array
         % of numbers) to plot (it is possible to default to plot all cables
         % if the array is []).
-        function plotCableForces(obj, plot_axis, cables_to_plot)
+        function plotCableForces(obj, cables_to_plot, plot_axis)
             CASPR_log.Assert(~isempty(obj.cableForces), 'Cannot plot since cableForces is empty');
             
-            if nargin <= 2 || isempty(cables_to_plot)
+            if nargin <= 1 || isempty(cables_to_plot)
                 cables_to_plot = 1:obj.model.numCables;
             end
             
@@ -42,7 +42,7 @@ classdef DynamicsSimulator < MotionSimulatorBase
             valid_forces_ind = find(forces(1,:) ~= CableModelBase.INVALID_FORCE);
             valid_forces_ind_inv = setdiff(1:length(obj.timeVector), valid_forces_ind);
             
-            if nargin <= 1 || isempty(plot_axis)
+            if nargin <= 2 || isempty(plot_axis)
                 figure;
                 hold on;
                 plot(obj.timeVector(valid_forces_ind), forces(cables_to_plot, valid_forces_ind), '.', 'LineWidth', 1.5, 'Color', 'k'); 
@@ -63,10 +63,10 @@ classdef DynamicsSimulator < MotionSimulatorBase
         % need to specify the plot axis and also which links (as an array
         % of numbers) to plot (it is possible to default to plot all links
         % if the array is []).
-        function plotInteractionForceMagnitudes(obj, plot_axis, links_to_plot)
+        function plotInteractionForceMagnitudes(obj, links_to_plot, plot_axis)
             CASPR_log.Assert(~isempty(obj.interactionWrench), 'Cannot plot since interactionWrench is empty');
             
-            if nargin <= 2 || isempty(links_to_plot)
+            if nargin <= 1 || isempty(links_to_plot)
                 links_to_plot = 1:obj.model.numLinks;
             end
             
@@ -82,7 +82,7 @@ classdef DynamicsSimulator < MotionSimulatorBase
                 end
             end
             
-            if nargin <= 1 || isempty(plot_axis)
+            if nargin <= 2 || isempty(plot_axis)
                 figure;
                 plot(obj.timeVector, forcesMag, 'LineWidth', 1.5, 'Color', 'k');
                 title('Magnitude of interaction forces');
@@ -98,10 +98,10 @@ classdef DynamicsSimulator < MotionSimulatorBase
         % interaction angles want to be measured with reference to the Z 
         % axis only. Can refer to IDConstraintInteractionForceAngleCone 
         % to incorporate the F_centre parameter.
-        function plotInteractionForceAngles(obj, plot_axis, links_to_plot)
+        function plotInteractionForceAngles(obj, links_to_plot, plot_axis)
             CASPR_log.Assert(~isempty(obj.interactionWrench), 'Cannot plot since interactionWrench is empty');
             
-            if nargin <= 2 || isempty(links_to_plot)
+            if nargin <= 1 || isempty(links_to_plot)
                 links_to_plot = 1:obj.model.numLinks;
             end
             
@@ -118,7 +118,7 @@ classdef DynamicsSimulator < MotionSimulatorBase
                 end
             end
             
-            if nargin <= 1 || isempty(plot_axis)
+            if nargin <= 2 || isempty(plot_axis)
                 figure;
                 plot(obj.timeVector, angles, 'LineWidth', 1.5, 'Color', 'k');
                 title('Interaction angles');
@@ -131,10 +131,10 @@ classdef DynamicsSimulator < MotionSimulatorBase
         % need to specify the plot axis and also which links (as an array
         % of numbers) to plot (it is possible to default to plot all links
         % if the array is []).
-        function plotInteractionMomentMagnitudes(obj, plot_axis, links_to_plot)
+        function plotInteractionMomentMagnitudes(obj, links_to_plot, plot_axis)
             CASPR_log.Assert(~isempty(obj.interactionWrench), 'Cannot plot since interactionWrench is empty');
             
-            if nargin <= 2 || isempty(links_to_plot)
+            if nargin <= 1 || isempty(links_to_plot)
                 links_to_plot = 1:obj.model.numLinks;
             end
             
@@ -150,7 +150,7 @@ classdef DynamicsSimulator < MotionSimulatorBase
                 end
             end
             
-            if nargin <= 1 || isempty(plot_axis)
+            if nargin <= 2 || isempty(plot_axis)
                 figure;
                 plot(obj.timeVector, momentsMag, 'LineWidth', 1.5, 'Color', 'k');
                 title('Magnitude of interaction moments'); 
@@ -163,10 +163,10 @@ classdef DynamicsSimulator < MotionSimulatorBase
         % need to specify the plot axis and also which links (as an array
         % of numbers) to plot (it is possible to default to plot all links
         % if the array is []).
-        function plotInteractionForceZ(obj, plot_axis, links_to_plot)
+        function plotInteractionForceZ(obj, links_to_plot, plot_axis)
             CASPR_log.Assert(~isempty(obj.interactionWrench), 'Cannot plot since interactionWrench is empty');
             
-            if nargin == 1 || isempty(links_to_plot)
+            if nargin <= 1 || isempty(links_to_plot)
                 links_to_plot = 1:obj.model.numLinks;
             end
             
@@ -182,7 +182,7 @@ classdef DynamicsSimulator < MotionSimulatorBase
                 end
             end
             
-            if nargin <= 1 || isempty(plot_axis)
+            if nargin <= 2 || isempty(plot_axis)
                 figure;
                 plot(obj.timeVector, forcesZ, 'LineWidth', 1.5, 'Color', 'k');
                 title('Interaction forces (Z component)'); 
@@ -190,6 +190,17 @@ classdef DynamicsSimulator < MotionSimulatorBase
                 plot(plot_axis, obj.timeVector, forcesZ, 'LineWidth', 1.5, 'Color', 'k');
             end
         end
+    end
+    
+    
+    % Set of GUI plotting functions
+    methods
+        function guiPlotCableForces(obj, plot_ax)
+            obj.plotCableForces([], plot_ax);
+        end        
+        function guiPlotInteractionForceMagnitudes(obj, plot_ax)
+            obj.plotInteractionForceMagnitudes([], plot_ax);
+        end        
     end
 end
 

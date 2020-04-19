@@ -362,9 +362,9 @@ function Rviz_pushbutton_Callback(~, ~, handles) %#ok<DEFNU>
     else
         try 
             load('CARDSFlowConfig.mat');
-            MotionSimulatorBase.plotCARDSFlow(modObj, sim.trajectory);  
+            MotionSimulatorBase.PlotCARDSFlow(modObj, sim.trajectory);  
         catch
-            MotionSimulatorBase.plotRviz(modObj, sim.trajectory, sim.cableForces);
+            MotionSimulatorBase.PlotRviz(modObj, sim.trajectory, sim.cableForces);
         end
     end
 end
@@ -597,8 +597,8 @@ function run_forward_dynamics(handles,modObj,trajectory_id)
     % Finally compare the results
     set(handles.status_text,'String','Plotting results');
     drawnow;
-    GUIOperations.GUIPlot('plotJointPose',idsim,handles,1,get(handles.undock_box,'Value'));
-    GUIOperations.GUIPlot('plotJointPose',fdsim,handles,1,get(handles.undock_box,'Value'));
+    GUIOperations.GUIPlot('guiPlotJointPose',idsim,handles,1,get(handles.undock_box,'Value'));
+    GUIOperations.GUIPlot('guiPlotJointPose',fdsim,handles,1,get(handles.undock_box,'Value'));
     set(handles.status_text,'String','No simulation running');
     assignin('base','forward_dynamics_simulator',fdsim);
 end

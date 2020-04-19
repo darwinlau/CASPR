@@ -175,7 +175,8 @@ function plot_type_popup_CreateFcn(hObject, ~, ~) %#ok<DEFNU>
     end
     settingsXMLObj = GUIOperations.GetSettings('/GUI/XML/kinematicsXML.xml');
     plot_str = GUIOperations.XmlObj2StringCellArray(settingsXMLObj.getElementsByTagName('simulator').item(0).getElementsByTagName('plot_functions').item(0).getElementsByTagName('plot_function'),'type');
-    set(hObject,'Value',1);    set(hObject, 'String', plot_str);
+    set(hObject,'Value', 1);    
+    set(hObject, 'String', plot_str);
     setappdata(hObject,'num_plots',1);
 end
 
@@ -413,9 +414,9 @@ function Rviz_pushbutton_Callback(~, ~, handles) %#ok<DEFNU>
     else
         try 
             load('CARDSFlowConfig.mat');
-            MotionSimulatorBase.plotCARDSFlow(modObj, sim.trajectory);       
+            MotionSimulatorBase.PlotCARDSFlow(modObj, sim.trajectory);       
         catch 
-            MotionSimulatorBase.plotRviz(modObj, sim.trajectory);     
+            MotionSimulatorBase.PlotRviz(modObj, sim.trajectory);     
         end       
     end
 end
@@ -593,9 +594,9 @@ function run_forward_kinematics(handles,modObj,trajectory_id)
     set(handles.status_text,'String','Simulation plotting');
     drawnow;
     start_tic = tic;
-    GUIOperations.GUIPlot('plotJointPose',iksim,handles,1,get(handles.undock_box,'Value'));
-    GUIOperations.GUIPlot('plotJointPose',fksim,handles,1,get(handles.undock_box,'Value'));
-    GUIOperations.GUIPlot('plotCableLengthError',fksim,handles,1,get(handles.undock_box,'Value'));
+    GUIOperations.GUIPlot('guiPlotJointPose',iksim,handles,1,get(handles.undock_box,'Value'));
+    GUIOperations.GUIPlot('guiPlotJointPose',fksim,handles,1,get(handles.undock_box,'Value'));
+    GUIOperations.GUIPlot('guiPlotCableLengthError',fksim,handles,1,get(handles.undock_box,'Value'));
     time_elapsed = toc(start_tic);
     CASPR_log.Info(sprintf('End Plotting Simulation : %f seconds', time_elapsed));
     set(handles.status_text,'String','No simulation running');

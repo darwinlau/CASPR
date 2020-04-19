@@ -36,7 +36,10 @@ classdef (Abstract) MotionSimulatorBase < SimulatorBase
         function ms = MotionSimulatorBase(model)
             ms@SimulatorBase(model);
         end
+    end
 
+    % Set of plotting methods
+    methods
         % Plots an avi movie file of the trajector motion of the robot.
         % Uses the static function implementation
         function plotMovie(obj, plot_axis, view_angle, filename, time, isHistory, width, height)            
@@ -138,7 +141,6 @@ classdef (Abstract) MotionSimulatorBase < SimulatorBase
             end   
             obj.trajectory.plotJointVelocity(states_to_plot, plot_ax);          
         end
-        
         
         % Plots the joint acceleration of the CDPR over the trajectory. Users
         % need to specify the plot axis and also which states (as an array
@@ -464,7 +466,7 @@ classdef (Abstract) MotionSimulatorBase < SimulatorBase
         % for the CASPR-RViz interface.
         % As an optional argument, a trajectory of cable forces can also be
         % used to visualize cable forces in RViz as arrows
-        function plotRviz(modelObj, joint_trajectory, force_trajectory)
+        function PlotRviz(modelObj, joint_trajectory, force_trajectory)
             % Assert the size of force_trajectory
             if nargin > 2
                 CASPR_log.Assert(size(joint_trajectory.timeVector,2)==size(force_trajectory, 2), ...
@@ -514,7 +516,7 @@ classdef (Abstract) MotionSimulatorBase < SimulatorBase
         % CARDSFlow interface. The model and the joint trajectory have to
         % be provided, together with the ROS_MASTER_URI and local ROS_IP
         % for the CARDSFlow interface.
-        function plotCARDSFlow(modelObj, trajectory)
+        function PlotCARDSFlow(modelObj, trajectory)
             % Create CARDSFlow Interface Object
             card_in = CARDSFlowInterface();
             % Set robot name rosparam
@@ -542,6 +544,40 @@ classdef (Abstract) MotionSimulatorBase < SimulatorBase
                     elapsed = toc(freq_tic);            
                 end 
             end
+        end
+    end
+    
+    % Set of GUI plotting functions
+    methods
+        function guiPlotCableLengths(obj, plot_ax)
+            obj.plotCableLengths([], plot_ax);
+        end        
+        function guiPlotCableLengthsVelocity(obj, plot_ax)
+            obj.plotCableLengthsVelocity([], plot_ax);
+        end        
+        function guiPlotJointPose(obj, plot_ax)
+            obj.plotJointPose([], plot_ax);
+        end        
+        function guiPlotJointVelocity(obj, plot_ax)
+            obj.plotJointVelocity([], plot_ax);
+        end        
+        function guiPlotJointAcceleration(obj, plot_ax)
+            obj.plotJointAcceleration([], plot_ax);
+        end        
+        function guiPlotBodyCoG(obj, plot_ax)
+            obj.plotBodyCoG([], plot_ax);
+        end        
+        function guiPlotBodyCoGVelocity(obj, plot_ax)
+            obj.plotBodyCoGVelocity([], plot_ax);
+        end        
+        function guiPlotBodyCoGAcceleration(obj, plot_ax)
+            obj.plotBodyCoGAcceleration([], plot_ax);
+        end        
+        function guiPlotAngularVelocity(obj, plot_ax)
+            obj.plotAngularVelocity([], plot_ax);
+        end        
+        function guiPlotAngularAcceleration(obj, plot_ax)
+            obj.plotAngularAcceleration([], plot_ax);
         end
     end
 end
