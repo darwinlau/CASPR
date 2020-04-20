@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE cables SYSTEM "../../../templates/cables.dtd">
 
-<cables default_cable_set="basic_4_cables">
-  <cable_set id="basic_4_cables">
+<cables default_cable_set="basic">
+  <cable_set id="basic">
     <cable_ideal name="cable 1" attachment_reference="com">
       <properties>
         <force_min>10.0</force_min>
@@ -11,11 +11,11 @@
       <attachments>
         <attachment>
           <link>0</link>
-          <location>0.5 0.005 0.0</location>
+          <location>0.5 0.0 0.0</location>
         </attachment>
         <attachment>
           <link>1</link>
-          <location>0.1 0.05 0.3</location>
+          <location>0.1 0.0 0.3</location>
         </attachment>
       </attachments>
     </cable_ideal>
@@ -27,11 +27,11 @@
       <attachments>
         <attachment>
           <link>0</link>
-          <location>1.5 0.005 0.0</location>
+          <location>1.5 0.0 0.0</location>
         </attachment>
         <attachment>
           <link>2</link>
-          <location>0.1 0.05 0.3</location>
+          <location>0.1 0.0 0.3</location>
         </attachment>
       </attachments>
     </cable_ideal>
@@ -43,11 +43,11 @@
       <attachments>
         <attachment>
           <link>0</link>
-          <location>-0.5 -0.005 0.0</location>
+          <location>-0.5 0.0 0.0</location>
         </attachment>
         <attachment>
           <link>1</link>
-          <location>-0.1 -0.05 0.3</location>
+          <location>-0.1 0.0 0.3</location>
         </attachment>
       </attachments>
     </cable_ideal>
@@ -59,11 +59,85 @@
       <attachments>
         <attachment>
           <link>0</link>
-          <location>-1.5 -0.005 0.0</location>
+          <location>-1.5 0.0 0.0</location>
         </attachment>
         <attachment>
           <link>2</link>
-          <location>-0.1 -0.05 0.3</location>
+          <location>-0.1 0.0 0.3</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+  </cable_set>
+  <cable_set id="basic_multi_segment">
+    <cable_ideal name="cable 1" attachment_reference="com">
+      <properties>
+        <force_min>10.0</force_min>
+        <force_max>100</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>0.5 0.0 0.0</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>0.25 0.0 0.3</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>0.15 0.0 0.1</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 2" attachment_reference="com">
+      <properties>
+        <force_min>10.0</force_min>
+        <force_max>100</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>1.5 0.0 0.0</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>0.1 0.0 0.3</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 3" attachment_reference="com">
+      <properties>
+        <force_min>10.0</force_min>
+        <force_max>100</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-0.5 0.0 0.0</location>
+        </attachment>
+        <attachment>
+          <link>1</link>
+          <location>-0.25 0.0 0.3</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>-0.15 0.0 0.1</location>
+        </attachment>
+      </attachments>
+    </cable_ideal>
+    <cable_ideal name="cable 4" attachment_reference="com">
+      <properties>
+        <force_min>10.0</force_min>
+        <force_max>100</force_max>
+      </properties>
+      <attachments>
+        <attachment>
+          <link>0</link>
+          <location>-1.5 0.0 0.0</location>
+        </attachment>
+        <attachment>
+          <link>2</link>
+          <location>-0.1 0.0 0.3</location>
         </attachment>
       </attachments>
     </cable_ideal>
