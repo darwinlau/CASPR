@@ -145,10 +145,10 @@ classdef SystemModel < handle
                 b.update(b.bodyModel.q_initial, b.bodyModel.q_dot_default, b.bodyModel.q_ddot_default, zeros(b.numDofs,1));
             elseif (model_mode == ModelModeType.SYMBOLIC)
                 % Create symbolic variables
-                q = sym('q', [b.numDofs,1]); 
-                q_d = sym('q_d', [b.numDofs,1]);
-                q_dd = sym('q_dd', [b.numDofs,1]); 
-                w_ext = sym('w_ext', [b.numDofs,1]);                               
+                q = sym('q', [b.numDofs,1], 'real'); 
+                q_d = sym('q_d', [b.numDofs,1], 'real');
+                q_dd = sym('q_dd', [b.numDofs,1], 'real'); 
+                w_ext = sym('w_ext', [b.numDofs,1], 'real');                               
                 b.update(q, q_d, q_dd, w_ext);
             end
         end
