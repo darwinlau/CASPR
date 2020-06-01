@@ -52,15 +52,15 @@ classdef BaseRotatingPulleyAttachment < CableAttachmentBase
         
         % Function to determine the leaving location of the pulley given:
         % INPUTS
-        %   - r_A: Constant location on the pulley where cable enters
-        %   - v_A: Direction vector of the cable entering r_A
+        %   - r_F: Constant location on the pulley where cable enters
+        %   - v_F: Direction vector of the cable entering r_F
         %   - r_B: Location of the other end of the cable on the robot
         %   - R: Radius of the pulley
         % OUTPUTS
-        %   - r_D: The position of the cable leaving the pulley
+        %   - r_A: The position of the cable leaving the pulley
         %   - l_arc: length of the arc on the pulley
         %   - r_C: The position of the centre of the pulley location
-        function [r_D, l_arc, r_C] = ComputePulleyLeavingLocation(r_A, v_A, r_B, R)            
+        function [r_A, l_arc, r_C] = ComputePulleyLeavingLocation(r_F, v_F, r_B, R)            
 %             n_plane = cross(v_A, r_B - r_A);
 %             p_plane = [0;0;0];
 %             n_c_perpendicular = v_A;
@@ -90,20 +90,20 @@ classdef BaseRotatingPulleyAttachment < CableAttachmentBase
             % First calculate the position of the centre of pulley
             % This must be in the plane of the pulley and also
             % perpendicular to the rotating axis
-            v_AB = r_B - r_A;
-            n_plane = cross(v_A, v_AB);
+            v_FB = r_B - r_F;
+            n_plane = cross(v_F, v_FB);
             n_plane_unit = n_plane/norm(n_plane);
-            v_AC = cross(n_plane, v_A);
-            r_C = r_A + R*v_AC/norm(v_AC);
+            v_FC = cross(n_plane, v_F);
+            r_C = r_F + R*v_FC/norm(v_FC);
             
             % Next calculate the position of the point leaving pulley
             rho = R/norm(r_B - r_C);
-            %t1 = r_C + rho^2 * (r_B - r_C) + rho * sqrt(1 - rho^2) * cross(n_plane_unit, r_B - r_C)
-            r_D = r_C + rho^2 * (r_B - r_C) - rho * sqrt(1 - rho^2) * cross(n_plane_unit, r_B - r_C);
+            
+            r_A = r_C + rho^2 * (r_B - r_C) - rho * sqrt(1 - rho^2) * cross(n_plane_unit, r_B - r_C);
             
             % Finally calculate the arc length (cable length)
-            n1 = (r_B - r_D)/norm(r_B-r_D);
-            n2 = v_A/norm(v_A);
+            n1 = (r_F - r_C)/norm(r_F - r_C);
+            n2 = (r_A - r_C)/norm(r_A - r_C);
             l_arc = R * acos(n1' * n2);
         end
     end
