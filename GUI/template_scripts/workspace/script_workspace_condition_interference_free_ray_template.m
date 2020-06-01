@@ -21,7 +21,7 @@ uGrid           =   UniformGrid(q_begin,q_end,q_step,'step_size');
 q_end(end) = 3.1415;
 q_begin(end) = -3.1415;
 min_segment_percentage = 1;
-w_condition     =   {WorkspaceRayConditionBase.CreateWorkspaceRayCondition(WorkspaceRayConditionType.INTERFERENCE,min_segment_percentage,modelObj)};
+w_condition     =   {WorkspaceRayConditionBase.CreateWorkspaceRayCondition(WorkspaceRayConditionType.INTERFERENCE_DIAMETER,min_segment_percentage,modelObj)};
 % opt             =   RayWorkspaceSimulatorOptions(false,false);
 w_metrics       =   [];
 % Start the simulation

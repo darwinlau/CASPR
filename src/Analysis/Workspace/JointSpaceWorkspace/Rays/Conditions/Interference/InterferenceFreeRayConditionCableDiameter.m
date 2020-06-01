@@ -5,7 +5,7 @@
 % Created       : 2017
 % Description   : 
 
-classdef InterferenceFreeRayCondition < WorkspaceRayConditionBase
+classdef InterferenceFreeRayConditionCableDiameter < WorkspaceRayConditionBase
     properties (SetAccess = protected, GetAccess = protected)
         min_ray_percentage          % The minimum percentage of the ray at which it is included
         safe_dis                    % Safe distance between two cables
@@ -13,7 +13,7 @@ classdef InterferenceFreeRayCondition < WorkspaceRayConditionBase
     
     methods
         % Constructor for interference free worksapce
-        function w= InterferenceFreeRayCondition(min_ray_percent,~)
+        function w= InterferenceFreeRayConditionCableDiameter(min_ray_percent,~)
             w.min_ray_percentage = min_ray_percent;
         end
             

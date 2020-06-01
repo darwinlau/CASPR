@@ -38,8 +38,10 @@ classdef WorkspaceRayConditionBase < handle
             switch conditionType
                 case WorkspaceRayConditionType.WRENCH_CLOSURE
                     wc = WrenchClosureRayCondition(min_ray_percentage,q_dof_type);
-                case WorkspaceRayConditionType.INTERFERENCE
-                    wc = InterferenceFreeRayCondition(min_ray_percentage,q_dof_type);
+                case WorkspaceRayConditionType.INTERFERENCE_CABLE_CABLE
+                    wc = CableCableInterferenceFreeRayCondition(min_ray_percentage,q_dof_type);
+                case WorkspaceRayConditionType.INTERFERENCE_DIAMETER
+                    wc = InterferenceFreeRayConditionCableDiameter(min_ray_percentage,q_dof_type);
                 case WorkspaceRayConditionType.INTERFERENCE_C_E
                     wc = InterferenceFreeRay_C_E(min_ray_percentage,q_dof_type);
                 case WorkspaceRayConditionType.INTERFERENCE_C_O
