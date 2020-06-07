@@ -61,7 +61,7 @@ classdef PointWorkspace < handle
         %       dimension of the plot. Note that the dimension of the array
         %       must the same as the DoF of the robot, the fixed values for
         %       the DoFs to be plotted will be ignored.
-        function w_handles = plotWorkspace(obj, dofs_to_plot, conditions_ind, metrics_ind, fixed_var_val)
+        function w_handles = plotWorkspace(obj, dofs_to_plot, conditions_ind, metrics_ind, fixed_var_val, is_plot_current)
             digit_tolerance = 4;
             
             % Start with a set of checking conditions
@@ -93,6 +93,9 @@ classdef PointWorkspace < handle
             end
             if nargin < 5
                 fixed_var_val = zeros(1, obj.model.numDofs);
+            end
+            if nargin < 6
+                is_plot_current = false;
             end
             
             CASPR_log.Assert(~isempty(conditions_ind) || ~isempty(metrics_ind), 'There should at least be one metric or condition specified.');
@@ -137,7 +140,7 @@ classdef PointWorkspace < handle
             
             % universal plotting function for 2d/3d
             if ~isempty(matched_poses_indices)
-                w_handles = universal_plot(obj, dofs_to_plot, points_to_plot, point_color_matrix);
+                w_handles = universal_plot(obj, dofs_to_plot, points_to_plot, point_color_matrix, is_plot_current);
             else
                 CASPR_log.Warn('There are no points for this workspace to plot');
                 cla
@@ -173,7 +176,7 @@ classdef PointWorkspace < handle
                 f(i) = figure;
                 f(i).Visible = 'on';
                 ax = axes('Parent', f(i), 'position', [0.15 0.2 0.7 0.7]);
-                workspace_fig = plotWorkspace(obj,plot_axis,conditions_ind, metrics{i},fixed_variables);
+                workspace_fig = plotWorkspace(obj, plot_axis, conditions_ind, metrics{i}, fixed_variables, true);
                 if isempty(workspace_fig)
                     f(i) = figure(i);
                     figure_date = [];
@@ -219,7 +222,6 @@ classdef PointWorkspace < handle
         end
         
         function fig = reloadFig(obj,metric_num,slide_axis,plot_axis,conditions_ind,metrics,var)
-            
             layer_indices = 1:obj.grid.q_length(slide_axis);
             q_grid = obj.grid.q_begin(slide_axis) + (layer_indices-1)*obj.grid.delta_q(slide_axis);
             slider_pos_1 = find(var(slide_axis) <= q_grid);
@@ -247,7 +249,7 @@ classdef PointWorkspace < handle
             else
                 hold on;
                 cla;
-                fig = plotWorkspace(obj,plot_axis,conditions_ind, metrics, var);
+                fig = plotWorkspace(obj,plot_axis,conditions_ind, metrics, var, true);
                 ax_old = gcf;
                 scatter_data = findobj(ax_old.Children,'-property','YData');
                 if ~isempty(scatter_data)
@@ -415,18 +417,34 @@ classdef PointWorkspace < handle
         
     end
     methods (Access=private)
-        function w_handles = universal_plot(obj, plot_axis, points_to_plot, point_color_matrix)
+        function w_handles = universal_plot(obj, plot_axis, points_to_plot, point_color_matrix, is_plot_current)
             g = groot;
-            %                 for i = 1:size(point_color_matrix,1)
-            %                     w_handles(i) = figure;%(i);
-            %                 end
-            if isempty(g.Children)
-                for i = size(point_color_matrix,1):-1:1
-                    w_handles(i) = figure;%(i);
-                end
-            elseif ~isempty(g.Children)
-                w_handles = g.CurrentFigure;
+            
+            % By default, if is_plot_current is not supplied, then plot on
+            % new figure
+            if (nargin < 5)
+                is_plot_current = false;
             end
+            
+            if is_plot_current
+                w_handles = g.CurrentFigure;
+            % Plot on new figures
+            else
+                for i = size(point_color_matrix,1):-1:1
+                        w_handles(i) = figure;
+                end
+            end
+                
+%             if isempty(g.Children)
+%                 for i = size(point_color_matrix,1):-1:1
+%                     w_handles(i) = figure;%(i);
+%                 end
+%             else
+%                 disp('hello');
+%                 g.CurrentFigure
+%                 w_handles = g.CurrentFigure;
+%                 disp('end');
+%             end
             
             if size(plot_axis,2) == 2 %plot 2D
                 
@@ -535,8 +553,5 @@ classdef PointWorkspace < handle
             graph_rep = graph_rep(1:number_intersects,:);
             graph_rep  = [graph_rep,ones(size(graph_rep,1),num_metrics)];%Add metrics connectivity
         end
-        
-        
-        
     end
 end
