@@ -105,7 +105,7 @@ classdef PointWorkspace < handle
             
             point_color_matrix = 0;
             
-            % Filter out the points to plot
+            % Filter out the points to plot            
             if ~isempty(conditions_ind)
                 filtered_node_list = create_node_list(obj, conditions_ind);
                 pose_data = round(filtered_node_list(:,2:end), digit_tolerance);
@@ -114,7 +114,6 @@ classdef PointWorkspace < handle
                 num_poses = size(obj.poses, 1);
                 pose_data = zeros(num_poses, obj.model.numDofs);
                 filtered_node_list = zeros(num_poses, obj.model.numDofs+1);
-                %filtered_node_list
                 for i = 1:num_poses
                     pose_data(i,:) = round(obj.poses{i}.pose',digit_tolerance);
                     filtered_node_list(i,:) = [i, obj.poses{i}.pose'];
@@ -501,25 +500,24 @@ classdef PointWorkspace < handle
         
         % function to create the node_list variable
         function node_list = create_node_list(obj, conditions_ind)
-            pose_data = obj.poses;
-            number_points = length(pose_data);
-            condition_indices = 1:length(obj.conditions);
+            pose_data_all = obj.poses;
+            number_points = length(pose_data_all);
+            %condition_indices = 1:length(obj.conditions);
             % Create list of nodes
             node_list = zeros(number_points,1+obj.grid.n_dimensions);
             number_node = 0;
             % For each point
             for i = 1:number_points
                 % Find out the poses that fulfill the condition(s)
-                if(~isempty(pose_data{i}))
-                    n_conditions = length(pose_data{i}.conditions);
-                    if n_conditions ~=0
-                        if (all(ismember(conditions_ind, condition_indices)))
+                pose_data = pose_data_all{i};
+                if(~isempty(pose_data))
+                    if ~isempty(pose_data.conditions)
+                        if (all(ismember(conditions_ind, pose_data.conditionsIndices)))
                             number_node = number_node + 1;
-                            node_list(number_node,:) = [i, pose_data{i}.pose'];
-                        else
-                            CASPR_log.Error('No available workspace conditions');
+                            node_list(number_node,:) = [i, pose_data.pose'];
                         end
-                        
+%                     else
+%                         CASPR_log.Error('No available workspace conditions');
                     end
                 end
             end
