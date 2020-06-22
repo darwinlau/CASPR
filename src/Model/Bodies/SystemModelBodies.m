@@ -301,7 +301,7 @@ classdef SystemModelBodies < handle
                 % Determine rotation matrix
                 % Determine joint location
                 R_pe = obj.bodies{k}.joint.R_pe;   
-                if (is_symbolic)
+                if (is_symbolic && isa(R_pe, 'sym'))
                     R_pe = simplify(R_pe, 'Step', 15);
                 end  
                                 
@@ -315,8 +315,10 @@ classdef SystemModelBodies < handle
                 end
                 
                 if (is_symbolic)
-                    CASPR_log.Info(sprintf('- Symbolic simplifying of R_0k for body %d', k));
-                    obj.bodies{k}.R_0k = simplify(obj.bodies{k}.R_0k, 'Step', k*15);
+                    if (isa(obj.bodies{k}.R_0k, 'sym'))
+                        CASPR_log.Info(sprintf('- Symbolic simplifying of R_0k for body %d', k));
+                        obj.bodies{k}.R_0k = simplify(obj.bodies{k}.R_0k, 'Step', k*15);
+                    end
                     CASPR_log.Info(sprintf('- Symbolic simplifying of r_OP for body %d', k));
                     obj.bodies{k}.r_OP = simplify(obj.bodies{k}.r_OP, 'Step', k*15);
                 end
@@ -362,8 +364,10 @@ classdef SystemModelBodies < handle
                     
                     if (is_symbolic)
                         CASPR_log.Info(sprintf('- Symbolic computing of P_ak, k: %d, a: %d', k, a));
-                        CASPR_log.Info(sprintf('- Symbolic simplifying of R_ka, k: %d, a: %d', k, a));
-                        R_ka = simplify(R_ka, 'Step', k*15);
+                        if (isa(R_ka, 'sym'))
+                            CASPR_log.Info(sprintf('- Symbolic simplifying of R_ka, k: %d, a: %d', k, a));
+                            R_ka = simplify(R_ka, 'Step', k*15);
+                        end
                     end
                     Pak_1 = R_ka*body_a.joint.R_pe.';
                     r_OP = body_a.r_OP;
@@ -378,7 +382,9 @@ classdef SystemModelBodies < handle
                                         
                     if (is_symbolic)
                         CASPR_log.Info(sprintf('- Symbolic simplifying of P_ak, k: %d, a: %d', k, a));
-                        Pak_1 = simplify(Pak_1, 'Step', k*5);
+                        if (isa(Pak_1, 'sym'))
+                            Pak_1 = simplify(Pak_1, 'Step', k*5);
+                        end
                         Pak_2 = simplify(Pak_2, 'Step', k*5);
                     end
                     
