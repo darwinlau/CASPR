@@ -52,7 +52,6 @@ classdef PointWorkspaceSimulator < SimulatorBase
             % Timing variables
             point_t_in = tic;
             total_t_in = tic;
-            empty_ws_num = [];
             % Runs over the grid and evaluates the workspace condition at
             % each point
             for i = 1:n_grid_points
@@ -63,13 +62,11 @@ classdef PointWorkspaceSimulator < SimulatorBase
                 wp = PointWorkspaceElement(q, obj.model, obj.conditions, obj.metrics);
                                
                 if (~isempty(wp.conditions) || ~isempty(wp.metrics))
-                    obj.workspace.poses{i} = wp;
                     workspace_count = workspace_count + 1;
-                else
-                    empty_ws_num = [empty_ws_num,i];
+                    obj.workspace.poses{workspace_count} = wp;
                 end
             end
-            obj.workspace.poses(empty_ws_num,:) = [];
+            obj.workspace.poses = obj.workspace.poses(1:workspace_count, 1);
             obj.comp_time_evaluation = toc(point_t_in);
             graph_t_in = tic;
                 
