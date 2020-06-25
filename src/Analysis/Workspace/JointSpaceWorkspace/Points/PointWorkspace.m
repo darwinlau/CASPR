@@ -382,7 +382,6 @@ classdef PointWorkspace < handle
         % Filter and creat new workspace based on the boundary of the
         % metric values
         function new_workspace = fliterWorkspaceMetric(obj,metrics,metric_min,metric_max)
-            
             if (~isempty(metric_min) && size(metrics,2) ~= size(metric_min,2)) ||...
                     (~isempty(metric_max) && size(metrics,1) ~= size(metric_max,2))
                 CASPR_log.Error('Number of metric boundary does not equal to the number of metrics')
@@ -430,23 +429,11 @@ classdef PointWorkspace < handle
             % Plot on new figures
             else
                 for i = size(point_color_matrix,1):-1:1
-                        w_handles(i) = figure;
+                    w_handles(i) = figure;
                 end
             end
-                
-%             if isempty(g.Children)
-%                 for i = size(point_color_matrix,1):-1:1
-%                     w_handles(i) = figure;%(i);
-%                 end
-%             else
-%                 disp('hello');
-%                 g.CurrentFigure
-%                 w_handles = g.CurrentFigure;
-%                 disp('end');
-%             end
             
             if size(plot_axis,2) == 2 %plot 2D
-                
                 x = points_to_plot(:,plot_axis(1));
                 y = points_to_plot(:,plot_axis(2));
                 for i = 1:size(point_color_matrix,1)
