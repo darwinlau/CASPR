@@ -14,25 +14,25 @@ classdef WrenchClosureRayCondition < WorkspaceRayConditionBase
         number_dofs;                 % The number of dofs
         number_cables;               % The number of cables
         degree_redundancy;           % The degree of redundancy   
-        % vector constants
-        zero_n;
-        true_np1;
     end
     
     methods
         % Constructor for wrench closure workspace
-        function w = WrenchClosureRayCondition(min_ray_percent,model)
+        function w = WrenchClosureRayCondition(model, min_ray_percent)
             w.min_ray_percentage = min_ray_percent;
             w.joint_type = model.bodyModel.q_dofType ==DoFType.TRANSLATION;
             w.number_dofs = model.numDofs;
             w.number_cables = model.numCables;
             w.degree_redundancy = w.number_cables - w.number_dofs;
-            w.zero_n = zeros(w.number_dofs,1);
-            w.true_np1 = true(w.number_dofs+1,1);
         end
         
         % The taghirad inspired method
-        function intervals = evaluateFunction(obj,model,workspace_ray)
+        % Intervals are of the form of 
+        % [min_1 max_1]
+        % [min_2 max_2] 
+        % [min_3 max_3] 
+        % [min_4 max_4] etc...
+        function intervals = evaluateFunction(obj, model, workspace_ray)
             %% Variable initialisation
             free_variable_index = workspace_ray.free_variable_index;
             % Use the joint type to determine the maximum polynomial
@@ -79,6 +79,7 @@ classdef WrenchClosureRayCondition < WorkspaceRayConditionBase
         % Method for evaluating in the case of degree of redundancy = 1.
         function intervals = evaluate_function_fully_restrained(obj,model,workspace_ray,maximum_degree,free_variable_index,free_variable_linear_space,least_squares_matrix_i)
             % Determine all of the sets of combinatorics that will be used
+            q_zero = zeros(obj.number_dofs, 1);
             cable_vector = 1:obj.number_cables;
             cable_combinations = zeros(obj.number_cables,obj.number_dofs);
             for i = 1:obj.number_cables
@@ -89,7 +90,8 @@ classdef WrenchClosureRayCondition < WorkspaceRayConditionBase
             % Pose data
             q_fixed = workspace_ray.fixed_variables;
             fixed_index = true(obj.number_dofs,1); fixed_index(workspace_ray.free_variable_index) = false;
-            q = obj.zero_n; q(fixed_index) = q_fixed;
+            q = q_zero; 
+            q(fixed_index) = q_fixed;
             %% Sample the polynomials
             % Start with matrix initialisation
             null_matrix = zeros(maximum_degree+1,obj.number_cables);
@@ -98,7 +100,7 @@ classdef WrenchClosureRayCondition < WorkspaceRayConditionBase
                 q_free = free_variable_linear_space(linear_space_index);
                 q(free_variable_index) = q_free;
                 % Update the model
-                model.update(q,obj.zero_n,obj.zero_n,obj.zero_n);
+                model.update(q, q_zero, q_zero, q_zero);
                 % Obtain the Jacobian for computation
                 if(obj.joint_type(free_variable_index))
                     A = -(model.L)';
@@ -180,6 +182,7 @@ classdef WrenchClosureRayCondition < WorkspaceRayConditionBase
         
         % Method for evaluating inthe case of degree of redundnacy > 1
         function intervals = evaluate_function_redundantly_restrained(obj,model,workspace_ray,maximum_degree,free_variable_index,free_variable_linear_space,least_squares_matrix_i)
+            q_zero = zeros(obj.number_dofs, 1);
             % Determine all of the sets of combinatorics that will be used
             cable_vector = 1:obj.number_cables;
             cable_combinations = nchoosek(cable_vector,obj.number_dofs);
@@ -189,7 +192,8 @@ classdef WrenchClosureRayCondition < WorkspaceRayConditionBase
             % Pose data
             q_fixed = workspace_ray.fixed_variables;
             fixed_index = true(obj.number_dofs,1); fixed_index(workspace_ray.free_variable_index) = false;
-            q = obj.zero_n; q(fixed_index) = q_fixed;
+            q = q_zero; 
+            q(fixed_index) = q_fixed;
             %% Sample the polynomials
             % Start with matrix initialisation
             determinant_matrix = zeros(maximum_degree+1,number_combinations);
@@ -199,7 +203,7 @@ classdef WrenchClosureRayCondition < WorkspaceRayConditionBase
                 q_free = free_variable_linear_space(linear_space_index);
                 q(free_variable_index) = q_free;
                 % Update the model
-                model.update(q,obj.zero_n,obj.zero_n,obj.zero_n);
+                model.update(q, q_zero, q_zero, q_zero);
                 % Obtain the Jacobian for computation
                 if(obj.joint_type(free_variable_index))
                     A = -(model.L)';
@@ -233,7 +237,7 @@ classdef WrenchClosureRayCondition < WorkspaceRayConditionBase
                             % Go through it and fill in all the
                             % determinants
                             for dof_iterations=1:obj.number_dofs+1
-                                temp_true = obj.true_np1;
+                                temp_true = true(obj.number_dofs+1,1);;
                                 temp_true(dof_iterations) = false;
                                 null_matrix(linear_space_index,combination_index,secondary_combination_index,dof_iterations) = det(A_np1(:,temp_true));
                             end

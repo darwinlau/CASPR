@@ -39,9 +39,9 @@ classdef RayWorkspace < handle
             
         end
         
-        function intersected_point_set = createWorkspaceRayGraph(obj,conditions,metrics)            
+        function intersected_point_set = createWorkspaceRayGraph(obj, conditions, metrics)
             % Create list of nodes and graph in ray representation
-            [~] =  create_ray_node_list(obj, conditions);
+            [~] =  obj.create_ray_node_list();
             [~,intersected_point_set] =  create_ray_graph_rep(obj, obj.ray_node.node_list, metrics);
             
             
@@ -89,8 +89,8 @@ classdef RayWorkspace < handle
             fixed_axis = 1:obj.model.numDofs;
             fixed_axis(plot_axis) = [];
             node_list = fix(create_point_node_list(obj, conditions)*10^rounding_digit)/10^rounding_digit;
-%             node_list = obj.point_node.node_list; % use this if there are
-%             node_list already
+            %             node_list = obj.point_node.node_list; % use this if there are
+            %             node_list already
             if ~isempty(fixed_variables)
                 plot_data_index = find(ismember(node_list(:,1 + fixed_axis),fixed_variables,'rows'));
             elseif size(plot_axis,2) == obj.model.numDofs
@@ -181,72 +181,110 @@ classdef RayWorkspace < handle
             node_color_matrix = [];edge_color_matrix = [];
         end
         
-        function plotRayWorkspace(obj,plot_axis,conditions,fixed_variables)
-            rounding_digit = 4; % remove numerical error from input, change it if not accurate enough
-            fixed_variables([plot_axis]) = [];
-%             fixed_variables = round(fixed_variables,rounding_digit);
-            fixed_variables = fix(fixed_variables*10^rounding_digit)/10^rounding_digit;
-            if max(size(fixed_variables)) + max(size(plot_axis)) ~= obj.model.numDofs
-                CASPR_log.Error('Not enought number of fixed axis')
+        % Function to plot the workspace in 2D or 3D. For robots with more
+        % than 3 DoFs, values of the fixed DoFs need to be provided to
+        % lower its dimension to 2D or 3D.
+        %
+        % Inputs:
+        %   - dofs_to_plot: The array of the joint pose (q) indices to plot
+        %       in 2-D or 3-D (in the order of XYZ)
+        %   - conditions_ind: The array of the indices of the workspace
+        %       conditions to be plotted
+        %   - metrics_ind: The array of the indices of the workspace
+        %       metrics to be plotted
+        %   - fixed_var_val: The array of the values for the fixed
+        %       variables when the DoF of the robot is greater than the
+        %       dimension of the plot. Note that the dimension of the array
+        %       must the same as the DoF of the robot, the fixed values for
+        %       the DoFs to be plotted will be ignored.
+        function w_handles = plotRayWorkspace(obj, dofs_to_plot, fixed_var_val, is_plot_current)
+        %function plotRayWorkspace(obj,plot_axis,conditions,fixed_variables)
+            digit_tolerance = 4; % remove numerical error from input, change it if not accurate enough
+            
+            % Start with a set of checking conditions
+            CASPR_log.Assert(length(dofs_to_plot) == 2 || length(dofs_to_plot) == 3, 'Number of DoFs to plot must be 2 or 3, otherwise it cannot be plotted.');
+            CASPR_log.Assert(length(dofs_to_plot) <= obj.model.numDofs, 'The number of DoFs to plot is more than the degrees of freedom available.');
+            if (length(dofs_to_plot) > obj.model.numDofs)
+                CASPR_log.Assert(nargin > 4, 'Must input ''fixed_var_val'' if the DoFs to plot does not cover all DoFs.');
+                CASPR_log.Assert(length(fixed_var_val) == obj.model.numDofs, 'Input ''fixed_var_val'' must have the same dimension as the DoFs of the robot.');
             end
-            %             node_list = create_ray_node_list(obj, conditions);
-            node_list = obj.ray_node.node_list;
-            plot_data_index = find(ismember(cell2mat(node_list(:,end)),plot_axis));
-            plot_data = node_list(plot_data_index,[plot_axis+1,end]);
+            
+            if nargin < 3
+                fixed_var_val = zeros(1, obj.model.numDofs);
+            end
+            if nargin < 4
+                is_plot_current = false;
+            end
+            
+            fixed_var_val = reshape(fixed_var_val, [1,obj.model.numDofs]);
+            fixed_var_val = round(fixed_var_val, digit_tolerance);
+            fixed_var_val(:, dofs_to_plot) = [];
+            
+            node_list = obj.create_ray_node_list();
+            
+            plot_data_index = find(ismember(cell2mat(node_list(:,end)), dofs_to_plot));
+            plot_data = node_list(plot_data_index, [dofs_to_plot+1,end]);
             
             fixed_variable_column_index = 1:size(node_list,2)-2;
-            fixed_variable_column_index([plot_axis]) = [];
-            fixed_variable_data = node_list(plot_data_index,[fixed_variable_column_index+1]);
-            
-            if ~isempty(fixed_variables)
-                fixed_variable_data = cellfun(@(x)round(x,rounding_digit),fixed_variable_data);
-                variables_matched_index = find(ismember(fixed_variable_data,fixed_variables,'rows'));
-            elseif size(plot_axis,2) == obj.model.numDofs
+            fixed_variable_column_index(dofs_to_plot) = [];
+            fixed_variable_data = node_list(plot_data_index, [fixed_variable_column_index+1]);
+            if ~isempty(fixed_var_val)
+                fixed_variable_data = cellfun(@(x)round(x, digit_tolerance), fixed_variable_data);
+                variables_matched_index = find(ismember(fixed_variable_data, fixed_var_val, 'rows'));
+            elseif size(dofs_to_plot, 2) == obj.model.numDofs
                 variables_matched_index = [obj.ray_node.node_list{:,1}]';
             end
             if isempty(variables_matched_index)
-                CASPR_log.Error('No available plot, try to change fixed variable value')
+                CASPR_log.Warn('No available plot, try to change fixed variable value')
             end
             figure;
-            if size(plot_axis,2) == 3 %3D plot
+            if size(dofs_to_plot, 2) == 3 %3D plot
                 for i = 1:size(variables_matched_index,1)
-                    if plot_data{variables_matched_index(i),end} == plot_axis(1)
+                    if plot_data{variables_matched_index(i),end} == dofs_to_plot(1)
                         x = plot_data{variables_matched_index(i),1};
                         y = ones(1,2)*plot_data{variables_matched_index(i),2};
                         z = ones(1,2)*plot_data{variables_matched_index(i),3};
-                    elseif plot_data{variables_matched_index(i),end} == plot_axis(2)
+                    elseif plot_data{variables_matched_index(i),end} == dofs_to_plot(2)
                         x = ones(1,2)*plot_data{variables_matched_index(i),1};
                         y = plot_data{variables_matched_index(i),2};
                         z = ones(1,2)*plot_data{variables_matched_index(i),3};
-                    elseif plot_data{variables_matched_index(i),end} == plot_axis(3)
+                    elseif plot_data{variables_matched_index(i),end} == dofs_to_plot(3)
                         x = ones(1,2)*plot_data{variables_matched_index(i),1};
                         y = ones(1,2)*plot_data{variables_matched_index(i),2};
                         z = plot_data{variables_matched_index(i),3};
                     end
                     plot3(x,y,z,'k');
-                    xlabel(['Variable: ',num2str(plot_axis(1))]);
-                    ylabel(['Variable: ',num2str(plot_axis(2))]);
-                    zlabel(['Variable: ',num2str(plot_axis(3))]);
-                    hold on
+                    % plotting title and other stuff, nothing important
+                    xlim(1.005*[obj.model.bodyModel.q_min(dofs_to_plot(1)),obj.model.bodyModel.q_max(dofs_to_plot(1))]);
+                    ylim(1.005*[obj.model.bodyModel.q_min(dofs_to_plot(2)),obj.model.bodyModel.q_max(dofs_to_plot(2))]);
+                    zlim(1.005*[obj.model.bodyModel.q_min(dofs_to_plot(3)),obj.model.bodyModel.q_max(dofs_to_plot(3))]);
+                    xlabel(sprintf('q_%d', dofs_to_plot(1)));
+                    ylabel(sprintf('q_%d', dofs_to_plot(2)));
+                    zlabel(sprintf('q_%d', dofs_to_plot(3)));
+                    hold on;
                 end
-            elseif size(plot_axis,2) == 2 %2D plot
+                hold off;
+            elseif size(dofs_to_plot, 2) == 2 %2D plot
                 for i = 1:size(variables_matched_index,1)
-                    if plot_data{variables_matched_index(i),end} == plot_axis(1)
+                    if plot_data{variables_matched_index(i),end} == dofs_to_plot(1)
                         x = plot_data{variables_matched_index(i),1};
                         y = ones(1,2)*plot_data{variables_matched_index(i),2};
-                    elseif plot_data{variables_matched_index(i),end} == plot_axis(2)
+                    elseif plot_data{variables_matched_index(i),end} == dofs_to_plot(2)
                         x = ones(1,2)*plot_data{variables_matched_index(i),1};
                         y = plot_data{variables_matched_index(i),2};
                     end
                     plot(x,y,'k');
-                    xlabel(['Variable: ',num2str(plot_axis(1))]);
-                    ylabel(['Variable: ',num2str(plot_axis(2))]);
+                    xlim(1.005*[obj.model.bodyModel.q_min(dofs_to_plot(1)),obj.model.bodyModel.q_max(dofs_to_plot(1))]);
+                    ylim(1.005*[obj.model.bodyModel.q_min(dofs_to_plot(2)),obj.model.bodyModel.q_max(dofs_to_plot(2))]);
+                    xlabel(sprintf('q_%d', dofs_to_plot(1)));
+                    ylabel(sprintf('q_%d', dofs_to_plot(2)));
                     hold on
                 end
+                hold off;
             else
                 CASPR_log.Error('Only 3D/2D plot is available.')
             end
-            title(['Fixed variables: ',num2str(fixed_variables)]);
+            title(['Fixed variables: ',num2str(fixed_var_val)]);
         end
         
     end
@@ -254,10 +292,12 @@ classdef RayWorkspace < handle
     methods(Access = private)
         
         % function to create the node_list variable for point representation
-        function node_list = create_point_node_list(obj, conditions)
-            count_time = 0;c_2 = 0; c_2 = tic;
-            intersected_ray = {};ref_intersected_point = [];
-            rays_seg = create_ray_node_list(obj, conditions);%get every rays as node
+        function node_list = create_point_node_list(obj)
+            count_time = 0;
+            c_2 = tic;
+            intersected_ray = {};
+            ref_intersected_point = [];
+            rays_seg = obj.create_ray_node_list();%get every rays as node
             %             rays_seg = obj.ray_node.node_list;
             ternimal_index = find(ismember([rays_seg{:,end}],rays_seg{end,end}));
             ternimal_index = ternimal_index(1);
@@ -268,21 +308,21 @@ classdef RayWorkspace < handle
                 co_planar_rays = [];
                 %find out co-planar rays
                 if  obj.model.bodyModel.numDofs >2
-                for j = rays_seg{i,end}+1:obj.grid.n_dimensions
-                    remove_index = [rays_seg{i,end}, j];
-                    plane_A  = ray_A; plane_A(remove_index) = []; plane_A(end) = []; plane_A = cell2mat(plane_A);
-                    compare_rays_index = find(ismember([rays_seg{:,end}],j));
-                    checking_rays = rays_seg([find(ismember([rays_seg{:,end}],j))],1:end-1);
-                    if isempty(checking_rays)
-                        break;
+                    for j = rays_seg{i,end}+1:obj.grid.n_dimensions
+                        remove_index = [rays_seg{i,end}, j];
+                        plane_A  = ray_A; plane_A(remove_index) = []; plane_A(end) = []; plane_A = cell2mat(plane_A);
+                        compare_rays_index = find(ismember([rays_seg{:,end}],j));
+                        checking_rays = rays_seg([find(ismember([rays_seg{:,end}],j))],1:end-1);
+                        if isempty(checking_rays)
+                            break;
+                        end
+                        checking_rays(:,[rays_seg{i,end}+1 j+1]) = [];
+                        co_planar_index = find(ismember(cell2mat(checking_rays(:,2:end)),plane_A,'rows'));
+                        co_planar_rays = [co_planar_rays;rays_seg(cell2mat(checking_rays(co_planar_index,1)),:)];
+                        
                     end
-                    checking_rays(:,[rays_seg{i,end}+1 j+1]) = [];
-                    co_planar_index = find(ismember(cell2mat(checking_rays(:,2:end)),plane_A,'rows'));
-                    co_planar_rays = [co_planar_rays;rays_seg(cell2mat(checking_rays(co_planar_index,1)),:)];
-                    
-                end
                 else
-                     j = rays_seg{i,end}+1:obj.grid.n_dimensions;
+                    j = rays_seg{i,end}+1:obj.grid.n_dimensions;
                     checking_rays = rays_seg([find(ismember([rays_seg{:,end}],j))],1:end);
                     co_planar_rays = checking_rays;
                 end
@@ -290,7 +330,7 @@ classdef RayWorkspace < handle
                 for j = 1:size(co_planar_rays,1)
                     ray_B = co_planar_rays(j,2:end);
                     [intersected_point,~] = check_intersection(ray_A,ray_B);
-%                     intersected_point = round(intersected_point,4);
+                    %                     intersected_point = round(intersected_point,4);
                     if ~isempty(intersected_point)
                         intersected_ray(end+1,:) = {rays_seg{i,1},co_planar_rays{j,1}};
                         ref_intersected_point(end+1,:) = intersected_point;
@@ -304,8 +344,9 @@ classdef RayWorkspace < handle
                 end
                 
             end
-            count_time = 0;c_2 = 0; c_2 = tic;
-            ref_intersected_point = round(ref_intersected_point,obj.tolerance)
+            count_time = 0;
+            c_2 = tic;
+            ref_intersected_point = round(ref_intersected_point,obj.tolerance);
             unique_points = unique(ref_intersected_point,'rows');
             node_list = cell(size(unique_points,1),size(unique_points,2)+obj.model.numDofs);%[node_number,intersected_point,ray_number]
             for i = 1:size(unique_points,1)
@@ -330,8 +371,9 @@ classdef RayWorkspace < handle
         function graph_rep = create_point_graph_rep(obj, node_list)
             rounding_digit = 4;
             graph_rep = [];
-%             node_list = round(node_list,rounding_digit);
-            count_time = 0;c_2 = 0; c_2 = tic;
+            %             node_list = round(node_list,rounding_digit);
+            count_time = 0;
+            c_2 = tic;
             for k = 1:size(node_list,1)
                 tic;
                 for i = 1:size(obj.grid.dim_disc_ia,1)
@@ -345,7 +387,7 @@ classdef RayWorkspace < handle
                         else
                             nearby_point = node_list(k,2:obj.model.numDofs+1) - delta_q_vector;
                         end
-%                         neighbour_point_index = find(ismember(node_list(:,2:obj.model.numDofs+1),round(nearby_point,rounding_digit),'rows'));
+                        %                         neighbour_point_index = find(ismember(node_list(:,2:obj.model.numDofs+1),round(nearby_point,rounding_digit),'rows'));
                         neighbour_point_index =  find(vecnorm(node_list(:,2:obj.model.numDofs+1)'-nearby_point')'<=10^-rounding_digit);
                         if ~isempty(neighbour_point_index)
                             if ~ismember(neighbour_point_index,node_list(1:k,1))
@@ -364,51 +406,36 @@ classdef RayWorkspace < handle
                 if toc(c_2) >= 5
                     disp(time_left);
                     c_2 = tic;
-                end                
+                end
                 data_count = k;
             end
             obj.point_node(:).graph_rep =  graph_rep;
         end
         
         % function to create the node_list variable for ray representation
-        function node_list = create_ray_node_list(obj, conditions)
+        function node_list = create_ray_node_list(obj)
             % covert the input conditions to same format as the ray
             % condition
-            count_time = 0; c_2 = 0;c_2 = tic;
-            conditions_types = input_conversion(conditions);
+            count_time = 0; 
+            c_2 = tic;
             number_node = 0;
             node_list = cell(1,obj.model.numDofs+2);
-            for i = 1:size(obj.rays,1)
+            for i = 1:size(obj.rays, 1)
                 tic
                 % Determine the ray that has same condtions as input
                 if(~isempty(obj.rays{i}))
-                    num_conditions = size(obj.rays{i}.conditions,1);
-                    intervals = [];
-                    
-                    for j = 1:num_conditions
-                        ray_condition_types(j) = obj.rays{i}.conditions{j,1};
-                    end
-                    
-                     if(all(ismember(conditions_types,ray_condition_types)))
-                        for j = 1:size(obj.rays{i}.conditions{2},1)
-                        intervals(j,:) = obj.rays{i}.conditions{2}(j,:);
+                    number_node = number_node + 1;
+                    node_list{number_node,1} = number_node; % node number
+                    kk = 1;
+                    for k = 2:size(node_list,2)-1
+                        if k ~= obj.rays{i}.free_variable_index+1
+                            node_list{number_node,k} =  obj.rays{i}.fixed_variables(kk);
+                            kk = kk + 1;
+                        else
+                            node_list{number_node,k} =  obj.rays{i}.interval;
                         end
-                     end
-                    
-                    for j = 1:size(intervals,1)
-                        number_node = number_node + 1;
-                        node_list{number_node,1} = number_node; % node number
-                        kk = 1;
-                        for k = 2:size(node_list,2)-1
-                            if k ~= obj.rays{i}.free_variable_index+1
-                                node_list{number_node,k} =  obj.rays{i}.fixed_variables(kk);
-                                kk = kk + 1;
-                            else
-                                node_list{number_node,k} =  intervals(j,:);
-                            end
-                        end
-                        node_list{number_node,end} = obj.rays{i}.free_variable_index;
                     end
+                    node_list{number_node,end} = obj.rays{i}.free_variable_index;
                 end
                 count_time = count_time + toc;
                 time_left = [ 'Creating ray nodes: ',num2str(round(100*i/size(obj.rays,1)),4),' % completed.'];
@@ -422,13 +449,14 @@ classdef RayWorkspace < handle
         
         % function to create the graph_rep variable for ray representation
         function [graph_rep,intersected_point_set] = create_ray_graph_rep(obj, node_list,metrics)
-            count_time = 0; c_2 = 0;c_2 = tic;
+            count_time = 0; 
+            c_2 = tic;
             graph_rep = [];metric_value = [];
             intersected_point_set = [];
             ternimal_index = find(ismember([node_list{:,end}],node_list{end,end}));
             ternimal_index = ternimal_index(1);
             for j = 1:ternimal_index-1
-%                 for j = 1:size(node_list,1) - ternimal_index
+                %                 for j = 1:size(node_list,1) - ternimal_index
                 tic;
                 current_variable = find(ismember([node_list{:,end}],node_list{j,end}));
                 starting_index = current_variable(end)+1;
@@ -475,121 +503,121 @@ classdef RayWorkspace < handle
         end
         
     end
-    
 end
-% function to handle numerous inputs to processable inputs
-function output_types = input_conversion(input)
-num_input= size(input,2);
 
-if num_input == 1 && ~iscell(input)
-    input = mat2cell(input,1);
-end
-for i = 1:num_input
-    output_types(i) = input{i}.type;
-end
-end
+% % function to handle numerous inputs to processable inputs
+% function output_types = input_conversion(input)
+%     num_input= size(input,2);
+% 
+%     if num_input == 1 && ~iscell(input)
+%         input = mat2cell(input,1);
+%     end
+%     for i = 1:num_input
+%         output_types(i) = input{i}.type;
+%     end
+% end
 
 % function to check intersection  and distance between two co-plannar rays
 function [intersected_point,min_dist] = check_intersection(ray_1,ray_2)
-% check if co-planar
-for i = 1:size(ray_2,2)-1
-    if i == ray_2{end} || i == ray_1{end}
-        intersected_point(i) = Inf;
-        co_planar_flag = 1;
-    else
-        pt_B = ray_2{i};
-        pt_A = ray_1{i};
-        if pt_A ~= pt_B
-            co_planar_flag = 0;
-            intersected_point = [];
-            min_dist = [];
-            break
-        else
+    % check if co-planar
+    for i = 1:size(ray_2,2)-1
+        if i == ray_2{end} || i == ray_1{end}
+            intersected_point(i) = Inf;
             co_planar_flag = 1;
-            intersected_point(i) = pt_A;
-        end
-    end
-end
-
-% find intersected point
-if (co_planar_flag)
-    seg_A_x = ray_1{ray_1{end}};
-    seg_A_y = ones(1,2)*ray_1{ray_2{end}};
-    
-    seg_B_x = ones(1,2)*ray_2{ray_1{end}};
-    seg_B_y = ray_2{ray_2{end}};
-    %     clf
-    %     plot(seg_A_x,seg_A_y);hold on
-    %     plot(seg_B_x,seg_B_y);
-    
-    [x_intersected,y_intersected] = polyxpoly(seg_A_x,seg_A_y,seg_B_x,seg_B_y);
-    int_coor = [x_intersected,y_intersected];
-    
-    
-    if ~isempty(x_intersected) && ~isempty(y_intersected)
-        min_dist = min([abs(seg_A_x(1)-x_intersected),abs(seg_A_x(2)-x_intersected),...
-            abs(seg_B_y(1)-y_intersected),abs(seg_B_y(2)-y_intersected)]);
-        
-        if ray_1{end} > ray_2{end}
-            int_coor = fliplr(int_coor);
-        end
-        j = 1;
-        for i = 1:size(intersected_point,2)
-            if intersected_point(i) == Inf
-                intersected_point(i) = int_coor(j);
-                j = j + 1;
+        else
+            pt_B = ray_2{i};
+            pt_A = ray_1{i};
+            if pt_A ~= pt_B
+                co_planar_flag = 0;
+                intersected_point = [];
+                min_dist = [];
+                break
+            else
+                co_planar_flag = 1;
+                intersected_point(i) = pt_A;
             end
         end
-    else
-        min_dist = [];intersected_point = [];
     end
-end
+
+    % find intersected point
+    if (co_planar_flag)
+        seg_A_x = ray_1{ray_1{end}};
+        seg_A_y = ones(1,2)*ray_1{ray_2{end}};
+
+        seg_B_x = ones(1,2)*ray_2{ray_1{end}};
+        seg_B_y = ray_2{ray_2{end}};
+        %     clf
+        %     plot(seg_A_x,seg_A_y);hold on
+        %     plot(seg_B_x,seg_B_y);
+
+        [x_intersected,y_intersected] = polyxpoly(seg_A_x,seg_A_y,seg_B_x,seg_B_y);
+        int_coor = [x_intersected,y_intersected];
+
+
+        if ~isempty(x_intersected) && ~isempty(y_intersected)
+            min_dist = min([abs(seg_A_x(1)-x_intersected),abs(seg_A_x(2)-x_intersected),...
+                abs(seg_B_y(1)-y_intersected),abs(seg_B_y(2)-y_intersected)]);
+
+            if ray_1{end} > ray_2{end}
+                int_coor = fliplr(int_coor);
+            end
+            j = 1;
+            for i = 1:size(intersected_point,2)
+                if intersected_point(i) == Inf
+                    intersected_point(i) = int_coor(j);
+                    j = j + 1;
+                end
+            end
+        else
+            min_dist = [];intersected_point = [];
+        end
+    end
 end
 
 % function to plot two color bar graph
 function graph = plot2ColorGraph(G,node_color_matrix,edge_color_matrix,title_str)
-figure
-for i = 1:2
-    ax(i) = axes;
-    if i == 1
-        graph = plot(G,'MarkerSize',2);
-        graph.NodeCData = node_color_matrix';
-        graph.EdgeColor = 'none';
-    else
-        graph = plot(G,'MarkerSize',2);
-        graph.NodeColor = 'none';
-        graph.EdgeCData = edge_color_matrix';
+    figure
+    for i = 1:2
+        ax(i) = axes;
+        if i == 1
+            graph = plot(G,'MarkerSize',2);
+            graph.NodeCData = node_color_matrix';
+            graph.EdgeColor = 'none';
+        else
+            graph = plot(G,'MarkerSize',2);
+            graph.NodeColor = 'none';
+            graph.EdgeCData = edge_color_matrix';
+        end
     end
-end
-linkaxes([ax(1),ax(2)]);
-ax(2).Visible = 'off';
-ax(2).XTick = [];
-ax(2).YTick = [];
-colormap(ax(1),cool)
-colormap(ax(2),autumn);
-set([ax(1),ax(2)],'Position',[.17 .11 .685 .815]);
-cb1 = colorbar(ax(1),'Position',[.14 .11 .03 .815]);
-cb2 = colorbar(ax(2),'Position',[.84 .11 .03 .815]);
-dim = [.42 .7 .3 .3];
-annotation('textbox',dim,'EdgeColor','none','String',title_str,'FitBoxToText','on');
+    linkaxes([ax(1),ax(2)]);
+    ax(2).Visible = 'off';
+    ax(2).XTick = [];
+    ax(2).YTick = [];
+    colormap(ax(1),cool)
+    colormap(ax(2),autumn);
+    set([ax(1),ax(2)],'Position',[.17 .11 .685 .815]);
+    cb1 = colorbar(ax(1),'Position',[.14 .11 .03 .815]);
+    cb2 = colorbar(ax(2),'Position',[.84 .11 .03 .815]);
+    dim = [.42 .7 .3 .3];
+    annotation('textbox',dim,'EdgeColor','none','String',title_str,'FitBoxToText','on');
 
 end
 
 % function to plot one color bar graph
 function graph = plot1ColorGraph(G,node_color,edge_color,title_str)
-figure
-graph = plot(G,'MarkerSize',2);
-if size(node_color,1) == 1
-    graph.NodeCData = node_color';
-else
-    graph.NodeColor = node_color;
-end
-if size(edge_color,2) == 1
-    graph.EdgeCData = edge_color';
-else
-    graph.EdgeColor = edge_color;
-end
-colormap(autumn);
-colorbar;
-title(title_str);
+    figure
+    graph = plot(G,'MarkerSize',2);
+    if size(node_color,1) == 1
+        graph.NodeCData = node_color';
+    else
+        graph.NodeColor = node_color;
+    end
+    if size(edge_color,2) == 1
+        graph.EdgeCData = edge_color';
+    else
+        graph.EdgeColor = edge_color;
+    end
+    colormap(autumn);
+    colorbar;
+    title(title_str);
 end
