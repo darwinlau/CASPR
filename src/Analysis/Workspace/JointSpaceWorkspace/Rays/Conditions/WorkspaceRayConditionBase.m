@@ -9,12 +9,17 @@
 %   Any new types of conditions need to be added to the WorkspaceRayConditionType 
 %   enum and also added to the CreateWorkspaceRayCondition method.
 classdef WorkspaceRayConditionBase < handle
-    properties 
+    properties (SetAccess = protected)
         method          % Method of implementation (an enum)
         type            % Type of joint from JointType enum
+        minRayLengths   % Minimum ray length as an array for each DoF
     end
     
     methods
+        function w = WorkspaceRayConditionBase(min_ray_lengths)
+            w.minRayLengths = min_ray_lengths;
+        end
+        
         % The unified implemetnation of evaluate. This evaluates the object
         % dynamics to determine if the workspace condition is satisfied.
         function [condition_intervals, condition_type, comp_time] = evaluate(obj, dynamics, workspace_ray)

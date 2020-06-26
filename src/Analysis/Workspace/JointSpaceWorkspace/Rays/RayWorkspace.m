@@ -32,23 +32,25 @@ classdef RayWorkspace < handle
             %node_list        % A list of all nodes
         end
         
-        function createWorkspacePointGraph(obj,conditions)
+        function createWorkspacePointGraph(obj)
             % Create list of nodes and graph in point representation
-            [~] = create_point_node_list(obj, conditions);
-            [~] = create_point_graph_rep(obj, obj.point_node.node_list);
+            [~] = obj.create_point_node_list();
+            [~] = obj.create_point_graph_rep();
             
         end
         
-        function intersected_point_set = createWorkspaceRayGraph(obj, conditions, metrics)
+        function intersected_point_set = createWorkspaceRayGraph(obj, metrics)
             % Create list of nodes and graph in ray representation
-            [~] =  obj.create_ray_node_list();
+            if (isempty(obj.ray_node.node_list))
+                obj.create_ray_node_list();
+            end
             [~,intersected_point_set] =  create_ray_graph_rep(obj, obj.ray_node.node_list, metrics);
             
             
         end
         
-        function point_graph = plotPointGraph(obj,conditions,metrics)
-            createWorkspacePointGraph(obj,conditions);
+        function point_graph = plotPointGraph(obj, metrics)
+            obj.createWorkspacePointGraph();
             if ~isempty(metrics)
                 for i = 1:size(obj.point_node.node_list,1)
                     wp(i,:) = PointWorkspaceElement(obj.point_node.node_list(i,2:end), obj.model, [], metrics);
@@ -124,8 +126,8 @@ classdef RayWorkspace < handle
             
         end
         
-        function plotRayGraph(obj,conditions,metrics)
-            intersected_point_set = createWorkspaceRayGraph(obj,conditions,metrics);
+        function plotRayGraph(obj, metrics)
+            intersected_point_set = createWorkspaceRayGraph(obj, metrics);
             
             G = graph(obj.ray_node.graph_rep(:,1),obj.ray_node.graph_rep(:,2));
             %remove zero intersection node
@@ -188,17 +190,12 @@ classdef RayWorkspace < handle
         % Inputs:
         %   - dofs_to_plot: The array of the joint pose (q) indices to plot
         %       in 2-D or 3-D (in the order of XYZ)
-        %   - conditions_ind: The array of the indices of the workspace
-        %       conditions to be plotted
-        %   - metrics_ind: The array of the indices of the workspace
-        %       metrics to be plotted
         %   - fixed_var_val: The array of the values for the fixed
         %       variables when the DoF of the robot is greater than the
         %       dimension of the plot. Note that the dimension of the array
         %       must the same as the DoF of the robot, the fixed values for
         %       the DoFs to be plotted will be ignored.
         function w_handles = plotRayWorkspace(obj, dofs_to_plot, fixed_var_val, is_plot_current)
-        %function plotRayWorkspace(obj,plot_axis,conditions,fixed_variables)
             digit_tolerance = 4; % remove numerical error from input, change it if not accurate enough
             
             % Start with a set of checking conditions
@@ -220,7 +217,11 @@ classdef RayWorkspace < handle
             fixed_var_val = round(fixed_var_val, digit_tolerance);
             fixed_var_val(:, dofs_to_plot) = [];
             
-            node_list = obj.create_ray_node_list();
+            if (isempty(obj.ray_node.node_list))
+                node_list = obj.create_ray_node_list();
+            else
+                node_list = obj.ray_node.node_list;
+            end
             
             plot_data_index = find(ismember(cell2mat(node_list(:,end)), dofs_to_plot));
             plot_data = node_list(plot_data_index, [dofs_to_plot+1,end]);
@@ -293,12 +294,13 @@ classdef RayWorkspace < handle
         
         % function to create the node_list variable for point representation
         function node_list = create_point_node_list(obj)
-            count_time = 0;
-            c_2 = tic;
             intersected_ray = {};
             ref_intersected_point = [];
-            rays_seg = obj.create_ray_node_list();%get every rays as node
-            %             rays_seg = obj.ray_node.node_list;
+            if (isempty(obj.ray_node.nodelist))
+                rays_seg = obj.create_ray_node_list();%get every rays as node
+            else
+                rays_seg = obj.ray_node.node_list;
+            end
             ternimal_index = find(ismember([rays_seg{:,end}],rays_seg{end,end}));
             ternimal_index = ternimal_index(1);
             
@@ -335,17 +337,9 @@ classdef RayWorkspace < handle
                         intersected_ray(end+1,:) = {rays_seg{i,1},co_planar_rays{j,1}};
                         ref_intersected_point(end+1,:) = intersected_point;
                     end
-                end
-                count_time = count_time + toc;
-                if toc(c_2) >= 2
-                    time_left = [ 'Finding intersected points : ',num2str(round(100*i/(size(rays_seg,1) - ternimal_index),2)),' % completed.'];
-                    disp(time_left);
-                    c_2 = tic;
-                end
-                
+                end                
             end
-            count_time = 0;
-            c_2 = tic;
+            
             ref_intersected_point = round(ref_intersected_point,obj.tolerance);
             unique_points = unique(ref_intersected_point,'rows');
             node_list = cell(size(unique_points,1),size(unique_points,2)+obj.model.numDofs);%[node_number,intersected_point,ray_number]
@@ -355,25 +349,17 @@ classdef RayWorkspace < handle
                 int_ray_index = [];
                 node = num2cell([i,unique_points(i,:),int_ray_index]);
                 node_list(i,1:size(node,2)) = node;
-                clear node
-                count_time = count_time + toc;
-                time_left = [ 'Creating point node list : ',num2str(100*i/size(unique_points,1)),' % completed, estimate ' num2str(round((count_time *size(unique_points,1) / i - count_time),2)),' sec left'];
-                if toc(c_2) >= 5
-                    disp(time_left);
-                    c_2 = tic;
-                end
+                clear node;
             end
             node_list = cell2mat(node_list);
             obj.point_node(:).node_list = node_list;
         end
         
         % function to create the graph_rep variable for point representation
-        function graph_rep = create_point_graph_rep(obj, node_list)
+        function graph_rep = create_point_graph_rep(obj)
+            node_list = obj.point_node.node_list;
             rounding_digit = 4;
             graph_rep = [];
-            %             node_list = round(node_list,rounding_digit);
-            count_time = 0;
-            c_2 = tic;
             for k = 1:size(node_list,1)
                 tic;
                 for i = 1:size(obj.grid.dim_disc_ia,1)
@@ -401,27 +387,20 @@ classdef RayWorkspace < handle
                         end
                     end
                 end
-                count_time = count_time + toc;
-                time_left = [ 'Creating point graph_rep: ', num2str(100*k/size(node_list,1)),' % completed, estimate ' num2str(round((count_time * size(node_list,1) / k - count_time),2)),' sec left'];
-                if toc(c_2) >= 5
-                    disp(time_left);
-                    c_2 = tic;
-                end
-                data_count = k;
             end
             obj.point_node(:).graph_rep =  graph_rep;
         end
         
         % function to create the node_list variable for ray representation
         function node_list = create_ray_node_list(obj)
+            
+            CASPR_log.Info('Creating ray workspace ray node list.');
+            
             % covert the input conditions to same format as the ray
             % condition
-            count_time = 0; 
-            c_2 = tic;
             number_node = 0;
             node_list = cell(1,obj.model.numDofs+2);
             for i = 1:size(obj.rays, 1)
-                tic
                 % Determine the ray that has same condtions as input
                 if(~isempty(obj.rays{i}))
                     number_node = number_node + 1;
@@ -437,21 +416,14 @@ classdef RayWorkspace < handle
                     end
                     node_list{number_node,end} = obj.rays{i}.free_variable_index;
                 end
-                count_time = count_time + toc;
-                time_left = [ 'Creating ray nodes: ',num2str(round(100*i/size(obj.rays,1)),4),' % completed.'];
-                if toc(c_2) >= 2
-                    disp(time_left);
-                    c_2 = tic;
-                end
                 obj.ray_node(:).node_list = node_list;
             end
         end
         
         % function to create the graph_rep variable for ray representation
-        function [graph_rep,intersected_point_set] = create_ray_graph_rep(obj, node_list,metrics)
-            count_time = 0; 
-            c_2 = tic;
-            graph_rep = [];metric_value = [];
+        function [graph_rep,intersected_point_set] = create_ray_graph_rep(obj, node_list, metrics)
+            graph_rep = [];
+            metric_value = [];
             intersected_point_set = [];
             ternimal_index = find(ismember([node_list{:,end}],node_list{end,end}));
             ternimal_index = ternimal_index(1);
@@ -491,12 +463,6 @@ classdef RayWorkspace < handle
                         
                         graph_rep = [graph_rep;node_list{j,1},co_planar_rays{i,1},min_dist,metric_value];
                     end
-                end
-                count_time = count_time + toc;
-                if toc(c_2) >= 5
-                    time_left = [ 'Creating ray graph_rep: ',num2str(round(100*j/(size(node_list,1) - ternimal_index),3)),' % completed, estimate ' num2str(round((count_time * size(node_list,1) / j - count_time),2)),' sec left'];
-                    disp(time_left);
-                    c_2 = tic;
                 end
                 obj.ray_node(:).graph_rep = graph_rep;
             end

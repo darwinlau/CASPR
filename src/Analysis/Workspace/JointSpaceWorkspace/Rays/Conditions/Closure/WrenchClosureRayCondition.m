@@ -5,11 +5,13 @@
 % Created       : 2015
 % Description    : 
 classdef WrenchClosureRayCondition < WorkspaceRayConditionBase
-    properties (SetAccess = protected, GetAccess = protected)
+    properties (Constant)
         % Fixed constants
         TOLERANCE = 1e-8;
+    end 
+    
+    properties (SetAccess = protected, GetAccess = protected)
         % Set constants
-        min_ray_percentage           % The minimum percentage of the ray at which it is included
         joint_type;                  % Boolean set to true if translation and false if rotation
         number_dofs;                 % The number of dofs
         number_cables;               % The number of cables
@@ -18,8 +20,9 @@ classdef WrenchClosureRayCondition < WorkspaceRayConditionBase
     
     methods
         % Constructor for wrench closure workspace
-        function w = WrenchClosureRayCondition(model, min_ray_percent)
-            w.min_ray_percentage = min_ray_percent;
+        function w = WrenchClosureRayCondition(model, min_ray_lengths)
+            w@WorkspaceRayConditionBase(min_ray_lengths);
+            %w.min_ray_percentage = min_ray_percent;
             w.joint_type = model.bodyModel.q_dofType ==DoFType.TRANSLATION;
             w.number_dofs = model.numDofs;
             w.number_cables = model.numCables;
@@ -65,8 +68,7 @@ classdef WrenchClosureRayCondition < WorkspaceRayConditionBase
             % larger than the tolerance
             count = 1;
             for iteration_index = 1:size(intervals,1)
-                segment_percentage = 100*(intervals(count,2)-intervals(count,1))/(workspace_ray.free_variable_range(2) - workspace_ray.free_variable_range(1));
-                if(segment_percentage < obj.min_ray_percentage)
+                if(intervals(count,2) - intervals(count,1) < obj.minRayLengths(free_variable_index))
                     intervals(count,:) = [];
                 else
                     count = count+1;
@@ -129,7 +131,7 @@ classdef WrenchClosureRayCondition < WorkspaceRayConditionBase
                 leading_zero_number = -1;
                 % Remove the leading zeros
                 for i = 1:maximum_degree+1
-                    if(abs(coefficients_null(i))>obj.TOLERANCE)
+                    if(abs(coefficients_null(i)) > obj.TOLERANCE)
                         leading_zero_number = i-1;
                         break;
                     end
@@ -170,7 +172,7 @@ classdef WrenchClosureRayCondition < WorkspaceRayConditionBase
                 if((sum(sign_vector>obj.TOLERANCE) == obj.number_cables)||(sum(sign_vector<-obj.TOLERANCE) == obj.number_cables))
                     % Add the interval
                     new_interval = evaluation_interval;
-                    intervals = obj.set_union(intervals,new_interval);
+                    intervals = obj.set_union(intervals, new_interval);
                 end
             end
             
@@ -237,7 +239,7 @@ classdef WrenchClosureRayCondition < WorkspaceRayConditionBase
                             % Go through it and fill in all the
                             % determinants
                             for dof_iterations=1:obj.number_dofs+1
-                                temp_true = true(obj.number_dofs+1,1);;
+                                temp_true = true(obj.number_dofs+1,1);
                                 temp_true(dof_iterations) = false;
                                 null_matrix(linear_space_index,combination_index,secondary_combination_index,dof_iterations) = det(A_np1(:,temp_true));
                             end
@@ -408,7 +410,7 @@ classdef WrenchClosureRayCondition < WorkspaceRayConditionBase
                         return;
                     end
                 end
-                if((~isempty(intervals))&&(obj.degree_redundancy==1)&&(100*(intervals(1,2)-intervals(1,1))/(workspace_ray.free_variable_range(2) - workspace_ray.free_variable_range(1))>obj.min_ray_percentage))
+                if (~isempty(intervals) && (obj.degree_redundancy==1) && (intervals(1,2) - intervals(1,1) > obj.minRayLengths(free_variable_index)))
                     return;
                 end
             end
