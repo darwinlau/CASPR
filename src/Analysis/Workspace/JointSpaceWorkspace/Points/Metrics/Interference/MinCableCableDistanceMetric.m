@@ -177,7 +177,7 @@ classdef MinCableCableDistanceMetric < WorkspaceMetricBase
         end
         
         
-        function d = DistanceSegmentsNonUniplanar(obj, segPoints_1, segPoints_2)
+        function d = DistanceSegmentsNonUniplanar(segPoints_1, segPoints_2)
             %To calculate the shortest distance of two non-nuiplanar segments by
             %[Judging 2 conditions]
             %s1,s2 mean two seg1 and seg2 [non-uniplanar]
@@ -231,10 +231,10 @@ classdef MinCableCableDistanceMetric < WorkspaceMetricBase
             if c1<0 && c2<0
                 d = c;
             else
-                d1 = obj.DistancePointAndSegment(A1, segPoints_2);
-                d2 = obj.DistancePointAndSegment(B1, segPoints_2);
-                d3 = obj.DistancePointAndSegment(A2, segPoints_1);
-                d4 = obj.DistancePointAndSegment(B2, segPoints_1);
+                d1 = MinCableCableDistanceMetric.DistancePointAndSegment(A1, segPoints_2);
+                d2 = MinCableCableDistanceMetric.DistancePointAndSegment(B1, segPoints_2);
+                d3 = MinCableCableDistanceMetric.DistancePointAndSegment(A2, segPoints_1);
+                d4 = MinCableCableDistanceMetric.DistancePointAndSegment(B2, segPoints_1);
                 d = min([d1, d2, d3, d4]);
             end
         end
