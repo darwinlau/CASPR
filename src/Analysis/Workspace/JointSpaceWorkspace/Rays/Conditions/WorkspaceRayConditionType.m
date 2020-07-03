@@ -6,7 +6,7 @@
 classdef WorkspaceRayConditionType
     enumeration 
         WRENCH_CLOSURE
-        INTERFERENCE
+        INTERFERENCE_CABLE_CABLE
         INTERFERENCE_C_E
         INTERFERENCE_C_O
     end

@@ -67,15 +67,16 @@ classdef RayWorkspaceSimulator < SimulatorBase
                     sub_grid = UniformGrid(obj.grid.q_begin(grid_index), obj.grid.q_end(grid_index), obj.grid.delta_q(grid_index), 'step_size', obj.grid.q_wrap(grid_index));
                     for j = 1:sub_grid.n_points
                         CASPR_log.Info(sprintf('Workspace DoF %d. Workspace ray %d. Completion Percentage: %3.2f.', i, j, 100*k/n_grid_points));
-                        
                         % Load the current fixed grid coordinates
                         q_fixed = sub_grid.getGridPoint(j);
-                        % Construct the workspace ray
-                        wre = RayWorkspaceElement(obj.model, q_fixed, obj.conditions, i, [obj.grid.q_begin(i),obj.grid.q_end(i)]);
                         
-                        if ~isempty(wre.interval)
-                            workspace_count = workspace_count + 1;
-                            obj.workspace.rays{workspace_count} = wre;
+                        if (obj.grid.q_begin(i) ~= obj.grid.q_end(i))
+                            % Construct the workspace ray
+                            wre = RayWorkspaceElement(obj.model, q_fixed, obj.conditions, i, [obj.grid.q_begin(i),obj.grid.q_end(i)]);
+                            if ~isempty(wre.interval)
+                                workspace_count = workspace_count + 1;
+                                obj.workspace.rays{workspace_count} = wre;
+                            end
                         end
                         k = k+1;
                     end

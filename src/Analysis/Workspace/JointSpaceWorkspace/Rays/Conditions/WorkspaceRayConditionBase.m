@@ -9,10 +9,13 @@
 %   Any new types of conditions need to be added to the WorkspaceRayConditionType 
 %   enum and also added to the CreateWorkspaceRayCondition method.
 classdef WorkspaceRayConditionBase < handle
+    properties (Constant, Abstract)
+        type            % Type of workspace condition (WorkspaceRayConditionType enum)
+    end
+    
     properties (SetAccess = protected)
-        method          % Method of implementation (an enum)
-        type            % Type of joint from JointType enum
-        minRayLengths   % Minimum ray length as an array for each DoF
+        method              % Method of implementation (an enum)
+        minRayLengths       % Minimum ray length as an array for each DoF
     end
     
     methods
@@ -44,7 +47,7 @@ classdef WorkspaceRayConditionBase < handle
                 case WorkspaceRayConditionType.WRENCH_CLOSURE
                     wc = WrenchClosureRayCondition(min_ray_percentage,model);
                 case WorkspaceRayConditionType.INTERFERENCE_CABLE_CABLE
-                    wc = CableCableInterferenceFreeRayCondition(min_ray_percentage,model);
+                    wc = InterferenceFreeRayConditionCableCable(min_ray_percentage, model);
                 case WorkspaceRayConditionType.INTERFERENCE_DIAMETER
                     wc = InterferenceFreeRayConditionCableDiameter(min_ray_percentage,model);
                 case WorkspaceRayConditionType.INTERFERENCE_C_E
