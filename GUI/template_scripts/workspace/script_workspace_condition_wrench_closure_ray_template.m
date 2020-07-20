@@ -6,7 +6,7 @@
 
 % Load configs
 model_config    =   DevModelConfig('CU-Brick');
-cable_set_id    =   'demo_causewaybay';
+cable_set_id    =   'AEI_demo';
 modelObj        =   model_config.getModel(cable_set_id);
 % Set up the model 
 % model_config    =   ModelConfig('Example planar XY');
@@ -19,11 +19,11 @@ q_step          =   (modelObj.bodyModel.q_max - modelObj.bodyModel.q_min)/3;
 uGrid           =   UniformGrid(q_begin,q_end,q_step,'step_size');
 % Workspace settings and conditions
 min_segment_percentage = 1;
-w_condition     =   {WorkspaceRayConditionBase.CreateWorkspaceRayCondition(WorkspaceRayConditionType.WRENCH_CLOSURE,min_segment_percentage,modelObj)};
+w_condition     =   {WorkspaceRayConditionBase.CreateWorkspaceRayCondition(WorkspaceRayConditionType.INTERFERENCE_CABLE_QUADSURF,min_segment_percentage,modelObj)};
 
 % w_metrics       =   {TensionFactorMetric,ConditionNumberMetric};
-w_metrics       =   {ConditionNumberMetric()};
-% w_metrics = {};
+% w_metrics       =   {ConditionNumberMetric()};
+w_metrics = {};
 
 % Start the simulation
 CASPR_log.Info('Start Setup Simulation');
