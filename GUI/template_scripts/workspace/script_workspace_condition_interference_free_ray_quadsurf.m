@@ -12,18 +12,33 @@ modelObj        =   model_config.getModel(cable_set_id);
 % model_config    =   ModelConfig('Example planar XY');
 % cable_set_id    =   'basic';
 
-q_begin         =   modelObj.bodyModel.q_min; q_end = modelObj.bodyModel.q_max; 
+q_begin         =   modelObj.bodyModel.q_min; 
+q_begin(4:6) = -pi/2;
+q_begin = [0.5 0.5 0.5 -pi/2 -pi/2 -pi/2]';
+q_end = modelObj.bodyModel.q_max; 
+q_end(4:6) = pi/2;
+q_end = [0.5 0.5 0.5 pi/2 pi/2 pi/2]';
 q_step          =   (modelObj.bodyModel.q_max - modelObj.bodyModel.q_min)/3;
 % Set up the workspace simulator
 % First the grid
 uGrid           =   UniformGrid(q_begin,q_end,q_step,'step_size');
 % Workspace settings and conditions
-
-QuadSurf = @(x,y,z) (x - 1).^2 + y.^2 - 0.5;
+QuadSurf = @(x,y,z) x.^2 + y.^2 + z.^2 - 0.2.*x - 1.*y + 0.1.*z + 0.5.*x.*y  + 0.2.*y.*z - 0.3.*x.*z+ 0.04;
+QuadSurf = @(x,y,z) (x-1).^2 + (y+0.5).^2 + (z-0.2).^2 - 0.2.*x - 1.*y + 0.1.*z + 0.4.*x.*y  + 0.2.*y.*z - 0.3.*x.*z+ 0.04;
+QuadSurf = @(x,y,z) (x-1).^2 + (y-0.5).^2 + (z-0.2).^2 - 0.2.*x - 0.5.*(y) + 0.1.*z + 0.4.*x.*y  + 0.2.*y.*z - 0.3.*x.*z+ .2;
+delete(ob1)
+ob1 = fimplicit3(QuadSurf,[-2 2 -2 2 0 2.5],'FaceColor',[0.5 0.5 0.5],'EdgeColor','none','FaceAlpha',0.4)
+            hold on;
+            
+% QuadSurf = @(x,y,z) x.^2 + y.^2 - 0.5;
+% QuadSurf = @(x,y,z) (x-0.2).^2 + (y-0.8).^2 - 0.01;
+% QuadSurf = @(x,y,z) (0.01.*x+0.5).^2 + (0.02.*y-0.5).^2 - z.^2 -0.4;
+% QuadSurf = @(x,y,z) x.^2 + (y-0.1).^2 - 0.5;
+% QuadSurf = @(x,y,z) (x - 1).^2 + y.^2 - 0.5;
 
 
 min_segment_percentage = 1;
-w_condition     =   {WorkspaceRayConditionBase.CreateWorkspaceRayCondition(WorkspaceRayConditionType.WRENCH_CLOSURE,min_segment_percentage,modelObj)};
+w_condition     =   {WorkspaceRayConditionBase.CreateWorkspaceRayCondition(WorkspaceRayConditionType.INTERFERENCE_CABLE_QUADSURF,min_segment_percentage,modelObj,QuadSurf)};
 
 % w_metrics       =   {TensionFactorMetric,ConditionNumberMetric};
 % w_metrics       =   {ConditionNumberMetric()};
