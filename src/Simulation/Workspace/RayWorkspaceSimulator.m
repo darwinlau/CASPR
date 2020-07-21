@@ -58,8 +58,7 @@ classdef RayWorkspaceSimulator < SimulatorBase
             ray_t_in = tic;
             total_t_in = tic;
             
-%             for i = 1:obj.grid.n_dimensions
-                for i = 4:obj.grid.n_dimensions
+            for i = 1:obj.grid.n_dimensions
                 if ismember(i, obj.grid.dim_disc_ia)
                     %i is the free variable index;
                     grid_index = true(obj.grid.n_dimensions,1); 

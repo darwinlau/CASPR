@@ -45,17 +45,17 @@ classdef WorkspaceRayConditionBase < handle
         function wc = CreateWorkspaceRayCondition(conditionType,min_ray_percentage,model,QuadSurf)
             switch conditionType
                 case WorkspaceRayConditionType.WRENCH_CLOSURE
-                    wc = WrenchClosureRayCondition(min_ray_percentage,model);
+                    wc = WrenchClosureRayCondition(model,min_ray_percentage);
                 case WorkspaceRayConditionType.INTERFERENCE_CABLE_CABLE
                     wc = InterferenceFreeRayConditionCableCable(model,min_ray_percentage);
                 case WorkspaceRayConditionType.INTERFERENCE_CABLE_QUADSURF
                     wc = InterferenceFreeRayConditionCableObstacle(model,min_ray_percentage,QuadSurf);
                 case WorkspaceRayConditionType.INTERFERENCE_DIAMETER
-                    wc = InterferenceFreeRayConditionCableDiameter(min_ray_percentage,model);
+                    wc = InterferenceFreeRayConditionCableDiameter(model,min_ray_percentage);
                 case WorkspaceRayConditionType.INTERFERENCE_C_E
-                    wc = InterferenceFreeRay_C_E(min_ray_percentage,model);
+                    wc = InterferenceFreeRay_C_E(model,min_ray_percentage);
                 case WorkspaceRayConditionType.INTERFERENCE_C_O
-                    wc = InterferenceFreeRay_C_O(min_ray_percentage,model);
+                    wc = InterferenceFreeRay_C_O(model,min_ray_percentage);
                 otherwise
                     CASPR_log.Error('Workspace condition type is not defined');
             end

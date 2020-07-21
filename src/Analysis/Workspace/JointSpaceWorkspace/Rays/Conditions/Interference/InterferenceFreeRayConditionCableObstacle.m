@@ -10,9 +10,6 @@ classdef InterferenceFreeRayConditionCableObstacle < WorkspaceRayConditionBase
         ROUNDING_DIGIT = 5;
         % Type of workspace condition (WorkspaceConditionType enum)
         type = WorkspaceRayConditionType.INTERFERENCE_CABLE_QUADSURF;
-        
-        MAX_DEGREE_TRANSLATION = 3;
-        MAX_DEGREE_ORIENTATION = 6;
     end
     
     properties (SetAccess = protected)
@@ -20,8 +17,8 @@ classdef InterferenceFreeRayConditionCableObstacle < WorkspaceRayConditionBase
         areDofsTranslation;         % Array for the q of the joint (true if translation and false if rotation)
         numDofs;                    % The number of dofs
         numCables;                  % The number of cables
-        degRedundancy;              % The degree of redundancy
         QuadSurf;                   % The obstacle surface equations
+        surface_bound               % Obstacle boundary
     end
     
     methods
@@ -31,192 +28,119 @@ classdef InterferenceFreeRayConditionCableObstacle < WorkspaceRayConditionBase
             w.areDofsTranslation = (model.bodyModel.q_dofType == DoFType.TRANSLATION);
             w.numDofs = model.numDofs;
             w.numCables = model.numCables;
-            w.QuadSurf = QuadSurf;
+            w.QuadSurf = QuadSurf.implicit_equation;
+            w.surface_bound = QuadSurf.boundary;
         end
         
         % Evaluate the interference free intervals
         function intervals =  evaluateFunction(obj, model, ws_ray)
-            interference_q = [];
-            intervals =[];
-            intervals_count = 1;
             % Variable initialisation
+            intervals = [];
+            intervals_count = 1;
             syms u v t;
-            q_zero = zeros(obj.numDofs, 1);
             free_variable_index = ws_ray.free_variable_index;
             is_dof_translation = obj.areDofsTranslation(free_variable_index);
             q_begin = [ws_ray.fixed_variables(1:free_variable_index-1);ws_ray.free_variable_range(1);ws_ray.fixed_variables(free_variable_index:end)];
             q_end = [ws_ray.fixed_variables(1:free_variable_index-1);ws_ray.free_variable_range(2);ws_ray.fixed_variables(free_variable_index:end)];
-%             ob1 = fimplicit3(obj.QuadSurf,[-2 2 -2 2 0 2.5],'FaceColor',[0.5 0.5 0.5],'EdgeColor','none','FaceAlpha',0.4)
-%             hold on;
-            if is_dof_translation
-                % Att_pts{1} -> base point,  Att_pts{2}-> start point,  Att_pts{3}-> end point
+            all_intersection_poses =[q_begin,q_end];
+%             clf
+%             ob1 = fimplicit3(obj.QuadSurf,obj.surface_bound,'FaceColor',[0.5 0.5 0.5],'EdgeColor','none','FaceAlpha',0.4);
+%             hold on;intersected_pts = [];
+%             model.update(q_begin,zeros(model.numDofs,1), zeros(model.numDofs,1),zeros(model.numDofs,1));
+%             draw_robot(model);
+%             model.update(q_end,zeros(model.numDofs,1), zeros(model.numDofs,1),zeros(model.numDofs,1));
+%             draw_robot(model);
+            % Att_pts{1} -> base point,  Att_pts{2}-> start point,  Att_pts{3}-> end point
                 [Att_pts{1},Att_pts{2}] = obj.GetSegmentData(model,q_begin);
-                [~,Att_pts{3}] = obj.GetSegmentData(model,q_end);
+                [~,Att_pts{3}] = obj.GetSegmentData(model,q_end); 
+            if is_dof_translation    
                 
-                
-                i_plot = [];
-                h = [];
-                q_intersected = [];
-                intersected_pts = [];
-                tic
                 for i = 1:obj.numCables
-                    i_plot = [];
-                    h=patch('Faces',1:3,'Vertices',[Att_pts{3}(i,:);Att_pts{2}(i,:);Att_pts{1}(i,:)]);
-                    set(h,'FaceColor','r','EdgeColor','k','LineWidth',2,'FaceAlpha',0.5);
+                    
+%                     h(i)=patch('Faces',1:3,'Vertices',[Att_pts{3}(i,:);Att_pts{2}(i,:);Att_pts{1}(i,:)]);
+%                     set(h(i),'FaceColor','r','EdgeColor','k','LineWidth',2,'FaceAlpha',0.5);
                     %% parametric form f(u,v) of the cable segment surface
                     parametric_cable_surf = (((Att_pts{3}(i,:) - Att_pts{2}(i,:))'.*u +  Att_pts{2}(i,:)') - Att_pts{1}(i,:)').*v + Att_pts{1}(i,:)';
                     parametric_cable_surf_uv = @(u,v) (((Att_pts{3}(i,:) - Att_pts{2}(i,:))'.*u +  Att_pts{2}(i,:)') - Att_pts{1}(i,:)').*v + Att_pts{1}(i,:)';
                     
+                    [q_intersected,intersected_pts] = obj.ParametericSurfaceIntersection(parametric_cable_surf_uv,Att_pts{1}(i,:),q_begin,q_end);
+                    all_intersection_poses = [all_intersection_poses, q_intersected];
+                    intersected_pts = [intersected_pts,intersected_pts];
                     %% boundary curves intersection
-                    Segment{1} = (Att_pts{3}(i,:) - Att_pts{2}(i,:))'.*t + Att_pts{2}(i,:)';
-                    Segment{2} = (Att_pts{3}(i,:) - Att_pts{1}(i,:))'.*t + Att_pts{1}(i,:)';
-                    Segment{3} = (Att_pts{2}(i,:) - Att_pts{1}(i,:))'.*t + Att_pts{1}(i,:)';
-                    for ii = 1:3
-                        tmp_intersected_pts = [];
-                        f_1 =@(t) obj.QuadSurf(Segment{ii}(1),Segment{ii}(2),Segment{ii}(3));
-                        %                         t_ans = double(solve(f_1(t),'Real',true));
-                        [t_coeff,t_degree] = coeffs(f_1(t),t);
-                        t_ans = roots(t_coeff);
-                        t_ans = t_ans(imag(t_ans)==0);
-                        t_ans(t_ans <0) = [];t_ans(t_ans > 1) = [];
-                        for iii = 1:size(t_ans,1)
-                            tmp_intersected_pts = [tmp_intersected_pts,double(subs(Segment{ii},t_ans(iii)))];
-                        end
-                        
-                        for iii = 1:size(tmp_intersected_pts,2)
-                            %                   angle(iii) = acos(((Att_pts{2}(i,:) - Att_pts{1}(i,:)) * (intersected_pts(:,iii)' - Att_pts{1}(i,:))')/...
-                            %   (norm((Att_pts{2}(i,:)' - Att_pts{1}(i,:))) * norm((intersected_pts(:,iii) - Att_pts{1}(i,:)))));
-                            %% finding the corresponding poses of intersection
-                            unit_vec_1 = parametric_cable_surf_uv(u,1) - Att_pts{1}(i,:)';
-                            unit_vec_2 = tmp_intersected_pts(:,iii) - Att_pts{1}(i,:)';
-                            %                             u_value = double(solve((unit_vec_1(1)^2 +  unit_vec_1(2)^2 +  unit_vec_1(3)^2)*unit_vec_2(1)^2/norm(unit_vec_2)^2 - unit_vec_1(1)^2,'Real',true));
-                            u_value = double(solve(sqrt((unit_vec_1(1)^2 +  unit_vec_1(2)^2 +  unit_vec_1(3)^2))*unit_vec_2(1)/norm(unit_vec_2) - unit_vec_1(1),'Real',true));
-                            u_value(u_value <0) = [];u_value(u_value > 1) = [];
-                            if ~isempty(u_value)
-                                q_intersected = [q_intersected,(q_end - q_begin)*u_value + q_begin];
-                                intersected_pts = [intersected_pts,tmp_intersected_pts(:,iii)];
-                            end
-                            
-                        end
-                        
-                    end
-                    %% surface inside the boundary intersection
-                    f_1 =@(u,v) obj.QuadSurf(parametric_cable_surf(1),parametric_cable_surf(2),parametric_cable_surf(3));
-                    [v_coeff,v_degree] = coeffs(f_1(u,v),v);
-                    
-                    f_2 = v_coeff(2)*v_coeff(2) - 4*v_coeff(3)*v_coeff(1);
-                    [u_numerator,u_denominator] = numden(f_2);
-                    [u_coeff,u_degree] = coeffs(u_numerator,u);
-                    u_ans = unique(double((roots(u_coeff))));
-                    u_ans = u_ans(imag(u_ans)==0);
-                    u_ans(u_ans <0) = [];u_ans(u_ans > 1) = [];
-                    if ~isempty(u_ans)
-                        for ii = 1:size(u_ans,1)
-                            %                         parametric_cable_surf_uv(u_ans(ii),v)
-                            v_coeff = subs(v_coeff,u_ans(ii));
-                            %                         v_ans = unqiue(double(roots(v_coeff)));
-                            v_ans = unique(round(double(roots(v_coeff)),obj.ROUNDING_DIGIT));
-                            v_ans(v_ans <0) = [];v_ans(v_ans > 1) = [];
-                            
-                            if ~isempty(v_ans)
-                                unit_vec_1 = parametric_cable_surf_uv(u,1) - Att_pts{1}(i,:)';
-                                unit_vec_2 = parametric_cable_surf_uv(u_ans(ii),1) - Att_pts{1}(i,:)';
-                                u_value =  double(solve(sqrt((unit_vec_1(1)^2 +  unit_vec_1(2)^2 +  unit_vec_1(3)^2))*unit_vec_2(1)/norm(unit_vec_2) - unit_vec_1(1),'Real',true));
-                                u_value(u_value <0) = [];u_value(u_value > 1) = [];
-                                q_intersected = [q_intersected,(q_end - q_begin).*u_value' + q_begin];
-                                
-                                tmp_intersected_pts = [tmp_intersected_pts, parametric_cable_surf_uv(u_value,v_ans)];
-                                if ~isempty(tmp_intersected_pts)
-                                    i_plot(ii) = scatter3(tmp_intersected_pts(1,:),tmp_intersected_pts(2,:),tmp_intersected_pts(3,:));
-                                    %
-                                    %                     else
-                                    %                         i_plot = [];
-                                end
-                            end
-                        end
-                    end
-                    intersected_pts = [intersected_pts,tmp_intersected_pts(:,iii)];
-                    
-                    %                     i
-                    if ~isempty(i_plot)
-                        delete(i_plot)
-                    end
-                    %                     delete(h)
+                    Segment{1} =@(t) (Att_pts{3}(i,:) - Att_pts{2}(i,:))'.*t + Att_pts{2}(i,:)';
+                    Segment{2} =@(t) (Att_pts{3}(i,:) - Att_pts{1}(i,:))'.*t + Att_pts{1}(i,:)';
+                    Segment{3} =@(t) (Att_pts{2}(i,:) - Att_pts{1}(i,:))'.*t + Att_pts{1}(i,:)';
+                    [q_intersected,intersected_pts] = CurveSurfaceIntersection(obj,Segment,parametric_cable_surf_uv,Att_pts{1}(i,:)',q_begin,q_end);
+                    all_intersection_poses = [all_intersection_poses, q_intersected];
+                    intersected_pts = [intersected_pts,intersected_pts];
+%                     if ~isempty(intersected_pts)
+%                         inplot(i) = scatter3(intersected_pts(1,:),intersected_pts(2,:),intersected_pts(3,:));
+%                     end
+                    %                 delete(h(i));
+                    %                 delete(inplot(i));
                 end
-                toc
-                if ~isempty(q_intersected)
-                    q_intersected = [q_intersected,q_begin,q_end];
-                    q_intersected = unique(round(q_intersected',obj.ROUNDING_DIGIT),'rows')';
-                    
-                    for i = 1:size(q_intersected,2) - 1
-                        check_interval = [];
-                        model.update(q_intersected(:,i),zeros(model.numDofs,1), zeros(model.numDofs,1),zeros(model.numDofs,1))
-                        draw_robot(model)
-                        model.update(q_intersected(:,i+1),zeros(model.numDofs,1), zeros(model.numDofs,1),zeros(model.numDofs,1))
-                        draw_robot(model)
-                        [Att1,Att2] = obj.GetSegmentData(model,(q_intersected(:,i)+q_intersected(:,i+1))/2);
-                        for ii = 1:obj.numCables
-                            Check_seg_t =   (Att2(ii,:) - Att1(ii,:))'.*t + Att1(ii,:)';
-                            f_1 =@(t) obj.QuadSurf(Check_seg_t(1),Check_seg_t(2),Check_seg_t(3));
-                            [t_coeff,t_degree] = coeffs(f_1(t),t);
-                            t_ans = double(roots(t_coeff));
-                            t_ans = t_ans(imag(t_ans)==0);
-                            t_ans(t_ans <0) = [];t_ans(t_ans > 1) = [];
-                            if ~isempty(t_ans)
-                                check_interval(ii) = 1;
-                            else
-                                check_interval(ii) = 0;
-                            end
-                        end
-                        if all(check_interval == 0)
-                            %% holding here, fill the codes later
-                            intervals{intervals_count} = [q_intersected(:,i),q_intersected(:,i+1)];
-                            intervals_count = intervals_count + 1;
-                        end
+                all_intersection_poses = unique(round(all_intersection_poses',obj.ROUNDING_DIGIT),'rows')';
+                for i = 1:size(all_intersection_poses,2) - 1
+                    has_intersected = obj.IntervalVerify(model,all_intersection_poses(:,i),all_intersection_poses(:,i+1));
+                    if has_intersected == 0
+                        intervals(intervals_count,:) = [all_intersection_poses(free_variable_index,i),all_intersection_poses(free_variable_index,i+1)];
+                        intervals_count = intervals_count + 1;
                     end
                 end
             else
                 [R_coeff,T_coeff] = obj.RotationMatrixCoefficient(model,q_begin,q_end);
                 [Si,base_point] = obj.GetSegmentEquation(model,R_coeff,T_coeff);
                 C_D = [1 0 2 0 1];
-                %% for plot only
-                t1 = linspace(0,1,20);
-                for i = 1:20
-                    for ii = 1:8
-                        for iii = 1:3
-                            ee_point(iii,:) = polyval(Si{ii}(iii,:),t1(i)) / polyval(C_D,t1(i));
-                        end
-                        LL = [base_point(:,ii),ee_point + base_point(:,ii)];
-                        plot3(LL(1,:),LL(2,:),LL(3,:),'k')
-                        hold on
-                    end
-                end
                                 
                 for i = 1:obj.numCables
-                    Si_u =@(u) Si{i}*[u^4;u^3;u^2;u^1;1] / (C_D*[u^4;u^3;u^2;u^1;1]);
+                    %% for plot only
+%                     t1 = linspace(0,1,20);
+%                     for ii = 1:size(t1,2)
+%                         for iii = 1:3
+%                             ee_point(iii,:) = polyval(Si{i}(iii,:),t1(ii)) / polyval(C_D,t1(ii));
+%                         end
+%                         LL = [base_point(:,i),ee_point + base_point(:,i)];
+%                         incplot(i,ii) = plot3(LL(1,:),LL(2,:),LL(3,:),'k');
+%                         hold on
+%                         
+%                     end
                     
+                    Si_u =@(u) Si{i}*[u^4;u^3;u^2;u^1;1] / (C_D*[u^4;u^3;u^2;u^1;1]);
                     %% parametric form f(u,v) of the cable segment surface
                     parametric_cable_surf = Si_u(u)* v + base_point(:,i);
                     parametric_cable_surf_uv =@(u,v) Si_u(u)* v + base_point(:,i);
-                    f_1 =@(u,v) obj.QuadSurf(parametric_cable_surf(1),parametric_cable_surf(2),parametric_cable_surf(3));
-                    [v_coeff,v_degree] = coeffs(f_1(u,v),v);
+                    [q_intersected,intersected_pts] = obj.ParametericSurfaceIntersection(parametric_cable_surf_uv,base_point(:,i),q_begin,q_end);
+                    all_intersection_poses = [all_intersection_poses, q_intersected];
+                    intersected_pts = [intersected_pts,intersected_pts];
                     
-                    f_2 = v_coeff(2)*v_coeff(2) - 4*v_coeff(3)*v_coeff(1);
-                    [u_numerator,u_denominator] = numden(f_2);
-                    [u_coeff,u_degree] = coeffs(u_numerator,u);
-                    u_ans = unique(double((roots(u_coeff))));
-                    u_ans = u_ans(imag(u_ans)==0);
-                    u_ans(u_ans <0) = [];u_ans(u_ans > 1) = [];
-                    u_ans
-                    u_ans;
-                    
+                    %% boundary curves intersection
+                    Segment{1} =@(t) Si_u(t) + base_point(:,i);
+                    Segment{2} =@(t) (Att_pts{3}(i,:) - Att_pts{1}(i,:))'.*t + Att_pts{1}(i,:)';
+                    Segment{3} =@(t) (Att_pts{2}(i,:) - Att_pts{1}(i,:))'.*t + Att_pts{1}(i,:)';
+                    [q_intersected,intersected_pts] = CurveSurfaceIntersection(obj,Segment,parametric_cable_surf_uv,Att_pts{1}(i,:)',q_begin,q_end);
+                    all_intersection_poses = [all_intersection_poses, q_intersected];
+                    intersected_pts = [intersected_pts,intersected_pts];
+%                     if ~isempty(intersected_pts)
+%                         inplot(i) = scatter3(intersected_pts(1,:),intersected_pts(2,:),intersected_pts(3,:));
+% %                         delete(inplot(i))    
+%                     end
+%                     delete(incplot)
+%                     
+                end  
+                
+                all_intersection_poses = unique(round(all_intersection_poses',obj.ROUNDING_DIGIT),'rows')';
+                for i = 1:size(all_intersection_poses,2) - 1
+                    has_intersected = obj.IntervalVerify(model,all_intersection_poses(:,i),all_intersection_poses(:,i+1));
+                    if has_intersected == 0
+                        intervals(intervals_count,:) = [all_intersection_poses(free_variable_index,i),all_intersection_poses(free_variable_index,i+1)];
+                        intervals_count = intervals_count + 1;
+                    end
                 end
+                
             end
             
         end
-        
     end
-    
     methods (Access = private)
         %functin to get the cable segment data
         function [base_att_pt,EE_att_pt] = GetSegmentData(~,model,q)
@@ -229,7 +153,7 @@ classdef InterferenceFreeRayConditionCableObstacle < WorkspaceRayConditionBase
             end
         end
         
-        %% function to get the coefficient of rotational matrix and translational variables
+        %% function to get the coefficient of rotational matrix and translational variables that represent the cable segment equ
         function [Rotation_Matrix_Coefficient,Translation_coeff] = RotationMatrixCoefficient(~,model,q_begin,q_end)
             % get start and end angles
             
@@ -278,6 +202,125 @@ classdef InterferenceFreeRayConditionCableObstacle < WorkspaceRayConditionBase
             end
         end
         
+        %% function to calculate the intersected poses between quad-surface and cable segment bounded surface
+        function [q_intersected,intersected_pts] = ParametericSurfaceIntersection(obj,uv_equ,base_att,q_begin,q_end)
+            syms u v
+            intersected_pts = [];q_intersected = [];
+            para_equ = uv_equ(u,v);
+            f_1 =@(u,v) obj.QuadSurf(para_equ(1),para_equ(2),para_equ(3));
+            [v_coeff,~] = coeffs(f_1(u,v),v);
+            % b^2 - 4ac
+            f_2 = v_coeff(2)*v_coeff(2) - 4*v_coeff(3)*v_coeff(1);
+            [u_numerator,~] = numden(f_2);
+            [u_coeff,~] = coeffs(u_numerator,u);
+            u_value = unique(double((roots(u_coeff))));
+            u_value = u_value(imag(u_value)==0);
+            u_value(u_value <0) = [];u_value(u_value > 1) = [];
+            if ~isempty(u_value)
+                for i = 1:size(u_value,1)
+                    v_coeff = subs(v_coeff,u_value(i));
+                    v_value(1) = double((-v_coeff(2) + sqrt(v_coeff(2)*v_coeff(2) - 4*v_coeff(3)*v_coeff(1)))/(2*v_coeff(1)));
+                    v_value(2) = double((-v_coeff(2) + sqrt(v_coeff(2)*v_coeff(2) - 4*v_coeff(3)*v_coeff(1)))/(2*v_coeff(1)));
+                    v_value = v_value(imag(v_value)==0);
+                    v_value = unique(round(v_value,obj.ROUNDING_DIGIT));
+                    v_value(v_value <0) = [];v_value(v_value > 1) = [];
+                    %% find the corresponding pose by finding the same unit vector
+                    if ~isempty(v_value)
+                        for ii = 1:size(v_value,2)
+                            %                         vec_1 = uv_equ(u,1) - base_att;
+                            %                         vec_2 = uv_equ(u_value(i),1) - base_att;
+                            %                         f_3 = (vec_1(1)^2 +  vec_1(2)^2 +  vec_1(3)^2)*vec_2(1)^2 ...
+                            %                             /norm(vec_2)^2 - vec_1(1)^2;
+                            %                         [u_1_numerator,~] = numden(f_3);
+                            %                         [u_1_coeff,~] = coeffs(u_1_numerator,u);
+                            %                         u_1_value = double(roots(u_1_coeff));
+                            %                         u_1_value = u_1_value(imag(u_1_value)==0);
+                            %                         u_1_value(u_1_value <0) = [];u_1_value(u_1_value > 1) = [];
+                            %                         q_intersected = [q_intersected,(q_end - q_begin).*u_1_value' + q_begin];
+                            %                         tmp_intersected_pts = [tmp_intersected_pts, parametric_cable_surf_uv(u_1_value,v_value)];
+                            %% check if out of surface boundary
+                            tmp_val = uv_equ(u_value(i),u_value(ii));
+                            if tmp_val(1) <= obj.surface_bound(2) && tmp_val(1) >= obj.surface_bound(1) && ...
+                                    tmp_val(2) <= obj.surface_bound(4) && tmp_val(2) >= obj.surface_bound(3) &&...
+                                    tmp_val(3) <= obj.surface_bound(6) && tmp_val(3) >= obj.surface_bound(5)
+                                q_intersected = [q_intersected,(q_end - q_begin)*u_value(i) + q_begin];
+                                intersected_pts = [intersected_pts, uv_equ(u_value(i),u_value(ii))];
+                            end
+                            
+                            %                                 q_intersected = [q_intersected,(q_end - q_begin)*u_value(i) + q_begin];
+                            %                                 intersected_pts = [intersected_pts, uv_equ(u_value(i),u_value(ii))];
+                            
+                        end
+                    end
+                    %
+                end
+            end
+        end
+        
+        %% function to calculate the intersected poses between quad-surface and 3 cable segment equations
+        function [q_intersected,intersected_pts] = CurveSurfaceIntersection(obj,t_equ,uv_equ,base_att,q_begin,q_end)
+            syms t u;
+            q_intersected = [];intersected_pts = [];
+            for i = 1:3
+                %                     tmp_intersected_pts = [];
+                para_equ = t_equ{i}(t);
+                f_1 =@(t) obj.QuadSurf(para_equ(1),para_equ(2),para_equ(3));
+                [t_numerator,t_denominator] = numden(f_1(t));
+                [t_coeff,t_degree] = coeffs(t_numerator,t);
+                t_ans = double(roots(t_coeff));
+                t_ans = t_ans(imag(t_ans)==0);
+                t_ans(t_ans <0) = [];t_ans(t_ans > 1) = [];
+                %                     for ii = 1:size(t_ans,1)
+                %                         tmp_intersected_pts = [tmp_intersected_pts,double(t_equ{i}(t_ans(i)))];
+                %                     end
+                if ~isempty(t_ans)
+                    for ii = 1:size(t_ans,2)
+                        %% finding the corresponding poses of intersection
+                        %                         unit_vec_1 = uv_equ(u,1) - base_att;
+                        %                         unit_vec_2 = tmp_intersected_pts(:,ii) - base_att;
+                        %                         %                             u_value = double(solve((unit_vec_1(1)^2 +  unit_vec_1(2)^2 +  unit_vec_1(3)^2)*unit_vec_2(1)^2/norm(unit_vec_2)^2 - unit_vec_1(1)^2,'Real',true));
+                        %                         u_value = double(solve(sqrt((unit_vec_1(1)^2 +  unit_vec_1(2)^2 +  unit_vec_1(3)^2))*unit_vec_2(1)/norm(unit_vec_2) - unit_vec_1(1),'Real',true));
+                        %                         u_value(u_value <0) = [];u_value(u_value > 1) = [];
+                        %                         if ~isempty(u_value)
+                        %                             q_intersected = [q_intersected,(q_end - q_begin)*u_value + q_begin];
+                        %                             intersected_pts = [intersected_pts,tmp_intersected_pts(:,ii)];
+                        %                         end
+                        
+                        %% check if out of surface boundary
+                        tmp_val = double(t_equ{i}(t_ans(ii)));
+                        if tmp_val(1) <= obj.surface_bound(2) && tmp_val(1) >= obj.surface_bound(1) && ...
+                                tmp_val(2) <= obj.surface_bound(4) && tmp_val(2) >= obj.surface_bound(3) &&...
+                                tmp_val(3) <= obj.surface_bound(6) && tmp_val(3) >= obj.surface_bound(5)
+                            intersected_pts = [intersected_pts, double(t_equ{i}(t_ans(ii)))];
+                            q_intersected = [q_intersected,(q_end - q_begin)*t_ans(ii) + q_begin];
+                        end
+                    end
+                end
+            end
+        end
+        %% function to check the intersected interval valid
+        function has_intersected = IntervalVerify(obj,model,q1,q2)
+            syms t;
+            [Att1,Att2] = obj.GetSegmentData(model,(q1+q2)/2);
+            for i = 1:obj.numCables
+                Check_seg_t =   (Att2(i,:) - Att1(i,:))'.*t + Att1(i,:)';
+                f_1 =@(t) obj.QuadSurf(Check_seg_t(1),Check_seg_t(2),Check_seg_t(3));
+                [t_coeff,~] = coeffs(f_1(t),t);
+                t_ans = double(roots(t_coeff));
+                t_ans = t_ans(imag(t_ans)==0);
+                t_ans(t_ans <0) = [];t_ans(t_ans > 1) = [];
+                if ~isempty(t_ans)
+                    val(i) = 1;
+                    has_intersected = 1;
+                    return
+                else
+                    val(i) = 0;
+                end
+            end
+            if  sum(val) == 0
+                has_intersected = sum(val);
+            end
+        end
     end
 end
 
