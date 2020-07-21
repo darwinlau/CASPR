@@ -18,8 +18,12 @@ q_step          =   (modelObj.bodyModel.q_max - modelObj.bodyModel.q_min)/3;
 % First the grid
 uGrid           =   UniformGrid(q_begin,q_end,q_step,'step_size');
 % Workspace settings and conditions
+
+QuadSurf = @(x,y,z) (x - 1).^2 + y.^2 - 0.5;
+
+
 min_segment_percentage = 1;
-w_condition     =   {WorkspaceRayConditionBase.CreateWorkspaceRayCondition(WorkspaceRayConditionType.INTERFERENCE_CABLE_QUADSURF,min_segment_percentage,modelObj)};
+w_condition     =   {WorkspaceRayConditionBase.CreateWorkspaceRayCondition(WorkspaceRayConditionType.INTERFERENCE_CABLE_QUADSURF,min_segment_percentage,modelObj,QuadSurf)};
 
 % w_metrics       =   {TensionFactorMetric,ConditionNumberMetric};
 % w_metrics       =   {ConditionNumberMetric()};

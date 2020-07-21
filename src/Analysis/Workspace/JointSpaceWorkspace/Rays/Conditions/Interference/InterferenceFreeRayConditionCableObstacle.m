@@ -1,9 +1,9 @@
-% Class to compute whether a pose (dynamics) is within the interference 
+% Class to compute whether a pose (dynamics) is within the interference
 % free workspace (IFW)
 %
 % Author        : Paul Cheng
 % Created       : 2020
-% Description   : 
+% Description   :
 
 classdef InterferenceFreeRayConditionCableObstacle < WorkspaceRayConditionBase
     properties (Constant)
@@ -20,151 +20,107 @@ classdef InterferenceFreeRayConditionCableObstacle < WorkspaceRayConditionBase
         areDofsTranslation;         % Array for the q of the joint (true if translation and false if rotation)
         numDofs;                    % The number of dofs
         numCables;                  % The number of cables
-        degRedundancy;              % The degree of redundancy   
-        dofMargins;         
+        degRedundancy;              % The degree of redundancy
+        QuadSurf;                   % The obstacle surface equations
     end
     
     methods
         % Constructor for interference free worksapce
-        function w = InterferenceFreeRayConditionCableObstacle(model, min_ray_lengths, magin_dofs)
+        function w = InterferenceFreeRayConditionCableObstacle(model, min_ray_lengths, QuadSurf)
             w@WorkspaceRayConditionBase(min_ray_lengths);
             w.areDofsTranslation = (model.bodyModel.q_dofType == DoFType.TRANSLATION);
             w.numDofs = model.numDofs;
             w.numCables = model.numCables;
-            w.dofMargins = magin_dofs;
+            w.QuadSurf = QuadSurf;
         end
-            
-        % Evaluate the interference free intervals 
+        
+        % Evaluate the interference free intervals
         function intervals =  evaluateFunction(obj, model, ws_ray)
             interference_q = [];
             % Variable initialisation
-            q_zero = zeros(obj.numDofs, 1);            
+            syms u v t;
+            q_zero = zeros(obj.numDofs, 1);
             free_variable_index = ws_ray.free_variable_index;
             is_dof_translation = obj.areDofsTranslation(free_variable_index);
             
             if is_dof_translation
-                maximum_degree = obj.MAX_DEGREE_TRANSLATION;
-            else
-                maximum_degree = obj.MAX_DEGREE_ORIENTATION;
-            end
-            
-            % ASSUME THAT EVERY CABLE IS ONE SEGMENT FOR NOW
-            cable_combinations = nchoosek(1:obj.numCables, 2);
-            num_cable_combs = size(cable_combinations, 1);
-            
-            free_var_lin_space_q = ws_ray.free_variable_range(1):(ws_ray.free_variable_range(2)-ws_ray.free_variable_range(1))/maximum_degree:ws_ray.free_variable_range(2);
-            
-            if is_dof_translation
-                free_var_lin_space_u = free_var_lin_space_q;
-            else
-                free_var_lin_space_u = tan(free_var_lin_space_q/2);
-            end
-            
-            % Pose data
-            q_fixed = ws_ray.fixed_variables;
-            fixed_index = true(obj.numDofs,1); 
-            fixed_index(ws_ray.free_variable_index) = false;
-            q = q_zero; 
-            q(fixed_index) = q_fixed;
-            
-            g_samples = zeros(num_cable_combs, maximum_degree+1);
-            g_coeffs = zeros(num_cable_combs, maximum_degree+1);
-            
-            for linear_space_index = 1:maximum_degree+1
-                % Update the value for q
-                q_free = free_var_lin_space_q(linear_space_index);
-                q(free_variable_index) = q_free;
-                % Update the model
-                model.update(q, q_zero, q_zero, q_zero);
+                q_begin = [ws_ray.free_variable_range(1);ws_ray.fixed_variables];
+                q_end = [ws_ray.free_variable_range(2);ws_ray.fixed_variables];
+                % Att_pts{1} -> base point,  Att_pts{2}-> start point,  Att_pts{3}-> end point
+                [Att_pts{1},Att_pts{2}] = obj.GetSegmentData(model,q_begin);
+                [~,Att_pts{3}] = obj.GetSegmentData(model,q_end);
                 
-                for k = 1:num_cable_combs
-                    i = cable_combinations(k, 1);
-                    j = cable_combinations(k, 2);
-                    A_i = model.cableModel.r_OAs(1:3, i);
-                    B_i = model.cableModel.r_OAs(4:6, i);
-                    A_j = model.cableModel.r_OAs(1:3, j);
-                    B_j = model.cableModel.r_OAs(4:6, j);
-                    [~, ~, g_samples(k, linear_space_index)] = obj.intersection_xyz(A_i, B_i, A_j, B_j);
-                    if ~is_dof_translation
-                        g_samples(k, linear_space_index) = (1 + (tan(q_free/2))^2)*g_samples(k, linear_space_index);
-                    end
-                end
-            end
-            
-            
-            for k = 1:num_cable_combs
-                g_coeffs(k, :) = GeneralMathOperations.PolynomialFit(free_var_lin_space_u', g_samples(k, :)', maximum_degree);
-                g_coeffs(k, :) = round(g_coeffs(k, :), obj.ROUNDING_DIGIT); 
-                intersect_roots_u = roots(g_coeffs(k, :));
-                for r = 1:length(intersect_roots_u)
-                    root_i_u = intersect_roots_u(r);
-                    if is_dof_translation
-                        root_i_q = root_i_u;
-                    else
-                        root_i_q = 2*atan(root_i_u);
-                    end
-                    if (isreal(root_i_u) && (root_i_q >= ws_ray.free_variable_range(1)) && (root_i_q <= ws_ray.free_variable_range(2)))
-            
-                        q(free_variable_index) = root_i_q;
-                        
-                        model.update(q, q_zero, q_zero, q_zero);
-                        i = cable_combinations(k, 1);
-                        j = cable_combinations(k, 2);
-                        A_i = model.cableModel.r_OAs(1:3, i);
-                        B_i = model.cableModel.r_OAs(4:6, i);
-                        A_j = model.cableModel.r_OAs(1:3, j);
-                        B_j = model.cableModel.r_OAs(4:6, j);
-                        [t_i, t_j] = obj.intersection_xyz(A_i, B_i, A_j, B_j);
-                        
-                        if (t_i >= 0 && t_i <= 1 && t_j >= 0 && t_j <= 1)
-                            interference_q = [interference_q; q(free_variable_index)];
-                            cable_combinations(k, :)
-%                             g
-                            q
-%                             A_i
-%                             B_i 
-%                             A_j
-%                             B_j
-                            metric = MinCableCableDistanceMetric();
-                            metric.evaluate(model)
+                ob1 = fimplicit3(obj.QuadSurf,[-2 2 -2 2 0 2.5],'FaceColor',[0.5 0.5 0.5],'EdgeColor','none','FaceAlpha',0.4)
+                hold on;
+                
+                for i = 1:obj.numCables
+                    h=patch('Faces',1:3,'Vertices',[Att_pts{3}(i,:);Att_pts{2}(i,:);Att_pts{1}(i,:)]);
+                    set(h,'FaceColor','r','EdgeColor','k','LineWidth',2,'FaceAlpha',0.5);
+                    %% parametric form f(u,v) of the cable segment surface
+                    parametric_cable_surf = (((Att_pts{3}(i,:) - Att_pts{2}(i,:))'.*u +  Att_pts{2}(i,:)') - Att_pts{1}(i,:)').*v + Att_pts{1}(i,:)';
+                    parametric_cable_surf_uv = @(u,v) (((Att_pts{3}(i,:) - Att_pts{2}(i,:))'.*u +  Att_pts{2}(i,:)') - Att_pts{1}(i,:)').*v + Att_pts{1}(i,:)';
+                    q_intersected = [];
+                    %% boundary curves intersection
+                    intersected_pts = [];
+                    Segment{1} = (Att_pts{3}(i,:) - Att_pts{2}(i,:))'.*t + Att_pts{2}(i,:)';
+                    Segment{2} = (Att_pts{3}(i,:) - Att_pts{1}(i,:))'.*t + Att_pts{1}(i,:)';
+                    Segment{3} = (Att_pts{2}(i,:) - Att_pts{1}(i,:))'.*t + Att_pts{1}(i,:)';
+                    for ii = 1:3
+                        f_1 =@(t) obj.QuadSurf(Segment{ii}(1),Segment{ii}(2),Segment{ii}(3));
+                        t_ans = double(solve(f_1(t)));
+                        t_ans(t_ans <0) = [];t_ans(t_ans > 1) = [];
+                        for iii = 1:size(t_ans,1)
+                        intersected_pts = [intersected_pts,double(subs(Segment{ii},t_ans(iii)))];
+                        end
+                        for iii = 1:size(intersected_pts,2)
+%                             angle(iii) = acos(((Att_pts{2}(i,:) - Att_pts{1}(i,:)) * (intersected_pts(:,iii)' - Att_pts{1}(i,:))')/...
+%                                 (norm((Att_pts{2}(i,:)' - Att_pts{1}(i,:))) * norm((intersected_pts(:,iii) - Att_pts{1}(i,:)))));
+                            %% finding the corresponding poses of intersection                            
+                            unit_vec_1 = parametric_cable_surf_uv(u,1) - Att_pts{1}(i,:)';
+                            unit_vec_2 = intersected_pts(:,iii) - Att_pts{1}(i,:)';
+                            u_value = double(solve((unit_vec_1(1)^2 +  unit_vec_1(2)^2 +  unit_vec_1(3)^2)*unit_vec_2(1)^2/norm(unit_vec_2)^2 - unit_vec_1(1)^2));
+                            u_value(u_value <0) = [];u_value(u_value > 1) = [];
+                            q_intersected = [q_intersected,(q_end - q_begin)*u_value + q_begin]
                         end
                     end
+                    
+                    i
+                    
+                    %                     f_1 =@(u,v) obj.QuadSurf(parametric_cable_surf(1),parametric_cable_surf(2),parametric_cable_surf(3));
+                    %                     [v_coeff,v_degree] = coeffs(f_1(u,v),v);
+                    %
+                    %                     f_2 = v_coeff(2)*v_coeff(2) - 4*v_coeff(3)*v_coeff(1);
+                    %                     [u_numerator,u_denominator] = numden(f_2);
+                    %                     [u_coeff,u_degree] = coeffs(u_numerator,u);
+                    %                     u_ans = unique(double((roots(u_coeff))));
+                    %                     u_ans(u_ans <0) = [];u_ans(u_ans > 1) = [];
+                    %
+                    %                     for ii = 1:max(size(u_ans))
+                    %                         parametric_cable_surf_uv(u_ans(1),v)
+                    %                         v_coeff = subs(v_coeff,u_ans(1));
+                    %                         v_ans = double(roots(v_coeff));
+                    %                         v_ans(v_ans <0) = [];v_ans(v_ans > 1) = [];
+                    %
+                    %                     end
                 end
+                
+            else
+                
             end
-            g_coeffs
             
-            intervals = [];
-            
-%             intervals = obj.evaluate_intersection(model, workspace_ray, maximum_degree, free_variable_index, free_variable_linear_space, least_squares_matrix_i);
-%             
-%             % Run though and ensure that the identified intervals are
-%             % larger than the tolerance
-%             count = 1;
-%             for iteration_index = 1:size(intervals,1)
-%                 if(intervals(count,2) - intervals(count,1) < obj.minRayLengths(free_variable_index))
-%                     intervals(count,:) = [];
-%                 else
-%                     count = count+1;
-%                 end
-%             end
         end
         
     end
     
     methods (Access = private)
-        function [ti, tj, g] = intersection_xyz(~, A_i, B_i, A_j, B_j)
-            A = [B_i(1)-A_i(1), -B_j(1)+A_j(1); B_i(2)-A_i(2), -B_j(2)+A_j(2)];
-            b = [A_j(1)-A_i(1); A_j(2)-A_i(2)];
+        function [base_att_pt,EE_att_pt] = GetSegmentData(~,model,q)
             
-            A_adj = adjoint(A);
-            x = A_adj*b;
-            n1 = x(1);
-            n2 = x(2);
-            d = det(A);
+            model.update(q,zeros(model.numDofs,1), zeros(model.numDofs,1),zeros(model.numDofs,1))
             
-            ti = n1/d;
-            tj = n2/d;
-            g = n1*(B_i(3)-A_i(3)) - n2*(B_j(3)-A_j(3)) - d*(A_j(3)-A_i(3));
+            for i = 1:model.numCables
+                base_att_pt(i,:) = model.cableModel.cables{1,i}.attachments{1,1}.r_OA';
+                EE_att_pt(i,:) = model.cableModel.cables{1,i}.attachments{1,2}.r_OA';
+            end
         end
     end
 end
