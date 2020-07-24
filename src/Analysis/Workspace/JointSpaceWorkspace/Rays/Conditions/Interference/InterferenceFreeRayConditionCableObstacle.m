@@ -98,12 +98,12 @@ classdef InterferenceFreeRayConditionCableObstacle < WorkspaceRayConditionBase
                     pre_has_intersected = has_intersected;
                 end
             else
-                [R_coeff,T_coeff,k_unit] = obj.RotationMatrixCoefficient(model,q_begin,q_end);
-                [Si,base_point] = obj.GetSegmentEquation(model,R_coeff,T_coeff,k_unit);
+%                 [R_coeff,T_coeff,k_unit] = obj.RotationMatrixCoefficient(model,q_begin,q_end);
+%                 [Si,base_point] = obj.GetSegmentEquation(model,R_coeff,T_coeff,k_unit);
                 %                 for k = 1:9
                 %                    K(k) = polyval(R_coeff(k,:),k_unit)
                 %                 end
-                Common_Denominator = [k_unit^4 0 2*k_unit^2 0 1];
+%                 Common_Denominator = [k_unit^4 0 2*k_unit^2 0 1];
                 
                 t_step = linspace(0,1,7);                
                 
@@ -124,23 +124,23 @@ classdef InterferenceFreeRayConditionCableObstacle < WorkspaceRayConditionBase
 %                     rOA_u * [(u)^4;(u)^3;(u)^2;(u);1]
                     %                     Si_u =@(u) Si{i}*[u^4;u^3;u^2;u^1;1] / (Common_Denominator*[u^4;u^3;u^2;u^1;1]);
                     %% parametric form f(u,v) of the cable segment surface
-                    Si_u =@(u) rOA_u * [u^6;u^5;u^4;u^3;u^2;u;1] - base_point(:,i);
+                    Si_u =@(u) rOA_u * [u^6;u^5;u^4;u^3;u^2;u;1] - Att_pts{1}(i,:)';
 %                     parametric_cable_surf_uv =@(u,v) Si_u(u)* v + base_point(:,i);
-                    parametric_cable_surf_uv =@(u,v) Si_u(u)* v + base_point(:,i);
+                    parametric_cable_surf_uv =@(u,v) Si_u(u)* v + Att_pts{1}(i,:)';
                     [q_intersected,intersected_pts] = obj.ParametericSurfaceIntersectionUniversal(parametric_cable_surf_uv,q_begin,q_end);
                     
                     all_intersection_poses = [all_intersection_poses, q_intersected];
                     all_intersected_pts = [all_intersected_pts,intersected_pts];
                     
                     %% boundary curves intersection
-                    Segment{1} =@(t) Si_u(t) + base_point(:,i);
+                    Segment{1} =@(t) Si_u(t) + Att_pts{1}(i,:)';
                     Segment{2} =@(t) (Att_pts{3}(i,:) - Att_pts{1}(i,:))'.*t + Att_pts{1}(i,:)';
                     Segment{3} =@(t) (Att_pts{2}(i,:) - Att_pts{1}(i,:))'.*t + Att_pts{1}(i,:)';
                     
                     rGAi = model.cableModel.cables{1,i}.attachments{1,2}.r_GA;
                     rOAi =  model.cableModel.cables{1,i}.attachments{1,2}.r_OA;
                     %                                      [q_intersected,intersected_pts] = Curve2QuadSurfIntersection(obj,Segment,parametric_cable_surf_uv,Att_pts{1}(i,:)',q_begin,q_end);
-                    [q_intersected,intersected_pts] = Curve2QuadSurfIntersection(obj,Segment,q_begin,q_end,R_coeff,T_coeff,rGAi,QuadSurfCoeff);
+                    [q_intersected,intersected_pts] = Curve2QuadSurfIntersection(obj,Segment,q_begin,q_end,[],[],rGAi,QuadSurfCoeff);
                     
                     all_intersection_poses = [all_intersection_poses, q_intersected];
                     all_intersected_pts = [all_intersected_pts,intersected_pts];
@@ -298,57 +298,57 @@ classdef InterferenceFreeRayConditionCableObstacle < WorkspaceRayConditionBase
             end
         end
         %% function to calculate the intersected poses between quad-surface and 3 cable segment equations
-        function [q_intersected,intersected_pts] = Curve2QuadSurfIntersection(obj,t_equ,q_begin,q_end,R_coeff,T_coeff,rGAi,QuadSurfCoeff)
+        function [q_intersected,intersected_pts] = Curve2QuadSurfIntersection(obj,t_equ,q_begin,q_end,~,~,rGAi,QuadSurfCoeff)
             syms t u;
-            s1 = QuadSurfCoeff(1);
-            s2 = QuadSurfCoeff(2);
-            s3 = QuadSurfCoeff(3);
-            s4 = QuadSurfCoeff(4);
-            s5 = QuadSurfCoeff(5);
-            s6 = QuadSurfCoeff(6);
-            s7 = QuadSurfCoeff(7);
-            s8 = QuadSurfCoeff(8);
-            s9 = QuadSurfCoeff(9);
-            s10 = QuadSurfCoeff(10);
-            
-            rGA1 = rGAi(1);
-            rGA2 = rGAi(2);
-            rGA3 = rGAi(3);
+%             s1 = QuadSurfCoeff(1);
+%             s2 = QuadSurfCoeff(2);
+%             s3 = QuadSurfCoeff(3);
+%             s4 = QuadSurfCoeff(4);
+%             s5 = QuadSurfCoeff(5);
+%             s6 = QuadSurfCoeff(6);
+%             s7 = QuadSurfCoeff(7);
+%             s8 = QuadSurfCoeff(8);
+%             s9 = QuadSurfCoeff(9);
+%             s10 = QuadSurfCoeff(10);
+%             
+%             rGA1 = rGAi(1);
+%             rGA2 = rGAi(2);
+%             rGA3 = rGAi(3);
             %             rOA1 = rOAi(1);
             %             rOA2 = rOAi(2);
             %             rOA3 = rOAi(3);
             
             
-            r11 = R_coeff(1,1); r12 = R_coeff(1,2); r13 = R_coeff(1,3); r14 = R_coeff(1,4); r15 = R_coeff(1,5);
-            r21 = R_coeff(2,1); r22 = R_coeff(2,2); r23 = R_coeff(2,3); r24 = R_coeff(2,4); r25 = R_coeff(2,5);
-            r31 = R_coeff(3,1); r32 = R_coeff(3,2); r33 = R_coeff(3,3); r34 = R_coeff(3,4); r35 = R_coeff(3,5);
-            r41 = R_coeff(4,1); r42 = R_coeff(4,2); r43 = R_coeff(4,3); r44 = R_coeff(4,4); r45 = R_coeff(4,5);
-            r51 = R_coeff(5,1); r52 = R_coeff(5,2); r53 = R_coeff(5,3); r54 = R_coeff(5,4); r55 = R_coeff(5,5);
-            r61 = R_coeff(6,1); r62 = R_coeff(6,2); r63 = R_coeff(6,3); r64 = R_coeff(6,4); r65 = R_coeff(6,5);
-            r71 = R_coeff(7,1); r72 = R_coeff(7,2); r73 = R_coeff(7,3); r74 = R_coeff(7,4); r75 = R_coeff(7,5);
-            r81 = R_coeff(8,1); r82 = R_coeff(8,2); r83 = R_coeff(8,3); r84 = R_coeff(8,4); r85 = R_coeff(8,5);
-            r91 = R_coeff(9,1); r92 = R_coeff(9,2); r93 = R_coeff(9,3); r94 = R_coeff(9,4); r95 = R_coeff(9,5);
-            
-            q1 = T_coeff(1);q2 = T_coeff(2);q3 = T_coeff(3);
-            
+%             r11 = R_coeff(1,1); r12 = R_coeff(1,2); r13 = R_coeff(1,3); r14 = R_coeff(1,4); r15 = R_coeff(1,5);
+%             r21 = R_coeff(2,1); r22 = R_coeff(2,2); r23 = R_coeff(2,3); r24 = R_coeff(2,4); r25 = R_coeff(2,5);
+%             r31 = R_coeff(3,1); r32 = R_coeff(3,2); r33 = R_coeff(3,3); r34 = R_coeff(3,4); r35 = R_coeff(3,5);
+%             r41 = R_coeff(4,1); r42 = R_coeff(4,2); r43 = R_coeff(4,3); r44 = R_coeff(4,4); r45 = R_coeff(4,5);
+%             r51 = R_coeff(5,1); r52 = R_coeff(5,2); r53 = R_coeff(5,3); r54 = R_coeff(5,4); r55 = R_coeff(5,5);
+%             r61 = R_coeff(6,1); r62 = R_coeff(6,2); r63 = R_coeff(6,3); r64 = R_coeff(6,4); r65 = R_coeff(6,5);
+%             r71 = R_coeff(7,1); r72 = R_coeff(7,2); r73 = R_coeff(7,3); r74 = R_coeff(7,4); r75 = R_coeff(7,5);
+%             r81 = R_coeff(8,1); r82 = R_coeff(8,2); r83 = R_coeff(8,3); r84 = R_coeff(8,4); r85 = R_coeff(8,5);
+%             r91 = R_coeff(9,1); r92 = R_coeff(9,2); r93 = R_coeff(9,3); r94 = R_coeff(9,4); r95 = R_coeff(9,5);
+% %             
+%             q1 = T_coeff(1);q2 = T_coeff(2);q3 = T_coeff(3);
+%             
             q_intersected = [];intersected_pts = [];
             for i = 1:3
                 %                     tmp_intersected_pts = [];
                 para_equ = t_equ{i}(t);
-                %                 f_1 =@(t) obj.QuadSurf(para_equ(1),para_equ(2),para_equ(3));
-                %                 [t_numerator,t_denominator] = numden(f_1(t));
-                %                 [t_coeff,t_degree] = coeffs(t_numerator,t);
-                t_coeff = [
-                    s1*q1^2 + s4*q1*q2 + s5*q1*q3 + 2*s1*q1*r11*rGA1 + 2*s1*q1*r21*rGA2 + 2*s1*q1*r31*rGA3 + s4*q1*r41*rGA1 + s4*q1*r51*rGA2 + s4*q1*r61*rGA3 + s5*q1*r71*rGA1 + s5*q1*r81*rGA2 + s5*q1*r91*rGA3 + s7*q1 + s2*q2^2 + s6*q2*q3 + s4*q2*r11*rGA1 + s4*q2*r21*rGA2 + s4*q2*r31*rGA3 + 2*s2*q2*r41*rGA1 + 2*s2*q2*r51*rGA2 + 2*s2*q2*r61*rGA3 + s6*q2*r71*rGA1 + s6*q2*r81*rGA2 + s6*q2*r91*rGA3 + s8*q2 + s3*q3^2 + s5*q3*r11*rGA1 + s5*q3*r21*rGA2 + s5*q3*r31*rGA3 + s6*q3*r41*rGA1 + s6*q3*r51*rGA2 + s6*q3*r61*rGA3 + 2*s3*q3*r71*rGA1 + 2*s3*q3*r81*rGA2 + 2*s3*q3*r91*rGA3 + s9*q3 + s1*r11^2*rGA1^2 + 2*s1*r11*r21*rGA1*rGA2 + 2*s1*r11*r31*rGA1*rGA3 + s4*r11*r41*rGA1^2 + s4*r11*r51*rGA1*rGA2 + s4*r11*r61*rGA1*rGA3 + s5*r11*r71*rGA1^2 + s5*r11*r81*rGA1*rGA2 + s5*r11*r91*rGA1*rGA3 + s7*r11*rGA1 + s1*r21^2*rGA2^2 + 2*s1*r21*r31*rGA2*rGA3 + s4*r21*r41*rGA1*rGA2 + s4*r21*r51*rGA2^2 + s4*r21*r61*rGA2*rGA3 + s5*r21*r71*rGA1*rGA2 + s5*r21*r81*rGA2^2 + s5*r21*r91*rGA2*rGA3 + s7*r21*rGA2 + s1*r31^2*rGA3^2 + s4*r31*r41*rGA1*rGA3 + s4*r31*r51*rGA2*rGA3 + s4*r31*r61*rGA3^2 + s5*r31*r71*rGA1*rGA3 + s5*r31*r81*rGA2*rGA3 + s5*r31*r91*rGA3^2 + s7*r31*rGA3 + s2*r41^2*rGA1^2 + 2*s2*r41*r51*rGA1*rGA2 + 2*s2*r41*r61*rGA1*rGA3 + s6*r41*r71*rGA1^2 + s6*r41*r81*rGA1*rGA2 + s6*r41*r91*rGA1*rGA3 + s8*r41*rGA1 + s2*r51^2*rGA2^2 + 2*s2*r51*r61*rGA2*rGA3 + s6*r51*r71*rGA1*rGA2 + s6*r51*r81*rGA2^2 + s6*r51*r91*rGA2*rGA3 + s8*r51*rGA2 + s2*r61^2*rGA3^2 + s6*r61*r71*rGA1*rGA3 + s6*r61*r81*rGA2*rGA3 + s6*r61*r91*rGA3^2 + s8*r61*rGA3 + s3*r71^2*rGA1^2 + 2*s3*r71*r81*rGA1*rGA2 + 2*s3*r71*r91*rGA1*rGA3 + s9*r71*rGA1 + s3*r81^2*rGA2^2 + 2*s3*r81*r91*rGA2*rGA3 + s9*r81*rGA2 + s3*r91^2*rGA3^2 + s9*r91*rGA3 + s10;
-                    r12*rGA1*s7 + r22*rGA2*s7 + r32*rGA3*s7 + r42*rGA1*s8 + r52*rGA2*s8 + r62*rGA3*s8 + r72*rGA1*s9 + r82*rGA2*s9 + r92*rGA3*s9 + 2*q1*r12*rGA1*s1 + q2*r12*rGA1*s4 + q3*r12*rGA1*s5 + 2*q1*r22*rGA2*s1 + q2*r22*rGA2*s4 + q3*r22*rGA2*s5 + 2*q1*r32*rGA3*s1 + q2*r32*rGA3*s4 + q3*r32*rGA3*s5 + 2*q2*r42*rGA1*s2 + q1*r42*rGA1*s4 + q3*r42*rGA1*s6 + 2*q2*r52*rGA2*s2 + q1*r52*rGA2*s4 + q3*r52*rGA2*s6 + 2*q2*r62*rGA3*s2 + q1*r62*rGA3*s4 + q3*r62*rGA3*s6 + q1*r72*rGA1*s5 + 2*q3*r72*rGA1*s3 + q2*r72*rGA1*s6 + q1*r82*rGA2*s5 + 2*q3*r82*rGA2*s3 + q2*r82*rGA2*s6 + q1*r92*rGA3*s5 + 2*q3*r92*rGA3*s3 + q2*r92*rGA3*s6 + 2*r11*r12*rGA1^2*s1 + 2*r21*r22*rGA2^2*s1 + r11*r42*rGA1^2*s4 + r12*r41*rGA1^2*s4 + 2*r31*r32*rGA3^2*s1 + r21*r52*rGA2^2*s4 + r22*r51*rGA2^2*s4 + 2*r41*r42*rGA1^2*s2 + r11*r72*rGA1^2*s5 + r12*r71*rGA1^2*s5 + r31*r62*rGA3^2*s4 + r32*r61*rGA3^2*s4 + 2*r51*r52*rGA2^2*s2 + r21*r82*rGA2^2*s5 + r22*r81*rGA2^2*s5 + r41*r72*rGA1^2*s6 + r42*r71*rGA1^2*s6 + 2*r61*r62*rGA3^2*s2 + r31*r92*rGA3^2*s5 + r32*r91*rGA3^2*s5 + r51*r82*rGA2^2*s6 + r52*r81*rGA2^2*s6 + 2*r71*r72*rGA1^2*s3 + r61*r92*rGA3^2*s6 + r62*r91*rGA3^2*s6 + 2*r81*r82*rGA2^2*s3 + 2*r91*r92*rGA3^2*s3 + 2*r11*r22*rGA1*rGA2*s1 + 2*r12*r21*rGA1*rGA2*s1 + 2*r11*r32*rGA1*rGA3*s1 + 2*r12*r31*rGA1*rGA3*s1 + 2*r21*r32*rGA2*rGA3*s1 + 2*r22*r31*rGA2*rGA3*s1 + r11*r52*rGA1*rGA2*s4 + r12*r51*rGA1*rGA2*s4 + r21*r42*rGA1*rGA2*s4 + r22*r41*rGA1*rGA2*s4 + r11*r62*rGA1*rGA3*s4 + r12*r61*rGA1*rGA3*s4 + r31*r42*rGA1*rGA3*s4 + r32*r41*rGA1*rGA3*s4 + r21*r62*rGA2*rGA3*s4 + r22*r61*rGA2*rGA3*s4 + r31*r52*rGA2*rGA3*s4 + r32*r51*rGA2*rGA3*s4 + 2*r41*r52*rGA1*rGA2*s2 + 2*r42*r51*rGA1*rGA2*s2 + r11*r82*rGA1*rGA2*s5 + r12*r81*rGA1*rGA2*s5 + r21*r72*rGA1*rGA2*s5 + r22*r71*rGA1*rGA2*s5 + 2*r41*r62*rGA1*rGA3*s2 + 2*r42*r61*rGA1*rGA3*s2 + r11*r92*rGA1*rGA3*s5 + r12*r91*rGA1*rGA3*s5 + r31*r72*rGA1*rGA3*s5 + r32*r71*rGA1*rGA3*s5 + 2*r51*r62*rGA2*rGA3*s2 + 2*r52*r61*rGA2*rGA3*s2 + r21*r92*rGA2*rGA3*s5 + r22*r91*rGA2*rGA3*s5 + r31*r82*rGA2*rGA3*s5 + r32*r81*rGA2*rGA3*s5 + r41*r82*rGA1*rGA2*s6 + r42*r81*rGA1*rGA2*s6 + r51*r72*rGA1*rGA2*s6 + r52*r71*rGA1*rGA2*s6 + r41*r92*rGA1*rGA3*s6 + r42*r91*rGA1*rGA3*s6 + r61*r72*rGA1*rGA3*s6 + r62*r71*rGA1*rGA3*s6 + r51*r92*rGA2*rGA3*s6 + r52*r91*rGA2*rGA3*s6 + r61*r82*rGA2*rGA3*s6 + r62*r81*rGA2*rGA3*s6 + 2*r71*r82*rGA1*rGA2*s3 + 2*r72*r81*rGA1*rGA2*s3 + 2*r71*r92*rGA1*rGA3*s3 + 2*r72*r91*rGA1*rGA3*s3 + 2*r81*r92*rGA2*rGA3*s3 + 2*r82*r91*rGA2*rGA3*s3;
-                    4*s10 + 4*q1*s7 + 4*q2*s8 + 4*q3*s9 + 4*q1^2*s1 + 4*q2^2*s2 + 4*q3^2*s3 + r12^2*rGA1^2*s1 + r22^2*rGA2^2*s1 + r32^2*rGA3^2*s1 + r42^2*rGA1^2*s2 + r52^2*rGA2^2*s2 + r62^2*rGA3^2*s2 + r72^2*rGA1^2*s3 + r82^2*rGA2^2*s3 + r92^2*rGA3^2*s3 + 4*q1*q2*s4 + 4*q1*q3*s5 + 4*q2*q3*s6 + 2*r11*rGA1*s7 + r13*rGA1*s7 + 2*r21*rGA2*s7 + r23*rGA2*s7 + 2*r31*rGA3*s7 + r33*rGA3*s7 + 2*r41*rGA1*s8 + r43*rGA1*s8 + 2*r51*rGA2*s8 + r53*rGA2*s8 + 2*r61*rGA3*s8 + r63*rGA3*s8 + 2*r71*rGA1*s9 + r73*rGA1*s9 + 2*r81*rGA2*s9 + r83*rGA2*s9 + 2*r91*rGA3*s9 + r93*rGA3*s9 + 4*q1*r11*rGA1*s1 + 2*q1*r13*rGA1*s1 + 2*q2*r11*rGA1*s4 + q2*r13*rGA1*s4 + 2*q3*r11*rGA1*s5 + q3*r13*rGA1*s5 + 4*q1*r21*rGA2*s1 + 2*q1*r23*rGA2*s1 + 2*q2*r21*rGA2*s4 + q2*r23*rGA2*s4 + 2*q3*r21*rGA2*s5 + q3*r23*rGA2*s5 + 4*q1*r31*rGA3*s1 + 2*q1*r33*rGA3*s1 + 2*q2*r31*rGA3*s4 + q2*r33*rGA3*s4 + 2*q3*r31*rGA3*s5 + q3*r33*rGA3*s5 + 4*q2*r41*rGA1*s2 + 2*q1*r41*rGA1*s4 + 2*q2*r43*rGA1*s2 + q1*r43*rGA1*s4 + 2*q3*r41*rGA1*s6 + q3*r43*rGA1*s6 + 4*q2*r51*rGA2*s2 + 2*q1*r51*rGA2*s4 + 2*q2*r53*rGA2*s2 + q1*r53*rGA2*s4 + 2*q3*r51*rGA2*s6 + q3*r53*rGA2*s6 + 4*q2*r61*rGA3*s2 + 2*q1*r61*rGA3*s4 + 2*q2*r63*rGA3*s2 + q1*r63*rGA3*s4 + 2*q3*r61*rGA3*s6 + q3*r63*rGA3*s6 + 2*q1*r71*rGA1*s5 + 4*q3*r71*rGA1*s3 + q1*r73*rGA1*s5 + 2*q2*r71*rGA1*s6 + 2*q3*r73*rGA1*s3 + q2*r73*rGA1*s6 + 2*q1*r81*rGA2*s5 + 4*q3*r81*rGA2*s3 + q1*r83*rGA2*s5 + 2*q2*r81*rGA2*s6 + 2*q3*r83*rGA2*s3 + q2*r83*rGA2*s6 + 2*q1*r91*rGA3*s5 + 4*q3*r91*rGA3*s3 + q1*r93*rGA3*s5 + 2*q2*r91*rGA3*s6 + 2*q3*r93*rGA3*s3 + q2*r93*rGA3*s6 + 2*r11*r13*rGA1^2*s1 + 2*r21*r23*rGA2^2*s1 + r11*r43*rGA1^2*s4 + r12*r42*rGA1^2*s4 + r13*r41*rGA1^2*s4 + 2*r31*r33*rGA3^2*s1 + r21*r53*rGA2^2*s4 + r22*r52*rGA2^2*s4 + r23*r51*rGA2^2*s4 + 2*r41*r43*rGA1^2*s2 + r11*r73*rGA1^2*s5 + r12*r72*rGA1^2*s5 + r13*r71*rGA1^2*s5 + r31*r63*rGA3^2*s4 + r32*r62*rGA3^2*s4 + r33*r61*rGA3^2*s4 + 2*r51*r53*rGA2^2*s2 + r21*r83*rGA2^2*s5 + r22*r82*rGA2^2*s5 + r23*r81*rGA2^2*s5 + r41*r73*rGA1^2*s6 + r42*r72*rGA1^2*s6 + r43*r71*rGA1^2*s6 + 2*r61*r63*rGA3^2*s2 + r31*r93*rGA3^2*s5 + r32*r92*rGA3^2*s5 + r33*r91*rGA3^2*s5 + r51*r83*rGA2^2*s6 + r52*r82*rGA2^2*s6 + r53*r81*rGA2^2*s6 + 2*r71*r73*rGA1^2*s3 + r61*r93*rGA3^2*s6 + r62*r92*rGA3^2*s6 + r63*r91*rGA3^2*s6 + 2*r81*r83*rGA2^2*s3 + 2*r91*r93*rGA3^2*s3 + 2*r11*r23*rGA1*rGA2*s1 + 2*r12*r22*rGA1*rGA2*s1 + 2*r13*r21*rGA1*rGA2*s1 + 2*r11*r33*rGA1*rGA3*s1 + 2*r12*r32*rGA1*rGA3*s1 + 2*r13*r31*rGA1*rGA3*s1 + 2*r21*r33*rGA2*rGA3*s1 + 2*r22*r32*rGA2*rGA3*s1 + 2*r23*r31*rGA2*rGA3*s1 + r11*r53*rGA1*rGA2*s4 + r12*r52*rGA1*rGA2*s4 + r13*r51*rGA1*rGA2*s4 + r21*r43*rGA1*rGA2*s4 + r22*r42*rGA1*rGA2*s4 + r23*r41*rGA1*rGA2*s4 + r11*r63*rGA1*rGA3*s4 + r12*r62*rGA1*rGA3*s4 + r13*r61*rGA1*rGA3*s4 + r31*r43*rGA1*rGA3*s4 + r32*r42*rGA1*rGA3*s4 + r33*r41*rGA1*rGA3*s4 + r21*r63*rGA2*rGA3*s4 + r22*r62*rGA2*rGA3*s4 + r23*r61*rGA2*rGA3*s4 + r31*r53*rGA2*rGA3*s4 + r32*r52*rGA2*rGA3*s4 + r33*r51*rGA2*rGA3*s4 + 2*r41*r53*rGA1*rGA2*s2 + 2*r42*r52*rGA1*rGA2*s2 + 2*r43*r51*rGA1*rGA2*s2 + r11*r83*rGA1*rGA2*s5 + r12*r82*rGA1*rGA2*s5 + r13*r81*rGA1*rGA2*s5 + r21*r73*rGA1*rGA2*s5 + r22*r72*rGA1*rGA2*s5 + r23*r71*rGA1*rGA2*s5 + 2*r41*r63*rGA1*rGA3*s2 + 2*r42*r62*rGA1*rGA3*s2 + 2*r43*r61*rGA1*rGA3*s2 + r11*r93*rGA1*rGA3*s5 + r12*r92*rGA1*rGA3*s5 + r13*r91*rGA1*rGA3*s5 + r31*r73*rGA1*rGA3*s5 + r32*r72*rGA1*rGA3*s5 + r33*r71*rGA1*rGA3*s5 + 2*r51*r63*rGA2*rGA3*s2 + 2*r52*r62*rGA2*rGA3*s2 + 2*r53*r61*rGA2*rGA3*s2 + r21*r93*rGA2*rGA3*s5 + r22*r92*rGA2*rGA3*s5 + r23*r91*rGA2*rGA3*s5 + r31*r83*rGA2*rGA3*s5 + r32*r82*rGA2*rGA3*s5 + r33*r81*rGA2*rGA3*s5 + r41*r83*rGA1*rGA2*s6 + r42*r82*rGA1*rGA2*s6 + r43*r81*rGA1*rGA2*s6 + r51*r73*rGA1*rGA2*s6 + r52*r72*rGA1*rGA2*s6 + r53*r71*rGA1*rGA2*s6 + r41*r93*rGA1*rGA3*s6 + r42*r92*rGA1*rGA3*s6 + r43*r91*rGA1*rGA3*s6 + r61*r73*rGA1*rGA3*s6 + r62*r72*rGA1*rGA3*s6 + r63*r71*rGA1*rGA3*s6 + r51*r93*rGA2*rGA3*s6 + r52*r92*rGA2*rGA3*s6 + r53*r91*rGA2*rGA3*s6 + r61*r83*rGA2*rGA3*s6 + r62*r82*rGA2*rGA3*s6 + r63*r81*rGA2*rGA3*s6 + 2*r71*r83*rGA1*rGA2*s3 + 2*r72*r82*rGA1*rGA2*s3 + 2*r73*r81*rGA1*rGA2*s3 + 2*r71*r93*rGA1*rGA3*s3 + 2*r72*r92*rGA1*rGA3*s3 + 2*r73*r91*rGA1*rGA3*s3 + 2*r81*r93*rGA2*rGA3*s3 + 2*r82*r92*rGA2*rGA3*s3 + 2*r83*r91*rGA2*rGA3*s3;
-                    ];
+                                f_1 =@(t) obj.QuadSurf(para_equ(1),para_equ(2),para_equ(3));
+                                [t_numerator,t_denominator] = numden(f_1(t));
+                                [t_coeff,t_degree] = coeffs(t_numerator,t);
+%                 t_coeff = [
+%                     s1*q1^2 + s4*q1*q2 + s5*q1*q3 + 2*s1*q1*r11*rGA1 + 2*s1*q1*r21*rGA2 + 2*s1*q1*r31*rGA3 + s4*q1*r41*rGA1 + s4*q1*r51*rGA2 + s4*q1*r61*rGA3 + s5*q1*r71*rGA1 + s5*q1*r81*rGA2 + s5*q1*r91*rGA3 + s7*q1 + s2*q2^2 + s6*q2*q3 + s4*q2*r11*rGA1 + s4*q2*r21*rGA2 + s4*q2*r31*rGA3 + 2*s2*q2*r41*rGA1 + 2*s2*q2*r51*rGA2 + 2*s2*q2*r61*rGA3 + s6*q2*r71*rGA1 + s6*q2*r81*rGA2 + s6*q2*r91*rGA3 + s8*q2 + s3*q3^2 + s5*q3*r11*rGA1 + s5*q3*r21*rGA2 + s5*q3*r31*rGA3 + s6*q3*r41*rGA1 + s6*q3*r51*rGA2 + s6*q3*r61*rGA3 + 2*s3*q3*r71*rGA1 + 2*s3*q3*r81*rGA2 + 2*s3*q3*r91*rGA3 + s9*q3 + s1*r11^2*rGA1^2 + 2*s1*r11*r21*rGA1*rGA2 + 2*s1*r11*r31*rGA1*rGA3 + s4*r11*r41*rGA1^2 + s4*r11*r51*rGA1*rGA2 + s4*r11*r61*rGA1*rGA3 + s5*r11*r71*rGA1^2 + s5*r11*r81*rGA1*rGA2 + s5*r11*r91*rGA1*rGA3 + s7*r11*rGA1 + s1*r21^2*rGA2^2 + 2*s1*r21*r31*rGA2*rGA3 + s4*r21*r41*rGA1*rGA2 + s4*r21*r51*rGA2^2 + s4*r21*r61*rGA2*rGA3 + s5*r21*r71*rGA1*rGA2 + s5*r21*r81*rGA2^2 + s5*r21*r91*rGA2*rGA3 + s7*r21*rGA2 + s1*r31^2*rGA3^2 + s4*r31*r41*rGA1*rGA3 + s4*r31*r51*rGA2*rGA3 + s4*r31*r61*rGA3^2 + s5*r31*r71*rGA1*rGA3 + s5*r31*r81*rGA2*rGA3 + s5*r31*r91*rGA3^2 + s7*r31*rGA3 + s2*r41^2*rGA1^2 + 2*s2*r41*r51*rGA1*rGA2 + 2*s2*r41*r61*rGA1*rGA3 + s6*r41*r71*rGA1^2 + s6*r41*r81*rGA1*rGA2 + s6*r41*r91*rGA1*rGA3 + s8*r41*rGA1 + s2*r51^2*rGA2^2 + 2*s2*r51*r61*rGA2*rGA3 + s6*r51*r71*rGA1*rGA2 + s6*r51*r81*rGA2^2 + s6*r51*r91*rGA2*rGA3 + s8*r51*rGA2 + s2*r61^2*rGA3^2 + s6*r61*r71*rGA1*rGA3 + s6*r61*r81*rGA2*rGA3 + s6*r61*r91*rGA3^2 + s8*r61*rGA3 + s3*r71^2*rGA1^2 + 2*s3*r71*r81*rGA1*rGA2 + 2*s3*r71*r91*rGA1*rGA3 + s9*r71*rGA1 + s3*r81^2*rGA2^2 + 2*s3*r81*r91*rGA2*rGA3 + s9*r81*rGA2 + s3*r91^2*rGA3^2 + s9*r91*rGA3 + s10;
+%                     r12*rGA1*s7 + r22*rGA2*s7 + r32*rGA3*s7 + r42*rGA1*s8 + r52*rGA2*s8 + r62*rGA3*s8 + r72*rGA1*s9 + r82*rGA2*s9 + r92*rGA3*s9 + 2*q1*r12*rGA1*s1 + q2*r12*rGA1*s4 + q3*r12*rGA1*s5 + 2*q1*r22*rGA2*s1 + q2*r22*rGA2*s4 + q3*r22*rGA2*s5 + 2*q1*r32*rGA3*s1 + q2*r32*rGA3*s4 + q3*r32*rGA3*s5 + 2*q2*r42*rGA1*s2 + q1*r42*rGA1*s4 + q3*r42*rGA1*s6 + 2*q2*r52*rGA2*s2 + q1*r52*rGA2*s4 + q3*r52*rGA2*s6 + 2*q2*r62*rGA3*s2 + q1*r62*rGA3*s4 + q3*r62*rGA3*s6 + q1*r72*rGA1*s5 + 2*q3*r72*rGA1*s3 + q2*r72*rGA1*s6 + q1*r82*rGA2*s5 + 2*q3*r82*rGA2*s3 + q2*r82*rGA2*s6 + q1*r92*rGA3*s5 + 2*q3*r92*rGA3*s3 + q2*r92*rGA3*s6 + 2*r11*r12*rGA1^2*s1 + 2*r21*r22*rGA2^2*s1 + r11*r42*rGA1^2*s4 + r12*r41*rGA1^2*s4 + 2*r31*r32*rGA3^2*s1 + r21*r52*rGA2^2*s4 + r22*r51*rGA2^2*s4 + 2*r41*r42*rGA1^2*s2 + r11*r72*rGA1^2*s5 + r12*r71*rGA1^2*s5 + r31*r62*rGA3^2*s4 + r32*r61*rGA3^2*s4 + 2*r51*r52*rGA2^2*s2 + r21*r82*rGA2^2*s5 + r22*r81*rGA2^2*s5 + r41*r72*rGA1^2*s6 + r42*r71*rGA1^2*s6 + 2*r61*r62*rGA3^2*s2 + r31*r92*rGA3^2*s5 + r32*r91*rGA3^2*s5 + r51*r82*rGA2^2*s6 + r52*r81*rGA2^2*s6 + 2*r71*r72*rGA1^2*s3 + r61*r92*rGA3^2*s6 + r62*r91*rGA3^2*s6 + 2*r81*r82*rGA2^2*s3 + 2*r91*r92*rGA3^2*s3 + 2*r11*r22*rGA1*rGA2*s1 + 2*r12*r21*rGA1*rGA2*s1 + 2*r11*r32*rGA1*rGA3*s1 + 2*r12*r31*rGA1*rGA3*s1 + 2*r21*r32*rGA2*rGA3*s1 + 2*r22*r31*rGA2*rGA3*s1 + r11*r52*rGA1*rGA2*s4 + r12*r51*rGA1*rGA2*s4 + r21*r42*rGA1*rGA2*s4 + r22*r41*rGA1*rGA2*s4 + r11*r62*rGA1*rGA3*s4 + r12*r61*rGA1*rGA3*s4 + r31*r42*rGA1*rGA3*s4 + r32*r41*rGA1*rGA3*s4 + r21*r62*rGA2*rGA3*s4 + r22*r61*rGA2*rGA3*s4 + r31*r52*rGA2*rGA3*s4 + r32*r51*rGA2*rGA3*s4 + 2*r41*r52*rGA1*rGA2*s2 + 2*r42*r51*rGA1*rGA2*s2 + r11*r82*rGA1*rGA2*s5 + r12*r81*rGA1*rGA2*s5 + r21*r72*rGA1*rGA2*s5 + r22*r71*rGA1*rGA2*s5 + 2*r41*r62*rGA1*rGA3*s2 + 2*r42*r61*rGA1*rGA3*s2 + r11*r92*rGA1*rGA3*s5 + r12*r91*rGA1*rGA3*s5 + r31*r72*rGA1*rGA3*s5 + r32*r71*rGA1*rGA3*s5 + 2*r51*r62*rGA2*rGA3*s2 + 2*r52*r61*rGA2*rGA3*s2 + r21*r92*rGA2*rGA3*s5 + r22*r91*rGA2*rGA3*s5 + r31*r82*rGA2*rGA3*s5 + r32*r81*rGA2*rGA3*s5 + r41*r82*rGA1*rGA2*s6 + r42*r81*rGA1*rGA2*s6 + r51*r72*rGA1*rGA2*s6 + r52*r71*rGA1*rGA2*s6 + r41*r92*rGA1*rGA3*s6 + r42*r91*rGA1*rGA3*s6 + r61*r72*rGA1*rGA3*s6 + r62*r71*rGA1*rGA3*s6 + r51*r92*rGA2*rGA3*s6 + r52*r91*rGA2*rGA3*s6 + r61*r82*rGA2*rGA3*s6 + r62*r81*rGA2*rGA3*s6 + 2*r71*r82*rGA1*rGA2*s3 + 2*r72*r81*rGA1*rGA2*s3 + 2*r71*r92*rGA1*rGA3*s3 + 2*r72*r91*rGA1*rGA3*s3 + 2*r81*r92*rGA2*rGA3*s3 + 2*r82*r91*rGA2*rGA3*s3;
+%                     4*s10 + 4*q1*s7 + 4*q2*s8 + 4*q3*s9 + 4*q1^2*s1 + 4*q2^2*s2 + 4*q3^2*s3 + r12^2*rGA1^2*s1 + r22^2*rGA2^2*s1 + r32^2*rGA3^2*s1 + r42^2*rGA1^2*s2 + r52^2*rGA2^2*s2 + r62^2*rGA3^2*s2 + r72^2*rGA1^2*s3 + r82^2*rGA2^2*s3 + r92^2*rGA3^2*s3 + 4*q1*q2*s4 + 4*q1*q3*s5 + 4*q2*q3*s6 + 2*r11*rGA1*s7 + r13*rGA1*s7 + 2*r21*rGA2*s7 + r23*rGA2*s7 + 2*r31*rGA3*s7 + r33*rGA3*s7 + 2*r41*rGA1*s8 + r43*rGA1*s8 + 2*r51*rGA2*s8 + r53*rGA2*s8 + 2*r61*rGA3*s8 + r63*rGA3*s8 + 2*r71*rGA1*s9 + r73*rGA1*s9 + 2*r81*rGA2*s9 + r83*rGA2*s9 + 2*r91*rGA3*s9 + r93*rGA3*s9 + 4*q1*r11*rGA1*s1 + 2*q1*r13*rGA1*s1 + 2*q2*r11*rGA1*s4 + q2*r13*rGA1*s4 + 2*q3*r11*rGA1*s5 + q3*r13*rGA1*s5 + 4*q1*r21*rGA2*s1 + 2*q1*r23*rGA2*s1 + 2*q2*r21*rGA2*s4 + q2*r23*rGA2*s4 + 2*q3*r21*rGA2*s5 + q3*r23*rGA2*s5 + 4*q1*r31*rGA3*s1 + 2*q1*r33*rGA3*s1 + 2*q2*r31*rGA3*s4 + q2*r33*rGA3*s4 + 2*q3*r31*rGA3*s5 + q3*r33*rGA3*s5 + 4*q2*r41*rGA1*s2 + 2*q1*r41*rGA1*s4 + 2*q2*r43*rGA1*s2 + q1*r43*rGA1*s4 + 2*q3*r41*rGA1*s6 + q3*r43*rGA1*s6 + 4*q2*r51*rGA2*s2 + 2*q1*r51*rGA2*s4 + 2*q2*r53*rGA2*s2 + q1*r53*rGA2*s4 + 2*q3*r51*rGA2*s6 + q3*r53*rGA2*s6 + 4*q2*r61*rGA3*s2 + 2*q1*r61*rGA3*s4 + 2*q2*r63*rGA3*s2 + q1*r63*rGA3*s4 + 2*q3*r61*rGA3*s6 + q3*r63*rGA3*s6 + 2*q1*r71*rGA1*s5 + 4*q3*r71*rGA1*s3 + q1*r73*rGA1*s5 + 2*q2*r71*rGA1*s6 + 2*q3*r73*rGA1*s3 + q2*r73*rGA1*s6 + 2*q1*r81*rGA2*s5 + 4*q3*r81*rGA2*s3 + q1*r83*rGA2*s5 + 2*q2*r81*rGA2*s6 + 2*q3*r83*rGA2*s3 + q2*r83*rGA2*s6 + 2*q1*r91*rGA3*s5 + 4*q3*r91*rGA3*s3 + q1*r93*rGA3*s5 + 2*q2*r91*rGA3*s6 + 2*q3*r93*rGA3*s3 + q2*r93*rGA3*s6 + 2*r11*r13*rGA1^2*s1 + 2*r21*r23*rGA2^2*s1 + r11*r43*rGA1^2*s4 + r12*r42*rGA1^2*s4 + r13*r41*rGA1^2*s4 + 2*r31*r33*rGA3^2*s1 + r21*r53*rGA2^2*s4 + r22*r52*rGA2^2*s4 + r23*r51*rGA2^2*s4 + 2*r41*r43*rGA1^2*s2 + r11*r73*rGA1^2*s5 + r12*r72*rGA1^2*s5 + r13*r71*rGA1^2*s5 + r31*r63*rGA3^2*s4 + r32*r62*rGA3^2*s4 + r33*r61*rGA3^2*s4 + 2*r51*r53*rGA2^2*s2 + r21*r83*rGA2^2*s5 + r22*r82*rGA2^2*s5 + r23*r81*rGA2^2*s5 + r41*r73*rGA1^2*s6 + r42*r72*rGA1^2*s6 + r43*r71*rGA1^2*s6 + 2*r61*r63*rGA3^2*s2 + r31*r93*rGA3^2*s5 + r32*r92*rGA3^2*s5 + r33*r91*rGA3^2*s5 + r51*r83*rGA2^2*s6 + r52*r82*rGA2^2*s6 + r53*r81*rGA2^2*s6 + 2*r71*r73*rGA1^2*s3 + r61*r93*rGA3^2*s6 + r62*r92*rGA3^2*s6 + r63*r91*rGA3^2*s6 + 2*r81*r83*rGA2^2*s3 + 2*r91*r93*rGA3^2*s3 + 2*r11*r23*rGA1*rGA2*s1 + 2*r12*r22*rGA1*rGA2*s1 + 2*r13*r21*rGA1*rGA2*s1 + 2*r11*r33*rGA1*rGA3*s1 + 2*r12*r32*rGA1*rGA3*s1 + 2*r13*r31*rGA1*rGA3*s1 + 2*r21*r33*rGA2*rGA3*s1 + 2*r22*r32*rGA2*rGA3*s1 + 2*r23*r31*rGA2*rGA3*s1 + r11*r53*rGA1*rGA2*s4 + r12*r52*rGA1*rGA2*s4 + r13*r51*rGA1*rGA2*s4 + r21*r43*rGA1*rGA2*s4 + r22*r42*rGA1*rGA2*s4 + r23*r41*rGA1*rGA2*s4 + r11*r63*rGA1*rGA3*s4 + r12*r62*rGA1*rGA3*s4 + r13*r61*rGA1*rGA3*s4 + r31*r43*rGA1*rGA3*s4 + r32*r42*rGA1*rGA3*s4 + r33*r41*rGA1*rGA3*s4 + r21*r63*rGA2*rGA3*s4 + r22*r62*rGA2*rGA3*s4 + r23*r61*rGA2*rGA3*s4 + r31*r53*rGA2*rGA3*s4 + r32*r52*rGA2*rGA3*s4 + r33*r51*rGA2*rGA3*s4 + 2*r41*r53*rGA1*rGA2*s2 + 2*r42*r52*rGA1*rGA2*s2 + 2*r43*r51*rGA1*rGA2*s2 + r11*r83*rGA1*rGA2*s5 + r12*r82*rGA1*rGA2*s5 + r13*r81*rGA1*rGA2*s5 + r21*r73*rGA1*rGA2*s5 + r22*r72*rGA1*rGA2*s5 + r23*r71*rGA1*rGA2*s5 + 2*r41*r63*rGA1*rGA3*s2 + 2*r42*r62*rGA1*rGA3*s2 + 2*r43*r61*rGA1*rGA3*s2 + r11*r93*rGA1*rGA3*s5 + r12*r92*rGA1*rGA3*s5 + r13*r91*rGA1*rGA3*s5 + r31*r73*rGA1*rGA3*s5 + r32*r72*rGA1*rGA3*s5 + r33*r71*rGA1*rGA3*s5 + 2*r51*r63*rGA2*rGA3*s2 + 2*r52*r62*rGA2*rGA3*s2 + 2*r53*r61*rGA2*rGA3*s2 + r21*r93*rGA2*rGA3*s5 + r22*r92*rGA2*rGA3*s5 + r23*r91*rGA2*rGA3*s5 + r31*r83*rGA2*rGA3*s5 + r32*r82*rGA2*rGA3*s5 + r33*r81*rGA2*rGA3*s5 + r41*r83*rGA1*rGA2*s6 + r42*r82*rGA1*rGA2*s6 + r43*r81*rGA1*rGA2*s6 + r51*r73*rGA1*rGA2*s6 + r52*r72*rGA1*rGA2*s6 + r53*r71*rGA1*rGA2*s6 + r41*r93*rGA1*rGA3*s6 + r42*r92*rGA1*rGA3*s6 + r43*r91*rGA1*rGA3*s6 + r61*r73*rGA1*rGA3*s6 + r62*r72*rGA1*rGA3*s6 + r63*r71*rGA1*rGA3*s6 + r51*r93*rGA2*rGA3*s6 + r52*r92*rGA2*rGA3*s6 + r53*r91*rGA2*rGA3*s6 + r61*r83*rGA2*rGA3*s6 + r62*r82*rGA2*rGA3*s6 + r63*r81*rGA2*rGA3*s6 + 2*r71*r83*rGA1*rGA2*s3 + 2*r72*r82*rGA1*rGA2*s3 + 2*r73*r81*rGA1*rGA2*s3 + 2*r71*r93*rGA1*rGA3*s3 + 2*r72*r92*rGA1*rGA3*s3 + 2*r73*r91*rGA1*rGA3*s3 + 2*r81*r93*rGA2*rGA3*s3 + 2*r82*r92*rGA2*rGA3*s3 + 2*r83*r91*rGA2*rGA3*s3;
+%                     ];
                 t_ans(1) = (-t_coeff(2) + sqrt(t_coeff(2)^2 - 4*t_coeff(1)*t_coeff(3)))/(2*t_coeff(1));
                 t_ans(2) = (-t_coeff(2) - sqrt(t_coeff(2)^2 - 4*t_coeff(1)*t_coeff(3)))/(2*t_coeff(1));
                 
                 t_ans = t_ans(imag(t_ans)==0);
                 t_ans(t_ans <0) = [];t_ans(t_ans > 1) = [];
-                
+                t_ans = double(t_ans);
                 if ~isempty(t_ans)
                     for ii = 1:size(t_ans,2)
                         %% finding the corresponding poses of intersection
@@ -367,7 +367,7 @@ classdef InterferenceFreeRayConditionCableObstacle < WorkspaceRayConditionBase
                         if tmp_val(1) <= obj.surface_bound(2) && tmp_val(1) >= obj.surface_bound(1) && ...
                                 tmp_val(2) <= obj.surface_bound(4) && tmp_val(2) >= obj.surface_bound(3) &&...
                                 tmp_val(3) <= obj.surface_bound(6) && tmp_val(3) >= obj.surface_bound(5)
-                            intersected_pts = [intersected_pts, double(t_equ{i}(t_ans(ii)))];
+                            intersected_pts = [intersected_pts, tmp_val];
                             q_intersected = [q_intersected,(q_end - q_begin)*t_ans(ii) + q_begin];
                         end
                     end
