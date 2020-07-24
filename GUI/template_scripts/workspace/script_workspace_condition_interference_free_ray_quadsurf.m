@@ -20,10 +20,10 @@ q_end(4:6) = 0;
 %% for rotational first
 q_begin = [0.3 0 0.5 0 0 0]';
 q_end = [0.3 1 0.5 0 0 0]';
-q_begin = [0.35 0.9 0.3 0 0 0]';
-q_end = [0.35 0.9 0.3 pi/2 0 0]';
-% q_begin = [0.5 0.5 0.5 0 -pi/2 0]';
-% q_end = [0.5 0.5 0.5 0 pi/2 0]';
+% q_begin = [0.35 0.9 0.3 0 0 0]';
+% q_end = [0.35 0.9 0.3 pi/2 0 0]';
+q_begin = [0.1 0.2 0.55 0 -pi/2 0]';
+q_end = [0.1 0.2 0.55 0 pi/2 0]';
 
 q_step          =   (modelObj.bodyModel.q_max - modelObj.bodyModel.q_min)/5;
 % Set up the workspace simulator

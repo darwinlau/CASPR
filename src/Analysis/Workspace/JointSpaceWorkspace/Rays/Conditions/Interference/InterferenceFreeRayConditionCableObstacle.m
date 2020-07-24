@@ -100,15 +100,33 @@ classdef InterferenceFreeRayConditionCableObstacle < WorkspaceRayConditionBase
             else
                 [R_coeff,T_coeff,k_unit] = obj.RotationMatrixCoefficient(model,q_begin,q_end);
                 [Si,base_point] = obj.GetSegmentEquation(model,R_coeff,T_coeff,k_unit);
-                
+                %                 for k = 1:9
+                %                    K(k) = polyval(R_coeff(k,:),k_unit)
+                %                 end
                 Common_Denominator = [k_unit^4 0 2*k_unit^2 0 1];
                 
+                t_step = linspace(0,1,7);                
+                
+                poses = q_begin + t_step.*(q_end - q_begin);
+                
+                
                 for i = 1:obj.numCables
-                    Si_u =@(u) Si{i}*[(u)^4;(u)^3;(u)^2;(u);1] / ((k_unit*u)^4 + 2*(u*k_unit)^2 + 1);
-%                     Si_u =@(u) Si{i}*[u^4;u^3;u^2;u^1;1] / (Common_Denominator*[u^4;u^3;u^2;u^1;1]);
-                    %% parametric form f(u,v) of the cable segment surface
-                    parametric_cable_surf_uv =@(u,v) Si_u(u)* v + base_point(:,i);
+                    r_OA_i = [];
+                    for ii = 1:max(size(t_step))
+                        model.update(poses(:,ii),zeros(model.numDofs,1), zeros(model.numDofs,1),zeros(model.numDofs,1));
+                        r_OA_i(:,ii) = model.cableModel.cables{1,i}.attachments{1,2}.r_OA;
+                    end
                     
+                    for ii = 1:3
+                        rOA_u(ii,:) = polyfit(t_step,r_OA_i(ii,:),6);
+                    end
+                    %                     Si_u =@(u) Si{i}*[(u)^4;(u)^3;(u)^2;(u);1] / ((k_unit*u)^4 + 2*(u*k_unit)^2 + 1);
+%                     rOA_u * [(u)^4;(u)^3;(u)^2;(u);1]
+                    %                     Si_u =@(u) Si{i}*[u^4;u^3;u^2;u^1;1] / (Common_Denominator*[u^4;u^3;u^2;u^1;1]);
+                    %% parametric form f(u,v) of the cable segment surface
+                    Si_u =@(u) rOA_u * [u^6;u^5;u^4;u^3;u^2;u;1] - base_point(:,i);
+%                     parametric_cable_surf_uv =@(u,v) Si_u(u)* v + base_point(:,i);
+                    parametric_cable_surf_uv =@(u,v) Si_u(u)* v + base_point(:,i);
                     [q_intersected,intersected_pts] = obj.ParametericSurfaceIntersectionUniversal(parametric_cable_surf_uv,q_begin,q_end);
                     
                     all_intersection_poses = [all_intersection_poses, q_intersected];
