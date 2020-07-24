@@ -439,11 +439,12 @@ classdef RayWorkspace < handle
                     remove_index = [node_list{j,end}, i];
                     plane_A  = ray_A; plane_A(remove_index) = []; plane_A(end) = []; plane_A = cell2mat(plane_A);
                     compare_rays_index = find(ismember([node_list{:,end}],i));
+                    if ~isempty(compare_rays_index)
                     checking_rays = node_list([find(ismember([node_list{:,end}],i))],1:end-1);
                     checking_rays(:,[node_list{j,end}+1 i+1]) = [];
                     co_planar_index = find(ismember(cell2mat(checking_rays(:,2:end)),plane_A,'rows'));
                     co_planar_rays = [co_planar_rays;node_list(cell2mat(checking_rays(co_planar_index,1)),:)];
-                    
+                    end
                 end
                 
                 %find intersection points
