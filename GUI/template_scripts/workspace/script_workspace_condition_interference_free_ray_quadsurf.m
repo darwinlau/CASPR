@@ -5,6 +5,7 @@
 % Description    :
 
 % Load configs
+clear
 model_config    =   DevModelConfig('CU-Brick');
 cable_set_id    =   'AEI_demo';
 modelObj        =   model_config.getModel(cable_set_id);
@@ -24,14 +25,19 @@ uGrid           =   UniformGrid(q_begin,q_end,q_step,'step_size');
 % Workspace settings and conditions
 
 %% this one for a sphere covers some attachment points 
-% QuadSurf.implicit_equation = @(x,y,z) x.^2 + y.^2 + z.^2 - 0.2.*x - 1.*y + 0.1.*z + 0.5.*x.*y  + 0.2.*y.*z - 0.3.*x.*z+ 0.04;
+QuadSurf.implicit_equation = @(x,y,z) x.^2 + y.^2 + z.^2 - 0.2.*x - 1.*y + 0.1.*z + 0.5.*x.*y  + 0.2.*y.*z - 0.3.*x.*z+ 0.04;
 
 %% this one for a sphere that intersected with some cables in translational cases
 % QuadSurf.implicit_equation = @(x,y,z) (x-1).^2 + (y+0.5).^2 + (z-0.2).^2 - 0.2.*x - 1.*y + 0.1.*z + 0.4.*x.*y  + 0.2.*y.*z - 0.3.*x.*z+ 0.04;
 
 %% this one for a sphpere that intersected with some cables with a ray in   
 % translational and rotational cases
-QuadSurf.implicit_equation = @(x,y,z) (x-1)^2+(y-0.5)^2+(z-0.6)^2 -0.2*x-0.5*y+0.2*z+0.4*x*y+0.2*y*z-0.3*x*z+0.2
+% QuadSurf.implicit_equation = @(x,y,z) (x-1)^2+(y-0.5)^2+(z-0.6)^2 -0.2*x-0.5*y+0.2*z+0.4*x*y+0.2*y*z-0.3*x*z+0.2
+%% debug use
+% s = sym('s%d',[1 10]);
+% QuadSurf.implicit_equation = @(x,y,z) s(1)*x^2 + s(2)*y^2 + s(3)*z^2 + ...
+%                                       s(4)*x*y + s(5)*x*z + s(6)*z*y + ...
+%                                       s(7)*x + s(8)*y + s(9)*z + s(10);
 
 %% this one for a cylinder covers some attachment points            
 % QuadSurf.implicit_equation = @(x,y,z) x.^2 + y.^2 - 0.5;
