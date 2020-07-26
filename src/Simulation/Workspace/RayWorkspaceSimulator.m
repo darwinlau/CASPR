@@ -62,6 +62,7 @@ classdef RayWorkspaceSimulator < SimulatorBase
             is_log = (log_level >= CASPR_log.GetLogLevel());
             
             for i = 1:obj.grid.n_dimensions
+                CASPR_log.Info(sprintf('Ray workspace analysis DoF %d.', i));
                 if ismember(i, obj.grid.dim_disc_ia)
                     %i is the free variable index;
                     grid_index = true(obj.grid.n_dimensions,1); 
