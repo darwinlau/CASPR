@@ -9,22 +9,23 @@
 % conditions that have been evalauted at that ray.
 classdef RayWorkspaceElement < handle
     properties(SetAccess = protected)
-        fixed_variables         % The pose for the workspace condition to be evaluated at
+        fixedVariables          % The pose for the workspace condition to be evaluated at
 %         metrics                 % A cell array of different metrics (enum and value)
         conditions              % Array of different workspace conditions evaluated
-        free_variable_index     % The index that is left free
-        free_variable_range
+        freeVariableIndex       % The index that is left free
+        freeVariableRange       % Range of the free variable values
         numDofs                 % The number of degrees of freedom associated with this ray
         intervals               % The workspace intervals
+        compTime                
     end
     properties (Hidden)
     end
     methods
         % Constructor for the class
         function wp = RayWorkspaceElement(model, fixed_variables, conditions, free_variable_index, free_variable_range)
-            wp.fixed_variables      =   fixed_variables;
-            wp.free_variable_index  =   free_variable_index;
-            wp.free_variable_range  =   free_variable_range;
+            wp.fixedVariables       =   fixed_variables;
+            wp.freeVariableIndex    =   free_variable_index;
+            wp.freeVariableRange    =   free_variable_range;
             wp.numDofs              =   model.numDofs;
             wp.conditions           =   conditions;
             interval_combined       =   free_variable_range;
@@ -33,7 +34,7 @@ classdef RayWorkspaceElement < handle
             for c_i = 1:size(conditions,2)
                 
                 % New condition
-                condition_intervals = conditions{c_i}.evaluate(model, wp);
+                [condition_intervals, ~, comp_time] = conditions{c_i}.evaluate(model, wp);
                 
                 if(~isempty(condition_intervals))
                     % There may be multiple intervals

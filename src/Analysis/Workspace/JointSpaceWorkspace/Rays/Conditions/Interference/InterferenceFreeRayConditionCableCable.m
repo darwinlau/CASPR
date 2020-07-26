@@ -41,7 +41,10 @@ classdef InterferenceFreeRayConditionCableCable < WorkspaceRayConditionBase
             interference_q = [];
             % Variable initialisation
             q_zero = zeros(obj.numDofs, 1);            
-            free_variable_index = ws_ray.free_variable_index;
+            free_variable_index = ws_ray.freeVariableIndex;
+            free_variable_lower = ws_ray.freeVariableRange(1);
+            free_variable_upper = ws_ray.freeVariableRange(2);
+            
             is_dof_translation = obj.areDofsTranslation(free_variable_index);
             dof_margin = obj.dofMargins(free_variable_index);
             
@@ -55,7 +58,7 @@ classdef InterferenceFreeRayConditionCableCable < WorkspaceRayConditionBase
             cable_combinations = nchoosek(1:size(model.cableModel.r_OAs, 2), 2);
             num_cable_combs = size(cable_combinations, 1);
             
-            free_var_lin_space_q = ws_ray.free_variable_range(1):(ws_ray.free_variable_range(2)-ws_ray.free_variable_range(1))/maximum_degree:ws_ray.free_variable_range(2);
+            free_var_lin_space_q = free_variable_lower:(free_variable_upper-free_variable_lower)/maximum_degree:free_variable_upper;
             
             if is_dof_translation
                 free_var_lin_space_u = free_var_lin_space_q;
@@ -64,9 +67,9 @@ classdef InterferenceFreeRayConditionCableCable < WorkspaceRayConditionBase
             end
             
             % Pose data
-            q_fixed = ws_ray.fixed_variables;
+            q_fixed = ws_ray.fixedVariables;
             fixed_index = true(obj.numDofs,1); 
-            fixed_index(ws_ray.free_variable_index) = false;
+            fixed_index(ws_ray.freeVariableIndex) = false;
             q = q_zero; 
             q(fixed_index) = q_fixed;
             
@@ -106,7 +109,7 @@ classdef InterferenceFreeRayConditionCableCable < WorkspaceRayConditionBase
                     else
                         root_i_q = 2*atan(root_i_u);
                     end
-                    if (isreal(root_i_u) && (root_i_q >= ws_ray.free_variable_range(1)) && (root_i_q <= ws_ray.free_variable_range(2)))
+                    if (isreal(root_i_u) && (root_i_q >= free_variable_lower) && (root_i_q <= free_variable_upper))
             
                         q(free_variable_index) = root_i_q;
                         
@@ -135,9 +138,9 @@ classdef InterferenceFreeRayConditionCableCable < WorkspaceRayConditionBase
                 interference_q = sort(interference_q);
                 intervals = zeros(length(interference_q)+1, 2);
                 
-                if (ws_ray.free_variable_range(1) < interference_q(1)-dof_margin/2) 
+                if (free_variable_lower < interference_q(1)-dof_margin/2) 
                     intervals_count = intervals_count + 1;
-                    intervals(intervals_count,:) = [ws_ray.free_variable_range(1), interference_q(1)-dof_margin/2];
+                    intervals(intervals_count,:) = [free_variable_lower, interference_q(1)-dof_margin/2];
                 end
                 
                 for i = 2:length(interference_q)
@@ -147,13 +150,13 @@ classdef InterferenceFreeRayConditionCableCable < WorkspaceRayConditionBase
                     end
                 end
                 
-                if (interference_q(end)+dof_margin/2 < ws_ray.free_variable_range(2)) 
+                if (interference_q(end)+dof_margin/2 < free_variable_upper) 
                     intervals_count = intervals_count + 1;
-                    intervals(end, :) = [interference_q(end)+dof_margin/2, ws_ray.free_variable_range(2)];
+                    intervals(end, :) = [interference_q(end)+dof_margin/2, free_variable_upper];
                 end                
                 intervals = intervals(1:intervals_count, :);
             else
-                intervals = [ws_ray.free_variable_range(1) ws_ray.free_variable_range(2)];
+                intervals = [free_variable_lower free_variable_upper];
             end
             
             

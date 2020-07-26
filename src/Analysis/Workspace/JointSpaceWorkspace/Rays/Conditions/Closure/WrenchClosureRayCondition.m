@@ -38,14 +38,14 @@ classdef WrenchClosureRayCondition < WorkspaceRayConditionBase
         % [min_4 max_4] etc...
         function intervals = evaluateFunction(obj, model, workspace_ray)
             %% Variable initialisation
-            free_variable_index = workspace_ray.free_variable_index;
+            free_variable_index = workspace_ray.freeVariableIndex;
             % Use the joint type to determine the maximum polynomial
             % degrees
             if(obj.areDofsTranslation(free_variable_index))
                 % THIS MAY NEED TO BE CHANGED
                 maximum_degree = obj.numDofs;
                 % Set up a linear space for the free variable
-                free_variable_linear_space = workspace_ray.free_variable_range(1):(workspace_ray.free_variable_range(2)-workspace_ray.free_variable_range(1))/maximum_degree:workspace_ray.free_variable_range(2);
+                free_variable_linear_space = workspace_ray.freeVariableRange(1):(workspace_ray.freeVariableRange(2)-workspace_ray.freeVariableRange(1))/maximum_degree:workspace_ray.freeVariableRange(2);
                 % Matrix for least squares computations
                 least_squares_matrix = GeneralMathOperations.ComputeLeastSquareMatrix(free_variable_linear_space',maximum_degree);
             else
@@ -53,7 +53,7 @@ classdef WrenchClosureRayCondition < WorkspaceRayConditionBase
                 maximum_degree = 2*obj.numDofs+3; % temporarily added 3 to increase the accuracy
 %                 maximum_degree = 2*obj.numDofs;
                 % Set up a linear space for the free variable
-                free_variable_linear_space = workspace_ray.free_variable_range(1):(workspace_ray.free_variable_range(2)-workspace_ray.free_variable_range(1))/maximum_degree:workspace_ray.free_variable_range(2);
+                free_variable_linear_space = workspace_ray.freeVariableRange(1):(workspace_ray.freeVariableRange(2)-workspace_ray.freeVariableRange(1))/maximum_degree:workspace_ray.freeVariableRange(2);
                 % Matrix for least squares computations
                 least_squares_matrix = GeneralMathOperations.ComputeLeastSquareMatrix(tan(0.5*free_variable_linear_space)',maximum_degree);
             end
@@ -91,8 +91,8 @@ classdef WrenchClosureRayCondition < WorkspaceRayConditionBase
             end
             
             % Pose data
-            q_fixed = workspace_ray.fixed_variables;
-            fixed_index = true(obj.numDofs,1); fixed_index(workspace_ray.free_variable_index) = false;
+            q_fixed = workspace_ray.fixedVariables;
+            fixed_index = true(obj.numDofs,1); fixed_index(workspace_ray.freeVariableIndex) = false;
             q = q_zero; 
             q(fixed_index) = q_fixed;
             %% Sample the polynomials
@@ -123,7 +123,7 @@ classdef WrenchClosureRayCondition < WorkspaceRayConditionBase
             intervals = [];
             polynomial_coefficients_null = zeros(obj.numCables,maximum_degree+1); % Initialised once it is always completely updated
             sign_vector = zeros(obj.numCables,1);
-            null_roots = [workspace_ray.free_variable_range(1);workspace_ray.free_variable_range(2)];
+            null_roots = [workspace_ray.freeVariableRange(1);workspace_ray.freeVariableRange(2)];
             for combination_index = 1:obj.numCables
                 % Repeat for each combination and k
                 null_vector = null_matrix(:,combination_index);
@@ -147,8 +147,8 @@ classdef WrenchClosureRayCondition < WorkspaceRayConditionBase
                         null_i_roots = 2*atan(null_i_roots);
                     end
                     % Remove roots that lie outside of the range
-                    null_i_roots(null_i_roots<workspace_ray.free_variable_range(1)) = [];
-                    null_i_roots(null_i_roots>workspace_ray.free_variable_range(2)) = [];
+                    null_i_roots(null_i_roots<workspace_ray.freeVariableRange(1)) = [];
+                    null_i_roots(null_i_roots>workspace_ray.freeVariableRange(2)) = [];
                     % incorporate the roots into the roots for all k
                     null_roots = [null_roots;null_i_roots];
                 end
@@ -178,7 +178,7 @@ classdef WrenchClosureRayCondition < WorkspaceRayConditionBase
             end
             
             % Stop if the interval is the whole set
-            if((~isempty(intervals))&&((abs(intervals(1,1) - workspace_ray.free_variable_range(1)) < obj.TOLERANCE) && (abs(intervals(1,2) - workspace_ray.free_variable_range(2))<obj.TOLERANCE)))
+            if((~isempty(intervals))&&((abs(intervals(1,1) - workspace_ray.freeVariableRange(1)) < obj.TOLERANCE) && (abs(intervals(1,2) - workspace_ray.freeVariableRange(2))<obj.TOLERANCE)))
                 return;
             end
         end
@@ -193,8 +193,8 @@ classdef WrenchClosureRayCondition < WorkspaceRayConditionBase
             
             number_secondary_combinations = 2^obj.degRedundancy - 1;
             % Pose data
-            q_fixed = workspace_ray.fixed_variables;
-            fixed_index = true(obj.numDofs,1); fixed_index(workspace_ray.free_variable_index) = false;
+            q_fixed = workspace_ray.fixedVariables;
+            fixed_index = true(obj.numDofs,1); fixed_index(workspace_ray.freeVariableIndex) = false;
             q = q_zero; 
             q(fixed_index) = q_fixed;
             %% Sample the polynomials
@@ -277,8 +277,8 @@ classdef WrenchClosureRayCondition < WorkspaceRayConditionBase
                         temp_roots = 2*atan(temp_roots);
                     end
                     % Remove roots that lie outside of the range
-                    temp_roots(temp_roots<workspace_ray.free_variable_range(1)) = [];
-                    temp_roots(temp_roots>workspace_ray.free_variable_range(2)) = [];
+                    temp_roots(temp_roots<workspace_ray.freeVariableRange(1)) = [];
+                    temp_roots(temp_roots>workspace_ray.freeVariableRange(2)) = [];
                     roots_cell_array{combination_index} = sort(temp_roots);
                 end
             end
@@ -289,7 +289,7 @@ classdef WrenchClosureRayCondition < WorkspaceRayConditionBase
                 if(leading_zero_number(combination_index) ~= -1)
                     % Repeat for each combination and k
                     for combination_index_2 = 1:number_secondary_combinations
-                        null_roots = [workspace_ray.free_variable_range(1);workspace_ray.free_variable_range(2)];
+                        null_roots = [workspace_ray.freeVariableRange(1);workspace_ray.freeVariableRange(2)];
                         for dof_index = 1:obj.numDofs+1
                             null_vector = null_matrix(:,combination_index,combination_index_2,dof_index);
                             polynomial_coefficients_null(dof_index,:) = ((-1)^(dof_index+1))*(least_squares_matrix_i*null_vector);
@@ -303,8 +303,8 @@ classdef WrenchClosureRayCondition < WorkspaceRayConditionBase
                                     null_i_roots = 2*atan(null_i_roots);
                                 end
                                 % Remove roots that lie outside of the range
-                                null_i_roots(null_i_roots<workspace_ray.free_variable_range(1)) = [];
-                                null_i_roots(null_i_roots>workspace_ray.free_variable_range(2)) = [];
+                                null_i_roots(null_i_roots<workspace_ray.freeVariableRange(1)) = [];
+                                null_i_roots(null_i_roots>workspace_ray.freeVariableRange(2)) = [];
                                 % incorporate the roots into the roots for all k
                                 null_roots = [null_roots;null_i_roots];
                             end
@@ -407,7 +407,7 @@ classdef WrenchClosureRayCondition < WorkspaceRayConditionBase
                         end
                     end
                     % Stop if the interval is the whole set
-                    if((~isempty(intervals))&&((abs(intervals(1,1) - workspace_ray.free_variable_range(1)) < obj.TOLERANCE) && (abs(intervals(1,2) - workspace_ray.free_variable_range(2))<obj.TOLERANCE)))
+                    if((~isempty(intervals))&&((abs(intervals(1,1) - workspace_ray.freeVariableRange(1)) < obj.TOLERANCE) && (abs(intervals(1,2) - workspace_ray.freeVariableRange(2))<obj.TOLERANCE)))
                         return;
                     end
                 end

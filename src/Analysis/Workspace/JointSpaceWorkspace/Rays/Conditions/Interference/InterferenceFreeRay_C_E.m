@@ -101,11 +101,11 @@ classdef InterferenceFreeRay_C_E < WorkspaceRayConditionBase
         
         %% --v2.0 to calcualte Lm (m=1:numSeg)
         function SegEndpt = CoeffLm(~, model, workspace_ray)
-            curflxvar = workspace_ray.free_variable_index;
-            magconvar = workspace_ray.fixed_variables';
+            curflxvar = workspace_ray.freeVariableIndex;
+            magconvar = workspace_ray.fixedVariables';
             % ---- the bound of curflxvar ----------
-            curValmin = workspace_ray.free_variable_range(1);
-            curValmax = workspace_ray.free_variable_range(2);
+            curValmin = workspace_ray.freeVariableRange(1);
+            curValmax = workspace_ray.freeVariableRange(2);
             % decide the num. of segments
             ncable = model.numCables;
             nlink  = model.numLinks;
@@ -402,7 +402,7 @@ classdef InterferenceFreeRay_C_E < WorkspaceRayConditionBase
                     out_temp = [L_intv', R_intv']; % n*2 matrix
                     % (option) change from T to angle (rad)
                     curtypevar= model.bodyModel.q_dofType;
-                    curflxvar = workspace_ray.free_variable_index;
+                    curflxvar = workspace_ray.freeVariableIndex;
                     if curtypevar(curflxvar)==DoFType.ROTATION
                         out_temp = 2*atan(out_temp);
                     %     % rad -> deg
@@ -416,8 +416,8 @@ classdef InterferenceFreeRay_C_E < WorkspaceRayConditionBase
             end
 
             %% to obtain IFW from Interference Intervals
-            min = workspace_ray.free_variable_range(1);
-            maxVal = workspace_ray.free_variable_range(2);
+            min = workspace_ray.freeVariableRange(1);
+            maxVal = workspace_ray.freeVariableRange(2);
             if ~isempty(intvInterf)
                 [L_comp, R_comp] = Comp_interval(obj, intvInterf(:,1), intvInterf(:,2));
                 if ~isempty(L_comp)
@@ -473,10 +473,10 @@ classdef InterferenceFreeRay_C_E < WorkspaceRayConditionBase
         end
         
         function Real_invt = RealRootsIntersectSet(obj, model, workspace_ray, CoUniPol, inequal)
-            curflxvar = workspace_ray.free_variable_index;
+            curflxvar = workspace_ray.freeVariableIndex;
             % Real_invt \in % n*2 matrix
             curtypevar= model.bodyModel.q_dofType;
-            bcurflxvar = workspace_ray.free_variable_range;
+            bcurflxvar = workspace_ray.freeVariableRange;
             % solve for roots
             real_root_pts = [];
             numIneq = length(CoUniPol); % num of inequalities 
@@ -736,7 +736,7 @@ classdef InterferenceFreeRay_C_E < WorkspaceRayConditionBase
         end
 
         function intvPtPt = MinDisPtPt(obj, model, workspace_ray, tflag, SegEndpt)
-            flxvar = workspace_ray.free_variable_index;
+            flxvar = workspace_ray.freeVariableIndex;
             % specify the transfer operator
             curtypevar= model.bodyModel.q_dofType;
             if curtypevar(flxvar)==DoFType.TRANSLATION 
@@ -815,7 +815,7 @@ classdef InterferenceFreeRay_C_E < WorkspaceRayConditionBase
         function intvPtSeg =  MinDisPtSeg(obj, model, workspace_ray, pt, segendpt, seg)
             % bcurflxvar = [obj.model.bodyModel.q_min(flxvar); obj.model.bodyModel.q_max(flxvar)];
             %% specify the transfer operator
-            flxvar = workspace_ray.free_variable_index;
+            flxvar = workspace_ray.freeVariableIndex;
             curtypevar= model.bodyModel.q_dofType;
             if curtypevar(flxvar)==DoFType.TRANSLATION
                 transf = [0 1]; % transfer to 3*2 matrix

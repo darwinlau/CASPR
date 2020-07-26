@@ -40,10 +40,10 @@ classdef InterferenceFreeRayConditionCableObstacle < WorkspaceRayConditionBase
             %             syms u v t;
             %             syms x y z;
             
-            free_variable_index = ws_ray.free_variable_index;
+            free_variable_index = ws_ray.freeVariableIndex;
             is_dof_translation = obj.areDofsTranslation(free_variable_index);
-            q_begin = [ws_ray.fixed_variables(1:free_variable_index-1);ws_ray.free_variable_range(1);ws_ray.fixed_variables(free_variable_index:end)];
-            q_end = [ws_ray.fixed_variables(1:free_variable_index-1);ws_ray.free_variable_range(2);ws_ray.fixed_variables(free_variable_index:end)];
+            q_begin = [ws_ray.fixedVariables(1:free_variable_index-1);ws_ray.freeVariableRange(1);ws_ray.fixedVariables(free_variable_index:end)];
+            q_end = [ws_ray.fixedVariables(1:free_variable_index-1);ws_ray.freeVariableRange(2);ws_ray.fixedVariables(free_variable_index:end)];
             all_intersection_poses = [q_begin,q_end];
             all_intersected_pts = [];
             % Att_pts{1} -> base point,  Att_pts{2}-> start point,  Att_pts{3}-> end point

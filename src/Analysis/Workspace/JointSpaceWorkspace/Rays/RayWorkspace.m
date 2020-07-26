@@ -404,14 +404,14 @@ classdef RayWorkspace < handle
                     node_list{number_node,1} = number_node; % node number
                     kk = 1;
                     for k = 2:size(node_list,2)-1
-                        if k ~= obj.rays{i}.free_variable_index+1
-                            node_list{number_node,k} =  obj.rays{i}.fixed_variables(kk);
+                        if k ~= obj.rays{i}.freeVariableIndex+1
+                            node_list{number_node,k} =  obj.rays{i}.fixedVariables(kk);
                             kk = kk + 1;
                         else
                             node_list{number_node,k} =  obj.rays{i}.intervals;
                         end
                     end
-                    node_list{number_node,end} = obj.rays{i}.free_variable_index;
+                    node_list{number_node,end} = obj.rays{i}.freeVariableIndex;
                 end
                 obj.ray_node(:).node_list = node_list;
             end
