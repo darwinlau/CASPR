@@ -37,7 +37,7 @@ classdef RayWorkspaceSimulator < SimulatorBase
             % Test if the metrics have infinite limits
             for i = 1:size(obj.metrics,2)
                 if((~isempty(obj.metrics{i}.metricMax))&&((abs(obj.metrics{i}.metricMax)==Inf)||(abs(obj.metrics{i}.metricMin)==Inf)))
-                    CASPR_log.Print('A metric with infinite limit values cannot be plotted.  To plot please set the metric limit to be finite or filter the workspace after plotting',CASPRLogLevel.WARNING);
+                    CASPR_log.Warn('A metric with infinite limit values cannot be plotted. To plot please set the metric limit to be finite or filter the workspace after plotting');
                 end
             end
             
@@ -58,6 +58,9 @@ classdef RayWorkspaceSimulator < SimulatorBase
             ray_t_in = tic;
             total_t_in = tic;
             
+            log_level = CASPRLogLevel.INFO;
+            is_log = (log_level >= CASPR_log.GetLogLevel());
+            
             for i = 1:obj.grid.n_dimensions
                 if ismember(i, obj.grid.dim_disc_ia)
                     %i is the free variable index;
@@ -66,14 +69,16 @@ classdef RayWorkspaceSimulator < SimulatorBase
                     % Create a subgrid
                     sub_grid = UniformGrid(obj.grid.q_begin(grid_index), obj.grid.q_end(grid_index), obj.grid.delta_q(grid_index), 'step_size', obj.grid.q_wrap(grid_index));
                     for j = 1:sub_grid.n_points
-                        CASPR_log.Info(sprintf('Workspace DoF %d. Workspace ray %d. Completion Percentage: %3.2f.', i, j, 100*k/n_grid_points));
+                        if (is_log)
+                            CASPR_log.Print(sprintf('Workspace DoF %d. Workspace ray %d. Completion Percentage: %3.2f.', i, j, 100*k/n_grid_points), log_level);
+                        end
                         % Load the current fixed grid coordinates
                         q_fixed = sub_grid.getGridPoint(j);
                         
                         if (obj.grid.q_begin(i) ~= obj.grid.q_end(i))
                             % Construct the workspace ray
                             wre = RayWorkspaceElement(obj.model, q_fixed, obj.conditions, i, [obj.grid.q_begin(i),obj.grid.q_end(i)]);
-                            if ~isempty(wre.interval)
+                            if ~isempty(wre.intervals)
                                 workspace_count = workspace_count + 1;
                                 obj.workspace.rays{workspace_count} = wre;
                             end

@@ -54,8 +54,13 @@ classdef PointWorkspaceSimulator < SimulatorBase
             total_t_in = tic;
             % Runs over the grid and evaluates the workspace condition at
             % each point
+            log_level = CASPRLogLevel.INFO;
+            is_log = (log_level >= CASPR_log.GetLogLevel());
+            
             for i = 1:n_grid_points
-                CASPR_log.Print([sprintf('Workspace point %d. ',i),sprintf('Completion Percentage: %3.2f',100*i/n_grid_points)],CASPRLogLevel.INFO);
+                if (is_log)
+                    CASPR_log.Print(sprintf('Workspace point %d. Completion Percentage: %3.2f', i,100*i/n_grid_points), log_level);
+                end
                 % Get the grid point
                 q = obj.grid.getGridPoint(i);
                 % Construct and evaluate the workspace point
