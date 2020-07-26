@@ -25,6 +25,7 @@ classdef WorkspaceRayConditionBase < handle
         
         % The unified implemetnation of evaluate. This evaluates the object
         % dynamics to determine if the workspace condition is satisfied.
+        % Resulting condition_intervals is of the type 
         function [condition_intervals, condition_type, comp_time] = evaluate(obj, dynamics, workspace_ray)
             start_tic       = tic;
             condition_intervals = obj.evaluateFunction(dynamics, workspace_ray);

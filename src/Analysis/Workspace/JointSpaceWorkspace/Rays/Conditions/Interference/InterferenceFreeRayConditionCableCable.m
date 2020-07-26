@@ -26,21 +26,24 @@ classdef InterferenceFreeRayConditionCableCable < WorkspaceRayConditionBase
     
     methods
         % Constructor for interference free worksapce
-        function w = InterferenceFreeRayConditionCableCable(model, min_ray_lengths, magin_dofs)
+        function w = InterferenceFreeRayConditionCableCable(model, min_ray_lengths, dof_margins)
             w@WorkspaceRayConditionBase(min_ray_lengths);
             w.areDofsTranslation = (model.bodyModel.q_dofType == DoFType.TRANSLATION);
             w.numDofs = model.numDofs;
             w.numCables = model.numCables;
-            w.dofMargins = magin_dofs;
+            w.dofMargins = dof_margins;
         end
             
         % Evaluate the interference free intervals 
         function intervals =  evaluateFunction(obj, model, ws_ray)
+            intervals = []; 
+            
             interference_q = [];
             % Variable initialisation
             q_zero = zeros(obj.numDofs, 1);            
             free_variable_index = ws_ray.free_variable_index;
             is_dof_translation = obj.areDofsTranslation(free_variable_index);
+            dof_margin = obj.dofMargins(free_variable_index);
             
             if is_dof_translation
                 maximum_degree = obj.MAX_DEGREE_TRANSLATION;
@@ -48,8 +51,8 @@ classdef InterferenceFreeRayConditionCableCable < WorkspaceRayConditionBase
                 maximum_degree = obj.MAX_DEGREE_ORIENTATION;
             end
             
-            % ASSUME THAT EVERY CABLE IS ONE SEGMENT FOR NOW
-            cable_combinations = nchoosek(1:obj.numCables, 2);
+            % Go through every cables and segments
+            cable_combinations = nchoosek(1:size(model.cableModel.r_OAs, 2), 2);
             num_cable_combs = size(cable_combinations, 1);
             
             free_var_lin_space_q = ws_ray.free_variable_range(1):(ws_ray.free_variable_range(2)-ws_ray.free_variable_range(1))/maximum_degree:ws_ray.free_variable_range(2);
@@ -116,26 +119,48 @@ classdef InterferenceFreeRayConditionCableCable < WorkspaceRayConditionBase
                         B_j = model.cableModel.r_OAs(4:6, j);
                         [t_i, t_j] = obj.intersection_xyz(A_i, B_i, A_j, B_j);
                         
-                        if (t_i >= 0 && t_i <= 1 && t_j >= 0 && t_j <= 1)
+                        if (t_i > 0 && t_i < 1 && t_j > 0 && t_j < 1)
                             interference_q = [interference_q; q(free_variable_index)];
-                            cable_combinations(k, :)
-%                             g
-                            q
-%                             A_i
-%                             B_i 
-%                             A_j
-%                             B_j
-                            metric = MinCableCableDistanceMetric();
-                            metric.evaluate(model)
+%                             cable_combinations(k, :)
+%                             q(free_variable_index)
+%                             metric = MinCableCableDistanceMetric();
+%                             metric.evaluate(model)
                         end
                     end
                 end
             end
-            g_coeffs
             
-            intervals = [];
+            intervals_count = 0;
+            if ~isempty(interference_q)
+                interference_q = sort(interference_q);
+                intervals = zeros(length(interference_q)+1, 2);
+                
+                if (ws_ray.free_variable_range(1) < interference_q(1)-dof_margin/2) 
+                    intervals_count = intervals_count + 1;
+                    intervals(intervals_count,:) = [ws_ray.free_variable_range(1), interference_q(1)-dof_margin/2];
+                end
+                
+                for i = 2:length(interference_q)
+                    if (interference_q(i-1)+dof_margin/2 < interference_q(i)-dof_margin/2)
+                        intervals_count = intervals_count + 1;
+                        intervals(intervals_count,:) = [interference_q(i-1)+dof_margin/2, interference_q(i)-dof_margin/2];
+                    end
+                end
+                
+                if (interference_q(end)+dof_margin/2 < ws_ray.free_variable_range(2)) 
+                    intervals_count = intervals_count + 1;
+                    intervals(end, :) = [interference_q(end)+dof_margin/2, ws_ray.free_variable_range(2)];
+                end                
+                intervals = intervals(1:intervals_count, :);
+            else
+                intervals = [ws_ray.free_variable_range(1) ws_ray.free_variable_range(2)];
+            end
             
-%             intervals = obj.evaluate_intersection(model, workspace_ray, maximum_degree, free_variable_index, free_variable_linear_space, least_squares_matrix_i);
+            
+            
+%             interference_q
+%             intervals
+            
 %             
 %             % Run though and ensure that the identified intervals are
 %             % larger than the tolerance
@@ -156,11 +181,13 @@ classdef InterferenceFreeRayConditionCableCable < WorkspaceRayConditionBase
             A = [B_i(1)-A_i(1), -B_j(1)+A_j(1); B_i(2)-A_i(2), -B_j(2)+A_j(2)];
             b = [A_j(1)-A_i(1); A_j(2)-A_i(2)];
             
-            A_adj = adjoint(A);
+            % Adjoint of A
+            A_adj = [A(2,2) -A(1,2); -A(2,1) A(1,1)];
             x = A_adj*b;
             n1 = x(1);
             n2 = x(2);
-            d = det(A);
+            % Determinant of A
+            d = A(1,1)*A(2,2) - A(1,2)*A(2,1);
             
             ti = n1/d;
             tj = n2/d;
