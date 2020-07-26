@@ -54,7 +54,7 @@ classdef PointWorkspaceSimulator < SimulatorBase
             total_t_in = tic;
             % Runs over the grid and evaluates the workspace condition at
             % each point
-            log_level = CASPRLogLevel.INFO;
+            log_level = CASPRLogLevel.DEBUG;
             is_log = (log_level >= CASPR_log.GetLogLevel());
             
             for i = 1:n_grid_points

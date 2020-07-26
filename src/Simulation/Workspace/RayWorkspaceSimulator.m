@@ -58,7 +58,7 @@ classdef RayWorkspaceSimulator < SimulatorBase
             ray_t_in = tic;
             total_t_in = tic;
             
-            log_level = CASPRLogLevel.INFO;
+            log_level = CASPRLogLevel.DEBUG;
             is_log = (log_level >= CASPR_log.GetLogLevel());
             
             for i = 1:obj.grid.n_dimensions
