@@ -122,7 +122,7 @@ classdef CARDSFlowInterface < CableActuatorInterfaceBase
         function tendonStateSend(obj, cdpr)  
             cable_Names = cell(cdpr.cableModel.numCables,1);
             n_Viapoints = zeros(cdpr.cableModel.numCables,1); 
-            via_array = robotics.ros.msggen.geometry_msgs.Vector3.empty(2*cdpr.cableModel.numSegments,0);
+            via_array = robotics.ros.msggen.geometry_msgs.Vector3.empty(2*cdpr.cableModel.numSegmentsTotal,0);
             % No use for now            
             f = zeros(cdpr.cableModel.numCables,1);            
             % Cables

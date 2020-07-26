@@ -177,7 +177,7 @@ classdef CASPRRVizInterface < CableActuatorInterfaceBase
         
         % publish attachements of segments
         function cableInfoSend(obj, cdpr)
-            cable_vec = reshape(cdpr.cableModel.r_OAs, 6*cdpr.cableModel.numSegments,1);
+            cable_vec = reshape(cdpr.cableModel.r_OAs, 6*cdpr.cableModel.numSegmentsTotal,1);
             obj.cable_msg.Data = cable_vec;
             send(obj.cable_pub, obj.cable_msg);
         end
@@ -200,7 +200,7 @@ classdef CASPRRVizInterface < CableActuatorInterfaceBase
         % publish cable force
         function forceInfoSend(obj, cdpr, f)
             % Create an array to hold the force for every segment          
-            f_seg = zeros(cdpr.cableModel.numSegments, 1);
+            f_seg = zeros(cdpr.cableModel.numSegmentsTotal, 1);
             seg_count = 1;
             % Assign the corresponding force to the segment
             for c = 1:cdpr.numCables

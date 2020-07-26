@@ -55,7 +55,8 @@ classdef SystemModelCables < handle
 
     properties (Dependent)
         numSegmentsMax              % Maximum number of segments out of all of the cables
-        numSegments                 % Total number of segments out of all of the cables
+        numSegmentsTotal            % Total number of segments out of all of the cables
+        
         % Information about cable lengths
         
         lengthsActive               % Vector of lengths for active cables
@@ -95,7 +96,7 @@ classdef SystemModelCables < handle
             ck.numLinks = bodiesModel.numLinks; 
             ck.modelOptions = model_options;
             
-            ck.r_OAs = MatrixOperations.Initialise([6,ck.numSegments],ck.isSymbolic);
+            ck.r_OAs = MatrixOperations.Initialise([6,ck.numSegmentsTotal],ck.isSymbolic);
             ck.V = MatrixOperations.Initialise([ck.numCables,6*ck.numLinks], ck.isSymbolic);
             ck.K = MatrixOperations.Initialise([ck.numCables,ck.numCables], ck.isSymbolic);
             ck.lengths = MatrixOperations.Initialise([ck.numCables,1], ck.isSymbolic);
@@ -230,11 +231,6 @@ classdef SystemModelCables < handle
             ind_active = 1;
             cable_indices_active = zeros(obj.numCablesActive, 1);
             for i = 1:obj.numCables
-%                 for j = 1:obj.cables{i}.numSegments
-%                     obj.cables{i}.segments{j}.attachments{1}.directUpdate(obj.r_OAs(1:3,segment_count));
-%                     obj.cables{i}.segments{j}.attachments{2}.directUpdate(obj.r_OAs(4:6,segment_count));
-%                     segment_count = segment_count + 1;
-%                 end
                 if (obj.cables{i}.isActive)
                     num_cables_active = num_cables_active + 1;
                     cable_indices_active(ind_active) = i;
@@ -273,7 +269,7 @@ classdef SystemModelCables < handle
             end
         end
         
-        function value = get.numSegments(obj)
+        function value = get.numSegmentsTotal(obj)
             value = 0;
             for i = 1:obj.numCables
                 value = value + obj.cables{i}.numSegments;
@@ -539,89 +535,6 @@ classdef SystemModelCables < handle
                 end
             end   
         end
-        
-        
-%         % Update function for preparation of compilation
-%         % - Symbolic expressions are calculated for the variables
-%         % - Simplification takes a long time, but it makes compilation
-%         % easier and more chance to be successfully done
-%         function symbolic_update(obj, bodyModel)
-%             CASPR_log.Assert(bodyModel.numLinks == obj.numLinks, 'Number of links between the cable and body kinematics must be consistent');
-%             is_symbolic = true;
-%             
-%             % Set each cable's kinematics (absolute attachment locations
-%             % and segment vectors) and Determine V
-%             obj.V = MatrixOperations.Initialise([obj.numCables,6*obj.numLinks],is_symbolic);
-%             obj.K = MatrixOperations.Initialise([obj.numCables,obj.numCables],is_symbolic);
-%             obj.r_OAs = MatrixOperations.Initialise([6,obj.numSegments],is_symbolic);
-%             
-%             CASPR_log.Info('Calculating V...');            
-%             obj.numCablesActive = 0;
-%             segment_count = 1;
-%             for i = 1:obj.numCables
-%                 obj.cables{i}.update(bodyModel);
-%                 cable = obj.cables{i};
-%                 num_cable_segments = cable.numSegments;
-%                 
-%                 for j = 1:num_cable_segments
-%                     CASPR_log.Info(sprintf('Cable: %d\tSegment: %d', i, j));
-%                     segment = cable.segments{j};
-%                     % Update V elements only when segments are on different
-%                     % links
-%                     if segment.attached_links(1)~=segment.attached_links(2)
-%                         % Starting point
-%                         k = segment.attached_links(1);
-%                         if k > 0
-%                             V_ijk_T = -bodyModel.bodies{k}.R_0k.'*segment.segmentVector/segment.length;
-%                             V_ijk_T = simplify(V_ijk_T, 'Step', k*20);
-%                             % - Translation
-%                             obj.V(i, 6*k-5:6*k-3) = obj.V(i, 6*k-5:6*k-3) + V_ijk_T.';
-%                             % - Orientation
-%                             obj.V(i, 6*k-2:6*k) = obj.V(i, 6*k-2:6*k) + ...
-%                                 cross(segment.attachments{1}.r_GA, V_ijk_T).';                          
-%                         end
-%                         
-%                         % Ending point
-%                         k = segment.attached_links(2);
-%                         if k > 0
-%                             V_ijk_T = bodyModel.bodies{k}.R_0k.'*segment.segmentVector/segment.length;
-%                             V_ijk_T = simplify(V_ijk_T, 'Step', k*20);
-%                             % - Translation
-%                             obj.V(i, 6*k-5:6*k-3) = obj.V(i, 6*k-5:6*k-3) + V_ijk_T.';
-%                             % - Orientation
-%                             obj.V(i, 6*k-2:6*k) = obj.V(i, 6*k-2:6*k) + ...
-%                                 cross(segment.attachments{2}.r_GA, V_ijk_T).';                           
-%                         end
-%                     end
-%                     % Store r_OA
-%                     obj.r_OAs(:,segment_count) = simplify([segment.attachments{1}.r_OA;segment.attachments{2}.r_OA],'Step',10);                    
-%                     segment_count = segment_count + 1;
-%                 end
-%                 obj.K(i,i) = obj.cables{i}.K;
-% 
-%                 if (cable.isActive)
-%                     obj.numCablesActive = obj.numCablesActive + 1;
-%                 end 
-%             end 
-%             CASPR_log.Info('Simplifying V...');
-%             obj.V = simplify(obj.V, 'Step', 20);           
-%                        
-%             ind_active = 1;
-%             obj.cableIndicesActive = zeros(obj.numCablesActive, 1);            
-%             obj.lengths = MatrixOperations.Initialise([obj.numCables,1],is_symbolic);
-%             for i = 1:obj.numCables
-%                 % Active cable
-%                 if (obj.cables{i}.isActive)
-%                     obj.cableIndicesActive(ind_active) = i;
-%                     ind_active = ind_active + 1;                    
-%                 end               
-%                 obj.lengths(i) = obj.cables{i}.length;                
-%             end               
-%             
-%             if(bodyModel.occupied.hessian)
-%                 obj.updateHessian(bodyModel);
-%             end
-%         end
         
         % set update function
         function set_update_fns(obj) 
