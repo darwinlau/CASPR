@@ -242,17 +242,17 @@ classdef RayWorkspace < handle
             if size(dofs_to_plot, 2) == 3 %3D plot
                 for i = 1:size(variables_matched_index,1)
                     if plot_data{variables_matched_index(i),end} == dofs_to_plot(1)
-                        x = plot_data{variables_matched_index(i),1};
-                        y = ones(1,2)*plot_data{variables_matched_index(i),2};
-                        z = ones(1,2)*plot_data{variables_matched_index(i),3};
+                        x = plot_data{variables_matched_index(i),1}';
+                        y = ones(1,2)*plot_data{variables_matched_index(i),2}';
+                        z = ones(1,2)*plot_data{variables_matched_index(i),3}';
                     elseif plot_data{variables_matched_index(i),end} == dofs_to_plot(2)
-                        x = ones(1,2)*plot_data{variables_matched_index(i),1};
-                        y = plot_data{variables_matched_index(i),2};
-                        z = ones(1,2)*plot_data{variables_matched_index(i),3};
+                        x = ones(1,2)*plot_data{variables_matched_index(i),1}';
+                        y = plot_data{variables_matched_index(i),2}';
+                        z = ones(1,2)*plot_data{variables_matched_index(i),3}';
                     elseif plot_data{variables_matched_index(i),end} == dofs_to_plot(3)
-                        x = ones(1,2)*plot_data{variables_matched_index(i),1};
-                        y = ones(1,2)*plot_data{variables_matched_index(i),2};
-                        z = plot_data{variables_matched_index(i),3};
+                        x = ones(1,2)*plot_data{variables_matched_index(i),1}';
+                        y = ones(1,2)*plot_data{variables_matched_index(i),2}';
+                        z = plot_data{variables_matched_index(i),3}';
                     end
                     plot3(x,y,z,'k');
                     % plotting title and other stuff, nothing important
@@ -268,11 +268,11 @@ classdef RayWorkspace < handle
             elseif size(dofs_to_plot, 2) == 2 %2D plot
                 for i = 1:size(variables_matched_index,1)
                     if plot_data{variables_matched_index(i),end} == dofs_to_plot(1)
-                        x = plot_data{variables_matched_index(i),1};
-                        y = ones(1,2)*plot_data{variables_matched_index(i),2};
+                        x = plot_data{variables_matched_index(i),1}';
+                        y = ones(1,2)*plot_data{variables_matched_index(i),2}';
                     elseif plot_data{variables_matched_index(i),end} == dofs_to_plot(2)
-                        x = ones(1,2)*plot_data{variables_matched_index(i),1};
-                        y = plot_data{variables_matched_index(i),2};
+                        x = ones(1,2)*plot_data{variables_matched_index(i),1}';
+                        y = plot_data{variables_matched_index(i),2}';
                     end
                     plot(x,y,'k');
                     xlim(1.005*[obj.model.bodyModel.q_min(dofs_to_plot(1)),obj.model.bodyModel.q_max(dofs_to_plot(1))]);
@@ -291,7 +291,6 @@ classdef RayWorkspace < handle
     end
     
     methods(Access = private)
-        
         % function to create the node_list variable for point representation
         function node_list = create_point_node_list(obj)
             intersected_ray = {};
@@ -393,9 +392,7 @@ classdef RayWorkspace < handle
         
         % function to create the node_list variable for ray representation
         function node_list = create_ray_node_list(obj)
-            
             CASPR_log.Info('Creating ray workspace ray node list.');
-            
             % covert the input conditions to same format as the ray
             % condition
             number_node = 0;
@@ -411,7 +408,7 @@ classdef RayWorkspace < handle
                             node_list{number_node,k} =  obj.rays{i}.fixed_variables(kk);
                             kk = kk + 1;
                         else
-                            node_list{number_node,k} =  obj.rays{i}.interval;
+                            node_list{number_node,k} =  obj.rays{i}.intervals;
                         end
                     end
                     node_list{number_node,end} = obj.rays{i}.free_variable_index;
@@ -469,122 +466,109 @@ classdef RayWorkspace < handle
             end
         end
         
-    end
-end
-
-% % function to handle numerous inputs to processable inputs
-% function output_types = input_conversion(input)
-%     num_input= size(input,2);
-% 
-%     if num_input == 1 && ~iscell(input)
-%         input = mat2cell(input,1);
-%     end
-%     for i = 1:num_input
-%         output_types(i) = input{i}.type;
-%     end
-% end
-
-% function to check intersection  and distance between two co-plannar rays
-function [intersected_point,min_dist] = check_intersection(ray_1,ray_2)
-    % check if co-planar
-    for i = 1:size(ray_2,2)-1
-        if i == ray_2{end} || i == ray_1{end}
-            intersected_point(i) = Inf;
-            co_planar_flag = 1;
-        else
-            pt_B = ray_2{i};
-            pt_A = ray_1{i};
-            if pt_A ~= pt_B
-                co_planar_flag = 0;
-                intersected_point = [];
-                min_dist = [];
-                break
-            else
-                co_planar_flag = 1;
-                intersected_point(i) = pt_A;
-            end
-        end
-    end
-
-    % find intersected point
-    if (co_planar_flag)
-        seg_A_x = ray_1{ray_1{end}};
-        seg_A_y = ones(1,2)*ray_1{ray_2{end}};
-
-        seg_B_x = ones(1,2)*ray_2{ray_1{end}};
-        seg_B_y = ray_2{ray_2{end}};
-        %     clf
-        %     plot(seg_A_x,seg_A_y);hold on
-        %     plot(seg_B_x,seg_B_y);
-
-        [x_intersected,y_intersected] = polyxpoly(seg_A_x,seg_A_y,seg_B_x,seg_B_y);
-        int_coor = [x_intersected,y_intersected];
-
-
-        if ~isempty(x_intersected) && ~isempty(y_intersected)
-            min_dist = min([abs(seg_A_x(1)-x_intersected),abs(seg_A_x(2)-x_intersected),...
-                abs(seg_B_y(1)-y_intersected),abs(seg_B_y(2)-y_intersected)]);
-
-            if ray_1{end} > ray_2{end}
-                int_coor = fliplr(int_coor);
-            end
-            j = 1;
-            for i = 1:size(intersected_point,2)
-                if intersected_point(i) == Inf
-                    intersected_point(i) = int_coor(j);
-                    j = j + 1;
+        % function to check intersection  and distance between two co-plannar rays
+        function [intersected_point,min_dist] = check_intersection(ray_1,ray_2)
+            % check if co-planar
+            for i = 1:size(ray_2,2)-1
+                if i == ray_2{end} || i == ray_1{end}
+                    intersected_point(i) = Inf;
+                    co_planar_flag = 1;
+                else
+                    pt_B = ray_2{i};
+                    pt_A = ray_1{i};
+                    if pt_A ~= pt_B
+                        co_planar_flag = 0;
+                        intersected_point = [];
+                        min_dist = [];
+                        break
+                    else
+                        co_planar_flag = 1;
+                        intersected_point(i) = pt_A;
+                    end
                 end
             end
-        else
-            min_dist = [];intersected_point = [];
+            
+            % find intersected point
+            if (co_planar_flag)
+                seg_A_x = ray_1{ray_1{end}};
+                seg_A_y = ones(1,2)*ray_1{ray_2{end}};
+                
+                seg_B_x = ones(1,2)*ray_2{ray_1{end}};
+                seg_B_y = ray_2{ray_2{end}};
+                %     clf
+                %     plot(seg_A_x,seg_A_y);hold on
+                %     plot(seg_B_x,seg_B_y);
+                
+                [x_intersected,y_intersected] = polyxpoly(seg_A_x,seg_A_y,seg_B_x,seg_B_y);
+                int_coor = [x_intersected,y_intersected];
+                
+                
+                if ~isempty(x_intersected) && ~isempty(y_intersected)
+                    min_dist = min([abs(seg_A_x(1)-x_intersected),abs(seg_A_x(2)-x_intersected),...
+                        abs(seg_B_y(1)-y_intersected),abs(seg_B_y(2)-y_intersected)]);
+                    
+                    if ray_1{end} > ray_2{end}
+                        int_coor = fliplr(int_coor);
+                    end
+                    j = 1;
+                    for i = 1:size(intersected_point,2)
+                        if intersected_point(i) == Inf
+                            intersected_point(i) = int_coor(j);
+                            j = j + 1;
+                        end
+                    end
+                else
+                    min_dist = [];intersected_point = [];
+                end
+            end
+        end
+        
+        % function to plot two color bar graph
+        function graph = plot2ColorGraph(G,node_color_matrix,edge_color_matrix,title_str)
+            figure
+            for i = 1:2
+                ax(i) = axes;
+                if i == 1
+                    graph = plot(G,'MarkerSize',2);
+                    graph.NodeCData = node_color_matrix';
+                    graph.EdgeColor = 'none';
+                else
+                    graph = plot(G,'MarkerSize',2);
+                    graph.NodeColor = 'none';
+                    graph.EdgeCData = edge_color_matrix';
+                end
+            end
+            linkaxes([ax(1),ax(2)]);
+            ax(2).Visible = 'off';
+            ax(2).XTick = [];
+            ax(2).YTick = [];
+            colormap(ax(1),cool)
+            colormap(ax(2),autumn);
+            set([ax(1),ax(2)],'Position',[.17 .11 .685 .815]);
+            cb1 = colorbar(ax(1),'Position',[.14 .11 .03 .815]);
+            cb2 = colorbar(ax(2),'Position',[.84 .11 .03 .815]);
+            dim = [.42 .7 .3 .3];
+            annotation('textbox',dim,'EdgeColor','none','String',title_str,'FitBoxToText','on');
+            
+        end
+        
+        % function to plot one color bar graph
+        function graph = plot1ColorGraph(G,node_color,edge_color,title_str)
+            figure
+            graph = plot(G,'MarkerSize',2);
+            if size(node_color,1) == 1
+                graph.NodeCData = node_color';
+            else
+                graph.NodeColor = node_color;
+            end
+            if size(edge_color,2) == 1
+                graph.EdgeCData = edge_color';
+            else
+                graph.EdgeColor = edge_color;
+            end
+            colormap(autumn);
+            colorbar;
+            title(title_str);
         end
     end
-end
-
-% function to plot two color bar graph
-function graph = plot2ColorGraph(G,node_color_matrix,edge_color_matrix,title_str)
-    figure
-    for i = 1:2
-        ax(i) = axes;
-        if i == 1
-            graph = plot(G,'MarkerSize',2);
-            graph.NodeCData = node_color_matrix';
-            graph.EdgeColor = 'none';
-        else
-            graph = plot(G,'MarkerSize',2);
-            graph.NodeColor = 'none';
-            graph.EdgeCData = edge_color_matrix';
-        end
-    end
-    linkaxes([ax(1),ax(2)]);
-    ax(2).Visible = 'off';
-    ax(2).XTick = [];
-    ax(2).YTick = [];
-    colormap(ax(1),cool)
-    colormap(ax(2),autumn);
-    set([ax(1),ax(2)],'Position',[.17 .11 .685 .815]);
-    cb1 = colorbar(ax(1),'Position',[.14 .11 .03 .815]);
-    cb2 = colorbar(ax(2),'Position',[.84 .11 .03 .815]);
-    dim = [.42 .7 .3 .3];
-    annotation('textbox',dim,'EdgeColor','none','String',title_str,'FitBoxToText','on');
-
-end
-
-% function to plot one color bar graph
-function graph = plot1ColorGraph(G,node_color,edge_color,title_str)
-    figure
-    graph = plot(G,'MarkerSize',2);
-    if size(node_color,1) == 1
-        graph.NodeCData = node_color';
-    else
-        graph.NodeColor = node_color;
-    end
-    if size(edge_color,2) == 1
-        graph.EdgeCData = edge_color';
-    else
-        graph.EdgeColor = edge_color;
-    end
-    colormap(autumn);
-    colorbar;
-    title(title_str);
 end

@@ -15,7 +15,7 @@ classdef RayWorkspaceElement < handle
         free_variable_index     % The index that is left free
         free_variable_range
         numDofs                 % The number of degrees of freedom associated with this ray
-        interval                % The workspace interval  
+        intervals               % The workspace intervals
     end
     properties (Hidden)
     end
@@ -27,7 +27,7 @@ classdef RayWorkspaceElement < handle
             wp.free_variable_range  =   free_variable_range;
             wp.numDofs              =   model.numDofs;
             wp.conditions           =   conditions;
-            interval_combined       = free_variable_range;
+            interval_combined       =   free_variable_range;
             
             % For each condition
             for c_i = 1:size(conditions,2)
@@ -56,7 +56,7 @@ classdef RayWorkspaceElement < handle
                     break;
                 end
             end
-            wp.interval = interval_combined;
+            wp.intervals = interval_combined;
         end
     end
 end
