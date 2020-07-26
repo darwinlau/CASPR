@@ -21,134 +21,181 @@ classdef MinCableCableDistanceMetric < WorkspaceMetricBase
         
         % Evaluate function implementation
         function v = evaluateFunction(obj,dynamics) % default of obj is itself
-            % pick up a seg. s1 from cable n and the other seg. s2 from cable m (may or may not same)
-            % the total munber of calculation for an input model at one worksapce point
-            sumcal_model = 0.5 * dynamics.numCables * (1 + dynamics.numCables);
-            obj.mindis_mn = zeros(1, sumcal_model);
-            % calculate min distance of these two segments 
-            for ind_i = 1:dynamics.numCables  
-                for ind_j = 1:ind_i
-                    % in the same cable, calculate the min distance betweem different seg. of this cable 
-                    if ind_j == ind_i
-                        % if one cable owns seg. less than 3 , i.e., one cable comprises 2 seg. or 1 seg., the calculation is trivial
-                        if dynamics.cableModel.cables{ind_i}.numSegments < 3
-                            matsamecable = +inf;
-                        else
-                            sumcal_samecable = 0.5 * (dynamics.cableModel.cables{ind_i}.numSegments - 1) * (dynamics.cableModel.cables{ind_i}.numSegments - 2);
-                            matsamecable = zeros(1, sumcal_samecable);
-                            i = 1;
-                            % to obtain the abs. location expressed in the frame {F_O} of 2 end points of s1 seg.
-                            for s1 = 1:dynamics.cableModel.cables{ind_i}.numSegments % s1 s2 is a index of segment (scalar)
-                                OA_s1 = dynamics.cableModel.cables{ind_i}.segments{s1}.attachments{1}.r_OA; % 1 refers to 'from'
-                                OB_s1 = dynamics.cableModel.cables{ind_i}.segments{s1}.attachments{2}.r_OA; % 2 refers to 'to'
-                                for s2 = 1:s1
-                                    % to obtain the abs. location expressed in the frame {F_O} of 2 end points of s2 seg
-                                    if s2 ~= s1 && s2 ~= s1 - 1 % the calculation between the same seg. and 2 adjacent seg. is trivial
-                                       OA_s2 = dynamics.cableModel.cables{ind_i}.segments{s2}.attachments{1}.r_OA; % 1 refers to 'from'
-                                       OB_s2 = dynamics.cableModel.cables{ind_i}.segments{s2}.attachments{2}.r_OA; % 2 refers to 'to'
-                                       %by Geometric Method
-                                        AB_s1 = OB_s1 - OA_s1;
-                                        AB_s2 = OB_s2 - OA_s2;
-                                        if all(AB_s1 == 0)
-                                            str_a = num2str(OA_s1');
-                                            str = strcat('The length of segment starting from', ' [', str_a, ']', ' is zero!');
-                                            CASPR_log.Warn(str); 
-                                            d = obj.DistancePointAndSegment(OA_s1, [OA_s2, OB_s2]);
-                                        elseif all(AB_s2 == 0)
-                                            str_a = num2str(OA_s2');
-                                            str = strcat('The length of segment starting from', ' [', str_a, ']', ' is zero!');
-                                            CASPR_log.Warn(str);   
-                                            d = obj.DistancePointAndSegment(OA_s2, [OA_s1, OB_s1]);
-                                        else
-                                            % non-zero seg. length
-                                            v1a = OA_s2 - OA_s1;
-                                            s1_vec = [OA_s1, OB_s1];  % s1_vec is a 3X2 vector
-                                            s2_vec = [OA_s2, OB_s2];  % s2_vec is a 3X2 vector
-                                            g = dot(v1a,cross(AB_s1,AB_s2)); % judge whether 2 segs are coplanar or not
-                                            g = round(g, 6); % round off the error to make sure g is integer 1/11
-                                                             % add 6 to round off the real numerical error 30/12
-                                            if g == 0 % coplanar 
-                                                d = obj.DistanceSegmentsUniplanar(s1_vec, s2_vec); % obj.DistanceSegmentsUniplanar(s1_vec, s2_vec)
-                                            else
-                                                d = obj.DistanceSegmentsNonUniplanar(s1_vec, s2_vec); % with judging 
-                                            end
-                                        end
-                                        % store the min distance of seg. s1 and seg. s2 
-                                        % among the same cable n (m == n)
-                                        matsamecable(i) = d;
-                                        i = i + 1;
-                                    end
-                                end
-                            end
-                        end
-                        % find the minimum value of min distance of the same cable of the input
-                        % model, which means the minimum value of min distance of different segments of one cable
-                        diag = 0.5 * ind_i * (ind_i + 1);
-                        obj.mindis_mn(diag) = min(min(matsamecable));
-                    % two cables selected in advance are different
-                    elseif ind_j ~= ind_i 
-                        matdiffcable = zeros(dynamics.cableModel.cables{ind_i}.numSegments, dynamics.cableModel.cables{ind_j}.numSegments);
-                        for s1 = 1:dynamics.cableModel.cables{ind_i}.numSegments %s1 s2 is a index of segment (scalar)
-                            OA_s1 = dynamics.cableModel.cables{ind_i}.segments{s1}.attachments{1}.r_OA; % 1 refers to 'from'
-                            OB_s1 = dynamics.cableModel.cables{ind_i}.segments{s1}.attachments{2}.r_OA; % 2 refers to 'to'
-                            for s2 = 1:dynamics.cableModel.cables{ind_j}.numSegments
-                                OA_s2 = dynamics.cableModel.cables{ind_j}.segments{s2}.attachments{1}.r_OA;
-                                OB_s2 = dynamics.cableModel.cables{ind_j}.segments{s2}.attachments{2}.r_OA;
-                                % by Geometric Method
-                                AB_s1 = OB_s1 - OA_s1; % from A to B
-                                AB_s2 = OB_s2 - OA_s2;
-                                % v1(v2) and v1_temp(v2_temp) are indentical
-                                % v1_temp = dynamics.cableModel.cables{n}.segments{s1}.segmentVector
-                                % v2_temp = dynamics.cableModel.cables{m}.segments{s2}.segmentVector
-                                % warning in case of 0 cable/seg. length [30/12]
-                                if all(AB_s1 == 0)
-                                    str_a = num2str(OA_s1');
-                                    str = strcat('The length of segment starting from', ' [', str_a, ']', ' is zero!');
-                                    CASPR_log.Warn(str); 
-                                    d = obj.DistancePointAndSegment(OA_s1, [OA_s2, OB_s2]);
-                                elseif all(AB_s2 == 0)
-                                    str_a = num2str(OA_s2');
-                                    str = strcat('The length of segment starting from', ' [', str_a, ']', ' is zero!');
-                                    CASPR_log.Warn(str);   
-                                    d = obj.DistancePointAndSegment(OA_s2, [OA_s1, OB_s1]);
-                                else
-                                    % non-zero seg. length
-                                    v1a = OA_s2 - OA_s1;
-                                    s1_vec = [OA_s1, OB_s1];  % s1_vec is a 3X2 vector
-                                    s2_vec = [OA_s2, OB_s2];  % s2_vec is a 3X2 vector
-                                    g = dot(v1a,cross(AB_s1,AB_s2)); % judge whether 2 segs are coplanar or not
-                                    g = round(g, 6); % round off the error to make sure g is integer 1/11
-                                                     % add 6 to round off the real numerical error 30/12
-                                    if g == 0 % coplanar 
-                                        d = obj.DistanceSegmentsUniplanar(s1_vec, s2_vec);
-                                    else
-                                        d = obj.DistanceSegmentsNonUniplanar(s1_vec, s2_vec); % with judging 
-                                    end
-                                end
-                                % store the min distance of seg. s1 and seg. s2 
-                                % among different cable n and cable m
-                                matdiffcable(s1, s2) = d;                               
-                            end
-                        end
-                        % find the minimum value of min distance of two different cables
-                        % among all cables of the input model
-                        belowdiag = 0.5 * ind_i * (ind_i - 1) + ind_j;
-                        obj.mindis_mn(belowdiag) = min(min(matdiffcable));
+%             % pick up a seg. s1 from cable n and the other seg. s2 from cable m (may or may not same)
+%             % the total munber of calculation for an input model at one worksapce point
+%             sumcal_model = 0.5 * dynamics.numCables * (1 + dynamics.numCables);
+%             obj.mindis_mn = zeros(1, sumcal_model);
+%             
+            v = Inf;
+
+            % This method uses the compiled r_OAs matrix to check for
+            % interference
+            
+            % Go through every cables and segments
+            cable_combinations = nchoosek(1:size(dynamics.cableModel.r_OAs, 2), 2);
+            num_cable_combs = size(cable_combinations, 1);
+            
+            for k = 1:num_cable_combs
+                i = cable_combinations(k, 1);
+                j = cable_combinations(k, 2);
+                
+                A_i = dynamics.cableModel.r_OAs(1:3, i);
+                B_i = dynamics.cableModel.r_OAs(4:6, i);
+                A_j = dynamics.cableModel.r_OAs(1:3, j);
+                B_j = dynamics.cableModel.r_OAs(4:6, j);
+                
+                AB_i = B_i - A_i; % from A to B
+                AB_j = B_j - A_j;
+                
+                % warning in case of 0 cable/seg. length [30/12]
+                if all(AB_i == 0)
+                    CASPR_log.Warn(sprintf('The length of segment starting from [%s] is zero!', num2str(A_i')));
+                    d = obj.DistancePointAndSegment(A_i, [A_j, B_j]);
+                elseif all(AB_j == 0)
+                    CASPR_log.Warn(sprintf('The length of segment starting from [%s] is zero!', num2str(A_j')));
+                    CASPR_log.Warn(str);
+                    d = obj.DistancePointAndSegment(A_j, [A_i, B_i]);
+                else
+                    % non-zero seg. length
+                    v1a = A_j - A_i;
+                    s1_vec = [A_i, B_i];  % s1_vec is a 3X2 vector
+                    s2_vec = [A_j, B_j];  % s2_vec is a 3X2 vector
+                    g = dot(v1a,cross(AB_i,AB_j)); % judge whether 2 segs are coplanar or not
+                    g = round(g, 6); % round off the error to make sure g is integer 1/11
+                    % add 6 to round off the real numerical error 30/12
+                    if g == 0 % coplanar
+                        d = obj.DistanceSegmentsUniplanar(s1_vec, s2_vec);
+                    else
+                        d = obj.DistanceSegmentsNonUniplanar(s1_vec, s2_vec); % with judging
                     end
                 end
-            end 
-            % find the min distance among all cables of the input model
-            v = min(min(obj.mindis_mn)); 
-            % obj.mindis_mn in the form of a lower triangular matrix
-            temp = zeros(dynamics.numCables, dynamics.numCables);
-            count = 1;
-            for i = 1: dynamics.numCables
-                for j = 1: i
-                temp(i, j) = obj.mindis_mn(count);
-                count = count + 1;
-                end
+                v = min(v, d);
             end
-            obj.mindis_mn = temp;
+%             
+%             % calculate min distance of these two segments 
+%             for ind_i = 1:dynamics.numCables  
+%                 for ind_j = 1:ind_i
+%                     % in the same cable, calculate the min distance betweem different seg. of this cable 
+%                     if ind_j == ind_i
+%                         % if one cable owns seg. less than 3 , i.e., one cable comprises 2 seg. or 1 seg., the calculation is trivial
+%                         if dynamics.cableModel.cables{ind_i}.numSegments < 3
+%                             matsamecable = +inf;
+%                         else
+%                             sumcal_samecable = 0.5 * (dynamics.cableModel.cables{ind_i}.numSegments - 1) * (dynamics.cableModel.cables{ind_i}.numSegments - 2);
+%                             matsamecable = zeros(1, sumcal_samecable);
+%                             i = 1;
+%                             % to obtain the abs. location expressed in the frame {F_O} of 2 end points of s1 seg.
+%                             for s1 = 1:dynamics.cableModel.cables{ind_i}.numSegments % s1 s2 is a index of segment (scalar)
+%                                 A_i = dynamics.cableModel.cables{ind_i}.segments{s1}.attachments{1}.r_OA; % 1 refers to 'from'
+%                                 B_i = dynamics.cableModel.cables{ind_i}.segments{s1}.attachments{2}.r_OA; % 2 refers to 'to'
+%                                 for s2 = 1:s1
+%                                     % to obtain the abs. location expressed in the frame {F_O} of 2 end points of s2 seg
+%                                     if s2 ~= s1 && s2 ~= s1 - 1 % the calculation between the same seg. and 2 adjacent seg. is trivial
+%                                        A_j = dynamics.cableModel.cables{ind_i}.segments{s2}.attachments{1}.r_OA; % 1 refers to 'from'
+%                                        B_j = dynamics.cableModel.cables{ind_i}.segments{s2}.attachments{2}.r_OA; % 2 refers to 'to'
+%                                        %by Geometric Method
+%                                         AB_i = B_i - A_i;
+%                                         AB_j = B_j - A_j;
+%                                         if all(AB_i == 0)
+%                                             str_a = num2str(A_i');
+%                                             str = strcat('The length of segment starting from', ' [', str_a, ']', ' is zero!');
+%                                             CASPR_log.Warn(str); 
+%                                             d = obj.DistancePointAndSegment(A_i, [A_j, B_j]);
+%                                         elseif all(AB_j == 0)
+%                                             str_a = num2str(A_j');
+%                                             str = strcat('The length of segment starting from', ' [', str_a, ']', ' is zero!');
+%                                             CASPR_log.Warn(str);   
+%                                             d = obj.DistancePointAndSegment(A_j, [A_i, B_i]);
+%                                         else
+%                                             % non-zero seg. length
+%                                             v1a = A_j - A_i;
+%                                             s1_vec = [A_i, B_i];  % s1_vec is a 3X2 vector
+%                                             s2_vec = [A_j, B_j];  % s2_vec is a 3X2 vector
+%                                             g = dot(v1a,cross(AB_i,AB_j)); % judge whether 2 segs are coplanar or not
+%                                             g = round(g, 6); % round off the error to make sure g is integer 1/11
+%                                                              % add 6 to round off the real numerical error 30/12
+%                                             if g == 0 % coplanar 
+%                                                 d = obj.DistanceSegmentsUniplanar(s1_vec, s2_vec); % obj.DistanceSegmentsUniplanar(s1_vec, s2_vec)
+%                                             else
+%                                                 d = obj.DistanceSegmentsNonUniplanar(s1_vec, s2_vec); % with judging 
+%                                             end
+%                                         end
+%                                         % store the min distance of seg. s1 and seg. s2 
+%                                         % among the same cable n (m == n)
+%                                         matsamecable(i) = d;
+%                                         i = i + 1;
+%                                     end
+%                                 end
+%                             end
+%                         end
+%                         % find the minimum value of min distance of the same cable of the input
+%                         % model, which means the minimum value of min distance of different segments of one cable
+%                         diag = 0.5 * ind_i * (ind_i + 1);
+%                         obj.mindis_mn(diag) = min(min(matsamecable));
+%                     % two cables selected in advance are different
+%                     elseif ind_j ~= ind_i 
+%                         matdiffcable = zeros(dynamics.cableModel.cables{ind_i}.numSegments, dynamics.cableModel.cables{ind_j}.numSegments);
+%                         for s1 = 1:dynamics.cableModel.cables{ind_i}.numSegments %s1 s2 is a index of segment (scalar)
+%                             A_i = dynamics.cableModel.cables{ind_i}.segments{s1}.attachments{1}.r_OA; % 1 refers to 'from'
+%                             B_i = dynamics.cableModel.cables{ind_i}.segments{s1}.attachments{2}.r_OA; % 2 refers to 'to'
+%                             for s2 = 1:dynamics.cableModel.cables{ind_j}.numSegments
+%                                 A_j = dynamics.cableModel.cables{ind_j}.segments{s2}.attachments{1}.r_OA;
+%                                 B_j = dynamics.cableModel.cables{ind_j}.segments{s2}.attachments{2}.r_OA;
+%                                 % by Geometric Method
+%                                 AB_i = B_i - A_i; % from A to B
+%                                 AB_j = B_j - A_j;
+%                                 % v1(v2) and v1_temp(v2_temp) are indentical
+%                                 % v1_temp = dynamics.cableModel.cables{n}.segments{s1}.segmentVector
+%                                 % v2_temp = dynamics.cableModel.cables{m}.segments{s2}.segmentVector
+%                                 % warning in case of 0 cable/seg. length [30/12]
+%                                 if all(AB_i == 0)
+%                                     str_a = num2str(A_i');
+%                                     str = strcat('The length of segment starting from', ' [', str_a, ']', ' is zero!');
+%                                     CASPR_log.Warn(str); 
+%                                     d = obj.DistancePointAndSegment(A_i, [A_j, B_j]);
+%                                 elseif all(AB_j == 0)
+%                                     str_a = num2str(A_j');
+%                                     str = strcat('The length of segment starting from', ' [', str_a, ']', ' is zero!');
+%                                     CASPR_log.Warn(str);   
+%                                     d = obj.DistancePointAndSegment(A_j, [A_i, B_i]);
+%                                 else
+%                                     % non-zero seg. length
+%                                     v1a = A_j - A_i;
+%                                     s1_vec = [A_i, B_i];  % s1_vec is a 3X2 vector
+%                                     s2_vec = [A_j, B_j];  % s2_vec is a 3X2 vector
+%                                     g = dot(v1a,cross(AB_i,AB_j)); % judge whether 2 segs are coplanar or not
+%                                     g = round(g, 6); % round off the error to make sure g is integer 1/11
+%                                                      % add 6 to round off the real numerical error 30/12
+%                                     if g == 0 % coplanar 
+%                                         d = obj.DistanceSegmentsUniplanar(s1_vec, s2_vec);
+%                                     else
+%                                         d = obj.DistanceSegmentsNonUniplanar(s1_vec, s2_vec); % with judging 
+%                                     end
+%                                 end
+%                                 % store the min distance of seg. s1 and seg. s2 
+%                                 % among different cable n and cable m
+%                                 matdiffcable(s1, s2) = d;                               
+%                             end
+%                         end
+%                         % find the minimum value of min distance of two different cables
+%                         % among all cables of the input model
+%                         belowdiag = 0.5 * ind_i * (ind_i - 1) + ind_j;
+%                         obj.mindis_mn(belowdiag) = min(min(matdiffcable));
+%                     end
+%                 end
+%             end 
+%             % find the min distance among all cables of the input model
+%             v = min(min(obj.mindis_mn)); 
+%             % obj.mindis_mn in the form of a lower triangular matrix
+%             temp = zeros(dynamics.numCables, dynamics.numCables);
+%             count = 1;
+%             for i = 1: dynamics.numCables
+%                 for j = 1: i
+%                 temp(i, j) = obj.mindis_mn(count);
+%                 count = count + 1;
+%                 end
+%             end
+%             obj.mindis_mn = temp;
         end
     end
     
