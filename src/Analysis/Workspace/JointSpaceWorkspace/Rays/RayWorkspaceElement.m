@@ -16,7 +16,7 @@ classdef RayWorkspaceElement < handle
         freeVariableRange       % Range of the free variable values
         numDofs                 % The number of degrees of freedom associated with this ray
         intervals               % The workspace intervals
-        compTime                
+        compTime                % Computational time to compute the ray
     end
     properties (Hidden)
     end
@@ -28,13 +28,15 @@ classdef RayWorkspaceElement < handle
             wp.freeVariableRange    =   free_variable_range;
             wp.numDofs              =   model.numDofs;
             wp.conditions           =   conditions;
+            
+            comp_time               =   0;
             interval_combined       =   free_variable_range;
             
             % For each condition
             for c_i = 1:size(conditions,2)
-                
                 % New condition
-                [condition_intervals, ~, comp_time] = conditions{c_i}.evaluate(model, wp);
+                [condition_intervals, ~, comp_time_i] = conditions{c_i}.evaluate(model, wp);
+                comp_time = comp_time + comp_time_i;
                 
                 if(~isempty(condition_intervals))
                     % There may be multiple intervals
@@ -58,6 +60,7 @@ classdef RayWorkspaceElement < handle
                 end
             end
             wp.intervals = interval_combined;
+            wp.compTime = comp_time;
         end
     end
 end

@@ -15,10 +15,7 @@ classdef PointWorkspaceSimulator < SimulatorBase
     end
     
     properties (SetAccess = private)
-        comp_time_total             % Total time to compute workspace
-        comp_time_evaluation        % Time to just evaluate the workspace points
-        comp_time_graph             % Time to construct the graph structure
-        
+        compTime                    % Total time to compute workspace
         conditions = []             % An array of conditions to be evaluated for
         metrics = []                % An array of metrics to be evaluated for
         connectivity                % Connectivity condition (children of WorkspaceConnectivityBase object)
@@ -36,6 +33,7 @@ classdef PointWorkspaceSimulator < SimulatorBase
         
         % Implementation of the run function
         function run(obj)
+            obj.compTime = 0;
             for i = 1:size(obj.metrics,2)
                 if((~isempty(obj.metrics{i}.metricMax))&&((abs(obj.metrics{i}.metricMax)==Inf)||(abs(obj.metrics{i}.metricMin)==Inf)))
                     CASPR_log.Print('A metric with infinite limit values cannot be plotted.  To plot please set the metric limit to be finite or filter the workspace after plotting',CASPRLogLevel.WARNING);
@@ -49,9 +47,6 @@ classdef PointWorkspaceSimulator < SimulatorBase
 
             workspace_count = 0;
             
-            % Timing variables
-            point_t_in = tic;
-            total_t_in = tic;
             % Runs over the grid and evaluates the workspace condition at
             % each point
             log_level = CASPRLogLevel.DEBUG;
@@ -70,13 +65,9 @@ classdef PointWorkspaceSimulator < SimulatorBase
                     workspace_count = workspace_count + 1;
                     obj.workspace.poses{workspace_count} = wp;
                 end
+                obj.compTime = obj.compTime + wp.compTime;
             end
             obj.workspace.poses = obj.workspace.poses(1:workspace_count, 1);
-            obj.comp_time_evaluation = toc(point_t_in);
-            graph_t_in = tic;
-                
-            obj.comp_time_graph = toc(graph_t_in);
-            obj.comp_time_total = toc(total_t_in);
         end  
     end
 end

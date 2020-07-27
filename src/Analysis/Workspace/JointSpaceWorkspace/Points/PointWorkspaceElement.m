@@ -12,6 +12,7 @@ classdef PointWorkspaceElement < handle
         conditions = {};        % A cell array of different workspace conditions (conditon object)
         conditionsAll = {};     % A cell array of all conditions evaluated
         conditionsIndices = []; % Array of indices of the conditions from conditionsAll (and same as PointWorkspace)
+        compTime = 0;           % Computational time of the workspace element                
     end
     
     methods
@@ -21,6 +22,7 @@ classdef PointWorkspaceElement < handle
             wp.pose             = q;
             wp.conditionsAll    = conditions;
             
+            t_comp = tic;
             % Checks if the modelObj is already this q value (and hence
             % updated)
             if (~isequal(q, modelObj.q))
@@ -30,6 +32,7 @@ classdef PointWorkspaceElement < handle
             wp.evaluateMetrics(modelObj, metrics);
             % Pass the evaluated metrics into the conditions to help
             wp.evaluateConditions(modelObj, conditions, wp.metrics);
+            wp.compTime = toc(t_comp);
         end
         
         % Evaluate all metrics and store values

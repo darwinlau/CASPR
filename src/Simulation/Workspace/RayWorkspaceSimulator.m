@@ -14,9 +14,7 @@ classdef RayWorkspaceSimulator < SimulatorBase
     end
     
     properties (SetAccess = private)
-        comp_time_total             % Total time to compute workspace
-        comp_time_evaluation        % Time to just evaluate the workspace points
-        comp_time_graph             % Time to construct the graph structure
+        compTime                    % Time to just evaluate the workspace
         
         free_variable_length    % The number of rays for each free variable
         conditions = []         % A list of conditions to be evaluated for
@@ -34,6 +32,7 @@ classdef RayWorkspaceSimulator < SimulatorBase
         
         % Implementation of the run function
         function run(obj)
+            obj.compTime = 0;
             % Test if the metrics have infinite limits
             for i = 1:size(obj.metrics,2)
                 if((~isempty(obj.metrics{i}.metricMax))&&((abs(obj.metrics{i}.metricMax)==Inf)||(abs(obj.metrics{i}.metricMin)==Inf)))
@@ -55,8 +54,6 @@ classdef RayWorkspaceSimulator < SimulatorBase
             % dimension
             % each point
             k = 1;
-            ray_t_in = tic;
-            total_t_in = tic;
             
             log_level = CASPRLogLevel.DEBUG;
             is_log = (log_level >= CASPR_log.GetLogLevel());
@@ -79,6 +76,7 @@ classdef RayWorkspaceSimulator < SimulatorBase
                         if (obj.grid.q_begin(i) ~= obj.grid.q_end(i))
                             % Construct the workspace ray
                             wre = RayWorkspaceElement(obj.model, q_fixed, obj.conditions, i, [obj.grid.q_begin(i),obj.grid.q_end(i)]);
+                            obj.compTime = obj.compTime + wre.compTime;
                             if ~isempty(wre.intervals)
                                 workspace_count = workspace_count + 1;
                                 obj.workspace.rays{workspace_count} = wre;
@@ -88,11 +86,7 @@ classdef RayWorkspaceSimulator < SimulatorBase
                     end
                 end
             end
-            obj.workspace.rays = obj.workspace.rays(1:workspace_count, 1);            
-            obj.comp_time_evaluation = toc(ray_t_in);
-            graph_t_in = tic;
-            obj.comp_time_graph = toc(graph_t_in);
-            obj.comp_time_total = toc(total_t_in);
+            obj.workspace.rays = obj.workspace.rays(1:workspace_count, 1);
         end
     end
 end

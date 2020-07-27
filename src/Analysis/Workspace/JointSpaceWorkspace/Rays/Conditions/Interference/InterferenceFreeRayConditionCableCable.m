@@ -36,8 +36,6 @@ classdef InterferenceFreeRayConditionCableCable < WorkspaceRayConditionBase
             
         % Evaluate the interference free intervals 
         function intervals =  evaluateFunction(obj, model, ws_ray)
-            intervals = []; 
-            
             interference_q = [];
             % Variable initialisation
             q_zero = zeros(obj.numDofs, 1);            
