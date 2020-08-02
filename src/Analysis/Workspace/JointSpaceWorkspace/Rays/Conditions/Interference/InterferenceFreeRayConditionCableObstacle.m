@@ -156,13 +156,13 @@ classdef InterferenceFreeRayConditionCableObstacle < WorkspaceRayConditionBase
             % codes here may need to be change according to the actually
             % situtation since it's difficult to find to which axis is
             % rotating from just the model
-%             Rotational_axis_ind =  find(~(q_begin == q_end));
-            Rotational_axis_ind = [4,5,6];
-            model.update(q_end,zeros(model.numDofs,1), zeros(model.numDofs,1),zeros(model.numDofs,1));
-            S1 = model.cableModel.cables{1, 1}.segments{1,1}.segmentVector;
-            model.update(q_begin,zeros(model.numDofs,1), zeros(model.numDofs,1),zeros(model.numDofs,1));
-            S2 = model.cableModel.cables{1, 1}.segments{1,1}.segmentVector;
-            Rotational_axis_ind(S2 == S1);
+            Rotational_axis_ind =  find(~(q_begin == q_end));
+%             Rotational_axis_ind = [4,5,6];
+%             model.update(q_end,zeros(model.numDofs,1), zeros(model.numDofs,1),zeros(model.numDofs,1));
+%             S1 = model.cableModel.cables{1, 1}.segments{1,1}.segmentVector;
+%             model.update(q_begin,zeros(model.numDofs,1), zeros(model.numDofs,1),zeros(model.numDofs,1));
+%             S2 = model.cableModel.cables{1, 1}.segments{1,1}.segmentVector;
+%             Rotational_axis_ind(S2 == S1);
             % 4: rotate about x-axis 5: rotate about x-axis 6: rotate about x-axis
             if Rotational_axis_ind == 4
                 Rot_Mat =@(u) [1 0 0;
@@ -241,7 +241,7 @@ classdef InterferenceFreeRayConditionCableObstacle < WorkspaceRayConditionBase
                             if tmp_val(1) <= obj.surface_bound{surf_ind}(2) && tmp_val(1) >= obj.surface_bound{surf_ind}(1) && ...
                                     tmp_val(2) <= obj.surface_bound{surf_ind}(4) && tmp_val(2) >= obj.surface_bound{surf_ind}(3) &&...
                                     tmp_val(3) <= obj.surface_bound{surf_ind}(6) && tmp_val(3) >= obj.surface_bound{surf_ind}(5)
-                                q_intersected = [q_intersected,(q_end - q_begin)*u_value(i) + q_begin];
+                                q_intersected = [q_intersected,(q_end - q_begin)*interp1([0 1],u_range,u_value(i)) + q_begin];
                                 intersected_pts = [intersected_pts, tmp_val];
                             end
                         end
@@ -312,7 +312,7 @@ classdef InterferenceFreeRayConditionCableObstacle < WorkspaceRayConditionBase
                                 tmp_val(2) <= obj.surface_bound{surf_ind}(4) && tmp_val(2) >= obj.surface_bound{surf_ind}(3) &&...
                                 tmp_val(3) <= obj.surface_bound{surf_ind}(6) && tmp_val(3) >= obj.surface_bound{surf_ind}(5)
                             intersected_pts = [intersected_pts, tmp_val];
-                            q_intersected = [q_intersected,(q_end - q_begin)*t_ans(ii) + q_begin];
+                            q_intersected = [q_intersected,(q_end - q_begin)*interp1([0 1],u_range,t_ans(ii)) + q_begin];                            
                         end
                     end
                 end

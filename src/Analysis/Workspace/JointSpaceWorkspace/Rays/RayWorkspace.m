@@ -295,7 +295,7 @@ classdef RayWorkspace < handle
         function node_list = create_point_node_list(obj)
             intersected_ray = {};
             ref_intersected_point = [];
-            if (isempty(obj.ray_node.nodelist))
+            if (isempty(obj.ray_node.node_list))
                 rays_seg = obj.create_ray_node_list();%get every rays as node
             else
                 rays_seg = obj.ray_node.node_list;
@@ -330,7 +330,7 @@ classdef RayWorkspace < handle
                 %find intersection points
                 for j = 1:size(co_planar_rays,1)
                     ray_B = co_planar_rays(j,2:end);
-                    [intersected_point,~] = check_intersection(ray_A,ray_B);
+                    [intersected_point,~] = obj.check_intersection(ray_A,ray_B);
                     %                     intersected_point = round(intersected_point,4);
                     if ~isempty(intersected_point)
                         intersected_ray(end+1,:) = {rays_seg{i,1},co_planar_rays{j,1}};
@@ -400,7 +400,12 @@ classdef RayWorkspace < handle
             for i = 1:size(obj.rays, 1)
                 % Determine the ray that has same condtions as input
                 if(~isempty(obj.rays{i}))
-                    number_node = number_node + 1;
+                    interval_num = size(obj.rays{i}.intervals,1);
+                    for ii = 1:interval_num
+                    number_node = number_node + 1;                    
+                    if number_node == 51
+                        i
+                    end
                     node_list{number_node,1} = number_node; % node number
                     kk = 1;
                     for k = 2:size(node_list,2)-1
@@ -408,10 +413,11 @@ classdef RayWorkspace < handle
                             node_list{number_node,k} =  obj.rays{i}.fixedVariables(kk);
                             kk = kk + 1;
                         else
-                            node_list{number_node,k} =  obj.rays{i}.intervals;
+                            node_list{number_node,k} =  obj.rays{i}.intervals(ii,:);
                         end
                     end
                     node_list{number_node,end} = obj.rays{i}.freeVariableIndex;
+                end
                 end
                 obj.ray_node(:).node_list = node_list;
             end
@@ -467,7 +473,7 @@ classdef RayWorkspace < handle
         end
         
         % function to check intersection  and distance between two co-plannar rays
-        function [intersected_point,min_dist] = check_intersection(ray_1,ray_2)
+        function [intersected_point,min_dist] = check_intersection(~,ray_1,ray_2)
             % check if co-planar
             for i = 1:size(ray_2,2)-1
                 if i == ray_2{end} || i == ray_1{end}

@@ -12,11 +12,11 @@ cable_set_id    =   'basic_8_cables';
 modelObj        =   model_config.getModel(cable_set_id);
 
 q_begin         =   modelObj.bodyModel.q_min; 
-% q_begin(4:6) = 0;
-q_begin(1:3) = 0.5;
+q_begin(4:6) = 0;
+% q_begin(1:3) = 0.5;
 q_end = modelObj.bodyModel.q_max; 
-% q_end(4:6) = 0;
-q_end(1:3) = 0.5;
+q_end(4:6) = 0;
+% q_end(1:3) = 0.5;
 %% for rotational first
 % q_begin = [0.3 0 0.5 0 0 0]';
 % q_end = [0.3 1 0.5 0 0 0]';
@@ -152,7 +152,7 @@ wsim.run()
 % %% optional functions (not yet tested)
 % 
 % % Plot point graph
-% wsim.workspace.plotPointGraph(w_condition,w_metrics);
+% wsim.workspace.plotPointGraph(w_metrics);
 % % Plot ray graph
 % wsim.workspace.plotRayGraph(w_metrics);
 % 
