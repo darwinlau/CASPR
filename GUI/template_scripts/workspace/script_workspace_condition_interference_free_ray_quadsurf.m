@@ -152,14 +152,14 @@ wsim.run()
 % %% optional functions (not yet tested)
 % 
 % % Plot point graph
-% wsim.workspace.plotPointGraph(w_metrics);
+wsim.workspace.plotPointGraph(w_metrics);
 % % Plot ray graph
-% wsim.workspace.plotRayGraph(w_metrics);
+wsim.workspace.plotRayGraph(w_metrics);
 % 
-% plot_axis = [1 2 3];
-% fixed_variables = wsim.grid.q_begin' + wsim.grid.delta_q' .* [1 3 2 0 0 0];
+plot_axis = [1 2 3];
+fixed_variables = wsim.grid.q_begin' + wsim.grid.delta_q' .* [1 3 2 0 0 0];
 % % Plot point workspace
-% wsim.workspace.plotPointWorkspace(plot_axis,w_condition,fixed_variables)
+wsim.workspace.plotPointWorkspace(plot_axis,fixed_variables)
 % 
 % % Plot ray workspace
-% wsim.workspace.plotRayWorkspace(plot_axis,w_condition,fixed_variables)
+wsim.workspace.plotRayWorkspace(plot_axis,fixed_variables)
