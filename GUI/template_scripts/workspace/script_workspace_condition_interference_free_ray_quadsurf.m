@@ -47,6 +47,8 @@ uGrid           =   UniformGrid(q_begin,q_end,q_step,'step_size');
 QuadSurfImplicitEqu{1} = @(x,y,z) (x - 0.5)^2 + (y - 0.5)^2 + (z - 0.5)^2 - 0.03
 QuadSurf.boundary{1} = [0.25 0.75 0.25 0.75 0.25 0.75];
 
+QuadSurfImplicitEqu{2} = @(x,y,z) (x - 0.5)^2 + (y - 0.5)^2 + (z - 0.1)^2 - 0.03
+QuadSurf.boundary{2} = [0.25 0.75 0.25 0.75 -0.2 0.4];
 
 % Cylinder           
 % QuadSurfImplicitEqu{1} = @(x,y,z) (x-0.5)^2 + (y-0.75)^2 - 0.02;
@@ -57,9 +59,9 @@ QuadSurf.boundary{1} = [0.25 0.75 0.25 0.75 0.25 0.75];
 % QuadSurf.boundary{2} = [0 1 0 1 0 1];
 
 
-%% Random flat quad surface
-% QuadSurfImplicitEqu{1} = @(x,y,z) (0.01.*x+0.5).^2 + (0.02.*y-0.5).^2 - z.^2 -0.4;
-% QuadSurf.boundary{1} = [0.45 0.75 0.45 0.75 0 1];
+% Random flat quad surface
+% QuadSurfImplicitEqu{2} = @(x,y,z) (0.01.*x+0.5).^2 + (0.02.*y-0.5).^2 - z.^2 -0.4;
+% QuadSurf.boundary{2} = [0.45 0.75 0.45 0.75 0 1];
 
 %%
 clf
@@ -152,14 +154,15 @@ wsim.run()
 % %% optional functions (not yet tested)
 % 
 % % Plot point graph
-wsim.workspace.plotPointGraph(w_metrics);
-% % Plot ray graph
-wsim.workspace.plotRayGraph(w_metrics);
-% 
+% wsim.workspace.plotPointGraph(w_metrics);
+% % % Plot ray graph
+% wsim.workspace.plotRayGraph(w_metrics);
+% % 
 plot_axis = [1 2 3];
 fixed_variables = wsim.grid.q_begin' + wsim.grid.delta_q' .* [1 3 2 0 0 0];
-% % Plot point workspace
-wsim.workspace.plotPointWorkspace(plot_axis,fixed_variables)
-% 
-% % Plot ray workspace
+% % % Plot point workspace
+plot_1 = wsim.workspace.plotPointWorkspace(plot_axis,fixed_variables)
+plot_1.SizeData = 1.5
+% % 
+% % % Plot ray workspace
 wsim.workspace.plotRayWorkspace(plot_axis,fixed_variables)

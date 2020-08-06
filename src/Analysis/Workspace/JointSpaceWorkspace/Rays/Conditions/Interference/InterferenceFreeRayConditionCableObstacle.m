@@ -119,20 +119,27 @@ classdef InterferenceFreeRayConditionCableObstacle < WorkspaceRayConditionBase
             %             tic
             pre_has_intersected = 1;
             [t_coeff_verify] = obj.GetUVCoeff4EdgeTrans();
+            
             for i = 1:size(all_intersection_poses,2) - 1
-                for surf_ind =1:size(obj.QuadSurf,1)
+                has_intersected = [];
+                for surf_ind =1:size(obj.QuadSurf,2)
                     QuadSurfCoeff = obj.GetQuadSurfCoeff(obj.QuadSurf{surf_ind});
-                    has_intersected = obj.IntervalVerify(model,QuadSurfCoeff,all_intersection_poses(:,i),all_intersection_poses(:,i+1),t_coeff_verify);
-                    if has_intersected == 0
-                        if pre_has_intersected ~= 0
-                            intervals(intervals_count,:) = [all_intersection_poses(free_variable_index,i),all_intersection_poses(free_variable_index,i+1)];
-                            intervals_count = intervals_count + 1;
-                        else
-                            intervals(intervals_count-1 ,end) = all_intersection_poses(free_variable_index,i+1);
+                    has_intersected(surf_ind) = obj.IntervalVerify(model,QuadSurfCoeff,all_intersection_poses(:,i),all_intersection_poses(:,i+1),t_coeff_verify);
+                    if has_intersected(surf_ind) ~= 0
+                        break
+                    else
+                        if all(has_intersected == 0) && surf_ind == size(obj.QuadSurf,2)
+                            if pre_has_intersected ~= 0
+                                intervals(intervals_count,:) = [all_intersection_poses(free_variable_index,i),all_intersection_poses(free_variable_index,i+1)];
+                                intervals_count = intervals_count + 1;
+                            else
+                                intervals(intervals_count-1 ,end) = all_intersection_poses(free_variable_index,i+1);
+                            end
                         end
                     end
-                end
-                pre_has_intersected = has_intersected;
+                end                
+                   
+                pre_has_intersected = any(has_intersected ~= 0);
             end
             
             if ~isempty(all_intersected_pts)
