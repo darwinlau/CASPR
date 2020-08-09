@@ -269,10 +269,10 @@ classdef RayWorkspace < handle
                 hold off;
             elseif size(dofs_to_plot, 2) == 2 %2D plot
                 for i = 1:size(variables_matched_index,1)
-                    if plot_data{variables_matched_index(i),end} == dofs_to_plot(1)
+                    if plot_data{variables_matched_index(i),1} == dofs_to_plot(1)
                         x = plot_data{variables_matched_index(i),2}';
                         y = ones(1,2)*plot_data{variables_matched_index(i),3}';
-                    elseif plot_data{variables_matched_index(i),end} == dofs_to_plot(2)
+                    elseif plot_data{variables_matched_index(i),1} == dofs_to_plot(2)
                         x = ones(1,2)*plot_data{variables_matched_index(i),2}';
                         y = plot_data{variables_matched_index(i),3}';
                     end
