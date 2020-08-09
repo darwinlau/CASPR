@@ -112,11 +112,6 @@ classdef SystemModelBodies < handle
         % Flags
         modelMode                           % The model mode
         modelOptions                        % ModelOptions object storing options for the model
-    end
-    
-    properties (Access = private)
-        compiled_bodies_lib_name; 
-        compiled_operational_space_lib_name; 
         
         % Function handles for compiled update mode        
         compiled_R_0ks_fn;
@@ -137,6 +132,11 @@ classdef SystemModelBodies < handle
         compiled_y_fn;
         compiled_y_dot_fn;
         compiled_y_ddot_fn;
+    end
+    
+    properties (Access = private)
+        compiled_bodies_lib_name;
+        compiled_operational_space_lib_name;
     end
 
     properties (Dependent)

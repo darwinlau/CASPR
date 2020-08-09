@@ -43,14 +43,15 @@ classdef SystemModelCables < handle
         modelMode                   % A flag to indicate the need for symbolic computations
         modelOptions                % ModelOptions object storing options for the model
         update                      % Update function handle
+        
+        % Function handles for compiled update mode
+        compiled_r_OAs_fn
+        compiled_lengths_fn
+        compiled_V_fn
     end
     
     properties (Access = private)
         compiled_lib_name
-        
-        compiled_r_OAs_fn
-        compiled_lengths_fn
-        compiled_V_fn
     end
 
     properties (Dependent)
