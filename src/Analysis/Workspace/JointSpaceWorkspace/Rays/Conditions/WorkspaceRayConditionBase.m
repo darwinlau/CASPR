@@ -50,7 +50,9 @@ classdef WorkspaceRayConditionBase < handle
                 case WorkspaceRayConditionType.INTERFERENCE_CABLE_CABLE
                     wc = InterferenceFreeRayConditionCableCable(model,min_ray_percentage);
                 case WorkspaceRayConditionType.INTERFERENCE_CABLE_QUADSURF
-                    wc = InterferenceFreeRayConditionCableObstacle(model,min_ray_percentage,QuadSurf);
+                    wc = InterferenceFreeRayConditionCableQuadraticObstacle(model,min_ray_percentage,QuadSurf);
+                case WorkspaceRayConditionType.INTERFERENCE_CABLE_PLANESURF
+                    wc = InterferenceFreeRayConditionCablePlaneObstacle(model,min_ray_percentage,QuadSurf);
                 case WorkspaceRayConditionType.INTERFERENCE_DIAMETER
                     wc = InterferenceFreeRayConditionCableDiameter(model,min_ray_percentage);
                 case WorkspaceRayConditionType.INTERFERENCE_C_E

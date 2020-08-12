@@ -5,7 +5,7 @@
 % Created       : 2020
 % Description   :
 
-classdef InterferenceFreeRayConditionCableObstacle < WorkspaceRayConditionBase
+classdef InterferenceFreeRayConditionCableQuadraticObstacle < WorkspaceRayConditionBase
     properties (Constant)
         ROUNDING_DIGIT = 9;
         % Type of workspace condition (WorkspaceConditionType enum)
@@ -23,7 +23,7 @@ classdef InterferenceFreeRayConditionCableObstacle < WorkspaceRayConditionBase
     
     methods
         % Constructor for interference free worksapce
-        function w = InterferenceFreeRayConditionCableObstacle(model, min_ray_lengths, QuadSurf)
+        function w = InterferenceFreeRayConditionCableQuadraticObstacle(model, min_ray_lengths, QuadSurf)
             w@WorkspaceRayConditionBase(min_ray_lengths);
             w.areDofsTranslation = (model.bodyModel.q_dofType == DoFType.TRANSLATION);
             w.numDofs = model.numDofs;
@@ -248,7 +248,7 @@ classdef InterferenceFreeRayConditionCableObstacle < WorkspaceRayConditionBase
                             if tmp_val(1) <= obj.surface_bound{surf_ind}(2) && tmp_val(1) >= obj.surface_bound{surf_ind}(1) && ...
                                     tmp_val(2) <= obj.surface_bound{surf_ind}(4) && tmp_val(2) >= obj.surface_bound{surf_ind}(3) &&...
                                     tmp_val(3) <= obj.surface_bound{surf_ind}(6) && tmp_val(3) >= obj.surface_bound{surf_ind}(5)
-                                q_intersected = [q_intersected,(q_end - q_begin)*interp1([0 1],u_range,u_value(i)) + q_begin];
+                                q_intersected = [q_intersected,(q_end - q_begin)*interp1(u_range,[0 1],u_value(i)) + q_begin];
                                 intersected_pts = [intersected_pts, tmp_val];
                             end
                         end
@@ -319,7 +319,7 @@ classdef InterferenceFreeRayConditionCableObstacle < WorkspaceRayConditionBase
                                 tmp_val(2) <= obj.surface_bound{surf_ind}(4) && tmp_val(2) >= obj.surface_bound{surf_ind}(3) &&...
                                 tmp_val(3) <= obj.surface_bound{surf_ind}(6) && tmp_val(3) >= obj.surface_bound{surf_ind}(5)
                             intersected_pts = [intersected_pts, tmp_val];
-                            q_intersected = [q_intersected,(q_end - q_begin)*interp1([0 1],u_range,t_ans(ii)) + q_begin];                            
+                            q_intersected = [q_intersected,(q_end - q_begin)*interp1(u_range,[0 1],t_ans(ii)) + q_begin];                            
                         end
                     end
                 end

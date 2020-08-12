@@ -226,7 +226,7 @@ classdef RayWorkspace < handle
             end
             
             plot_data_index = find(ismember(cell2mat(node_list(:,2)), dofs_to_plot));
-            plot_data = node_list(plot_data_index, 2:dofs_to_plot+4);
+            plot_data = node_list(plot_data_index, [2,2+dofs_to_plot]);
             
             fixed_variable_column_index = 3:size(node_list,2);
             fixed_variable_column_index(dofs_to_plot) = [];

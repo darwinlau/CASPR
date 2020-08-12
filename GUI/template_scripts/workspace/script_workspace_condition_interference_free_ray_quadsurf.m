@@ -12,14 +12,14 @@ cable_set_id    =   'basic_8_cables';
 modelObj        =   model_config.getModel(cable_set_id);
 
 q_begin         =   modelObj.bodyModel.q_min; 
-q_begin(4:6) = 0;
+% q_begin(4:6) = 0;
 % q_begin(1:3) = 0.5;
 q_end = modelObj.bodyModel.q_max; 
-q_end(4:6) = 0;
+% q_end(4:6) = 0;
 % q_end(1:3) = 0.5;
 %% for rotational first
-% q_begin = [0.3 0 0.5 0 0 0]';
-% q_end = [0.3 1 0.5 0 0 0]';
+q_begin = [0.3 0 0.5 0 0 0]';
+q_end = [0.3 1 0.5 0 0 0]';
 % q_begin = [0.35 0.9 0.3 0 0 0]';
 % q_end = [0.35 0.9 0.3 pi/2 0 0]';
 % q_begin = [0.1 0.4 0.55 -pi 0 0]';
@@ -47,8 +47,21 @@ uGrid           =   UniformGrid(q_begin,q_end,q_step,'step_size');
 QuadSurfImplicitEqu{1} = @(x,y,z) (x - 0.5)^2 + (y - 0.5)^2 + (z - 0.5)^2 - 0.03
 QuadSurf.boundary{1} = [0.25 0.75 0.25 0.75 0.25 0.75];
 
-QuadSurfImplicitEqu{2} = @(x,y,z) (x - 0.5)^2 + (y - 0.5)^2 + (z - 0.1)^2 - 0.03
-QuadSurf.boundary{2} = [0.25 0.75 0.25 0.75 -0.2 0.4];
+QuadSurfImplicitEqu{1} = @(x,y,z) (x - 0.5)^2 + (y - 0.5)^2 + (z - 0.5)^2 - 1
+QuadSurf.boundary{1} = [-1 2 -1 2 -1 2];
+
+
+QuadSurfImplicitEqu{1} = @(x,y,z) (x - 0.5)^2 + (y - 0.5)^2 - 0.25
+QuadSurf.boundary{1} = [-1 2 -1 2 0.7 0.7];
+% 
+% [x y] = meshgrid(0:0.1:1);
+% z = 0.2.*x + 0.3.*y + 0.2;
+% surf(x,y,z);
+QuadSurfImplicitEqu{1} = @(x,y,z) 0.2*x + 0.3*y + 0.2 - z
+QuadSurf.boundary{1} = [0 1 0 1 0 1];
+
+% QuadSurfImplicitEqu{2} = @(x,y,z) (x - 0.5)^2 + (y - 0.5)^2 + (z - 0.1)^2 - 0.03
+% QuadSurf.boundary{2} = [0.25 0.75 0.25 0.75 -0.2 0.4];
 
 % Cylinder           
 % QuadSurfImplicitEqu{1} = @(x,y,z) (x-0.5)^2 + (y-0.75)^2 - 0.02;
@@ -88,6 +101,8 @@ end
 % %     delete(cable_graph(6));
 % %     delete(cable_graph(8));
 % end
+
+
 % 
 % % % % 
 % s = sym('s%d',[1 10]);
@@ -158,11 +173,11 @@ wsim.run()
 % % % Plot ray graph
 % wsim.workspace.plotRayGraph(w_metrics);
 % % 
-plot_axis = [1 2 3];
-fixed_variables = wsim.grid.q_begin' + wsim.grid.delta_q' .* [1 3 2 0 0 0];
+% plot_axis = [1 2 3];
+% fixed_variables = wsim.grid.q_begin' + wsim.grid.delta_q' .* [1 3 2 0 0 0];
 % % % Plot point workspace
-plot_1 = wsim.workspace.plotPointWorkspace(plot_axis,fixed_variables)
-plot_1.SizeData = 1.5
+% plot_1 = wsim.workspace.plotPointWorkspace(plot_axis,fixed_variables)
+% plot_1.SizeData = 1.5
 % % 
 % % % Plot ray workspace
-wsim.workspace.plotRayWorkspace(plot_axis,fixed_variables)
+% wsim.workspace.plotRayWorkspace(plot_axis,fixed_variables)
