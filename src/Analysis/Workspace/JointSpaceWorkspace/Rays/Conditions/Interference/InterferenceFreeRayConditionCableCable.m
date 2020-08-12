@@ -43,6 +43,8 @@ classdef InterferenceFreeRayConditionCableCable < WorkspaceRayConditionBase
             free_variable_lower = ws_ray.freeVariableRange(1);
             free_variable_upper = ws_ray.freeVariableRange(2);
             
+            is_compiled_mode = (model.modelMode == ModelModeType.COMPILED);
+            
             is_dof_translation = obj.areDofsTranslation(free_variable_index);
             dof_margin = obj.dofMargins(free_variable_index);
             
@@ -78,16 +80,22 @@ classdef InterferenceFreeRayConditionCableCable < WorkspaceRayConditionBase
                 % Update the value for q
                 q_free = free_var_lin_space_q(linear_space_index);
                 q(free_variable_index) = q_free;
+                
                 % Update the model
-                model.update(q, q_zero, q_zero, q_zero);
+                if ~is_compiled_mode
+                    model.update(q, q_zero, q_zero, q_zero);
+                    r_OAs = model.cableModel.r_OAs;
+                else
+                    r_OAs = model.cableModel.compiled_r_OAs_fn(q, q_zero, q_zero, q_zero);
+                end
                 
                 for k = 1:num_cable_combs
                     i = cable_combinations(k, 1);
                     j = cable_combinations(k, 2);
-                    A_i = model.cableModel.r_OAs(1:3, i);
-                    B_i = model.cableModel.r_OAs(4:6, i);
-                    A_j = model.cableModel.r_OAs(1:3, j);
-                    B_j = model.cableModel.r_OAs(4:6, j);
+                    A_i = r_OAs(1:3, i);
+                    B_i = r_OAs(4:6, i);
+                    A_j = r_OAs(1:3, j);
+                    B_j = r_OAs(4:6, j);
                     [~, ~, g_samples(k, linear_space_index)] = obj.intersection_xyz(A_i, B_i, A_j, B_j);
                     if ~is_dof_translation
                         g_samples(k, linear_space_index) = (1 + (tan(q_free/2))^2)*g_samples(k, linear_space_index);
@@ -111,13 +119,20 @@ classdef InterferenceFreeRayConditionCableCable < WorkspaceRayConditionBase
             
                         q(free_variable_index) = root_i_q;
                         
-                        model.update(q, q_zero, q_zero, q_zero);
+                        % Update the model
+                        if ~is_compiled_mode
+                            model.update(q, q_zero, q_zero, q_zero);
+                            r_OAs = model.cableModel.r_OAs;
+                        else
+                            r_OAs = model.cableModel.compiled_r_OAs_fn(q, q_zero, q_zero, q_zero);
+                        end
+                        
                         i = cable_combinations(k, 1);
                         j = cable_combinations(k, 2);
-                        A_i = model.cableModel.r_OAs(1:3, i);
-                        B_i = model.cableModel.r_OAs(4:6, i);
-                        A_j = model.cableModel.r_OAs(1:3, j);
-                        B_j = model.cableModel.r_OAs(4:6, j);
+                        A_i = r_OAs(1:3, i);
+                        B_i = r_OAs(4:6, i);
+                        A_j = r_OAs(1:3, j);
+                        B_j = r_OAs(4:6, j);
                         [t_i, t_j] = obj.intersection_xyz(A_i, B_i, A_j, B_j);
                         
                         if (t_i > 0 && t_i < 1 && t_j > 0 && t_j < 1)
