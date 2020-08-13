@@ -551,47 +551,48 @@ classdef SystemModel < handle
                     ModelConfigBase.WriteCompileRecordFile(base_compile_folder, ModelConfigBase.COMPILE_RECORD_OPERATIONAL_SPACES_FILENAME);
                 end
                 
-                
-                CASPR_log.Info('Compiling CPP files...');
-                if (exist(cpp_folder, 'dir'))
-                    rmdir(cpp_folder, 's');
-                end
-                mkdir(cpp_folder);
-                               
-                % Do the .cpp compile
-                files_list = [dir([b_folder, '/**/', '*.m']); dir([c_folder, '/**/', '*.m'])];
-                
-                if (compile_opspaces)
-                    files_list = [files_list; dir([op_folder, '/**/', '*.m'])];
-                end
-                
-                source_files = cell(1, length(files_list));
-                for i = 1:length(files_list)
-                    source_files{i} = [files_list(i).folder, '\', files_list(i).name];
-                end
-                % Set the input data type for the cpp functions
-                input_data = {zeros(obj.numDofs,1), zeros(obj.numDofs,1), zeros(obj.numDofs,1), zeros(obj.numDofs,1)};
-                % Setup the CPP compile config
-                cpp_code_config = coder.config('dll');
-                %code_config.IncludeTerminateFcn = false;
-                cpp_code_config.SupportNonFinite = false;
-                cpp_code_config.SaturateOnIntegerOverflow = false;
-                cpp_code_config.GenerateExampleMain = 'DoNotGenerate';
-                cpp_code_config.TargetLang = 'C++';
-                cpp_code_config.FilePartitionMethod = 'SingleFile';
-                % Code generation
-                str = ['codegen -d ', cpp_folder, ' -o ', cpp_lib_name, ' -config cpp_code_config '];
-                for i = 1:length(source_files)
-                    str = [str, source_files{i},' -args input_data '];
-                end
-                eval(str)
-                CASPR_log.Info('Finished compiling cpp files');
-                CASPR_log.Info('Cleaning up...');
-                % Remove unnecessary stuff
-                rmdir([cpp_folder, '/examples']);
-                delete([cpp_folder, '/*.mat']);
-                
-                ModelConfigBase.WriteCompileRecordFile(cpp_folder, ModelConfigBase.COMPILE_RECORD_FILENAME);
+%                 % Compile CPP files (START)
+%                 CASPR_log.Info('Compiling CPP files...');
+%                 if (exist(cpp_folder, 'dir'))
+%                     rmdir(cpp_folder, 's');
+%                 end
+%                 mkdir(cpp_folder);
+%                                
+%                 % Do the .cpp compile
+%                 files_list = [dir([b_folder, '/**/', '*.m']); dir([c_folder, '/**/', '*.m'])];
+%                 
+%                 if (compile_opspaces)
+%                     files_list = [files_list; dir([op_folder, '/**/', '*.m'])];
+%                 end
+%                 
+%                 source_files = cell(1, length(files_list));
+%                 for i = 1:length(files_list)
+%                     source_files{i} = [files_list(i).folder, '\', files_list(i).name];
+%                 end
+%                 % Set the input data type for the cpp functions
+%                 input_data = {zeros(obj.numDofs,1), zeros(obj.numDofs,1), zeros(obj.numDofs,1), zeros(obj.numDofs,1)};
+%                 % Setup the CPP compile config
+%                 cpp_code_config = coder.config('dll');
+%                 %code_config.IncludeTerminateFcn = false;
+%                 cpp_code_config.SupportNonFinite = false;
+%                 cpp_code_config.SaturateOnIntegerOverflow = false;
+%                 cpp_code_config.GenerateExampleMain = 'DoNotGenerate';
+%                 cpp_code_config.TargetLang = 'C++';
+%                 cpp_code_config.FilePartitionMethod = 'SingleFile';
+%                 % Code generation
+%                 str = ['codegen -d ', cpp_folder, ' -o ', cpp_lib_name, ' -config cpp_code_config '];
+%                 for i = 1:length(source_files)
+%                     str = [str, source_files{i},' -args input_data '];
+%                 end
+%                 eval(str)
+%                 CASPR_log.Info('Finished compiling cpp files');
+%              
+%                 CASPR_log.Info('Cleaning up cpp compile...');
+%                 % Remove unnecessary stuff
+%                 rmdir([cpp_folder, '/examples']);
+%                 delete([cpp_folder, '/*.mat']);
+%                 ModelConfigBase.WriteCompileRecordFile(cpp_folder, ModelConfigBase.COMPILE_RECORD_FILENAME);
+%                 % Compile CPP files (END)
                 
                 % Add the compiled files to the path
                 addpath(genpath(base_compile_folder));
