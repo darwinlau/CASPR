@@ -143,7 +143,7 @@ classdef InterferenceFreeRayConditionCableQuadraticObstacle < WorkspaceRayCondit
             end
             
             if ~isempty(all_intersected_pts)
-                                scatter3(all_intersected_pts(1,:),all_intersected_pts(2,:),all_intersected_pts(3,:),'r','filled');
+%                                 scatter3(all_intersected_pts(1,:),all_intersected_pts(2,:),all_intersected_pts(3,:),'r','filled');
             end
         end
     end
