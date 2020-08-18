@@ -9,19 +9,20 @@ clear all;close all;clc
 model_config    =   ModelConfig('Example spatial'); 
 cable_set_id    =   'cross_8_cables';
 modelObj        =   model_config.getModel(cable_set_id);
+% modelObj =  model_config.getModel('cross_8_cables', [], ModelModeType.COMPILED);
 
 q_begin         =   modelObj.bodyModel.q_min; 
-% q_begin(4:6) = 0;
-q_begin(1:3) = 0.5;
+q_begin(4:6) = 0;
+% q_begin(1:3) = 0.5;
 q_end = modelObj.bodyModel.q_max; 
-% q_end(4:6) = 0;
-q_end(1:3) = 0.5;
+q_end(4:6) = 0;
+% q_end(1:3) = 0.5;
 %% for rotational first
-% q_begin = [0.3 0 0.5 0 0 0]';
-% q_end = [0.3 1 0.5 0 0 0]';
+% q_begin = [0.2 0 0.7 0 0 0]';
+% q_end = [0.2 1 0.7 0 0 0]';
 % q_begin = [0.35 0.9 0.3 0 0 0]';
 % q_end = [0.35 0.9 0.3 pi/2 0 0]';
-% q_begin = [0.1 0.4 0.55 -pi 0 0]';
+% q_begin = [0.1 0.4 0.55 -pi/1.1 0 0]';
 % q_end = [0.1 0.4 0.55 pi/2 0 0]';
 % q_begin = [0.1 0.4 0.55 0 -pi/2 0 ]';
 % q_end = [0.1 0.4 0.55 0 0 0]';
@@ -42,14 +43,18 @@ uGrid           =   UniformGrid(q_begin,q_end,q_step,'step_size');
 %% Ball
 % QuadSurfImplicitEqu{1} = @(x,y,z) (x - 0.5)^2 + (y - 0.5)^2 + (z - 0.5)^2 - 0.05
 % QuadSurf.boundary{1} = [0.25 0.75 0.25 0.75 0.25 0.75];
-% 
-% QuadSurfImplicitEqu{1} = @(x,y,z) (x - 0.5)^2 + (y - 0.5)^2 + (z - 0.5)^2 - 0.03
-% QuadSurf.boundary{1} = [0.25 0.75 0.25 0.75 0.25 0.75];
-% 
+
+QuadSurfImplicitEqu{1} = @(x,y,z) (x - 0.5)^2 + (y - 0.25)^2 + (z - 0.5)^2 - 0.03
+QuadSurf.boundary{1} = [0.25 0.75 0.0 0.75 0.25 0.75];
+QuadSurfImplicitEqu{2} = @(x,y,z) (x - 0.5)^2 + (y - 0.35)^2 + (z - 0.5)^2 - 0.03
+QuadSurf.boundary{2} = [0.25 0.75 0.0 0.75 0.25 0.75];
+% % % 
+% QuadSurfImplicitEqu{2} = @(x,y,z) (x - 0.45)^2 + (y - 0.45)^2 + (z - 0.5)^2 - 0.03
+% QuadSurf.boundary{2} = [0.25 0.75 0.25 0.75 0.25 0.75];
 % QuadSurfImplicitEqu{1} = @(x,y,z) (x - 0.5)^2 + (y - 0.5)^2 + (z - 0.5)^2 - 1
 % QuadSurf.boundary{1} = [-1 2 -1 2 -1 2];
 
-% 
+% % 
 % QuadSurfImplicitEqu{1} = @(x,y,z) (x - 0.5)^2 + (y - 0.5)^2 - 0.25
 % QuadSurf.boundary{1} = [-1 2 -1 2 0.7 0.7];
 
@@ -59,18 +64,18 @@ uGrid           =   UniformGrid(q_begin,q_end,q_step,'step_size');
 %% Cylinder           
 % QuadSurfImplicitEqu{3} = @(x,y,z) (x-0.5)^2 + (y-0.75)^2 - 0.02;
 % QuadSurf.boundary{3} = [0 1 0 1 0 1];
-
-QuadSurfImplicitEqu{3} = @(x,y,z) (x-0.5)^2 + (y-0.5)^2 - 0.002;
-QuadSurf.boundary{3} = [0 1 0 1 0 0.1];
+% 
+% QuadSurfImplicitEqu{3} = @(x,y,z) (x-0.5)^2 + (y-0.5)^2 - 0.002;
+% QuadSurf.boundary{3} = [0 1 0 1 0 0.1];
 %% Cone
 % QuadSurfImplicitEqu{1} = @(x,y,z) (x-0.5)^2/0.005 + (y-0.5)^2 /0.005 - z^2/0.05
 % QuadSurf.boundary{1} = [0 1 0 1 0 1];
 
-QuadSurfImplicitEqu{1} = @(x,y,z) (x-0.5)^2/0.0035 + (y-0.5)^2 /0.0035 - (z - 0.5)^2/0.05
-QuadSurf.boundary{1} = [0 1 0 1 0.25 0.5];
-
-QuadSurfImplicitEqu{2} = @(x,y,z) (x-0.5)^2/0.0045 + (y-0.5)^2 /0.0045 - (z - 0.35)^2/0.05
-QuadSurf.boundary{2} = [0 1 0 1 0.1 0.35];
+% QuadSurfImplicitEqu{1} = @(x,y,z) (x-0.5)^2/0.0035 + (y-0.5)^2 /0.0035 - (z - 0.5)^2/0.05
+% QuadSurf.boundary{1} = [0 1 0 1 0.25 0.5];
+% 
+% QuadSurfImplicitEqu{2} = @(x,y,z) (x-0.5)^2/0.0045 + (y-0.5)^2 /0.0045 - (z - 0.35)^2/0.05
+% QuadSurf.boundary{2} = [0 1 0 1 0.1 0.35];
 
 % Random flat quad surface
 % QuadSurfImplicitEqu{2} = @(x,y,z) (0.01.*x+0.5).^2 + (0.02.*y-0.5).^2 - z.^2 -0.4;
@@ -80,12 +85,12 @@ QuadSurf.boundary{2} = [0 1 0 1 0.1 0.35];
 % clf
 for i = 1:size(QuadSurfImplicitEqu,2)
 % obs(i) = fimplicit3(QuadSurfImplicitEqu{i},QuadSurf.boundary{i},'FaceColor',[0.5 0.5 0.5],'EdgeColor','none','FaceAlpha',0.8);
-obs(i) = fimplicit3(QuadSurfImplicitEqu{i},QuadSurf.boundary{i},'FaceAlpha',0.9,'MeshDensity',70,'EdgeColor','none');
+obs(i) = fimplicit3(QuadSurfImplicitEqu{i},QuadSurf.boundary{i},'FaceAlpha',0.9,'MeshDensity',35,'EdgeColor','none');
 hold on;
 end
-xlim([0 1])
-ylim([0 1])
-zlim([0 1])
+% xlim([0 1])
+% ylim([0 1])
+% zlim([0 1])
 %%  debug use
 % t = linspace(0,1,30);
 % for i = 1:30
@@ -106,9 +111,6 @@ zlim([0 1])
 % %     delete(cable_graph(8));
 % end
 
-
-% 
-% % % % 
 % s = sym('s%d',[1 10]);
 % QuadSurfImplicitEqu{1} = @(x,y,z) s(1)*x^2 + s(2)*y^2 + s(3)*z^2 + ...
 %                                       s(4)*x*y + s(5)*x*z + s(6)*z*y + ...
