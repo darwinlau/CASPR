@@ -18,7 +18,8 @@ classdef InterferenceFreeRayConditionCablePlaneObstacle < WorkspaceRayConditionB
         numDofs;                    % The number of dofs
         numCables;                  % The number of cables
         vertices;                   % The obstacle surface vertices
-        connectivity                % surface vertices connectivity
+        connectivity;                % surface vertices connectivity
+        is_compiled_mode;
     end
     
     methods
@@ -30,6 +31,7 @@ classdef InterferenceFreeRayConditionCablePlaneObstacle < WorkspaceRayConditionB
             w.numCables = model.numCables;
             w.vertices = PolyObj{1};
             w.connectivity = PolyObj{2};
+            w.is_compiled_mode = (model.modelMode == ModelModeType.COMPILED);
         end
         
         % Evaluate the interference free intervals
@@ -55,32 +57,37 @@ classdef InterferenceFreeRayConditionCablePlaneObstacle < WorkspaceRayConditionB
             [tri_u,tri_v,seg_t] = obj.RayTriangleEquation();
             
             if is_dof_translation
-                
                 for i = 1:obj.numCables
                     % three attachements from base frame
                     AttPts = [Cable_Surface_End_pts{1}(i,:);Cable_Surface_End_pts{2}(i,:);Cable_Surface_End_pts{3}(i,:)];
+                    O_vector(i,:) = AttPts(2,:);
+                    unit_vector(i,:) = (AttPts(3,:) - AttPts(2,:))/norm(AttPts(3,:) - AttPts(2,:));
+                    ray_o(:,i) = Cable_Surface_End_pts{2}(i,:)';
+                    ray_d(:,i) = unit_vector(i,:)';
+                end
+                
+                [v1,v2,v3,v4,v5,v6,v7,v8,v9,o1,o2,o3,d1,d2,d3] = obj.VarSubs(O_vector,unit_vector, vertices_i);
+                
+                % find the intersection of the ray to the triangle
+                % surfaces
+                u =tri_u(v1,v2,v3,v4,v5,v6,v7,v8,v9,o1,o2,o3,d1,d2,d3);
+                %                     u = u(:);
+                v =tri_v(v1,v2,v3,v4,v5,v6,v7,v8,v9,o1,o2,o3,d1,d2,d3);
+                %                     v = v(:);
+                t = seg_t(v1,v2,v3,v4,v5,v6,v7,v8,v9,o1,o2,o3,d1,d2,d3);
+                flag = double(u>= 0) + double(v>=0) + double(v+u <=1);
+                %                         + double(t>= 0) + double(t <= 1)
+                [intersected_tri_index,intersected_cable] =  find(flag == 3);
+                
+                if ~isempty(intersected_tri_index)
                     
-                    [v1,v2,v3,v4,v5,v6,v7,v8,v9,o1,o2,o3,d1,d2,d3] = obj.VarSubs(AttPts(2,:), (AttPts(3,:) - AttPts(2,:))/norm(AttPts(3,:) - AttPts(2,:)), vertices_i);
-                    
-                    % find the intersection of the ray to the triangle
-                    % surfaces
-                    u =tri_u(v1,v2,v3,v4,v5,v6,v7,v8,v9,o1,o2,o3,d1,d2,d3);
-                    v =tri_v(v1,v2,v3,v4,v5,v6,v7,v8,v9,o1,o2,o3,d1,d2,d3);
-                    t = seg_t(v1,v2,v3,v4,v5,v6,v7,v8,v9,o1,o2,o3,d1,d2,d3);
-                    flag = double(u>= 0) + double(v>=0) + double(v+u <=1);
-                    %                         + double(t>= 0) + double(t <= 1)
-                    intersected_tri_index =  find(flag == 3);
-                    if ~isempty(intersected_tri_index)
-                        
-                        for j = 1:size(intersected_tri_index,1)
-                            tmp_val(:,j) = round(AttPts(2,:) + (AttPts(3,:) - AttPts(2,:))/norm(AttPts(3,:) - AttPts(2,:)).*t(intersected_tri_index(j),:),obj.ROUNDING_DIGIT)';
-                            
-                            if  tmp_val(1,j) <= max(vertices_i{intersected_tri_index(j)}(:,1)) && tmp_val(1,j)>= min(vertices_i{intersected_tri_index(j)}(:,1)) &&...
-                                    tmp_val(2,j) <= max(vertices_i{intersected_tri_index(j)}(:,2)) && tmp_val(2,j)>= min(vertices_i{intersected_tri_index(j)}(:,2)) &&...
-                                    tmp_val(3,j) <= max(vertices_i{intersected_tri_index(j)}(:,3)) && tmp_val(3,j)>= min(vertices_i{intersected_tri_index(j)}(:,3))
-                                all_intersection_poses = [all_intersection_poses,(q_end - q_begin)*t(intersected_tri_index(j)) + q_begin];
-                                all_intersected_pts = [all_intersected_pts, tmp_val(:,j)];
-                            end
+                    for j = 1:size(intersected_tri_index,1)
+                        tmp_val(:,j) = round(ray_o(:,intersected_cable(j)) + ray_d(:,intersected_cable(j)) .*t(intersected_tri_index(j),intersected_cable(j)),obj.ROUNDING_DIGIT)';
+                        if  tmp_val(1,j) <= max(vertices_i{intersected_tri_index(j)}(:,1)) && tmp_val(1,j)>= min(vertices_i{intersected_tri_index(j)}(:,1)) &&...
+                                tmp_val(2,j) <= max(vertices_i{intersected_tri_index(j)}(:,2)) && tmp_val(2,j)>= min(vertices_i{intersected_tri_index(j)}(:,2)) &&...
+                                tmp_val(3,j) <= max(vertices_i{intersected_tri_index(j)}(:,3)) && tmp_val(3,j)>= min(vertices_i{intersected_tri_index(j)}(:,3))
+                            all_intersection_poses = [all_intersection_poses,(q_end - q_begin)*t(intersected_tri_index(j)) + q_begin];
+                            all_intersected_pts = [all_intersected_pts, tmp_val(:,j)];
                         end
                     end
                 end
@@ -91,19 +98,24 @@ classdef InterferenceFreeRayConditionCablePlaneObstacle < WorkspaceRayConditionB
                 [Si,rot_axis] = GetSegmentEquation(obj,model,q_begin,q_end);
                 
                 u_coeff_quad = obj.GetUVCoeff4QuadOrient(rot_axis);
-                
-                for i = 1:obj.numCables
-                    
-                    rOAi = model.cableModel.cables{1,i}.attachments{1,1}.r_OA;
-                    rGAi = model.cableModel.cables{1,i}.attachments{1,2}.r_GA;
-                    parametric_cable_surf_uv = @(u) Si{i}(u);
-                    [q_intersected,intersected_pts] = ParametericSurfaceIntersectionOrientation(obj,vertices_i,rOAi,rGAi,parametric_cable_surf_uv,...
-                        q_begin,q_end,valid_range,u_coeff_quad,tri_u,tri_v,seg_t);
-                    
-                    all_intersection_poses = [all_intersection_poses, q_intersected];
-                    all_intersected_pts = [all_intersected_pts,intersected_pts];
-                    
+                q_zero = zeros(model.numDofs,1);
+                if obj.is_compiled_mode
+                    rOAi_all = model.cableModel.compiled_r_OAs_fn(q_begin,q_zero,q_zero,q_zero);
+                else
+                    rOAi_all = model.cableModel.r_OAs;
                 end
+                
+                rOAi = rOAi_all(1:3,:);
+                for i = 1:obj.numCables
+                    rGAi(:,i) = model.cableModel.cables{1,i}.attachments{1,2}.r_GA;
+                end
+                parametric_cable_surf_uv = Si;
+                [q_intersected,intersected_pts] = ParametericSurfaceIntersectionOrientation(obj,vertices_i,rOAi,rGAi,parametric_cable_surf_uv,...
+                    q_begin,q_end,valid_range,u_coeff_quad,tri_u,tri_v,seg_t);
+                
+                all_intersection_poses = [all_intersection_poses, q_intersected];
+                all_intersected_pts = [all_intersected_pts,intersected_pts];
+                
             end
             
             %% verify the intersection interval
@@ -113,26 +125,40 @@ classdef InterferenceFreeRayConditionCablePlaneObstacle < WorkspaceRayConditionB
             
             for i = 1:size(all_intersection_poses,2) - 1
                 q_test = (all_intersection_poses(:,i)+all_intersection_poses(:,i+1))/2;
-                model.update(q_test,zeros(model.numDofs,1), zeros(model.numDofs,1),zeros(model.numDofs,1));
-                for j = 1:obj.numCables
-                    Si_unit = model.cableModel.cables{1,j}.segments{1,1}.segmentVector/norm(model.cableModel.cables{1,j}.segments{1,1}.segmentVector);
-                    rOAi  = model.cableModel.cables{1,j}.attachments{1,1}.r_OA;
-                    rGAi  = model.cableModel.cables{1,j}.attachments{1,2}.r_OA;
-                    [v1,v2,v3,v4,v5,v6,v7,v8,v9,o1,o2,o3,d1,d2,d3] = obj.VarSubs(rOAi, Si_unit, vertices_i);
-                    u = tri_u(v1,v2,v3,v4,v5,v6,v7,v8,v9,o1,o2,o3,d1,d2,d3);
-                    v = tri_v(v1,v2,v3,v4,v5,v6,v7,v8,v9,o1,o2,o3,d1,d2,d3);
-                    t = seg_t(v1,v2,v3,v4,v5,v6,v7,v8,v9,o1,o2,o3,d1,d2,d3);
-                    flag = double(u>= 0) + double(v>=0) + double(v+u <=1) ;
-                    %                         + double(t>= 0) + double(t <= 1);
-                    intersected_flag(j) =  ~isempty(find(flag == 3));
-                    % if not empty, there is intersection, the the flag
-                    % is 1
-                    
+                q_zero = zeros(model.numDofs,1);
+                if obj.is_compiled_mode
+                    rOAi_all = model.cableModel.compiled_r_OAs_fn(q_test,q_zero,q_zero,q_zero);
+                    length = model.cableModel.compiled_lengths_fn(q_test,q_zero,q_zero,q_zero);
+                else
+                    model.update(q_test,q_zero,q_zero,q_zero);
+                    rOAi_all = model.cableModel.r_OAs;
+                    length = model.cableLengths;
                 end
                 
-                if ~any(intersected_flag)
-                    intervals(intervals_count,:) = [all_intersection_poses(free_variable_index,i),all_intersection_poses(free_variable_index,i+1)];
-                    intervals_count = intervals_count + 1;
+                rOAi_i= rOAi_all(1:3,:);
+                rOAi_j= rOAi_all(4:6,:);
+                Si_unit_all =   (rOAi_j - rOAi_i)./length';
+                
+                [v1,v2,v3,v4,v5,v6,v7,v8,v9,o1,o2,o3,d1,d2,d3] = obj.VarSubs(rOAi_i', Si_unit_all', vertices_i);
+                u = tri_u(v1,v2,v3,v4,v5,v6,v7,v8,v9,o1,o2,o3,d1,d2,d3);
+                v = tri_v(v1,v2,v3,v4,v5,v6,v7,v8,v9,o1,o2,o3,d1,d2,d3);
+                %                     t = seg_t(v1,v2,v3,v4,v5,v6,v7,v8,v9,o1,o2,o3,d1,d2,d3);
+                flag = double(u>= 0) + double(v>=0) + double(v+u <=1) ;
+                %                         + double(t>= 0) + double(t <= 1);
+                [tri_ind,cable_ind] = find(flag == 3);
+                is_intersected =  ~isempty(cable_ind);
+                % if not empty, there is intersection, the the flag
+                % is 1
+                
+                
+                if ~is_intersected
+                    if ~isempty(intervals) && intervals(end) == all_intersection_poses(free_variable_index,i)
+                        intervals(end) = all_intersection_poses(free_variable_index,i+1);
+                    else
+                        intervals(intervals_count,:) = [all_intersection_poses(free_variable_index,i),all_intersection_poses(free_variable_index,i+1)];
+                        intervals_count = intervals_count + 1;
+                    end
+                    
                 end
                 
             end
@@ -144,12 +170,17 @@ classdef InterferenceFreeRayConditionCablePlaneObstacle < WorkspaceRayConditionB
     end
     methods (Access = private)
         %functin to get the cable segment data
-        function [base_att_pt,EE_att_pt] = GetSegmentData(~,model,q)
-            
-            model.update(q,zeros(model.numDofs,1), zeros(model.numDofs,1),zeros(model.numDofs,1))
-            for i = 1:model.numCables
-                base_att_pt(i,:) = model.cableModel.cables{1,i}.attachments{1,1}.r_OA';
-                EE_att_pt(i,:) = model.cableModel.cables{1,i}.attachments{1,2}.r_OA';
+        function [base_att_pt,EE_att_pt] = GetSegmentData(obj,model,q)
+            q_zero = zeros(model.numDofs,1);
+            if obj.is_compiled_mode
+                rOAi = model.cableModel.compiled_r_OAs_fn(q,q_zero,q_zero,q_zero);
+                base_att_pt =  rOAi(1:3,:)';
+                EE_att_pt = rOAi(4:6,:)';
+            else
+                model.update(q,q_zero,q_zero,q_zero);
+                rOAi = model.cableModel.r_OAs;
+                base_att_pt =  rOAi(1:3,:)';
+                EE_att_pt = rOAi(4:6,:)';
             end
         end
         
@@ -181,9 +212,14 @@ classdef InterferenceFreeRayConditionCablePlaneObstacle < WorkspaceRayConditionB
             else
                 CASPR_log.Error('Cannot find rotational axis of this ray')
             end
-            %                         syms a1 a2 a3 b1 b2 b3 q1 q2 q3 u
+            if obj.is_compiled_mode
+                q_zero = zeros(model.numDofs,1);
+                rOAi_all = model.cableModel.compiled_r_OAs_fn(q_begin,q_zero,q_zero,q_zero);
+            else
+                rOAi_all = model.cableModel.r_OAs;
+            end
             for i = 1:model.numCables
-                r_OA_i = model.cableModel.cables{1,i}.attachments{1,1}.r_OA;
+                r_OA_i = rOAi_all(1:3,i);
                 r_GA_i = model.cableModel.cables{1,i}.attachments{1,2}.r_GA;
                 Si{i} =@(u) (q_begin(obj.areDofsTranslation) - r_OA_i) + Rot_Mat(u)*r_GA_i;
             end
@@ -198,33 +234,37 @@ classdef InterferenceFreeRayConditionCablePlaneObstacle < WorkspaceRayConditionB
             q2 = q(2);
             q3 = q(3);
             
-            a1 = r_OA_i(1);
-            a2 = r_OA_i(2);
-            a3 = r_OA_i(3);
-            b1 = r_GA_i(1);
-            b2 = r_GA_i(2);
-            b3 = r_GA_i(3);
-            u_coeff = [];
+            a1 = r_OA_i(1,:);
+            a2 = r_OA_i(2,:);
+            a3 = r_OA_i(3,:);
+            b1 = r_GA_i(1,:);
+            b2 = r_GA_i(2,:);
+            b3 = r_GA_i(3,:);
+            
+            
             tri_edge_pattern = [3,2;3,1;2,1];
-            tmp_u_value = [];
             
             for i = 1:size(tri_edge_pattern,1)
                 for j = 1:12
-                    k11(j,:) = vertices{j}(tri_edge_pattern(i,1),1);
-                    k12(j,:) = vertices{j}(tri_edge_pattern(i,1),2);
-                    k13(j,:) = vertices{j}(tri_edge_pattern(i,1),3);
-                    k21(j,:) = vertices{j}(tri_edge_pattern(i,2),1);
-                    k22(j,:) = vertices{j}(tri_edge_pattern(i,2),2);
-                    k23(j,:) = vertices{j}(tri_edge_pattern(i,2),3);
+                    k11(j,i) = vertices{j}(tri_edge_pattern(i,1),1);
+                    k12(j,i) = vertices{j}(tri_edge_pattern(i,1),2);
+                    k13(j,i) = vertices{j}(tri_edge_pattern(i,1),3);
+                    k21(j,i) = vertices{j}(tri_edge_pattern(i,2),1);
+                    k22(j,i) = vertices{j}(tri_edge_pattern(i,2),2);
+                    k23(j,i) = vertices{j}(tri_edge_pattern(i,2),3);
                 end
-                u_coeff = [u_coeff;round(u_coeff_u(a1,a2,a3,b1,b2,b3,k11,k12,k13,k21,k22,k23,q1,q2,q3),obj.ROUNDING_DIGIT)];
             end
-            for i = 1:size(u_coeff,1)
-                tmp_u_value = [tmp_u_value;roots(u_coeff(i,:))];
-            end
+            k11 = k11(:);k12 = k12(:);k13 = k13(:);k21 = k21(:);k22 = k22(:);k23 = k23(:);
+            tmp_u_value = [];
+            u_coeff = [];
             
+            u_coeff = round(u_coeff_u(a1,a2,a3,b1,b2,b3,k11,k12,k13,k21,k22,k23,q1,q2,q3),obj.ROUNDING_DIGIT);
+            tmp_u_value_1 = @(a,b,c) (-b + sqrt(b.^2-4*a.*c))./(2*a);
+            tmp_u_value_2 = @(a,b,c) (-b - sqrt(b.^2-4*a.*c))./(2*a);
+            tmp_u_value = [tmp_u_value_1(u_coeff(:,1),u_coeff(:,2),u_coeff(:,3));tmp_u_value_2(u_coeff(:,1),u_coeff(:,2),u_coeff(:,3))];
+            
+            tmp_u_value = tmp_u_value(imag(tmp_u_value)==0);
             u_value = unique(tmp_u_value);
-            u_value = u_value(imag(u_value)==0);
             u_value(u_value <u_range(1)) = [];u_value(u_value > u_range(2)) = [];
             
             %             dfd = uv_equ(u_value) + r_OA_i
@@ -240,24 +280,29 @@ classdef InterferenceFreeRayConditionCablePlaneObstacle < WorkspaceRayConditionB
             %             f3 = f2v(2)
             %             [f3v,f3vd] = coeffs(f3,u);
             %             f3uans = -f3v(2) + sqrt(f3v(2)^2)
-            
-            
+
             if ~isempty(u_value)
                 for i = 1:size(u_value,1)
                     %%% find the intersection point
-                    [v1,v2,v3,v4,v5,v6,v7,v8,v9,o1,o2,o3,d1,d2,d3] = obj.VarSubs(r_OA_i, uv_equ(u_value(i)), vertices);
+                    for j = 1:size(uv_equ,2)
+                        Si_unit(j,:) =  uv_equ{j}(u_value(i))';
+                    end
+                    [v1,v2,v3,v4,v5,v6,v7,v8,v9,o1,o2,o3,d1,d2,d3] = obj.VarSubs(r_OA_i', Si_unit, vertices);
                     u = tri_u(v1,v2,v3,v4,v5,v6,v7,v8,v9,o1,o2,o3,d1,d2,d3);
                     v = tri_v(v1,v2,v3,v4,v5,v6,v7,v8,v9,o1,o2,o3,d1,d2,d3);
                     t = seg_t(v1,v2,v3,v4,v5,v6,v7,v8,v9,o1,o2,o3,d1,d2,d3);
-                    flag = double(u>= 0) + double(v>=0) + double(v+u <=1);
-                    %                     + double(t>= 0) + double(t <= 1);
-                    intersected_tri_index =  find(flag == 3);
-                    if ~isempty(intersected_tri_index)
-                        for j = 1:size(intersected_tri_index,1)
-                            tmp_val(:,j) = round(r_OA_i + uv_equ(u_value(i)).*t(intersected_tri_index(j),:),obj.ROUNDING_DIGIT);
-                            if  tmp_val(1,j) <= max(vertices{intersected_tri_index(j)}(:,1)) && tmp_val(1,j)>= min(vertices{intersected_tri_index(j)}(:,1)) &&...
-                                    tmp_val(2,j) <= max(vertices{intersected_tri_index(j)}(:,2)) && tmp_val(2,j)>= min(vertices{intersected_tri_index(j)}(:,2)) &&...
-                                    tmp_val(3,j) <= max(vertices{intersected_tri_index(j)}(:,3)) && tmp_val(3,j)>= min(vertices{intersected_tri_index(j)}(:,3))
+                    flag = double(u>= 0) + double(v>=0) + double(v+u <=1) ;
+                    [tri_ind,cable_ind] = find(flag == 3);
+                    
+                    ray_d = Si_unit';
+                    ray_o = r_OA_i;
+                    if ~isempty(tri_ind)
+                        for j = 1:size(tri_ind,1)
+                            tmp_val(:,j) = round(ray_o(:,cable_ind(j)) + ray_d(:,cable_ind(j)) .*t(tri_ind(j),cable_ind(j)),obj.ROUNDING_DIGIT)';
+                            
+                            if  tmp_val(1,j) <= max(vertices{tri_ind(j)}(:,1)) && tmp_val(1,j)>= min(vertices{tri_ind(j)}(:,1)) &&...
+                                    tmp_val(2,j) <= max(vertices{tri_ind(j)}(:,2)) && tmp_val(2,j)>= min(vertices{tri_ind(j)}(:,2)) &&...
+                                    tmp_val(3,j) <= max(vertices{tri_ind(j)}(:,3)) && tmp_val(3,j)>= min(vertices{tri_ind(j)}(:,3))
                                 q_intersected = [q_intersected,(q_end - q_begin)*interp1(u_range,[0 1],u_value(i)) + q_begin];
                                 intersected_pts = [intersected_pts, tmp_val(:,j)];
                             end
@@ -265,6 +310,7 @@ classdef InterferenceFreeRayConditionCablePlaneObstacle < WorkspaceRayConditionB
                     end
                 end
             end
+
         end
         
         %% function to get the u coefficient in order to speed up the calculation
@@ -272,14 +318,21 @@ classdef InterferenceFreeRayConditionCablePlaneObstacle < WorkspaceRayConditionB
             u_coeff = [];
             if rot_axis == 4 % x-axis
                 u_coeff =@(a1,a2,a3,b1,b2,b3,k11,k12,k13,k21,k22,k23,q1,q2,q3)...
-                    [ a1*b3.*k12 - a1*b2.*k13 - a2*b1.*k13 - a2*b3.*k11 + a3*b1.*k12 + a3*b2.*k11 + a1*b2.*k23 - a1*b3.*k22 + a2*b1.*k23 + a2*b3.*k21 - a3*b1.*k22 - a3*b2.*k21 + a1.*k12.*k23 - a1.*k13.*k22 - a2.*k11.*k23 + a2.*k13.*k21 + a3.*k11.*k22 - a3.*k12.*k21 - b1.*k12.*k23 + b1.*k13.*k22 - b2.*k11.*k23 + b2.*k13.*k21 + b3.*k11.*k22 - b3.*k12.*k21 - a1.*k12*q3 + a1.*k13*q2 + a2.*k11*q3 - a2.*k13*q1 - a3.*k11*q2 + a3.*k12*q1 + a1.*k22*q3 - a1.*k23*q2 - a2.*k21*q3 + a2.*k23*q1 + a3.*k21*q2 - a3.*k22*q1 - k11.*k22*q3 + k11.*k23*q2 + k12.*k21*q3 - k12.*k23*q1 - k13.*k21*q2 + k13.*k22*q1, 2*a2*b2.*k11 - 2*a1*b2.*k12 - 2*a1*b3.*k13 + 2*a3*b3.*k11 + 2*a1*b2.*k22 - 2*a2*b2.*k21 + 2*a1*b3.*k23 - 2*a3*b3.*k21 - 2*b2.*k11.*k22 + 2*b2.*k12.*k21 - 2*b3.*k11.*k23 + 2*b3.*k13.*k21, a1*b2.*k13 - a1*b3.*k12 - a2*b1.*k13 + a2*b3.*k11 + a3*b1.*k12 - a3*b2.*k11 - a1*b2.*k23 + a1*b3.*k22 + a2*b1.*k23 - a2*b3.*k21 - a3*b1.*k22 + a3*b2.*k21 + a1.*k12.*k23 - a1.*k13.*k22 - a2.*k11.*k23 + a2.*k13.*k21 + a3.*k11.*k22 - a3.*k12.*k21 - b1.*k12.*k23 + b1.*k13.*k22 + b2.*k11.*k23 - b2.*k13.*k21 - b3.*k11.*k22 + b3.*k12.*k21 - a1.*k12*q3 + a1.*k13*q2 + a2.*k11*q3 - a2.*k13*q1 - a3.*k11*q2 + a3.*k12*q1 + a1.*k22*q3 - a1.*k23*q2 - a2.*k21*q3 + a2.*k23*q1 + a3.*k21*q2 - a3.*k22*q1 - k11.*k22*q3 + k11.*k23*q2 + k12.*k21*q3 - k12.*k23*q1 - k13.*k21*q2 + k13.*k22*q1];
+                    [ reshape(a1.*b3.*k12 - a1.*b2.*k13 - a2.*b1.*k13 - a2.*b3.*k11 + a3.*b1.*k12 + a3.*b2.*k11 + a1.*b2.*k23 - a1.*b3.*k22 + a2.*b1.*k23 + a2.*b3.*k21 - a3.*b1.*k22 - a3.*b2.*k21 + a1.*k12.*k23 - a1.*k13.*k22 - a2.*k11.*k23 + a2.*k13.*k21 + a3.*k11.*k22 - a3.*k12.*k21 - b1.*k12.*k23 + b1.*k13.*k22 - b2.*k11.*k23 + b2.*k13.*k21 + b3.*k11.*k22 - b3.*k12.*k21 - a1.*k12*q3 + a1.*k13*q2 + a2.*k11*q3 - a2.*k13*q1 - a3.*k11*q2 + a3.*k12*q1 + a1.*k22*q3 - a1.*k23*q2 - a2.*k21*q3 + a2.*k23*q1 + a3.*k21*q2 - a3.*k22*q1 - k11.*k22*q3 + k11.*k23*q2 + k12.*k21*q3 - k12.*k23*q1 - k13.*k21*q2 + k13.*k22*q1,[size(k12,1)*size(a3,2),1]),...
+                    reshape(2*a2.*b2.*k11 - 2*a1.*b2.*k12 - 2*a1.*b3.*k13 + 2*a3.*b3.*k11 + 2*a1.*b2.*k22 - 2*a2.*b2.*k21 + 2*a1.*b3.*k23 - 2*a3.*b3.*k21 - 2.*b2.*k11.*k22 + 2.*b2.*k12.*k21 - 2.*b3.*k11.*k23 + 2.*b3.*k13.*k21,[size(k12,1)*size(a3,2),1]),...
+                    reshape(a1.*b2.*k13 - a1.*b3.*k12 - a2.*b1.*k13 + a2.*b3.*k11 + a3.*b1.*k12 - a3.*b2.*k11 - a1.*b2.*k23 + a1.*b3.*k22 + a2.*b1.*k23 - a2.*b3.*k21 - a3.*b1.*k22 + a3.*b2.*k21 + a1.*k12.*k23 - a1.*k13.*k22 - a2.*k11.*k23 + a2.*k13.*k21 + a3.*k11.*k22 - a3.*k12.*k21 - b1.*k12.*k23 + b1.*k13.*k22 + b2.*k11.*k23 - b2.*k13.*k21 - b3.*k11.*k22 + b3.*k12.*k21 - a1.*k12*q3 + a1.*k13*q2 + a2.*k11*q3 - a2.*k13*q1 - a3.*k11*q2 + a3.*k12*q1 + a1.*k22*q3 - a1.*k23*q2 - a2.*k21*q3 + a2.*k23*q1 + a3.*k21*q2 - a3.*k22*q1 - k11.*k22*q3 + k11.*k23*q2 + k12.*k21*q3 - k12.*k23*q1 - k13.*k21*q2 + k13.*k22*q1,[size(k12,1)*size(a3,2),1])];
             elseif rot_axis == 5 %y-axis
                 u_coeff =@(a1,a2,a3,b1,b2,b3,k11,k12,k13,k21,k22,k23,q1,q2,q3)...
-                    [ a1*b2.*k13 + a1*b3.*k12 + a2*b1.*k13 - a2*b3.*k11 - a3*b1.*k12 - a3*b2.*k11 - a1*b2.*k23 - a1*b3.*k22 - a2*b1.*k23 + a2*b3.*k21 + a3*b1.*k22 + a3*b2.*k21 + a1.*k12.*k23 - a1.*k13.*k22 - a2.*k11.*k23 + a2.*k13.*k21 + a3.*k11.*k22 - a3.*k12.*k21 + b1.*k12.*k23 - b1.*k13.*k22 + b2.*k11.*k23 - b2.*k13.*k21 + b3.*k11.*k22 - b3.*k12.*k21 - a1.*k12*q3 + a1.*k13*q2 + a2.*k11*q3 - a2.*k13*q1 - a3.*k11*q2 + a3.*k12*q1 + a1.*k22*q3 - a1.*k23*q2 - a2.*k21*q3 + a2.*k23*q1 + a3.*k21*q2 - a3.*k22*q1 - k11.*k22*q3 + k11.*k23*q2 + k12.*k21*q3 - k12.*k23*q1 - k13.*k21*q2 + k13.*k22*q1, 2*a1*b1.*k12 - 2*a2*b1.*k11 - 2*a2*b3.*k13 + 2*a3*b3.*k12 - 2*a1*b1.*k22 + 2*a2*b1.*k21 + 2*a2*b3.*k23 - 2*a3*b3.*k22 + 2*b1.*k11.*k22 - 2*b1.*k12.*k21 - 2*b3.*k12.*k23 + 2*b3.*k13.*k22, a1*b2.*k13 - a1*b3.*k12 - a2*b1.*k13 + a2*b3.*k11 + a3*b1.*k12 - a3*b2.*k11 - a1*b2.*k23 + a1*b3.*k22 + a2*b1.*k23 - a2*b3.*k21 - a3*b1.*k22 + a3*b2.*k21 + a1.*k12.*k23 - a1.*k13.*k22 - a2.*k11.*k23 + a2.*k13.*k21 + a3.*k11.*k22 - a3.*k12.*k21 - b1.*k12.*k23 + b1.*k13.*k22 + b2.*k11.*k23 - b2.*k13.*k21 - b3.*k11.*k22 + b3.*k12.*k21 - a1.*k12*q3 + a1.*k13*q2 + a2.*k11*q3 - a2.*k13*q1 - a3.*k11*q2 + a3.*k12*q1 + a1.*k22*q3 - a1.*k23*q2 - a2.*k21*q3 + a2.*k23*q1 + a3.*k21*q2 - a3.*k22*q1 - k11.*k22*q3 + k11.*k23*q2 + k12.*k21*q3 - k12.*k23*q1 - k13.*k21*q2 + k13.*k22*q1];
+                    [ reshape(a1.*b2.*k13 + a1.*b3.*k12 + a2.*b1.*k13 - a2.*b3.*k11 - a3.*b1.*k12 - a3.*b2.*k11 - a1.*b2.*k23 - a1.*b3.*k22 - a2.*b1.*k23 + a2.*b3.*k21 + a3.*b1.*k22 + a3.*b2.*k21 + a1.*k12.*k23 - a1.*k13.*k22 - a2.*k11.*k23 + a2.*k13.*k21 + a3.*k11.*k22 - a3.*k12.*k21 + b1.*k12.*k23 - b1.*k13.*k22 + b2.*k11.*k23 - b2.*k13.*k21 + b3.*k11.*k22 - b3.*k12.*k21 - a1.*k12*q3 + a1.*k13*q2 + a2.*k11*q3 - a2.*k13*q1 - a3.*k11*q2 + a3.*k12*q1 + a1.*k22*q3 - a1.*k23*q2 - a2.*k21*q3 + a2.*k23*q1 + a3.*k21*q2 - a3.*k22*q1 - k11.*k22*q3 + k11.*k23*q2 + k12.*k21*q3 - k12.*k23*q1 - k13.*k21*q2 + k13.*k22*q1,[size(k12,1)*size(a3,2),1]),...
+                    reshape(2*a1.*b1.*k12 - 2*a2.*b1.*k11 - 2*a2.*b3.*k13 + 2*a3.*b3.*k12 - 2*a1.*b1.*k22 + 2*a2.*b1.*k21 + 2*a2.*b3.*k23 - 2*a3.*b3.*k22 + 2.*b1.*k11.*k22 - 2.*b1.*k12.*k21 - 2.*b3.*k12.*k23 + 2.*b3.*k13.*k22,[size(k12,1)*size(a3,2),1]),...
+                    reshape(a1.*b2.*k13 - a1.*b3.*k12 - a2.*b1.*k13 + a2.*b3.*k11 + a3.*b1.*k12 - a3.*b2.*k11 - a1.*b2.*k23 + a1.*b3.*k22 + a2.*b1.*k23 - a2.*b3.*k21 - a3.*b1.*k22 + a3.*b2.*k21 + a1.*k12.*k23 - a1.*k13.*k22 - a2.*k11.*k23 + a2.*k13.*k21 + a3.*k11.*k22 - a3.*k12.*k21 - b1.*k12.*k23 + b1.*k13.*k22 + b2.*k11.*k23 - b2.*k13.*k21 - b3.*k11.*k22 + b3.*k12.*k21 - a1.*k12*q3 + a1.*k13*q2 + a2.*k11*q3 - a2.*k13*q1 - a3.*k11*q2 + a3.*k12*q1 + a1.*k22*q3 - a1.*k23*q2 - a2.*k21*q3 + a2.*k23*q1 + a3.*k21*q2 - a3.*k22*q1 - k11.*k22*q3 + k11.*k23*q2 + k12.*k21*q3 - k12.*k23*q1 - k13.*k21*q2 + k13.*k22*q1,[size(k12,1)*size(a3,2),1])];
             elseif rot_axis ==6
                 u_coeff =@(a1,a2,a3,b1,b2,b3,k11,k12,k13,k21,k22,k23,q1,q2,q3)...
-                    [ a2*b1.*k13 - a1*b3.*k12 - a1*b2.*k13 + a2*b3.*k11 - a3*b1.*k12 + a3*b2.*k11 + a1*b2.*k23 + a1*b3.*k22 - a2*b1.*k23 - a2*b3.*k21 + a3*b1.*k22 - a3*b2.*k21 + a1.*k12.*k23 - a1.*k13.*k22 - a2.*k11.*k23 + a2.*k13.*k21 + a3.*k11.*k22 - a3.*k12.*k21 + b1.*k12.*k23 - b1.*k13.*k22 - b2.*k11.*k23 + b2.*k13.*k21 - b3.*k11.*k22 + b3.*k12.*k21 - a1.*k12*q3 + a1.*k13*q2 + a2.*k11*q3 - a2.*k13*q1 - a3.*k11*q2 + a3.*k12*q1 + a1.*k22*q3 - a1.*k23*q2 - a2.*k21*q3 + a2.*k23*q1 + a3.*k21*q2 - a3.*k22*q1 - k11.*k22*q3 + k11.*k23*q2 + k12.*k21*q3 - k12.*k23*q1 - k13.*k21*q2 + k13.*k22*q1, 2*a1*b1.*k13 - 2*a3*b1.*k11 + 2*a2*b2.*k13 - 2*a3*b2.*k12 - 2*a1*b1.*k23 + 2*a3*b1.*k21 - 2*a2*b2.*k23 + 2*a3*b2.*k22 + 2*b1.*k11.*k23 - 2*b1.*k13.*k21 + 2*b2.*k12.*k23 - 2*b2.*k13.*k22, a1*b2.*k13 - a1*b3.*k12 - a2*b1.*k13 + a2*b3.*k11 + a3*b1.*k12 - a3*b2.*k11 - a1*b2.*k23 + a1*b3.*k22 + a2*b1.*k23 - a2*b3.*k21 - a3*b1.*k22 + a3*b2.*k21 + a1.*k12.*k23 - a1.*k13.*k22 - a2.*k11.*k23 + a2.*k13.*k21 + a3.*k11.*k22 - a3.*k12.*k21 - b1.*k12.*k23 + b1.*k13.*k22 + b2.*k11.*k23 - b2.*k13.*k21 - b3.*k11.*k22 + b3.*k12.*k21 - a1.*k12*q3 + a1.*k13*q2 + a2.*k11*q3 - a2.*k13*q1 - a3.*k11*q2 + a3.*k12*q1 + a1.*k22*q3 - a1.*k23*q2 - a2.*k21*q3 + a2.*k23*q1 + a3.*k21*q2 - a3.*k22*q1 - k11.*k22*q3 + k11.*k23*q2 + k12.*k21*q3 - k12.*k23*q1 - k13.*k21*q2 + k13.*k22*q1];
+                    [ reshape(a2.*b1.*k13 - a1.*b3.*k12 - a1.*b2.*k13 + a2.*b3.*k11 - a3.*b1.*k12 + a3.*b2.*k11 + a1.*b2.*k23 + a1.*b3.*k22 - a2.*b1.*k23 - a2.*b3.*k21 + a3.*b1.*k22 - a3.*b2.*k21 + a1.*k12.*k23 - a1.*k13.*k22 - a2.*k11.*k23 + a2.*k13.*k21 + a3.*k11.*k22 - a3.*k12.*k21 + b1.*k12.*k23 - b1.*k13.*k22 - b2.*k11.*k23 + b2.*k13.*k21 - b3.*k11.*k22 + b3.*k12.*k21 - a1.*k12*q3 + a1.*k13*q2 + a2.*k11*q3 - a2.*k13*q1 - a3.*k11*q2 + a3.*k12*q1 + a1.*k22*q3 - a1.*k23*q2 - a2.*k21*q3 + a2.*k23*q1 + a3.*k21*q2 - a3.*k22*q1 - k11.*k22*q3 + k11.*k23*q2 + k12.*k21*q3 - k12.*k23*q1 - k13.*k21*q2 + k13.*k22*q1,[size(k12,1)*size(a3,2),1]),...
+                    reshape(2*a1.*b1.*k13 - 2*a3.*b1.*k11 + 2*a2.*b2.*k13 - 2*a3.*b2.*k12 - 2*a1.*b1.*k23 + 2*a3.*b1.*k21 - 2*a2.*b2.*k23 + 2*a3.*b2.*k22 + 2.*b1.*k11.*k23 - 2.*b1.*k13.*k21 + 2.*b2.*k12.*k23 - 2.*b2.*k13.*k22,[size(k12,1)*size(a3,2),1])...
+                    reshape(a1.*b2.*k13 - a1.*b3.*k12 - a2.*b1.*k13 + a2.*b3.*k11 + a3.*b1.*k12 - a3.*b2.*k11 - a1.*b2.*k23 + a1.*b3.*k22 + a2.*b1.*k23 - a2.*b3.*k21 - a3.*b1.*k22 + a3.*b2.*k21 + a1.*k12.*k23 - a1.*k13.*k22 - a2.*k11.*k23 + a2.*k13.*k21 + a3.*k11.*k22 - a3.*k12.*k21 - b1.*k12.*k23 + b1.*k13.*k22 + b2.*k11.*k23 - b2.*k13.*k21 - b3.*k11.*k22 + b3.*k12.*k21 - a1.*k12*q3 + a1.*k13*q2 + a2.*k11*q3 - a2.*k13*q1 - a3.*k11*q2 + a3.*k12*q1 + a1.*k22*q3 - a1.*k23*q2 - a2.*k21*q3 + a2.*k23*q1 + a3.*k21*q2 - a3.*k22*q1 - k11.*k22*q3 + k11.*k23*q2 + k12.*k21*q3 - k12.*k23*q1 - k13.*k21*q2 + k13.*k22*q1,[size(k12,1)*size(a3,2),1])];
             end
+            
         end
         %% function to calculate the intersection of a segment and triangle
         function [flag, u, v, t] = SegmentTriangleIntersection (~,o, d, vertrics)
@@ -351,19 +404,30 @@ classdef InterferenceFreeRayConditionCablePlaneObstacle < WorkspaceRayConditionB
         end
         
         function [u,v,t] = RayTriangleEquation(~)
-            
             u = @(v1,v2,v3,v4,v5,v6,v7,v8,v9,o1,o2,o3,d1,d2,d3)...
-                -((d2.*(v1 - v7) - d1.*(v2 - v8)).*(o3 - v3) - (d3.*(v1 - v7) - d1.*(v3 - v9)).*(o2 - v2) + (d3.*(v2 - v8) - d2.*(v3 - v9)).*(o1 - v1))./((d2.*(v1 - v7) - d1.*(v2 - v8)).*(v3 - v6) - (d3.*(v1 - v7) - d1.*(v3 - v9)).*(v2 - v5) + (d3.*(v2 - v8) - d2.*(v3 - v9)).*(v1 - v4));
+                -((d2'.*(v1 - v7) - d1'.*(v2 - v8)).*(o3' - v3) - (d3'.*(v1 - v7) - d1'.*(v3 - v9)).*(o2' - v2) + (d3'.*(v2 - v8) - d2'.*(v3 - v9)).*(o1' - v1))./((d2'.*(v1 - v7) - d1'.*(v2 - v8)).*(v3 - v6) - (d3'.*(v1 - v7) - d1'.*(v3 - v9)).*(v2 - v5) + (d3'.*(v2 - v8) - d2'.*(v3 - v9)).*(v1 - v4));
             v = @(v1,v2,v3,v4,v5,v6,v7,v8,v9,o1,o2,o3,d1,d2,d3)...
-                (d3.*((o1 - v1).*(v2 - v5) - (o2 - v2).*(v1 - v4)) - d2.*((o1 - v1).*(v3 - v6) - (o3 - v3).*(v1 - v4)) + d1.*((o2 - v2).*(v3 - v6) - (o3 - v3).*(v2 - v5)))./((d2.*(v1 - v7) - d1.*(v2 - v8)).*(v3 - v6) - (d3.*(v1 - v7) - d1.*(v3 - v9)).*(v2 - v5) + (d3.*(v2 - v8) - d2.*(v3 - v9)).*(v1 - v4));
+                (d3'.*((o1' - v1).*(v2 - v5) - (o2' - v2).*(v1 - v4)) - d2'.*((o1' - v1).*(v3 - v6) - (o3' - v3).*(v1 - v4)) + d1'.*((o2' - v2).*(v3 - v6) - (o3' - v3).*(v2 - v5)))./((d2'.*(v1 - v7) - d1'.*(v2 - v8)).*(v3 - v6) - (d3'.*(v1 - v7) - d1'.*(v3 - v9)).*(v2 - v5) + (d3'.*(v2 - v8) - d2'.*(v3 - v9)).*(v1 - v4));
             t = @(v1,v2,v3,v4,v5,v6,v7,v8,v9,o1,o2,o3,d1,d2,d3)...
-                -((v3 - v9).*((o1 - v1).*(v2 - v5) - (o2 - v2).*(v1 - v4)) - (v2 - v8).*((o1 - v1).*(v3 - v6) - (o3 - v3).*(v1 - v4)) + (v1 - v7).*((o2 - v2).*(v3 - v6) - (o3 - v3).*(v2 - v5)))./((d2.*(v1 - v7) - d1.*(v2 - v8)).*(v3 - v6) - (d3.*(v1 - v7) - d1.*(v3 - v9)).*(v2 - v5) + (d3.*(v2 - v8) - d2.*(v3 - v9)).*(v1 - v4));
+                -((v3 - v9).*((o1' - v1).*(v2 - v5) - (o2' - v2).*(v1 - v4)) - (v2 - v8).*((o1' - v1).*(v3 - v6) - (o3' - v3).*(v1 - v4)) + (v1 - v7).*((o2' - v2).*(v3 - v6) - (o3' - v3).*(v2 - v5)))./((d2'.*(v1 - v7) - d1'.*(v2 - v8)).*(v3 - v6) - (d3'.*(v1 - v7) - d1'.*(v3 - v9)).*(v2 - v5) + (d3'.*(v2 - v8) - d2'.*(v3 - v9)).*(v1 - v4));
+            
+            %             u = @(v1,v2,v3,v4,v5,v6,v7,v8,v9,o1,o2,o3,d1,d2,d3)...
+            %                 -((d2.*(v1 - v7) - d1.*(v2 - v8)).*(o3 - v3) - (d3.*(v1 - v7) - d1.*(v3 - v9)).*(o2 - v2) + (d3.*(v2 - v8) - d2.*(v3 - v9)).*(o1 - v1))./((d2.*(v1 - v7) - d1.*(v2 - v8)).*(v3 - v6) - (d3.*(v1 - v7) - d1.*(v3 - v9)).*(v2 - v5) + (d3.*(v2 - v8) - d2.*(v3 - v9)).*(v1 - v4));
+            %             v = @(v1,v2,v3,v4,v5,v6,v7,v8,v9,o1,o2,o3,d1,d2,d3)...
+            %                 (d3.*((o1 - v1).*(v2 - v5) - (o2 - v2).*(v1 - v4)) - d2.*((o1 - v1).*(v3 - v6) - (o3 - v3).*(v1 - v4)) + d1.*((o2 - v2).*(v3 - v6) - (o3 - v3).*(v2 - v5)))./((d2.*(v1 - v7) - d1.*(v2 - v8)).*(v3 - v6) - (d3.*(v1 - v7) - d1.*(v3 - v9)).*(v2 - v5) + (d3.*(v2 - v8) - d2.*(v3 - v9)).*(v1 - v4));
+            %             t = @(v1,v2,v3,v4,v5,v6,v7,v8,v9,o1,o2,o3,d1,d2,d3)...
+            %                 -((v3 - v9).*((o1 - v1).*(v2 - v5) - (o2 - v2).*(v1 - v4)) - (v2 - v8).*((o1 - v1).*(v3 - v6) - (o3 - v3).*(v1 - v4)) + (v1 - v7).*((o2 - v2).*(v3 - v6) - (o3 - v3).*(v2 - v5)))./((d2.*(v1 - v7) - d1.*(v2 - v8)).*(v3 - v6) - (d3.*(v1 - v7) - d1.*(v3 - v9)).*(v2 - v5) + (d3.*(v2 - v8) - d2.*(v3 - v9)).*(v1 - v4));
             
         end
         
         function [v1,v2,v3,v4,v5,v6,v7,v8,v9,o1,o2,o3,d1,d2,d3] = VarSubs(~,var1,var2,var3)
-            o1 = var1(1);o2 = var1(2);o3 = var1(3);
-            d1 = var2(1);d2 = var2(2);d3 = var2(3);
+            %input var1,var2 -> n x 3, var3 -> 1 x m
+            for i = 1:size(var1,1)
+                o1(i,:) = var1(i,1);o2(i,:) = var1(i,2);o3(i,:) = var1(i,3);
+                d1(i,:) = var2(i,1);d2(i,:) = var2(i,2);d3(i,:) = var2(i,3);
+            end
+            %             o1 = var1(1);o2 = var1(2);o3 = var1(3);
+            %             d1 = var2(1);d2 = var2(2);d3 = var2(3);
             for i = 1:size(var3,2)
                 v1(i,:) = var3{i}(1,1);
                 v2(i,:) = var3{i}(1,2);
