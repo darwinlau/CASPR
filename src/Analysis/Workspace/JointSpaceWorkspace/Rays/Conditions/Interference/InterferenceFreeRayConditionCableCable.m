@@ -96,7 +96,7 @@ classdef InterferenceFreeRayConditionCableCable < WorkspaceRayConditionBase
                     B_i = r_OAs(4:6, i);
                     A_j = r_OAs(1:3, j);
                     B_j = r_OAs(4:6, j);
-                    [~, ~, g_samples(k, linear_space_index)] = obj.intersection_xyz(A_i, B_i, A_j, B_j);
+                    [~, ~, g_samples(k, linear_space_index)] = intersection_xyz(obj,A_i, B_i, A_j, B_j);
                     if ~is_dof_translation
                         g_samples(k, linear_space_index) = (1 + (tan(q_free/2))^2)*g_samples(k, linear_space_index);
                     end
@@ -133,7 +133,7 @@ classdef InterferenceFreeRayConditionCableCable < WorkspaceRayConditionBase
                         B_i = r_OAs(4:6, i);
                         A_j = r_OAs(1:3, j);
                         B_j = r_OAs(4:6, j);
-                        [t_i, t_j] = obj.intersection_xyz(A_i, B_i, A_j, B_j);
+                        [t_i, t_j] = intersection_xyz(obj,A_i, B_i, A_j, B_j);
                         
                         if (t_i > 0 && t_i < 1 && t_j > 0 && t_j < 1)
                             interference_q = [interference_q; q(free_variable_index)];
@@ -193,10 +193,17 @@ classdef InterferenceFreeRayConditionCableCable < WorkspaceRayConditionBase
     end
     
     methods (Access = private)
-        function [ti, tj, g] = intersection_xyz(~, A_i, B_i, A_j, B_j)
-            A = [B_i(1)-A_i(1), -B_j(1)+A_j(1); B_i(2)-A_i(2), -B_j(2)+A_j(2)];
-            b = [A_j(1)-A_i(1); A_j(2)-A_i(2)];
-            
+        function [ti, tj, g] = intersection_xyz(obj, A_i, B_i, A_j, B_j)
+            seg_cross = round(cross(A_i -B_i,A_j -B_j),obj.ROUNDING_DIGIT);
+ 
+            if sum(seg_cross == 0) >= 2
+                ind = find( seg_cross == 0);
+            else
+                ind = [1,2];
+            end
+            A = [B_i(ind(1))-A_i(ind(1)), -B_j(ind(1))+A_j(ind(1)); B_i(ind(2))-A_i(ind(2)), -B_j(ind(2))+A_j(ind(2))];
+            b = [A_j(ind(1))-A_i(ind(1)); A_j(ind(2))-A_i(ind(2))];
+     
             % Adjoint of A
             A_adj = [A(2,2) -A(1,2); -A(2,1) A(1,1)];
             x = A_adj*b;
