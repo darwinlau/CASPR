@@ -1,9 +1,9 @@
-% Class to compute whether a pose (dynamics) is within the interference 
+% Class to compute whether a pose (dynamics) is within the interference
 % free workspace (IFW)
 %
 % Author        : Darwin Lau
 % Created       : 2020
-% Description   : 
+% Description   :
 
 classdef InterferenceFreeRayConditionCableCable < WorkspaceRayConditionBase
     properties (Constant)
@@ -20,8 +20,8 @@ classdef InterferenceFreeRayConditionCableCable < WorkspaceRayConditionBase
         areDofsTranslation;         % Array for the q of the joint (true if translation and false if rotation)
         numDofs;                    % The number of dofs
         numCables;                  % The number of cables
-        degRedundancy;              % The degree of redundancy   
-        dofMargins;         
+        degRedundancy;              % The degree of redundancy
+        dofMargins;
     end
     
     methods
@@ -33,12 +33,12 @@ classdef InterferenceFreeRayConditionCableCable < WorkspaceRayConditionBase
             w.numCables = model.numCables;
             w.dofMargins = dof_margins;
         end
-            
-        % Evaluate the interference free intervals 
+        
+        % Evaluate the interference free intervals
         function intervals =  evaluateFunction(obj, model, ws_ray)
             interference_q = [];
             % Variable initialisation
-            q_zero = zeros(obj.numDofs, 1);            
+            q_zero = zeros(obj.numDofs, 1);
             free_variable_index = ws_ray.freeVariableIndex;
             free_variable_lower = ws_ray.freeVariableRange(1);
             free_variable_upper = ws_ray.freeVariableRange(2);
@@ -68,9 +68,9 @@ classdef InterferenceFreeRayConditionCableCable < WorkspaceRayConditionBase
             
             % Pose data
             q_fixed = ws_ray.fixedVariables;
-            fixed_index = true(obj.numDofs,1); 
+            fixed_index = true(obj.numDofs,1);
             fixed_index(ws_ray.freeVariableIndex) = false;
-            q = q_zero; 
+            q = q_zero;
             q(fixed_index) = q_fixed;
             
             g_samples = zeros(num_cable_combs, maximum_degree+1);
@@ -96,19 +96,25 @@ classdef InterferenceFreeRayConditionCableCable < WorkspaceRayConditionBase
                     B_i = r_OAs(4:6, i);
                     A_j = r_OAs(1:3, j);
                     B_j = r_OAs(4:6, j);
-                    [~, ~, g_samples(k, linear_space_index)] = intersection_xyz(obj,A_i, B_i, A_j, B_j);
+                    g_samples(k, linear_space_index) = intersection_xyz(obj,A_i, B_i, A_j, B_j);
                     if ~is_dof_translation
                         g_samples(k, linear_space_index) = (1 + (tan(q_free/2))^2)*g_samples(k, linear_space_index);
                     end
                 end
             end
-            
-            
-            for k = 1:num_cable_combs
+
+            intersect_roots_u = [0;1];
+            for k = 1:size(g_samples,1)
+           
                 g_coeffs(k, :) = GeneralMathOperations.PolynomialFit(free_var_lin_space_u', g_samples(k, :)', maximum_degree);
-                g_coeffs(k, :) = round(g_coeffs(k, :), obj.ROUNDING_DIGIT); 
-                intersect_roots_u = roots(g_coeffs(k, :));
-                for r = 1:length(intersect_roots_u)
+                g_coeffs(k, :) = round(g_coeffs(k, :), obj.ROUNDING_DIGIT);
+                intersect_roots_u = [intersect_roots_u;roots(g_coeffs(k, :))];
+
+            end
+            intersect_roots_u = intersect_roots_u(imag(intersect_roots_u) == 0);
+            intersect_roots_u = unique(intersect_roots_u);
+            previous_intersected = 0;
+            for r = 1:size(intersect_roots_u,1)
                     root_i_u = intersect_roots_u(r);
                     if is_dof_translation
                         root_i_q = root_i_u;
@@ -116,7 +122,7 @@ classdef InterferenceFreeRayConditionCableCable < WorkspaceRayConditionBase
                         root_i_q = 2*atan(root_i_u);
                     end
                     if (isreal(root_i_u) && (root_i_q >= free_variable_lower) && (root_i_q <= free_variable_upper))
-            
+                        
                         q(free_variable_index) = root_i_q;
                         
                         % Update the model
@@ -126,32 +132,44 @@ classdef InterferenceFreeRayConditionCableCable < WorkspaceRayConditionBase
                         else
                             r_OAs = model.cableModel.compiled_r_OAs_fn(q, q_zero, q_zero, q_zero);
                         end
-                        
-                        i = cable_combinations(k, 1);
-                        j = cable_combinations(k, 2);
-                        A_i = r_OAs(1:3, i);
-                        B_i = r_OAs(4:6, i);
-                        A_j = r_OAs(1:3, j);
-                        B_j = r_OAs(4:6, j);
-                        [t_i, t_j] = intersection_xyz(obj,A_i, B_i, A_j, B_j);
-                        
-                        if (t_i > 0 && t_i < 1 && t_j > 0 && t_j < 1)
-                            interference_q = [interference_q; q(free_variable_index)];
-%                             cable_combinations(k, :)
-%                             q(free_variable_index)
-%                             metric = MinCableCableDistanceMetric();
-%                             metric.evaluate(model)
+                        for k = 1:num_cable_combs
+                            i = cable_combinations(k, 1);
+                            j = cable_combinations(k, 2);
+                            A_i = r_OAs(1:3, i);
+                            B_i = r_OAs(4:6, i);
+                            A_j = r_OAs(1:3, j);
+                            B_j = r_OAs(4:6, j);
+                            [t_i(k,:), t_j(k,:)] = intersection_titj(obj,A_i, B_i, A_j, B_j);
+                        end
+                        if  sum((t_i>=0 & t_i<=1) & (t_j>=0 & t_j<=1)) > 0
+                            if previous_intersected == 0
+                                previous_intersected = 1;
+                                if ~isempty(interference_q)
+                                    interference_q = [interference_q; q(free_variable_index)];
+                                    
+                                else
+                                    interference_q = q(free_variable_index);
+                                end
+                            else                                
+                                interference_q(end) = q(free_variable_index);
+                            end
+                        else
+                            previous_intersected = 0;
                         end
                     end
-                end
+                
             end
             
             intervals_count = 0;
-            if ~isempty(interference_q)
+            if ~isempty(interference_q)        
+                if size(interference_q,1) == 1 && interference_q == free_variable_upper
+                    intervals = [];
+                    return
+                end
                 interference_q = sort(interference_q);
                 intervals = zeros(length(interference_q)+1, 2);
                 
-                if (free_variable_lower < interference_q(1)-dof_margin/2) 
+                if (free_variable_lower < interference_q(1)-dof_margin/2)
                     intervals_count = intervals_count + 1;
                     intervals(intervals_count,:) = [free_variable_lower, interference_q(1)-dof_margin/2];
                 end
@@ -163,59 +181,72 @@ classdef InterferenceFreeRayConditionCableCable < WorkspaceRayConditionBase
                     end
                 end
                 
-                if (interference_q(end)+dof_margin/2 < free_variable_upper) 
+                if (interference_q(end)+dof_margin/2 < free_variable_upper)
                     intervals_count = intervals_count + 1;
                     intervals(end, :) = [interference_q(end)+dof_margin/2, free_variable_upper];
-                end                
+                end
                 intervals = intervals(1:intervals_count, :);
             else
                 intervals = [free_variable_lower free_variable_upper];
             end
             
-            
-            
-%             interference_q
-%             intervals
-            
-%             
-%             % Run though and ensure that the identified intervals are
-%             % larger than the tolerance
-%             count = 1;
-%             for iteration_index = 1:size(intervals,1)
-%                 if(intervals(count,2) - intervals(count,1) < obj.minRayLengths(free_variable_index))
-%                     intervals(count,:) = [];
-%                 else
-%                     count = count+1;
-%                 end
-%             end
         end
         
     end
     
     methods (Access = private)
-        function [ti, tj, g] = intersection_xyz(obj, A_i, B_i, A_j, B_j)
-            seg_cross = round(cross(A_i -B_i,A_j -B_j),obj.ROUNDING_DIGIT);
- 
-            if sum(seg_cross == 0) >= 2
-                ind = find( seg_cross == 0);
-            else
-                ind = [1,2];
-            end
-            A = [B_i(ind(1))-A_i(ind(1)), -B_j(ind(1))+A_j(ind(1)); B_i(ind(2))-A_i(ind(2)), -B_j(ind(2))+A_j(ind(2))];
-            b = [A_j(ind(1))-A_i(ind(1)); A_j(ind(2))-A_i(ind(2))];
-     
+        function g = intersection_xyz(obj, A_i, B_i, A_j, B_j)
+
+            A = [B_i(1)-A_i(1), -B_j(1)+A_j(1); B_i(2)-A_i(2), -B_j(2)+A_j(2)];
+            b = [A_j(1)-A_i(1); A_j(2)-A_i(2)];
             % Adjoint of A
             A_adj = [A(2,2) -A(1,2); -A(2,1) A(1,1)];
             x = A_adj*b;
             n1 = x(1);
             n2 = x(2);
             % Determinant of A
-            d = A(1,1)*A(2,2) - A(1,2)*A(2,1);
+            d = A(1,1)*A(2,2) - A(1,2)*A(2,1);            
+            g = n1*(B_i(3)-A_i(3)) - n2*(B_j(3)-A_j(3)) - d*(A_j(3)-A_i(3));
+
+%              g = cross((B_i-A_i),(B_j-A_j))'*(A_i-A_j);
+        end
+        function [ti,tj] = intersection_titj(obj, A_i, B_i, A_j, B_j)
+            if round(cross((B_i-A_i),(B_j-A_j))'*(A_i-A_j),obj.ROUNDING_DIGIT) == 0
+            b = [A_j(1)-A_i(1); A_j(2)-A_i(2)];
+            A = [B_i(1)-A_i(1), -B_j(1)+A_j(1); B_i(2)-A_i(2), -B_j(2)+A_j(2)];
+            
+            
+            % Adjoint of A
+            A_adj = [A(2,2) -A(1,2); -A(2,1) A(1,1)];
+            x = A_adj*b;
+            n1 = x(1);
+            n2 = x(2);
+            % Determinant of A
+            d = A(1,1)*A(2,2) - A(1,2)*A(2,1); 
             
             ti = n1/d;
             tj = n2/d;
-            g = n1*(B_i(3)-A_i(3)) - n2*(B_j(3)-A_j(3)) - d*(A_j(3)-A_i(3));
+            if (ti == 0 && tj == 0 ) || (isnan(ti) && isnan(tj))
+                b = [A_j(1)-A_i(1); A_j(3)-A_i(3)];
+                A = [B_i(1)-A_i(1), -B_j(1)+A_j(1); B_i(3)-A_i(3), -B_j(3)+A_j(3)];
+                
+                
+                % Adjoint of A
+                A_adj = [A(2,2) -A(1,2); -A(2,1) A(1,1)];
+                x = A_adj*b;
+                n1 = x(1);
+                n2 = x(2);
+                % Determinant of A
+                d = A(1,1)*A(2,2) - A(1,2)*A(2,1);
+                ti = n1/d;
+                tj = n2/d;
+            end
+            else
+              ti = Inf;
+              tj = Inf;
+            end
         end
+        
     end
 end
 

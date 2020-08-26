@@ -256,7 +256,7 @@ classdef RayWorkspace < handle
                         y = ones(1,2)*plot_data{variables_matched_index(i),3}';
                         z = plot_data{variables_matched_index(i),4}';
                     end
-                    plot3(x,y,z,'k');
+                    w_handles(i) = plot3(x,y,z,'k');
                     % plotting title and other stuff, nothing important
                     xlim(1.005*[obj.model.bodyModel.q_min(dofs_to_plot(1)),obj.model.bodyModel.q_max(dofs_to_plot(1))]);
                     ylim(1.005*[obj.model.bodyModel.q_min(dofs_to_plot(2)),obj.model.bodyModel.q_max(dofs_to_plot(2))]);
@@ -276,7 +276,7 @@ classdef RayWorkspace < handle
                         x = ones(1,2)*plot_data{variables_matched_index(i),2}';
                         y = plot_data{variables_matched_index(i),3}';
                     end
-                    plot(x,y,'k');
+                   w_handles(i) =  plot(x,y,'k');
                     xlim(1.005*[obj.model.bodyModel.q_min(dofs_to_plot(1)),obj.model.bodyModel.q_max(dofs_to_plot(1))]);
                     ylim(1.005*[obj.model.bodyModel.q_min(dofs_to_plot(2)),obj.model.bodyModel.q_max(dofs_to_plot(2))]);
                     xlabel(sprintf('q_%d', dofs_to_plot(1)));
