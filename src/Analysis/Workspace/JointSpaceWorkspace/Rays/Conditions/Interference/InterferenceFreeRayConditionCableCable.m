@@ -36,7 +36,6 @@ classdef InterferenceFreeRayConditionCableCable < WorkspaceRayConditionBase
         
         % Evaluate the interference free intervals
         function intervals =  evaluateFunction(obj, model, ws_ray)
-            interference_q = [];
             % Variable initialisation
             q_zero = zeros(obj.numDofs, 1);
             free_variable_index = ws_ray.freeVariableIndex;
@@ -104,6 +103,7 @@ classdef InterferenceFreeRayConditionCableCable < WorkspaceRayConditionBase
             end
 
             intersect_roots_u = [0;1];
+            intervals_count = 1;intervals = [];
             for k = 1:size(g_samples,1)
            
                 g_coeffs(k, :) = GeneralMathOperations.PolynomialFit(free_var_lin_space_u', g_samples(k, :)', maximum_degree);
@@ -141,53 +141,35 @@ classdef InterferenceFreeRayConditionCableCable < WorkspaceRayConditionBase
                             B_j = r_OAs(4:6, j);
                             [t_i(k,:), t_j(k,:)] = intersection_titj(obj,A_i, B_i, A_j, B_j);
                         end
-                        if  sum((t_i>=0 & t_i<=1) & (t_j>=0 & t_j<=1)) > 0
+                        if sum((t_i>=0 & t_i<=1) & (t_j>=0 & t_j<=1)) > 0 % exist intersection
+                            previous_intersected = 1;
+                            if isempty(intervals)
+                                intervals(1,1) = q(free_variable_index);    
+                            else                            
+                                intervals(intervals_count,2) = q(free_variable_index);                                
+                                intervals_count = intervals_count + 1;
+                            end
+                        else %no intersection
                             if previous_intersected == 0
-                                previous_intersected = 1;
-                                if ~isempty(interference_q)
-                                    interference_q = [interference_q; q(free_variable_index)];
-                                    
+                                if isempty(intervals)
+                                    intervals(1,1) = q(free_variable_index);
                                 else
-                                    interference_q = q(free_variable_index);
+                                    intervals(end,2) =  q(free_variable_index);
                                 end
                             else                                
-                                interference_q(end) = q(free_variable_index);
+                                intervals(intervals_count,:) = [intervals(end),q(free_variable_index)];
                             end
-                        else
                             previous_intersected = 0;
                         end
                     end
                 
             end
             
-            intervals_count = 0;
-            if ~isempty(interference_q)        
-                if size(interference_q,1) == 1 && interference_q == free_variable_upper
-                    intervals = [];
-                    return
-                end
-                interference_q = sort(interference_q);
-                intervals = zeros(length(interference_q)+1, 2);
-                
-                if (free_variable_lower < interference_q(1)-dof_margin/2)
-                    intervals_count = intervals_count + 1;
-                    intervals(intervals_count,:) = [free_variable_lower, interference_q(1)-dof_margin/2];
-                end
-                
-                for i = 2:length(interference_q)
-                    if (interference_q(i-1)+dof_margin/2 < interference_q(i)-dof_margin/2)
-                        intervals_count = intervals_count + 1;
-                        intervals(intervals_count,:) = [interference_q(i-1)+dof_margin/2, interference_q(i)-dof_margin/2];
-                    end
-                end
-                
-                if (interference_q(end)+dof_margin/2 < free_variable_upper)
-                    intervals_count = intervals_count + 1;
-                    intervals(end, :) = [interference_q(end)+dof_margin/2, free_variable_upper];
-                end
-                intervals = intervals(1:intervals_count, :);
-            else
-                intervals = [free_variable_lower free_variable_upper];
+            if ~isempty(intervals)
+                interval_bound = intervals([1,end]);
+                intervals(:,1) =  intervals(:,1) + dof_margin/2;
+                intervals(:,2) =  intervals(:,2) - dof_margin/2;
+                intervals([1,end]) = interval_bound;
             end
             
         end
@@ -211,7 +193,11 @@ classdef InterferenceFreeRayConditionCableCable < WorkspaceRayConditionBase
 %              g = cross((B_i-A_i),(B_j-A_j))'*(A_i-A_j);
         end
         function [ti,tj] = intersection_titj(obj, A_i, B_i, A_j, B_j)
-            if round(cross((B_i-A_i),(B_j-A_j))'*(A_i-A_j),obj.ROUNDING_DIGIT) == 0
+            a = B_i-A_i;
+            b = B_j-A_j;
+            c = [a(2)*b(3) - a(3)*b(2) ; a(3)*b(1) - a(1)*b(3) ; a(1)*b(2) - a(2)*b(1)];
+            d = c(1) * (A_i(1)-A_j(1)) + c(2) * (A_i(2)-A_j(2)) + c(3) * (A_i(3)-A_j(3));
+            if round(d,obj.ROUNDING_DIGIT) == 0
             b = [A_j(1)-A_i(1); A_j(2)-A_i(2)];
             A = [B_i(1)-A_i(1), -B_j(1)+A_j(1); B_i(2)-A_i(2), -B_j(2)+A_j(2)];
             
