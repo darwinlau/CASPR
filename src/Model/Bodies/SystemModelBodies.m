@@ -295,48 +295,49 @@ classdef SystemModelBodies < handle
             % Now the global system updates
             % Set bodies kinematics (rotation matrices)
             for k = 1:num_links
-                parent_link_num = obj.bodies{k}.parentLinkId;
+                body_k = obj.bodies{k};
+                parent_link_num = body_k.parentLinkId;
                 CASPR_log.Assert(parent_link_num < k, 'Problem with numbering of links with parent and child');
 
                 % Determine rotation matrix
                 % Determine joint location
-                R_pe = obj.bodies{k}.joint.R_pe;   
+                R_pe = body_k.joint.R_pe;   
                 if (is_symbolic && isa(R_pe, 'sym'))
                     R_pe = simplify(R_pe, 'Step', 15);
                 end  
                                 
                 if parent_link_num > 0
                     parent_R_0k = obj.bodies{parent_link_num}.R_0k;
-                    obj.bodies{k}.R_0k = parent_R_0k*R_pe; 
-                    obj.bodies{k}.r_OP = R_pe.'*(obj.bodies{parent_link_num}.r_OP + obj.bodies{k}.r_Parent + obj.bodies{k}.joint.r_rel);
+                    body_k.R_0k = parent_R_0k*R_pe; 
+                    body_k.r_OP = R_pe.'*(obj.bodies{parent_link_num}.r_OP + body_k.r_Parent + body_k.joint.r_rel);
                 else
-                    obj.bodies{k}.R_0k = R_pe;
-                    obj.bodies{k}.r_OP = R_pe.'*(obj.bodies{k}.r_Parent + obj.bodies{k}.joint.r_rel);
+                    body_k.R_0k = R_pe;
+                    body_k.r_OP = R_pe.'*(obj.bodies{k}.r_Parent + body_k.joint.r_rel);
                 end
                 
                 if (is_symbolic)
-                    if (isa(obj.bodies{k}.R_0k, 'sym'))
+                    if (isa(body_k.R_0k, 'sym'))
                         CASPR_log.Info(sprintf('- Symbolic simplifying of R_0k for body %d', k));
-                        obj.bodies{k}.R_0k = simplify(obj.bodies{k}.R_0k, 'Step', k*15);
+                        body_k.R_0k = simplify(body_k.R_0k, 'Step', k*15);
                     end
                     CASPR_log.Info(sprintf('- Symbolic simplifying of r_OP for body %d', k));
-                    obj.bodies{k}.r_OP = simplify(obj.bodies{k}.r_OP, 'Step', k*15);
+                    body_k.r_OP = simplify(body_k.r_OP, 'Step', k*15);
                 end
                 
                 % Determine absolute position of COG
-                obj.bodies{k}.r_OG  = obj.bodies{k}.r_OP + obj.bodies{k}.r_G;
+                body_k.r_OG  = body_k.r_OP + obj.bodies{k}.r_G;
                 % Determine absolute position of link's ending position
-                obj.bodies{k}.r_OPe = obj.bodies{k}.r_OP + obj.bodies{k}.r_Pe;
+                body_k.r_OPe = body_k.r_OP + obj.bodies{k}.r_Pe;
                 
                 % Determine absolute position of the operational space
                 if(~isempty(obj.bodies{k}.operationalSpace))
-                    obj.bodies{k}.r_OY  = obj.bodies{k}.r_OP + obj.bodies{k}.r_y;
+                    body_k.r_OY  = body_k.r_OP + body_k.r_y;
                 end
                 % Store information in matrices
-                obj.R_0ks(:,3*k-2:3*k) = obj.bodies{k}.R_0k;
-                obj.r_OPs(:,k) = obj.bodies{k}.r_OP;
-                obj.r_Gs(:,k) = obj.bodies{k}.r_G;
-                obj.r_Pes(:,k) = obj.bodies{k}.r_Pe;
+                obj.R_0ks(:,3*k-2:3*k) = body_k.R_0k;
+                obj.r_OPs(:,k) = body_k.r_OP;
+                obj.r_Gs(:,k) = body_k.r_G;
+                obj.r_Pes(:,k) = body_k.r_Pe;
             end
 
             if (is_symbolic)
@@ -345,9 +346,10 @@ classdef SystemModelBodies < handle
             % Set S (joint state matrix) and S_dot            
             index_dofs = 1;
             for k = 1:num_links
-                obj.S(6*k-5:6*k, index_dofs:index_dofs+obj.bodies{k}.joint.numDofs-1) = obj.bodies{k}.joint.S;
-                obj.S_dot(6*k-5:6*k, index_dofs:index_dofs+obj.bodies{k}.joint.numDofs-1) = obj.bodies{k}.joint.S_dot;
-                index_dofs = index_dofs + obj.bodies{k}.joint.numDofs;
+                body_k = obj.bodies{k};
+                obj.S(6*k-5:6*k, index_dofs:index_dofs+body_k.joint.numDofs-1) = body_k.joint.S;
+                obj.S_dot(6*k-5:6*k, index_dofs:index_dofs+body_k.joint.numDofs-1) = body_k.joint.S_dot;
+                index_dofs = index_dofs + body_k.joint.numDofs;
             end            
             
             if (is_symbolic)
@@ -487,6 +489,12 @@ classdef SystemModelBodies < handle
             % Body kinematics
             obj.R_0ks = obj.compiled_R_0ks_fn(q, q_dot, q_ddot, w_ext);
             obj.r_OPs = obj.compiled_r_OPs_fn(q, q_dot, q_ddot, w_ext);
+            
+            for k = 1:num_links
+                body_k = obj.bodies{k};
+                obj.r_Gs(:,k) = body_k.r_G;
+                obj.r_Pes(:,k) = body_k.r_Pe;
+            end
             
 %             for k = 1:obj.numLinks
 %                 obj.bodies{k}.R_0k = obj.R_0ks(:,3*k-2:3*k);

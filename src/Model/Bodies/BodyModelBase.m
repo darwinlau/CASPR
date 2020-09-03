@@ -19,10 +19,7 @@ classdef (Abstract) BodyModelBase < handle
         % Absolution Accelerations
         a_OG = zeros(3,1);      % Absolute linear acceleration vector to centre of gravity in {k}
         w_dot = zeros(3,1);     % Absolute angular acceleration vector in {k}        
-    end
-    
-    % make these properties public (originally set protected) to achieve easy property change
-    properties
+        
         r_G                     % Position vector from joint to COG
         % Inertia
         m                       % Mass of body
