@@ -1,17 +1,16 @@
-% Class to compute whether a pose (dynamics) is within the interference
-% free workspace (IFW)
+% Class to compute whether a ray inside the obstacles from quadtratic and
+% quatic degree s
 %
 % Author        : Paul Cheng
 % Created       : 2020
 % Description   :
 
-classdef InterferenceFreeRayConditionCableQuadraticObstacle < WorkspaceRayConditionBase
+classdef InterferenceFreeRayConditionCableObstacle < WorkspaceRayConditionBase
     properties (Constant)
         ROUNDING_DIGIT = 9;
         % Type of workspace condition (WorkspaceConditionType enum)
         type = WorkspaceRayConditionType.INTERFERENCE_CABLE_QUADSURF;
-        MAX_DEGREE_TRANSLATION = 1;
-        MAX_DEGREE_ORIENTATION = 2;
+        
     end
     
     properties (SetAccess = protected)
@@ -19,25 +18,27 @@ classdef InterferenceFreeRayConditionCableQuadraticObstacle < WorkspaceRayCondit
         areDofsTranslation;         % Array for the q of the joint (true if translation and false if rotation)
         numDofs;                    % The number of dofs
         numCables;                  % The number of cables
-        QuadSurf;                   % The obstacle surface equations
+        Surf_equ;                   % The obstacle surface equations
         surface_bound;               % Obstacle boundary
         numSurf
         is_compiled_mode;
         segment_num;
+        Surface_Degree;         % record the highest degree of a surface
     end
     
     methods
         % Constructor for interference free worksapce
-        function w = InterferenceFreeRayConditionCableQuadraticObstacle(model, min_ray_lengths, QuadSurf)
+        function w = InterferenceFreeRayConditionCableObstacle(model, min_ray_lengths, QuadSurf)
             w@WorkspaceRayConditionBase(min_ray_lengths);
             w.areDofsTranslation = (model.bodyModel.q_dofType == DoFType.TRANSLATION);
             w.numDofs = model.numDofs;
             w.numCables = model.numCables;
-            w.QuadSurf = QuadSurf.Quad_Matrix;
+            w.Surf_equ = QuadSurf.Implicit_Function;
             w.surface_bound = QuadSurf.boundary;
             w.is_compiled_mode = (model.modelMode == ModelModeType.COMPILED);
             w.numSurf = size(QuadSurf.Quad_Matrix,2);
             w.segment_num = size(model.cableModel.r_OAs,2);
+            w.Surface_Degree = QuadSurf.Surface_degree;
         end
         
         % Evaluate the interference free intervals
@@ -45,40 +46,35 @@ classdef InterferenceFreeRayConditionCableQuadraticObstacle < WorkspaceRayCondit
             % Variable initialisation
             intervals = [];
             intervals_count = 1;
-            %             tic
             free_variable_index = ws_ray.freeVariableIndex;
             is_dof_translation = obj.areDofsTranslation(free_variable_index);
             
             q_begin = [ws_ray.fixedVariables(1:free_variable_index-1);ws_ray.freeVariableRange(1);ws_ray.fixedVariables(free_variable_index:end)];
             q_end = [ws_ray.fixedVariables(1:free_variable_index-1);ws_ray.freeVariableRange(2);ws_ray.fixedVariables(free_variable_index:end)];
-                        
+            
             [OA_i_begin,OB_i_begin] = obj.GetSegmentData(model,q_begin);
             [OA_i_end,OB_i_end] = obj.GetSegmentData(model,q_end);
             for i = 1:size(OA_i_begin,1)
                 [OA_i_hat(i,:),~] = obj.LineIntersection3D([OB_i_begin(i,:);OB_i_end(i,:)],[OA_i_begin(i,:);OA_i_end(i,:)]);
             end
-            
-            for surf_ind = 1:size(obj.QuadSurf,2)
-                QuadSurfCoeff(surf_ind,:)  = obj.GetQuadSurfCoeff(obj.QuadSurf{surf_ind});
-            end
+
             u_value = [];
             if is_dof_translation
-                for surf_ind = 1:size(obj.QuadSurf,2)
-                [~,u_surface,segment_ind_surf] = obj.SurfaceIntersection(model,q_begin,q_end,surf_ind,free_variable_index,OA_i_hat);
-                
-                [~,u_segment,segment_ind_surf] = obj.SegmentIntersection(OB_i_begin,OB_i_end,surf_ind);
-                
-                u_value = [u_value;u_surface;u_segment];
+                for surf_ind = 1:size(obj.Surf_equ,2)
+                    [~,u_surface,segment_ind_surf] = obj.SurfaceIntersection(model,q_begin,q_end,surf_ind,free_variable_index,OA_i_hat);
+                    
+                    [~,u_segment,segment_ind_surf] = obj.SegmentIntersection(OB_i_begin,OB_i_end,surf_ind);
+                    
+                    u_value = [u_value;u_surface;u_segment];
                 end
                 q_intersected = (q_end - q_begin)*u_value' + q_begin;
             else
                 %% find surface surface/edge intersection
-                for surf_ind = 1:size(obj.QuadSurf,2)
-                [~,u_surface,segment_ind_surf] = obj.SurfaceIntersection(model,q_begin,q_end,surf_ind,free_variable_index,OA_i_hat);
-                
-                [~,u_curve,segment_ind_curv] = obj.CurveIntersection(model,q_begin,q_end,surf_ind,free_variable_index);
-                
-                u_value = [u_value;u_surface;u_curve];
+                for surf_ind = 1:size(obj.Surf_equ,2)
+                    [~,u_surface,segment_ind_surf] = obj.SurfaceIntersection(model,q_begin,q_end,surf_ind,free_variable_index,OA_i_hat);
+                    
+                    [~,u_curve,segment_ind_curv] = obj.CurveIntersection(model,q_begin,q_end,surf_ind,free_variable_index);
+                    u_value = [u_value;u_surface;u_curve];
                 end
                 q_intersected = repmat(q_begin,1,size(u_value,1));
                 q_intersected(free_variable_index,:) = 2*atan(u_value);
@@ -91,7 +87,7 @@ classdef InterferenceFreeRayConditionCableQuadraticObstacle < WorkspaceRayCondit
             
             for i = 1:size(q_intersected,2) - 1
                 
-                has_intersected = obj.IntervalVerify(model,QuadSurfCoeff,q_intersected(:,i),q_intersected(:,i+1));
+                has_intersected = obj.IntervalVerify(model,q_intersected(:,i),q_intersected(:,i+1));
                 
                 if ~has_intersected
                     if ~isempty(intervals) && intervals(end) == q_intersected(free_variable_index,i)
@@ -128,71 +124,85 @@ classdef InterferenceFreeRayConditionCableQuadraticObstacle < WorkspaceRayCondit
         function [flag,u_val,segment_ind] = SurfaceIntersection(obj,model,q_begin,q_end,surf_ind,free_variable_index,OA_i_hat)
             u_coeff = [];v_coeff = [];
             if ~obj.areDofsTranslation(free_variable_index)
-                sample_size = 5;
+                sample_size = obj.Surface_Degree*2 + 1;
                 q_sample = linspace(q_begin(free_variable_index),q_end(free_variable_index),sample_size);
                 u_sample = tan(q_sample/2);
-                H_1_u_denominator = (1+u_sample.^2).^2;
-                H_2_u_denominator = (1+u_sample.^2);
-                H_3_u_denominator = [1 1 1 1 1];
-                H_1_deg = 4;
-                H_2_deg = 2;
-                H_3_deg = 0;
+                for i = 0:obj.Surface_Degree
+                    H_i_u_denominator(i+1,:) = (1+u_sample.^2).^i;
+                end
+                H_i_u_denominator = flipud(H_i_u_denominator);
+                H_i_deg = obj.Surface_Degree*2:-2:0;
             else
-                sample_size = 3;
+                sample_size = obj.Surface_Degree + 1;
                 q_sample = linspace(q_begin(free_variable_index),q_end(free_variable_index),sample_size);
                 u_sample = linspace(0,1,sample_size);
-                H_1_u_denominator = [1 1 1];
-                H_2_u_denominator = [1 1 1];
-                H_3_u_denominator = [1 1 1];
-                H_1_deg = 2;
-                H_2_deg = 1;
-                H_3_deg = 0;
+                H_i_deg = obj.Surface_Degree:-1:0;
+                for i = 0:obj.Surface_Degree
+                    H_i_u_denominator(i+1,:) = ones(size(u_sample));
+                end
             end
             v = linspace(0,1,sample_size);
             segment_ind =  repmat(1:obj.segment_num,sample_size-1,1); segment_ind = segment_ind(:);
             
-            
             q_update = q_begin;
-            u_sample_per_pose = [];
             for i = 1:size(q_sample,2)
                 q_update(free_variable_index) = q_sample(i);
                 [~,OB_i_u]  = obj.GetSegmentData(model,q_update);
-                u_sample_per_cable = [];
-                %                 G_uv_v(i,:) = reshape(((OB_i_u - OA_i_hat)*v_sample(i) + OA_i_hat),1,obj.segment_num*3);
                 for j = 1:size(v,2)
                     G_uv_v{j} = ((OB_i_u - OA_i_hat)*v(j) + OA_i_hat);
                 end
-                %                 G_uv_v_0 = ((OB_i_u - OA_i_hat)*0 + OA_i_hat); % v =
-                %                 G_uv_v_1 = ((OB_i_u - OA_i_hat)*0.25 + OA_i_hat); % v = 0.25
-                %                 G_uv_v_2 = ((OB_i_u - OA_i_hat)*0.5 + OA_i_hat); % v = 0.5
-                %                 G_uv_v_3 = ((OB_i_u - OA_i_hat)*0.75 + OA_i_hat); % v = 1
-                %                 G_uv_v_4 = ((OB_i_u - OA_i_hat)*1 + OA_i_hat); % v = 1
                 for j = 1:obj.segment_num
                     for k = 1:size(v,2)
-                        v_sample(k) = [G_uv_v{k}(j,:) 1]*obj.QuadSurf{surf_ind}*[G_uv_v{k}(j,:) 1]';
+                        v_sample(k) = obj.Surf_equ{surf_ind}(G_uv_v{k}(j,1),G_uv_v{k}(j,2),G_uv_v{k}(j,3));
+                        
                     end
-                    %                     v_sample(1) = [G_uv_v_0(j,:) 1]*obj.QuadSurf{surf_ind}*[G_uv_v_0(j,:) 1]';
-                    %                     v_sample(2) = [G_uv_v_1(j,:) 1]*obj.QuadSurf{surf_ind}*[G_uv_v_1(j,:) 1]';
-                    %                     v_sample(3) = [G_uv_v_2(j,:) 1]*obj.QuadSurf{surf_ind}*[G_uv_v_2(j,:) 1]';
-                    %                     v_sample(4) = [G_uv_v_3(j,:) 1]*obj.QuadSurf{surf_ind}*[G_uv_v_3(j,:) 1]';
-                    %                     v_sample(5) = [G_uv_v_4(j,:) 1]*obj.QuadSurf{surf_ind}*[G_uv_v_4(j,:) 1]';
-                    v_coeff{i}(:,j) = GeneralMathOperations.PolynomialFit(v', v_sample', 2);
+                    v_coeff{i}(:,j) = GeneralMathOperations.PolynomialFit(v', v_sample', obj.Surface_Degree);
+                    
                 end
             end
             for j = 1:obj.segment_num
                 for i = 1:size(v_coeff,2)
-                    %                     H_1_u_sample(j,i) = v_coeff{i}(1,j) *(1+u_sample(i)^2)^2;
-                    %                     H_2_u_sample(j,i) = v_coeff{i}(2,j) *(1+u_sample(i)^2);
-                    %                     H_3_u_sample(j,i) = v_coeff{i}(3,j);
-                    H_1_u_sample(j,i) = v_coeff{i}(1,j) * H_1_u_denominator(i);
-                    H_2_u_sample(j,i) = v_coeff{i}(2,j) * H_2_u_denominator(i);
-                    H_3_u_sample(j,i) = v_coeff{i}(3,j) * H_3_u_denominator(i);
+                    H_i_u_sample(:,i) = v_coeff{i}(:,j) .* H_i_u_denominator(:,i);
                 end
-                H_1_coeff = GeneralMathOperations.PolynomialFit(u_sample', H_1_u_sample(j,:)', H_1_deg)';
-                H_2_coeff = GeneralMathOperations.PolynomialFit(u_sample', H_2_u_sample(j,:)', H_2_deg)';
-                H_3_coeff = GeneralMathOperations.PolynomialFit(u_sample', H_3_u_sample(j,:)', H_3_deg)';
+                for i = 1:size(H_i_u_sample,1)
+                    H_i_coeff{i,:} = GeneralMathOperations.PolynomialFit(u_sample', H_i_u_sample(i,:)', H_i_deg(i))';
+                end
+                if obj.Surface_Degree == 2
+                    a = H_i_coeff{1}; b = H_i_coeff{2}; c = H_i_coeff{3};
+                    u_coeff(j,:) = obj.SumCoeff({conv(b,b);-4*a*c(end)});
+                elseif obj.Surface_Degree == 3
+                    a = H_i_coeff{1}; b = H_i_coeff{2}; c = H_i_coeff{3}; d = H_i_coeff{4};
+                    u_coeff(j,:) = obj.SumCoeff({
+                        conv(conv(conv(b,b),c),c);...
+                        -4*conv(conv(conv(a,c),c),c);...
+                        -4*conv(conv(conv(b,b),b),d);...
+                        -27*conv(conv(conv(a,a),d),d);...
+                        18*conv(conv(conv(a,b),c),d)
+                        });
+                elseif obj.Surface_Degree == 4
+                    a = H_i_coeff{1}; b = H_i_coeff{2}; c = H_i_coeff{3}; d = H_i_coeff{4}; e = H_i_coeff{5};
+                    u_coeff(j,:) = obj.SumCoeff({
+                        256*conv(conv(conv(conv(conv(a,a),a),e),e),e);...
+                        -192*conv(conv(conv(conv(conv(a,a),b),d),e),e);...
+                        -128*conv(conv(conv(conv(conv(a,a),c),c),e),e);...
+                        144*conv(conv(conv(conv(conv(a,a),c),d),d),e);...
+                        -27*conv(conv(conv(conv(conv(a,a),d),d),d),d);...
+                        144*conv(conv(conv(conv(conv(a,b),b),c),e),e);...
+                        -6*conv(conv(conv(conv(conv(a,b),b),d),d),e);...
+                        -80*conv(conv(conv(conv(conv(a,b),c),c),d),e);...
+                        18*conv(conv(conv(conv(conv(a,b),c),d),d),d);...
+                        16*conv(conv(conv(conv(conv(a,c),c),c),c),e);...
+                        -4*conv(conv(conv(conv(conv(a,c),c),c),d),d);...
+                        -27*conv(conv(conv(conv(conv(b,b),b),b),e),e);...
+                        18*conv(conv(conv(conv(conv(b,b),b),c),d),e);...
+                        -4*conv(conv(conv(conv(conv(b,b),b),d),d),d);...
+                        -4*conv(conv(conv(conv(conv(b,b),c),c),c),e);...
+                        1*conv(conv(conv(conv(conv(b,b),c),c),d),d)
+                        });
+                else
+                    CASPR_log.Error('Only surface degree 2 to 4 is supported in this algorithm');
+                end
                 
-                u_coeff(j,:) = obj.SumCoeff({conv(H_2_coeff,H_2_coeff);-4*H_1_coeff*H_3_coeff(end)});
             end
             
             u_val = [];
@@ -210,6 +220,7 @@ classdef InterferenceFreeRayConditionCableQuadraticObstacle < WorkspaceRayCondit
             real_sol_index(remove_index) = [];
             u_val(remove_index) = [];
             segment_ind = segment_ind(real_sol_index);
+            
             if ~isempty(u_val)
                 flag = 1;
             else
@@ -220,19 +231,9 @@ classdef InterferenceFreeRayConditionCableQuadraticObstacle < WorkspaceRayCondit
         
         %function to find intersection between curve edge and quadratic surface
         function [flag,u_val,segment_ind] = CurveIntersection(obj,model,q_begin,q_end,surf_ind,free_variable_index)
-            %             OB_i_u = GetOBiu(obj,model,q_begin,q_end,free_variable_index);
-            %             S = obj.GetQuadSurfCoeff(obj.QuadSurf{surf_ind})
-            %             u_c = [1 0 1];
-            %             for i = 1:obj.segment_num
-            %                 u_x = OB_i_u{i}(1,:);u_y = OB_i_u{i}(2,:);u_z = OB_i_u{i}(3,:);
-            %                 u_coeff1(i,:) =  SumCoeff({S(1)*conv(u_x,u_x);S(2)*conv(u_y,u_y);S(3)*conv(u_z,u_z);...
-            %                     S(4)*conv(u_x,u_y);S(5)*conv(u_x,u_z);S(6)*conv(u_y,u_z);...
-            %                     S(7)*conv(u_x,u_c);S(8)*conv(u_y,u_c); S(9)*conv(u_z,u_c);S(10)*conv(u_c,u_c)});
-            %             end
             
-            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             u_val = [];
-            sample_size = 5;
+            sample_size = obj.Surface_Degree*2 + 1;
             segment_ind =  repmat(1:obj.segment_num,sample_size-1,1); segment_ind = segment_ind(:);
             
             q_sample = linspace(q_begin(free_variable_index),q_end(free_variable_index),sample_size);
@@ -242,11 +243,11 @@ classdef InterferenceFreeRayConditionCableQuadraticObstacle < WorkspaceRayCondit
                 q_update(free_variable_index) = q_sample(i);
                 [~,OB_i_u]  = obj.GetSegmentData(model,q_update);
                 for j = 1:obj.segment_num
-                    f_sample(i,j) = ([OB_i_u(j,:) 1]*obj.QuadSurf{surf_ind}*[OB_i_u(j,:) 1]')*(1+u_sample(i)^2)^2;
+                    f_sample(i,j) = obj.Surf_equ{surf_ind}(OB_i_u(j,1),OB_i_u(j,2),OB_i_u(j,3))*(1+u_sample(i)^2)^ obj.Surface_Degree;
                 end
             end
             for i = 1:obj.segment_num
-                u_coeff(i,:) = GeneralMathOperations.PolynomialFit(u_sample', f_sample(:,i), 4)';
+                u_coeff(i,:) = GeneralMathOperations.PolynomialFit(u_sample', f_sample(:,i),  obj.Surface_Degree*2)';
                 u_val = [u_val;roots(u_coeff(i,:))];
             end
             real_sol_index = find(imag(u_val) == 0);
@@ -268,7 +269,7 @@ classdef InterferenceFreeRayConditionCableQuadraticObstacle < WorkspaceRayCondit
         %function to find intersection between linear edge and quadratic surface
         function [flag,v_val,segment_ind] = SegmentIntersection(obj,P_begin,P_end,surf_ind)
             
-            sample_size = 3;
+            sample_size = obj.Surface_Degree(surf_ind)+1;
             segment_ind =  repmat(1:size(P_begin,1),sample_size-1,1); segment_ind = segment_ind(:);
             
             v_sample = linspace(0,1,sample_size);
@@ -278,37 +279,44 @@ classdef InterferenceFreeRayConditionCableQuadraticObstacle < WorkspaceRayCondit
             for i = 1:size(v_sample,2)
                 Si_t = ((P_end - P_begin)*v_sample(i) + P_begin);
                 for j = 1:obj.segment_num
-                    f_sample(i,j) = [Si_t(j,:) 1]*obj.QuadSurf{surf_ind}*[Si_t(j,:) 1]';
-                    %                             v_coeff{i}(:,j) = GeneralMathOperations.PolynomialFit(linspace(0,1,2*obj.MAX_DEGREE_ORIENTATION+1)', v_sample', 2);
+                    f_sample(i,j) = obj.Surf_equ{surf_ind}(Si_t(j,1),Si_t(j,2),Si_t(j,3));
                 end
             end
             for i = 1:obj.segment_num
-                t_coeff(i,:) = GeneralMathOperations.PolynomialFit(v_sample', f_sample(:,i), 2)';
+                t_coeff(i,:) = GeneralMathOperations.PolynomialFit(v_sample', f_sample(:,i), obj.Surface_Degree(surf_ind))';
                 v_val = [v_val;roots( t_coeff(i,:))];
             end
-            %                 end
             
             real_sol_index = find(imag(v_val) == 0);
-            %             u_value = unique((roots(u_coeff)));
             v_val = v_val(imag(v_val)==0);
             [v_val,ia,~] = unique(v_val);
             real_sol_index = real_sol_index(ia,:);
-            %             u_value = u_value(imag(u_value)==0);
             remove_index = [find(v_val < 0);find(v_val > 1)];
             real_sol_index(remove_index) = [];
             v_val(remove_index) = [];
-            segment_ind = unique(segment_ind(real_sol_index));
+            segment_ind = segment_ind(real_sol_index);
             if ~isempty(v_val)
-                flag = 1;
+                for i = 1:size(v_val,1)
+                    P_j = ((P_end(segment_ind(i),:) - P_begin(segment_ind(i),:) )*v_val(i) + P_begin(segment_ind(i),:));
+                    flag_P_j(i) = P_j(1) >= obj.surface_bound{surf_ind}(1) && P_j(1) <= obj.surface_bound{surf_ind}(2) &&...
+                        P_j(2) >= obj.surface_bound{surf_ind}(3) && P_j(2) <= obj.surface_bound{surf_ind}(4) &&...
+                        P_j(3) >= obj.surface_bound{surf_ind}(5) && P_j(3) <= obj.surface_bound{surf_ind}(6);
+                    if any(flag_P_j)
+                        flag = 1;
+                    else
+                        flag = 0;
+                    end
+                end
+                
             else
                 flag = 0;
             end
         end
         
         %% function to check the intersected interval valid
-        function has_intersected = IntervalVerify(obj,model,QuadSurfCoeff,q1,q2)
+        function has_intersected = IntervalVerify(obj,model,q1,q2)
             [OA_i,OB_i] = obj.GetSegmentData(model,(q1+q2)/2);
-            for surf_ind = 1:size(QuadSurfCoeff,1)
+            for surf_ind = 1:size(obj.Surf_equ,1)
                 [flag(surf_ind),~,~] = obj.SegmentIntersection(OB_i,OA_i,surf_ind);
             end
             if any(flag == 1)
@@ -319,19 +327,19 @@ classdef InterferenceFreeRayConditionCableQuadraticObstacle < WorkspaceRayCondit
         end
         
         %% function to get the coeffcient of the quadratic surface
-        function Q  = GetQuadSurfCoeff(~,QuadSurf)
+        function Q  = GetSurf_equCoeff(~,Surf_equ)
             %              Q = sym('s%d',[1 10]);
             Q = zeros(1,10);
-            Q(1) = QuadSurf(1,1);
-            Q(2) = QuadSurf(2,2);
-            Q(3) = QuadSurf(3,3);
-            Q(4) = 2*QuadSurf(1,2);
-            Q(5) = 2*QuadSurf(2,3);
-            Q(6) = 2*QuadSurf(1,3);
-            Q(7) = 2*QuadSurf(1,4);
-            Q(8) = 2*QuadSurf(2,4);
-            Q(9) = 2*QuadSurf(3,4);
-            Q(10) = QuadSurf(4,4);
+            Q(1) = Surf_equ(1,1);
+            Q(2) = Surf_equ(2,2);
+            Q(3) = Surf_equ(3,3);
+            Q(4) = 2*Surf_equ(1,2);
+            Q(5) = 2*Surf_equ(2,3);
+            Q(6) = 2*Surf_equ(1,3);
+            Q(7) = 2*Surf_equ(1,4);
+            Q(8) = 2*Surf_equ(2,4);
+            Q(9) = 2*Surf_equ(3,4);
+            Q(10) = Surf_equ(4,4);
         end
         %% function to find 2 line intersection point in 3D
         function [P_intersect,distances] = LineIntersection3D(~,PA,PB)
