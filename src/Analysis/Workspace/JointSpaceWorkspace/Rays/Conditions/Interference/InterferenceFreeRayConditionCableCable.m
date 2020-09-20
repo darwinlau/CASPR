@@ -111,6 +111,7 @@ classdef InterferenceFreeRayConditionCableCable < WorkspaceRayConditionBase
                 intersect_roots_u = [intersect_roots_u;roots(g_coeffs(k, :))];
 
             end
+            %g_coeffs
             intersect_roots_u = intersect_roots_u(imag(intersect_roots_u) == 0);
             intersect_roots_u = unique(intersect_roots_u);
             previous_intersected = 0;
@@ -157,7 +158,7 @@ classdef InterferenceFreeRayConditionCableCable < WorkspaceRayConditionBase
                                     intervals(end,2) =  q(free_variable_index);
                                 end
                             else                                
-                                intervals(intervals_count,:) = [intervals(end),q(free_variable_index)];
+                                intervals(intervals_count,1:2) = [intervals(end),q(free_variable_index)];
                             end
                             previous_intersected = 0;
                         end
