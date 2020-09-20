@@ -43,16 +43,16 @@ classdef WorkspaceRayConditionBase < handle
     methods (Static)
         % Creates a new condition (for the moment methods and wrench sets
         % are not considered)
-        function wc = CreateWorkspaceRayCondition(conditionType,min_ray_percentage,model,QuadSurf)
+        function wc = CreateWorkspaceRayCondition(conditionType,min_ray_percentage,model,Obstacles)
             switch conditionType
                 case WorkspaceRayConditionType.WRENCH_CLOSURE
                     wc = WrenchClosureRayCondition(model,min_ray_percentage);
                 case WorkspaceRayConditionType.INTERFERENCE_CABLE_CABLE
                     wc = InterferenceFreeRayConditionCableCable(model,min_ray_percentage);
                 case WorkspaceRayConditionType.INTERFERENCE_CABLE_QUADSURF
-                    wc = InterferenceFreeRayConditionCableQuadraticObstacle(model,min_ray_percentage,QuadSurf);
+                    wc = InterferenceFreeRayConditionCableObstacle(model,min_ray_percentage,Obstacles);
                 case WorkspaceRayConditionType.INTERFERENCE_CABLE_PLANESURF
-                    wc = InterferenceFreeRayConditionCablePlaneObstacle(model,min_ray_percentage,QuadSurf);
+                    wc = InterferenceFreeRayConditionCablePlaneObstacle(model,min_ray_percentage,Obstacles);
                 case WorkspaceRayConditionType.INTERFERENCE_DIAMETER
                     wc = InterferenceFreeRayConditionCableDiameter(model,min_ray_percentage);
                 case WorkspaceRayConditionType.INTERFERENCE_C_E

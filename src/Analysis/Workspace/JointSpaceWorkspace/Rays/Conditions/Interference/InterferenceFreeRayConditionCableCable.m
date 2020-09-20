@@ -101,8 +101,11 @@ classdef InterferenceFreeRayConditionCableCable < WorkspaceRayConditionBase
                     end
                 end
             end
-
-            intersect_roots_u = [0;1];
+            if is_dof_translation  
+                intersect_roots_u = ws_ray.freeVariableRange';
+            else
+                intersect_roots_u = tan(ws_ray.freeVariableRange'/2);
+            end
             intervals_count = 1;intervals = [];
             for k = 1:size(g_samples,1)
            
@@ -166,11 +169,12 @@ classdef InterferenceFreeRayConditionCableCable < WorkspaceRayConditionBase
                 
             end
             
-            if ~isempty(intervals)
+            if size(intervals,1)>1 
                 interval_bound = intervals([1,end]);
                 intervals(:,1) =  intervals(:,1) + dof_margin/2;
                 intervals(:,2) =  intervals(:,2) - dof_margin/2;
                 intervals([1,end]) = interval_bound;
+                
             end
             
         end
