@@ -160,7 +160,12 @@ classdef CreateObstacleElement < handle
         end
         
         function obs_plot = plotObstacle(obj)
-            
+%             figure
+            for i = 1:obj.surfaceNum
+                obs_plot(i)= fimplicit3(obj.surfaceEqu{i},obj.surfaceBoundXYZ{i},'FaceAlpha',1,'MeshDensity',35,'EdgeColor','none');
+%                 obs_plot(i)= fimplicit3(obj.surfaceEqu{i},obj.surfaceBoundXYZ{i},'FaceAlpha',1,'MeshDensity',2);
+                hold on
+            end
         end
         
     end
