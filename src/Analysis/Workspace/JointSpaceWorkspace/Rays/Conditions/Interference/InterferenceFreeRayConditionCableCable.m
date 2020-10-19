@@ -149,8 +149,9 @@ classdef InterferenceFreeRayConditionCableCable < WorkspaceRayConditionBase
                             B_j = (A2(4:6, j) * u_root^2 + A1(4:6, j) * u_root + A0(4:6, j))/(1+u_root)^2;
                         end
                         
-                        [ti, tj] = obj.intersection_titj(A_i, B_i, A_j, B_j);
-                        if (ti >= 0 && ti <= 1 && tj >=0 && tj <=1)
+                        is_intersected = obj.intersection_titj(A_i, B_i, A_j, B_j);
+%                         if (ti >= 0 && ti <= 1 && tj >=0 && tj <=1)
+                        if is_intersected
                             if is_dof_translation
                                 q_root = u_root;
                             else
@@ -207,44 +208,65 @@ classdef InterferenceFreeRayConditionCableCable < WorkspaceRayConditionBase
             g = n1*(B_i(3)-A_i(3)) - n2*(B_j(3)-A_j(3)) - d*(A_j(3)-A_i(3));
         end
         
-        function [ti,tj] = intersection_titj(obj, A_i, B_i, A_j, B_j)
+        function [is_intersected] = intersection_titj(obj, A_i, B_i, A_j, B_j)
+            %% cross plane
             a = B_i-A_i;
             b = B_j-A_j;
-            c = [a(2)*b(3) - a(3)*b(2) ; a(3)*b(1) - a(1)*b(3) ; a(1)*b(2) - a(2)*b(1)];
-            d = c(1) * (A_i(1)-A_j(1)) + c(2) * (A_i(2)-A_j(2)) + c(3) * (A_i(3)-A_j(3));
-            if round(d,obj.ROUNDING_DIGIT) == 0
-                b = [A_j(1)-A_i(1); A_j(2)-A_i(2)];
-                A = [B_i(1)-A_i(1), -B_j(1)+A_j(1); B_i(2)-A_i(2), -B_j(2)+A_j(2)];
-                
-                
-                % Adjoint of A
-                A_adj = [A(2,2) -A(1,2); -A(2,1) A(1,1)];
-                x = A_adj*b;
-                n1 = x(1);
-                n2 = x(2);
-                % Determinant of A
-                d = A(1,1)*A(2,2) - A(1,2)*A(2,1);
-                
-                ti = n1/d;
-                tj = n2/d;
-                if (ti == 0 && tj == 0 ) || (isnan(ti) && isnan(tj))
-                    b = [A_j(1)-A_i(1); A_j(3)-A_i(3)];
-                    A = [B_i(1)-A_i(1), -B_j(1)+A_j(1); B_i(3)-A_i(3), -B_j(3)+A_j(3)];
-                    
-                    % Adjoint of A
-                    A_adj = [A(2,2) -A(1,2); -A(2,1) A(1,1)];
-                    x = A_adj*b;
-                    n1 = x(1);
-                    n2 = x(2);
-                    % Determinant of A
-                    d = A(1,1)*A(2,2) - A(1,2)*A(2,1);
-                    ti = n1/d;
-                    tj = n2/d;
-                end
-            else
-                ti = Inf;
-                tj = Inf;
-            end
+%             c = [a(2)*b(3) - a(3)*b(2) ; a(3)*b(1) - a(1)*b(3) ; a(1)*b(2) - a(2)*b(1)];
+            A = [a -b];
+            B = A_j - A_i;
+            x = A\B;
+            is_intersected = all(0 <= round(x,5)) & all(1 >= round(x,5));
+            %% fast check
+%             r = B_i - A_i;
+%             s = B_j - A_j;
+%             q = A_i - A_j;
+%             line([B_i(1) A_i(1)],[B_i(2) A_i(2)],[B_i(1) A_i(2)])
+%             hold on
+%             line([B_j(1) A_j(1)],[B_j(2) A_j(2)],[B_j(1) A_j(2)])
+%             t = ((q'*s)*(s'*r) - (q'*r)*(s'*s))/((r'*r)*(s'*s) - (r'*s)*(s'*r));
+%             u = ((q'*s) - t*(r'*s))/(s'*s);
+%             p1 = A_j + u*s;
+%             p0 = A_i + t*r;
+%             is_intersected = round(norm((p1-p0)),obj.ROUNDING_DIGIT) == 0;
+%             %%
+%             a = B_i-A_i;
+%             b = B_j-A_j;
+%             c = [a(2)*b(3) - a(3)*b(2) ; a(3)*b(1) - a(1)*b(3) ; a(1)*b(2) - a(2)*b(1)];
+%             d = c(1) * (A_i(1)-A_j(1)) + c(2) * (A_i(2)-A_j(2)) + c(3) * (A_i(3)-A_j(3));
+%             if round(d,obj.ROUNDING_DIGIT) == 0
+%                 b = [A_j(1)-A_i(1); A_j(2)-A_i(2)];
+%                 A = [B_i(1)-A_i(1), -B_j(1)+A_j(1); B_i(2)-A_i(2), -B_j(2)+A_j(2)];
+%                 
+%                 
+%                 % Adjoint of A
+%                 A_adj = [A(2,2) -A(1,2); -A(2,1) A(1,1)];
+%                 x = A_adj*b;
+%                 n1 = x(1);
+%                 n2 = x(2);
+%                 % Determinant of A
+%                 d = A(1,1)*A(2,2) - A(1,2)*A(2,1);
+%                 
+%                 ti = n1/d;
+%                 tj = n2/d;
+%                 if (ti == 0 && tj == 0 ) || (isnan(ti) && isnan(tj))
+%                     b = [A_j(1)-A_i(1); A_j(3)-A_i(3)];
+%                     A = [B_i(1)-A_i(1), -B_j(1)+A_j(1); B_i(3)-A_i(3), -B_j(3)+A_j(3)];
+%                     
+%                     % Adjoint of A
+%                     A_adj = [A(2,2) -A(1,2); -A(2,1) A(1,1)];
+%                     x = A_adj*b;
+%                     n1 = x(1);
+%                     n2 = x(2);
+%                     % Determinant of A
+%                     d = A(1,1)*A(2,2) - A(1,2)*A(2,1);
+%                     ti = n1/d;
+%                     tj = n2/d;
+%                 end
+%             else
+%                 ti = Inf;
+%                 tj = Inf;
+%             end
         end
         
         function [m, c] = attachment_fit_translation(~, u_min, u_max, A_min, A_max)
