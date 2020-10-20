@@ -174,8 +174,8 @@ classdef InterferenceFreeRayConditionCableCable < WorkspaceRayConditionBase
             % section/range is intersecting?
             
             q_roots_all = unique(q_roots_all);
-            intervals = zeros(length(q_roots_all)+1, 2);
-            
+            intervals = zeros(length(q_roots_all)-1, 2);
+%             intervals = zeros(length(q_roots_all)+1, 2);
             for i = 1:length(q_roots_all)-1
                 intervals(i, :) = [q_roots_all(i) q_roots_all(i+1)];
             end
