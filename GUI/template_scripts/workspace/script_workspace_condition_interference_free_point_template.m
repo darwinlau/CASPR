@@ -8,13 +8,18 @@
 clc; clear; warning off; close all;
 
 % Set up the model 
-model_config    =   ModelConfig('Example planar XY');
-cable_set_id    =   'basic_notouch';
+model_config    =   ModelConfig('Example spatial');
+cable_set_id    =   'cross_8_cables';
 modelObj        =   model_config.getModel(cable_set_id);
+modelObj =  model_config.getModel('cross_8_cables', [], ModelModeType.COMPILED);
 % Define the number of points per axis
-num_seg = 5;
-q_begin         =   modelObj.bodyModel.q_min; q_end = modelObj.bodyModel.q_max;
-q_step          =   (modelObj.bodyModel.q_max - modelObj.bodyModel.q_min)./num_seg;
+q_begin         =   modelObj.bodyModel.q_min; 
+% q_begin(4:6) = 0;
+q_begin(1:3) = [0.5 0.2 0.8]';
+q_end = modelObj.bodyModel.q_max; 
+% q_end(4:6) = 0;
+q_end(1:3) = [0.5 0.2 0.8]';
+q_step          =   (q_end - q_begin)/50;
 
 % Set up the workspace simulator
 % Specify any fixed value (optional)
@@ -39,20 +44,21 @@ wsim            =   PointWorkspaceSimulator(modelObj, uGrid, w_conditions, w_met
 
 % Run the simulation
 CASPR_log.Info('Start Running Simulation');
+tic
 wsim.run();
-
+toc
 % Plot the simulation, accept single/multiple conditions/metrics input
 CASPR_log.Info('Start Plotting Simulation');
 
-graph_plot = wsim.workspace.plotGraph(w_conditions,w_metrics,w_connectivity);
-
-figure
-plot_axis = [1 2 3];% Maximum allow 3 axis plot e.g. here 1st, 2nd variables as the axis
-% Fixed variables, you can leave the value of plot axis zero/any number, it won't affect the result plot
-% 4 digits numbers are counted into the plotting error
-fixed_variables = wsim.grid.q_begin' + wsim.grid.delta_q' .* [0 0 0];
-% 2D/3D plot
-cartesian_workspace_plot = wsim.workspace.plotWorkspace(plot_axis, w_conditions, w_metrics, fixed_variables);
+% graph_plot = wsim.workspace.plotGraph(w_conditions,w_metrics,w_connectivity);
+% 
+% figure
+% plot_axis = [1 2 3];% Maximum allow 3 axis plot e.g. here 1st, 2nd variables as the axis
+% % Fixed variables, you can leave the value of plot axis zero/any number, it won't affect the result plot
+% % 4 digits numbers are counted into the plotting error
+% fixed_variables = wsim.grid.q_begin' + wsim.grid.delta_q' .* [0 0 0];
+% % 2D/3D plot
+% cartesian_workspace_plot = wsim.workspace.plotWorkspace(plot_axis, w_conditions, w_metrics, fixed_variables);
 
 % close all 
 % % 2D/3D slider plot 

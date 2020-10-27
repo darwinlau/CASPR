@@ -15,6 +15,8 @@ classdef CreateObstacleElement < handle
         boundaryEqu                % the boundary parametric equations
         boundaryEquCoeff           % coefficient of the boundary parametric equations
         boundaryDeg                % the degree of boundary parametric equations
+        boundary2surf              % Surface and its boundary index
+        surf2boundary
         
         surfaceDirection
         
@@ -22,12 +24,18 @@ classdef CreateObstacleElement < handle
         boundaryNum
     end
     methods
-        function obs = CreateObstacleElement(surface,surfaceBoundXYZ,Direction,boundary)
+        function obs = CreateObstacleElement(surface,surfaceBoundXYZ,Direction,boundary,SurfaceBoundaryConnectivity)
             syms x y z t;
             obs.surfaceDirection = Direction;
             obs.surfaceNum = size(surface,2);
             obs.boundaryNum = size(boundary,2);
-            
+            if ~isempty(SurfaceBoundaryConnectivity)
+            obs.boundary2surf = SurfaceBoundaryConnectivity; 
+            for i = 1:obs.surfaceNum
+               [col,~] = find(ismember(obs.boundary2surf(:,2:3),i));
+               obs.surf2boundary(i,:) = [i,obs.boundary2surf(col,1)'];
+            end
+            end
             for surf_ind = 1:size(surface,2)
                 [coeff_f,var_f] = coeffs(surface{surf_ind}(x,y,z));   
                 Fi = @(x,y,z) c(1).*x.^4 + c(2).*y.^4 + c(3).*z.^4 +...

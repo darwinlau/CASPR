@@ -231,7 +231,7 @@
         </attachment>
         <attachment>
           <link>1</link>
-          <location>-0.0248764 0.2195 1.8743851E-04</location>
+          <location>-0.026 0.2195 0.025</location>
         </attachment>
       </attachments>
     </cable_vsd_polynomial>
@@ -250,7 +250,7 @@
         </attachment>
         <attachment>
           <link>1</link>
-          <location>-0.0248764 0.2545 1.8743851E-04</location>
+          <location>-0.0248764 0.2545 -0.02</location>
         </attachment>
       </attachments>
     </cable_vsd_polynomial>
@@ -269,7 +269,7 @@
         </attachment>
         <attachment>
           <link>1</link>
-          <location>0.025124 0.2195 1.8743851E-04</location>
+          <location>0.026 0.2195 0.025</location>
         </attachment>
       </attachments>
     </cable_vsd_polynomial>
@@ -288,7 +288,7 @@
         </attachment>
         <attachment>
           <link>1</link>
-          <location>0.025124 0.2545 1.8743851E-04</location>
+          <location>0.025124 0.2545 -0.02</location>
         </attachment>
       </attachments>
     </cable_vsd_polynomial>

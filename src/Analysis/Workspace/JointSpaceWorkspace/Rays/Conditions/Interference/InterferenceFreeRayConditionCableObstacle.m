@@ -28,7 +28,7 @@ classdef InterferenceFreeRayConditionCableObstacle < WorkspaceRayConditionBase
         obstacle;
         surf_ans_ind = [];
         OA_i_hat;
-        is_fiiting;
+        is_fitting;
     end
     
     methods
@@ -45,14 +45,14 @@ classdef InterferenceFreeRayConditionCableObstacle < WorkspaceRayConditionBase
                 tmp_ind = repmat(1:w.segment_num,obstacle.surfaceDeg(surf_ind),1);
                 w.surf_ans_ind = [w.surf_ans_ind;tmp_ind(:)];
             end
-            w.is_fiiting = 0;
+            w.is_fitting = 0;
         end
         
         % Evaluate the interference free intervals
         function intervals =  evaluateFunction(obj, model, ws_ray)
             % Variable initialisation
             %             tic
-            
+            IFI = [];%interference_free_interval for each segment
             intervals = [];
             intervals_count = 1;
             free_variable_index = ws_ray.freeVariableIndex;
@@ -81,11 +81,131 @@ classdef InterferenceFreeRayConditionCableObstacle < WorkspaceRayConditionBase
             %             toc
             
             u_obstacle = [];  u_segment_surface_index_1 = [];
-            u_boundary_G = [];      u_segment_surface_index_2 = [];
+            u_Gxyz = [];      u_segment_surface_index_2 = [];
             u_boundary_F = [];      u_segment_surface_index_3 = [];
             u_all = [];             u_segment_surface_index_all = [];
-            if ~obj.is_fiiting
-                %             tic
+            if ~obj.is_fitting
+%                 for bound_ind = 1:obj.obstacle.boundaryNum
+%                     [~,~,u_segment_surface_index_3] = obj.SegmentIntersection_Gxyz(bound_ind);
+%                     u_Gxyz = [u_Gxyz;u_segment_surface_index_3];
+%                     
+%                 end
+%                 tic
+%                 for segment_index = 1:obj.segment_num
+%                     
+%                     interval_count = 1;
+%                     u_surface_index_all = [];
+%                     u_segment_surface_index_all = [];
+%                     for surf_ind = 1:obj.obstacle.surfaceNum
+%                         [~,u_segment_surface_index_1] = obj.Cable_Obstacle_Surface_Intersection_1(segment_index,surf_ind);
+%                         if obj.is_dof_translation
+%                             
+%                             [~,~,u_segment_surface_index_2] = obj.LineSegment_Surface_Intersection_1(segment_index,OB_i_begin(segment_index,:),OB_i_end(segment_index,:),surf_ind,0);
+%                         else
+%                             [~,u_segment_surface_index_2] = obj.CurveSegment_Surface_Intersection_1(segment_index,surf_ind);
+%                         end
+%                         u_segment_surface_index_all = [u_segment_surface_index_all;u_segment_surface_index_1;u_segment_surface_index_2];
+%                         
+%                     end
+%                     if ~isempty(u_Gxyz)
+%                         u_segment_surface_index_all = [u_segment_surface_index_all;u_Gxyz(find(ismember(u_Gxyz(:,2),segment_index)),:)];
+%                     end
+%                     if ~isempty(u_segment_surface_index_all)
+%                         [~,u_surface_index_all] = obj.SortAnswerWithIndex(u_segment_surface_index_all);
+%                     end
+%                     %                     u_segment = [u_segment;obj.u_range'];
+%                     %                     u_surface_index_all = [obj.u_range(1),u_surface_index_all(1,2);
+%                     %                                             u_surface_index_all;
+%                     %                                             obj.u_range(2),u_surface_index_all(end,2)];
+%                     u_surface_index_all = [obj.u_range(1),{(1:obj.obstacle.surfaceNum)'};
+%                         u_surface_index_all;
+%                         obj.u_range(2),{(1:obj.obstacle.surfaceNum)'}];
+%                     continue_no_intersected = 0;
+%                     for i = 1:size(u_surface_index_all,1)- 1
+%                         %                         clf
+%                         has_intersected = 0;flag = [];
+%                         q1 = q_begin;  q2 = q_begin;
+%                         if obj.is_dof_translation
+%                             q1 = (q_end - q_begin)*u_surface_index_all{i,1} + q_begin;
+%                             q2 = (q_end - q_begin)*u_surface_index_all{i+1,1} + q_begin;
+%                         else
+%                             q1(free_variable_index,:) = 2*atan(u_surface_index_all{i,1});
+%                             q2(free_variable_index,:) = 2*atan(u_surface_index_all{i+1,1});
+%                         end
+%                         intersected_surf = unique([u_surface_index_all{i,2};u_surface_index_all{i+1,2}]);
+%                         
+%                         [OA_i,OB_i] = obj.GetSegmentData(model,(q1+q2)/2);
+%                         %                         [~,~] = draw_robot(model,(q1+q2)/2);
+%                         %                         obj.obstacle.plotObstacle
+%                         for j = 1:size(intersected_surf,1)
+%                             [flag(j),~,~] = obj.LineSegment_Surface_Intersection_1(segment_index,OA_i(segment_index,:),OB_i(segment_index,:),intersected_surf(j),1);
+%                             
+%                         end
+%                         for j = 1:obj.obstacle.surfaceNum
+%                             A_direction(j) = sign(round(obj.obstacle.surfaceEqu{j}(OA_i(segment_index,1),OA_i(segment_index,2),OA_i(segment_index,3)),4));
+%                             if A_direction(j) == 0
+%                                 A_direction(j) = obj.obstacle.surfaceDirection(j);
+%                             end
+%                             B_direction(j) = sign(round(obj.obstacle.surfaceEqu{j}(OB_i(segment_index,1),OB_i(segment_index,2),OB_i(segment_index,3)),4));
+%                             if B_direction(j) == 0
+%                                 B_direction(j) = obj.obstacle.surfaceDirection(j);
+%                             end
+%                         end
+%                         if norm(A_direction - obj.obstacle.surfaceDirection) == 0 || norm(B_direction - obj.obstacle.surfaceDirection) == 0
+%                             flag = 1;
+%                         end
+%                         if any(flag)
+%                             has_intersected = 1;
+%                         else
+%                             has_intersected = 0;
+%                         end
+% %                         if segment_index == 2
+% %                             segment_index
+% %                             clf
+% %                             [~,~] = draw_robot(model,(q1+q2)/2);
+% %                             obj.obstacle.plotObstacle
+% %                         end
+%                         if ~has_intersected
+%                             if ~continue_no_intersected
+%                                 IFI{segment_index}(interval_count,:) = [u_surface_index_all{i,1},u_surface_index_all{i+1,1}];
+%                                 interval_count = interval_count + 1;
+%                             else
+%                                 IFI{segment_index}(end) = u_surface_index_all{i+1,1};
+%                             end
+%                             continue_no_intersected = 1;
+%                         else
+%                             continue_no_intersected = 0;
+%                             
+%                         end
+%                         
+%                         
+%                         %                         has_intersected = obj.IntervalVerify(model,q_intersected(:,i),q_intersected(:,i+1));
+%                         %
+%                         %                         if ~has_intersected
+%                         %                             if ~isempty(intervals) && intervals(end) == q_intersected(free_variable_index,i)
+%                         %                                 intervals(end) = q_intersected(free_variable_index,i+1);
+%                         %                             else
+%                         %                                 intervals(intervals_count,:) = [q_intersected(free_variable_index,i),q_intersected(free_variable_index,i+1)];
+%                         %                                 intervals_count = intervals_count + 1;
+%                         %                             end
+%                         %                         end
+%                     end
+%                     
+%                 end
+%                 
+%                 current_interval = sort(reshape(cell2mat(IFI(:,1)),1,[]));
+%                 for i = 2:size(IFI,2)
+%                     compare_interval = sort(reshape(cell2mat(IFI(:,i)),1,[]));
+%                     current_interval = obj.range_intersection(compare_interval,current_interval);
+%                 end
+%                 
+%                 interval(:,1)  = current_interval(1:2:size(current_interval,2));
+%                 interval(:,2)  = current_interval(2:2:size(current_interval,2));
+%                 toc
+                %                 current_interval = reshape(current_interval,[],2)
+                %%
+%                 tic
+                u_segment_surface_index_all = [];
                 for surf_ind = 1:obj.obstacle.surfaceNum
                     if  obj.obstacle.surfaceDeg(surf_ind) ~= 1
                         
@@ -103,15 +223,13 @@ classdef InterferenceFreeRayConditionCableObstacle < WorkspaceRayConditionBase
                     u_segment_surface_index_all = [u_segment_surface_index_all;u_segment_surface_index_1;u_segment_surface_index_2];
                     
                 end
-                %             toc
-                %             tic
+                
                 for bound_ind = 1:obj.obstacle.boundaryNum
-                    
                     [~,~,u_segment_surface_index_3] = obj.SegmentIntersection_Gxyz(bound_ind);
-                    %                 u_all = [u_all;u_boundary_F];
                     u_segment_surface_index_all = [u_segment_surface_index_all;u_segment_surface_index_3];
                     
                 end
+                %%
                 %             toc
                 
             else
@@ -148,27 +266,30 @@ classdef InterferenceFreeRayConditionCableObstacle < WorkspaceRayConditionBase
                     end
                 end
             end
-            %             toc
+%                         toc
             
         end
         
         %%
         function has_intersected = IntervalVerify(obj,model,q1,q2)
             [OA_i,OB_i] = obj.GetSegmentData(model,(q1+q2)/2);
-            
-%                                     [~,b] = draw_robot(model,(q1+q2)/2);
-%                                     delete(a)
+%             clf
+%             obj.obstacle.plotObstacle
+%                                                 [~,b] = draw_robot(model,q1+q2)/2);
+            %                                     delete(a)
             for surf_ind = 1:obj.obstacle.surfaceNum
                 [flag(surf_ind),~,~] = LineSegment_Surface_Intersection(obj,OA_i,OB_i,surf_ind,1);
                 if any(flag)
                     has_intersected = 1;
-%                                                          delete(b)
+                    %                                                          delete(b)
                     return;
                 end
             end
             has_intersected = 0;
-%                                       delete(b)
+            %                                       delete(b)
         end
+        
+        
         %%
         function [o1,o2] = SortAnswerWithIndex(obj,value)
             o2 = [];o1 = [];
@@ -176,10 +297,11 @@ classdef InterferenceFreeRayConditionCableObstacle < WorkspaceRayConditionBase
             [uni_val,ia,~] = unique(val,'rows');
             remove_index = [find(uni_val(:,1) < obj.u_range(1));find(uni_val(:,1) > obj.u_range(2))];
             uni_val(remove_index) = [];
+            
             if ~isempty(uni_val)
                 for i = 1:size(uni_val,1)
                     index = find(ismember(val,uni_val(i)));
-                    tmp_val = {uni_val(i),value(index,2:3)};
+                    tmp_val = {uni_val(i),value(index,3)};
                     o1 = [o1;value(index,1)];
                     o2 = [o2;tmp_val];
                 end
@@ -224,7 +346,7 @@ classdef InterferenceFreeRayConditionCableObstacle < WorkspaceRayConditionBase
                         intersection_pt = (P_end(segment_ind(j),:) - P_begin(segment_ind(j),:))*v(i) + P_begin(segment_ind(j),:);
                         
                         %%
-%                         dd(j) = scatter3(intersection_pt(:,1),intersection_pt(:,2),intersection_pt(:,3),'filled')
+                        %                         dd(j) = scatter3(intersection_pt(:,1),intersection_pt(:,2),intersection_pt(:,3),'filled')
                         in_surf =  intersection_pt(1) >= obj.obstacle.surfaceBoundXYZ{surf_ind}(1) &&...
                             intersection_pt(1) <= obj.obstacle.surfaceBoundXYZ{surf_ind}(2) &&...
                             intersection_pt(2) >= obj.obstacle.surfaceBoundXYZ{surf_ind}(3) &&...
@@ -234,7 +356,7 @@ classdef InterferenceFreeRayConditionCableObstacle < WorkspaceRayConditionBase
                         
                         if in_surf
                             flag = 1;
-%                             delete(dd)
+                            %                             delete(dd)
                             return;
                         end
                     end
@@ -243,7 +365,7 @@ classdef InterferenceFreeRayConditionCableObstacle < WorkspaceRayConditionBase
                     %                         tmp_in_surf(tmp_in_surf==0) = obj.obstacle.surfaceDirection(j);
                     %                         in_surf(:,j) = tmp_in_surf;
                     %                     end
-%                     delete(dd)
+                    %                     delete(dd)
                     %                     for j = 1:obj.segment_num
                     %                         if isequal(in_surf(j,:),obj.obstacle.surfaceDirection)
                     %                             flag = 1;
@@ -257,14 +379,101 @@ classdef InterferenceFreeRayConditionCableObstacle < WorkspaceRayConditionBase
             end
         end
         
+        %% function to find intersection between a line segment and the obstacle surface
+        function [flag,v,seg_surf_ind] = LineSegment_Surface_Intersection_1(obj,segment_index,P_begin,P_end,surf_ind,need_varify)
+            
+            v = []; seg_surf_ind = []; flag = 0;
+            t_coeff = [];
+            %             tic
+            %             for i = 1:obj.segment_num
+            t_coeff = s_coeffs_T(P_end',P_begin',obj.obstacle.surfaceCoeffs{surf_ind});
+            t_roots = roots(t_coeff);
+            imag_index = find(imag(t_roots) ~= 0);
+            t_roots(imag_index) = [];
+            if ~isempty(t_roots)
+                v = [v;t_roots];
+                seg_surf_ind = [seg_surf_ind;[t_roots, repmat([segment_index,surf_ind],size(t_roots))]];
+            end
+            %             end
+            %             toc
+            
+            if ~isempty(seg_surf_ind) && need_varify
+                if ~isempty(obj.obstacle.surf2boundary)
+                    related_boundary_index = obj.obstacle.surf2boundary(find(ismember(obj.obstacle.surf2boundary(:,1),surf_ind)),2:end);
+                    tmp_index = obj.obstacle.boundary2surf(find(ismember(obj.obstacle.boundary2surf(:,1),related_boundary_index)),2:end);
+                    related_surfaces_index = unique(tmp_index(:));
+                    surf_ind = related_surfaces_index;
+                end
+                remove_ind = v>1 | v<0;
+                seg_surf_ind(remove_ind,:) = [];
+                v(remove_ind,:) = [];
+                [v,ia,~] = unique(v);
+                %                 seg_surf_ind = seg_surf_ind(ia,:);
+                %                 v = seg_surf_ind(:,1);
+                %                  tic
+                for i = 1:size(v,1)
+                    
+                    v_related_surf_ind = find(ismember(seg_surf_ind(:,1),v(i)));
+                    segment_ind = seg_surf_ind(v_related_surf_ind,2);
+                    
+                    for j = 1:size(v_related_surf_ind,1)
+                        intersection_pt = (P_end - P_begin)*v(i) + P_begin;
+                        
+                        %%
+                        
+                        %                         dd = scatter3(intersection_pt(:,1),intersection_pt(:,2),intersection_pt(:,3),'filled')
+                        %                         in_surf =  intersection_pt(1) >= obj.obstacle.surfaceBoundXYZ{surf_ind}(1) &&...
+                        %                             intersection_pt(1) <= obj.obstacle.surfaceBoundXYZ{surf_ind}(2) &&...
+                        %                             intersection_pt(2) >= obj.obstacle.surfaceBoundXYZ{surf_ind}(3) &&...
+                        %                             intersection_pt(2) <= obj.obstacle.surfaceBoundXYZ{surf_ind}(4) &&...
+                        %                             intersection_pt(3) >= obj.obstacle.surfaceBoundXYZ{surf_ind}(5) &&...
+                        %                             intersection_pt(3) <= obj.obstacle.surfaceBoundXYZ{surf_ind}(6);
+                        for k = 1:size(surf_ind,1)
+                            in_surf(k) = sign(round(obj.obstacle.surfaceEqu{surf_ind(k)}(intersection_pt(1),intersection_pt(2),intersection_pt(3)),4));
+                            %                         delete(dd)
+                            if in_surf(k) == 0
+                                in_surf(k) =  obj.obstacle.surfaceDirection(surf_ind(k));
+                            end
+                        end
+                        if all(in_surf == obj.obstacle.surfaceDirection(surf_ind))
+                            flag = 1;
+                            %                             delete(dd)
+                            return;
+                        else
+                            flag = 0;
+                        end
+                    end
+                    %                     for j = 1:obj.obstacle.surfaceNum
+                    %                         tmp_in_surf = sign(round(obj.obstacle.surfaceEqu{j}(intersection_pt(:,1),intersection_pt(:,2),intersection_pt(:,3)),4));
+                    %                         tmp_in_surf(tmp_in_surf==0) = obj.obstacle.surfaceDirection(j);
+                    %                         in_surf(:,j) = tmp_in_surf;
+                    %                     end
+                    %                     delete(dd)
+                    %                     for j = 1:obj.segment_num
+                    %                         if isequal(in_surf(j,:),obj.obstacle.surfaceDirection)
+                    %                             flag = 1;
+                    %                             return;
+                    %                         end
+                    %                     end
+                    
+                end
+                %                 toc
+                flag = 0;
+            end
+        end
         %% function to find intersection between boundary of implicit surface to cable surface
-        function [u_edge,v_edge,val_seg_bound] = SegmentIntersection_Gxyz(obj,bound_ind)
+        function [u_edge,v_edge,val_seg_surf] = SegmentIntersection_Gxyz(obj,bound_ind)
             u_edge = []; segment_ind = []; v_edge= [];
-            P_j = [];v_value = [];val_seg_bound = [];
+            related_surface_index = obj.obstacle.boundary2surf(find(ismember(obj.obstacle.boundary2surf(:,1),bound_ind)),2:end);
+            P_j = [];v_value = [];val_seg_surf = [];
             u_value = [];
             v_roots = []; v = []; segment_ind = [];
+            %             obj.obstacle.plotObstacle;
+            %             hold on
             for i = 1:obj.segment_num
+                
                 v_coeffs = g_coeffs(obj.obstacle.boundaryEquCoeff{bound_ind},obj.G_coeffs(i,:)');
+                
                 v_roots = roots(v_coeffs);
                 imag_index = find(imag(v_roots) ~= 0);
                 v_roots(imag_index) = [];
@@ -272,6 +481,8 @@ classdef InterferenceFreeRayConditionCableObstacle < WorkspaceRayConditionBase
                     v_roots(v_roots > 1) = [];v_roots(v_roots < 0) = [];
                     
                     if ~isempty(v_roots)
+                        %                         ha(i)= fimplicit3(obj.G_xyz{i},[0 1 0 1 0 1],'FaceColor',[0.2,0.2,0.2],'FaceAlpha',0.8,'MeshDensity',35,'EdgeColor','none');
+                        %                 delete(ha)
                         v = [v;v_roots];
                         for j = 1:size(v_roots,1)
                             P_j = [P_j,obj.obstacle.boundaryEqu{bound_ind}(v_roots(j))];
@@ -286,7 +497,8 @@ classdef InterferenceFreeRayConditionCableObstacle < WorkspaceRayConditionBase
                         v_val <= 1 &&  v_val >= 0
                     u_edge = [u_edge;u_val];
                     v_edge = [v_edge;v_val];
-                    val_seg_bound = [u_val,segment_ind(i,2:end)];
+                    %                     val_seg_surf = [u_val,segment_ind(i,2:end)];
+                    val_seg_surf = [repmat(u_val,size(related_surface_index))',repmat(segment_ind(i,2),size(related_surface_index))',related_surface_index'];
                 end
             end
             
@@ -352,6 +564,9 @@ classdef InterferenceFreeRayConditionCableObstacle < WorkspaceRayConditionBase
             u_coeff = [];
             u_obs = [];
             seg_surf_ind = [];
+            if obj.obstacle.surfaceDeg(surf_ind) == 1
+                return;
+            end
             for i = 1:obj.segment_num
                 if ~obj.is_dof_translation
                     if obj.obstacle.surfaceDeg(surf_ind) == 4
@@ -415,8 +630,8 @@ classdef InterferenceFreeRayConditionCableObstacle < WorkspaceRayConditionBase
                         else
                             v_coeff = v_coeffs_O(obj.OB_u{i},obj.OA_i_hat(i,:)',obj.obstacle.surfaceCoeffs{surf_ind},u_roots(k));
                         end
-%                         v_roots  = roots(round(v_coeff,obj.ROUNDING_DIGIT));
-                         v_roots  = round(roots(v_coeff),4);
+                        %                         v_roots  = roots(round(v_coeff,obj.ROUNDING_DIGIT));
+                        v_roots  = round(roots(v_coeff),3);
                         imag_index = find(imag(v_roots) ~= 0);
                         v_roots(imag_index) = [];
                         
@@ -439,6 +654,100 @@ classdef InterferenceFreeRayConditionCableObstacle < WorkspaceRayConditionBase
             
         end
         
+        %% %function to find intersection between obstacle and cable swept surface
+        function [u_obs,seg_surf_ind] = Cable_Obstacle_Surface_Intersection_1(obj,segment_index,surf_ind)
+            u_coeff = [];
+            u_obs = [];
+            seg_surf_ind = [];
+            if obj.obstacle.surfaceDeg(surf_ind) == 1
+                return;
+            end
+            %             for i = 1:obj.segment_num
+            if ~obj.is_dof_translation
+                if obj.obstacle.surfaceDeg(surf_ind) == 4
+                    a = H4_O(obj.OB_u{segment_index},obj.OA_i_hat(segment_index,:)',obj.obstacle.surfaceCoeffs{surf_ind});
+                    b = H3_O(obj.OB_u{segment_index},obj.OA_i_hat(segment_index,:)',obj.obstacle.surfaceCoeffs{surf_ind});
+                    c = H2_O(obj.OB_u{segment_index},obj.OA_i_hat(segment_index,:)',obj.obstacle.surfaceCoeffs{surf_ind});
+                    d = H1_O(obj.OB_u{segment_index},obj.OA_i_hat(segment_index,:)',obj.obstacle.surfaceCoeffs{surf_ind});
+                    e = H0_O(obj.OB_u{segment_index},obj.OA_i_hat(segment_index,:)',obj.obstacle.surfaceCoeffs{surf_ind});
+                    u_coeff = [u_coeff;u_coeffs_4_deg(a,b,c,d,e)];
+                elseif obj.obstacle.surfaceDeg(surf_ind) == 3
+                    a = H3_O(obj.OB_u{segment_index},obj.OA_i_hat(segment_index,:)',obj.obstacle.surfaceCoeffs{surf_ind});
+                    b = H2_O(obj.OB_u{segment_index},obj.OA_i_hat(segment_index,:)',obj.obstacle.surfaceCoeffs{surf_ind});
+                    c = H1_O(obj.OB_u{segment_index},obj.OA_i_hat(segment_index,:)',obj.obstacle.surfaceCoeffs{surf_ind});
+                    d = H0_O(obj.OB_u{segment_index},obj.OA_i_hat(segment_index,:)',obj.obstacle.surfaceCoeffs{surf_ind});
+                    u_coeff = [u_coeff;u_coeffs_3_deg(a,b,c,d)];
+                elseif obj.obstacle.surfaceDeg(surf_ind) == 2
+                    a = H2_O(obj.OB_u{segment_index},obj.OA_i_hat(segment_index,:)',obj.obstacle.surfaceCoeffs{surf_ind});
+                    b = H1_O(obj.OB_u{segment_index},obj.OA_i_hat(segment_index,:)',obj.obstacle.surfaceCoeffs{surf_ind});
+                    c = H0_O(obj.OB_u{segment_index},obj.OA_i_hat(segment_index,:)',obj.obstacle.surfaceCoeffs{surf_ind});
+                    u_coeff = [u_coeff;u_coeffs_2_deg(a,b,c)];
+                end
+            else
+                if obj.obstacle.surfaceDeg(surf_ind) == 4
+                    a = zeros(1,9); b = zeros(1,7); c = zeros(1,5); d = zeros(1,3); e = zeros(1,1);
+                    a(5:end) = H4_T(obj.OB_u{segment_index},obj.OA_i_hat(segment_index,:)',obj.obstacle.surfaceCoeffs{surf_ind});
+                    b(4:end) = H3_T(obj.OB_u{segment_index},obj.OA_i_hat(segment_index,:)',obj.obstacle.surfaceCoeffs{surf_ind});
+                    c(3:end) = H2_T(obj.OB_u{segment_index},obj.OA_i_hat(segment_index,:)',obj.obstacle.surfaceCoeffs{surf_ind});
+                    d(2:end) = H1_T(obj.OB_u{segment_index},obj.OA_i_hat(segment_index,:)',obj.obstacle.surfaceCoeffs{surf_ind});
+                    e(1:end) = H0_T(obj.OB_u{segment_index},obj.OA_i_hat(segment_index,:)',obj.obstacle.surfaceCoeffs{surf_ind});
+                    u_coeff = [u_coeff;u_coeffs_4_deg(a,b,c,d,e)];
+                elseif obj.obstacle.surfaceDeg(surf_ind) == 3
+                    a = zeros(1,7); b = zeros(1,5); c = zeros(1,3); d = zeros(1,1);
+                    a(4:end) = H3_T(obj.OB_u{segment_index},obj.OA_i_hat(segment_index,:)',obj.obstacle.surfaceCoeffs{surf_ind});
+                    b(3:end) = H2_T(obj.OB_u{segment_index},obj.OA_i_hat(segment_index,:)',obj.obstacle.surfaceCoeffs{surf_ind});
+                    c(2:end) = H1_T(obj.OB_u{segment_index},obj.OA_i_hat(segment_index,:)',obj.obstacle.surfaceCoeffs{surf_ind});
+                    d(1:end) = H0_T(obj.OB_u{segment_index},obj.OA_i_hat(segment_index,:)',obj.obstacle.surfaceCoeffs{surf_ind});
+                    u_coeff = [u_coeff;u_coeffs_3_deg(a,b,c,d)];
+                elseif obj.obstacle.surfaceDeg(surf_ind) == 2
+                    a = zeros(1,5); b = zeros(1,3); c = zeros(1,1);
+                    a(3:end) = H2_T(obj.OB_u{segment_index},obj.OA_i_hat(segment_index,:)',obj.obstacle.surfaceCoeffs{surf_ind});
+                    b(2:end) = H1_T(obj.OB_u{segment_index},obj.OA_i_hat(segment_index,:)',obj.obstacle.surfaceCoeffs{surf_ind});
+                    c = H0_T(obj.OB_u{segment_index},obj.OA_i_hat(segment_index,:)',obj.obstacle.surfaceCoeffs{surf_ind});
+                    u_coeff = [u_coeff;u_coeffs_2_deg(a,b,c)];
+                end
+            end
+            
+            %             end
+            
+            u_coeff = round(u_coeff,obj.ROUNDING_DIGIT);
+            if any(isnan(u_coeff))
+                return;
+            end
+            u_roots = roots(u_coeff);
+            imag_index = find(imag(u_roots) ~= 0);
+            u_roots(imag_index) = [];
+            
+            if ~isempty(u_roots)
+                wrong_u_index = [];
+                for k = 1:size(u_roots,1)
+                    if obj.is_dof_translation
+                        v_coeff = v_coeffs_T(obj.OB_u{segment_index},obj.OA_i_hat(segment_index,:)',obj.obstacle.surfaceCoeffs{surf_ind},u_roots(k));
+                    else
+                        v_coeff = v_coeffs_O(obj.OB_u{segment_index},obj.OA_i_hat(segment_index,:)',obj.obstacle.surfaceCoeffs{surf_ind},u_roots(k));
+                    end
+                    %                         v_roots  = roots(round(v_coeff,obj.ROUNDING_DIGIT));
+                    v_roots  = round(roots(v_coeff),4);
+                    imag_index = find(imag(v_roots) ~= 0);
+                    v_roots(imag_index) = [];
+                    
+                    if isempty(v_roots)
+                        wrong_u_index = [wrong_u_index;k];
+                    else
+                        v_roots = v_roots(1);
+                        if v_roots > 1 || v_roots < 0
+                            wrong_u_index = [wrong_u_index;k];
+                        end
+                    end
+                end
+                u_roots(wrong_u_index) = [];
+                if ~isempty(u_roots)
+                    u_obs = [u_obs;u_roots];
+                    seg_surf_ind = [seg_surf_ind;[u_roots, repmat([segment_index,surf_ind],size(u_roots))]];
+                end
+            end
+            
+        end
         %%
         function [cable_implicit_coeff,cable_implicit_fun] = GetGxyz(obj,model,q_begin,q_end,free_variable_index,is_dof_translation)
             cable_implicit_fun = []; cable_implicit_coeff = [];
@@ -451,14 +760,14 @@ classdef InterferenceFreeRayConditionCableObstacle < WorkspaceRayConditionBase
             q_sample = linspace(q_begin(free_variable_index),q_end(free_variable_index),sample_size);
             q_update = q_begin;
             surface_data = {};
-            for i = 1:size(q_sample,2)
-                q_update(free_variable_index) = q_sample(i);
+            for segment_index = 1:size(q_sample,2)
+                q_update(free_variable_index) = q_sample(segment_index);
                 [OA_i_u,OB_i_u]  = obj.GetSegmentData(model,q_update);
                 t = [0.1;0.25;0.5;0.75;0.9];
                 for j = 1:size(t,1)
                     tmp_data = (OB_i_u - OA_i_u).*t(j) + OA_i_u;
                     for k = 1:obj.segment_num
-                        if i == 1 && j == 1
+                        if segment_index == 1 && j == 1
                             surface_data{k}(j,:) = tmp_data(k,:);
                         else
                             surface_data{k}(end+1,:) = tmp_data(k,:);
@@ -467,18 +776,18 @@ classdef InterferenceFreeRayConditionCableObstacle < WorkspaceRayConditionBase
                 end
             end
             v = zeros(obj.segment_num,10);
-            for i = 1:obj.segment_num
+            for segment_index = 1:obj.segment_num
                 if is_dof_translation
-                    v(i,7:end) = obj.Plane_fit(surface_data{i});
-                    cable_implicit_fun{i} =@(x,y,z) v(i,1).*x +  v(i,2).*y +  v(i,3).*z +  v(i,4);
+                    v(segment_index,7:end) = obj.Plane_fit(surface_data{segment_index});
+                    cable_implicit_fun{segment_index} =@(x,y,z) v(segment_index,7).*x +  v(segment_index,8).*y +  v(segment_index,9).*z +  v(segment_index,10);
                 else
-                    [v(i,:),center(i,:)] = obj.Cone_fit(surface_data{i});
-                    cable_implicit_fun{i} =@(x,y,z) v(i,1).*x.^2 + v(i,2).*y.^2 + v(i,3).*z.^2 + ...
-                        v(i,4).*x.*y + v(i,5).*x.*z + v(i,6).*y.*z + v(i,7).*x + v(i,8).*y +...
-                        v(i,9).*z + v(i,10);
+                    [v(segment_index,:),center(segment_index,:)] = obj.Cone_fit(surface_data{segment_index});
+                    cable_implicit_fun{segment_index} =@(x,y,z) v(segment_index,1).*x.^2 + v(segment_index,2).*y.^2 + v(segment_index,3).*z.^2 + ...
+                        v(segment_index,4).*x.*y + v(segment_index,5).*x.*z + v(segment_index,6).*y.*z + v(segment_index,7).*x + v(segment_index,8).*y +...
+                        v(segment_index,9).*z + v(segment_index,10);
                 end
-                
             end
+            
             cable_implicit_coeff = v;
         end
         %% function to fit the cable swept surface into implicit form for orientation
@@ -576,16 +885,16 @@ classdef InterferenceFreeRayConditionCableObstacle < WorkspaceRayConditionBase
                 OB_u_deg = 2;
             end
             q_update = q_begin;
-            for i = 1:size(q_sample,2)
-                q_update(free_variable_index) = q_sample(i);
+            for segment_index = 1:size(q_sample,2)
+                q_update(free_variable_index) = q_sample(segment_index);
                 [~,OB_i_u]  = obj.GetSegmentData(model,q_update);
                 for j = 1:obj.segment_num
-                    OB_i_u_sample{j}(i,:) = OB_i_u(j,:).*H_i_u_denominator(i);
+                    OB_i_u_sample{j}(segment_index,:) = OB_i_u(j,:).*H_i_u_denominator(segment_index);
                 end
             end
-            for i = 1:obj.segment_num
+            for segment_index = 1:obj.segment_num
                 for j = 1:3
-                    OB_u{i}(j,:) = GeneralMathOperations.PolynomialFit(u_sample', OB_i_u_sample{i}(:,j), OB_u_deg)';
+                    OB_u{segment_index}(j,:) = GeneralMathOperations.PolynomialFit(u_sample', OB_i_u_sample{segment_index}(:,j), OB_u_deg)';
                 end
             end
             %OB_u -> [x(u);y(u);z(u)]
@@ -617,14 +926,88 @@ classdef InterferenceFreeRayConditionCableObstacle < WorkspaceRayConditionBase
             if nargout>1
                 N = size(PA,1);
                 distances=zeros(N,1);
-                for i=1:N %This is faster:
-                    ui=(P_intersect-PA(i,:))*Si(i,:)'/(Si(i,:)*Si(i,:)');
-                    distances(i)=norm(P_intersect-PA(i,:)-ui*Si(i,:));
+                for segment_index=1:N %This is faster:
+                    ui=(P_intersect-PA(segment_index,:))*Si(segment_index,:)'/(Si(segment_index,:)*Si(segment_index,:)');
+                    distances(segment_index)=norm(P_intersect-PA(segment_index,:)-ui*Si(segment_index,:));
                 end
-                %for i=1:N %http://mathworld.wolfram.com/Point-LineDistance3-Dimensional.html:
-                %    distances(i) = norm(cross(P_intersect-PA(i,:),P_intersect-PB(i,:))) / norm(Si(i,:));
+                %for segment_index=1:N %http://mathworld.wolfram.com/Point-LineDistance3-Dimensional.html:
+                %    distances(segment_index) = norm(cross(P_intersect-PA(segment_index,:),P_intersect-PB(segment_index,:))) / norm(Si(segment_index,:));
                 %end
             end
+        end
+        
+        %% function to find the interval intersection
+        function out=range_intersection(~,first,second)
+            % Purpose: Range/interval intersection
+            %
+            % A and B two ranges of closed intervals written
+            % as vectors [lowerbound1 upperbound1 lowerbound2 upperbound2]
+            % or as matrix [lowerbound1, lowerbound2, lowerboundn;
+            %               upperbound1, upperbound2, upperboundn]
+            % A and B have to be sorted in ascending order
+            %
+            % out is the mathematical intersection A n B
+            %
+            %
+            % EXAMPLE USAGE:
+            %   >> out=range_intersection([1 3 5 9],[2 9])
+            %   	out =  [2 3 5 9]
+            %   >> out=range_intersection([40 44 55 58], [42 49 50 52])
+            %   	out =  [42 44]
+            %
+            % Author: Xavier Beudaert <xavier.beudaert@gmail.com>
+            % Original: 10-June-2011
+            % Major modification and bug fixing 30-May-2012
+            
+            % Allocate, as we don't know yet the size, we assume the largest case
+            out1(1:(numel(second)+(numel(first)-2)))=0;
+            
+            k=1;
+            while isempty(first)==0 && isempty(second)==0
+                % make sure that first is ahead second
+                if first(1)>second(1)
+                    temp=second;
+                    second=first;
+                    first=temp;
+                end
+                
+                if first(2)<second(1)
+                    first=first(3:end);
+                    continue;
+                elseif first(2)==second(1)
+                    out1(k)=second(1);
+                    out1(k+1)=second(1);
+                    k=k+2;
+                    
+                    first=first(3:end);
+                    continue;
+                else
+                    if first(2)==second(2)
+                        out1(k)=second(1);
+                        out1(k+1)=second(2);
+                        k=k+2;
+                        
+                        first=first(3:end);
+                        second=second(3:end);
+                        
+                    elseif first(2)<second(2)
+                        out1(k)=second(1);
+                        out1(k+1)=first(2);
+                        k=k+2;
+                        
+                        first=first(3:end);
+                    else
+                        out1(k)=second(1);
+                        out1(k+1)=second(2);
+                        k=k+2;
+                        
+                        second=second(3:end);
+                    end
+                end
+            end
+            
+            % Remove the tails
+            out=out1(1:k-1);
         end
     end
 end

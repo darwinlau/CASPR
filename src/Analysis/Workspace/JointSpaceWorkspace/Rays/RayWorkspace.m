@@ -240,7 +240,7 @@ classdef RayWorkspace < handle
             if isempty(variables_matched_index)
                 CASPR_log.Warn('No available plot, try to change fixed variable value')
             end
-            figure;
+%             figure;
             if size(dofs_to_plot, 2) == 3 %3D plot
                 for i = 1:size(variables_matched_index,1)
                     if plot_data{variables_matched_index(i),1} == dofs_to_plot(1)
@@ -256,11 +256,12 @@ classdef RayWorkspace < handle
                         y = ones(1,2)*plot_data{variables_matched_index(i),3}';
                         z = plot_data{variables_matched_index(i),4}';
                     end
-                    w_handles(i) = plot3(x,y,z,'k');
+%                     w_handles(i) = plot3(x,y,z,'k');
+                    w_handles(i) = plot3(x,y,z,'Color','k', 'LineWidth', 0.01);
                     % plotting title and other stuff, nothing important
-                    xlim(1.005*[obj.model.bodyModel.q_min(dofs_to_plot(1)),obj.model.bodyModel.q_max(dofs_to_plot(1))]);
-                    ylim(1.005*[obj.model.bodyModel.q_min(dofs_to_plot(2)),obj.model.bodyModel.q_max(dofs_to_plot(2))]);
-                    zlim(1.005*[obj.model.bodyModel.q_min(dofs_to_plot(3)),obj.model.bodyModel.q_max(dofs_to_plot(3))]);
+%                     xlim(1.005*[obj.model.bodyModel.q_min(dofs_to_plot(1)),obj.model.bodyModel.q_max(dofs_to_plot(1))]);
+%                     ylim(1.005*[obj.model.bodyModel.q_min(dofs_to_plot(2)),obj.model.bodyModel.q_max(dofs_to_plot(2))]);
+%                     zlim(1.005*[obj.model.bodyModel.q_min(dofs_to_plot(3)),obj.model.bodyModel.q_max(dofs_to_plot(3))]);
                     xlabel(sprintf('q_%d', dofs_to_plot(1)));
                     ylabel(sprintf('q_%d', dofs_to_plot(2)));
                     zlabel(sprintf('q_%d', dofs_to_plot(3)));
@@ -268,26 +269,33 @@ classdef RayWorkspace < handle
                 end
                 hold off;
             elseif size(dofs_to_plot, 2) == 2 %2D plot
+                ray_boundary = [obj.grid.q_begin(dofs_to_plot),obj.grid.q_end(dofs_to_plot)];
                 for i = 1:size(variables_matched_index,1)
                     if plot_data{variables_matched_index(i),1} == dofs_to_plot(1)
-                        x = plot_data{variables_matched_index(i),2}';
-                        y = ones(1,2)*plot_data{variables_matched_index(i),3}';
+                        x = plot_data{variables_matched_index(i),2};
+                        y = ones(1,2)*plot_data{variables_matched_index(i),3};
+                        ray_end_ind = ~ismember(x,ray_boundary(1,:));
+                        scatter_points = [x(ray_end_ind);y(ray_end_ind)];                            
                     elseif plot_data{variables_matched_index(i),1} == dofs_to_plot(2)
-                        x = ones(1,2)*plot_data{variables_matched_index(i),2}';
-                        y = plot_data{variables_matched_index(i),3}';
-                    end
+                        x = ones(1,2)*plot_data{variables_matched_index(i),2};
+                        y = plot_data{variables_matched_index(i),3};
+                        ray_end_ind = ~ismember(y,ray_boundary(2,:));
+                        scatter_points = [x(ray_end_ind);y(ray_end_ind)];
+                    end                    
+                   p_handles(i) = scatter(scatter_points(1,:),scatter_points(2,:),10,'filled','b'); 
                    w_handles(i) =  plot(x,y,'k');
-                    xlim(1.005*[obj.model.bodyModel.q_min(dofs_to_plot(1)),obj.model.bodyModel.q_max(dofs_to_plot(1))]);
-                    ylim(1.005*[obj.model.bodyModel.q_min(dofs_to_plot(2)),obj.model.bodyModel.q_max(dofs_to_plot(2))]);
-                    xlabel(sprintf('q_%d', dofs_to_plot(1)));
-                    ylabel(sprintf('q_%d', dofs_to_plot(2)));
+%                     xlim(1.005*[obj.model.bodyModel.q_min(dofs_to_plot(1)),obj.model.bodyModel.q_max(dofs_to_plot(1))]);
+%                     ylim(1.005*[obj.model.bodyModel.q_min(dofs_to_plot(2)),obj.model.bodyModel.q_max(dofs_to_plot(2))]);
+%                     xlabel(sprintf('q_%d', dofs_to_plot(1)));
+%                     ylabel(sprintf('q_%d', dofs_to_plot(2)));
                     hold on
                 end
                 hold off;
             else
                 CASPR_log.Error('Only 3D/2D plot is available.')
             end
-            title(['Fixed variables: ',num2str(fixed_var_val)]);
+%             title(['Fixed variables: ',num2str(fixed_var_val)]);
+%             title(['z: ',num2str(fixed_var_val(1))]);
         end
         
     end
