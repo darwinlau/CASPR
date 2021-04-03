@@ -240,7 +240,7 @@ classdef (Abstract) ModelConfigBase < handle
                 [datetime_out, timezone] = ModelConfigBase.GetCompiledDatetime(compile_bodies_dtstamp_file);
                 % If the timezone from file is not the system, maybe a change
                 % in system times occured, recompile anyway for safety
-                if (curr_date.TimeZone ~= timezone)
+                if (strcmp(curr_date.TimeZone, timezone) == false)
                     compile_bodies = true;
                     compile_cables = true;
                     compile_opspaces = true;
