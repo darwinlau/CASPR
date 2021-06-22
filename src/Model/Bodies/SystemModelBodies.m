@@ -1071,6 +1071,30 @@ classdef SystemModelBodies < handle
             matlabFunction(obj.S, 'File', strcat(path, '/', lib_name, '_compiled_S'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});
             matlabFunction(obj.S_dot, 'File', strcat(path, '/', lib_name, '_compiled_S_dot'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});
             
+            % Kinematics
+            CASPR_log.Info('Compiling R_0ks...');
+            matlabFunction(obj.R_0ks, 'File', strcat(path, '/', lib_name, '_compiled_R_0ks'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});
+                
+            CASPR_log.Info('Compiling r_OPs...');
+            matlabFunction(obj.r_OPs, 'File', strcat(path, '/', lib_name, '_compiled_r_OPs'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});
+            
+            % Absolute CoM velocities and accelerations (linear and angular)
+            CASPR_log.Info('Compiling Velocities and Accelerations...');        
+            CASPR_log.Info('- Compiling x_dot...');            
+            matlabFunction(obj.x_dot, 'File', strcat(path, '/', lib_name, '_compiled_x_dot'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
+            CASPR_log.Info('- Compiling x_ddot...');            
+            matlabFunction(obj.x_ddot, 'File', strcat(path, '/', lib_name, '_compiled_x_ddot'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
+            
+            % Dynamics
+            %if(obj.modelOptions.isComputeDynamics)
+                CASPR_log.Info('Compiling Dynamics Variables...'); 
+                CASPR_log.Info('- Compiling M_b...'); 
+                matlabFunction(obj.M_b, 'File', strcat(path, '/', lib_name, '_compiled_M_b'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
+                CASPR_log.Info('- Compiling C_b...'); 
+                matlabFunction(obj.C_b, 'File', strcat(path, '/', lib_name, '_compiled_C_b'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
+                CASPR_log.Info('- Compiling G_b...'); 
+                matlabFunction(obj.G_b, 'File', strcat(path, '/', lib_name, '_compiled_G_b'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});  
+            
             CASPR_log.Info('Compiling P...');
             tmp_body_P_path = strcat(path, '/P');
             if ~exist(tmp_body_P_path, 'dir')
@@ -1096,30 +1120,6 @@ classdef SystemModelBodies < handle
                 end
             end
             fclose(fid);
-            
-            % Kinematics
-            CASPR_log.Info('Compiling R_0ks...');
-            matlabFunction(obj.R_0ks, 'File', strcat(path, '/', lib_name, '_compiled_R_0ks'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});
-                
-            CASPR_log.Info('Compiling r_OPs...');
-            matlabFunction(obj.r_OPs, 'File', strcat(path, '/', lib_name, '_compiled_r_OPs'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});
-            
-            % Absolute CoM velocities and accelerations (linear and angular)
-            CASPR_log.Info('Compiling Velocities and Accelerations...');        
-            CASPR_log.Info('- Compiling x_dot...');            
-            matlabFunction(obj.x_dot, 'File', strcat(path, '/', lib_name, '_compiled_x_dot'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
-            CASPR_log.Info('- Compiling x_ddot...');            
-            matlabFunction(obj.x_ddot, 'File', strcat(path, '/', lib_name, '_compiled_x_ddot'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
-            
-            % Dynamics
-            %if(obj.modelOptions.isComputeDynamics)
-                CASPR_log.Info('Compiling Dynamics Variables...'); 
-                CASPR_log.Info('- Compiling M_b...'); 
-                matlabFunction(obj.M_b, 'File', strcat(path, '/', lib_name, '_compiled_M_b'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
-                CASPR_log.Info('- Compiling C_b...'); 
-                matlabFunction(obj.C_b, 'File', strcat(path, '/', lib_name, '_compiled_C_b'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
-                CASPR_log.Info('- Compiling G_b...'); 
-                matlabFunction(obj.G_b, 'File', strcat(path, '/', lib_name, '_compiled_G_b'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e});  
 %                 matlabFunction(obj.M, 'File', strcat(path, '/', lib_name, '_compiled_M'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
 %                 matlabFunction(obj.C, 'File', strcat(path, '/', lib_name, '_compiled_C'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
 %                 matlabFunction(obj.G, 'File', strcat(path, '/', lib_name, '_compiled_G'), 'Vars', {obj.q, obj.q_dot, obj.q_ddot, obj.W_e}); 
