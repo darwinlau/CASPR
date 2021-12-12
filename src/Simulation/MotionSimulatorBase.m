@@ -436,17 +436,23 @@ classdef (Abstract) MotionSimulatorBase < SimulatorBase
             %writerObj.Quality = 100;
             writerObj.open();
             plot_handle = figure('Position', [10, 10, width, height]);
+            
             % Create a cell array to hold the operational space history
             operationalHistory = cell(modelObj.bodyModel.numOperationalSpaces, 0);
+            
             % Use default mode to update individual bodies
-            modelObj.setModelMode(ModelModeType.DEFAULT);
+            % TODO: RE-CHECK THAT THIS IS REQUIRED TO USE DEFAULT MODE 
+            % (COMPARED WITH JUST USING COMPILED MODE OR SYMBOLICS)
+            model_config = ModelConfig(modelObj.robotName);
+            model_default_mode = model_config.getModel(modelObj.cableSetName, modelObj.operationalSpaceName);
+            
             for i = 1:round(fps*time)
                 t = round(length(trajectory.timeVector)/round(fps*time)*i);
                 if t == 0
                     t = 1;
                 end
-                modelObj.update(trajectory.q{t}, trajectory.q_dot{t}, trajectory.q_ddot{t}, zeros(size(trajectory.q_dot{t})));
-                op_point = MotionSimulatorBase.PlotFrame(modelObj, plot_axis, view_angle, plot_handle); 
+                model_default_mode.update(trajectory.q{t}, trajectory.q_dot{t}, trajectory.q_ddot{t}, zeros(size(trajectory.q_dot{t})));
+                op_point = MotionSimulatorBase.PlotFrame(model_default_mode, plot_axis, view_angle, plot_handle); 
                 if isHistory
                     for j=1:size(op_point,1)
                         operationalHistory{j, end+1} = op_point(j, :)';
