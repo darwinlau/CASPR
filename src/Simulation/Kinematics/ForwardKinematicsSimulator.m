@@ -82,7 +82,7 @@ classdef ForwardKinematicsSimulator < MotionSimulatorBase
         % coordinates.
         function plotCableLengthError(obj, plot_axis)
             lengthError_array = cell2mat(obj.lengthError);
-            if (nargin <= 2 || isempty(plot_axis))
+            if (nargin <= 1 || isempty(plot_axis))
                 figure;
                 plot(obj.timeVector, lengthError_array, 'Color', 'k', 'LineWidth', 1.5);
                 title('Cable Length Error');
@@ -97,7 +97,7 @@ classdef ForwardKinematicsSimulator < MotionSimulatorBase
         % length with the length as a result of the solution generalised
         % coordinates.
         function plotCableLengthErrorNorm(obj, plot_axis)
-            if (nargin <= 2 || isempty(plot_axis))
+            if (nargin <= 1 || isempty(plot_axis))
                 figure;
                 plot(obj.timeVector, obj.lengthErrorNorm, 'Color', 'k', 'LineWidth', 1.5);
                 title('Cable Length Error');
@@ -116,7 +116,7 @@ classdef ForwardKinematicsSimulator < MotionSimulatorBase
             value = sum(obj.lengthErrorNorm);
         end
                 
-        function guiPlotCableLengthError(obj, ~, plot_axis)
+        function guiPlotCableLengthError(obj, plot_axis)
             obj.plotCableLengthError(plot_axis);
         end
     end
