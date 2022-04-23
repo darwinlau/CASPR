@@ -41,7 +41,7 @@ classdef DynamicsSimulator < MotionSimulatorBase
             
             valid_forces_ind = find(forces(1,:) ~= CableModelBase.INVALID_FORCE);
             valid_forces_ind_inv = setdiff(1:length(obj.timeVector), valid_forces_ind);
-            
+                
             if nargin <= 2 || isempty(plot_axis)
                 figure;
                 hold on;
@@ -52,7 +52,7 @@ classdef DynamicsSimulator < MotionSimulatorBase
             else
                 hold on;
                 plot(plot_axis,obj.timeVector(valid_forces_ind), forces(cables_to_plot, valid_forces_ind), '.', 'LineWidth', 1.5, 'Color', 'k'); 
-                 plot(plot_axis,obj.timeVector(valid_forces_ind_inv), forces(cables_to_plot, valid_forces_ind_inv), '.', 'LineWidth', 1.5, 'Color', 'r'); 
+                plot(plot_axis,obj.timeVector(valid_forces_ind_inv), forces(cables_to_plot, valid_forces_ind_inv), '.', 'LineWidth', 1.5, 'Color', 'r'); 
                 hold off;                
             end
             xlabel('Time (seconds)')

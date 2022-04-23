@@ -468,19 +468,21 @@ function run_control(handles,modObj,model_config,trajectory_id)
     time_elapsed = toc(start_tic);
     CASPR_log.Info(sprintf('End Running Simulation : %f seconds', time_elapsed));
     
-    
-    % Plot the data
-    CASPR_log.Info('Start Plotting Simulation');
-    set(handles.status_text,'String','Simulation plotting');
-    drawnow;
-    start_tic = tic;
-    GUIOperations.GUIPlot(plot_type,control_sim,handles,str2double(getappdata(handles.plot_type_popup,'num_plots')),get(handles.undock_box,'Value'));
-    time_elapsed = toc(start_tic);
-    CASPR_log.Info(sprintf('End Plotting Simulation : %f seconds', time_elapsed));
-    set(handles.status_text,'String','No simulation running');
-    setappdata(handles.figure1,'sim',control_sim);
-    assignin('base','controller_simulator',control_sim);
-    
+    if (control_sim.controllerExitType == ControllerExitType.NO_ERROR)
+        % Plot the data
+        CASPR_log.Info('Start Plotting Simulation');
+        set(handles.status_text,'String','Simulation plotting');
+        drawnow;
+        start_tic = tic;
+        GUIOperations.GUIPlot(plot_type,control_sim,handles,str2double(getappdata(handles.plot_type_popup,'num_plots')),get(handles.undock_box,'Value'));
+        time_elapsed = toc(start_tic);
+        CASPR_log.Info(sprintf('End Plotting Simulation : %f seconds', time_elapsed));
+        set(handles.status_text,'String','No simulation running');
+        setappdata(handles.figure1,'sim',control_sim);
+        assignin('base','controller_simulator',control_sim);
+    else 
+        CASPR_log.Warn('Control simulation ended prematurely and did not complete');
+    end
 end
 function id_solver = load_idsolver(handles,modelObj)
     solver_class_contents = cellstr(get(handles.id_solver_class_popup,'String'));

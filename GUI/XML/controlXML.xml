@@ -21,37 +21,37 @@
 	<fd_solver_class id="ODE4"/>
 	<fd_solver_class id="ODE1"/>
 	<plot_functions>
-        <plot_function type="plotCableForces">
+        <plot_function type="guiPlotCableForces">
             <figure_quantity>1</figure_quantity>
         </plot_function>
-        <plot_function type="plotInteractionForceMagnitudes">
+        <plot_function type="guiPlotInteractionForceMagnitudes">
             <figure_quantity>1</figure_quantity>
         </plot_function>
-        <plot_function type="plotAngularVelocity">
+        <plot_function type="guiPlotAngularVelocity">
             <figure_quantity>1</figure_quantity>
         </plot_function>
-        <plot_function type="plotAngularAcceleration">
+        <plot_function type="guiPlotAngularAcceleration">
             <figure_quantity>1</figure_quantity>
         </plot_function>
-        <plot_function type="plotBodyCoG">
+        <plot_function type="guiPlotBodyCoG">
             <figure_quantity>1</figure_quantity>
         </plot_function>
-        <plot_function type="plotBodyCoGVelocity">
+        <plot_function type="guiPlotBodyCoGVelocity">
             <figure_quantity>1</figure_quantity>
         </plot_function>
-        <plot_function type="plotBodyCoGAcceleration">
+        <plot_function type="guiPlotBodyCoGAcceleration">
             <figure_quantity>1</figure_quantity>
         </plot_function>
-        <plot_function type="plotJointPose">
+        <plot_function type="guiPlotJointPose">
             <figure_quantity>1</figure_quantity>
         </plot_function>
-        <plot_function type="plotJointVelocity">
+        <plot_function type="guiPlotJointVelocity">
             <figure_quantity>1</figure_quantity>
         </plot_function>
-        <plot_function type="plotCableLengths">
+        <plot_function type="guiPlotCableLengths">
             <figure_quantity>1</figure_quantity>
         </plot_function>
-        <plot_function type="plotCableLengthsVelocity">
+        <plot_function type="guiPlotCableLengthsVelocity">
             <figure_quantity>1</figure_quantity>
         </plot_function>
 	</plot_functions>
