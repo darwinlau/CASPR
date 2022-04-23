@@ -10,8 +10,8 @@ clc; clear; close all;
 CASPR_log.Info('Start Setup Simulation');
 % Set up the type of model, trajectory and the set of cables:
 model_config = ModelConfig('Example planar XY');
-trajectory_id = 'basic';
-cable_set_id = 'example_linear';
+cable_set_id = 'basic';
+trajectory_id = 'example_linear';
 
 % Construct SystemModel objects
 modelObj     =   model_config.getModel(cable_set_id);
