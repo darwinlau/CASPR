@@ -108,7 +108,7 @@ classdef UniformGrid < PointGridBase
                 connectivity_list = [connectivity_list;connectivity_list_i];
                 if toc > 4
                     have_save_file = 1;
-                    filename = [CASPR_configuration.LoadHomePath,'\AutoGenCodeFolder','\connectivity_list_',num2str(file_count),'.mat'];
+                    filename = [CASPR_configuration.LoadHomePath,'\data\AutoGenScripts','\connectivity_list_',num2str(file_count),'.mat'];
                     save(filename,'connectivity_list');
                     connectivity_list = [];
                     file_count = file_count + 1;
@@ -120,10 +120,16 @@ classdef UniformGrid < PointGridBase
             if have_save_file == 1
                 connectivity_list = [];
                 for i = 1:file_count-1
-                    filename = [CASPR_configuration.LoadHomePath,'\AutoGenCodeFolder','\connectivity_list_',num2str(i),'.mat'];
-                    tmp_list = load(filename);
+                    filename = [CASPR_configuration.LoadHomePath,'\data\AutoGenScripts','\connectivity_list_',num2str(i),'.mat'];
+                    tmp_list = load(filename);                    
                     connectivity_list = [connectivity_list;tmp_list.connectivity_list];
                 end
+                
+                for i = 1:file_count-1
+                    filename = [CASPR_configuration.LoadHomePath,'\data\AutoGenScripts','\connectivity_list_',num2str(i),'.mat'];
+                    delete(filename)
+                end
+                
             end
 
             %% remove redundant list
