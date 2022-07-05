@@ -514,8 +514,9 @@ classdef UniformGrid < PointGridBase
                 end
                 di = di-1;
             end
+            % remove diagonal
             diagonal_idx = sum(abs(nbi),2) > 1;
-nbi(diagonal_idx,:) = [];
+            nbi(diagonal_idx,:) = [];
 
 
             %% Create distance matrix
