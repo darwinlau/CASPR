@@ -12,21 +12,28 @@ classdef UniformGrid < PointGridBase
         q_length    % The length of each index
         q_wrap      % A boolean vector to indicate if the coordinate wraps around at its limits
         dim_disc_ia % array contains the index of dimensions to be discretized
+        connectivity_list
     end
-
+    properties (Hidden)
+        include_diagonal = false;
+        % false: for closest 2*n point(not include diagonal;
+        % true : for closest 3*n point(include diagonal;
+        % however, not so support true since its will be extremly slow
+    end
     methods
         % The constructor for the grid.
-        function id = UniformGrid(q_begin,q_end,q_info,info_type,q_wrap)
+        function id = UniformGrid(q_begin,q_end,q_info,info_type,q_wrap,generate_node_list)
             CASPR_log.Assert((size(q_begin,2)==1)&&(size(q_end,2)==1)&&(size(q_info,2)==1),'Input to UniformGrid must be a column vector');
             CASPR_log.Assert((size(q_begin,1)==size(q_end,1))&&(size(q_begin,1)==size(q_info,1)),'Inputs must be of the same dimension');
             CASPR_log.Assert(sum(q_begin - q_end > 0) == 0,'Invalid input range');
+            q_info(isnan(q_info)) = 0; 
             CASPR_log.Assert(sum(q_info < 0) == 0,'q_info variable contain only non-negative terms');
             % Maybe add more checks to ensure
             id.q_begin  =   q_begin;
             id.q_end    =   q_end;
             id.n_dimensions = size(q_begin,1);
             id.dim_disc_ia = find(q_info ~= 0);
-            
+
             if((nargin==3)||strcmp(info_type,'step_size'))
                 id.delta_q = q_info;
                 id.q_length = -1*ones(id.n_dimensions, 1);
@@ -53,10 +60,16 @@ classdef UniformGrid < PointGridBase
             end
             id.n_dimensions = size(q_begin,1);
             id.n_points = round(prod(id.q_length));
-            if(nargin <= 4)
+            if(nargin <= 6)
                 id.q_wrap = false(size(q_begin));
             else
                 id.q_wrap = q_wrap;
+            end
+            if nargin >= 5
+                if generate_node_list == 1
+                    point_set = creatNodeList(id);
+                    id.getConnectivityList(point_set);
+                end
             end
         end
 
@@ -75,6 +88,52 @@ classdef UniformGrid < PointGridBase
             q = obj.q_begin + q_index.*obj.delta_q;
         end
 
+        % Generate the connectivity list
+        function getConnectivityList(obj,point_set)
+
+            node_number = 1:size(point_set,1);
+
+            include_diagonal = false;
+            connectivity_list = [];
+            grid_density = reshape(obj.q_length,1,[]); % make sure the intput is row array
+            node_num = 1:1:size(point_set,1);
+            A = reshape(node_num,fliplr(grid_density)); % mapping the node into the N-Dimensional matrix
+            have_save_file = 0;
+            disp('Generating node list...')
+            file_count = 1;
+            tic
+            for i = 1:size(point_set,1)
+                [neighbour_node_idx,distance] = obj.neighbourND(i, size(A),fliplr(obj.delta_q'));
+                connectivity_list_i = [repmat(i,size(neighbour_node_idx));neighbour_node_idx;distance]';
+                connectivity_list = [connectivity_list;connectivity_list_i];
+                if toc > 4
+                    have_save_file = 1;
+                    filename = [CASPR_configuration.LoadHomePath,'\AutoGenCodeFolder','\connectivity_list_',num2str(file_count),'.mat'];
+                    save(filename,'connectivity_list');
+                    connectivity_list = [];
+                    file_count = file_count + 1;
+                    percentage = [num2str(round(i/size(point_set,1)*100,2)),'%'];
+                    disp(percentage)
+                    tic
+                end
+            end
+            if have_save_file == 1
+                connectivity_list = [];
+                for i = 1:file_count-1
+                    filename = [CASPR_configuration.LoadHomePath,'\AutoGenCodeFolder','\connectivity_list_',num2str(i),'.mat'];
+                    tmp_list = load(filename);
+                    connectivity_list = [connectivity_list;tmp_list.connectivity_list];
+                end
+            end
+
+            %% remove redundant list
+            tmp_c = sort(connectivity_list(:,[1,2]),2);
+            [~,uidx] = unique(tmp_c,'rows');
+
+
+            obj.connectivity_list = connectivity_list(uidx,:);
+        end
+
         % Obtain the grid coordinate from a given index
         function q_coord = getGridCoordinate(obj,index)
             % Convert the index into a column index
@@ -89,7 +148,7 @@ classdef UniformGrid < PointGridBase
             end
             q_coord = q_index + ones(size(q_index));
         end
-        
+
         % Obtain the grid index from the current point
         function index = getGridIndex(obj,point)
             % First find q_index
@@ -101,7 +160,7 @@ classdef UniformGrid < PointGridBase
                 index = index + q_div*(round((point(i) - obj.q_begin(i))/(obj.delta_q(i))));
             end
         end
-        
+
         % Obtain a single dimension subgrid
         function grid_single_dim = getSingleDimensionSubGrid(obj, dim)
             if dim > obj.n_dimensions
@@ -109,7 +168,7 @@ classdef UniformGrid < PointGridBase
             end
             grid_single_dim = obj.q_begin(dim):obj.delta_q(dim):obj.q_end(dim);
         end
-        
+
         % function that merges subgrids using the corresponding index table
         function resulting_index_table = mergeSubGrids(obj, index_table_1, index_table_2)
             resulting_index_table    =   index_table_2;
@@ -129,8 +188,8 @@ classdef UniformGrid < PointGridBase
                 end
             end
         end
-        
-        
+
+
         % TODO: given a center shift, shift the box reusing the original
         % box
         function [result_index, removed_index, added_index] = getShiftedSubgrid(obj, ori_center, new_center, half_size, ori_index_set)
@@ -160,28 +219,28 @@ classdef UniformGrid < PointGridBase
                         center_step_diff(i) = ceil(center_val_diff(i)/obj.delta_q(i));
                     end
                 end
-%                 center_step_diff = center_val_diff./obj.delta_q;
+                %                 center_step_diff = center_val_diff./obj.delta_q;
                 reuse_q_mult = ori_q_mult - center_step_diff;
                 reuse_q_div = prod(reuse_q_mult);
                 reuse_numPoints = reuse_q_div;
                 changed_numPoints = ori_numPoints - reuse_numPoints;
 
-                result_index = ori_index_set; 
+                result_index = ori_index_set;
                 removed_index = [];
                 added_index = [];
-%                 center_step_diff_magnitude = abs(center_step_diff);
-%                 center_step_diff_sign = sign(center_step_diff);
+                %                 center_step_diff_magnitude = abs(center_step_diff);
+                %                 center_step_diff_sign = sign(center_step_diff);
                 new_q_begin_local  	=   ori_q_begin_local + center_val_diff;
                 new_q_end_local  	=   ori_q_end_local + center_val_diff;
                 flag_inside_ori_box = false;
                 flag_inside_new_box = false;
-                
+
                 for i = 1:ori_numPoints
                     % take a simple to implement but computationally less
                     % effcient way first
                     current_index = ori_index_set(i);
                     current_q = obj.getGridPoint(current_index);
-                    
+
                     if prod(current_q >= ori_q_begin_local & current_q <= ori_q_end_local)
                         flag_inside_ori_box = true;
                     else
@@ -192,14 +251,14 @@ classdef UniformGrid < PointGridBase
                     else
                         flag_inside_new_box = false;
                     end
-                    
+
                     if flag_inside_ori_box && ~flag_inside_new_box
                         % indicate the point is not inside the new box, it
                         % needs to be removed and a counterpart needs to be
                         % added
                         counterpart_q = ori_center + new_center - current_q;
                         counterpart_index = obj.getGridIndex(counterpart_q);
-                        result_index = result_index(result_index ~= current_index); 
+                        result_index = result_index(result_index ~= current_index);
                         removed_index = [removed_index; current_index];
                         added_index = [added_index; counterpart_index];
                     elseif flag_inside_ori_box && flag_inside_new_box
@@ -221,7 +280,7 @@ classdef UniformGrid < PointGridBase
                 end
             end
         end
-        
+
         % Obtain a subgrid with a specific size (NOTE: the size is given as
         % integers which indicate number of grid steps)
         function result_index = getSubGrid(obj, center, half_size, existing_grid_index)
@@ -281,9 +340,8 @@ classdef UniformGrid < PointGridBase
                 end
             end
         end
-        
-        
-        
+
+
         % Obtain a subgrid with a specific size (NOTE: the size is given as
         % integers which indicate number of grid steps)
         function result_index = getSubGridVertices(obj, center, half_size)
@@ -310,7 +368,7 @@ classdef UniformGrid < PointGridBase
                 cnt = cnt + 1;
             end
         end
-        
+
         % getters
         function q_begin = getPoseLowerBound(obj)
             q_begin = obj.q_begin;
@@ -323,6 +381,189 @@ classdef UniformGrid < PointGridBase
         end
         function q_length = getPoseLength(obj)
             q_length = obj.q_length;
+        end
+        function node_list = creatNodeList(obj)
+            for i = 1:obj.n_points
+                pose_set(i,:) = obj.getGridPoint(i);
+            end
+            node_number = 1:size(pose_set,1);
+            node_list  = [node_number',pose_set];
+        end
+    end
+
+    methods (Static)
+        function [Iadj , Radj, Nfound ] = neighbourND( index, sizeA, res )
+            % Ronald Ouwerkerk (2022). Neighbour points in a matrix (https://www.mathworks.com/matlabcentral/fileexchange/29330-neighbour-points-in-a-matrix), MATLAB Central File Exchange. Retrieved June 27, 2022.
+            % function  [Iadj , Radj, Nfound] = neighbour3D( index,  sizeA, res )
+            % Calculate the linear indices for neighboring points in a matrix
+            % Second output is and array of distances based on an input resolution vector
+            % This resolution vector defaults to ones(1,ndims)
+            % The output Nfound reports the number of neighbours found in within the
+            % matrix. For 2D we expect up to 8, for 3D up to 26 etc...
+            %
+            % Example 1:
+            % A is a 128x128x16 image data matrix with a spatial resolution of
+            % 0.1x 0.25x .375 mm^3
+            % to get the neighbouring point linear indices for point 456 we do
+            % sizeA = [128 128 16]
+            % [ Iadj , Radj, Nfound] = neighbourND( 456, sizeA, [ .10 .25 .375] )
+            %
+            % NEW: now index can be a column array with linear indices
+            % Output Iadj will be Nx8 (2D) or Nx26 (3D) etc and Radj will be
+            % a row array 1x8 or 1x26 etc...
+            %
+            % Example 2:
+            % create points near the center of a 144x192x16 matrix
+            % spatial resolution .3 x .3x 5 mm^3
+            % idx = (-6:1:6)+((144*192*3)+144*96+76)
+            %[ Iadj , Radj, Nfound] = neighbourND( idx , [144,192, 32] , [.3, 0.3, 5])
+            % Results in 11x26 matrix Iadj,
+            % 26 distances in Radj and Nfound is 26
+            %
+            % The neighbour indices outside the matrix will be zero!
+            % when a single index is entered the outside points are still removed so a
+            % point in a 3D matrix at the edge can sill return 17 neighbours or even less
+            % when it is a corner.
+            %==============================================
+
+            %==============================================
+            % Ronald Ouwerkerk 2010 NIH/NIDDK
+            % New version: Now handles arrays of indices
+            % This script is made available on Matlab file exchange by the author
+            % for use by other Matlab programmers.
+            % This script is not intended for commercial use.
+            % If used for published work a reference or acknowledgement is greatly
+            % appreciated.
+            % The function was tested for several 1D(col and row), 2D, 3D and 4D cases
+            % I cannot be sure that it really works for all dimensionalities.
+            % Let me know if you find a bug (and feel free to squash it for me)
+            %==============================================
+
+            %% Set defaults and process input parameters
+            % first two are arbitary values for a demo
+            if nargin <1
+                % default index [7,6,2]
+                index = 128*128+ 128*5+7
+            end
+
+            if nargin < 2
+                % default size 128x128xN with N big enough for the index
+                i3 = floor( index /128/128);
+                disp( 'Demo mode')
+                sizeA =[128, 128, i3+2]
+            end
+
+            % Get dimensionality
+            ndimA = length( sizeA );
+
+            %Set default resolution to isotropic distances
+            if nargin < 3
+                res =ones(1, length( sizeA) );
+            else
+                if length(res) < ndimA;
+                    errstr = sprintf('\nError in %s.\n The length of the resolution array (%d) must equal the number of matrix dimensions (%d)\n', ...
+                        mfilename,                                           length(res)  ,                                                         ndimA  );
+                    disp(errstr)
+                    help( mfilename)
+                    return
+                else
+                    % reduce the resolution array, last digit is probably slice
+                    % thickness, irrelevant if we have one slice only
+                    res = res( 1:ndimA );
+                end
+            end
+
+            %% explicit version of ind2sub
+            % ind2sub requires multiple output arguments, one for each dimension
+            ilin = index(:);
+            np = length( ilin );
+            imat = ones( np, ndimA);
+
+            for di = ndimA:-1:2
+                blocksize = prod( sizeA( 1:(di-1)  ) );
+                ndi = 1+ floor( ( ilin-1) / blocksize );
+                ilin = ilin- (ndi -1) *blocksize;
+                imat(:,di) = ndi;
+            end
+            imat(:,1) = ilin;
+
+            %% Find the indices of neighbours
+            % Get all the index permutations for neighbours ( -1, +1) over all
+            % dimensions. The total number of neighbours should be three  to the power Ndim
+            % minus one if we discard the original point itself
+
+            % initialize the shift index array
+            nneighb = 3^ndimA;
+            nbi = zeros( nneighb, ndimA);
+
+            di = ndimA;
+            while ( di )
+                N = 3^(di-1);
+                ni = 1:N;
+                while( ni(end) < nneighb+1 )
+                    for val=[-1, 0, 1]
+                        nbi( ni ,di ) = val;
+                        ni = ni+ N;
+                    end
+                end
+                di = di-1;
+            end
+            diagonal_idx = sum(abs(nbi),2) > 1;
+nbi(diagonal_idx,:) = [];
+
+
+            %% Create distance matrix
+            d = ones(nneighb, 1) * res;
+            d(diagonal_idx,:) = [];
+            d = d.*abs( nbi );
+            % create a row vector with distances
+            dvec = sqrt( sum( d.^2, 2))';
+            % Get index to exclude the original point: distance = 0
+            notorig = logical( dvec > 0 );
+
+            nneighb = size(nbi,1);
+            %% Add the input index array to nbi to get all neighbours
+            % set up the array for neighbour indices
+            nd = length( index);
+            Iadj = zeros( nd, nneighb );
+            kdo = notorig(ones(nd,1), : );
+
+            for di = 1:ndimA
+                indices = imat( :, di );
+                shifts = nbi( :, di )';
+                neighbindices = indices( :, ones( 1,nneighb)) +shifts( ones(nd, 1), : ) ;
+                maxmat = sizeA( di );
+                % set up mask matrix to keep indices within limits and excllude the original point
+                s = logical( neighbindices <= maxmat );
+                s =logical( neighbindices > 0 ) & s;
+                kdo = kdo & s;
+                % Calculate the linear index
+                if di == 1
+                    Iadj( kdo ) =  neighbindices( kdo );
+                else
+                    blocksize = prod( sizeA( 1:(di-1)  ) );
+                    m = neighbindices-1;
+                    Iadj(kdo )  = Iadj(kdo )+ m(kdo)*blocksize;
+                end
+            end
+
+            %% Select only the sensible points for the neighbour index and distances matrices
+            % Remove columns that have no valid indices anywhere at all (e.g. origin)
+            % for shorter index lists with  all points near the edges more may be
+            % removed.
+            if nd == 1
+                allkdo = any( kdo, 1);
+                Iadj = Iadj( :, allkdo);
+                Radj = dvec( allkdo );
+                Nfound = length(  find( allkdo ) );
+            else
+                Nfound = nneighb-1;
+                Radj = dvec;
+                iself = (Radj == 0);
+                Iadj = Iadj(:,~iself);
+                Radj = Radj(~iself);
+            end
+
         end
     end
 end
