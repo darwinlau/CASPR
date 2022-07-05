@@ -602,7 +602,6 @@ classdef RayWorkspace < handle
                 load_name = sprintf('node_list_%d.mat',i);
                 loaded_data = load(load_name);
                 obj.ray_node.node_list = [obj.ray_node.node_list;loaded_data.node_list_i];
-                delete(load_name)
             end
             obj.ray_node(:).node_list = [num2cell(1:number_node)',obj.ray_node.node_list(1:end,:)];
             node_list_i = obj.ray_node(:).node_list;
