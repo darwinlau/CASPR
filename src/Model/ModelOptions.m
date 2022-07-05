@@ -17,9 +17,11 @@ classdef ModelOptions < handle
         function bmo = ModelOptions(compute_dynamics, compute_hessian, compute_linear_model)
             if (nargin >= 1)
                 bmo.isComputeDynamics = compute_dynamics;
-            elseif (nargin >= 2)
+            end
+            if (nargin >= 2)
                 bmo.isComputeHessian = compute_hessian;
-            elseif (nargin >= 3)
+            end
+            if (nargin >= 3)
                 bmo.isComputeLinearisation = compute_linear_model;
             end
         end
