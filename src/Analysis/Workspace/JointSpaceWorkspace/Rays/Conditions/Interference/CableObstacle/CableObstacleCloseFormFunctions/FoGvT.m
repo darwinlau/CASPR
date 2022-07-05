@@ -1,4 +1,4 @@
-function v_c = v_coeffs_T(in1,in2,in3,u)
+function v_c = FoGvT(in1,in2,in3,u)
 %V_COEFFS_T
 %    V_C = V_COEFFS_T(IN1,IN2,IN3,U)
 

@@ -22,16 +22,21 @@ classdef InterferenceFreeRayConditionCableCable < WorkspaceRayConditionBase
         numCables;                  % The number of cables
         degRedundancy;              % The degree of redundancy
         dofMargins;
+        total_time;
     end
     
     methods
         % Constructor for interference free worksapce
-        function w = InterferenceFreeRayConditionCableCable(model, min_ray_lengths, dof_margins)
+        function w = InterferenceFreeRayConditionCableCable(model, min_ray_lengths, varargin)
             w@WorkspaceRayConditionBase(min_ray_lengths);
             w.areDofsTranslation = (model.bodyModel.q_dofType == DoFType.TRANSLATION);
             w.numDofs = model.numDofs;
             w.numCables = model.numCables;
-            w.dofMargins = dof_margins;
+            if ~isempty(varargin)
+            w.dofMargins = ones(1,w.numDofs)*varargin{1};
+            else
+              w.dofMargins = zeros(1,w.numDofs);  
+            end
         end
         
         % Evaluate the interference free intervals
@@ -128,9 +133,9 @@ classdef InterferenceFreeRayConditionCableCable < WorkspaceRayConditionBase
                 i = cable_combinations(k, 1);
                 j = cable_combinations(k, 2);
                 if is_dof_translation
-                    g_coeffs(k, :) = cable_cable_ifc_ray_translation_g_coeff(A1(1:3, i), A0(1:3, i), A1(1:3, j), A0(1:3, j), A1(4:6, i), A0(4:6, i), A1(4:6, j), A0(4:6, j));
+                    g_coeffs(k, :) = CableCableGuT(A1(1:3, i), A0(1:3, i), A1(1:3, j), A0(1:3, j), A1(4:6, i), A0(4:6, i), A1(4:6, j), A0(4:6, j));
                 else
-                    g_coeffs(k, :) = cable_cable_ifc_ray_orientation_g_coeff(A2(1:3, i), A1(1:3, i), A0(1:3, i), A2(1:3, j), A1(1:3, j), A0(1:3, j), A2(4:6, i), A1(4:6, i), A0(4:6, i), A2(4:6, j), A1(4:6, j), A0(4:6, j));
+                    g_coeffs(k, :) = CableCableGuO(A2(1:3, i), A1(1:3, i), A0(1:3, i), A2(1:3, j), A1(1:3, j), A0(1:3, j), A2(4:6, i), A1(4:6, i), A0(4:6, i), A2(4:6, j), A1(4:6, j), A0(4:6, j));
                 end
                 %g_coeffs(k, :) = round(g_coeffs(k, :), obj.ROUNDING_DIGIT);
                 u_roots = roots(g_coeffs(k, :));
@@ -278,7 +283,7 @@ classdef InterferenceFreeRayConditionCableCable < WorkspaceRayConditionBase
             g_coeffs = coeffs(g_fn, t);
             g_coeffs = simplify(g_coeffs);
             g_coeffs = fliplr(g_coeffs); % Re-order to highest degree to lowest degree
-            matlabFunction(g_coeffs, 'File', [folder_path, '\cable_cable_ifc_ray_translation_g_coeff'], 'Vars', {Ai_1, Ai_0, Aj_1, Aj_0, Bi_1, Bi_0, Bj_1, Bj_0});
+            matlabFunction(g_coeffs, 'File', [folder_path, '\CableCableGuT'], 'Vars', {Ai_1, Ai_0, Aj_1, Aj_0, Bi_1, Bi_0, Bj_1, Bj_0});
             
             % Compute rotation
             A_i = Ai_2*t^2 + Ai_1*t + Ai_0;
@@ -295,7 +300,7 @@ classdef InterferenceFreeRayConditionCableCable < WorkspaceRayConditionBase
             g_coeffs = fliplr(g_coeffs); % Re-order to highest degree to lowest degree
             
             
-            matlabFunction(g_coeffs, 'File', [folder_path, '\cable_cable_ifc_ray_orientation_g_coeff'], 'Vars', {Ai_2, Ai_1, Ai_0, Aj_2, Aj_1, Aj_0, Bi_2, Bi_1, Bi_0, Bj_2, Bj_1, Bj_0});
+            matlabFunction(g_coeffs, 'File', [folder_path, '\CableCableGuO'], 'Vars', {Ai_2, Ai_1, Ai_0, Aj_2, Aj_1, Aj_0, Bi_2, Bi_1, Bi_0, Bj_2, Bj_1, Bj_0});
         end
     end
 end

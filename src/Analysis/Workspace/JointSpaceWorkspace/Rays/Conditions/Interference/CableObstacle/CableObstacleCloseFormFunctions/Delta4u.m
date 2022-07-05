@@ -1,4 +1,4 @@
-function u_c = u_coeffs_4_deg(in1,in2,in3,in4,u0)
+function u_c = Delta4u(in1,in2,in3,in4,u0)
 %U_COEFFS
 %    U_C = U_COEFFS(IN1,IN2,IN3,IN4,U0)
 

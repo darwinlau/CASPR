@@ -1,4 +1,4 @@
-function g_coeffs = cable_cable_ifc_ray_orientation_g_coeff(in1,in2,in3,in4,in5,in6,in7,in8,in9,in10,in11,in12)
+function g_coeffs = CableCableGuO(in1,in2,in3,in4,in5,in6,in7,in8,in9,in10,in11,in12)
 %CABLE_CABLE_IFC_RAY_ORIENTATION_G_COEFF
 %    G_COEFFS = CABLE_CABLE_IFC_RAY_ORIENTATION_G_COEFF(IN1,IN2,IN3,IN4,IN5,IN6,IN7,IN8,IN9,IN10,IN11,IN12)
 

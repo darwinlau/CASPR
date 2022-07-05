@@ -1,4 +1,4 @@
-function g_c = g_coeffs(in1,in2)
+function g_c = GoftD1(in1,in2)
 %G_COEFFS
 %    in1 -> coeffs of G(x,y,z), in2 -> segment coeffs
 %    G_C = G_COEFFS(IN1,IN2)

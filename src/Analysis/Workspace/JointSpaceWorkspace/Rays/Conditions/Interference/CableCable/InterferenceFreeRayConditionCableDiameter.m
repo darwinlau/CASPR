@@ -1,23 +1,20 @@
-% Class to compute whether a pose (dynamics) is within the interference 
+frti8u% Class to compute whether a pose (dynamics) is within the interference 
 % free workspace (IFW)
 %
 % Author        : Benji
 % Created       : 2017
-% Description   : calculated resulting rays between cables and the
-%                 end-effector's edges
+% Description   : 
 
-classdef InterferenceFreeRay_C_E < WorkspaceRayConditionBase
+classdef InterferenceFreeRayConditionCableDiameter < WorkspaceRayConditionBase
     properties (SetAccess = protected, GetAccess = protected)
         min_ray_percentage          % The minimum percentage of the ray at which it is included
-        safe_dis                    % Safe distance between two segments
-        opt
+        safe_dis                    % Safe distance between two cables
     end
     
     methods
         % Constructor for interference free worksapce
-        function w= InterferenceFreeRay_C_E(min_ray_percent,opt)
+        function w= InterferenceFreeRayConditionCableDiameter(min_ray_percent,~)
             w.min_ray_percentage = min_ray_percent;
-            w.opt = opt;
         end
             
         % Evaluate the interference free intervals 
@@ -25,65 +22,39 @@ classdef InterferenceFreeRay_C_E < WorkspaceRayConditionBase
             % generate the Lm (m=1:numCables) before reviewing each pair of
             % cables
             SegEndpt = CoeffLm(obj, model, workspace_ray);
-%             %% CABLEs
-%             % select 2 cables to get non-interset intervals
+            %% select 2 cables to get non-interset intervals
             flag   = 0; % flag for non-null 
-%             ncable = model.numCables;
-%             L_A = -inf;
-%             R_A = inf;
-%             % in the form of lower triangular matrix
-%             for ithcable = 1: ncable % i-th cable
-%                 for jthcable = 1: (ithcable - 1) % j-th cable
-%                     % -- new --
-%                     twocables = [ithcable; jthcable];
-%                     SegEndpt_ij = {SegEndpt{ithcable,:}; SegEndpt{jthcable,:}};
-%                     intvifw2c = IFW_HyB_2C_safebuf(obj, model, workspace_ray, SegEndpt_ij, twocables);
-%                     
-%                     % update non-intersect intervals 
-%                     if ~isempty(intvifw2c)
-%                         L_B = intvifw2c(:, 1);
-%                         R_B = intvifw2c(:, 2);
-%                         if ~isempty(L_A)
-%                             [L_A, R_A] = or_and_or(obj, L_A, R_A, L_B, R_B);
-%                         else
-%                             flag = 1;
-%                             break;
-%                         end
-%                     else
-%                         % intvifwmc_temp = [];
-%                         flag = 1;
-%                         break;
-%                     end
-%                 end
-%                 if flag == 1
-%                     break;
-%                 end
-%             end
-            %% CABLEs and EndEffector
-            box = obj.opt{1,1};
+            ncable = model.numCables;
             L_A = -inf;
             R_A = inf;
-            for cnt = 1:size(box,1)
-                fflg = box(cnt,:)';% column
-                SegEndpt_ij = {SegEndpt{fflg(1),:}; SegEndpt{fflg(2),:}};
-                intvifw_ca_lkot = IFW_HyB_2C_safebuf(obj, model, workspace_ray, SegEndpt_ij, fflg);
-                % update non-intersect intervals 
-                if ~isempty(intvifw_ca_lkot)
-                    L_B = intvifw_ca_lkot(:, 1);
-                    R_B = intvifw_ca_lkot(:, 2);
-                    if ~isempty(L_A)
-                        [L_A, R_A] = or_and_or(obj, L_A, R_A, L_B, R_B);
+            % in the form of lower triangular matrix
+            for ithcable = 1: ncable % i-th cable
+                for jthcable = 1: (ithcable - 1) % j-th cable
+                    % -- new --
+                    twocables = [ithcable; jthcable];
+                    SegEndpt_ij = {SegEndpt{ithcable,:}; SegEndpt{jthcable,:}};
+                    intvifw2c = IFW_HyB_2C_safebuf(obj, model, workspace_ray, SegEndpt_ij, twocables);
+                    
+                    % update non-intersect intervals 
+                    if ~isempty(intvifw2c)
+                        L_B = intvifw2c(:, 1);
+                        R_B = intvifw2c(:, 2);
+                        if ~isempty(L_A)
+                            [L_A, R_A] = or_and_or(obj, L_A, R_A, L_B, R_B);
+                        else
+                            flag = 1;
+                            break;
+                        end
                     else
+                        % intvifwmc_temp = [];
                         flag = 1;
                         break;
                     end
-                else
-                    % intvifwmc_temp = [];
-                    flag = 1;
+                end
+                if flag == 1
                     break;
                 end
             end
-                
             if flag == 1
                 intvifwmc_temp = [];
             else
@@ -91,6 +62,9 @@ classdef InterferenceFreeRay_C_E < WorkspaceRayConditionBase
             end
             %% generate non-intersect intervals of multicables
             % avoid isolated pts occur i.e., L_A == R_A
+%                 if round(intvifwmc_temp(:,1)-intvifwmc_temp(:,2),7)==0
+%                     intvifwmc_temp(round(intvifwmc_temp(:,1)-intvifwmc_temp(:,2),7)==0,:)=[];
+%                 end
             if ~isempty(intvifwmc_temp)
                 if abs(intvifwmc_temp(:,1)-intvifwmc_temp(:,2)) <= obj.min_ray_percentage
                     intvifwmc_temp(abs(intvifwmc_temp(:,1)-intvifwmc_temp(:,2))<=obj.min_ray_percentage,:)=[];
@@ -106,13 +80,8 @@ classdef InterferenceFreeRay_C_E < WorkspaceRayConditionBase
             % ---- the bound of curflxvar ----------
             curValmin = workspace_ray.freeVariableRange(1);
             curValmax = workspace_ray.freeVariableRange(2);
-            % decide the num. of segments
-            ncable = model.numCables;
-            nlink  = model.numLinks;
-            %%% Temporarily FOR PERPENDICULAR SUPPORT LINKS
-            nother = model.numCables; 
-            %%%
-            nseg = ncable + nlink + nother;
+            % just for cables collisions
+            nseg = model.numCables;
             
             SegEndpt = cell(nseg,2);
             curtypevar = model.bodyModel.q_dofType;            
@@ -143,44 +112,11 @@ classdef InterferenceFreeRay_C_E < WorkspaceRayConditionBase
             w_ext = zeros(model.numDofs,1);
             Ep_iax = zeros(size(q_temp,2),1); Ep_iay = zeros(size(q_temp,2),1); Ep_iaz = zeros(size(q_temp,2),1);
             Ep_ibx = zeros(size(q_temp,2),1); Ep_iby = zeros(size(q_temp,2),1); Ep_ibz = zeros(size(q_temp,2),1);
-% %             for rmflg = 1:nseg
-% %                 for cnt = 1:size(q_temp,2)
-% %                     model.update(q_temp(:,cnt), q_dot, q_ddot,w_ext);
-% %                     endpt_ia = model.cableModel.cables{rmflg}.attachments{1}.r_OA;
-% %                     endpt_ib = model.cableModel.cables{rmflg}.attachments{2}.r_OA;
-% %                     Ep_iax(cnt) = trsf(cnt)*endpt_ia(1); Ep_iay(cnt) = trsf(cnt)*endpt_ia(2); Ep_iaz(cnt) = trsf(cnt)*endpt_ia(3);
-% %                     Ep_ibx(cnt) = trsf(cnt)*endpt_ib(1); Ep_iby(cnt) = trsf(cnt)*endpt_ib(2); Ep_ibz(cnt) = trsf(cnt)*endpt_ib(3);
-% %                 end
-% % 
-% %                 % > Liendpt \in 1*2 cell
-% %                 % >> Liendpt{1} \in 3*3 matrix; each row refers to x or y or z
-% %                 row1 = (M\Ep_iax)'; row2 = (M\Ep_iay)'; row3 = (M\Ep_iaz)';
-% %                 Liendpt{1} = round([row1; row2; row3], 12);
-% %                 % >> Liendpt{2} \in 3*3 matrix
-% %                 row1 = (M\Ep_ibx)'; row2 = (M\Ep_iby)'; row3 = (M\Ep_ibz)';
-% %                 Liendpt{2} = round([row1; row2; row3], 12);
-% %                 % ref  SegEndpt = [Liendpt; Ljendpt]; Liendpt \in 1*2 cell
-% %                 SegEndpt(rmflg,:) = Liendpt;
-% %             end
             for rmflg = 1:nseg
                 for cnt = 1:size(q_temp,2)
                     model.update(q_temp(:,cnt), q_dot, q_ddot,w_ext);
-                    if rmflg <= ncable
-                        endpt_ia = model.cableModel.cables{rmflg}.attachments{1}.r_OA;
-                        endpt_ib = model.cableModel.cables{rmflg}.attachments{2}.r_OA;
-                    elseif (ncable < rmflg)&&(rmflg <= (ncable+nlink))
-                        lkflg = rmflg - ncable;
-                        endpt_ia = model.bodyModel.bodies{lkflg}.R_0k*(model.bodyModel.bodies{lkflg}.r_OP); %joint
-                        endpt_ib = model.bodyModel.bodies{lkflg}.R_0k*(model.bodyModel.bodies{lkflg}.r_OPe); % end of link
-                    else %% Temporarily FOR HORIZONAL SUPPORT LINKS
-                        otflg = rmflg - (ncable+nlink);
-                        % Maybe ONLY FOR 'JOINT' REFERENCE
-                        % r_A? from orign of {0} to attachment pt expressed in local {k} frame
-                        r_A = model.bodyModel.bodies{model.cableModel.cables{otflg}.attachments{2}.link_num}.r_OG+ ...
-                            model.cableModel.cables{otflg}.attachments{2}.r_GA; 
-                        endpt_ia = model.bodyModel.bodies{model.cableModel.cables{otflg}.attachments{2}.link_num}.R_0k*[0;0;r_A(3)];
-                        endpt_ib = model.cableModel.cables{otflg}.attachments{2}.r_OA;
-                    end
+                    endpt_ia = model.cableModel.cables{rmflg}.attachments{1}.r_OA;
+                    endpt_ib = model.cableModel.cables{rmflg}.attachments{2}.r_OA;
                     Ep_iax(cnt) = trsf(cnt)*endpt_ia(1); Ep_iay(cnt) = trsf(cnt)*endpt_ia(2); Ep_iaz(cnt) = trsf(cnt)*endpt_ia(3);
                     Ep_ibx(cnt) = trsf(cnt)*endpt_ib(1); Ep_iby(cnt) = trsf(cnt)*endpt_ib(2); Ep_ibz(cnt) = trsf(cnt)*endpt_ib(3);
                 end
@@ -200,12 +136,8 @@ classdef InterferenceFreeRay_C_E < WorkspaceRayConditionBase
         function intvifw2c = IFW_HyB_2C_safebuf(obj, model, workspace_ray, SegEndpt, flagCable)
             L{1} = SegEndpt{1,2} - SegEndpt{1,1};
             L{2} = SegEndpt{2,2} - SegEndpt{2,1};  
-            if max(flagCable)<= model.numCables
-                obj.safe_dis = 0.5*(model.cableModel.cables{flagCable(1)}.diameter+...
-                    model.cableModel.cables{flagCable(2)}.diameter);
-            else
-                obj.safe_dis = obj.opt{2,1}; % safe distance specified by users for C-EE
-            end
+            obj.safe_dis = 0.5*(model.cableModel.cables{flagCable(1)}.diameter+...
+                model.cableModel.cables{flagCable(2)}.diameter);
             % parallel or not by cross product
             cropro = CrossProductPoly(obj, L{1}, L{2});
             isparallel = all(round(cropro(:),10)==0); % test if all the elements are zero
@@ -220,57 +152,25 @@ classdef InterferenceFreeRay_C_E < WorkspaceRayConditionBase
 %                 intvInterf = MinDisPtSeg(obj, model, workspace_ray, pt, segendpt, seg);
                 warning('Parallel segments')
             else
-% %                 %% NON-parallel cables [C-C]
-% %                 % coefficients of nti/ntj/nhatcp_2/den(3*4 or 5*4 matrix)
-% %                 Coeff4Poly = Coeff_ntijdenhat_2(obj, model, workspace_ray, flagCable);
-% %                 temp_coeff{1} = Coeff4Poly(:,1)'; % nti      (row vector)
-% %                 temp_coeff{2} = Coeff4Poly(:,2)'; % ntj      (row vector)
-% %                 temp_coeff{3} = Coeff4Poly(:,3)'; % den      (row vector)
-% %                 temp_coeff{4} = Coeff4Poly(:,4)'; % nhatcp_2 (row vector)
-% % 
-% %                 %% obtain the coefficient of polynomial w.r.t nti/ntj/den/hatcp_2
-% %                 % simplify & reshape to uniform form (ROW Vectors)
-% %                 coeff = cell(1,4);
-% %                 for i = 1:4
-% %                     coeff{i} = CoeffUniPoly(obj, temp_coeff{i});
-% %                 end
-% %                 coeff_nti = coeff{1};
-% %                 coeff_ntj = coeff{2};
-% %                 coeff_den = coeff{3};
-% %                 coeff_nhatcp_2 = coeff{4};
-                
-                % For CABLEs v.s. END-EFFECOTR case [C-E]
-                lix = L{1}(1,:); liy = L{1}(2,:); liz = L{1}(3,:); % 1 for cable
-                x_Ej = L{2}(1,:); y_Ej = L{2}(2,:); z_Ej = L{2}(3,:); % 2 for ee
-                BE =  SegEndpt{2,1} - SegEndpt{1,2};
-                x_BE = BE(1,:); y_BE = BE(2,:); z_BE =  BE(3,:);
-                nti = conv((-conv(liy,y_BE)-conv(liz,z_BE)),conv(x_Ej,x_Ej))+...
-                    conv((conv((conv(lix,y_BE)+conv(liy,x_BE)),y_Ej)+conv(z_Ej,(conv(lix,z_BE)+conv(liz,x_BE)))),x_Ej)+...
-                    conv((-conv(lix,x_BE)-conv(liz,z_BE)),conv(y_Ej,y_Ej))+...
-                    conv(z_Ej,conv((conv(liy,z_BE)+conv(liz,y_BE)),y_Ej))-...
-                    conv(conv(z_Ej,z_Ej),(conv(lix,x_BE)+conv(liy,y_BE)));
-                ntj = conv((-conv(y_BE,y_Ej)-conv(z_BE,z_Ej)),conv(lix,lix))+...
-                    conv((conv((conv(x_BE,y_Ej)+conv(x_Ej,y_BE)),liy)+conv(liz,(conv(x_BE,z_Ej)+conv(x_Ej,z_BE)))),lix)+...
-                    conv((-conv(x_BE,x_Ej)-conv(z_BE,z_Ej)),conv(liy,liy))+...
-                    conv(liz,conv((conv(y_BE,z_Ej)+conv(y_Ej,z_BE)),liy))-...
-                    conv(conv(liz,liz),(conv(x_BE,x_Ej)+conv(y_BE,y_Ej)));
-                temmp = conv((conv(x_BE,y_Ej)-conv(x_Ej,y_BE)),liz)+...
-                    conv(conv(lix,y_BE),z_Ej)-conv(conv(lix,y_Ej),z_BE)-...
-                    conv(liy,conv(x_BE,z_Ej))+conv(liy,conv(x_Ej,z_BE));
-                nhatcp_2 = conv(temmp,temmp);
-                den = conv((conv(liy,liy)+conv(liz,liz)),conv(x_Ej,x_Ej))-...
-                    2*conv(conv(lix,x_Ej),(conv(liy,y_Ej)+conv(liz,z_Ej)))+...
-                    conv((conv(lix,lix)+conv(liz,liz)),conv(y_Ej,y_Ej))-...
-                    2*conv(conv(liy,liz),conv(y_Ej,z_Ej))+...
-                    conv(conv(z_Ej,z_Ej),(conv(lix,lix)+conv(liy,liy)));
-                %%%%%%%%%%%%%%%%%%%%% simplify
-%                 L{1}
-%                 L{2}
-                coeff_nti = CoeffUniPoly(obj, nti);
-                coeff_ntj = CoeffUniPoly(obj, ntj);
-                coeff_nhatcp_2 = CoeffUniPoly(obj, nhatcp_2);
-                coeff_den = CoeffUniPoly(obj, den);
-                
+                %% NON-parallel cables [C-C]
+                % coefficients of nti/ntj/nhatcp_2/den(3*4 or 5*4 matrix)
+                Coeff4Poly = Coeff_ntijdenhat_2(obj, model, workspace_ray, flagCable);
+                temp_coeff{1} = Coeff4Poly(:,1)'; % nti      (row vector)
+                temp_coeff{2} = Coeff4Poly(:,2)'; % ntj      (row vector)
+                temp_coeff{3} = Coeff4Poly(:,3)'; % den      (row vector)
+                temp_coeff{4} = Coeff4Poly(:,4)'; % nhatcp_2 (row vector)
+
+                %% obtain the coefficient of polynomial w.r.t nti/ntj/den/hatcp_2
+                % simplify & reshape to uniform form (ROW Vectors)
+                coeff = cell(1,4);
+                for i = 1:4
+                    coeff{i} = CoeffUniPoly(obj, temp_coeff{i});
+                end
+                coeff_nti = coeff{1};
+                coeff_ntj = coeff{2};
+                coeff_den = coeff{3};
+                coeff_nhatcp_2 = coeff{4};              
+              
                 %% solve the univariable polynomial equations
                 % reshape to 5th degree (ROW Vectors) to addication
                 coeff_nti = padarray(coeff_nti, [0 5-length(coeff_nti)], 'pre');
@@ -417,12 +317,12 @@ classdef InterferenceFreeRay_C_E < WorkspaceRayConditionBase
 
             %% to obtain IFW from Interference Intervals
             min = workspace_ray.freeVariableRange(1);
-            maxVal = workspace_ray.freeVariableRange(2);
+            max = workspace_ray.freeVariableRange(2);
             if ~isempty(intvInterf)
                 [L_comp, R_comp] = Comp_interval(obj, intvInterf(:,1), intvInterf(:,2));
                 if ~isempty(L_comp)
                     % results from fun'or_and_or' is closed intervals 
-                    [resultL, resultR] = or_and_or(obj, min, maxVal, L_comp, R_comp);
+                    [resultL, resultR] = or_and_or(obj, min, max, L_comp, R_comp);
                     % avoid the adjcent intervals
                     % [resultL, resultR] = Or_interval(resultL, resultR);
                     % modify to open set (delete the isolated point)
@@ -434,9 +334,87 @@ classdef InterferenceFreeRay_C_E < WorkspaceRayConditionBase
                     intvifw_temp = [];
                 end
             else
-                intvifw_temp = [min, maxVal];
+                intvifw_temp = [min, max];
             end
             intvifw2c = intvifw_temp; % (m) or (rad)
+        end
+        
+        function coeff = Coeff_ntijdenhat_2(~, model, workspace_ray, flagCable)
+            riflg = flagCable(1); rjflg = flagCable(2);
+            
+            curflxvar = workspace_ray.freeVariableIndex;
+            magconvar = workspace_ray.fixedVariables';
+            % ---- the bound of curflxvar ----------
+            curValmin = workspace_ray.freeVariableRange(1);
+            curValmax = workspace_ray.freeVariableRange(2);
+            
+            curtypevar= model.bodyModel.q_dofType;
+            if curtypevar(curflxvar)==DoFType.TRANSLATION 
+                % -- q1, q2, q3 ----
+                curVal2 = (curValmin+curValmax)*0.5; 
+                curVal1 = (curValmin+curVal2)*0.5;
+                curVal3 = (curVal2+curValmax)*0.5;
+                q_temp = zeros(model.numDofs,3);
+                q_temp(:,1) = [magconvar(1:curflxvar-1) curVal1 magconvar(curflxvar:end)]';
+                q_temp(:,2) = [magconvar(1:curflxvar-1) curVal2 magconvar(curflxvar:end)]';
+                q_temp(:,3) = [magconvar(1:curflxvar-1) curVal3 magconvar(curflxvar:end)]';
+                M = [curVal1^2 curVal1 1; curVal2^2 curVal2 1; curVal3^2 curVal3 1];
+                trsf = ones(1,3);
+            else % -- T1, T2, T3, T4, T5 -- 
+                delta = (curValmax - curValmin)/6;
+                angle1 = curValmin+delta*1; T1 = tan(0.5*angle1);
+                angle2 = curValmin+delta*2; T2 = tan(0.5*angle2);
+                angle3 = (curValmax+curValmin)/2; T3 = tan(0.5*angle3);
+                angle4 = curValmin+delta*4; T4 = tan(0.5*angle4);
+                angle5 = curValmin+delta*5; T5 = tan(0.5*angle5);
+                q_temp = zeros(model.numDofs,5);
+                q_temp(:,1) = [magconvar(1:curflxvar-1) angle1 magconvar(curflxvar:end)]';
+                q_temp(:,2) = [magconvar(1:curflxvar-1) angle2 magconvar(curflxvar:end)]';
+                q_temp(:,3) = [magconvar(1:curflxvar-1) angle3 magconvar(curflxvar:end)]';
+                q_temp(:,4) = [magconvar(1:curflxvar-1) angle4 magconvar(curflxvar:end)]';
+                q_temp(:,5) = [magconvar(1:curflxvar-1) angle5 magconvar(curflxvar:end)]';
+                M = [T1^4 T1^3 T1^2 T1 1; T2^4 T2^3 T2^2 T2 1; T3^4 T3^3 T3^2 T3 1; T4^4 T4^3 T4^2 T4 1; T5^4 T5^3 T5^2 T5 1];
+                trsf1 = (1+(T1)^2)^2; trsf2 = (1+(T2)^2)^2; trsf3 = (1+(T3)^2)^2; trsf4 = (1+(T4)^2)^2; trsf5 = (1+(T5)^2)^2;
+                trsf = [trsf1 trsf2 trsf3 trsf4 trsf5];
+            end
+            
+            % calculate W (constant vector)
+            % Up to now, attachment pts come from the BASE
+            ra_1 = model.cableModel.cables{riflg}.attachments{1}.r_OA;
+            ra_2 = model.cableModel.cables{rjflg}.attachments{1}.r_OA;
+            W = ra_2 - ra_1;
+            Wx = W(1); Wy = W(2); Wz = W(3);
+            
+            % -- li & lj ( _1,_2,_3 )
+            q_dot = zeros(model.numDofs,1);
+            q_ddot = zeros(model.numDofs,1);
+            w_ext = zeros(model.numDofs,1);
+            nti = zeros(size(q_temp,2),1);
+            ntj = zeros(size(q_temp,2),1);
+            nhatcp_2 = zeros(size(q_temp,2),1);
+            den = zeros(size(q_temp,2),1);
+            for cnt = 1:size(q_temp,2)
+                model.update(q_temp(:,cnt), q_dot, q_ddot,w_ext);
+                li = model.cableModel.cables{riflg}.segments{1}.segmentVector;
+                lj = model.cableModel.cables{rjflg}.segments{1}.segmentVector;
+                lix = li(1); liy = li(2); liz = li(3);
+                ljx = lj(1); ljy = lj(2); ljz = lj(3);
+                % calculate the nti/ntj/nhatcp_2/den
+                nti(cnt) = trsf(cnt)*((Wy*liy+Wz*liz)*ljx^2+((-Wx*liy-Wy*lix)*ljy-ljz*(Wx*liz+Wz*lix))*ljx+(Wx*lix+Wz*liz)*ljy^2-ljz*(Wy*liz+Wz*liy)*ljy+ljz^2*(Wx*lix+Wy*liy));
+                ntj(cnt) = trsf(cnt)*((-Wy*ljy-Wz*ljz)*lix^2+((Wx*ljy+Wy*ljx)*liy+liz*(Wx*ljz+Wz*ljx))*lix+(-Wx*ljx-Wz*ljz)*liy^2+liz*(Wy*ljz+Wz*ljy)*liy-liz^2*(Wx*ljx+Wy*ljy));
+                nhatcp_2(cnt) = trsf(cnt)*(((lix*ljy-liy*ljx)*Wz+Wx*liy*ljz+(-Wx*ljy+Wy*ljx)*liz-Wy*lix*ljz)^2);
+                den(cnt) = trsf(cnt)*((ljy^2+ljz^2)*lix^2-2*ljx*(liy*ljy+liz*ljz)*lix+(ljx^2+ljz^2)*liy^2-2*liy*liz*ljy*ljz+liz^2*(ljx^2+ljy^2));
+            end
+            % coefficient of nti (denote: a') \in 3*1 or 5*1 vector
+            coeff_nti = M\nti;
+            % coefficient of ntj (denote: b')
+            coeff_ntj = M\ntj;
+            % coefficient of nhatcp_2 (denote: c')
+            coeff_nhatcp_2 = M\nhatcp_2;
+            % coefficient of den (denote: d')
+            coeff_den = M\den;
+            % finial results in the order of [nti ntj den nhatcp_2]
+            coeff = [coeff_nti coeff_ntj coeff_den coeff_nhatcp_2]; % \in 3*4 or 5*4 matrix
         end
         
         function y = CrossProductPoly(~, x1, x2)
@@ -456,7 +434,7 @@ classdef InterferenceFreeRay_C_E < WorkspaceRayConditionBase
         function  coeff = CoeffUniPoly(~, temp_coeff)
             % simplify twice
             cnt = 1;
-            while cnt <= 5
+            while cnt <= 2
                 [q, r] = deconv(temp_coeff, [1 0 1]);
                 if round(r, 10) == 0 % just for check
                     % disp('remainder is zero!');
@@ -524,7 +502,7 @@ classdef InterferenceFreeRay_C_E < WorkspaceRayConditionBase
                         end
                     % ----
                     else
-                        CASPR_log.Print('Invalid Sign or solution is zero',CASPRLogLevel.ERROR);
+                        CASPR_log.Error('Invalid Sign or solution is zero');
                     end
                 end
             end
@@ -548,7 +526,7 @@ classdef InterferenceFreeRay_C_E < WorkspaceRayConditionBase
                     end
                 end
                 if min>= max
-                    CASPR_log.Print('Invalid limits of flexible variable',CASPRLogLevel.ERROR);
+                    CASPR_log.Error('Invalid limits of flexible variable');
                 end
                 Rel_root_pts = real_root_pts((real_root_pts > min) & (real_root_pts < max));
 
@@ -584,7 +562,7 @@ classdef InterferenceFreeRay_C_E < WorkspaceRayConditionBase
                         polyval_temp_ind = (polyval_temp>0);                            
                         % -----
                     else
-                        CASPR_log.Print('Invaid inequality',CASPRLogLevel.ERROR);
+                        CASPR_log.Error('Invaid inequality');
                     end
                     PolyVal(:, i) = polyval_temp_ind;
                 end
@@ -607,11 +585,11 @@ classdef InterferenceFreeRay_C_E < WorkspaceRayConditionBase
         
         function [L_or, R_or] = Or_interval(obj, L, R)
             if length(L) ~= length(R)
-                CASPR_log.Print('Invaid Input',CASPRLogLevel.ERROR);
+                CASPR_log.Error('Invaid Input');
             elseif max(L > R)                
-                CASPR_log.Print('Plz make sure L <= R',CASPRLogLevel.ERROR);
+                CASPR_log.Error('Please ensure that L <= R');
             elseif isempty(L) % the input is one null interval
-                disp('[WARNING] Empty Input') % union(a null space)
+                CASPR_log.Warn('Empty Input'); % union(a null space)
                 L_or = [];
                 R_or = [];
             else  % the input is not one null interval so Note-3 holds
@@ -651,11 +629,11 @@ classdef InterferenceFreeRay_C_E < WorkspaceRayConditionBase
 
         function [L_or, R_or] = Or_interval_2(~, L, R)
             if length(L) ~= length(R)
-                CASPR_log.Print('Invaid Input',CASPRLogLevel.ERROR);
+                CASPR_log.Errer('Invaid Input');
             elseif max(L > R)
-                CASPR_log.Print('Plz make sure L <= R',CASPRLogLevel.ERROR);
+                CASPR_log.Error('Please ensure that L <= R');
             elseif isempty(L) % both L and R are empty could happen; one of them is empty would get error from the condition 'length(L) ~= length(R)'
-                disp('[WARNING] Empty Input') % union(null space)
+                CASPR_log.Warn('Empty Input'); % union(a null space)
                 L_or = [];
                 R_or = [];
             else 
@@ -684,12 +662,12 @@ classdef InterferenceFreeRay_C_E < WorkspaceRayConditionBase
 
         function [L_and, R_and] = And_interval(~, L, R)
             if length(L) ~= length(R)
-                CASPR_log.Print('Invaid Input',CASPRLogLevel.ERROR);
+                CASPR_log.Errer('Invaid Input');
             elseif max(L > R)
-                CASPR_log.Print('Plz make sure L <= R',CASPRLogLevel.ERROR);
+                CASPR_log.Error('Please ensure that L <= R');
             % elseif isempty(option) || strcmp(option, 'and') % default of option is 'and'
             elseif isempty(L) % One null set could happen; one of them is empty would get error from the condition 'length(L) ~= length(R)'
-                    disp('[WARNING] Empty Input') % inters(one null set); see Input-2)
+                    CASPR_log.Warn('Empty Input'); % inters(one null set); see Input-2)
                     L_and = [];
                     R_and = [];
             else % the input is not one null interval
@@ -756,7 +734,7 @@ classdef InterferenceFreeRay_C_E < WorkspaceRayConditionBase
                 case 1 % ti>1
                     pt1 = SegEndpt{1,1}; pt2 = SegEndpt{1,2};
                 otherwise
-                    CASPR_log.Print('Invalid ti_flag',CASPRLogLevel.ERROR);
+                    CASPR_log.Error('Invalid ti_flag');
             end
             switch tflag(2)
                 case -1 % tj<0
@@ -764,7 +742,7 @@ classdef InterferenceFreeRay_C_E < WorkspaceRayConditionBase
                 case 1 % tj>1
                     pt3 = SegEndpt{2,1}; pt4 = SegEndpt{2,2};
                 otherwise
-                    CASPR_log.Print('Invalid tj_flag',CASPRLogLevel.ERROR);
+                    CASPR_log.Error('Invalid tj_flag');
             end
             % P1 = dot(AiBj, li)/norm(li)
             pt1pt4 = pt4 - pt1;
@@ -1013,11 +991,11 @@ classdef InterferenceFreeRay_C_E < WorkspaceRayConditionBase
 
         function [L_comp, R_comp] = Comp_interval(obj, L, R)
             if length(L) ~= length(R)
-                CASPR_log.Print('Invaid Input',CASPRLogLevel.ERROR);
+                CASPR_log.Error('Invaid Input');
             elseif max(L > R)
-                CASPR_log.Print('Plz make sure L <= R',CASPRLogLevel.ERROR);
+                CASPR_log.Error('Please ensure that L <= R');
             elseif isempty(L) % both L and R are empty could happen; one of them is empty would get error from the condition 'length(L) ~= length(R)'
-                disp('[WARNING] Empty Input')  % comp(null)
+                CASPR_log.Warn('Empty input')  % comp(null)
                 L_comp = -inf;
                 R_comp = +inf;
             else % the input is not one null interval, then Note 4 holds
@@ -1057,11 +1035,11 @@ classdef InterferenceFreeRay_C_E < WorkspaceRayConditionBase
 
         function [L_comp, R_comp] = Comp_interval_12(obj, L, R)
             if length(L) ~= length(R)
-                CASPR_log.Print('Invaid Input',CASPRLogLevel.ERROR);
+                CASPR_log.Error('Invaid Input');
             elseif max(L > R)
-                CASPR_log.Print('Plz make sure L <= R',CASPRLogLevel.ERROR);
+                CASPR_log.Error('Please ensure that L <= R');
             elseif isempty(L) % both L and R are empty could happen; one of them is empty would get error from the condition 'length(L) ~= length(R)'
-                disp('[WARNING] Empty Input')  % comp(null set)
+                CASPR_log.Warn('Empty input');  % comp(null set)
                 L_comp = -inf;
                 R_comp = +inf;
             elseif length(L) == 1
@@ -1117,10 +1095,10 @@ classdef InterferenceFreeRay_C_E < WorkspaceRayConditionBase
 
                     end    
                 else
-                    CASPR_log.Print('Make sure 2 non-intersecting intervals',CASPRLogLevel.ERROR);
+                    CASPR_log.Error('Make sure 2 non-intersecting intervals');
                 end
             else
-                CASPR_log.Print('Make sure the number of inputs <= 2',CASPRLogLevel.ERROR);
+                CASPR_log.Error('Make sure the number of inputs <= 2');
             end
         end
 

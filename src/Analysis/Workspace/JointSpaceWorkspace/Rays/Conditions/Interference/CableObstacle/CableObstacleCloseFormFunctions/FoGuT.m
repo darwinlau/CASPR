@@ -1,4 +1,4 @@
-function t_c = s_coeffs_T(in1,in2,in3)
+function t_c = FoGuT(in1,in2,in3)
 %T_COEFFS
 %    T_C = T_COEFFS(IN1,IN2,IN3)
 

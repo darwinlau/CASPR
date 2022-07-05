@@ -1,4 +1,4 @@
-function v_c = v_coeffs_O(in1,in2,in3,u)
+function v_c = FoGvO(in1,in2,in3,u)
 %V_COEFFS_O
 %    V_C = V_COEFFS_O(IN1,IN2,IN3,U)
 
