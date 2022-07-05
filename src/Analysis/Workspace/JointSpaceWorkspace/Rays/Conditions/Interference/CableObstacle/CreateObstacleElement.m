@@ -152,7 +152,7 @@ classdef CreateObstacleElement < handle
                         PlotEdge = varargin{i+1};
                     elseif strcmpi(varargin{i},'Color')
                         face_color = varargin{i+1};
-                    elseif strcmpi(varargin{i},'meashdensity')
+                    elseif strcmpi(varargin{i},'meshdensity')
                         mesh_density = varargin{i+1};
                     elseif strcmpi(varargin{i},'PlotMethod')
                         plot_method = varargin{i+1};
