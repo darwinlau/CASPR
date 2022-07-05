@@ -15,20 +15,23 @@ classdef RayWorkspaceElement < handle
         freeVariableIndex       % The index that is left free
         freeVariableRange       % Range of the free variable values
         numDofs                 % The number of degrees of freedom associated with this ray
-        intervals               % The workspace intervals
         compTime                % Computational time to compute the ray
+       
     end
-    properties (Hidden)
+    properties 
+         intervals              % The workspace intervals
     end
     methods
         % Constructor for the class
-        function wp = RayWorkspaceElement(model, fixed_variables, conditions, free_variable_index, free_variable_range)
+        function wp = RayWorkspaceElement(model, fixed_variables, conditions, free_variable_index, free_variable_range, offset)
             wp.fixedVariables       =   fixed_variables;
             wp.freeVariableIndex    =   free_variable_index;
             wp.freeVariableRange    =   free_variable_range;
             wp.numDofs              =   model.numDofs;
             wp.conditions           =   conditions;
-            
+            if isempty(offset)
+               offset = 0.01; 
+            end
             comp_time               =   0;
             interval_combined       =   free_variable_range;
             
@@ -40,6 +43,8 @@ classdef RayWorkspaceElement < handle
                 
                 if(~isempty(condition_intervals))
                     % There may be multiple intervals
+                    condition_intervals(:,1) = condition_intervals(:,1) + abs(offset);
+                    condition_intervals(:,2) = condition_intervals(:,2) - abs(offset);
                     temp_intervals = [];
                     for i = 1:size(condition_intervals, 1)
                         for j = 1:size(interval_combined, 1)
