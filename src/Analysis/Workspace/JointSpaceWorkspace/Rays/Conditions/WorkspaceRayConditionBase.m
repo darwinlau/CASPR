@@ -14,13 +14,15 @@ classdef WorkspaceRayConditionBase < handle
     end
     
     properties (SetAccess = protected)
-        method              % Method of implementation (an enum)
-        minRayLengths       % Minimum ray length as an array for each DoF
+        method                  % Method of implementation (an enum)
+        minRayLengths = 0.01;   % Minimum ray length as an array for each DoF
     end
     
     methods
-        function w = WorkspaceRayConditionBase(min_ray_lengths)
-            w.minRayLengths = min_ray_lengths;
+        function w = WorkspaceRayConditionBase(varargin)
+            if ~isempty(varargin)
+            w.minRayLengths = varargin{1};
+            end
         end
         
         % The unified implemetnation of evaluate. This evaluates the object
@@ -43,26 +45,39 @@ classdef WorkspaceRayConditionBase < handle
     methods (Static)
         % Creates a new condition (for the moment methods and wrench sets
         % are not considered)
-        function wc = CreateWorkspaceRayCondition(conditionType,min_ray_percentage,model,Obstacles)
+        function wc = CreateWorkspaceRayCondition(conditionType,model,varargin)
+            minRayLengths = 0.01; RayBoundaryOffset = []; Obstacles = [];
+            if ~isempty(varargin)
+                for i = 1:2:size(varargin,2)
+                    if strcmpi(varargin{i},'MinimumRayLength')
+                        minRayLengths  = varargin{i+1};
+                    elseif strcmpi(varargin{i},'BoundaryOffset')
+                        RayBoundaryOffset  = varargin{i+1};
+                    elseif strcmpi(varargin{i},'Obstacle')
+                        Obstacles  = varargin{i+1};
+                    end
+                 end
+            end
+            
             switch conditionType
                 case WorkspaceRayConditionType.WRENCH_CLOSURE
-                    wc = WrenchClosureRayCondition(model,min_ray_percentage);
+                    wc = WrenchClosureRayCondition(model,minRayLengths);
                 case WorkspaceRayConditionType.INTERFERENCE_CABLE_CABLE
-                    wc = InterferenceFreeRayConditionCableCable(model,min_ray_percentage);
-                case WorkspaceRayConditionType.INTERFERENCE_CABLE_QUADSURF
-                    wc = InterferenceFreeRayConditionCableObstacle(model,min_ray_percentage,Obstacles);
+                    wc = InterferenceFreeRayConditionCableCable(model,minRayLengths,RayBoundaryOffset);
+                case WorkspaceRayConditionType.INTERFERENCE_CABLE_SURF
+                    wc = InterferenceFreeRayConditionCableObstacle(model,minRayLengths,Obstacles);
                 case WorkspaceRayConditionType.INTERFERENCE_CABLE_PLANESURF
-                    wc = InterferenceFreeRayConditionCablePlaneObstacle(model,min_ray_percentage,Obstacles);
+                    wc = InterferenceFreeRayConditionCablePlaneObstacle(model,minRayLengths,Obstacles);
                 case WorkspaceRayConditionType.INTERFERENCE_DIAMETER
-                    wc = InterferenceFreeRayConditionCableDiameter(model,min_ray_percentage);
+                    wc = InterferenceFreeRayConditionCableDiameter(model,minRayLengths);
                 case WorkspaceRayConditionType.INTERFERENCE_C_E
-                    wc = InterferenceFreeRay_C_E(model,min_ray_percentage);
+                    wc = InterferenceFreeRay_C_E(model,minRayLengths);
                 case WorkspaceRayConditionType.INTERFERENCE_C_O
-                    wc = InterferenceFreeRay_C_O(model,min_ray_percentage);
+                    wc = InterferenceFreeRay_C_O(model,minRayLengths);
                 otherwise
                     CASPR_log.Error('Workspace condition type is not defined');
             end
-%             wc.type = conditionType;
+            
         end
     end
 end
