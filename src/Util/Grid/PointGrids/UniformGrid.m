@@ -15,7 +15,8 @@ classdef UniformGrid < PointGridBase
         connectivity_list
     end
     properties (Hidden)
-        include_diagonal = false;
+        include_diagonal = false;      
+        save_path = [];
         % false: for closest 2*n point(not include diagonal;
         % true : for closest 3*n point(include diagonal;
         % however, not so support true since its will be extremly slow
@@ -23,6 +24,11 @@ classdef UniformGrid < PointGridBase
     methods
         % The constructor for the grid.
         function id = UniformGrid(q_begin,q_end,q_info,info_type,q_wrap,generate_node_list)
+            id.save_path = [CASPR_configuration.LoadHomePath,'\scripts\local\AutoGenScripts'];
+            if ~exist(id.save_path)
+                mkdir(id.save_path);
+                addpath(id.save_path);
+            end
             CASPR_log.Assert((size(q_begin,2)==1)&&(size(q_end,2)==1)&&(size(q_info,2)==1),'Input to UniformGrid must be a column vector');
             CASPR_log.Assert((size(q_begin,1)==size(q_end,1))&&(size(q_begin,1)==size(q_info,1)),'Inputs must be of the same dimension');
             CASPR_log.Assert(sum(q_begin - q_end > 0) == 0,'Invalid input range');
@@ -108,7 +114,7 @@ classdef UniformGrid < PointGridBase
                 connectivity_list = [connectivity_list;connectivity_list_i];
                 if toc > 4
                     have_save_file = 1;
-                    filename = [CASPR_configuration.LoadHomePath,'\data\AutoGenScripts','\connectivity_list_',num2str(file_count),'.mat'];
+                    filename = [obj.save_path,'\connectivity_list_',num2str(file_count),'.mat'];
                     save(filename,'connectivity_list');
                     connectivity_list = [];
                     file_count = file_count + 1;
@@ -120,13 +126,13 @@ classdef UniformGrid < PointGridBase
             if have_save_file == 1
                 connectivity_list = [];
                 for i = 1:file_count-1
-                    filename = [CASPR_configuration.LoadHomePath,'\data\AutoGenScripts','\connectivity_list_',num2str(i),'.mat'];
+                    filename = [obj.save_path,'\connectivity_list_',num2str(i),'.mat'];
                     tmp_list = load(filename);                    
                     connectivity_list = [connectivity_list;tmp_list.connectivity_list];
                 end
                 
                 for i = 1:file_count-1
-                    filename = [CASPR_configuration.LoadHomePath,'\data\AutoGenScripts','\connectivity_list_',num2str(i),'.mat'];
+                    filename = [obj.save_path,'\connectivity_list_',num2str(i),'.mat'];
                     delete(filename)
                 end
                 

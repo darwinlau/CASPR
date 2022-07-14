@@ -11,3 +11,4 @@ scripts/local/*
 logs/
 /**/*.asv
 README.md
+*.mat

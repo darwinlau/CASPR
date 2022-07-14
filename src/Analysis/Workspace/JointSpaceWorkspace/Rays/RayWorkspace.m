@@ -27,8 +27,12 @@ classdef RayWorkspace < handle
             pw.grid = grid;
             pw.rays = cell(grid.n_points,1);
             pw.ray_node = struct('graph_rep', [], 'node_list', []);
-            pw.point_node = struct('graph_rep', [], 'node_list', [], 'point_ray_connnectivity', []);
-            pw.save_path = [CASPR_configuration.LoadHomePath,'\data\AutoGenScripts\',model.robotName,'\'];
+            pw.point_node = struct('graph_rep', [], 'node_list', [], 'point_ray_connnectivity', []);             
+            pw.save_path = [CASPR_configuration.LoadHomePath,'\scripts\local\AutoGenScripts\',model.robotName,'\'];
+            if ~exist(pw.save_path)
+                mkdir(pw.save_path);
+                addpath(pw.save_path);
+            end
             % graph_rep        % The graph representation for the workspace
             % sturcture of grpah_rep:[node_num,node_num,min_distance,metric_1,...metric_n]
             %node_list        % A list of all nodes
