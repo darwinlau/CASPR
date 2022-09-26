@@ -469,7 +469,7 @@ classdef InterferenceFreeRayConditionCableObstacle < WorkspaceRayConditionBase
             
             % determine the u,v
             for i = 1:size(t_ans,1)
-                [u_roots,v_roots] = obj.Finduv(obj.OB_u{CSI},obj.OA_i_hat(CSI,:),IntersectPoint(:,i),obj.u_range);
+                [u_roots,v_roots] = obj.Finduv(obj.OB_u{CSI},obj.OA_i_hat(CSI,:),IntersectPoint(:,i));
 %                 u_roots = round(u_roots,obj.ROUNDING_DIGIT);
 %                 v_roots = round(v_roots,obj.ROUNDING_DIGIT);
 
@@ -490,17 +490,17 @@ classdef InterferenceFreeRayConditionCableObstacle < WorkspaceRayConditionBase
         end
         
         %% function to calculate the u,v where points on the G(u,v)
-        function [u,v] = Finduv(obj,OB_u,OA,P,u_range)
+        function [u,v] = Finduv(obj,OB_u,OA,P)
             
             if obj.isTranslationDoF
                 OA = OA';
-                B0 = OB_u*[u_range(1);1];
-                B1 = OB_u*[u_range(2);1];
+                B0 = OB_u*[0;1];
+                B1 = OB_u*[1;1];
                 
                 StartPt = [OA,B0]';
                 EndPt   = [P ,B1]';
                 PAB = obj.LineIntersection3D(StartPt,EndPt)';
-                u = (PAB - B0)'*(B1-B0)/norm(B1-B0);
+                u = (PAB - B0)'*(B1-B0)/norm(B1 - B0);
                 v = norm(P - OA)/norm(PAB - OA);
             else
                 
