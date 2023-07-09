@@ -12,3 +12,4 @@ logs/
 /**/*.asv
 README.md
 *.mat
+scripts/tutorials/T8_workspace_analysis_2.mlx
