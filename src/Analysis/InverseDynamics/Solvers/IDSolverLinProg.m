@@ -55,7 +55,7 @@ classdef IDSolverLinProg < IDSolverBase
                     if(isempty(obj.options))
                         obj.options = optimoptions('linprog', 'Display', 'off', 'Algorithm', 'interior-point');
                     end
-                    [actuation_forces, id_exit_type] = id_lp_matlab(obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);
+                    [actuation_forces, id_exit_type] = id_lp_matlab(obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.options);
                 case ID_LP_SolverType.OPTITOOLBOX_OOQP
                     if(obj.is_OptiToolbox)
                         if(isempty(obj.options))
@@ -66,7 +66,7 @@ classdef IDSolverLinProg < IDSolverBase
                         if(isempty(obj.options))
                             obj.options = optimoptions('linprog', 'Display', 'off', 'Algorithm', 'interior-point');
                         end
-                        [actuation_forces, id_exit_type] = id_lp_matlab(obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);
+                        [actuation_forces, id_exit_type] = id_lp_matlab(obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.options);
                     end
                 case ID_LP_SolverType.OPTITOOLBOX_LP_SOLVE
                     if(obj.is_OptiToolbox)
@@ -78,7 +78,7 @@ classdef IDSolverLinProg < IDSolverBase
                         if(isempty(obj.options))
                             obj.options = optimoptions('linprog', 'Display', 'off', 'Algorithm', 'interior-point');
                         end
-                        [actuation_forces, id_exit_type] = id_lp_matlab(obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.f_previous,obj.options);
+                        [actuation_forces, id_exit_type] = id_lp_matlab(obj.objective.b, A_ineq, b_ineq, A_eq, b_eq, fmin, fmax, obj.options);
                     end
                 otherwise
                     CASPR_log.Print('ID_LP_SolverType type is not defined', CASPRLogLevel.ERROR);
