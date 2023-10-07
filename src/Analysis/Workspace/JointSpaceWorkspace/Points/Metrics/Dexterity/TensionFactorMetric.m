@@ -32,7 +32,11 @@ classdef TensionFactorMetric < WorkspaceMetricBase
             % Determine the Jacobian Matrix
 %             L = dynamics.L_active;
             L = dynamics.L;
-            [u,~,exit_flag] = linprog(ones(1,dynamics.numCablesActive),[],[],-L',zeros(dynamics.numDofs,1),1e-6*ones(dynamics.numCablesActive,1),1e6*ones(dynamics.numCablesActive,1),[],obj.options);
+            if (isempty(obj.options))
+                [u,~,exit_flag] = linprog(ones(1,dynamics.numCablesActive), [], [], -L', zeros(dynamics.numDofs,1), 1e-6*ones(dynamics.numCablesActive,1), 1e6*ones(dynamics.numCablesActive,1));
+            else
+                [u,~,exit_flag] = linprog(ones(1,dynamics.numCablesActive), [], [], -L', zeros(dynamics.numDofs,1), 1e-6*ones(dynamics.numCablesActive,1), 1e6*ones(dynamics.numCablesActive,1), obj.options);
+            end
             if((exit_flag == 1) && (rank(L) == dynamics.numDofs))
                 h = u/norm(u);
                 h_min = min(h); h_max = max(h);

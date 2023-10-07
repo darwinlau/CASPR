@@ -40,7 +40,7 @@ classdef TensionFactorModifiedMetric < WorkspaceMetricBase
             k = max(Sigma)/min(Sigma);
             % For the moment calculate the UD assuming that all cables are
             % used
-            [u,~,exit_flag] = linprog(ones(1,dynamics.numCablesActive),[],[],-L',zeros(dynamics.numDofs,1),1e-6*ones(dynamics.numCablesActive,1),1e6*ones(dynamics.numCablesActive,1),[],obj.options);
+            [u,~,exit_flag] = linprog(ones(1,dynamics.numCablesActive),[],[],-L',zeros(dynamics.numDofs,1),1e-6*ones(dynamics.numCablesActive,1),1e6*ones(dynamics.numCablesActive,1),obj.options);
             if((exit_flag == 1) && (rank(L) == dynamics.numDofs))
                 % ADD A LATER FLAG THAT CAN USE WCW IF ALREADY TESTED
                 h = u/norm(u);
@@ -59,7 +59,7 @@ classdef TensionFactorModifiedMetric < WorkspaceMetricBase
                     Aeq     =   -L_m';
                     lb      =   1e-9*ones(dynamics.numCablesActive-1,1);
                     ub      =   Inf*ones(dynamics.numCablesActive-1,1);
-                    [u,~,exit_flag] = linprog(f,[],[],Aeq,zeros(dynamics.numDofs,1),lb,ub,[],obj.options);
+                    [u,~,exit_flag] = linprog(f,[],[],Aeq,zeros(dynamics.numDofs,1),lb,ub,obj.options);
                     % Test if the Jacobian is full rank
                     if((exit_flag==1) && (L_rank == dynamics.numDofs))
                         h = u/norm(u);
