@@ -42,7 +42,7 @@ classdef CapacityMarginMetric < WorkspaceMetricBase
                 v = -1;
             else
                 q   =   length(w.b);
-                vert = obj.desiredWrenchSet.points;
+                vert = obj.desiredWrenchSet;
                 p   =   size(vert, 2);
                 s   =   zeros(p,q);
                 for i = 1:p
