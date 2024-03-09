@@ -1,5 +1,5 @@
 % All length variables in this class use metric unit.
-classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
+classdef DynamixelCASPRInterface < CableActuatorInterfaceBase
     properties (Access = private)
         numMotor            % Number of actuator
         comPort             % Serial COM port connected to USB2Dynamixel
@@ -51,7 +51,7 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
     methods (Access = public)
         % e.g. comPort = 'COM3'
         % cableLengths_full: SIZE: numMotor x 1
-        function interface = PoCaBotCASPRInterface(comPort, actuatorType, numMotor, dynamixel_direction_reversed, gripperOn)
+        function interface = DynamixelCASPRInterface(comPort, actuatorType, numMotor, dynamixel_direction_reversed, gripperOn)
             interface@CableActuatorInterfaceBase();
             if(~iscellstr(comPort))
                 CASPR_Log.Error('The argument ''comport'' should be a cell array of character arrays!');
@@ -101,7 +101,7 @@ classdef PoCaBotCASPRInterface < CableActuatorInterfaceBase
                     accessories_temp(i) = meter_20_Spool;
                 end
             else
-                disp('Please specify spool type in PoCaBotCASPRInterface')
+                disp('Please specify spool type in DynamixelCASPRInterface')
                 % TODO put the spool type into xml for spool types
             end
             interface.accessories = accessories_temp;

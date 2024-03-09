@@ -1,4 +1,4 @@
-classdef PoCaBotExperiment < ExperimentBase
+classdef DynamixelExperiment < ExperimentBase
     %POCABOTEXPERIMENT Summary of this class goes here
     %   Detailed explanation goes here
     
@@ -58,8 +58,8 @@ classdef PoCaBotExperiment < ExperimentBase
     methods
         % strCOMPort should be an array of cells, each one of which
         % indicate a COM port with a string format. e.g. strCOMPort = {'COM3','COM5'};
-        function exp = PoCaBotExperiment(modelObj, strCOMPort, actuatorMotor, timestep, gripperOn, server)
-            hw_interface = PoCaBotCASPRInterface(strCOMPort, actuatorMotor, modelObj.numActuators,false, gripperOn);  %1
+        function exp = DynamixelExperiment(modelObj, strCOMPort, actuatorMotor, timestep, gripperOn, server)
+            hw_interface = DynamixelCASPRInterface(strCOMPort, actuatorMotor, modelObj.numActuators,false, gripperOn);  %1
             exp@ExperimentBase(hw_interface, modelObj);
             exp.numMotor = modelObj.numActuators;
             %            eb.forwardKin = FKDifferential(modelObj);
