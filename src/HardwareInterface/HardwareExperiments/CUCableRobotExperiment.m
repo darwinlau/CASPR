@@ -83,8 +83,8 @@ classdef CUCableRobotExperiment < ExperimentBase
             model_obj = model_config.getModel(cable_set_id);
             
             % Setup the hardware interface
-            hw_interface = GSK_EightAxisStaticCASPRInterface(model_obj, 'data/temp/curobot_trajectories/', trajectory_id, LargeCableRobotExperiment.ZERO_CABLE_LENGTHS);
-            exp = LargeCableRobotExperiment(hw_interface, model_config, model_obj);
+            hw_interface = GSK_EightAxisStaticCASPRInterface(model_obj, 'data/temp/curobot_trajectories/', trajectory_id, CUCableRobotExperiment.ZERO_CABLE_LENGTHS);
+            exp = CUCableRobotExperiment(hw_interface, model_config, model_obj);
             
             % Setup the trajectory and run the experiment
             trajectory = model_config.getJointTrajectory(trajectory_id);
